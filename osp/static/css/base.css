@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Merriweather&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+li,
+a,
+button {
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.dropdown-item {
+  text-align: center;
+}
+.dropdown-menu {
+  transform: translate(-2px, 40px) !important;
+  min-width: 80px !important;
+}
+.text-flex {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+footer {
+  border-top: solid 2px black;
+  margin-top: 20px;
+  padding: 10px;
+  font-family: "Zen Maru Gothic", sans-serif;
+  text-align: center;
+  display: grid;
+  grid-row: 1fr 1fr 1fr;
+  grid-column: 1fr 1fr;
+  grid-column-gap: 50px;
+  grid-row-gap: 10px;
+}
+.footer-item-col1 {
+  grid-column: 1/2;
+}
+.footer-item-col2 {
+  grid-column: 2/3;
+}
+.footer-item-row1 {
+  grid-row: 1/2;
+  font-weight: bold;
+}
+.footer-item-row1 {
+  grid-row: 2/3;
+}
