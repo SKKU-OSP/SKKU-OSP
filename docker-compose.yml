@@ -1,0 +1,15 @@
+version: "3.8"
+
+services: 
+  OSP: 
+    image: osp
+    container_name: osp
+    restart: always
+    command: >
+      sh -c "python3 manage.py makemigrations &&
+             python3 manage.py migrate &&
+             python3 manage.py runserver 0.0.0.0:8000 --insecure"
+    ports: 
+      - "8000:8000"
+    extra_hosts: 
+     - host.docker.internal:host-gateway
