@@ -1,0 +1,48 @@
+from django.db import models
+
+# Create your models here.
+
+class StudentTab(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+    college = models.CharField(max_length=45)
+    dept = models.CharField(max_length=45)
+    github_id = models.CharField(max_length=40)
+    absence = models.IntegerField()
+    plural_major = models.IntegerField()
+    personal_email = models.CharField(max_length=100)
+    primary_email = models.CharField(max_length=100)
+    secondary_email = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'student_tab'
+
+
+class GithubOverview(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    stars = models.IntegerField()
+    followers = models.IntegerField()
+    followings = models.IntegerField()
+    total_repos = models.IntegerField()
+    total_commits = models.IntegerField()
+    total_prs = models.CharField(db_column='total_PRs', max_length=45)  # Field name made lowercase.
+    total_issues = models.CharField(max_length=45)
+    achievements = models.CharField(max_length=200, blank=True, null=True)
+    highlights = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'github_overview'
+
+
+class GithubStatsYymm(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    start_yymm = models.DateField()
+    end_yymm = models.DateField()
+    stars = models.IntegerField()
+    num_of_cr_repos = models.IntegerField()
+    num_of_co_repos = models.IntegerField()
+    num_of_commits = models.IntegerField()
+    num_of_prs = models.IntegerField(db_column='num_of_PRs')  # Field name made lowercase.
+    num_of_issues = models.IntegerField()
