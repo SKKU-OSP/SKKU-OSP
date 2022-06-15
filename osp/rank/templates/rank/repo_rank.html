@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+{% extends 'main.html' %}
+
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <table class="table table-striped table-hover" id="scoreTable">
+        <thead class="table-light">
+            <tr>
+                <th>Repository</th>
+                <th>Star</th>
+                <th>Fork</th>
+                <th>Commits</th>
+                <th>PR</th>
+                <th>Issues</th>
+                <th>Watchers</th>
+                <th>Language</th>
+                <th>Contributors</th>
+                <th>Student Contributors</tr>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>
+                    <a href="https://github.com/{{row.github_id}}/{{row.repo_name}}">
+                    {{row.github_id}}/{{row.repo_name}}
+                    </a>
+                </td>
+                <td>{{row.stargazers_count}}</td>
+                <td>{{row.forks_count}}</td>
+                <td>{{row.commits_count}}</td>
+                <td>{{row.prs_count}}</td>
+                <td>{{row.open_issue_count|add:row.close_issue_count}}</td>
+                <td>{{row.watchers_count}}</td>
+                <td>{{row.language}}</td>
+                <td>{{row.contributors_count}}</td>
+                <td>{{row.student_contributor}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}
+{% block script %}
+<script src="{% static 'js/repo_rank.js' %}" defer></script>
+<!-- Datatables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css"/> 
+<link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/2.0.1/css/searchPanes.bootstrap5.min.css"/> 
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.4.0/css/select.bootstrap5.min.css"/> 
+
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js" defer></script>
+<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js" defer></script>
+<script src="https://cdn.datatables.net/searchpanes/2.0.1/js/dataTables.searchPanes.min.js" defer></script>
+<script src="https://cdn.datatables.net/searchpanes/2.0.1/js/searchPanes.bootstrap5.min.js" defer></script>
+<script src="https://cdn.datatables.net/select/1.4.0/js/dataTables.select.min.js" defer></script>
+{% endblock script %}
+</html>
