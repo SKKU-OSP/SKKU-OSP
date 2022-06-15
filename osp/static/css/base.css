@@ -10,13 +10,6 @@ button {
   text-decoration: none;
 }
 
-.dropdown-item {
-  text-align: center;
-}
-.dropdown-menu {
-  transform: translate(-2px, 40px) !important;
-  min-width: 80px !important;
-}
 .text-flex {
   display: flex;
   flex-wrap: wrap;
