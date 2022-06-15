@@ -46,3 +46,23 @@ class GithubStatsYymm(models.Model):
     num_of_commits = models.IntegerField()
     num_of_prs = models.IntegerField(db_column='num_of_PRs')  # Field name made lowercase.
     num_of_issues = models.IntegerField()
+    
+class ScoreTable(models.Model):
+    id = models.IntegerField(primary_key=True)
+    year = models.IntegerField()
+    name = models.CharField(max_length=20)
+    github_id = models.CharField(max_length=40)
+    total_score = models.FloatField()
+    commit_cnt = models.IntegerField()
+    commit_line = models.IntegerField()
+    issue_cnt = models.IntegerField()
+    pr_cnt = models.IntegerField()
+    repo_cnt = models.IntegerField()
+    dept = models.CharField(max_length=45)
+    absence = models.IntegerField()
+    plural_major = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'score_table_sum'
+        unique_together = (('id', 'year'),)
