@@ -3,10 +3,14 @@
     {% include 'head.html' %}
     
     {% include 'header.html' %}
-
-    {% block content %}
-    
+    {% block additional_header %}
     {% endblock %}
+
+    <div class="h-100">
+        {% block content %}
+
+        {% endblock %}
+    </div>
 
     {% include 'footer.html' %}
 </html>
