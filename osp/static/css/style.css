@@ -1,0 +1,104 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+.row {
+  --bs-gutter-x: 0.8rem !important;
+}
+@media (min-width: 768px) {
+  .col-my-p20 {
+    flex: 0 0 auto;
+    width: 20%;
+  }
+}
+
+h5.card-title {
+  font: 16px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-weight: 500;
+  text-indent: 5px;
+}
+
+button.chosen {
+  font-family: "Roboto", sans-serif;
+}
+button.unchosen {
+  font-family: "Roboto", sans-serif;
+  color: RGB(13, 110, 253);
+}
+
+.kpi {
+  font-size: 2rem;
+  /* font-size: 2vw; */
+}
+@media (max-width: 768px) {
+  .kpi {
+    font-size: 2rem !important;
+  }
+}
+
+.percent-wrapper {
+  opacity: 0.5;
+  font-size: 1rem;
+  margin-left: 0.25rem;
+}
+
+.tab-container {
+  margin: 10px 0px;
+}
+
+#overviewChart > .col-md-3 > .card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.card {
+  height: 100%;
+  margin-bottom: 5px;
+  font-family: "Roboto", sans-serif;
+}
+
+#copyright {
+  margin-bottom: 0px;
+  font-size: 12px;
+}
+.logo-link {
+  color: black;
+  display: flex;
+  font-size: 12px;
+}
+.logo-link:nth-child(n) {
+  align-items: end;
+}
+.logo-link > a {
+  margin: 0px 5px;
+}
+a.nav-link {
+  cursor: pointer;
+}
+
+.repo-card {
+  width: 45%;
+  margin: 5px;
+}
+
+.form-switch {
+  padding-top: 9px;
+  flex-basis: 150px;
+}
+.d-flex.text-lg > .btn-toolbar {
+  margin-right: 20px;
+}
+.d-flex.text-lg > .dropdown {
+  margin-right: 30px;
+}
+.form-check-label {
+  font-family: "Noto Sans KR", sans-serif;
+  color: gray;
+}
+
+.bold {
+  font-weight: bold;
+  color: black;
+}
+.none {
+  display: none;
+}
