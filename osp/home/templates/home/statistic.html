@@ -99,7 +99,7 @@
       <div class="card p-2"> 
         <h5 class="card-title" id="repoTitle">총 Repo 수</h5>
         <div class="text-center kpi"><span class="current text-primary" id="repoNumerator"></span> / <span class="total" id="repoDenominator"></span><span class="percent-wrapper">(<span class="percent" id="repoPercent">0.0%</span>)</span></div>
-        <canvas id="repoOvervieow"></canvas>
+        <canvas id="repoOverview"></canvas>
       </div>
     </div>
   </div>
@@ -114,20 +114,20 @@
     <div class="row mt-2"> 
       <div class="col-md-4"> 
         <div class="card p-2">
-          <h5 class="card-title factor">전체 Score분포</h5>
+          <h5 class="card-title factor">전체 Score 분포</h5>
           <div class="text-flex" id="perScore"></div>
           <canvas id="totalScoreDist"> </canvas>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card p-2">
-          <h5 class="card-title factor">학번별 Score분포</h5>
+          <h5 class="card-title factor">학번별 Score 분포</h5>
           <canvas id="sidScoreDist"></canvas>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card p-2">
-          <h5 class="card-title factor">학과별 Score분포</h5>
+          <h5 class="card-title factor">학과별 Score 분포</h5>
           <canvas id="deptScoreDist"></canvas>
         </div>
       </div>
@@ -137,11 +137,14 @@
 </body>
 
   <script type="text/javascript">
-    let chartdata = JSON.parse("{{ annual_overview | escapejs }}");
+    let chartdata_0 = JSON.parse("{{ chartdata_0 | escapejs }}");
+    let chartdata_1 = JSON.parse("{{ chartdata_1 | escapejs }}");
+    let chartdata_2 = JSON.parse("{{ chartdata_2 | escapejs }}");
+    let chartdata_3 = JSON.parse("{{ chartdata_3 | escapejs }}");
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="http://code.jquery.com/jquery-latest.js"></script>
   <script type="text/javascript" src="{% static 'js/statistic.js' %}"></script>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+  
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
-  <script type="text/javascript" src="scripts/chartjs-chart-error-bars/build/index.umd.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
   {% endblock content %}
