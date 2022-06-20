@@ -1,0 +1,150 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<body>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <div class="container mt-2 mb-2">
+    <div class="d-flex text-lg">
+      <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group me-2" role="group" aria-label="First group">
+          <button class="btn btn-primary btn-score" type="button">1 </button>
+          <button class="btn btn-outline-primary btn-score" type="button">2</button>
+          <button class="btn btn-outline-primary btn-score" type="button">3</button>
+        </div>
+      </div>
+    <div class="form-check form-switch"> 
+      <input class="form-check-input" id="absenceSwitch" type="checkbox" role="switch" checked="checked"/>
+      <label class="form-check-label" for="absenceSwitch"><span class="bold">휴학생 </span><span class="switch-toggle-absence none">미포함 </span><span class="switch-toggle-absence bold">포함 </span></label>
+    </div>
+    <div class="form-check form-switch"> 
+      <input class="form-check-input" id="majorSwitch" type="checkbox" role="switch" checked="checked"/>
+      <label class="form-check-label" for="majorSwitch"><span class="bold">복수전공 </span><span class="switch-toggle-major none">미포함 </span><span class="switch-toggle-major bold">포함 </span></label>
+    </div>
+  </div>
+  <div class="row pt-2 mb-2">
+    <div class="col-my-p20 ps-">
+      <div class="card p-1">
+        <h5 class="card-title">연도별 Score</h5>
+        <canvas id="scoreYear"></canvas>
+      </div>
+    </div>
+    <div class="col-my-p20">
+      <div class="card p-1"> 
+        <h5 class="card-title">연도별 Commit</h5>
+        <canvas id="commitYear"></canvas>
+      </div>
+    </div>
+    <div class="col-my-p20">
+      <div class="card p-1">
+        <h5 class="card-title">연도별 Star</h5>
+        <canvas id="starYear"></canvas>
+      </div>
+    </div>
+    <div class="col-my-p20">
+      <div class="card p-1"> 
+        <h5 class="card-title">연도별 PR</h5>
+        <canvas id="prYear"></canvas>
+      </div>
+    </div>
+    <div class="col-my-p20">
+      <div class="card p-1"> 
+        <h5 class="card-title">연도별 Issue</h5>
+        <canvas id="issueYear"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex text-lg">
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle me-2" id="dropdownMenuButton1" type="button" data-bs-toggle="dropdown" aria-expanded="false">2021 </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <li>
+          <button class="dropdown-item" id="dropdownBtn2021">2021</button>
+        </li>
+        <li> 
+          <button class="dropdown-item" id="dropdownBtn2020">2020</button>
+        </li>
+        <li> 
+          <button class="dropdown-item" id="dropdownBtn2019">2019</button>
+        </li>
+      </ul>
+    </div>
+    <div class="form-check form-switch"> 
+      <input class="form-check-input" id="totalSwitch" type="checkbox" role="switch" checked="checked"/>
+      <label class="form-check-label" for="totalSwitch"><span class="switch-toggle">개별 </span><span class="switch-toggle bold">합계</span></label>
+    </div>
+  </div>
+  <div class="row pt-2" id="overviewChart">
+    <div class="col-md-3">
+      <div class="card p-2">
+        <h5 class="card-title" id="scoreTitle">3점 이상 인원</h5>
+        <div class="text-center kpi"><span class="current text-primary" id="overGoalNumerator"></span> / <span class="total" id="overGoalDenominator"></span><span class="percent-wrapper">(<span class="percent" id="overGoalPercent">0.0%</span>)</span></div>
+        <canvas id="scoreOverview"></canvas>
+      </div>
+    </div>
+    <div class="col-md-3"> 
+      <div class="card p-2">
+        <h5 class="card-title" id="commitTitle">총 Commit 수</h5>
+        <div class="text-center kpi"><span class="current text-primary" id="commitNumerator"></span> / <span class="total" id="commitDenominator"></span><span class="percent-wrapper">(<span class="percent" id="commitPercent">0.0%</span>)</span></div>
+        <canvas id="commitOverview"></canvas>
+      </div>
+    </div>
+    <div class="col-md-3"> 
+      <div class="card p-2">
+        <h5 class="card-title" id="starTitle">총 Star 수</h5>
+        <div class="text-center kpi"><span class="current text-primary" id="starNumerator"></span> / <span class="total" id="starDenominator"></span><span class="percent-wrapper">(<span class="percent" id="starPercent">0.0%</span>)</span></div>
+        <canvas id="starOverview"></canvas>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-2"> 
+        <h5 class="card-title" id="repoTitle">총 Repo 수</h5>
+        <div class="text-center kpi"><span class="current text-primary" id="repoNumerator"></span> / <span class="total" id="repoDenominator"></span><span class="percent-wrapper">(<span class="percent" id="repoPercent">0.0%</span>)</span></div>
+        <canvas id="repoOverview"></canvas>
+      </div>
+    </div>
+  </div>
+  <ul class="nav nav-tabs mt-4 text-lg">
+    <li class="nav-item"><a class="nav-link active" id="pills-score-tab">Score</a></li>
+    <li class="nav-item"><a class="nav-link" id="pills-commits-tab">Commits</a></li>
+    <li class="nav-item"><a class="nav-link" id="pills-stars-tab">Stars</a></li>
+    <li class="nav-item"><a class="nav-link" id="pills-pr-tab">Pull Requests</a></li>
+    <li class="nav-item"><a class="nav-link" id="pills-issue-tab">Issues</a></li>
+  </ul>
+  <div class="tab-pane fade show mt-2" id="pills-score">
+    <div class="row mt-2"> 
+      <div class="col-md-4"> 
+        <div class="card p-2">
+          <h5 class="card-title factor">전체 Score 분포</h5>
+          <div class="text-flex" id="perScore"></div>
+          <canvas id="totalScoreDist"> </canvas>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-2">
+          <h5 class="card-title factor">학번별 Score 분포</h5>
+          <canvas id="sidScoreDist"></canvas>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-2">
+          <h5 class="card-title factor">학과별 Score 분포</h5>
+          <canvas id="deptScoreDist"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+  <script type="text/javascript">
+    let chartdata_0 = JSON.parse("{{ chartdata_0 | escapejs }}");
+    let chartdata_1 = JSON.parse("{{ chartdata_1 | escapejs }}");
+    let chartdata_2 = JSON.parse("{{ chartdata_2 | escapejs }}");
+    let chartdata_3 = JSON.parse("{{ chartdata_3 | escapejs }}");
+  </script>
+  <script type="text/javascript" src="{% static 'js/statistic.js' %}"></script>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+  
+  <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
+  {% endblock content %}
