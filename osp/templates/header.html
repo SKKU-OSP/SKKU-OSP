@@ -13,6 +13,9 @@
                         <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
                     </ul>
                 </li>
+                {% if user_type == 'admin' %}
+                <li class="nav-item"> <a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>

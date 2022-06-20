@@ -76,6 +76,7 @@ def statistic(request):
             
         context["chartdata_"+str(case)] = json.dumps(chartdata)
         
+    context['user_type'] = 'admin'
     #context = {"chartdata_":json.dumps(chartdata)}
     # print(context["chartdata_0"])
     # print(json.loads(context["chartdata_0"])["year2021"])

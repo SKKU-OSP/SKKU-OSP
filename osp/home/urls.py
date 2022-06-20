@@ -6,5 +6,4 @@ from .views import statistic
 
 urlpatterns = [
   path('statistic/', statistic, name='statistic'),
-
 ]
