@@ -4,7 +4,16 @@
             aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"> </span></button>
         <div class="collapse navbar-collapse container-fluid" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"> <a class="nav-link" aria-current="page" href="/">Home</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="NavCommunityDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">Community</a>
+                    <ul class="dropdown-menu" aria-labelledby="NavCommunityDropdown">
+                        <li><a class="dropdown-item" href="/community/notice">Notice</a></li>
+                        <li><a class="dropdown-item" href="/community/education">Education</a></li>
+                        <li><a class="dropdown-item" href="/community/team">Team</a></li>
+                        <li><a class="dropdown-item" href="/community/qna">Q&A</a></li>
+                    </ul>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="NavRankDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
@@ -13,6 +22,7 @@
                         <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
                     </ul>
                 </li>
+                <li class="nav-item"><a class="nav-link" aria-current="page" href="/challenge">Challenge</a></li>
                 {% if user.is_staff %}
                 <li class="nav-item"> <a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
                 {% endif %}
