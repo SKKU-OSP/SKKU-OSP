@@ -2,7 +2,7 @@
     <div class="container"> <a class="navbar-brand" href="#">SKKU OSP</a><button class="navbar-toggler" type="button"
             data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
             aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"> </span></button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse container-fluid" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"> <a class="nav-link" aria-current="page" href="/">Home</a></li>
                 <li class="nav-item dropdown">
@@ -13,10 +13,25 @@
                         <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
                     </ul>
                 </li>
-                {% if user_type == 'admin' %}
+                {% if user.is_staff %}
                 <li class="nav-item"> <a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
                 {% endif %}
             </ul>
+            {% if user.is_authenticated %}
+            <div class="d-flex">
+                <div class="dropdown">
+                    <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown">
+                        {{user.username}}
+                    </div>
+                    <ul class="dropdown-menu" aria-labelledby="ProfileDropdown">
+                        <li><a class="dropdown-item" href="/accounts/logout">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+            {% else %}
+            <a class="btn btn-outline-primary mx-2" href="/accounts/login">Log In</a>
+            <a class="btn btn-outline-success mx-2" href="/accounts/register">Sign Up</a>
+            {% endif %}
         </div>
     </div>
 </nav>
