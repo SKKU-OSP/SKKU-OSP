@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -22,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rank/', include('rank.urls')),
     path('accounts/', include('common.urls')),
-    path('user/', include('user.urls'))
+    path('user/', include('user.urls')),
+    path('', lambda req: redirect('/accounts/login'))
 ]
