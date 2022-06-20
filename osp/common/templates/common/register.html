@@ -88,6 +88,29 @@
                 <label for="secondary_email" class="form-label">Secondary Email</label>
                 <input type="email" class="form-control" id="secondary_email" placeholder="Git과 연결된 예비 Email">
             </div>
+            <div class="col-md-12 mb-3">
+                <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
+                <input type="email" list="preferLanguageOptions" class="form-control" id="preferLanguage"
+                    placeholder="C++, Java, Python" multiple>
+                <datalist id="preferLanguageOptions">
+                    <option value="C">
+                    <option value="C++">
+                    <option value="Java">
+                    <option value="Python">
+                    <option value="Javascript">
+                </datalist>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="preferDomain" class="form-label">관심 분야</label>
+                <input type="email" list="preferDomainOptions" class="form-control" id="preferDomain"
+                    placeholder="AI, Big Data" multiple>
+                <datalist id="preferDomainOptions">
+                    <option value="System">
+                    <option value="AI">
+                    <option value="NLP">
+                    <option value="Big Data">
+                </datalist>
+            </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
