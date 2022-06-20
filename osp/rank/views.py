@@ -1,8 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from user.models import ScoreTable, StudentTab
+from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
+
 # Create your views here.
+@login_required
 def user_rank(request):
     # Split by Year
     score_by_year = {}
@@ -23,6 +26,7 @@ def user_rank(request):
             student_list.append(row)
     return render(request, 'rank/user_rank.html', {'data': student_list})
 
+@login_required
 def repo_rank(request):
     repo_list = []
     student_contributor = {}

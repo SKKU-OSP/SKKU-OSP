@@ -1,10 +1,11 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 import json
 import time
 
 # Create your views here.
-
+@login_required
 def statistic(request):
     
     context = dict()
