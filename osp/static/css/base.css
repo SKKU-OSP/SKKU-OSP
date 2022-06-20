@@ -56,6 +56,12 @@ footer {
   grid-row: 1/2;
   font-weight: bold;
 }
+
 .footer-item-row1 {
   grid-row: 2/3;
+}
+
+.form-floating-group input {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
 }
