@@ -1,7 +1,7 @@
 {% load user_templatetag %}
 
     <ul class="nav nav-tabs">
-      <li class="nav-item"><a class="nav-link {% tab_repo_type cur_repo_type "owned" %}" id="owned_repo_tab" data-toggle="tab" data-load="true" data-url="/ajax/owned_repo?student_id=" href="#owned_repo">Owned Repository</a></li>
+      <li class="nav-item"><a class="nav-link {% tab_repo_type cur_repo_type "owned" %}" id="owned_repo_tab" data-toggle="tab" data-load="true" data-url="/ajax/owned_repo?student_id=">Owned Repository</a></li>
       <li class="nav-item"><a class="nav-link {% tab_repo_type cur_repo_type "contributed" %}" id="contr_repo_tab" data-toggle="tab" data-load="false" data-url="/ajax/contr_repo?student_id=" href="#contr_repo">Contributed Repository</a></li>
     </ul>
     <div class="tab-content">
