@@ -1,10 +1,11 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 import json
 import time
 
 # Create your views here.
-
+@login_required
 def statistic(request):
     
     context = dict()
@@ -76,6 +77,7 @@ def statistic(request):
             
         context["chartdata_"+str(case)] = json.dumps(chartdata)
         
+    context['user_type'] = 'admin'
     #context = {"chartdata_":json.dumps(chartdata)}
     # print(context["chartdata_0"])
     # print(json.loads(context["chartdata_0"])["year2021"])

@@ -10,15 +10,34 @@ button {
   text-decoration: none;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+#body-wrapper {
+  min-height: 100%;
+  position: relative;
+}
+
+#body-content {
+  padding-bottom: 80px;
+}
+
 .text-flex {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
+
 footer {
+  height: 80px;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  position : absolute;
   border-top: solid 2px black;
-  margin-top: 20px;
-  padding: 10px;
   font-family: "Zen Maru Gothic", sans-serif;
   text-align: center;
   display: grid;
@@ -37,6 +56,12 @@ footer {
   grid-row: 1/2;
   font-weight: bold;
 }
+
 .footer-item-row1 {
   grid-row: 2/3;
+}
+
+.form-floating-group input {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
 }

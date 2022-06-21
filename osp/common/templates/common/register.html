@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+{% extends 'main.html' %}
+
+{% load static %}
+{% block content %}
+<div class="d-flex justify-content-center container my-5">
+    <div class="col-6">
+        <div class="d-flex justify-content-center">
+            <img src="/static/images/logo.jpg" alt="Logo" class="w-25" />
+        </div>
+        <form method="post" action="." class="row">
+            {% csrf_token %}
+            <div class="col-md-6 mb-3">
+                <label for="username" class="form-label">ID</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="username" placeholder="ID">
+                    <button class="btn btn-outline-secondary" type="button" id="duplicate_check">Check</button>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Password">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="student_id" class="form-label">학번</label>
+                <input type="text" class="form-control" id="student_id" placeholder="ex) 20XXXXXXXX">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="name" class="form-label">이름</label>
+                <input type="text" class="form-control" id="name" placeholder="ex) 홍길동">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="college" class="form-label">소속 대학</label>
+                <input type="text" class="form-control" id="college" placeholder="ex) 소프트웨어융합대학">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="dept" class="form-label">소속 학과</label>
+                <input type="text" class="form-control" id="dept" placeholder="ex) 소프트웨어학과">
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="form-label">
+                    <label for="absenceRadioOptions">재학 여부</label>
+                </div>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="absenceRadioOptions" id="absenceFalse"
+                            value="0" checked>
+                        <label class="form-check-label" for="absenceFalse">재학</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="absenceRadioOptions" id="absenceTrue"
+                            value="1">
+                        <label class="form-check-label" for="absenceTrue">휴학/졸업</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="form-label">
+                    <label for="absenceRadioOptions">복수 전공</label>
+                </div>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="pluralRadioOptions" id="pluralFalse"
+                            value="0" checked>
+                        <label class="form-check-label" for="absenceFalse">원전공</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="pluralRadioOptions" id="pluralTrue"
+                            value="1">
+                        <label class="form-check-label" for="absenceTrue">복수전공</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="github_id" class="form-label">GitHub ID</label>
+                <input type="text" class="form-control" id="github_id" placeholder="GitHub ID">
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="연락용 Email">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="primary_email" class="form-label">GitHub Email</label>
+                <input type="email" class="form-control" id="primary_email" placeholder="GitHub 계정과 연결된 Email">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="secondary_email" class="form-label">Secondary Email</label>
+                <input type="email" class="form-control" id="secondary_email" placeholder="Git과 연결된 예비 Email">
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
+                <input type="email" list="preferLanguageOptions" class="form-control" id="preferLanguage"
+                    placeholder="C++, Java, Python" multiple>
+                <datalist id="preferLanguageOptions">
+                    <option value="C">
+                    <option value="C++">
+                    <option value="Java">
+                    <option value="Python">
+                    <option value="Javascript">
+                </datalist>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="preferDomain" class="form-label">관심 분야</label>
+                <input type="email" list="preferDomainOptions" class="form-control" id="preferDomain"
+                    placeholder="AI, Big Data" multiple>
+                <datalist id="preferDomainOptions">
+                    <option value="System">
+                    <option value="AI">
+                    <option value="NLP">
+                    <option value="Big Data">
+                </datalist>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}
+{% endblock script %}
+
+</html>

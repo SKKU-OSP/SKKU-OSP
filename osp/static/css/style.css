@@ -60,17 +60,6 @@ button.unchosen {
   margin-bottom: 0px;
   font-size: 12px;
 }
-.logo-link {
-  color: black;
-  display: flex;
-  font-size: 12px;
-}
-.logo-link:nth-child(n) {
-  align-items: end;
-}
-.logo-link > a {
-  margin: 0px 5px;
-}
 a.nav-link {
   cursor: pointer;
 }
