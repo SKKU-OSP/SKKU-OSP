@@ -11,32 +11,57 @@
         </div>
         <form method="post" action="." class="row">
             {% csrf_token %}
-            <div class="col-md-6 mb-3">
-                <label for="username" class="form-label">ID</label>
+            <div class="col-md-4 mb-3">
+                <label for="username" class="form-label">Username</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="username" placeholder="ID">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                     <button class="btn btn-outline-secondary" type="button" id="duplicate_check">Check</button>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                    required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="password_check" class="form-label">Password Check</label>
+                <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password"
+                    required>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="student_id" class="form-label">학번</label>
-                <input type="text" class="form-control" id="student_id" placeholder="ex) 20XXXXXXXX">
+                <input type="text" class="form-control" id="student_id" name="student_id" placeholder="ex) 20XXXXXXXX"
+                    required>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="name" class="form-label">이름</label>
-                <input type="text" class="form-control" id="name" placeholder="ex) 홍길동">
+                <input type="text" class="form-control" id="name" name="name" placeholder="ex) 홍길동" required>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="college" class="form-label">소속 대학</label>
-                <input type="text" class="form-control" id="college" placeholder="ex) 소프트웨어융합대학">
+                <select class="form-select" name="college" id="college">
+                    <option value="경영대학">경영대학</option>
+                    <option value="경제대학">경제대학</option>
+                    <option value="공과대학">공과대학</option>
+                    <option value="문과대학">문과대학</option>
+                    <option value="법과대학">법과대학</option>
+                    <option value="사범대학">사범대학</option>
+                    <option value="사회과학대학">사회과학대학</option>
+                    <option value="생명공학대학">생명공학대학</option>
+                    <option value="소프트웨어융합대학" selected>소프트웨어융합대학</option>
+                    <option value="스포츠과학대학">스포츠과학대학</option>
+                    <option value="약학대학">약학대학</option>
+                    <option value="예술대학">예술대학</option>
+                    <option value="유학대학">유학대학</option>
+                    <option value="의학대학">의학대학</option>
+                    <option value="자연과학대학">자연과학대학</option>
+                    <option value="정보통신대학">정보통신대학</option>
+                    <option value="학부대학">학부대학</option>
+                </select>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="dept" class="form-label">소속 학과</label>
-                <input type="text" class="form-control" id="dept" placeholder="ex) 소프트웨어학과">
+                <input type="text" class="form-control" id="dept" name="dept" placeholder="ex) 소프트웨어학과" required>
             </div>
             <div class="col-md-6 mb-3">
                 <div class="form-label">
@@ -44,13 +69,11 @@
                 </div>
                 <div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="absenceRadioOptions" id="absenceFalse"
-                            value="0" checked>
+                        <input class="form-check-input" type="radio" name="absence" id="absenceFalse" value="0" checked>
                         <label class="form-check-label" for="absenceFalse">재학</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="absenceRadioOptions" id="absenceTrue"
-                            value="1">
+                        <input class="form-check-input" type="radio" name="absence" id="absenceTrue" value="1">
                         <label class="form-check-label" for="absenceTrue">휴학/졸업</label>
                     </div>
                 </div>
@@ -61,37 +84,40 @@
                 </div>
                 <div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="pluralRadioOptions" id="pluralFalse"
-                            value="0" checked>
+                        <input class="form-check-input" type="radio" name="plural_major" id="pluralFalse" value="0"
+                            checked>
                         <label class="form-check-label" for="absenceFalse">원전공</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="pluralRadioOptions" id="pluralTrue"
-                            value="1">
+                        <input class="form-check-input" type="radio" name="plural_major" id="pluralTrue" value="1">
                         <label class="form-check-label" for="absenceTrue">복수전공</label>
                     </div>
                 </div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="github_id" class="form-label">GitHub ID</label>
-                <input type="text" class="form-control" id="github_id" placeholder="GitHub ID">
+                <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
+                    required>
             </div>
-            <div class="col-md-12 mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="연락용 Email">
+            <div class="col-md-6 mb-3">
+                <label for="personal_email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="personal_email" name="personal_email" placeholder="연락용 Email"
+                    required>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="primary_email" class="form-label">GitHub Email</label>
-                <input type="email" class="form-control" id="primary_email" placeholder="GitHub 계정과 연결된 Email">
+                <input type="email" class="form-control" id="primary_email" name="primary_email"
+                    placeholder="GitHub 계정과 연결된 Email" required>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="secondary_email" class="form-label">Secondary Email</label>
-                <input type="email" class="form-control" id="secondary_email" placeholder="Git과 연결된 예비 Email">
+                <input type="email" class="form-control" id="secondary_email" name="secondary_email"
+                    placeholder="Git과 연결된 예비 Email">
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
-                <input type="email" list="preferLanguageOptions" class="form-control" id="preferLanguage"
-                    placeholder="C++, Java, Python" multiple>
+                <input type="text" list="preferLanguageOptions" class="form-control" id="preferLanguage"
+                    name="preferLanguage" placeholder="C++, Java, Python" multiple>
                 <datalist id="preferLanguageOptions">
                     <option value="C">
                     <option value="C++">
@@ -100,9 +126,9 @@
                     <option value="Javascript">
                 </datalist>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="preferDomain" class="form-label">관심 분야</label>
-                <input type="email" list="preferDomainOptions" class="form-control" id="preferDomain"
+                <input type="text" list="preferDomainOptions" class="form-control" id="preferDomain" name="preferDomain"
                     placeholder="AI, Big Data" multiple>
                 <datalist id="preferDomainOptions">
                     <option value="System">
