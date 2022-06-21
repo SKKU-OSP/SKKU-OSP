@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from user.models import StudentTab, ScoreTable
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 # from ..repository.models import *
+import datetime
 
 from django.db.models import Max, Min
 
@@ -24,16 +25,19 @@ def get_owned_repos(github_id):
         pulls = GithubPulls.objects.filter(owner_id=github_id, repo_name=repo_name)
         issues = GithubPulls.objects.filter(owner_id=github_id, repo_name=repo_name)
 
-        if commits or pulls or issues:
-            max_dates = [commits.aggregate(Max('committer_date')).get('committer_date__max').date(),
-                         pulls.aggregate(Max('date')).get('date__max'), issues.aggregate(Max('date')).get('date__max')]
-            max_year = max(x for x in max_dates if x is not None).year
-            min_dates = [commits.aggregate(Min('committer_date')).get('committer_date__min').date(),
-                         pulls.aggregate(Min('date')).get('date__min'), issues.aggregate(Min('date')).get('date__min')]
-            min_year = max(x for x in min_dates if x is not None).year
-
         records = []
-        if min_year and max_year:
+        if commits or pulls or issues:
+            ignore_date = datetime.datetime.utcfromtimestamp(0)
+
+
+            max_dates = [ (commits.aggregate(Max('committer_date')).get('committer_date__max') or ignore_date).date(),
+                         pulls.aggregate(Max('date')).get('date__max'), issues.aggregate(Max('date')).get('date__max')]
+
+            max_year = max(x for x in max_dates if x is not None and x is not ignore_date).year
+            min_dates = [(commits.aggregate(Min('committer_date')).get('committer_date__min') or ignore_date).date(),
+                         pulls.aggregate(Min('date')).get('date__min'), issues.aggregate(Min('date')).get('date__min')]
+            min_year = max(x for x in min_dates if x is not None and x is not ignore_date).year
+
             for year in range(min_year, max_year + 1):
                 record_info = {}
                 record_info['year'] = year
