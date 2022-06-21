@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" style="height:100%;">
     {% include 'head.html' %}
     
     {% include 'header.html' %}
     {% block additional_header %}
     {% endblock %}
 
-    <div class="h-100">
+    <body style="height:100%;">
         {% block content %}
 
         {% endblock %}
-    </div>
+    </body>
 
     {% include 'footer.html' %}
 
