@@ -1,0 +1,86 @@
+{% load user_templatetag %}
+
+    <ul class="nav nav-tabs">
+      <li class="nav-item"><a class="nav-link {% tab_repo_type cur_repo_type "owned" %}" id="owned_repo_tab" data-toggle="tab" data-load="true" data-url="/ajax/owned_repo?student_id=" href="#owned_repo">Owned Repository</a></li>
+      <li class="nav-item"><a class="nav-link {% tab_repo_type cur_repo_type "contributed" %}" id="contr_repo_tab" data-toggle="tab" data-load="false" data-url="/ajax/contr_repo?student_id=" href="#contr_repo">Contributed Repository</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade w-100" id="owned_repo"></div>
+      <div class="tab-pane fade w-100" id="contr_repo"></div>
+    </div>
+
+<div class="d-flex flex-wrap justify-content-between" style="margin-top:5px;width:100%;height:80%;overflow:auto;">
+
+
+{% if cur_repo_type == "owned" %}
+    {% for repo in repos %}
+    <div class="card repo-card" style="width:32%;  min-width:310px; margin-bottom:5px;">
+        <div class="card-body">
+            <a href="{% github_link std.github_id repo.name %}" style="text-decoration:none">
+                <h4 class="card-title fw-bold text-body">
+                    {{ repo.name }}
+                </h4>
+            </a>
+            <table class="table text-center">
+                <thead>
+                <tr>
+                    <th>Year</th><th>Commits</th><th>Issues</th><th>Pull Requests</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in repo.records %}
+                    <tr>
+                    <td>{{ record.year }}</td><td>{{ record.commit_cnt }}</td><td>{{ record.issue_cnt }}</td><td>{{ record.pr_cnt }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                    <td>-</td><td>0</td><td>0</td><td>0</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    {% empty %}
+        <div class="text-center">"owned repository가 없습니다."</div>
+    {% endfor %}
+
+{% else %}
+    {% for repo in repos %}
+    <div class="card repo-card">
+        <div class="card-body">
+            <a href="{% github_link repo.github_id repo.name %}" style="text-decoration:none">
+                <h4 class="card-title fw-bold text-body">
+                    {{ repo.github_id }}/{{ repo.name }}
+                </h4>
+            </a>
+            <table class="table text-center">
+                <thead>
+                <tr>
+                    <th>Year</th><th>Commits</th><th>Issues</th><th>Issues</th><th>Pull Requests</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in rpo.records %}
+                    <tr>
+                    <td>{{ record.year }}</td><td>{{ record.commit_cnt }}</td><td>{{ record.issu_cnt }}</td><td>{{ record.pr_cnt }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                    <td>-</td><td>0</td><td>0</td><td>0</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    {% empty %}
+        <div>"owned repository가 없습니다."</div>
+    {% endfor %}
+
+</div>
+
+{% endif %}
+

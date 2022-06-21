@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'home',
     'repository',
     'user',
-    # 'rank',
+    'rank',
 ]
 
 MIDDLEWARE = [
