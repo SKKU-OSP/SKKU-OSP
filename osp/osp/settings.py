@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'user',
     'rank',
     'common',
+    'tag',
 ]
 
 MIDDLEWARE = [

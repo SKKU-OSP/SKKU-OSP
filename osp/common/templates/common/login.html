@@ -12,7 +12,7 @@
         {% for error in form.non_field_errors %}
         <div class="text-center mb-3">
             {% if error == "Please enter a correct username and password. Note that both fields may be case-sensitive." %}
-            <strong>ID와 비밀번호가 일치하지 않습니다</strong>
+            <strong>Username과 비밀번호가 일치하지 않습니다</strong>
             {% else %}
             <strong>{{ error }}</strong>
             {% endif %}
@@ -21,8 +21,8 @@
         <form method="post" action=".">
             {% csrf_token %}
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" name="username" id="username" placeholder="exampleid" required>
-                <label for="IDHelp">ID</label>
+                <input type="text" class="form-control" name="username" id="username" placeholder="exampleusername" required>
+                <label for="UsernameHelp">Username</label>
             </div>
             <div class="form-floating mb-3">
                 <input type="password" class="form-control" name="password" id="password" placeholder="examplepw"

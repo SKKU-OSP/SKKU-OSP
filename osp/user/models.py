@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -66,3 +67,7 @@ class ScoreTable(models.Model):
         managed = False
         db_table = 'score_table_sum'
         unique_together = (('id', 'year'),)
+
+class Account(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE)
