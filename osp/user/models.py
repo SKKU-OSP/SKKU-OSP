@@ -18,6 +18,7 @@ class StudentTab(models.Model):
     class Meta:
         managed = False
         db_table = 'student_tab'
+        ordering  = ['id']
 
 
 class GithubOverview(models.Model):
@@ -71,3 +72,5 @@ class ScoreTable(models.Model):
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE)
+    class Meta:
+        ordering  = ['student_data']
