@@ -3,11 +3,14 @@ from django.views import View
 from tag.models import Tag
 
 # Create your views here.
-class LanguageTagView(View):
+class TagAPIView(View):
     def get(self, request):
         keyword = request.GET.get('keyword', '')
+        target_type = request.GET.get('type', False)
         result = []
-        for row in Tag.objects.filter(type='language'):
+        for row in Tag.objects.all():
+            if target_type and target_type != row.type:
+                continue
             pos = row.name.lower().find(keyword.lower())
             if pos >= 0:
                 result.append((pos, row.name))
