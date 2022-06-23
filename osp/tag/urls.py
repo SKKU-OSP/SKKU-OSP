@@ -2,5 +2,5 @@ from django.urls import path
 from tag import views
 
 urlpatterns = [
-    path('language/', views.LanguageTagView.as_view(), name='language-api'),
+    path('api/', views.TagAPIView.as_view(), name='tag-api'),
 ]
