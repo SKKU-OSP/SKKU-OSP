@@ -51,9 +51,9 @@ window.onload = function () {
     chartFactor = "score";
     changeCardTitle(chartFactor);
     includeAbsence = !includeAbsence;
-    destroyOverviewChart();
-    destroyChart();
-    destroyYearChart();
+    destroyChart(overviewChart, 4);
+    destroyChart(chart, 3);
+    destroyChart(yearChart, 5);
     fetchData();
   });
   switchMajor.addEventListener("change", function (e) {
@@ -76,9 +76,9 @@ window.onload = function () {
     chartFactor = "score";
     changeCardTitle(chartFactor);
     includePluralMajor = !includePluralMajor;
-    destroyOverviewChart();
-    destroyChart();
-    destroyYearChart();
+    destroyChart(overviewChart, 4);
+    destroyChart(chart, 3);
+    destroyChart(yearChart, 5);
     fetchData();
   });
   const yearChart = createObjArray(5);
@@ -91,26 +91,16 @@ window.onload = function () {
     }
     return arr;
   }
-  function destroyChart() {
-    for (let i = 0; i < 3; i++) {
+  function destroyChart(chart, size) {
+    for (let i = 0; i < size; i++) {
       chart[i].destroy();
-    }
-  }
-  function destroyOverviewChart() {
-    for (let i = 0; i < 4; i++) {
-      overviewChart[i].destroy();
-    }
-  }
-  function destroyYearChart() {
-    for (let i = 0; i < 5; i++) {
-      yearChart[i].destroy();
     }
   }
   function changeCardTitle(factor) {
     const cardTitle = document.getElementsByClassName("factor");
     let word;
     if (factor === "pr")
-      word = factor.charAt(0).toUpperCase() + factor.charAt(1).toUpperCase();
+      word = "PR";
     else {
       word = factor.charAt(0).toUpperCase() + factor.slice(1);
     }
@@ -185,7 +175,6 @@ window.onload = function () {
     const deptLabel = ["소프트웨어", "글로벌융합", "컴퓨터공학"];
     const yearFactorList = ["score", "commit", "star", "pr", "issue"];
     let labelList = [scoreDistLabel, sidLabel, deptLabel];
-    console.log("NEW DIST", makeHistogramJson(dist, scoreDistLabel));
     let sidStd = annual_dist[`${chartFactor}_sid_std`];
     let deptStd = annual_dist[`${chartFactor}_dept_std`];
     const annualStdList = [
@@ -222,8 +211,9 @@ window.onload = function () {
         .getElementById(`${canvasNameRule[i]}ScoreDist`)
         .getContext("2d");
     }
+    
 
-    setOverallStat(chartdata);
+    setOverallStat(annual_total);
     /* color pallet ref: 
       https://learnui.design/tools/data-color-picker.html#palette*/
     const bsPrimary = "#0d6efd";
@@ -234,18 +224,6 @@ window.onload = function () {
       "#ff268a",
       "#ff6657",
       "#ffab21",
-      "#ffe913",
-    ];
-    const cc10 = [
-      "#4245cb",
-      "#743fc6",
-      "#b52eb5",
-      "#e1219e",
-      "#ff2e83",
-      "#ff5c5e",
-      "#ff8046",
-      "#ff9439",
-      "#ffbe1b",
       "#ffe913",
     ];
     const noLegendOption = {
@@ -384,9 +362,9 @@ window.onload = function () {
           }
         );
 
-        setGraphData(annual, chartFactor);
+        setAnnualDistData(annual, chartFactor);
         setOverallStat(
-          chartdata,
+          annual_total,
           switchChecked ? 1 : annual_total["student_total"][annual - start_year]
         );
         if (switchChecked === true) {
@@ -471,27 +449,27 @@ window.onload = function () {
     btn21.addEventListener("click", function () {
       $("#totalSwitch").classList;
       annual = 2021;
-      setGraphData(annual, chartFactor);
+      setAnnualDistData(annual, chartFactor);
       setOverallStat(
-        chartdata,
+        annual_total,
         switchChecked ? 1 : annual_total["student_total"][annual - start_year]
       );
       reloadChart(annual, chartFactor);
     });
     btn20.addEventListener("click", function () {
       annual = 2020;
-      setGraphData(annual, chartFactor);
+      setAnnualDistData(annual, chartFactor);
       setOverallStat(
-        chartdata,
+        annual_total,
         switchChecked ? 1 : annual_total["student_total"][annual - start_year]
       );
       reloadChart(annual, chartFactor);
     });
     btn19.addEventListener("click", function () {
       annual = 2019;
-      setGraphData(annual, chartFactor);
+      setAnnualDistData(annual, chartFactor);
       setOverallStat(
-        chartdata,
+        annual_total,
         switchChecked ? 1 : annual_total["student_total"][annual - start_year]
       );
       reloadChart(annual, chartFactor);
@@ -539,8 +517,8 @@ window.onload = function () {
         $("#commitTitle").text("학생당 Commit 수");
         $("#starTitle").text("학생당 Star 수");
         $("#repoTitle").text("학생당 Repo 수");
-        setOverallStat(chartdata, annual_total["student_total"][annual - start_year]);
-        destroyOverviewChart();
+        setOverallStat(annual_total, annual_total["student_total"][annual - start_year]);
+        destroyChart(overviewChart, 4);
         const data = [];
         for (let year = start_year; year <= end_year; year++) {
           annual_student = JSON.parse(chartdata[`student${year}`]);
@@ -760,8 +738,8 @@ window.onload = function () {
         $("#commitTitle").text("총 Commit 수");
         $("#starTitle").text("총 Star 수");
         $("#repoTitle").text("총 Repo 수");
-        destroyOverviewChart();
-        setOverallStat(chartdata);
+        destroyChart(overviewChart, 4);
+        setOverallStat(annual_total);
         
         overviewDatasetList = [
           annual_total["student_KP"],
@@ -797,11 +775,11 @@ window.onload = function () {
       return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    function setOverallStat(chartdata, nStudent = 1) {
+    function setOverallStat(annual_total, nStudent = 1) {
 
       // Overall statistic data: 3점 이상 비율, 총 커밋 수, 총 스타 수, 총 레포 수
       let fix = nStudent === 1 ? 0 : 1;
-      let annual_total = JSON.parse(chartdata["annual_total"])[0];
+      // let annual_total = JSON.parse(chartdata["annual_total"])[0];
       let idx_asc = annual - start_year;
       let idx_desc = end_year - annual;
       const overGoalcount = annual_total[`student_KP${scoreList[scoreIdx]}`][idx_asc];
@@ -849,7 +827,7 @@ window.onload = function () {
 
       controlFontSize();
     }
-    function setGraphData(annual, factor) {
+    function setAnnualDistData(annual, factor) {
       document.getElementById("dropdownMenuButton1").textContent = annual;
       if (factor === "score") {
         annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
@@ -866,7 +844,7 @@ window.onload = function () {
         deptTopData = annual_dist[`${factor}_dept_pct`];
       }
     }
-    function makeChart(dist, type, factor,
+    function makeChart(ctx, type, factor,
       labels, data, color, options, topdata = []) {
 
       let chart;
@@ -876,7 +854,7 @@ window.onload = function () {
         const barPercentage = 0.9;
         const categoryPercentage = 1;
 
-        chart = new Chart(dist, {
+        chart = new Chart(ctx, {
           data: {
             labels: labels,
             datasets: [
@@ -903,7 +881,7 @@ window.onload = function () {
         const barPercentage = 1;
         const categoryPercentage = 1;
 
-        chart = new Chart(dist, {
+        chart = new Chart(ctx, {
           data: {
             labels: labels,
             datasets: [
@@ -921,7 +899,7 @@ window.onload = function () {
           options: options,
         });
       } else {
-        chart = new Chart(dist, {
+        chart = new Chart(ctx, {
           data: {
             labels: labels,
             datasets: [
@@ -941,7 +919,7 @@ window.onload = function () {
     }
 
     function reloadChart(annual, factor) {
-      destroyChart();
+      destroyChart(chart, 3);
       chartColorRule = [bsPrimary, cc6, cc3];
       switch (factor) {
         case "score":
@@ -1072,6 +1050,7 @@ window.onload = function () {
           y: dist[j],
         };
       }
+      console.log("NEW DIST", newDist);
       return newDist;
     }
 
@@ -1099,7 +1078,6 @@ window.onload = function () {
     }
 
     // too long text
-    controlFontSize();
     function controlFontSize() {
       const numerator = document.getElementsByClassName("text-primary");
       const denominator = document.getElementsByClassName("total");
@@ -1109,11 +1087,9 @@ window.onload = function () {
         let lenNumer = numerator.item(i).textContent.length;
         let lenDenom = denominator.item(i).textContent.length;
         let lenPercent = percent.item(i).textContent.length;
-
-        if (lenNumer + lenDenom + lenPercent / 2 > 10) {
-          kpi.item(i).style.fontSize =
-            ((2 / (lenNumer + lenDenom + lenPercent / 2)) * 10).toFixed(2) +
-            "rem";
+        let lenText = (lenNumer + lenDenom + lenPercent);
+        if (lenText >= 13) {
+          kpi.item(i).style.fontSize = (25 / lenText).toFixed(2) +"rem";
         }
       }
     }
