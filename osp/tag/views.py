@@ -21,18 +21,21 @@ class TagAPIView(View):
         method = request.POST.get('method', '')
         if method == '' :
             return JsonResponse({'status': 'fail', 'message': f'Method field is empty'})
-        lang_name = request.POST.get('name', '')
-        if lang_name == '' :
+        tag_name = request.POST.get('name', '')
+        if tag_name == '' :
             return JsonResponse({'status': 'fail', 'message': f'Name field is empty'})
         if method == 'create':
-            if len(Tag.objects.filter(name=lang_name, type='language')) > 0:
-                return JsonResponse({'status': 'fail', 'message': f'{lang_name} already exists'})
-            Tag.objects.create(name=lang_name, type='language').save()
-            return JsonResponse({'status': 'success', 'message': f'{lang_name} is created'})
+            if len(Tag.objects.filter(name=tag_name)) > 0:
+                return JsonResponse({'status': 'fail', 'message': f'{tag_name} already exists'})
+            tag_type = request.POST.get('type', '')
+            if tag_type == '' :
+                return JsonResponse({'status': 'fail', 'message': f'Type field is empty'})
+            Tag.objects.create(name=tag_name, type=tag_type).save()
+            return JsonResponse({'status': 'success', 'message': f'{tag_name} is created'})
         if method == 'delete':
-            if len(Tag.objects.filter(name=lang_name, type='language')) == 0:
-                return JsonResponse({'status': 'fail', 'message': f'{lang_name} doesn\'t exist'})
-            x = Tag.objects.filter(name=lang_name, type='language')[0]
+            if len(Tag.objects.filter(name=tag_name)) == 0:
+                return JsonResponse({'status': 'fail', 'message': f'{tag_name} doesn\'t exist'})
+            x = Tag.objects.filter(name=tag_name)[0]
             x.delete()
-            return JsonResponse({'status': 'success', 'message': f'{lang_name} is created'})
+            return JsonResponse({'status': 'success', 'message': f'{tag_name} is created'})
         return JsonResponse({'status': 'fail', 'message': f'{method} doesn\'t support'})
