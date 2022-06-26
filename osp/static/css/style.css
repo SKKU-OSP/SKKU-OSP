@@ -64,10 +64,11 @@ a.nav-link {
   cursor: pointer;
 }
 
-.repo-card {
-  width: 45%;
-  margin: 5px;
-}
+/*.repo-card {*/
+/*  width: 30%;*/
+/*  min-width:300px;*/
+/*  margin:10px;*/
+/*}*/
 
 .form-switch {
   padding-top: 9px;
