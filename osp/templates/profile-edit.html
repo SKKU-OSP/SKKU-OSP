@@ -1,0 +1,73 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block additional_header %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<body>
+  <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
+  <div class="container-xl">
+    <div class="row row-cols-2">
+      <div class="col">
+        <div class="card" id="visualization">
+          <h5 class="card-title"> 개인정보 설정 </h5>
+          <div class="card-body">
+            <form class="form-floating m-2">
+              <input type="email" class="form-control" id="floatingInputValue1" placeholder="name@example.com" value={{data.info.personal_email}}>
+              <label for="floatingInputValue1">Input with value</label>
+            </form>
+            <form class="form-floating mb-3 m-2" >
+              <input type="url" class="form-control" id="floatingInputValue2" placeholder="https://github.com/name" value="https://github.com/name">
+              <label for="floatingInputValue2">GitHub Link</label>
+            </form>
+            <form class="form-floating mb-3 m-2" >
+              <input type="url" class="form-control" id="floatingInputValue3" placeholder="name.github.io" value="name.github.io">
+              <label for="floatingInputValue3">Blog Link</label>
+            </form>
+            <div class="mb-3">
+              <label for="exampleFormControlTextarea1" class="form-label">Self Introduction</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" id="visualization">
+          <h5 class="card-title"> 관심분야 설정 </h5>
+          <div class="card-body">
+            {% include 'interests.html' %}
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" id="portfolio">
+          <h5 class="card-title"> 포트폴리오 설정 </h5>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="exampleFormControlTextarea1" class="form-label"></label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="15"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" id="visualization">
+            <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
+          <div class="card-body">
+            {% include 'languages.html' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    저장--------------버튼
+  </div>
+</body>
+
+{% endblock %}
+
+
