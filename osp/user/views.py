@@ -1,7 +1,8 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.contrib.auth.models import User
 from django.views.generic import TemplateView
-from user.models import ScoreTable, StudentTab, GithubScore
+from user.models import ScoreTable, StudentTab, GithubScore, Account
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
@@ -9,9 +10,6 @@ import time
 import json
 
 # Create your views here.
-
-
-
 class ProfileView(TemplateView):
 
     template_name = 'profile/profile.html'
@@ -51,10 +49,9 @@ class ProfileView(TemplateView):
         
         context = super().get_context_data(**kwargs)
         print(context)
-        student_id = context["username"]
-        std = StudentTab.objects.filter(id=student_id).first()
-        github_id = std.github_id
-        print("student_id",student_id, "github_id:", github_id)
+        user = User.objects.get(username=context["username"])
+        student_data = Account.objects.get(user=user).student_data
+        github_id = student_data.github_id
         
         chartdata = dict()
         score_data_list = list()
@@ -100,7 +97,10 @@ class ProfileEditView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
 
-        student_info = StudentTab.objects.get(id=context['username'])
+        username = context['username']
+        user = User.objects.get(username=username)
+        student_id = Account.objects.get(user=user.id).student_data.id
+        student_info = StudentTab.objects.get(id=student_id)
         data = {}
         data['info'] = student_info
 
@@ -111,3 +111,6 @@ class ProfileEditView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
+def student_id_to_username(request, student_id):
+    username = Account.objects.get(student_data=student_id).user.username
+    return redirect(f'/user/{username}/')
