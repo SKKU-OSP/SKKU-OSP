@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rank',
     'common',
     'tag',
+    'community'
 ]
 
 MIDDLEWARE = [
