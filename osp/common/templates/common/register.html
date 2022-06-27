@@ -115,33 +115,11 @@
                 <input type="email" class="form-control" id="secondary_email" name="secondary_email"
                     placeholder="Git과 연결된 예비 Email">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
                 <select name="" id="multiple" multiple>
                     {% category_tag request %}
                 </select>
-{#                <input type="text" list="preferLanguageOptions" class="form-control" id="preferLanguage"#}
-{#                    name="preferLanguage" placeholder="C++, Java, Python" multiple>#}
-{#                <datalist id="preferLanguageOptions">#}
-{#                    <option value="{% github_link '1' %}">#}
-{#                    <option value="C">#}
-{#                    <option value="C++">#}
-{#                    <option value="Java">#}
-{#                    <option value="Python">#}
-{#                    <option value="Javascript">#}
-{#                    {% category_tag request %}#}
-{#                </datalist>#}
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="preferDomain" class="form-label">관심 분야</label>
-                <input type="text" list="preferDomainOptions" class="form-control" id="preferDomain" name="preferDomain"
-                    placeholder="AI, Big Data" multiple>
-                <datalist id="preferDomainOptions">
-                    <option value="System">
-                    <option value="AI">
-                    <option value="NLP">
-                    <option value="Big Data">
-                </datalist>
             </div>
             <div class="col-12">
                 <button class="btn btn-primary" onclick="ajaxSignIn();">Submit</button>
@@ -169,9 +147,7 @@
         ajax_form_data.append('college', $('#college').val());
         ajax_form_data.append('dept', $('#dept').val());
         ajax_form_data.append('github_id', $('#github_id').val());
-        {#ajax_form_data.append('absence', $("input[name='absence']:checked").val()==0 ? $('label[for="absenceFalse"]').text() : $('label[for="absenceTrue"]').text());#}
         ajax_form_data.append('absence', $("input[name='absence']:checked").val());
-        {#ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val()==0 ? $('label[for="pluralFalse"]').text() : $('label[for="pluralTrue"]').text());#}
         ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val());
         ajax_form_data.append('personal_email', $('#personal_email').val());
         ajax_form_data.append('primary_email', $('#primary_email').val());
@@ -194,7 +170,7 @@
                     console.log(data);
                     if(data['status']=="success"){
                         alert('회원가입이 완료되었습니다! 로그인 해주세요.')
-                        window.location.href = "{% url 'home:statistic' %}";
+                        window.location.href = "{% url 'common:login' %}";
                     }
                     else{
                       alert( data['message'] );
@@ -205,15 +181,6 @@
                 }
          });
     }
-{#    $("form")#}
-{#    .ajaxForm({#}
-{#        url : '{% url 'common:signup' %}', // or whatever#}
-{#        dataType : 'json',#}
-{#        success : function (response) {#}
-{#            alert("The server says: " + response);#}
-{#        }#}
-{#    })#}
-{#;#}
     </script>
 {% endblock script %}
 
