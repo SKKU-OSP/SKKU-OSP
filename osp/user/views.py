@@ -13,10 +13,8 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 class ProfileView(TemplateView):
 
     def get(self, request, *args, **kwargs):
-        student_id = self.kwargs.get('student_id')
 
         context = self.get_context_data(request, *args, **kwargs)
-
         # std = StudentTab.objects.filter(id=student_id)
 
         # # 화면 에러 처리
@@ -39,8 +37,8 @@ class ProfileView(TemplateView):
         #     print(context['repos'])
 
         # return render(request=request, template_name=self.template_name, context=context)
-        student_info = StudentTab.objects.get(id=context['user_id'])
-        student_score = ScoreTable.objects.get(id=context['user_id'], year=2021)
+        student_info = StudentTab.objects.get(id=context['username'])
+        student_score = ScoreTable.objects.get(id=context['username'], year=2021)
         data = {}
         data['info'] = student_info
         data['score'] = student_score
@@ -71,7 +69,7 @@ class ProfileEditView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
 
-        student_info = StudentTab.objects.get(id=context['user_id'])
+        student_info = StudentTab.objects.get(id=context['username'])
         data = {}
         data['info'] = student_info
 
