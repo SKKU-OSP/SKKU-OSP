@@ -15,13 +15,9 @@ class ProfileView(TemplateView):
     template_name = 'profile/profile.html'
     # 새로 고침 시 GET 요청으로 처리됨.
     def get(self, request, *args, **kwargs):
-        try:
-            student_id = self.kwargs.get('student_id')
-        except Exception as e:
-            print(e)
 
         context = self.get_context_data(request, *args, **kwargs)
-
+        student_id = context["student_id"]
         std = StudentTab.objects.filter(id=student_id)
 
         # 화면 에러 처리
@@ -40,6 +36,12 @@ class ProfileView(TemplateView):
             # student repository info
             context['cur_repo_type'] = 'owned'
             ## owned repository
+        student_info = StudentTab.objects.get(id=student_id)
+        student_score = ScoreTable.objects.get(id=student_id, year=2021)
+        data = {}
+        data['info'] = student_info
+        data['score'] = student_score
+        context["data"] = data
 
         return render(request=request, template_name=self.template_name, context=context)
 
@@ -56,6 +58,7 @@ class ProfileView(TemplateView):
         chartdata = dict()
         score_data_list = list()
         context["user_type"] = 'user'
+        context["student_id"] = student_data.id
         annual_overview = AnnualOverview.objects.filter(case_num=0).first()
         chartdata["annual_overview"] = annual_overview.to_avg_json()
         user_data = Student.objects.filter(github_id=github_id)
