@@ -34,6 +34,11 @@
                         {{user.username}}
                     </div>
                     <ul class="dropdown-menu" aria-labelledby="ProfileDropdown">
+                        {% if user.is_superuser %}
+                        <li><a class="dropdown-item" href="/admin">Admin</a></li>
+                        {% else %}
+                        <li><a class="dropdown-item" href="/user/{{user}}">Profile</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href="/accounts/logout">Logout</a></li>
                     </ul>
                 </div>
