@@ -60,11 +60,11 @@ class ProfileView(TemplateView):
     #     context['repos'] = get_repos(context['cur_repo_type'], github_id)
 
 
-    # def get_context_data(self, request, *args, **kwargs):
+    def get_context_data(self, request, *args, **kwargs):
         
-    #     context = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
-    #     return context
+        return context
 
 class ProfileEditView(TemplateView):
 
