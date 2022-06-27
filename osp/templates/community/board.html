@@ -9,9 +9,75 @@
         <div class="col-3 border">
             {% include "community/sidebar.html" %}
         </div>
-        <div class="col-9">
-            Main
+        <div class="col-9 d-flex flex-column">
+            {{ board_name }}
+            {% if board_name == 'team' %}
+                <!--최근 모집글-->
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-row border justify-content-between" style="height:40px;">
+                        <div class="border"><h3>최근 모집글</h3></div>
+                        <div class="border" style="position:relative">
+                            <div id="recent_pagination"class="pagination-wrapper border">
+{#                                <svg class="btn btn--prev" height="96" viewBox="0 0 24 24" width="96" xmlns="http://www.w3.org/2000/svg">#}
+{#                                    <path d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"/>#}
+{#                                    <path d="M0-.5h24v24H0z" fill="none"/>#}
+{#                                  </svg>#}
+                                <button class="btn btn--prev" ><</button>
+
+                                  <div class="pagination-container">
+                                    <div class="little-dot  little-dot--first"></div>
+                                    <div class="little-dot">
+                                      <div class="big-dot-container">
+                                        <div class="big-dot"></div>
+                                      </div>
+                                    </div>
+                                    <div class="little-dot  little-dot--last"></div>
+                                  </div>
+                                <button class="btn btn--next">></button>
+{#                                  <svg class="btn btn--next" height="96" viewBox="0 0 24 24" width="96" xmlns="http://www.w3.org/2000/svg">#}
+{#                                    <path d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"/>#}
+{#                                    <path d="M0-.25h24v24H0z" fill="none"/>#}
+{#                                  </svg>#}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border d-flex flex-row justify-content-between">
+                        <div style="width:30%;height:100px;" class="border card">
+
+                        </div>
+                        <div style="width:30%;height:100px;" class="border card">
+
+                        </div>
+                        <div style="width:30%;height:100px;" class="border card">
+
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="d-flex flex-column border">
+                <div class="d-flex flex-row justify-content-between">
+                    <div class="">
+                     <h4>팀 모집 게시판</h4>
+                    </div>
+                    <div>
+                        <button>-</button>
+                        <button>글쓰기</button>
+                    </div>
+                </div>
+                <div class="d-flex flex-column border">
+                    <div class="border" style="height:60px;width:100%;"></div>
+                    <div class="border" style="height:60px;width:100%;"></div>
+                    <div class="border" style="height:60px;width:100%;"></div>
+                    <div class="border" style="height:60px;width:100%;"></div>
+                    <div class="border" style="height:60px;width:100%;"></div>
+                </div>
+            </div>
         </div>
+        <div class="border d-flex flex-row justify-content-around">
+            <div class="border" style="width:30%">pagination</div>
+            <div class="border" style="width:30%">search</div>
+        </div>
+
     </div>
 </div>
 {% endblock content %}
