@@ -16,7 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('home/', include('home.urls')),
@@ -26,5 +25,6 @@ urlpatterns = [
     path('accounts/', include('common.urls')),
     path('user/', include('user.urls')),
     path('tag/', include('tag.urls')),
+    path('community/', include('community.urls')),
     path('', lambda req: redirect('/accounts/login'))
 ]
