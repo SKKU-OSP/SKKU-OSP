@@ -21,7 +21,7 @@ class ProfileView(TemplateView):
         data['info'] = student_info
         data['score'] = student_score
         
-        return render(request, 'profile.html', {'data': data})
+        return render(request, 'profile/profile.html', {'data': data})
 
     def get_context_data(self, request, *args, **kwargs):
         
@@ -38,7 +38,7 @@ class ProfileEditView(TemplateView):
         data = {}
         data['info'] = student_info
 
-        return render(request, 'profile-edit.html', {'data': data})
+        return render(request, 'profile/profile-edit.html', {'data': data})
 
     def get_context_data(self, request, *args, **kwargs):
         

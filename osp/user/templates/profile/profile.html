@@ -1,13 +1,6 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block additional_header %}
-<link rel="stylesheet" href="{% static 'css/profile-style.css' %}">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script type="text/javascript" src="{% static 'js/users.js' %}"></script>>
-{% endblock %}
-
-
 {% block content %}
 <body>
 <link rel="stylesheet" type="text/css "href="{% static 'css/profile-style.css' %}">
@@ -171,4 +164,9 @@
     </div>
   </div>
 </body>
+{% endblock %}
+
+
+{% block script %}
+<link rel="stylesheet" href="{% static 'css/profile-style.css' %}">
 {% endblock %}
