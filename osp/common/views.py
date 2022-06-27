@@ -3,7 +3,6 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from user.models import StudentTab, Account
-from tag.models import *
 import re
 
 def register_page(request):
