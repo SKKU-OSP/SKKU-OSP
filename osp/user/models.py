@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from tag.models import Tag
 
 # Create your models here.
 
@@ -74,3 +75,8 @@ class Account(models.Model):
     student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE)
     class Meta:
         ordering  = ['student_data']
+
+class AccountInterest(models.Model):
+    id = models.AutoField(primary_key=True)
+    account = models.ForeignKey(Account, models.CASCADE)
+    tag = models.ForeignKey(Tag, models.CASCADE)

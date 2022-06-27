@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from user.models import StudentTab, Account
+from user.models import StudentTab, Account, AccountInterest
+from tag.models import Tag
 import re
 
 def register_page(request):
@@ -18,7 +18,6 @@ def register_page(request):
             fail_reason.append('학번 형식이 다릅니다.')
         if len(request.POST['name']) > 20:
             fail_reason.append('이름은 20자를 넘을 수 없습니다.')
-        print(request.POST['dept'])
         if len(request.POST['dept']) > 45:
             fail_reason.append('학과은 45자를 넘을 수 없습니다.')
         if len(request.POST['personal_email']) > 100:
@@ -45,9 +44,11 @@ def register_page(request):
             secondary_email=request.POST['secondary_email']
         )
         student_data.save()
-        Account.objects.create(user=user, student_data=student_data).save()
-        return JsonResponse({'status': 'sucesss'})
-
-def username_dupcheck(request):
-    request.POST['username']
-    pass
+        new_account = Account.objects.create(user=user, student_data=student_data)
+        new_account.save()
+        tag_list = request.POST.get('category_tag_list', '').split(',')
+        for tag in tag_list:
+            tag = Tag.objects.filter(name=tag)
+            if len(tag) == 1:
+                AccountInterest.objects.create(account=new_account, tag=tag[0])
+        return JsonResponse({'status': 'success'})
