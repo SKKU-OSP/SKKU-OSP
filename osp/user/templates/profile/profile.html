@@ -1,0 +1,172 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<body>
+<link rel="stylesheet" type="text/css "href="{% static 'css/profile-style.css' %}">
+  <div class="container-xl">
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="container-sm">
+          <div class="card" >
+            <div class="card-body">
+            프로필 사진
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-3">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <td scope="row">이름</td>
+                    <td>{{data.info.name}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">학번</td>
+                    <td>{{data.info.id}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">대학</td>
+                    <td>{{data.info.college}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">학과</td>
+                    <td>{{data.info.dept}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">전공</td>
+                    <td>{{data.info.plural_major}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">GitHub</td>
+                    <td><a href="https://github.com/"></a></td>
+                  </tr>
+                  <tr>
+                    <td scope="row">개인 Email</td>
+                    <td>{{data.info.personal_email}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">Github Email</td>
+                    <td>{{data.info.primary_email}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card" id="interests">
+              <div class="card-body">
+                <h5 class="card-title">관심분야</h5>
+              </div>
+            </div>
+            <div class="card" id="languages">
+              <div class="card-body">
+                <h5 class="card-title">사용언어/기술스택</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-9">
+        <div class="container-lg">
+          <div class="row">
+            <div class="col-sm">
+              <div class="card" >
+                <h5 class="card-title">개발자 성향</h5>
+                <div class="card-body">
+                  MBTI
+                </div>
+              </div>
+            </div>
+            <div class="col-sm">
+              <div class="card">
+                <h5 class="card-title">Score</h5>
+                <div class="container-xs">
+                  <center><h1 class="display-3">{{data.score.total_score}}</h1></center>
+                </div>
+                <div class="container">
+                  <div class="row">
+                    <div class="col">
+                      <table class="table">
+                        <tbody>
+                          <tr>
+                            <th scope="row" style="width: 10%">Commits</th>
+                            <td style="width: 10%">{{data.score.commit_cnt}}</td>
+      
+                          </tr>
+                          <tr>
+                            <th scope="row" style="width: 10%">Repositories</th>
+                            <td style="width: 10%">{{data.score.repo_cnt}}</td>
+      
+                          </tr>
+                          <tr>
+                            <th scope="row" style="width: 10%">Pull Requests</th>
+                            <td style="width: 10%">{{data.score.pr_cnt}}</td>
+      
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col">
+                      <table class="table">
+                        <tbody>
+                          <tr>
+                            <th scope="row" style="width: 10%">Commit Lines</th>
+                            <td style="width: 10%">{{data.score.commit_line}}</td>
+      
+                          </tr>
+                          <tr>
+                            <th scope="row" style="width: 10%">Issues</th>
+                            <td style="width: 10%">{{data.score.issue_cnt}}</td>
+      
+                          </tr>
+                          <tr>
+                            <th scope="row" style="width: 10%">Stars</th>
+                            <td style="width: 10%">-</td>
+      
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm">
+              <div class="card">
+                <h5 class="card-title">Recent Contributions</h5>
+                <div class="card-body">
+                  repository
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container-lg" id="undercontainers">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="card" id="portfolio">
+                <h5 class="card-title">포트폴리오</h5>
+                <div class="card-body">
+                  Portfolio
+
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8" >
+              <div class="card" id="visualization">
+                <h5 class="card-title">기여내역 시각화</h5>
+                <div class="card-body">
+                  visualization
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}
+
+
+{% block script %}
+<link rel="stylesheet" href="{% static 'css/profile-style.css' %}">
+{% endblock %}
