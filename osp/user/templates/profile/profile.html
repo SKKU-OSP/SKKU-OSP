@@ -3,7 +3,7 @@
 
 {% block content %}
 <body>
-<link rel="stylesheet" type="text/css "href="{% static 'css/profile-style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <div class="container-xl">
     <div class="row">
       <div class="col-sm-3">
@@ -155,7 +155,11 @@
               <div class="card" id="visualization">
                 <h5 class="card-title">기여내역 시각화</h5>
                 <div class="card-body">
-                  visualization
+                  <canvas id="canvas1" class="ctx-item"> </canvas>
+                  <canvas id="canvas2" class="ctx-item"> </canvas>
+                  <canvas id="canvas3" class="ctx-item"> </canvas>
+                  <canvas id="canvas4" class="ctx-item"> </canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -168,5 +172,11 @@
 
 
 {% block script %}
+  <script type="text/javascript">
+    let chart_data = JSON.parse("{{ chart_data | escapejs }}");
+  </script>
+  <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
+  <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
 <link rel="stylesheet" href="{% static 'css/profile-style.css' %}">
 {% endblock %}
