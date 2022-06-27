@@ -10,7 +10,7 @@
         <div class="d-flex justify-content-center">
             <img src="/static/images/logo.jpg" alt="Logo" class="w-25" />
         </div>
-        <form method="post" action="." class="row">
+        <form method="post" action="." class="row" onSubmit="return false;">
             {% csrf_token %}
             <div class="col-md-4 mb-3">
                 <label for="username" class="form-label">Username</label>
@@ -87,11 +87,11 @@
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="plural_major" id="pluralFalse" value="0"
                             checked>
-                        <label class="form-check-label" for="absenceFalse">원전공</label>
+                        <label class="form-check-label" for="pluralFalse">원전공</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="plural_major" id="pluralTrue" value="1">
-                        <label class="form-check-label" for="absenceTrue">복수전공</label>
+                        <label class="form-check-label" for="pluralTrue">복수전공</label>
                     </div>
                 </div>
             </div>
@@ -144,7 +144,7 @@
                 </datalist>
             </div>
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button class="btn btn-primary" onclick="ajaxSignIn();">Submit</button>
             </div>
         </form>
     </div>
@@ -157,6 +157,62 @@
         })
     </script>
 
+<script>
+    function ajaxSignIn(){
+
+        ajax_form_data=new FormData();
+        ajax_form_data.append('username',$('#username').val());
+        ajax_form_data.append('password',$('#password').val());
+        ajax_form_data.append('password_check',$('#password_check').val());
+        ajax_form_data.append('student_id', $('#student_id').val());
+        ajax_form_data.append('name', $('#name').val());
+        ajax_form_data.append('college', $('#college').val());
+        ajax_form_data.append('dept', $('#dept').val());
+        ajax_form_data.append('github_id', $('#github_id').val());
+        {#ajax_form_data.append('absence', $("input[name='absence']:checked").val()==0 ? $('label[for="absenceFalse"]').text() : $('label[for="absenceTrue"]').text());#}
+        ajax_form_data.append('absence', $("input[name='absence']:checked").val());
+        {#ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val()==0 ? $('label[for="pluralFalse"]').text() : $('label[for="pluralTrue"]').text());#}
+        ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val());
+        ajax_form_data.append('personal_email', $('#personal_email').val());
+        ajax_form_data.append('primary_email', $('#primary_email').val());
+        ajax_form_data.append('secondary_email',$('#secondary_email').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+
+
+        $.ajax({
+                type: "POST",
+                url: "{% url 'common:signup' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    console.log(data);
+                    if(data['status']=="success"){
+                        alert('회원가입이 완료되었습니다! 로그인 해주세요.')
+                        window.location.href = "{% url 'home:statistic' %}";
+                    }
+                    else{
+                      alert( data['message'] );
+                    }
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+         });
+    }
+{#    $("form")#}
+{#    .ajaxForm({#}
+{#        url : '{% url 'common:signup' %}', // or whatever#}
+{#        dataType : 'json',#}
+{#        success : function (response) {#}
+{#            alert("The server says: " + response);#}
+{#        }#}
+{#    })#}
+{#;#}
+    </script>
 {% endblock script %}
 
 </html>
