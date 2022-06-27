@@ -16,12 +16,12 @@ class Article(models.Model):
     mod_date = models.DateField()
     view_cnt = models.IntegerField(default=0)
     anonymous_writer = models.BooleanField()
-    board_id = models.OneToOneField(Board, models.CASCADE)
-    writer = models.OneToOneField(Account, models.SET_NULL, null=True)
+    board_id = models.ForeignKey(Board, models.CASCADE)
+    writer = models.ForeignKey(Account, models.SET_NULL, null=True)
 
 class ArticleLike(models.Model):
-    article = models.OneToOneField(Article, models.CASCADE)
-    account = models.OneToOneField(Account, models.CASCADE)
+    article = models.ForeignKey(Article, models.CASCADE)
+    account = models.ForeignKey(Account, models.CASCADE)
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -32,16 +32,16 @@ class ArticleLike(models.Model):
 
 class ArticleComment(models.Model):
     id = models.AutoField(primary_key=True)
-    article = models.OneToOneField(Article, models.CASCADE)
+    article = models.ForeignKey(Article, models.CASCADE)
     body = models.TextField()
     pub_date = models.DateField()
     mod_date = models.DateField()
     anonymous_writer = models.BooleanField()
-    writer = models.OneToOneField(Account, models.SET_NULL, null=True)
+    writer = models.ForeignKey(Account, models.SET_NULL, null=True)
 
 class ArticleCommentLike(models.Model):
-    comment = models.OneToOneField(ArticleComment, models.CASCADE)
-    account = models.OneToOneField(Account, models.CASCADE)
+    comment = models.ForeignKey(ArticleComment, models.CASCADE)
+    account = models.ForeignKey(Account, models.CASCADE)
     class Meta:
         constraints = [
             models.UniqueConstraint(
