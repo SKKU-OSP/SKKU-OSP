@@ -3,6 +3,7 @@
 {% extends 'main.html' %}
 
 {% load static %}
+{% load tag_templatetag %}
 {% block content %}
 <div class="d-flex justify-content-center container my-5">
     <div class="col-6">
@@ -116,15 +117,20 @@
             </div>
             <div class="col-md-6 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
-                <input type="text" list="preferLanguageOptions" class="form-control" id="preferLanguage"
-                    name="preferLanguage" placeholder="C++, Java, Python" multiple>
-                <datalist id="preferLanguageOptions">
-                    <option value="C">
-                    <option value="C++">
-                    <option value="Java">
-                    <option value="Python">
-                    <option value="Javascript">
-                </datalist>
+                <select name="" id="multiple" multiple>
+                    {% category_tag request %}
+                </select>
+{#                <input type="text" list="preferLanguageOptions" class="form-control" id="preferLanguage"#}
+{#                    name="preferLanguage" placeholder="C++, Java, Python" multiple>#}
+{#                <datalist id="preferLanguageOptions">#}
+{#                    <option value="{% github_link '1' %}">#}
+{#                    <option value="C">#}
+{#                    <option value="C++">#}
+{#                    <option value="Java">#}
+{#                    <option value="Python">#}
+{#                    <option value="Javascript">#}
+{#                    {% category_tag request %}#}
+{#                </datalist>#}
             </div>
             <div class="col-md-6 mb-3">
                 <label for="preferDomain" class="form-label">관심 분야</label>
@@ -145,6 +151,12 @@
 </div>
 {% endblock content %}
 {% block script %}
+    <script>
+    new SlimSelect({
+          select: '#multiple'
+        })
+    </script>
+
 {% endblock script %}
 
 </html>
