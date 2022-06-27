@@ -1,9 +1,9 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from user.models import ScoreTable, StudentTab
+from .models import ScoreTable, StudentTab, Account
 from django.contrib.auth.decorators import login_required
-from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
+from .models import GithubRepoStats, GithubRepoCommits
 
 
 # Create your views here.
@@ -15,6 +15,34 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         context = self.get_context_data(request, *args, **kwargs)
+
+        student_info = StudentTab.objects.get(id=context['username'])  
+        student_github = student_info.primary_email
+        student_score = ScoreTable.objects.get(id=context['username'], year=2021)
+
+        student_repos = GithubRepoCommits.objects.filter(committer=student_github).order_by('-committer_date')
+        commit_repos = student_repos.values("repo_name").order_by("repo_name").distinct()
+
+
+        recent_repos = {}
+        last_commits = {}
+
+        commit_repos = list(commit_repos)
+        print(commit_repos)
+        for i in range(4):
+            recent_repos[i] = commit_repos[i]
+            last_commits[i] = student_repos.filter(repo_name=commit_repos[i]['repo_name'])[0]
+
+        
+
+        data = {}
+        data['info'] = student_info
+        data['score'] = student_score
+        data['repos'] = recent_repos
+        data['last'] = last_commits
+
+        
+        return render(request, 'profile/profile.html', {'data': data})
         # std = StudentTab.objects.filter(id=student_id)
 
         # # 화면 에러 처리
@@ -37,13 +65,7 @@ class ProfileView(TemplateView):
         #     print(context['repos'])
 
         # return render(request=request, template_name=self.template_name, context=context)
-        student_info = StudentTab.objects.get(id=context['username'])
-        student_score = ScoreTable.objects.get(id=context['username'], year=2021)
-        data = {}
-        data['info'] = student_info
-        data['score'] = student_score
-        
-        return render(request, 'profile/profile.html', {'data': data})
+
 
     # ajax 요청 시 POST로 처리됨.(owned/ contributed repository Tab)
     # def post(self, request, *args, **kwargs):
