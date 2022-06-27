@@ -15,7 +15,6 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         context = self.get_context_data(request, *args, **kwargs)
-        print(context)
         # std = StudentTab.objects.filter(id=student_id)
 
         # # 화면 에러 처리
