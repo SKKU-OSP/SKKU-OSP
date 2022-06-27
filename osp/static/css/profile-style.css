@@ -30,7 +30,10 @@
 #interests {
     height: 150px;
 }
+#repos{
+    height: 100px;
 
+}
 
 .container-sm {
     margin-top: 20px;
