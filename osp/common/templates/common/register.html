@@ -151,15 +151,15 @@
 </div>
 {% endblock content %}
 {% block script %}
-    <script>
-    new SlimSelect({
+<script>
+    var category_select
+    $(document).ready(function(){
+        category_select = new SlimSelect({
           select: '#multiple'
         })
-    </script>
+    });
 
-<script>
     function ajaxSignIn(){
-
         ajax_form_data=new FormData();
         ajax_form_data.append('username',$('#username').val());
         ajax_form_data.append('password',$('#password').val());
@@ -177,6 +177,8 @@
         ajax_form_data.append('primary_email', $('#primary_email').val());
         ajax_form_data.append('secondary_email',$('#secondary_email').val());
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        ajax_form_data.append('category_tag_list', category_select.selected().toString());
 
 
 
