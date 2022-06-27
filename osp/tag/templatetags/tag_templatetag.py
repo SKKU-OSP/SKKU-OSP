@@ -20,6 +20,7 @@ def category_tag(request):
         #                 result += f'<option value="{tag}">{tag}</option>'
         tags = Tag.objects.all()
         type_list = list(tags.values_list("type", flat=True).distinct())
+        type_list.remove('domain')
 
         for t in type_list:
             result += f'<optgroup label="{t}">'
