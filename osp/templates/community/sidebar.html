@@ -1,6 +1,7 @@
 <div class="row m-2" id="profile-tab">
-    <div class="col-6"><img class="w-100"
-            src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png">
+    <div class="col-6"><img class="w-100">
+            <!--src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"-->
+
     </div>
     <div class="col-6">
         <a href="/user/{{user.username}}">{{user.username}}</a>
@@ -31,7 +32,7 @@
             <a href="/community/QnA">QnA</a>
         </li>
         <li class="list-group-item">
-            <a href="/community/Team">Team</a>
+            <a href="{% url 'community:Board' board_name='team' %}">Team</a>
         </li>
     </ul>
 </div>
