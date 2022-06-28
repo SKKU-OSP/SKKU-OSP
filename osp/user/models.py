@@ -134,10 +134,12 @@ class GithubScore(models.Model):
             "year":self.year,
             "excellent_contributor":self.excellent_contributor,
             "best_repo":self.best_repo,
-            "contributor_score":self.contributor_score,
-            "owner_score": self.guideline_score + self.code_score +self.other_project_score,
-            "additional_score": self.star_score+self.contribution_score,
-            "total_score": (self.guideline_score + self.code_score +self.other_project_score) + (self.star_score+self.contribution_score) + self.contributor_score
+            "main_repo_score": self.repo_score_sum,
+            "other_repo_score": self.score_other_repo_sum,
+            "reputation_score": self.score_star+self.score_fork,
+            "guideline_score": self.guideline_score,
+            "additional_score": self.additional_score_sum,
+            "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork
         }
 
 class GithubRepoCommits(models.Model):
@@ -157,10 +159,6 @@ class GithubRepoCommits(models.Model):
         managed = False
         db_table = 'github_repo_commits'
         unique_together = (('github_id', 'repo_name', 'sha'),)
-
-
-
-
 
 class GithubRepoStats(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)
