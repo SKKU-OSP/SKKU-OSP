@@ -6,7 +6,7 @@ window.onload = function () {
   let chartObjList = [];
   let year_intvl = end_year-start_year;
   let select_year = 2021;
-  let chartFactor = "score";
+  let chartFactor = "score_sum";
   visual_ctx = new Array(4);
   for(let i=0; i<3; i++){
     console.log(`canvas${String(i+1)}`);
@@ -226,7 +226,7 @@ window.onload = function () {
       yearLabel.push(y);
     }
     let factor_label = scoreDistLabel;
-    if(chartFactor=="score") factor_label = scoreDistLabel;
+    if(chartFactor=="score_sum") factor_label = scoreDistLabel;
     else if(chartFactor=="commit") factor_label = commitDistLabel;
     else if(chartFactor=="star") factor_label = starDistLabel;
     else if(chartFactor=="pr") factor_label = prDistLabel;
@@ -237,7 +237,6 @@ window.onload = function () {
 
     console.log("factor_label", factor_label);
     let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    console.log("dist[factor_label]", dist[chartFactor]);
     let dist_dataset = makeHistogramJson(dist[chartFactor], factor_label);
     console.log("dist_dataset", dist_dataset);
 
@@ -265,8 +264,8 @@ window.onload = function () {
     chartObjList.push(dist_chart);
     /* Chart 4: 세부 점수 그래프 */
     const score_dataset= [];
-    const specific_score_label = ["owner_score", "contributor_score", "additional_score"];
-    const cc3 = ["#4245cb", "#ff4470", "#ffe913"];
+    const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
+    const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
     for(let i = 0; i <= year_intvl; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
@@ -281,24 +280,56 @@ window.onload = function () {
     }
     console.log("score_dataset",score_dataset);
 
+    const total_score_data = [];
+    for(let y = 0; y <= year_intvl; y++){
+      total_score_data.push(score_data[y]["total_score"]);
+    }
+
     let specific_score_chart = new Chart(visual_ctx[2], {
       type: "bar",
       data: {labels:yearLabel, datasets:score_dataset},
       options: {
         indexAxis: 'y',
         elements: {
-          bar: {borderWidth: 2,}
+          bar: {borderWidth: 1,}
         },
         responsive: true,
         plugins: {
           legend: {display: false,},
           title: {display: true, text: 'Score Bar Chart'},
+          datalabels:{
+            anchor: 'end',
+            align: (context)=>{
+              if(total_score_data[context.dataIndex] <= 4.6)
+                return 'end';
+              else
+                return 'start';
+            },
+            formatter: (value, context) => {
+              const datasetArray = [];
+              context.chart.data.datasets.forEach((dataset)=>{
+                if(dataset.data[context.dataIndex] != 'undefined'){
+                  datasetArray.push(dataset.data[context.dataIndex]);
+                }
+              });
+              function totalSum(total, datapoint) {
+                return total + datapoint;
+              }
+              let sum = datasetArray.reduce(totalSum, 0);
+              if(context.datasetIndex === datasetArray.length - 1)
+                if(sum === 0) return 0;
+                else return sum.toFixed(3);
+              else
+                return '';
+            }
+          }
         },
         scales: {
-          x: { max: 5, beginAtZero: true, stacked: true,},
-          y: {stacked: true}
+          x: { max: 5, beginAtZero: true, stacked: true },
+          y: { stacked: true }
         },
       },
+      plugins: [ChartDataLabels],
     });
     chartObjList.push(specific_score_chart);
   }
