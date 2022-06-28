@@ -3,13 +3,14 @@
 {% extends 'main.html' %}
 
 {% load static %}
+{% load tag_templatetag %}
 {% block content %}
 <div class="d-flex justify-content-center container my-5">
     <div class="col-6">
         <div class="d-flex justify-content-center">
             <img src="/static/images/logo.jpg" alt="Logo" class="w-25" />
         </div>
-        <form method="post" action="." class="row">
+        <form method="post" action="." class="row" onSubmit="return false;">
             {% csrf_token %}
             <div class="col-md-4 mb-3">
                 <label for="username" class="form-label">Username</label>
@@ -86,11 +87,11 @@
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="plural_major" id="pluralFalse" value="0"
                             checked>
-                        <label class="form-check-label" for="absenceFalse">원전공</label>
+                        <label class="form-check-label" for="pluralFalse">원전공</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="plural_major" id="pluralTrue" value="1">
-                        <label class="form-check-label" for="absenceTrue">복수전공</label>
+                        <label class="form-check-label" for="pluralTrue">복수전공</label>
                     </div>
                 </div>
             </div>
@@ -114,37 +115,73 @@
                 <input type="email" class="form-control" id="secondary_email" name="secondary_email"
                     placeholder="Git과 연결된 예비 Email">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
-                <input type="text" list="preferLanguageOptions" class="form-control" id="preferLanguage"
-                    name="preferLanguage" placeholder="C++, Java, Python" multiple>
-                <datalist id="preferLanguageOptions">
-                    <option value="C">
-                    <option value="C++">
-                    <option value="Java">
-                    <option value="Python">
-                    <option value="Javascript">
-                </datalist>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="preferDomain" class="form-label">관심 분야</label>
-                <input type="text" list="preferDomainOptions" class="form-control" id="preferDomain" name="preferDomain"
-                    placeholder="AI, Big Data" multiple>
-                <datalist id="preferDomainOptions">
-                    <option value="System">
-                    <option value="AI">
-                    <option value="NLP">
-                    <option value="Big Data">
-                </datalist>
+                <select name="" id="multiple" multiple>
+                    {% category_tag request %}
+                </select>
             </div>
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button class="btn btn-primary" onclick="ajaxSignIn();">Submit</button>
             </div>
         </form>
     </div>
 </div>
 {% endblock content %}
 {% block script %}
+<script>
+    var category_select
+    $(document).ready(function(){
+        category_select = new SlimSelect({
+          select: '#multiple'
+        })
+    });
+
+    function ajaxSignIn(){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('username',$('#username').val());
+        ajax_form_data.append('password',$('#password').val());
+        ajax_form_data.append('password_check',$('#password_check').val());
+        ajax_form_data.append('student_id', $('#student_id').val());
+        ajax_form_data.append('name', $('#name').val());
+        ajax_form_data.append('college', $('#college').val());
+        ajax_form_data.append('dept', $('#dept').val());
+        ajax_form_data.append('github_id', $('#github_id').val());
+        ajax_form_data.append('absence', $("input[name='absence']:checked").val());
+        ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val());
+        ajax_form_data.append('personal_email', $('#personal_email').val());
+        ajax_form_data.append('primary_email', $('#primary_email').val());
+        ajax_form_data.append('secondary_email',$('#secondary_email').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        ajax_form_data.append('category_tag_list', category_select.selected().toString());
+
+
+
+        $.ajax({
+                type: "POST",
+                url: "{% url 'common:signup' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    console.log(data);
+                    if(data['status']=="success"){
+                        alert('회원가입이 완료되었습니다! 로그인 해주세요.')
+                        window.location.href = "{% url 'common:login' %}";
+                    }
+                    else{
+                      alert( data['message'] );
+                    }
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+         });
+    }
+    </script>
 {% endblock script %}
 
 </html>

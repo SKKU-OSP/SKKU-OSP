@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 import json
@@ -7,7 +8,8 @@ import time
 # Create your views here.
 @login_required
 def statistic(request):
-    
+    if not request.user.is_superuser:
+        return redirect(f'/user/{request.user.username}')
     context = dict()
     start = time.time()  # 시작 시간 저장
     #filter: case
