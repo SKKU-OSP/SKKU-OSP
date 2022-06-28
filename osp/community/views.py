@@ -1,9 +1,13 @@
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from .models import Board, Article
 from datetime import datetime, timedelta
 from django.views.generic import TemplateView
+import hashlib
+import math
 
 # Create your views here.
 
@@ -12,18 +16,22 @@ def main(request):
     board_list = []
     for board in Board.objects.all():
         week_ago = datetime.now() - timedelta(days=7)
+        print(week_ago)
+        print(datetime.now())
         article_list = Article.objects.filter(board_id=board, 
                                               pub_date__range=[
-                                                  week_ago.strftime('%Y-%m-%d'),
-                                                  datetime.now().strftime('%Y-%m-%d')
-                                              ])
+                                                  week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
+                                                  datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
+                                              ]
+                                              )
+        print(article_list)
         if len(article_list) > 0:
             article_list = article_list.order_by('-view_cnt')
-            board.top_article = article_list[:min(3, len(article_list))]
+            board.article_list = article_list[:min(3, len(article_list))]
         else:
-            board.top_article = []
+            board.article_list = []
+        board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
         board_list.append(board)
-    print(board_list)
     return render(request, 'community/main.html', {'boards': board_list})
 
 def board(request, board_name):
@@ -31,35 +39,33 @@ def board(request, board_name):
         board = Board.objects.get(name=board_name)
     except Board.DoesNotExist:
         return redirect('/community')
-    return render(request, 'community/board.html', {'board': '', 'board_name':board_name})
+    board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
+    if board.board_type == 'QnA':
+        return render(request, 'community/qna-board.html', {'board': board, 'board_name':board_name, 'board_color': board_color})
+    if board.board_type == 'Normal':
+        return render(request, 'community/board.html', {'board': '', 'board_name':board_name, 'board_color': board_color})
+    if board.board_type == 'Team':
+        return render(request, 'community/team-board.html', {'board': '', 'board_name':board_name, 'board_color': board_color})
 
-
-# class TeamView(TemplateView):
-#
-#     def get(self, request, *args, **kwargs):
-#
-#         context = self.get_context_data(request, *args, **kwargs)
-#
-#
-#         # return render(request=request, template_name=self.template_name, context=context)
-#         data = {}
-#
-#
-#         return render(request, 'community/team.html', {'data': data})
-#
-#     # ajax 요청 시 POST로 처리됨.(owned/ contributed repository Tab)
-#     # def post(self, request, *args, **kwargs):
-#     #     context = self.get_context_data(request, *args, **kwargs)
-#     #     # POST 요청 시 예외 처리 안함.
-#     #     std = self.POST.get('student_id')
-#     #     context['std'] = std
-#     #
-#     #     github_id = StudentTab.objects.first(id=std.id).github_id
-#     #
-#     #     context['cur_repo_type'] = self.POST.get('cur_repo_type')
-#     #     context['repos'] = get_repos(context['cur_repo_type'], github_id)
-#
-#     def get_context_data(self, request, *args, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#
-#         return context
+def article_list(request, board_name):
+    PAGE_SIZE = 5
+    try:
+        board = Board.objects.get(name=board_name)
+    except Board.DoesNotExist:
+        result = {'html': '', 'max-page': 0}
+        return JsonResponse(result)
+    context = {}
+    context['bartype'] = 'normal'
+    context['board_color'] = hashlib.md5(board.name.encode()).hexdigest()[:6]
+    sort_field = request.GET.get('sort', ('-pub_date', 'title'))
+    page = int(request.GET.get('page', 1))
+    total_len = len(Article.objects.all())
+    article_list = Article.objects.filter(board_id=board
+                    ).order_by(*sort_field
+                    )[PAGE_SIZE * (page - 1):]
+    article_list = article_list[:PAGE_SIZE]
+    context['article_list'] = article_list
+    result = {}
+    result['html'] = render_to_string('community/article-bar.html', context)
+    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+    return JsonResponse(result)

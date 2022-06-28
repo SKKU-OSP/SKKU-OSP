@@ -1,0 +1,98 @@
+<div id="article-list-footer" class="d-flex justify-content-between mt-2">
+    <div id="search-field">
+        검색창
+    </div>
+    <div id="article-list-pagination">
+        <nav>
+            <ul class="pagination" id="pagination-body">
+            </ul>
+        </nav>
+    </div>
+    <script>
+        var MAX_PAGE = 1;
+        var now_page = 1;
+
+        function page_item(page, href) {
+            if(page == now_page){
+                return $('<li></li>').addClass('page-item').addClass('active').append(
+                    $('<a></a>').addClass('page-link').attr('href', '#').attr('value', page).html(page)
+                )
+            }
+            return $('<li></li>').addClass('page-item').append(
+                $('<a></a>').addClass('page-link').attr('href', '#').attr('value', page).html(page)
+            )
+        }
+
+        function draw_page() {
+            var page_body = $('#pagination-body');
+            page_body.empty();
+            if(now_page != 1) {
+                page_body.append(page_item('<i class="bi-chevron-double-left">'));
+                page_body.append(page_item('<i class="bi-chevron-left">'));
+            }
+            else{
+                page_body.append(page_item('<i class="bi-chevron-double-left">').addClass('disabled'));
+                page_body.append(page_item('<i class="bi-chevron-left">').addClass('disabled'));
+            }
+            var left_limit = Math.max(1, now_page - 2);
+            var right_limit = Math.min(MAX_PAGE, now_page + 2);
+            if(right_limit - left_limit < 5){
+                if(now_page - left_limit < 2){
+                    right_limit = Math.min(MAX_PAGE, right_limit + 2 - (now_page - left_limit));
+                }
+                if(right_limit - now_page < 2){
+                    left_limit = Math.max(1, left_limit - (2 - (right_limit - now_page)));
+                }
+            }
+            for(i = left_limit; i <= right_limit; i++){
+                page_body.append(page_item(i));
+            }
+            if(now_page != MAX_PAGE) {
+                page_body.append(page_item('<i class="bi-chevron-right">'));
+                page_body.append(page_item('<i class="bi-chevron-double-right">'));
+            }
+            else{
+                page_body.append(page_item('<i class="bi-chevron-double-right">').addClass('disabled'));
+                page_body.append(page_item('<i class="bi-chevron-right">').addClass('disabled'));
+            }
+            $('.page-link').click(function(){
+                var val = $(this).attr('value');
+                if(isNaN(val)){
+                    console.log('Special');
+                    special_code = $(val).attr('class');
+                    if(special_code == 'bi-chevron-left'){
+                        now_page -= 1;
+                    }
+                    if(special_code == 'bi-chevron-double-left'){
+                        now_page = 1;
+                    }
+                    if(special_code == 'bi-chevron-right'){
+                        now_page += 1
+                    }
+                    if(special_code == 'bi-chevron-double-right'){
+                        now_page = MAX_PAGE;
+                    }
+                }
+                else{
+                    now_page = Number(val);
+                }
+                redraw();
+            })
+        }
+        function redraw(){
+            $.ajax(
+                {
+                    url: '/community/article-list/{{board.name}}/',
+                    data: {'page': now_page,},
+                    method: 'GET',
+                    dataType: 'JSON'
+                }
+            ).done(function(data){
+                $('#article-list-body').html(data['html']);
+                MAX_PAGE = data['max-page']
+                draw_page();
+            });
+        }
+        redraw();
+    </script>
+</div>

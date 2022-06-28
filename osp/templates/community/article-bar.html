@@ -1,25 +1,41 @@
-{% if bartype == 'compact' %}
+{% for article in article_list %}
 <div class="d-flex article-bar bg-light p-1 border">
-    <div style="width: 1%; background-color: {{board_color}};"></div>
+    <div style="width: 1%; background-color: #{{board_color}};"></div>
     <div style="width: 1%;"></div>
     <div style="width: 98%">
         <div class="row">
+            {% if bartype == 'compact' %}
             <h5 class="article-bar-title my-1 fw-bold col-6">
-                예시 제목
+            {% elif bartype == 'normal' %}
+            <h5 class="article-bar-title my-1 fw-bold col-9">
+            {% endif %}
+                {{article.title}}
             </h5>
+            {% if bartype == 'compact' %}
             <div class="d-flex justify-content-between my-auto col-6">
-                <div class="fw-bold text-muted">작성자</div>
-                <div class="fw-bold text-muted">작성시간</div>
+            {% elif bartype == 'normal' %}
+            <div class="d-flex justify-content-between my-auto col-3">
+            {% endif %}
+                <div class="fw-bold text-muted">{{article.writer.user.username}}</div>
+                <div class="fw-bold text-muted">{{article.pub_date|date:'Y-m-d'}}</div>
             </div>
         </div>
         <div class="row">
+            {% if bartype == 'compact' %}
             <div class="col-6 overflow-hidden">
+            {% elif bartype == 'normal' %}
+            <div class="col-9 overflow-hidden">
+            {% endif %}
                 <span class="badge text-bg-primary">언어 태그</span>
                 <span class="badge text-bg-warning">Tool 태그</span>
                 <!-- <span class="badge text-bg-success">분야 태그</span> -->
                 <!-- <span class="badge text-bg-secondary">기타 태그</span> -->
             </div>
+            {% if bartype == 'compact' %}
             <div class="col-6 d-flex justify-content-between">
+            {% elif bartype == 'normal' %}
+            <div class="col-3 d-flex justify-content-between">
+            {% endif %}
                 <div class="col-4">
                     <i class="bi-chat-left-dots"></i> 10
                 </div>
@@ -33,4 +49,4 @@
         </div>
     </div>
 </div>
-{% endif %}
+{% endfor %}

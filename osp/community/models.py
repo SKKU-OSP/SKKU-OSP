@@ -12,14 +12,14 @@ class Article(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=100)
     body = models.TextField()
-    pub_date = models.DateField()
-    mod_date = models.DateField()
+    pub_date = models.DateTimeField()
+    mod_date = models.DateTimeField()
     view_cnt = models.IntegerField(default=0)
     anonymous_writer = models.BooleanField()
     board_id = models.ForeignKey(Board, models.CASCADE)
-    writer = models.ForeignKey(Account, models.SET_NULL, null=True)
-    period_start = models.DateField(null=True)
-    period_end = models.DateField(null=True)
+    writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
+    period_start = models.DateTimeField(blank=True, null=True)
+    period_end = models.DateTimeField(blank=True, null=True)
 
 class ArticleLike(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
@@ -36,10 +36,10 @@ class ArticleComment(models.Model):
     id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, models.CASCADE)
     body = models.TextField()
-    pub_date = models.DateField()
-    mod_date = models.DateField()
+    pub_date = models.DateTimeField()
+    mod_date = models.DateTimeField()
     anonymous_writer = models.BooleanField()
-    writer = models.ForeignKey(Account, models.SET_NULL, null=True)
+    writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
 
 class ArticleCommentLike(models.Model):
     comment = models.ForeignKey(ArticleComment, models.CASCADE)

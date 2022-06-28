@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+{% extends 'main.html' %}
+
+{% load static %}
+{% block content %}
+<div class="container my-4">
+  <div class="row">
+    <div class="col-3 border">
+      {% include "community/sidebar.html" %}
+    </div>
+    <div class="col-9">
+      <div class="d-flex justify-content-between bg-light" id="board-title-bar">
+        <div class="d-flex">
+          <h2>{{ board_name }} 게시판</h2>
+          <div class="m-auto" id="tag-filter">
+            태그 필터
+          </div>
+        </div>
+        <div class="my-auto">
+          <button class="btn btn-outline-secondary" id="">
+            글쓰기
+            <i class="bi-pencil"></i>
+          </button>
+        </div>
+      </div>
+      <div id="article-list-body">
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
+      </div>
+      {% include "community/footer.html" with max_page=7 %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+{% endblock script %}
+
+</html>
