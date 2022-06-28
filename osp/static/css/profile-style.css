@@ -22,7 +22,7 @@
 
 #visualization {
     height: 500px;
-
+    overflow: scroll;
 }
 #languages {
     height: 150px;
@@ -139,3 +139,70 @@ a.nav-link {
   display: none;
 }
 
+/* Canvas */
+.card-body{
+  display: flex;
+	flex-wrap: wrap;
+}
+.ctx-item{
+  flex: 1 1 40%;
+  width: 200px;
+  height: 200px;
+}
+
+.border-profile {
+  display: block;
+  width: 80%;;
+  border: 1px solid #aaaaaa ;
+  border-radius: 0.3rem;
+}
+
+.vertical-menu{
+  width: 20% ;
+  height: 8rem ;
+  overflow-y: auto;
+}
+
+.vertical-menu button{
+  width: 85%;
+  text-align: start;
+  border: none;
+  outline: none;
+  background-color: white;
+  color:black;
+  display: block;
+  padding:12px;
+  margin:0 3px;
+  border-radius: 0.2rem;
+  text-decoration: none;
+}
+
+.vertical-menu button:hover{
+  background-color: #dddddd;
+}
+.vertical-menu button.active{
+  background-color: #0969da;
+  color:white;
+}
+
+/* Scroll bar Custom */
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #eeeeee;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #dddddd;
+}

@@ -183,11 +183,35 @@
             <div class="col-sm-8" >
               <div class="card" id="visualization">
                 <h5 class="card-title">기여내역 시각화</h5>
+                <ul class="nav nav-tabs mt-2 text-lg">
+                    <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pills-dist-tab">점수 분포</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 내역</a></li>
+                  </ul>
                 <div class="card-body">
-                  <canvas id="canvas1" class="ctx-item"> </canvas>
-                  <canvas id="canvas2" class="ctx-item"> </canvas>
-                  <canvas id="canvas3" class="ctx-item"> </canvas>
-                  <canvas id="canvas4" class="ctx-item"> </canvas>
+                  <div class="tab-pane fade show mt-2" id="pills-score">
+                    <h5 id="visual-subtitle">개요</h5>
+                    <div class="d-flex flex-wrap">
+                      
+                      <svg id="activity-monthly" class="border-profile">
+                      </svg>
+                      <!--vertical scroll menu  -->
+                      <div class="vertical-menu">
+                        <button class="btn-year">2022</button>
+                        <button class="btn-year active">2021</button>
+                        <button class="btn-year">2020</button>
+                        <button class="btn-year">2019</button>
+                      </div>
+                      <svg id="activity-factor" class="border-profile">
+                        <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                        </g>
+                      </svg>
+                    </div>
+                    <canvas id="canvas1" class="ctx-item"></canvas>
+                  </div>
+                  <canvas id="canvas2" class="ctx-item"></canvas>
+                  <canvas id="canvas3" class="ctx-item"></canvas>
                 </div>
               </div>
             </div>
@@ -207,5 +231,4 @@
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
-<link rel="stylesheet" href="{% static 'css/profile-style.css' %}">
 {% endblock %}
