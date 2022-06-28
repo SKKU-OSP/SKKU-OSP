@@ -11,16 +11,24 @@
     </div>
     <div class="col-9">
       <div class="row">
+        {% for board in boards %}
         <div class="col-6 my-2">
           <div class="card">
             <div class="card-body">
-              <h4 class="card-title fw-bold">Hot 게시판</h4>
+              <div class="d-flex justify-content-between">
+                <h4 class="card-title fw-bold">{{board.name}} 게시판</h4>
+                <a href="/community/{{board.name}}">
+                  더보기
+                  <i class="bi-chevron-right"></i>
+                </a>
+              </div>
               {% include "community/article-bar.html" with bartype="compact" board_color="#00FF00" %}
               {% include "community/article-bar.html" with bartype="compact" board_color="#00FF00"  %}
               {% include "community/article-bar.html" with bartype="compact" board_color="#00FF00"  %}
             </div>
           </div>
         </div>
+        {% endfor %}
         <div class="col-6 my-2">
           <div class="card">
             <div class="card-body">
