@@ -1,16 +1,15 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from .models import Board, Article
+from .models import ArticleComment, Board, Article, ArticleLike
 from datetime import datetime, timedelta
 from django.views.generic import TemplateView
 import hashlib
 import math
 
 # Create your views here.
-
 @login_required
 def main(request):
     board_list = []
@@ -24,12 +23,14 @@ def main(request):
                                                   datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
                                               ]
                                               )
-        print(article_list)
         if len(article_list) > 0:
             article_list = article_list.order_by('-view_cnt')
             board.article_list = article_list[:min(3, len(article_list))]
         else:
             board.article_list = []
+        for article in board.article_list:
+            article.like_cnt = len(ArticleLike.objects.filter(article=article))
+            article.comment_cnt = len(ArticleComment.objects.filter(article=article))
         board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
         board_list.append(board)
     return render(request, 'community/main.html', {'boards': board_list})
@@ -48,7 +49,7 @@ def board(request, board_name):
         return render(request, 'community/team-board.html', {'board': '', 'board_name':board_name, 'board_color': board_color})
 
 def article_list(request, board_name):
-    PAGE_SIZE = 5
+    PAGE_SIZE = 10
     try:
         board = Board.objects.get(name=board_name)
     except Board.DoesNotExist:
@@ -64,6 +65,11 @@ def article_list(request, board_name):
                     ).order_by(*sort_field
                     )[PAGE_SIZE * (page - 1):]
     article_list = article_list[:PAGE_SIZE]
+    for article in article_list:
+        comment_cnt = len(ArticleComment.objects.filter(article=article))
+        like_cnt = len(ArticleLike.objects.filter(article=article))
+        article.comment_cnt = comment_cnt
+        article.like_cnt = like_cnt
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context)

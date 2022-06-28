@@ -1,3 +1,4 @@
+{% load community_tag %}
 {% for article in article_list %}
 <div class="d-flex article-bar bg-light p-1 border">
     <div style="width: 1%; background-color: #{{board_color}};"></div>
@@ -13,11 +14,13 @@
             </h5>
             {% if bartype == 'compact' %}
             <div class="d-flex justify-content-between my-auto col-6">
+                <div class="fw-bold text-muted">{{article.writer.user.username}}</div>
+                <div class="fw-bold text-muted">{{article.pub_date|time_left}}</div>
             {% elif bartype == 'normal' %}
             <div class="d-flex justify-content-between my-auto col-3">
+                <div class="text-muted">{{article.writer.user.username}}</div>
+                <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
             {% endif %}
-                <div class="fw-bold text-muted">{{article.writer.user.username}}</div>
-                <div class="fw-bold text-muted">{{article.pub_date|date:'Y-m-d'}}</div>
             </div>
         </div>
         <div class="row">
@@ -37,13 +40,13 @@
             <div class="col-3 d-flex justify-content-between">
             {% endif %}
                 <div class="col-4">
-                    <i class="bi-chat-left-dots"></i> 10
+                    <i class="bi-chat-left-dots"></i> {{article.comment_cnt}}
                 </div>
                 <div class="col-4">
-                    <i class="bi-bookmark-star"></i> 100
+                    <i class="bi-star"></i> {{article.like_cnt}}
                 </div>
                 <div class="col-4">
-                    <i class="bi-eye"></i> 2000
+                    <i class="bi-eye"></i> {{article.view_cnt}}
                 </div>
             </div>
         </div>
