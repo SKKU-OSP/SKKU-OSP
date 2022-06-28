@@ -1,6 +1,9 @@
-<div id="article-list-footer" class="d-flex justify-content-between mt-2">
-    <div id="search-field">
-        검색창
+<div id="article-list-footer" class="d-flex justify-content-between mt-3">
+    <div>
+        <div class="input-group" id="search-field">
+            <input type="text" class="form-control" placeholder="제목/본문" id="search-keyword" aria-describedby="search-btn">
+            <button class="btn btn-outline-secondary" type="button" id="search-btn">검색</button>
+        </div>
     </div>
     <div id="article-list-pagination">
         <nav>
@@ -47,7 +50,7 @@
             for(i = left_limit; i <= right_limit; i++){
                 page_body.append(page_item(i));
             }
-            if(now_page != MAX_PAGE) {
+            if(now_page < MAX_PAGE) {
                 page_body.append(page_item('<i class="bi-chevron-right">'));
                 page_body.append(page_item('<i class="bi-chevron-double-right">'));
             }
@@ -83,7 +86,10 @@
             $.ajax(
                 {
                     url: '/community/article-list/{{board.name}}/',
-                    data: {'page': now_page,},
+                    data: {
+                        'page': now_page,
+                        'keyword': $('#search-keyword').val()
+                    },
                     method: 'GET',
                     dataType: 'JSON'
                 }
@@ -93,6 +99,11 @@
                 draw_page();
             });
         }
+        $('#search-btn').click(function() {
+            console.log('search');
+            now_page=1;
+            redraw();
+        });
         redraw();
     </script>
 </div>

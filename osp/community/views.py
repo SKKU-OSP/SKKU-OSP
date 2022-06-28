@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.db.models import Q
 from .models import ArticleComment, Board, Article, ArticleLike
 from datetime import datetime, timedelta
 from django.views.generic import TemplateView
@@ -59,12 +60,22 @@ def article_list(request, board_name):
     context['bartype'] = 'normal'
     context['board_color'] = hashlib.md5(board.name.encode()).hexdigest()[:6]
     sort_field = request.GET.get('sort', ('-pub_date', 'title'))
+    
     page = int(request.GET.get('page', 1))
-    total_len = len(Article.objects.all())
-    article_list = Article.objects.filter(board_id=board
-                    ).order_by(*sort_field
-                    )[PAGE_SIZE * (page - 1):]
+    # Filter Board
+    article_list = Article.objects.filter(board_id=board)
+    # Filter Keyword
+    keyword = request.GET.get('keyword', '')
+    if keyword != '':
+        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+        print(keyword, type(keyword),article_list)
+    total_len = len(article_list)
+    # Order
+    article_list = article_list.order_by(*sort_field)
+    # Slice to Page
+    article_list = article_list[PAGE_SIZE * (page - 1):]
     article_list = article_list[:PAGE_SIZE]
+    
     for article in article_list:
         comment_cnt = len(ArticleComment.objects.filter(article=article))
         like_cnt = len(ArticleLike.objects.filter(article=article))
