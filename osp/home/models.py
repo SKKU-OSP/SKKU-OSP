@@ -57,6 +57,18 @@ class AnnualOverview(models.Model):
             "fork" : json.loads(self.fork),
             "fork_std" : json.loads(self.fork_std)
         }
+    def to_avg_json(self):
+        return {
+            "case_num" : self.case_num,
+            "score" : json.loads(self.score),
+            "score_diff" : json.loads(self.score_diff),
+            "score_sum" : json.loads(self.score_sum),
+            "commit" : json.loads(self.commit),
+            "star" : json.loads(self.star),
+            "pr" : json.loads(self.pr),
+            "issue" : json.loads(self.issue),
+            "fork" : json.loads(self.fork),
+        }
     
 
 # 합계 3점 이상 인원, 총 Commit, Star, Repo 수

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from tag.models import Tag
 
 # Create your models here.
 
@@ -74,3 +75,67 @@ class Account(models.Model):
     student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE)
     class Meta:
         ordering  = ['student_data']
+
+class AccountInterest(models.Model):
+    id = models.AutoField(primary_key=True)
+    account = models.ForeignKey(Account, models.CASCADE)
+    tag = models.ForeignKey(Tag, models.CASCADE)
+    
+class GithubScore(models.Model):
+    yid =models.CharField(max_length=45, null=False, primary_key=True)
+    github_id = models.CharField(max_length=45, null=False)
+    year = models.IntegerField(null=False)
+    excellent_contributor = models.IntegerField(null=False)
+    best_repo = models.CharField(max_length=100, null=False)
+    guideline_score = models.FloatField(null=False)
+    code_score = models.FloatField(null=False)
+    other_project_score = models.FloatField(null=False)
+    contributor_score = models.FloatField(null=False)
+    star_score = models.FloatField(null=False)
+    contribution_score = models.FloatField(null=False)
+    
+    star_count = models.IntegerField(null=False)
+    commit_count = models.IntegerField(null=False)
+    pr_count = models.IntegerField(null=False)
+    issue_count = models.IntegerField(null=False)
+    star_owner_count = models.IntegerField(null=False)
+    fork_owner_count = models.IntegerField(null=False)
+    
+    score_10000L_sub = models.FloatField(null=False)
+    score_10000L_add = models.FloatField(null=False)
+    score_10000L_sum = models.FloatField(null=False)
+    score_50C = models.FloatField(null=False)
+    score_pr_issue = models.FloatField(null=False)
+    
+    guideline_score_v2 = models.FloatField(null=False)
+    repo_score_sub = models.FloatField(null=False)
+    repo_score_add = models.FloatField(null=False)
+    repo_score_sum = models.FloatField(null=False)
+    
+    score_star = models.FloatField(null=False)
+    score_fork = models.FloatField(null=False)
+    score_other_repo_sub = models.FloatField(null=False)
+    score_other_repo_add = models.FloatField(null=False)
+    score_other_repo_sum = models.FloatField(null=False)
+    
+    additional_score_sub = models.FloatField(null=False)
+    additional_score_add = models.FloatField(null=False)
+    additional_score_sum = models.FloatField(null=False)
+    
+    
+    class Meta:
+        managed = False
+        db_table = 'github_score'
+        
+    def to_json(self):
+        return {
+            "yid": self.yid,
+            "github_id":self.github_id,
+            "year":self.year,
+            "excellent_contributor":self.excellent_contributor,
+            "best_repo":self.best_repo,
+            "contributor_score":self.contributor_score,
+            "owner_score": self.guideline_score + self.code_score +self.other_project_score,
+            "additional_score": self.star_score+self.contribution_score,
+            "total_score": (self.guideline_score + self.code_score +self.other_project_score) + (self.star_score+self.contribution_score) + self.contributor_score
+        }
