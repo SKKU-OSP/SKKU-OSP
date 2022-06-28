@@ -1,0 +1,36 @@
+{% if bartype == 'compact' %}
+<div class="d-flex article-bar bg-light p-1 border">
+    <div style="width: 1%; background-color: {{board_color}};"></div>
+    <div style="width: 1%;"></div>
+    <div style="width: 98%">
+        <div class="row">
+            <h5 class="article-bar-title my-1 fw-bold col-6">
+                예시 제목
+            </h5>
+            <div class="d-flex justify-content-between my-auto col-6">
+                <div class="fw-bold text-muted">작성자</div>
+                <div class="fw-bold text-muted">작성시간</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 overflow-hidden">
+                <span class="badge text-bg-primary">언어 태그</span>
+                <span class="badge text-bg-warning">Tool 태그</span>
+                <!-- <span class="badge text-bg-success">분야 태그</span> -->
+                <!-- <span class="badge text-bg-secondary">기타 태그</span> -->
+            </div>
+            <div class="col-6 d-flex justify-content-between">
+                <div class="col-4">
+                    <i class="bi-chat-left-dots"></i> 10
+                </div>
+                <div class="col-4">
+                    <i class="bi-bookmark-star"></i> 100
+                </div>
+                <div class="col-4">
+                    <i class="bi-eye"></i> 2000
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
