@@ -1,19 +1,131 @@
 window.onload = function () {
   const start_year = 2019;
   const end_year = 2021;
+  const grass_size = 60;
+  const NS = "http://www.w3.org/2000/svg";
+  let chartObjList = [];
   let year_intvl = end_year-start_year;
   let select_year = 2021;
   let chartFactor = "score";
   visual_ctx = new Array(4);
-  for(let i=0; i<4; i++){
+  for(let i=0; i<3; i++){
+    console.log(`canvas${String(i+1)}`);
+    visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
+  }
+  let btn_year = document.getElementsByClassName("btn-year");
+  btn_year.remo
+  for (let btn of btn_year) {
+    btn.addEventListener("click",function(){
+      select_year = btn.innerText;
+      console.log(btn.innerText);
+      $('.btn-year.active').removeClass("active");
+      this.className += " active";
+      destroyChart(chartObjList, chartObjList.length);
+      chartObjList = [];
+      makePage(chart_data);
+    });
+  }
+  let chart_nav = document.getElementsByClassName("nav-link");
+  for (let nav of chart_nav) {
+    nav.addEventListener("click",function(){
+      document.getElementById("visual-subtitle").innerText = nav.innerText;
+      console.log(nav.innerText);
+      $('.nav-link.active').removeClass("active");
+      this.className += " active";
+      // 모든 차트를 구현하고 나서 확대페이지를 만든 후,
+      // 개별 차트의 삭제와 생성을 구현
+    });
+  }
+  
+  const div_activity_monthly = document.getElementById("activity-monthly");
+  const div_activity_factor = document.getElementById("activity-factor");
+  console.log("div_activity_monthly");
+  let start = new Date();
+  let monthly_contribution = [];
+  for(let i=0;i<12;i++){
+    monthly_contribution.push(Math.floor(Math.random()*5));
+  }
+  let factor_contribution = [];
+  for(let i=0;i<6;i++){
+    factor_contribution.push(Math.floor(Math.random()*5));
+  }
+  for(let col = 1; col <= 6; col++){//month
+    let gr = document.createElementNS(NS, "g");
+    for(let row = 1; row <=2; row++){
+      let rect = document.createElementNS(NS,"rect");
+      let ctb = monthly_contribution[((col-1)*2+row)-1];
+      rect.setAttributeNS(null,"x", 14);
+      rect.setAttributeNS(null,"y", (grass_size+4)*row - 48);
+      rect.setAttributeNS(null,"width", grass_size);
+      rect.setAttributeNS(null,"height", grass_size);
+      rect.setAttributeNS(null,"rx", "2");
+      rect.setAttributeNS(null,"ry", "2");
+      rect.setAttributeNS(null,"month", (col-1)*2+row);
+      rect.setAttributeNS(null,"class", "ContributionCalendar-day");
+      rect.setAttributeNS(null,"data-level", ctb);
+      console.log(ctb);
+      switch(ctb){
+        case 0:
+          rect.style.fill = "#EBEDF0"; break;
+        case 1:
+          rect.style.fill = "#9BE9A8"; break;
+        case 2:
+          rect.style.fill = "#40C463"; break;
+        case 3:
+          rect.style.fill = "#30A14E"; break;
+        case 4:
+          rect.style.fill = "#216E39"; break;
+      }
+      rect.addEventListener("click",(e) =>{
+        alert(((col-1)*2+row).toFixed());
+      });
+      gr.appendChild(rect);
+    }
+    gr.setAttribute("transform", `translate(${(col-1)*(grass_size+4)}, 0)`);
+    gr.setAttribute("stroke", "#aaaaaa");
+    div_activity_monthly.appendChild(gr);
+  }
+  let factor_grass = document.getElementById("factor-grass");
+  console.log("factor_grass", factor_grass);
+  
+  for(let col = 0; col < 6; col++){//factor
+    let rect = document.createElementNS(NS,"rect");
+    let ctb = monthly_contribution[col];
+    rect.setAttributeNS(null,"x", (grass_size+4)*col+14);
+    rect.setAttributeNS(null,"y", 12);
+    rect.setAttributeNS(null,"width", grass_size);
+    rect.setAttributeNS(null,"height", grass_size);
+    rect.setAttributeNS(null,"rx", "2");
+    rect.setAttributeNS(null,"ry", "2");
+    rect.setAttributeNS(null,"class", "ContributionCalendar-day");
+    rect.setAttributeNS(null,"data-level", ctb);
+    console.log(ctb);
+    switch(ctb){
+      case 0:
+        rect.style.fill = "#EBEDF0"; break;
+      case 1:
+        rect.style.fill = "#9BE9A8"; break;
+      case 2:
+        rect.style.fill = "#40C463"; break;
+      case 3:
+        rect.style.fill = "#30A14E"; break;
+      case 4:
+        rect.style.fill = "#216E39"; break;
+    }
+    rect.addEventListener("click",(e) =>{
+      alert("factor");
+    });
+    factor_grass.appendChild(rect);
+  }
+  let end = new Date();
+  console.log("elapsed time", end-start);
+  
+  for(let i=0; i<3; i++){
     console.log(`canvas${String(i+1)}`);
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
   }
   
-  fetchData();
-  function fetchData() {
-    makePage(chart_data);
-  }
+  makePage(chart_data);
   function makePage(chart_data){
     console.log("makePage");
     console.log(chart_data);
@@ -24,7 +136,6 @@ window.onload = function () {
     let score_data = chart_data["score_data"];
     console.log("score_data", score_data);
 
-    const DATA_COUNT = 5;
     const labels = ["commits", "stars", "issues", "PRs"];
     const label_keys = ["commit", "star", "issue", "pr"];
     const average_data = [];
@@ -91,7 +202,7 @@ window.onload = function () {
         },
         options: radarOption,
       });
-    
+    chartObjList.push(radar_chart);
     /* Chart 3: 분포도 히스토그램 */
     const scoreDistLabel = new Array(10);
     for (let i = 0; i < 10; i++) {
@@ -139,7 +250,7 @@ window.onload = function () {
     }
     console.log("paramColor", paramColor);
     
-    let dist_chart = makeChart(visual_ctx[2], /*type=*/"bar", /*factor=*/chartFactor, factor_label, dist_dataset, paramColor, 
+    let dist_chart = makeChart(visual_ctx[1], /*type=*/"bar", /*factor=*/chartFactor, factor_label, dist_dataset, paramColor, 
     {
       plugins: {
         legend: {
@@ -151,9 +262,8 @@ window.onload = function () {
         }
       },
     },);
-
+    chartObjList.push(dist_chart);
     /* Chart 4: 세부 점수 그래프 */
-    console.log("make score dataset",score_data[2]["total_score"]);
     const score_dataset= [];
     const specific_score_label = ["owner_score", "contributor_score", "additional_score"];
     const cc3 = ["#4245cb", "#ff4470", "#ffe913"];
@@ -171,7 +281,7 @@ window.onload = function () {
     }
     console.log("score_dataset",score_dataset);
 
-    let specific_score_chart = new Chart(visual_ctx[3], {
+    let specific_score_chart = new Chart(visual_ctx[2], {
       type: "bar",
       data: {labels:yearLabel, datasets:score_dataset},
       options: {
@@ -190,6 +300,7 @@ window.onload = function () {
         },
       },
     });
+    chartObjList.push(specific_score_chart);
   }
 
   function findDistIdx(label=[], value){
