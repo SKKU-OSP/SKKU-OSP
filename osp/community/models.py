@@ -18,6 +18,8 @@ class Article(models.Model):
     anonymous_writer = models.BooleanField()
     board_id = models.ForeignKey(Board, models.CASCADE)
     writer = models.ForeignKey(Account, models.SET_NULL, null=True)
+    period_start = models.DateField(null=True)
+    period_end = models.DateField(null=True)
 
 class ArticleLike(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
