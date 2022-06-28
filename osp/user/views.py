@@ -38,9 +38,27 @@ class ProfileView(TemplateView):
             ## owned repository
         student_info = StudentTab.objects.get(id=student_id)
         student_score = ScoreTable.objects.get(id=student_id, year=2021)
+
+        student_repos = GithubRepoCommits.objects.filter(committer_github=github_id).order_by('-committer_date')
+        commit_repos = student_repos.values("repo_name").order_by("repo_name").distinct()
+
+
+        recent_repos = {}
+        last_commits = {}
+
+        commit_repos = list(commit_repos)
+        print(commit_repos)
+        for i in range(4):
+            recent_repos[i] = commit_repos[i]
+            last_commits[i] = student_repos.filter(repo_name=commit_repos[i]['repo_name'])[0]
+
+        
+
         data = {}
         data['info'] = student_info
         data['score'] = student_score
+        data['repos'] = recent_repos
+        data['last'] = last_commits
         context["data"] = data
 
         return render(request=request, template_name=self.template_name, context=context)
