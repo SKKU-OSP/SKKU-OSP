@@ -11,10 +11,10 @@
     </div>
     <div class="col-9">
       <div class="d-flex justify-content-between bg-light" id="board-title-bar">
-        <div class="d-flex">
+        <div class="d-flex col-8 justify-content-start">
           <h2>{{ board_name }} 게시판</h2>
-          <div class="m-auto" id="tag-filter">
-            태그 필터
+          <div class="my-auto col-6" id="tag-filter">
+            <select class="mx-2" style="min-width: 25%;" id="tag-select" multiple></select>
           </div>
         </div>
         <div class="my-auto">
@@ -32,6 +32,7 @@
 </div>
 {% endblock content %}
 {% block script %}
+<script src="{% static 'js/tag_select.js' %}"></script>
 {% endblock script %}
 
 </html>
