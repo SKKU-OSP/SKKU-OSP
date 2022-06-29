@@ -29,10 +29,9 @@
             {% elif bartype == 'normal' %}
             <div class="col-9 overflow-hidden">
             {% endif %}
-                <span class="badge text-bg-primary">언어 태그</span>
-                <span class="badge text-bg-warning">Tool 태그</span>
-                <!-- <span class="badge text-bg-success">분야 태그</span> -->
-                <!-- <span class="badge text-bg-secondary">기타 태그</span> -->
+            {% for tag in article.tags %}
+                <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
+            {% endfor %}
             </div>
             {% if bartype == 'compact' %}
             <div class="col-6 d-flex justify-content-between">

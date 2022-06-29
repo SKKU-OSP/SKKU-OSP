@@ -4,9 +4,8 @@ from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Q
-from .models import ArticleComment, Board, Article, ArticleLike
+from .models import ArticleComment, Board, Article, ArticleLike, ArticleTag
 from datetime import datetime, timedelta
-from django.views.generic import TemplateView
 import hashlib
 import math
 
@@ -69,18 +68,30 @@ def article_list(request, board_name):
     if keyword != '':
         article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
         print(keyword, type(keyword),article_list)
+    # Filter Tag
+    tag_list = request.GET.get('tag', False)
+    if tag_list:
+        tag_list = tag_list.split(',')
+        tag_query = Q()
+        for tag in tag_list:
+            tag_query = tag_query | Q(tag=tag)
+        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
+        article_list = article_list.filter(id__in=article_with_tag)
+    
     total_len = len(article_list)
     # Order
     article_list = article_list.order_by(*sort_field)
     # Slice to Page
     article_list = article_list[PAGE_SIZE * (page - 1):]
     article_list = article_list[:PAGE_SIZE]
-    
+    # Get Article Metadata
     for article in article_list:
         comment_cnt = len(ArticleComment.objects.filter(article=article))
         like_cnt = len(ArticleLike.objects.filter(article=article))
+        tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
         article.comment_cnt = comment_cnt
         article.like_cnt = like_cnt
+        article.tags = tags
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context)

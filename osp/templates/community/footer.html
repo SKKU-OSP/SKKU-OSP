@@ -83,12 +83,17 @@
             })
         }
         function redraw(){
+            var tag_list = []
+            for(tag of $('.ss-value-text')){
+                tag_list.push($(tag).html())
+            }
             $.ajax(
                 {
                     url: '/community/article-list/{{board.name}}/',
                     data: {
                         'page': now_page,
-                        'keyword': $('#search-keyword').val()
+                        'keyword': $('#search-keyword').val(),
+                        'tag': tag_list.join(',')
                     },
                     method: 'GET',
                     dataType: 'JSON'
