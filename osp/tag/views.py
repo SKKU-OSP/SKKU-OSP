@@ -13,8 +13,8 @@ class TagAPIView(View):
                 continue
             pos = row.name.lower().find(keyword.lower())
             if pos >= 0:
-                result.append((pos, row.name))
-        result = [x[1] for x in sorted(result)]
+                result.append((pos, {'name': row.name, 'type':row.type}))
+        result = [x[1] for x in sorted(result, key=lambda x:x[0])]
         return JsonResponse({'status': 'success', 'data': result})
     
     def post(self, request):
