@@ -1,51 +1,54 @@
 {% load community_tag %}
 {% for article in article_list %}
-<div class="d-flex article-bar bg-light p-1 border">
-    <div style="width: 1%; background-color: #{{board_color}};"></div>
-    <div style="width: 1%;"></div>
-    <div style="width: 98%">
-        <div class="row">
-            {% if bartype == 'compact' %}
-            <h5 class="article-bar-title my-1 fw-bold col-6">
-            {% elif bartype == 'normal' %}
-            <h5 class="article-bar-title my-1 fw-bold col-9">
-            {% endif %}
-                {{article.title}}
-            </h5>
-            {% if bartype == 'compact' %}
-            <div class="d-flex justify-content-between my-auto col-6">
-                <div class="fw-bold text-muted">{{article.writer.user.username}}</div>
-                <div class="fw-bold text-muted">{{article.pub_date|time_left}}</div>
-            {% elif bartype == 'normal' %}
-            <div class="d-flex justify-content-between my-auto col-3">
-                <div class="text-muted">{{article.writer.user.username}}</div>
-                <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
-            {% endif %}
-            </div>
-        </div>
-        <div class="row">
-            {% if bartype == 'compact' %}
-            <div class="col-6 overflow-hidden">
-            {% elif bartype == 'normal' %}
-            <div class="col-9 overflow-hidden">
-            {% endif %}
-            {% for tag in article.tags %}
-                <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
-            {% endfor %}
-            </div>
-            {% if bartype == 'compact' %}
-            <div class="col-6 d-flex justify-content-between">
-            {% elif bartype == 'normal' %}
-            <div class="col-3 d-flex justify-content-between">
-            {% endif %}
-                <div class="col-4">
-                    <i class="bi-chat-left-dots"></i> {{article.comment_cnt}}
+<div class="article-bar">
+    <div class="d-flexbg-light p-1 border">
+        <div style="width: 1%; background-color: #{{board_color}};"></div>
+        <div style="width: 1%;"></div>
+        <div style="width: 98%">
+            <div class="row">
+                {% if bartype == 'compact' %}
+                <h5 class="article-bar-title my-1 fw-bold col-6">
+                {% elif bartype == 'normal' %}
+                <h5 class="article-bar-title my-1 fw-bold col-9">
+                {% endif %}
+                    {{article.title}}
+                </h5>
+                {% if bartype == 'compact' %}
+                <div class="d-flex justify-content-between my-auto col-6">
+                    <div class="fw-bold text-muted">{{article.writer.user.username}}</div>
+                    <div class="fw-bold text-muted">{{article.pub_date|time_left}}</div>
+                {% elif bartype == 'normal' %}
+                <div class="d-flex justify-content-between my-auto col-3">
+                    <div class="text-muted">{{article.writer.user.username}}</div>
+                    <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
+                {% endif %}
                 </div>
-                <div class="col-4">
-                    <i class="bi-star"></i> {{article.like_cnt}}
+            </div>
+            <div class="row">
+                {% if bartype == 'compact' %}
+                <div class="col-6 overflow-hidden">
+                {% elif bartype == 'normal' %}
+                <div class="col-9 overflow-hidden">
+                {% endif %}
+                {{article.period_start|date:'y/m/d H:m'}} ~ {{article.period_end|date:'y/m/d H:m'}}
+                {% for tag in article.tags %}
+                    <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
+                {% endfor %}
                 </div>
-                <div class="col-4">
-                    <i class="bi-eye"></i> {{article.view_cnt}}
+                {% if bartype == 'compact' %}
+                <div class="col-6 d-flex justify-content-between">
+                {% elif bartype == 'normal' %}
+                <div class="col-3 d-flex justify-content-between">
+                {% endif %}
+                    <div class="col-4">
+                        <i class="bi-chat-left-dots"></i> {{article.comment_cnt}}
+                    </div>
+                    <div class="col-4">
+                        <i class="bi-star"></i> {{article.like_cnt}}
+                    </div>
+                    <div class="col-4">
+                        <i class="bi-eye"></i> {{article.view_cnt}}
+                    </div>
                 </div>
             </div>
         </div>

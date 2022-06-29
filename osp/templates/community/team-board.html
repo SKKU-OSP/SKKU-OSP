@@ -3,6 +3,7 @@
 {% extends 'main.html' %}
 
 {% load static %}
+{% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
   <div class="row">
@@ -10,11 +11,36 @@
       {% include "community/sidebar.html" %}
     </div>
     <div class="col-9">
+      <div id="active-article">
+        <div id="active-article-control">
+          
+        </div>
+        <div class="d-flex my-2 overflow-hidden" id="active-article-list">
+        {% for article in active_article %}
+        <div class="article-item col-3 p-1">
+          <div class="h-100 w-100 border">
+            <div class="team-profile row">
+              <i class="bi-person col-6" style="font-size: 4rem;"></i>
+              <div class="col-6">Team Name</div>
+            </div>
+            <div class="fw-bold">{{article.title}}</div>
+            <div>
+            {% for tag in article.tags %}
+              <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
+            {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
       <div class="d-flex justify-content-between bg-light" id="board-title-bar">
-        <div class="d-flex">
-          <h2>{{ board_name }} 게시판</h2>
-          <div class="m-auto" id="tag-filter">
-            태그 필터
+        <div class="d-flex col-8 justify-content-start">
+          <h2>{{ board.name }} 게시판</h2>
+          <div class="my-auto col-6" id="tag-filter">
+            <select class="mx-2" style="min-width: 25%;" id="tag-select" multiple>
+              {% category_tag request %}
+            </select>
           </div>
         </div>
         <div class="my-auto">
@@ -25,20 +51,25 @@
         </div>
       </div>
       <div id="article-list-body">
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
-        {% include "community/article-bar.html" with bartype="normal" board_color=board_color %}
       </div>
-      {% include "community/footer.html" with max_page=7 %}
+      {% include "community/footer.html" with board=board %}
     </div>
   </div>
 </div>
 {% endblock content %}
 {% block script %}
+<script>
+  $(function(){
+  var tag_selector = new SlimSelect({
+    select: '#tag-select',
+    onChange: (selected_list) => {
+      for(selected of selected_list){
+        $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+      }
+      redraw();
+    }
+  })});
+</script>
 {% endblock script %}
 
 </html>

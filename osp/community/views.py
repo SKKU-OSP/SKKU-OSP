@@ -41,21 +41,33 @@ def board(request, board_name):
     except Board.DoesNotExist:
         return redirect('/community')
     board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
+    context = {'board': board, 'board_color': board_color}
     if board.board_type == 'QnA':
-        return render(request, 'community/qna-board.html', {'board': board, 'board_name':board_name, 'board_color': board_color})
-    if board.board_type == 'Normal':
-        return render(request, 'community/board.html', {'board': '', 'board_name':board_name, 'board_color': board_color})
+        return render(request, 'community/qna-board.html', context)
     if board.board_type == 'Team':
-        return render(request, 'community/team-board.html', {'board': '', 'board_name':board_name, 'board_color': board_color})
+        active_article = Article.objects.filter(board_id=board)
+        active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00'))
+        for article in active_article:
+            article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+        context['active_article'] = active_article
+        return render(request, 'community/team-board.html', context)
+    
+    return render(request, 'community/board.html', context)
 
 def article_list(request, board_name):
-    PAGE_SIZE = 10
     try:
         board = Board.objects.get(name=board_name)
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
+    if board.board_type == 'Team':
+        PAGE_SIZE = 5
+    elif board.board_type == 'QnA':
+        PAGE_SIZE = 7
+    else:
+        PAGE_SIZE = 10
     context = {}
+    context['board'] = board
     context['bartype'] = 'normal'
     context['board_color'] = hashlib.md5(board.name.encode()).hexdigest()[:6]
     sort_field = request.GET.get('sort', ('-pub_date', 'title'))
