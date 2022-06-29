@@ -6,7 +6,10 @@ window.onload = function () {
   let chartObjList = [];
   let year_intvl = end_year-start_year;
   let select_year = 2021;
+  let select_month = 0;
   let chartFactor = "score_sum";
+  let is_selected_month = 0;
+  let is_selected_factor = 0;
   visual_ctx = new Array(4);
   for(let i=0; i<3; i++){
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
@@ -36,44 +39,69 @@ window.onload = function () {
   }
   
   const div_activity_monthly = document.getElementById("activity-monthly");
-  const div_activity_factor = document.getElementById("activity-factor");
-  let start = new Date();
+  let factor_grass = document.getElementById("factor-grass");
 
   let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
   console.log("monthly_contr", monthly_contr);
   let monthly_contribution = Array(12).fill(0);
+  let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
-  const factorLables = ["commits", "stars", "prs", "issues", "cr_repos","co_repos"];
+  let factor_contribution_level = Array(6).fill(0);
+  const factorLables = ["commit", "star", "pr", "issue", "repo_cr", "repo_co"];
   for(let i=0; i<monthly_contr.length; i++){
-    // console.log(i,monthly_contr[i]);
+    console.log(i,monthly_contr[i]);
     let total = monthly_contr[i]["total"];
+    monthly_contribution[i] = total;
     if(total<=30){
-      monthly_contribution[i] = Math.ceil(total / 10);
+      monthly_contribution_level[i] = Math.ceil(total / 10);
     }
-    else monthly_contribution[i] = 4;
-    for(let j=0; j<factorLables.length; j++){
-      factor_contribution[j] += monthly_contr[i][factorLables[j]];
+    else {
+      monthly_contribution_level[i] = 4;
     }
   }
-  console.log("factor_contribution", factor_contribution);
-  for(let i=0; i<factorLables.length; i++){
-    factor_contribution[i] = getDataLevel(factor_contribution[i], i, true);
-  }
-  function getDataLevel(value, type, isYear=false){
-    let level = 0;
-    if(isYear){
-      if (type === 0) level = Math.ceil(value / 100);
-      else if (type === 1)  level = Math.ceil(value / 2);
-      else if (type === 2)  level = Math.ceil(value / 5);
-      else level = Math.ceil(value / 4);
+  updateFactor(factorLables, select_month);
+  function updateFactor(factorLables, month=0) { 
+    console.log("updateFactor")
+    if(month == 0){
+      for(let i=0; i<monthly_contr.length; i++) {
+        for(let j=0; j<factorLables.length; j++) {
+          factor_contribution[j] += monthly_contr[i][factorLables[j]];
+        }
+      }
     }
     else{
+      for(let j=0; j<factorLables.length; j++){
+        factor_contribution[j] = monthly_contr[month-1][factorLables[j]];
+      }
+    }
+    for(let i=0; i<factorLables.length; i++){
+      factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
+    }
+    console.log(factor_grass.lastElementChild);
+    console.log("grass len", factor_grass.children.length);
+    let child = factor_grass.lastElementChild;
+    while(child){
+      factor_grass.removeChild(child);
+      child = factor_grass.lastElementChild;
+    }
+    makeFactorGrass();
+  }
+  console.log("factor_contribution", factor_contribution);
+  
+  function getDataLevel(value, type, isMonthly=true){
+    let level = 0;
+    if (isMonthly) {
       if (type === 0) level = Math.ceil(value / 25);
       else if (type === 2)  level = value;
       else if (type === 2)  level = Math.ceil(value / 3);
       else level = Math.ceil(value / 2);
     }
-
+    else {
+      if (type === 0) level = Math.ceil(value / 100);
+      else if (type === 1)  level = Math.ceil(value / 2);
+      else if (type === 2)  level = Math.ceil(value / 5);
+      else level = Math.ceil(value / 4);
+    }
     if(level>4) level = 4;
     return level;
   }
@@ -84,18 +112,22 @@ window.onload = function () {
   for(let col = 1; col <= 6; col++){
     let gr = document.createElementNS(NS, "g");
     for(let row = 1; row <=2; row++){
+      let mIdx = (col-1)*2+row;
       let rect = document.createElementNS(NS,"rect");
-      let ctb = monthly_contribution[((col-1)*2+row)-1];
-      rect.setAttributeNS(null,"month", (col-1)*2+row);
+      let ctb = monthly_contribution[mIdx-1]
+      let level = monthly_contribution_level[mIdx-1];
+      rect.setAttributeNS(null,"month", mIdx);
+      rect.setAttributeNS(null,"raw", ctb);
+      rect.setAttributeNS(null,"focus", 0);
       rect.setAttributeNS(null,"x", 14);
       rect.setAttributeNS(null,"y", (grass_size+4)*row - 48);
       rect.setAttributeNS(null,"width", grass_size);
       rect.setAttributeNS(null,"height", grass_size);
       rect.setAttributeNS(null,"rx", "2");
       rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"class", "ContributionCalendar-day");
-      rect.setAttributeNS(null,"data-level", ctb);
-      switch(ctb){
+      rect.setAttributeNS(null,"class", "ContributionMonth");
+      rect.setAttributeNS(null,"data-level", level);
+      switch(level){
         case 0:
           rect.style.fill = "#EBEDF0"; break;
         case 1:
@@ -108,7 +140,27 @@ window.onload = function () {
           rect.style.fill = "#216E39"; break;
       }
       rect.addEventListener("click",(e) =>{
-        console.log(e.target.attributes[0].value);
+        console.log(e.target.attributes[0].value, e.target.attributes[1].value, e.target.attributes[2].value);
+        console.log(e.target);
+        let focus = 1 - e.target.attributes[2].value;
+        console.log("focus", focus);
+        is_selected_month = focus;
+
+        if(is_selected_month) {
+          select_month = e.target.attributes[0].value;
+          month_elements = document.getElementsByClassName("ContributionMonth");
+          console.log("byclass month", month_elements.length);
+          for(let rect of month_elements){
+            rect.setAttributeNS(null, "focus", 0);
+          }
+        }
+        else select_month = 0;
+        e.target.attributes[2].value = focus;
+        console.log("month", select_month);
+        destroyChart(chartObjList, chartObjList.length);
+        chartObjList = [];
+        makePage(chart_data);
+        updateFactor(factorLables, select_month);
       });
       gr.appendChild(rect);
     }
@@ -117,38 +169,62 @@ window.onload = function () {
     div_activity_monthly.appendChild(gr);
   }
   /* Grass for Factor */
-  let factor_grass = document.getElementById("factor-grass");
-  for(let col = 0; col < 6; col++){
-    let rect = document.createElementNS(NS,"rect");
-    let ctb = factor_contribution[col];
-    rect.setAttributeNS(null,"factor", factorLables[col]);
-    rect.setAttributeNS(null,"x", (grass_size+4)*col+14);
-    rect.setAttributeNS(null,"y", 12);
-    rect.setAttributeNS(null,"width", grass_size);
-    rect.setAttributeNS(null,"height", grass_size);
-    rect.setAttributeNS(null,"rx", "2");
-    rect.setAttributeNS(null,"ry", "2");
-    rect.setAttributeNS(null,"class", "ContributionCalendar-day");
-    rect.setAttributeNS(null,"data-level", ctb);
-    switch(ctb){
-      case 0:
-        rect.style.fill = "#EBEDF0"; break;
-      case 1:
-        rect.style.fill = "#9BE9A8"; break;
-      case 2:
-        rect.style.fill = "#40C463"; break;
-      case 3:
-        rect.style.fill = "#30A14E"; break;
-      case 4:
-        rect.style.fill = "#216E39"; break;
+  // makeFactorGrass();
+  function makeFactorGrass(){
+    let start = new Date();
+    for(let col = 0; col < 6; col++){
+      let rect = document.createElementNS(NS,"rect");
+      let ctb = factor_contribution[col];
+      let level = factor_contribution_level[col];
+      rect.setAttributeNS(null,"factor", factorLables[col]);
+      rect.setAttributeNS(null,"raw", ctb);
+      rect.setAttributeNS(null,"focus", 0);
+      rect.setAttributeNS(null,"x", (grass_size+4)*col+14);
+      rect.setAttributeNS(null,"y", 12);
+      rect.setAttributeNS(null,"width", grass_size);
+      rect.setAttributeNS(null,"height", grass_size);
+      rect.setAttributeNS(null,"rx", "2");
+      rect.setAttributeNS(null,"ry", "2");
+      rect.setAttributeNS(null,"class", "ContributionFactor");
+      rect.setAttributeNS(null,"data-level", level);
+      switch(level){
+        case 0:
+          rect.style.fill = "#EBEDF0"; break;
+        case 1:
+          rect.style.fill = "#9BE9A8"; break;
+        case 2:
+          rect.style.fill = "#40C463"; break;
+        case 3:
+          rect.style.fill = "#30A14E"; break;
+        case 4:
+          rect.style.fill = "#216E39"; break;
+      }
+      rect.addEventListener("click",(e) =>{
+        console.log(e.target.attributes[0].value, e.target.attributes[1].value);
+        let focus = 1 - e.target.attributes[2].value;
+        console.log("focus", focus);
+        is_selected_factor = focus;
+        if(is_selected_factor){
+          chartFactor = (e.target.attributes[0].value).split("_")[0];
+          factor_elements = document.getElementsByClassName("ContributionFactor");
+          console.log("byclass factor",factor_elements.length);
+          for(let rect of factor_elements){
+            rect.setAttributeNS(null, "focus", 0);
+          }
+        }
+        else chartFactor = "score_sum";
+        e.target.attributes[2].value = focus;
+        console.log("factor", chartFactor);
+        destroyChart(chartObjList, chartObjList.length);
+        chartObjList = [];
+        makePage(chart_data);
+      });
+      factor_grass.appendChild(rect);
     }
-    rect.addEventListener("click",(e) =>{
-      console.log(e.target.attributes[0].value);
-    });
-    factor_grass.appendChild(rect);
+    let end = new Date();
+    console.log("makeFactorGrass elapsed time", end-start);
   }
-  let end = new Date();
-  console.log("elapsed time", end-start);
+  
   
   for(let i=0; i<3; i++){
     console.log(`canvas${String(i+1)}`);
@@ -158,7 +234,6 @@ window.onload = function () {
   makePage(chart_data);
   function makePage(chart_data){
     console.log("makePage");
-    console.log(chart_data);
     let student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
     console.log("student_data", student_data);
     let annual_data = chart_data["annual_overview"];
@@ -167,10 +242,10 @@ window.onload = function () {
     console.log("score_data", score_data);
     
 
-    const labels = ["commits", "stars", "issues", "PRs"];
-    const label_keys = ["commit", "star", "issue", "pr"];
+    const radar_labels = ["commits", "stars", "issues", "PRs"];
+    const radar_label_keys = ["commit", "star", "issue", "pr"];
     const average_data = [];
-    label_keys.forEach((label)=>{
+    radar_label_keys.forEach((label)=>{
       if(label == "commit"){
         average_data.push(Math.log2(annual_data[label][select_year-start_year]));
       }
@@ -179,7 +254,7 @@ window.onload = function () {
       }
     });
     const user_data = [];
-    label_keys.forEach((label)=>{
+    radar_label_keys.forEach((label)=>{
       if(label == "commit"){
         user_data.push(Math.log2(student_data[label]));
       }
@@ -215,7 +290,7 @@ window.onload = function () {
     /* Chart 1: 레이더 차트 */
     let radar_chart = new Chart(visual_ctx[0], {
         data: {
-          labels: labels,
+          labels: radar_labels,
           datasets: [
             { // 전체 평균
               type: "radar",
@@ -285,6 +360,7 @@ window.onload = function () {
     let factor_scope_label = newArrayScope(factor_Xaxis_label);
 
     let dist = JSON.parse(chart_data[`year${select_year}`])[0];
+    console.log("dist[chartFactor]",chartFactor);
     let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
 
     let colorIdx = findDistIdx(factor_Xaxis_label, Number(student_data[chartFactor]));
@@ -295,8 +371,7 @@ window.onload = function () {
       if(i != colorIdx) paramColor.push(baseColor);
       else paramColor.push(userColor);
     }
-    console.log("paramColor", paramColor);
-    
+
     let dist_chart = makeChart(visual_ctx[1], /*type=*/"bar", /*factor=*/chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     chartObjList.push(dist_chart);
 
@@ -425,7 +500,7 @@ window.onload = function () {
   }
 
   function makeHistogramJson(dist, label) {
-    console.log("makeHistogramJson", dist, label);
+    console.log("makeHistogramJson", label[0]);
     let offset = 0;
     //label expect NUM1~NUM2 or NUM
     let newDist = new Array(dist.length);

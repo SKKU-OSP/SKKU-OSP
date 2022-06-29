@@ -59,12 +59,12 @@ class GithubStatsYymm(models.Model):
             "github_id" : self.github_id,
             "year" : self.start_yymm.year,
             "month" : self.start_yymm.month,
-            "stars" : self.stars,
-            "cr_repos" : self.num_of_cr_repos,
-            "co_repos": self.num_of_co_repos,
-            "commits" : self.num_of_commits,
-            "prs" : self.num_of_prs,
-            "issues" : self.num_of_issues,
+            "star" : self.stars,
+            "repo_cr" : self.num_of_cr_repos,
+            "repo_co": self.num_of_co_repos,
+            "commit" : self.num_of_commits,
+            "pr" : self.num_of_prs,
+            "issue" : self.num_of_issues,
             "total" : self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
         }
         
