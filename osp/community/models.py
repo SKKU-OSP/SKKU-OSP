@@ -1,5 +1,6 @@
 from django.db import models
 from user.models import Account
+from tag.models import Tag
 
 # Create your models here.
 class Board(models.Model):
@@ -20,6 +21,17 @@ class Article(models.Model):
     writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
     period_start = models.DateTimeField(blank=True, null=True)
     period_end = models.DateTimeField(blank=True, null=True)
+
+class ArticleTag(models.Model):
+    article = models.ForeignKey(Article, models.CASCADE)
+    tag = models.ForeignKey(Tag, models.CASCADE)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['article', 'tag'],
+                name='unique_article_tag'
+            )
+        ]
 
 class ArticleLike(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
