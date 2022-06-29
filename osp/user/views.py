@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView
-from user.models import ScoreTable, StudentTab, GithubScore, Account
+from user.models import ScoreTable, StudentTab, GithubScore, Account, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
@@ -73,22 +73,27 @@ class ProfileView(TemplateView):
         student_data = Account.objects.get(user=user).student_data
         github_id = student_data.github_id
         
-        chartdata = dict()
-        score_data_list = list()
+        chartdata = {}
+        score_data_list = []
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
-        annual_overview = AnnualOverview.objects.filter(case_num=0).first()
+        annual_overview = AnnualOverview.objects.get(case_num=0)
         chartdata["annual_overview"] = annual_overview.to_avg_json()
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         
-        
+        monthly_contr = []
         for year in range(2019, 2022):
-            # 3. MODEL DistScore
-            dist_score = DistScore.objects.filter(case_num=0, year=year).first()
+            # user MODEL GithubStatsYymm
+            month_data = GithubStatsYymm.objects.filter(github_id=github_id, start_yymm__year=year)
+            print("month_data len", len(month_data))
+            monthly_contr.append(json.dumps([row.to_json() for row in month_data]))
+            
+            # home MODEL DistScore
+            dist_score = DistScore.objects.get(case_num=0, year=year)
             annual_dist = dist_score.to_json()
             
-            # 4. MODEL DistFactor
+            # home MODEL DistFactor
             dist_factor = DistFactor.objects.filter(case_num=0, year=year)
             for row in dist_factor:
                 row_json = row.to_json()
@@ -102,15 +107,14 @@ class ProfileView(TemplateView):
             key_name = "year"+str(year)
             chartdata[key_name] = json.dumps([annual_dist])
             
-            score_data = GithubScore.objects.filter(yid=str(year)+github_id).first()
+            score_data = GithubScore.objects.get(yid=str(year)+github_id)
             score_data_list.append(score_data.to_json())
         chartdata["score_data"] = score_data_list
+        chartdata["monthly_contr"] = monthly_contr
         
-        # print("score_data:\n", score_data)
         context["chart_data"] = json.dumps(chartdata)
-        # print("context:\n", context)
+        print("\ntime :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
         
-        print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
         return context
 
 class ProfileEditView(TemplateView):

@@ -9,11 +9,9 @@ window.onload = function () {
   let chartFactor = "score_sum";
   visual_ctx = new Array(4);
   for(let i=0; i<3; i++){
-    console.log(`canvas${String(i+1)}`);
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
   }
   let btn_year = document.getElementsByClassName("btn-year");
-  btn_year.remo
   for (let btn of btn_year) {
     btn.addEventListener("click",function(){
       select_year = btn.innerText;
@@ -39,31 +37,64 @@ window.onload = function () {
   
   const div_activity_monthly = document.getElementById("activity-monthly");
   const div_activity_factor = document.getElementById("activity-factor");
-  console.log("div_activity_monthly");
   let start = new Date();
-  let monthly_contribution = [];
-  for(let i=0;i<12;i++){
-    monthly_contribution.push(Math.floor(Math.random()*5));
+
+  let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
+  console.log("monthly_contr", monthly_contr);
+  let monthly_contribution = Array(12).fill(0);
+  let factor_contribution = Array(6).fill(0);
+  const factorLables = ["commits", "stars", "prs", "issues", "cr_repos","co_repos"];
+  for(let i=0; i<monthly_contr.length; i++){
+    // console.log(i,monthly_contr[i]);
+    let total = monthly_contr[i]["total"];
+    if(total<=30){
+      monthly_contribution[i] = Math.ceil(total / 10);
+    }
+    else monthly_contribution[i] = 4;
+    for(let j=0; j<factorLables.length; j++){
+      factor_contribution[j] += monthly_contr[i][factorLables[j]];
+    }
   }
-  let factor_contribution = [];
-  for(let i=0;i<6;i++){
-    factor_contribution.push(Math.floor(Math.random()*5));
+  console.log("factor_contribution", factor_contribution);
+  for(let i=0; i<factorLables.length; i++){
+    factor_contribution[i] = getDataLevel(factor_contribution[i], i, true);
   }
-  for(let col = 1; col <= 6; col++){//month
+  function getDataLevel(value, type, isYear=false){
+    let level = 0;
+    if(isYear){
+      if (type === 0) level = Math.ceil(value / 100);
+      else if (type === 1)  level = Math.ceil(value / 2);
+      else if (type === 2)  level = Math.ceil(value / 5);
+      else level = Math.ceil(value / 4);
+    }
+    else{
+      if (type === 0) level = Math.ceil(value / 25);
+      else if (type === 2)  level = value;
+      else if (type === 2)  level = Math.ceil(value / 3);
+      else level = Math.ceil(value / 2);
+    }
+
+    if(level>4) level = 4;
+    return level;
+  }
+  console.log("monthly_contribution", monthly_contribution);
+  console.log("factor_contribution", factor_contribution);
+
+  /* Grass for Month */
+  for(let col = 1; col <= 6; col++){
     let gr = document.createElementNS(NS, "g");
     for(let row = 1; row <=2; row++){
       let rect = document.createElementNS(NS,"rect");
       let ctb = monthly_contribution[((col-1)*2+row)-1];
+      rect.setAttributeNS(null,"month", (col-1)*2+row);
       rect.setAttributeNS(null,"x", 14);
       rect.setAttributeNS(null,"y", (grass_size+4)*row - 48);
       rect.setAttributeNS(null,"width", grass_size);
       rect.setAttributeNS(null,"height", grass_size);
       rect.setAttributeNS(null,"rx", "2");
       rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"month", (col-1)*2+row);
       rect.setAttributeNS(null,"class", "ContributionCalendar-day");
       rect.setAttributeNS(null,"data-level", ctb);
-      console.log(ctb);
       switch(ctb){
         case 0:
           rect.style.fill = "#EBEDF0"; break;
@@ -77,7 +108,7 @@ window.onload = function () {
           rect.style.fill = "#216E39"; break;
       }
       rect.addEventListener("click",(e) =>{
-        alert(((col-1)*2+row).toFixed());
+        console.log(e.target.attributes[0].value);
       });
       gr.appendChild(rect);
     }
@@ -85,12 +116,12 @@ window.onload = function () {
     gr.setAttribute("stroke", "#aaaaaa");
     div_activity_monthly.appendChild(gr);
   }
+  /* Grass for Factor */
   let factor_grass = document.getElementById("factor-grass");
-  console.log("factor_grass", factor_grass);
-  
-  for(let col = 0; col < 6; col++){//factor
+  for(let col = 0; col < 6; col++){
     let rect = document.createElementNS(NS,"rect");
-    let ctb = monthly_contribution[col];
+    let ctb = factor_contribution[col];
+    rect.setAttributeNS(null,"factor", factorLables[col]);
     rect.setAttributeNS(null,"x", (grass_size+4)*col+14);
     rect.setAttributeNS(null,"y", 12);
     rect.setAttributeNS(null,"width", grass_size);
@@ -99,7 +130,6 @@ window.onload = function () {
     rect.setAttributeNS(null,"ry", "2");
     rect.setAttributeNS(null,"class", "ContributionCalendar-day");
     rect.setAttributeNS(null,"data-level", ctb);
-    console.log(ctb);
     switch(ctb){
       case 0:
         rect.style.fill = "#EBEDF0"; break;
@@ -113,7 +143,7 @@ window.onload = function () {
         rect.style.fill = "#216E39"; break;
     }
     rect.addEventListener("click",(e) =>{
-      alert("factor");
+      console.log(e.target.attributes[0].value);
     });
     factor_grass.appendChild(rect);
   }
@@ -135,6 +165,7 @@ window.onload = function () {
     console.log("annual_data", annual_data);
     let score_data = chart_data["score_data"];
     console.log("score_data", score_data);
+    
 
     const labels = ["commits", "stars", "issues", "PRs"];
     const label_keys = ["commit", "star", "issue", "pr"];
@@ -203,66 +234,73 @@ window.onload = function () {
         options: radarOption,
       });
     chartObjList.push(radar_chart);
-    /* Chart 3: 분포도 히스토그램 */
-    const scoreDistLabel = new Array(10);
-    for (let i = 0; i < 10; i++) {
-      scoreDistLabel[i] = `${((5 * i) / 10).toFixed(1)}~${(
-        (5 * i) / 10 + 0.5
-      ).toFixed(1)}`;
+
+    /* Chart 2: 분포도 히스토그램 */
+    function newArrayRange(start, end, step=1, fix_point=0){
+      let arr = [];
+      for(let i=start; i<=end; i = i+step){
+        arr.push(i.toFixed(fix_point));
+      }
+      return arr;
     }
-    console.log("scoreDistLabel", scoreDistLabel, scoreDistLabel.length);
-    const commitDistLabel = [
-      "0~100",
-      "100~200",
-      "200~300",
-      "300~400",
-      "400~500",
-    ];
-    const starDistLabel = ["0~2", "2~4", "4~6", "6~8", "8~10"]; //contain over 10
-    const prDistLabel = ["0~5", "5~10", "10~15", "15~20", "20~25"];
-    const issueDistLabel = ["0~2", "2~4", "4~6", "6~8", "8~10"];
-    const yearLabel = [];
-    for(y = start_year; y<=end_year;y++){
-      yearLabel.push(y);
-    }
-    let factor_label = scoreDistLabel;
-    if(chartFactor=="score_sum") factor_label = scoreDistLabel;
-    else if(chartFactor=="commit") factor_label = commitDistLabel;
-    else if(chartFactor=="star") factor_label = starDistLabel;
-    else if(chartFactor=="pr") factor_label = prDistLabel;
-    else if(chartFactor=="issue") factor_label = issueDistLabel;
-    else{
-      console.log("not changes");
+    function newArrayScope(range_arr=[]){
+      let arr = [];
+      for (let i = 1; i < range_arr.length; i++) {
+        arr.push(range_arr[i-1]+"~"+range_arr[i]);
+      }
+      return arr;
     }
 
-    console.log("factor_label", factor_label);
+    const yearLabel = newArrayRange(start_year, end_year);
+    let factor_Xaxis_label = [];
+    let factor_option = {}
+    switch(chartFactor){
+      case "score_sum":
+        factor_Xaxis_label = newArrayRange(0, 5, 0.5, 1);
+        factor_option = histogramOption(0.25);
+        break;
+      case "commit":
+        factor_Xaxis_label = newArrayRange(0, 500, 100);
+        factor_option = histogramOption(50);
+        break;
+      case "star":
+        factor_Xaxis_label = newArrayRange(0, 10, 2);
+        factor_option = histogramOption(1);
+        break;
+      case "pr":
+        factor_Xaxis_label = newArrayRange(0, 25, 5);
+        factor_option = histogramOption(2.5);
+        break;
+      case "issue":
+        factor_Xaxis_label = newArrayRange(0, 10, 2);
+        factor_option = histogramOption(1);
+        break;
+      case "repo":
+        factor_Xaxis_label = newArrayRange(0, 10, 2);
+        factor_option = histogramOption(1);
+        break;
+      default:
+        console.error("unknown factor");
+    }
+    let factor_scope_label = newArrayScope(factor_Xaxis_label);
+
     let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    let dist_dataset = makeHistogramJson(dist[chartFactor], factor_label);
-    console.log("dist_dataset", dist_dataset);
+    let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
 
-    let paramColor = Array(10);
-    let colorIdx = findDistIdx(factor_label, Number(student_data[chartFactor]));
+    let colorIdx = findDistIdx(factor_Xaxis_label, Number(student_data[chartFactor]));
     console.log("colorIdx", colorIdx);
-    for(let i=0; i<10;i++){
-      paramColor[i] = baseColor;
-      if(i==colorIdx) paramColor[i] = userColor;
+
+    let paramColor = [];
+    for(let i=0; i<factor_scope_label.length; i++){
+      if(i != colorIdx) paramColor.push(baseColor);
+      else paramColor.push(userColor);
     }
     console.log("paramColor", paramColor);
     
-    let dist_chart = makeChart(visual_ctx[1], /*type=*/"bar", /*factor=*/chartFactor, factor_label, dist_dataset, paramColor, 
-    {
-      plugins: {
-        legend: {
-          display: false,
-        },
-        title: {
-          display: true,
-          text: 'Distribution Histogram'
-        }
-      },
-    },);
+    let dist_chart = makeChart(visual_ctx[1], /*type=*/"bar", /*factor=*/chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     chartObjList.push(dist_chart);
-    /* Chart 4: 세부 점수 그래프 */
+
+    /* Chart 3: 세부 점수 그래프 */
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
     const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
@@ -334,24 +372,18 @@ window.onload = function () {
     chartObjList.push(specific_score_chart);
   }
 
-  function findDistIdx(label=[], value){
-    let ret_idx = label.length;
+  function findDistIdx(label=[], value=0){
+    let ret_idx = 0;
     try{
-      
-      label.forEach((interval, idx) => {
-        let Vals = interval.split("~");
-        let startVal = Number(Vals[0]);
-        let endVal = Number(Vals[1]);
-        if(startVal <= value && value < endVal){
-          ret_idx = idx
-        }
+      label.forEach((cmpVal, idx) => {
+        if(Number(cmpVal)<=value) ret_idx = idx;
       });
     }catch(error){
       console.error(error)
       return -1;
     }
+    if (ret_idx >= label.length-1) ret_idx = label.length-2;
     return ret_idx;
-    
   }
 
   function destroyChart(chart, size) {
@@ -420,4 +452,39 @@ window.onload = function () {
     console.log("NEW DIST", newDist);
     return newDist;
   }
+
+  function histogramOption(offset) {
+      return {
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                if (!items.length) {
+                  return "";
+                }
+                const item = items[0];
+                const x = item.parsed.x;
+                let min = x - offset <= 0 ? 0 : x - offset;
+                let max = x + offset;
+                if (x === 0) {
+                  min = 0;
+                  max = 0;
+                }
+                return `${min}~${max}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: "linear",
+            offset: false,
+            grid: { offset: false },
+            ticks: { stepSize: offset * 2 },
+          },
+          y: { beginAtZero: true },
+        },
+      };
+    }
 };

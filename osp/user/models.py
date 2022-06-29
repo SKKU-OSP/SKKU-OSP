@@ -50,6 +50,25 @@ class GithubStatsYymm(models.Model):
     num_of_prs = models.IntegerField(db_column='num_of_PRs')  # Field name made lowercase.
     num_of_issues = models.IntegerField()
     
+    class Meta:
+        managed = False
+        db_table = 'github_stats_yymm'
+        
+    def to_json(self):
+        return{
+            "github_id" : self.github_id,
+            "year" : self.start_yymm.year,
+            "month" : self.start_yymm.month,
+            "stars" : self.stars,
+            "cr_repos" : self.num_of_cr_repos,
+            "co_repos": self.num_of_co_repos,
+            "commits" : self.num_of_commits,
+            "prs" : self.num_of_prs,
+            "issues" : self.num_of_issues,
+            "total" : self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
+        }
+        
+    
 class ScoreTable(models.Model):
     id = models.IntegerField(primary_key=True)
     year = models.IntegerField()
