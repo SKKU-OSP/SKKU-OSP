@@ -39,18 +39,25 @@ class ProfileView(TemplateView):
         student_info = StudentTab.objects.get(id=student_id)
         student_score = ScoreTable.objects.get(id=student_id, year=2021)
 
-        student_repos = GithubRepoCommits.objects.filter(committer_github=github_id).order_by('-committer_date')
-        commit_repos = student_repos.values("repo_name").order_by("repo_name").distinct()
+        
+        commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("repo_name", "committer_date").order_by("repo_name").distinct()
+        commit_repos = commit_repos.values("repo_name", "committer_date")
+        sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True)
 
-
-        recent_repos = {}
-        last_commits = {}
-
-        commit_repos = list(commit_repos)
-        print(commit_repos)
-        for i in range(4):
-            recent_repos[i] = commit_repos[i]
-            last_commits[i] = student_repos.filter(repo_name=commit_repos[i]['repo_name'])[0]
+        recent_repos = []
+        cur = 0
+        while(cur < len(sorted_commit)):
+            if(len(recent_repos) == 4):
+                break
+            cur_repo = sorted_commit[cur]
+            flag = 1
+            for i in range(len(recent_repos)):
+                if (recent_repos[i]['repo_name'] == cur_repo['repo_name']):
+                    flag = 0
+                    break
+            if(flag == 1):
+                recent_repos.append(cur_repo)
+            cur = cur + 1
 
         
 
