@@ -210,10 +210,7 @@
                 <div class="card-body">
                   <div class="tab-pane fade show mt-2" id="pills-score">
                     <h5 id="visual-subtitle">개요</h5>
-                    <div class="d-flex flex-wrap">
-                      
-                      <svg id="activity-monthly" class="border-profile">
-                      </svg>
+                    <div class="d-flex">
                       <!--vertical scroll menu  -->
                       <div class="vertical-menu">
                         <button class="btn-year">2022</button>
@@ -221,12 +218,17 @@
                         <button class="btn-year">2020</button>
                         <button class="btn-year">2019</button>
                       </div>
-                      <svg id="activity-factor" class="border-profile">
+                      <svg id="activity-monthly" class="grass double"></svg>
+                    </div>
+                    <div class="d-flex">
+                      <div style="height:6rem; width:6rem;"></div>
+                      <svg id="activity-factor" class="grass half">
                         <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                         </g>
                       </svg>
                     </div>
                     <canvas id="canvas1" class="ctx-item"></canvas>
+                    <div id="task-tooltip" display="none" style="position: absolute; display: none;"></div>
                   </div>
                   <canvas id="canvas2" class="ctx-item"></canvas>
                   <canvas id="canvas3" class="ctx-item"></canvas>

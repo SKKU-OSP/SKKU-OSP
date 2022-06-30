@@ -18,29 +18,26 @@ window.onload = function () {
   for (let btn of btn_year) {
     btn.addEventListener("click",function(){
       select_year = btn.innerText;
-      console.log(btn.innerText);
       $('.btn-year.active').removeClass("active");
       this.className += " active";
-      destroyChart(chartObjList, chartObjList.length);
-      chartObjList = [];
-      makePage(chart_data);
+      let start = new Date();
+      updateMonthly(select_year);
+      let end = new Date();
+      console.log("updateMonthly elapsed time", end-start);
     });
   }
   let chart_nav = document.getElementsByClassName("nav-link");
   for (let nav of chart_nav) {
     nav.addEventListener("click",function(){
       document.getElementById("visual-subtitle").innerText = nav.innerText;
-      console.log(nav.innerText);
       $('.nav-link.active').removeClass("active");
       this.className += " active";
       // 모든 차트를 구현하고 나서 확대페이지를 만든 후,
       // 개별 차트의 삭제와 생성을 구현
     });
   }
-  
   const div_activity_monthly = document.getElementById("activity-monthly");
   let factor_grass = document.getElementById("factor-grass");
-
   let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
   console.log("monthly_contr", monthly_contr);
   let monthly_contribution = Array(12).fill(0);
@@ -48,21 +45,47 @@ window.onload = function () {
   let factor_contribution = Array(6).fill(0);
   let factor_contribution_level = Array(6).fill(0);
   const factorLables = ["commit", "star", "pr", "issue", "repo_cr", "repo_co"];
-  for(let i=0; i<monthly_contr.length; i++){
-    console.log(i,monthly_contr[i]);
-    let total = monthly_contr[i]["total"];
-    monthly_contribution[i] = total;
-    if(total<=30){
-      monthly_contribution_level[i] = Math.ceil(total / 10);
+  
+  let start = new Date();
+  updateMonthly(select_year);
+  let end = new Date();
+  console.log("updateMonthly elapsed time", end-start);
+
+  function updateMonthly(select_year){
+    
+    monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
+    for(let i=0; i<monthly_contr.length; i++){
+      let total = monthly_contr[i]["total"];
+      monthly_contribution[i] = total;
+      if(total<=30){
+        monthly_contribution_level[i] = Math.ceil(total / 10);
+      }
+      else {
+        monthly_contribution_level[i] = 4;
+      }
     }
-    else {
-      monthly_contribution_level[i] = 4;
+    clearChildElement(div_activity_monthly);
+    is_selected_month = 0;
+    is_selected_factor = 0;
+    hideTooltip();
+    makeMonthGrass();
+    select_month = 0;
+    updateFactor(factorLables, select_month);
+  }
+  function clearChildElement(element){
+    let child = element.lastElementChild;
+    while(child){
+      element.removeChild(child);
+      child = element.lastElementChild;
     }
   }
-  updateFactor(factorLables, select_month);
   function updateFactor(factorLables, month=0) { 
     console.log("updateFactor")
     if(month == 0){
+      //initialize
+      for(let i=0; i<monthly_contr.length; i++) {
+        factor_contribution[i] = 0;
+      }
       for(let i=0; i<monthly_contr.length; i++) {
         for(let j=0; j<factorLables.length; j++) {
           factor_contribution[j] += monthly_contr[i][factorLables[j]];
@@ -77,16 +100,9 @@ window.onload = function () {
     for(let i=0; i<factorLables.length; i++){
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
     }
-    console.log(factor_grass.lastElementChild);
-    console.log("grass len", factor_grass.children.length);
-    let child = factor_grass.lastElementChild;
-    while(child){
-      factor_grass.removeChild(child);
-      child = factor_grass.lastElementChild;
-    }
+    clearChildElement(factor_grass);
     makeFactorGrass();
   }
-  console.log("factor_contribution", factor_contribution);
   
   function getDataLevel(value, type, isMonthly=true){
     let level = 0;
@@ -105,88 +121,110 @@ window.onload = function () {
     if(level>4) level = 4;
     return level;
   }
-  console.log("monthly_contribution", monthly_contribution);
-  console.log("factor_contribution", factor_contribution);
 
   /* Grass for Month */
-  for(let col = 1; col <= 6; col++){
-    let gr = document.createElementNS(NS, "g");
-    for(let row = 1; row <=2; row++){
-      let mIdx = (col-1)*2+row;
-      let rect = document.createElementNS(NS,"rect");
-      let ctb = monthly_contribution[mIdx-1]
-      let level = monthly_contribution_level[mIdx-1];
-      rect.setAttributeNS(null,"month", mIdx);
-      rect.setAttributeNS(null,"raw", ctb);
-      rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", 14);
-      rect.setAttributeNS(null,"y", (grass_size+4)*row - 48);
-      rect.setAttributeNS(null,"width", grass_size);
-      rect.setAttributeNS(null,"height", grass_size);
-      rect.setAttributeNS(null,"rx", "2");
-      rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"class", "ContributionMonth");
-      rect.setAttributeNS(null,"data-level", level);
-      switch(level){
-        case 0:
-          rect.style.fill = "#EBEDF0"; break;
-        case 1:
-          rect.style.fill = "#9BE9A8"; break;
-        case 2:
-          rect.style.fill = "#40C463"; break;
-        case 3:
-          rect.style.fill = "#30A14E"; break;
-        case 4:
-          rect.style.fill = "#216E39"; break;
-      }
-      rect.addEventListener("click",(e) =>{
-        console.log(e.target.attributes[0].value, e.target.attributes[1].value, e.target.attributes[2].value);
-        console.log(e.target);
-        let focus = 1 - e.target.attributes[2].value;
-        console.log("focus", focus);
-        is_selected_month = focus;
-
-        if(is_selected_month) {
-          select_month = e.target.attributes[0].value;
-          month_elements = document.getElementsByClassName("ContributionMonth");
-          console.log("byclass month", month_elements.length);
-          for(let rect of month_elements){
-            rect.setAttributeNS(null, "focus", 0);
-          }
+  function makeMonthGrass(){
+    console.log("mMG: y",select_year, "month_contr", monthly_contribution);
+    const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const fs = 15;
+    for(let col = 1; col <= 6; col++){
+      let gr = document.createElementNS(NS, "g");
+      for(let row = 1; row <=2; row++){
+        let mIdx = (col-1)*2+row-1;
+        let rect = document.createElementNS(NS,"rect");
+        let ctb = monthly_contribution[mIdx]
+        let level = monthly_contribution_level[mIdx];
+        let mLabel = document.createElementNS(NS,"text");
+        rect.setAttributeNS(null,"month", mIdx+1);
+        rect.setAttributeNS(null,"raw", ctb);
+        rect.setAttributeNS(null,"focus", 0);
+        rect.setAttributeNS(null,"x", fs);
+        rect.setAttributeNS(null,"y", (grass_size+fs)*row - fs*3);
+        rect.setAttributeNS(null,"width", grass_size);
+        rect.setAttributeNS(null,"height", grass_size);
+        rect.setAttributeNS(null,"rx", "2");
+        rect.setAttributeNS(null,"ry", "2");
+        rect.setAttributeNS(null,"class", "ContributionMonth");
+        rect.setAttributeNS(null,"data-level", level);
+        mLabel.setAttributeNS(null, "x", fs);
+        mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
+        mLabel.setAttributeNS(null, "font-family", "verdana");
+        mLabel.setAttributeNS(null, "font-size", "15px");
+        mLabel.style.fill = "black";
+        mLabel.textContent = month_label[mIdx];
+        switch(level){
+          case 0:
+            rect.style.fill = "#EBEDF0"; break;
+          case 1:
+            rect.style.fill = "#9BE9A8"; break;
+          case 2:
+            rect.style.fill = "#40C463"; break;
+          case 3:
+            rect.style.fill = "#30A14E"; break;
+          case 4:
+            rect.style.fill = "#216E39"; break;
         }
-        else select_month = 0;
-        e.target.attributes[2].value = focus;
-        console.log("month", select_month);
-        destroyChart(chartObjList, chartObjList.length);
-        chartObjList = [];
-        makePage(chart_data);
-        updateFactor(factorLables, select_month);
-      });
-      gr.appendChild(rect);
+        rect.addEventListener("click",(e) =>{
+          let focus = 1 - e.target.attributes[2].value;
+          is_selected_month = focus;
+
+          if(is_selected_month) {
+            select_month = e.target.attributes[0].value;
+            let month_elements = document.getElementsByClassName("ContributionMonth");
+            for(let rect of month_elements){
+              rect.setAttributeNS(null, "focus", 0);
+              rect.removeAttribute("stroke");
+              rect.removeAttribute("stroke-width");
+            }
+            showTooltip(e, String(e.target.attributes[0].value)+"월: "+e.target.attributes[1].value);
+            e.target.setAttribute("stroke", "#fc2121");
+            e.target.setAttribute("stroke-width", "2px");
+          }
+          else {
+            select_month = 0;
+            hideTooltip();
+            e.target.removeAttribute("stroke");
+            e.target.removeAttribute("stroke-width");
+          }
+          e.target.attributes[2].value = focus;
+          updateFactor(factorLables, select_month);
+        });
+         gr.appendChild(rect);
+         gr.appendChild(mLabel);
+      }
+      gr.setAttribute("transform", `translate(${(col-1)*(grass_size+fs)}, 0)`);
+      gr.setAttribute("stroke", "#aaaaaa");
+      div_activity_monthly.appendChild(gr);
     }
-    gr.setAttribute("transform", `translate(${(col-1)*(grass_size+4)}, 0)`);
-    gr.setAttribute("stroke", "#aaaaaa");
-    div_activity_monthly.appendChild(gr);
   }
   /* Grass for Factor */
-  // makeFactorGrass();
   function makeFactorGrass(){
-    let start = new Date();
+    console.log("mFG: y",select_year,"m",select_month,"ftr_contr", factor_contribution);
+    const factor_label = ["COMMIT", "STAR", "PR", "ISSUE", "CR", "CO"];
+    const fs = 15;
     for(let col = 0; col < 6; col++){
       let rect = document.createElementNS(NS,"rect");
       let ctb = factor_contribution[col];
       let level = factor_contribution_level[col];
+      let fLabel = document.createElementNS(NS,"text");
       rect.setAttributeNS(null,"factor", factorLables[col]);
       rect.setAttributeNS(null,"raw", ctb);
       rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", (grass_size+4)*col+14);
-      rect.setAttributeNS(null,"y", 12);
+      rect.setAttributeNS(null,"x", (col)*(grass_size+fs)+fs);
+      rect.setAttributeNS(null,"y", fs);
       rect.setAttributeNS(null,"width", grass_size);
       rect.setAttributeNS(null,"height", grass_size);
       rect.setAttributeNS(null,"rx", "2");
       rect.setAttributeNS(null,"ry", "2");
       rect.setAttributeNS(null,"class", "ContributionFactor");
       rect.setAttributeNS(null,"data-level", level);
+      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs)+fs);
+      fLabel.setAttributeNS(null, "y", fs);
+      fLabel.setAttributeNS(null, "font-family", "verdana");
+      fLabel.setAttributeNS(null, "font-size", "15px");
+      fLabel.style.fill = "black";
+      fLabel.textContent = factor_label[col];
       switch(level){
         case 0:
           rect.style.fill = "#EBEDF0"; break;
@@ -200,38 +238,44 @@ window.onload = function () {
           rect.style.fill = "#216E39"; break;
       }
       rect.addEventListener("click",(e) =>{
-        console.log(e.target.attributes[0].value, e.target.attributes[1].value);
         let focus = 1 - e.target.attributes[2].value;
-        console.log("focus", focus);
         is_selected_factor = focus;
         if(is_selected_factor){
           chartFactor = (e.target.attributes[0].value).split("_")[0];
-          factor_elements = document.getElementsByClassName("ContributionFactor");
-          console.log("byclass factor",factor_elements.length);
+          let factor_elements = document.getElementsByClassName("ContributionFactor");
           for(let rect of factor_elements){
             rect.setAttributeNS(null, "focus", 0);
+            rect.removeAttribute("stroke");
+            rect.removeAttribute("stroke-width");
           }
+          showTooltip(e, String(e.target.attributes[0].value)+": "+e.target.attributes[1].value);
+          e.target.setAttribute("stroke", "#fc2121");
+          e.target.setAttribute("stroke-width", "2px");
         }
-        else chartFactor = "score_sum";
+        else {
+          chartFactor = "score_sum";
+          hideTooltip();
+          e.target.removeAttribute("stroke");
+          e.target.removeAttribute("stroke-width");
+        }
         e.target.attributes[2].value = focus;
-        console.log("factor", chartFactor);
         destroyChart(chartObjList, chartObjList.length);
         chartObjList = [];
         makePage(chart_data);
       });
       factor_grass.appendChild(rect);
+      factor_grass.appendChild(fLabel);
     }
-    let end = new Date();
-    console.log("makeFactorGrass elapsed time", end-start);
+    destroyChart(chartObjList, chartObjList.length);
+    chartObjList = [];
+    makePage(chart_data);
   }
   
   
   for(let i=0; i<3; i++){
-    console.log(`canvas${String(i+1)}`);
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
   }
   
-  makePage(chart_data);
   function makePage(chart_data){
     console.log("makePage");
     let student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
@@ -277,12 +321,8 @@ window.onload = function () {
     const radarOption = {
       plugins: {
         legend: {
-          display: true,
+          display: false,
         },
-        title: {
-          display: true,
-          text: 'Radar Chart'
-        }
       },
       responsive: true,
     };
@@ -360,19 +400,17 @@ window.onload = function () {
     let factor_scope_label = newArrayScope(factor_Xaxis_label);
 
     let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    console.log("dist[chartFactor]",chartFactor);
+    console.log("chartFactor",chartFactor);
     let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
-
     let colorIdx = findDistIdx(factor_Xaxis_label, Number(student_data[chartFactor]));
-    console.log("colorIdx", colorIdx);
-
     let paramColor = [];
+
     for(let i=0; i<factor_scope_label.length; i++){
       if(i != colorIdx) paramColor.push(baseColor);
       else paramColor.push(userColor);
     }
 
-    let dist_chart = makeChart(visual_ctx[1], /*type=*/"bar", /*factor=*/chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
+    let dist_chart = makeChart(visual_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     chartObjList.push(dist_chart);
 
     /* Chart 3: 세부 점수 그래프 */
@@ -391,7 +429,6 @@ window.onload = function () {
         "backgroundColor":cc3[i],
       });
     }
-    console.log("score_dataset",score_dataset);
 
     const total_score_data = [];
     for(let y = 0; y <= year_intvl; y++){
@@ -409,7 +446,6 @@ window.onload = function () {
         responsive: true,
         plugins: {
           legend: {display: false,},
-          title: {display: true, text: 'Score Bar Chart'},
           datalabels:{
             anchor: 'end',
             align: (context)=>{
@@ -561,5 +597,19 @@ window.onload = function () {
           y: { beginAtZero: true },
         },
       };
+    }
+    function showTooltip(evt, text) {
+      let tooltip = document.getElementById("task-tooltip");
+      tooltip.innerHTML = text;
+      tooltip.setAttribute("display", "block");
+      tooltip.style.display = "block";
+      let scrollTop = document.getElementById("visualization").scrollTop
+      tooltip.style.left = (evt.layerX - 20) + "px";
+      tooltip.style.top = (evt.layerY - 50) + scrollTop + "px";
+    }
+
+    function hideTooltip() {
+      var tooltip = document.getElementById("task-tooltip");
+      tooltip.style.display = "none";
     }
 };
