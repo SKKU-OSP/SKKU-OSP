@@ -10,6 +10,7 @@ window.onload = function () {
   let chartFactor = "score_sum";
   let is_selected_month = 0;
   let is_selected_factor = 0;
+  let is_nomalization = 0;
   visual_ctx = new Array(4);
   for(let i=0; i<3; i++){
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
@@ -36,6 +37,19 @@ window.onload = function () {
       // 개별 차트의 삭제와 생성을 구현
     });
   }
+  let btn_toggle = document.getElementById("btn-toggle");
+  btn_toggle.addEventListener("click", (e)=>{
+    is_nomalization = 1 - is_nomalization;
+    makeRadarChart(is_nomalization);
+    if(is_nomalization){
+      e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/100 값입니다.");
+      e.target.textContent = "raw";
+    }
+    else{
+      e.target.setAttribute("title","평균을 10점으로 맞추어 자신의 점수를 비교하기 쉽게 만듭니다.");
+      e.target.textContent = "nomalize";
+    }
+  });
   const div_activity_monthly = document.getElementById("activity-monthly");
   let factor_grass = document.getElementById("factor-grass");
   let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
@@ -271,11 +285,15 @@ window.onload = function () {
     makePage(chart_data);
   }
   
-  
   for(let i=0; i<3; i++){
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
   }
-  
+  function getNormalCoeff(value, label, is_work=1, goal=10){
+    if(value == 0) return 1;
+    if(is_work) return goal / value;
+    else if(label == "commit") return 1/100;
+    else return 1;
+  }
   function makePage(chart_data){
     console.log("makePage");
     let student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
@@ -285,29 +303,6 @@ window.onload = function () {
     let score_data = chart_data["score_data"];
     console.log("score_data", score_data);
     
-
-    const radar_labels = ["commits", "stars", "issues", "PRs"];
-    const radar_label_keys = ["commit", "star", "issue", "pr"];
-    const average_data = [];
-    radar_label_keys.forEach((label)=>{
-      if(label == "commit"){
-        average_data.push(Math.log2(annual_data[label][select_year-start_year]));
-      }
-      else{
-        average_data.push(annual_data[label][select_year-start_year]);
-      }
-    });
-    const user_data = [];
-    radar_label_keys.forEach((label)=>{
-      if(label == "commit"){
-        user_data.push(Math.log2(student_data[label]));
-      }
-      else{
-        user_data.push(student_data[label]);
-      }
-    });
-    console.log("average_data", average_data);
-    console.log("user_data", user_data);
     const baseColor = "#174adf";
     const userColor = "#ffe522";
     const cc6 = [
@@ -318,38 +313,8 @@ window.onload = function () {
       "#ffab21",
       "#ffe913",
     ];
-    const radarOption = {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-      responsive: true,
-    };
-
-    /* Chart 1: 레이더 차트 */
-    let radar_chart = new Chart(visual_ctx[0], {
-        data: {
-          labels: radar_labels,
-          datasets: [
-            { // 전체 평균
-              type: "radar",
-              label: "average",
-              data: average_data,
-              backgroundColor: "rgba(0, 0, 200, 0.5)"
-            },
-            { // 유저
-              type: "radar",
-              label: "you",
-              data: user_data,
-              backgroundColor: "rgba(200, 0, 0, 0.5)"
-            },
-          ],
-        },
-        options: radarOption,
-      });
-    chartObjList.push(radar_chart);
-
+    makeRadarChart(is_nomalization);
+    
     /* Chart 2: 분포도 히스토그램 */
     function newArrayRange(start, end, step=1, fix_point=0){
       let arr = [];
@@ -483,6 +448,65 @@ window.onload = function () {
     chartObjList.push(specific_score_chart);
   }
 
+  function makeRadarChart(is_nomalization=0){
+    const annual_data = chart_data["annual_overview"];
+    const student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    const radar_labels = ["commits", "stars", "issues", "PRs"];
+    const radar_label_keys = ["commit", "star", "issue", "pr"];
+    const average_data = [];
+    const coeffs = {};
+    radar_label_keys.forEach((label)=>{
+      let annual_value = annual_data[label][select_year-start_year];
+      let coeff = getNormalCoeff(annual_value, label, is_nomalization);
+      coeffs[label] = coeff;
+      average_data.push(coeff * annual_data[label][select_year-start_year]);
+    });
+    const user_data = [];
+    radar_label_keys.forEach((label)=>{
+        user_data.push(coeffs[label] * student_data[label]);
+    });
+
+    console.log("average_data", average_data);
+    console.log("user_data", user_data);
+    
+    const radarOption = {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      responsive: true,
+    };
+
+    /* Chart 1: 레이더 차트 */
+    if(chartObjList.length > 0){
+      destroyChart(chartObjList, 1);
+    }
+    let radar_chart = new Chart(visual_ctx[0], {
+        data: {
+          labels: radar_labels,
+          datasets: [
+            { // 전체 평균
+              type: "radar",
+              label: "average",
+              data: average_data,
+              backgroundColor: "rgba(0, 0, 200, 0.5)"
+            },
+            { // 유저
+              type: "radar",
+              label: "you",
+              data: user_data,
+              backgroundColor: "rgba(200, 0, 0, 0.5)"
+            },
+          ],
+        },
+        options: radarOption,
+      });
+    console.log("chartObjList", chartObjList);
+    if (chartObjList.length > 0) chartObjList[0] = radar_chart;
+    else chartObjList.push(radar_chart);
+  }
+
   function findDistIdx(label=[], value=0){
     let ret_idx = 0;
     try{
@@ -497,7 +521,7 @@ window.onload = function () {
     return ret_idx;
   }
 
-  function destroyChart(chart, size) {
+  function destroyChart(chart=[], size=0) {
     for (let i = 0; i < size; i++) {
       chart[i].destroy();
     }
@@ -611,5 +635,8 @@ window.onload = function () {
     function hideTooltip() {
       var tooltip = document.getElementById("task-tooltip");
       tooltip.style.display = "none";
+    }
+    function toggleChart(){
+      console.log("toggle");
     }
 };
