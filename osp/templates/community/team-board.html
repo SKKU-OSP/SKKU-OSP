@@ -19,9 +19,16 @@
         {% for article in active_article %}
         <div class="article-item col-3 p-1">
           <div class="h-100 w-100 border">
-            <div class="team-profile row">
-              <i class="bi-person col-6" style="font-size: 4rem;"></i>
-              <div class="col-6">Team Name</div>
+            <div class="team-profile d-flex">
+              <img src="{{article.team.image.url}}" alt="profile" class="w-50">
+              <div>
+                <div>
+                  {{article.team.name}}
+                </div>
+                <div>
+                  {{article.team.description}}
+                </div>
+              </div>
             </div>
             <div class="fw-bold">{{article.title}}</div>
             <div>
