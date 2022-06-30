@@ -7,6 +7,7 @@ from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repo
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 import time
+import datetime
 import json
 
 # Create your views here.
@@ -45,6 +46,8 @@ class ProfileView(TemplateView):
         commit_repos = commit_repos.values("repo_name", "committer_date")
         sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True) # committer_date 기준 정렬
 
+        dataetime_format = "%y-%m-%d"
+
         recent_repos = []
         cur = 0
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
@@ -58,7 +61,10 @@ class ProfileView(TemplateView):
                     flag = 0
                     break
             if(flag == 1):
+                cur_repo['committer_date'] = cur_repo['committer_date'].date()
                 recent_repos.append(cur_repo)
+                print(type(cur_repo['committer_date']))
+                print(cur_repo['committer_date'])
             cur = cur + 1
 
         
@@ -72,6 +78,10 @@ class ProfileView(TemplateView):
 
 
 
+        # 관심 목록 리스트
+        Interets = AccountInterest.objects.filter(id=student_id)
+        print(Interets)
+
 
 
         data = {}
@@ -80,7 +90,7 @@ class ProfileView(TemplateView):
         data['score'] = student_score
         data['repos'] = recent_repos
         data['short'] = recent_short_desc
-        
+
         context['data'] = data
 
         return render(request=request, template_name=self.template_name, context=context)

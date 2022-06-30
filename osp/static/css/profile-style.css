@@ -32,7 +32,11 @@
 }
 #repos{
     height: 100px;
+    margin: 5px;
 
+}
+#last_commit{
+  font-size: 10px;
 }
 
 .container-sm {
