@@ -13,5 +13,5 @@ def time_left(date):
     elif delta < timedelta(hours=24):
         repr_string = f'{delta.seconds // 3600}시간 전'
     else:
-        repr_string = f'{delta.seconds // 86400}일 전'
+        repr_string = f'{delta.days}일 전'
     return repr_string

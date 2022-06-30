@@ -1,8 +1,8 @@
 {% load community_tag %}
 {% for article in article_list %}
 <div class="article-bar">
-    <div class="d-flexbg-light p-1 border">
-        <div style="width: 1%; background-color: #{{board_color}};"></div>
+    <div class="d-flex bg-light p-1 border">
+        <div style="width: 1%; background-color: #{{board.board_color}};"></div>
         <div style="width: 1%;"></div>
         <div style="width: 98%">
             <div class="row">
@@ -30,7 +30,9 @@
                 {% elif bartype == 'normal' %}
                 <div class="col-9 overflow-hidden">
                 {% endif %}
+                {% if board.type == 'Team' %}
                 {{article.period_start|date:'y/m/d H:m'}} ~ {{article.period_end|date:'y/m/d H:m'}}
+                {% endif %}
                 {% for tag in article.tags %}
                     <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
                 {% endfor %}

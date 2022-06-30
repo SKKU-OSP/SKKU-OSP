@@ -67,9 +67,10 @@ def article_list(request, board_name):
     else:
         PAGE_SIZE = 10
     context = {}
+    board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
     context['board'] = board
     context['bartype'] = 'normal'
-    context['board_color'] = hashlib.md5(board.name.encode()).hexdigest()[:6]
+    
     sort_field = request.GET.get('sort', ('-pub_date', 'title'))
     
     page = int(request.GET.get('page', 1))
