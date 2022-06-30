@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Q
 from .models import ArticleComment, Board, Article, ArticleLike, ArticleTag
+from team.models import TeamRecruitArticle
 from datetime import datetime, timedelta
 import hashlib
 import math
@@ -49,6 +50,7 @@ def board(request, board_name):
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00'))
         for article in active_article:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+            article.team = TeamRecruitArticle.objects.get(article=article).team
         context['active_article'] = active_article
         return render(request, 'community/team-board.html', context)
     
@@ -105,6 +107,8 @@ def article_list(request, board_name):
         article.comment_cnt = comment_cnt
         article.like_cnt = like_cnt
         article.tags = tags
+        if board.board_type == 'Team':
+            article.team = TeamRecruitArticle.objects.get(article=article).team
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context)
