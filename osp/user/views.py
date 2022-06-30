@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView
-from user.models import ScoreTable, StudentTab, GithubScore, Account, GithubStatsYymm
+from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
@@ -40,9 +40,10 @@ class ProfileView(TemplateView):
         student_score = ScoreTable.objects.get(id=student_id, year=2021)
 
         
+        # 최근 기여 리포지토리 목록
         commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("repo_name", "committer_date").order_by("repo_name").distinct()
         commit_repos = commit_repos.values("repo_name", "committer_date")
-        sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True)
+        sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True) # committer_date 기준 정렬
 
         recent_repos = []
         cur = 0
@@ -61,13 +62,26 @@ class ProfileView(TemplateView):
             cur = cur + 1
 
         
+        # 최근 기여 리포지토리의 요약을 가져옴
+        recent_short_desc = []
+        for i in range(len(recent_repos)):
+            if i==4:
+                break
+            print(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
+            recent_short_desc.append(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
+
+
+
+
 
         data = {}
+
         data['info'] = student_info
         data['score'] = student_score
         data['repos'] = recent_repos
-
-        context["data"] = data
+        data['short'] = recent_short_desc
+        
+        context['data'] = data
 
         return render(request=request, template_name=self.template_name, context=context)
 
