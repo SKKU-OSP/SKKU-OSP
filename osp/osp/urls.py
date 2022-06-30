@@ -26,5 +26,5 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('tag/', include('tag.urls')),
     path('community/', include('community.urls')),
-    path('', lambda req: redirect('/accounts/login'))
+    path('', lambda req: redirect('/community'))
 ]
