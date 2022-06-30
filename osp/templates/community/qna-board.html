@@ -43,10 +43,10 @@
       for(selected of selected_list){
         $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
       }
+      now_page = 1;
       redraw();
     }
   })});
 </script>
 {% endblock script %}
-
 </html>
