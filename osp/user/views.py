@@ -46,6 +46,7 @@ class ProfileView(TemplateView):
 
         recent_repos = []
         cur = 0
+        # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         while(cur < len(sorted_commit)):
             if(len(recent_repos) == 4):
                 break
@@ -65,7 +66,7 @@ class ProfileView(TemplateView):
         data['info'] = student_info
         data['score'] = student_score
         data['repos'] = recent_repos
-        data['last'] = last_commits
+
         context["data"] = data
 
         return render(request=request, template_name=self.template_name, context=context)
