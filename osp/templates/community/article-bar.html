@@ -19,11 +19,15 @@
                     </h5>
                     {% if bartype == 'compact' %}
                     <div class="d-flex justify-content-between my-auto col-6">
-                        <div class="fw-bold text-muted">{{article.writer.user.username}}</div>
+                        <div class="fw-bold text-muted">
+                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                        </div>
                         <div class="fw-bold text-muted">{{article.pub_date|time_left}}</div>
                     {% elif bartype == 'normal' %}
                     <div class="d-flex justify-content-between my-auto col-3">
-                        <div class="text-muted">{{article.writer.user.username}}</div>
+                        <div class="text-muted">
+                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                        </div>
                         <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
                     {% endif %}
                     </div>
@@ -67,11 +71,14 @@
                 {{article.comment.comment.body}}
             </div>
             <div class="ms-auto">
+                <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
+            </div>
+            <div class="mx-2">
                 <i class="bi-star"></i>
                 {{article.comment.like_cnt}}
             </div>
             {% else %}
-            <div class="m-auto">댓글이 없습니다</div>
+            <div class="m-auto text-muted">댓글이 없습니다</div>
             {% endif %}
         </div>
         {% endif %}
