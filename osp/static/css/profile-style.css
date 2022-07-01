@@ -59,7 +59,7 @@ td {
     font-size: 11pt;
 }
 
-h5.card-title {
+h5.card-title, h5.modal-title {
     margin-top: 15px;
     font: 16px;
     font-family: "Noto Sans KR", sans-serif;
@@ -152,6 +152,7 @@ a.nav-link {
   flex: 1 1 40%;
   width: 200px;
   height: 200px;
+  margin: 8px 0;
 }
 
 .grass{
@@ -219,7 +220,8 @@ a.nav-link {
 }
 
 /* 출처: https://devbirdfeet.tistory.com/152 [새발개발자:티스토리] */
-#task-tooltip {
+#task-tooltip, #modal-task-tooltip{
+  font-family: "Roboto", sans-serif;
   background-color: #eef3fd;
   border: #7689fd solid 1px;
   border-radius: 5px;
@@ -232,10 +234,11 @@ a.nav-link {
   padding: 5px 11px;
   position: relative;
   width: fit-content;
-  z-index: 100;
 }
-
-#task-tooltip::after {
+#modal-task-tooltip{
+  z-index: 1100;
+}
+#task-tooltip::after, #modal-task-tooltip::after {
   border-color: #eef3fd transparent;
   border-style: solid;
   border-width: 8px 6px 0 6.5px;
@@ -244,10 +247,11 @@ a.nav-link {
   position: absolute;
   bottom: -7px;
   width: 0;
-  z-index: 1;
 }
-
-#task-tooltip::before {
+#modal-task-tooltip::after {
+  z-index: 1099;
+}
+#task-tooltip::before, #modal-task-tooltip::before{
   border-color: #7689fd transparent;
   border-style: solid;
   border-width: 8px 6px 0 6.5px;
@@ -256,7 +260,9 @@ a.nav-link {
   position: absolute;
   bottom: -8px;
   width: 0;
-  z-index: 0;
+}
+#modal-task-tooltip::before{
+  z-index: 1098;
 }
 .month-label{
   display: inline-block;
@@ -264,6 +270,15 @@ a.nav-link {
   text-align: center;
 }
 #btn-toggle{
-  width:92px;
+  width:90px;
   margin-top: 10px;
+  font-size: 14px;
+}
+.evt-icon, #closeModalBtn, #closeModalIcon{
+  cursor: pointer;
+  display: inline;
+  text-indent: 0;
+}
+.modal-content{
+  font-family: "Roboto", sans-serif;
 }
