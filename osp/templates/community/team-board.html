@@ -13,12 +13,20 @@
     <div class="col-9">
       <div id="active-article">
         <div id="active-article-control">
-          
+          <i class="bi-chevron-left active-article-control" value="left"></i>
+          {% for i in active_article_tab %}
+            {% if forloop.first %}
+            <i class="active-article-control bi-circle-fill text-primary active" value="{{i}}"></i>
+            {% else %}
+            <i class="bi-record active-article-control" value="{{i}}"></i>
+            {% endif %}
+          {% endfor %}
+          <i class="bi-chevron-right active-article-control" value="right"></i>
         </div>
         <div class="d-flex my-2 overflow-hidden" id="active-article-list">
         {% for article in active_article %}
         <div class="article-item col-3 p-1">
-          <div class="h-100 w-100 border">
+          <div class="h-100 w-100 border p-1">
             <div class="team-profile d-flex">
               <img src="{{article.team.image.url}}" alt="profile" class="w-50">
               <div>
@@ -67,16 +75,35 @@
 {% block script %}
 <script>
   $(function(){
-  var tag_selector = new SlimSelect({
-    select: '#tag-select',
-    onChange: (selected_list) => {
-      for(selected of selected_list){
-        $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
-      }
-      now_page = 1;
-      redraw();
-    }
-  })});
+    var tag_selector = new SlimSelect({
+      select: '#tag-select',
+      onChange: (selected_list) => {
+        for(selected of selected_list){
+          $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+        }
+        now_page = 1;
+        redraw();
+    }});
+    $('.active-article-control').click(function(){
+      // active_list = $('.article-item').toArray()
+      // now_tab = Number($('.active-article-control.active').attr('value'))
+      // selected_tab = Number($(this).attr('value'))
+      // sorted_list = active_list.slice((now_tab + 1) * 4, active_list.length).concat(active_list.slice(0, (now_tab + 1) * 4))
+      // console.log(now_tab, selected_tab)
+      // selected_list = sorted_list.slice(now_tab * 4, (now_tab + 1) * 4)
+      // .concat(sorted_list.slice((now_tab + 1) * 4, sorted_list.length))
+      // .concat(sorted_list.slice(0, now_tab * 4))
+      // $('#active-article-list').html()
+      // for(active_article of selected_list){
+      //   console.log(active_article)
+      //   $('#active-article-list').append(active_article);
+      // }
+      // $('.active-article-control.active').toggleClass('active')
+      // .toggleClass('bi-circle-fill').toggleClass('bi-record').toggleClass('text-primary')
+      // $(`.active-article-control[value=${selected_tab}]`).toggleClass('active')
+      // .toggleClass('bi-circle-fill').toggleClass('bi-record').toggleClass('text-primary')
+    });
+  });
 </script>
 {% endblock script %}
 

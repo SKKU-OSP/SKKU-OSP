@@ -30,6 +30,7 @@ def main(request):
         else:
             board.article_list = []
         for article in board.article_list:
+            article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
         board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
@@ -52,6 +53,7 @@ def board(request, board_name):
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.team = TeamRecruitArticle.objects.get(article=article).team
         context['active_article'] = active_article
+        context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
         return render(request, 'community/team-board.html', context)
     
     return render(request, 'community/board.html', context)
