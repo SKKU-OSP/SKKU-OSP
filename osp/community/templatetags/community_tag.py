@@ -1,4 +1,6 @@
 from django import template
+from user.models import Account
+from community.models import ArticleComment, ArticleLike, Article
 from datetime import datetime, timedelta, timezone
 
 register = template.Library()
@@ -15,3 +17,18 @@ def time_left(date):
     else:
         repr_string = f'{delta.days}일 전'
     return repr_string
+
+@register.filter
+def user_article(user_model):
+    account = Account.objects.get(user=user_model)
+    return len(Article.objects.filter(writer=account))
+
+@register.filter
+def user_comment(user_model):
+    account = Account.objects.get(user=user_model)
+    return len(ArticleComment.objects.filter(writer=account))
+
+@register.filter
+def user_like(user_model):
+    account = Account.objects.get(user=user_model)
+    return len(ArticleLike.objects.filter(account=account))

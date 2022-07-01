@@ -3,8 +3,8 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.db.models import Q
-from .models import ArticleComment, Board, Article, ArticleLike, ArticleTag
+from django.db.models import Q, Count
+from .models import *
 from team.models import TeamRecruitArticle
 from datetime import datetime, timedelta
 import hashlib
@@ -109,6 +109,14 @@ def article_list(request, board_name):
         article.tags = tags
         if board.board_type == 'Team':
             article.team = TeamRecruitArticle.objects.get(article=article).team
+        if board.board_type == 'QnA':
+            comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
+                ArticleComment.objects.filter(article=article).values('id'))\
+                .annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            if len(comment_by_like):
+                article.comment = comment_by_like[0]
+    if board.board_type == 'QnA':
+        context['comment_visible'] = True
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context)
