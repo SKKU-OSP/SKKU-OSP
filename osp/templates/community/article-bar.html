@@ -1,8 +1,8 @@
 {% load community_tag %}
 {% for article in article_list %}
 <div class="article-bar">
-    <div>
-        <div class="d-flex bg-light p-1 border">
+    <div class="border">
+        <div class="d-flex bg-light p-1">
             <div style="width: 1%; background-color: #{{board.board_color}};"></div>
             <div style="width: 1%;"></div>
             <div style="width: 98%">
@@ -59,6 +59,22 @@
                 </div>
             </div>
         </div>
+        {% if comment_visible %}
+        <div class="d-flex" style="background-color: lightgray;">
+            {% if article.comment %}
+            <div style="width: 2%;"></div>
+            <div class="text-muted">
+                {{article.comment.comment.body}}
+            </div>
+            <div class="ms-auto">
+                <i class="bi-star"></i>
+                {{article.comment.like_cnt}}
+            </div>
+            {% else %}
+            <div class="m-auto">댓글이 없습니다</div>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endfor %}
