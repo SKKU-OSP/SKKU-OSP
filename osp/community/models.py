@@ -8,6 +8,9 @@ class Board(models.Model):
     name = models.CharField(max_length=20)
     board_type = models.CharField(max_length=10)
     anonymous_writer = models.BooleanField()
+    
+    def __str__(self) -> str:
+        return f'{self.id:03d}:{self.name}({self.board_type})'
 
 class Article(models.Model):
     id = models.AutoField(primary_key=True)
@@ -21,6 +24,9 @@ class Article(models.Model):
     writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
     period_start = models.DateTimeField(blank=True, null=True)
     period_end = models.DateTimeField(blank=True, null=True)
+    
+    def __str__(self) -> str:
+        return f'{self.id:03d}:{self.title}'
 
 class ArticleTag(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
@@ -52,6 +58,9 @@ class ArticleComment(models.Model):
     mod_date = models.DateTimeField()
     anonymous_writer = models.BooleanField()
     writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
+    
+    def __str__(self) -> str:
+        return f'{self.id:03d}:{self.body})'
 
 class ArticleCommentLike(models.Model):
     comment = models.ForeignKey(ArticleComment, models.CASCADE)
