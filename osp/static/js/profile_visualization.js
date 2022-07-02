@@ -27,14 +27,20 @@ window.onload = function () {
       console.log("updateMonthly elapsed time", end-start);
     });
   }
-  let chart_nav = document.getElementsByClassName("nav-link");
-  for (let nav of chart_nav) {
-    nav.addEventListener("click",function(){
-      document.getElementById("visual-subtitle").innerText = nav.innerText;
+  let chart_navs = document.getElementsByClassName("nav-link");
+  for (let nav of chart_navs) {
+    nav.addEventListener("click",function(e){
       $('.nav-link.active').removeClass("active");
       this.className += " active";
-      // 모든 차트를 구현하고 나서 확대페이지를 만든 후,
-      // 개별 차트의 삭제와 생성을 구현
+      let nav_id = e.target.attributes.id.value;
+      let pane_id = nav_id.split("-tab")[0];
+      console.log("pane_id",pane_id);
+      let chart_pane = $('#'+pane_id);
+      before_pane = $('.tab-pane.show.active')
+      before_pane.removeClass("active");
+      before_pane.removeClass("show");
+      chart_pane.addClass("active");
+      chart_pane.addClass("show");
     });
   }
   let btn_toggle = document.getElementById("btn-toggle");
@@ -184,6 +190,7 @@ window.onload = function () {
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
             is_selected_month = focus;
+            chartFactor="score_sum";
 
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
@@ -291,10 +298,6 @@ window.onload = function () {
     chartObjList = [];
     makePage(chart_data);
   }
-  
-  for(let i=0; i<3; i++){
-    visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
-  }
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
@@ -338,6 +341,11 @@ window.onload = function () {
       return arr;
     }
 
+    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
+    if(typeof(dist[chartFactor]) =="undefined"){
+      chartFactor = "score_sum";
+    }
+    console.log("chartFactor",chartFactor);
     const yearLabel = newArrayRange(start_year, end_year);
     let factor_Xaxis_label = [];
     let factor_option = {}
@@ -370,9 +378,6 @@ window.onload = function () {
         console.error("unknown factor");
     }
     let factor_scope_label = newArrayScope(factor_Xaxis_label);
-
-    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    console.log("chartFactor",chartFactor);
     let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
     let colorIdx = findDistIdx(factor_Xaxis_label, Number(student_data[chartFactor]));
     let paramColor = [];
@@ -599,7 +604,8 @@ window.onload = function () {
     return {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: chartFactor.split("_")[0]},
+        title: {display: true, text: chartFactor.split("_")[0].toUpperCase(), 
+        font: { size: 20 }},
         tooltip: {
           callbacks: {
             title: (items) => {

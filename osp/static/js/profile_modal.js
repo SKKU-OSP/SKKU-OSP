@@ -174,6 +174,7 @@ function setModal(){
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
             is_selected_month = focus;
+            chartFactor="score_sum";
 
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
@@ -282,9 +283,6 @@ function setModal(){
     makePage(chart_data);
   }
   
-  for(let i=0; i<3; i++){
-    modal_ctx[i] = document.getElementById(`modal-canvas${String(i+1)}`).getContext("2d");
-  }
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
@@ -328,6 +326,11 @@ function setModal(){
       return arr;
     }
 
+    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
+    if(typeof(dist[chartFactor]) =="undefined"){
+      chartFactor = "score_sum";
+    }
+    console.log("chartFactor",chartFactor);
     const yearLabel = newArrayRange(start_year, end_year);
     let factor_Xaxis_label = [];
     let factor_option = {}
@@ -360,9 +363,6 @@ function setModal(){
         console.error("unknown factor");
     }
     let factor_scope_label = newArrayScope(factor_Xaxis_label);
-
-    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    console.log("chartFactor",chartFactor);
     let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
     let colorIdx = findDistIdx(factor_Xaxis_label, Number(student_data[chartFactor]));
     let paramColor = [];
@@ -590,7 +590,8 @@ function setModal(){
     return {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: chartFactor.split("_")[0]},
+        title: {display: true, text: chartFactor.split("_")[0].toUpperCase(), 
+        font: { size: 26 }},
         tooltip: {
           callbacks: {
             title: (items) => {

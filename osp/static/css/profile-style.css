@@ -149,10 +149,7 @@ a.nav-link {
 	flex-wrap: wrap;
 }
 .ctx-item{
-  flex: 1 1 40%;
-  width: 200px;
-  height: 200px;
-  margin: 8px 0;
+  margin: 16px 8px;
 }
 
 .grass{
@@ -281,4 +278,7 @@ a.nav-link {
 }
 .modal-content{
   font-family: "Roboto", sans-serif;
+}
+.card-body.tab-content{
+  display: block;
 }
