@@ -20,7 +20,7 @@ class ProfileView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         student_id = context["student_id"]
         std = StudentTab.objects.filter(id=student_id)
-
+        print(std)
         # 화면 에러 처리
         if std.count() < 1:
             context['std'] = None
@@ -46,10 +46,9 @@ class ProfileView(TemplateView):
         commit_repos = commit_repos.values("repo_name", "committer_date")
         sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True) # committer_date 기준 정렬
 
-        dataetime_format = "%y-%m-%d"
-
         recent_repos = []
         cur = 0
+
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         while(cur < len(sorted_commit)):
             if(len(recent_repos) == 4):
@@ -63,8 +62,6 @@ class ProfileView(TemplateView):
             if(flag == 1):
                 cur_repo['committer_date'] = cur_repo['committer_date'].date()
                 recent_repos.append(cur_repo)
-                print(type(cur_repo['committer_date']))
-                print(cur_repo['committer_date'])
             cur = cur + 1
 
         
@@ -73,16 +70,12 @@ class ProfileView(TemplateView):
         for i in range(len(recent_repos)):
             if i==4:
                 break
-            print(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
             recent_short_desc.append(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
 
 
 
         # 관심 목록 리스트
-        Interets = AccountInterest.objects.filter(id=student_id)
-        print(Interets)
-
-
+        interests = AccountInterest.objects.filter(account=User.objects.get(username=github_id).id).values('tag')
 
         data = {}
 
@@ -90,6 +83,8 @@ class ProfileView(TemplateView):
         data['score'] = student_score
         data['repos'] = recent_repos
         data['short'] = recent_short_desc
+        data['inter'] = interests
+
 
         context['data'] = data
 
