@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.views.generic import TemplateView
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
+from tag.models import Tag
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 import time
@@ -153,8 +154,15 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
+
+
+        tags = Tag.objects.filter(type='language')
+        print(tags)
         data = {}
         data['info'] = student_info
+        data['tags'] = tags
+        
+        
 
         return render(request, 'profile/profile-edit.html', {'data': data})
 
