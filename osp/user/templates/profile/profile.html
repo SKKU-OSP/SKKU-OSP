@@ -53,13 +53,17 @@
               </table>
             </div>
             <div class="card" id="interests">
+              <h5 class="card-title">관심분야</h5>
               <div class="card-body">
-                <h5 class="card-title">관심분야</h5>
+                {% for row in data.inter %}
+                  <span class="badge rounded-pill text-bg-primary" style="height:20px">{{row.tag}}</span>
+                {% endfor %}
               </div>
             </div>
             <div class="card" id="languages">
+              <h5 class="card-title">사용언어/기술스택</h5>
               <div class="card-body">
-                <h5 class="card-title">사용언어/기술스택</h5>
+                
               </div>
             </div>
           </div>
@@ -78,8 +82,8 @@
             </div>
             <div class="col-sm">
               <div class="card">
-                <h5 class="card-title">Score</h5>
-                <div class="container-xs">
+                <h5 class="card-title" style="margin-bottom: 50px;">Score</h5>
+                <div class="container-xs" style="margin-bottom: 50px;">
                   <center><h1 class="display-3">{{data.score.total_score}}</h1></center>
                 </div>
                 <div class="container">
@@ -110,12 +114,10 @@
                           <tr>
                             <th scope="row" style="width: 10%">Issues</th>
                             <td style="width: 10%">{{data.score.issue_cnt}}</td>
-      
                           </tr>
                           <tr>
                             <th scope="row" style="width: 10%">Stars</th>
-                            <td style="width: 10%">-</td>
-      
+                            <td style="width: 10%">-</td>      
                           </tr>
                         </tbody>
                       </table>
@@ -139,7 +141,6 @@
                           <br>
                           {{data.short.0.proj_short_desc}}
                         </div>
-                        
                       </div>
                     </div>
                     <div class="card" id="repos">
@@ -151,8 +152,7 @@
                           last commit : {{data.repos.1.committer_date}}
                           <br>
                           {{data.short.1.proj_short_desc}}        
-                        </div>
-                        
+                        </div>   
                       </div>
                     </div>
                     <div class="card" id="repos">
@@ -165,7 +165,6 @@
                           <br>
                           {{data.short.2.proj_short_desc}}
                         </div>
-                        
                       </div>
                     </div>
                     <div class="card" id="repos">
@@ -178,7 +177,6 @@
                           <br>
                           {{data.short.3.proj_short_desc}}
                         </div>
-                        
                       </div>
                     </div>
                   </div>
