@@ -1,9 +1,9 @@
-window.onload = function () {
+function setModal(){
   const start_year = 2019;
   const end_year = 2021;
   const grass_size = 60;
   const NS = "http://www.w3.org/2000/svg";
-  let chartObjList = [];
+  let modalChartObjList = [];
   let year_intvl = end_year-start_year;
   let select_year = 2021;
   let select_month = 0;
@@ -11,42 +11,26 @@ window.onload = function () {
   let is_selected_month = 0;
   let is_selected_factor = 0;
   let is_nomalization = 0;
-  let visual_ctx = new Array(4);
+  let modal_ctx = new Array(4);
   for(let i=0; i<3; i++){
-    visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
+    console.log(document.getElementById(`modal-canvas${String(i+1)}`));
+    modal_ctx[i] = document.getElementById(`modal-canvas${String(i+1)}`).getContext("2d");
   }
-  let btn_year = document.getElementsByClassName("btn-year");
-  for (let btn of btn_year) {
-    btn.addEventListener("click",function(){
-      select_year = btn.innerText;
-      $('.btn-year.active').removeClass("active");
-      this.className += " active";
-      let start = new Date();
-      updateMonthly(select_year);
-      let end = new Date();
-      console.log("updateMonthly elapsed time", end-start);
-    });
-  }
-  let chart_navs = document.getElementsByClassName("nav-link");
-  for (let nav of chart_navs) {
-    nav.addEventListener("click",function(e){
-      $('.nav-link.active').removeClass("active");
-      this.className += " active";
-      let nav_id = e.target.attributes.id.value;
-      let pane_id = nav_id.split("-tab")[0];
-      console.log("pane_id",pane_id);
-      let chart_pane = $('#'+pane_id);
-      before_pane = $('.tab-pane.show.active')
-      before_pane.removeClass("active");
-      before_pane.removeClass("show");
-      chart_pane.addClass("active");
-      chart_pane.addClass("show");
-    });
-  }
-  let btn_toggle = document.getElementById("btn-toggle");
+  let icon_modal = document.getElementById("icon-modal");
+  icon_modal.addEventListener("click", (e)=>{
+    $('#modalBox').modal('show');
+  });
+  // close modal
+  document.getElementById("closeModalIcon").addEventListener("click", ()=>{
+    $('#modalBox').modal("hide");
+  })
+  document.getElementById("closeModalBtn").addEventListener("click", ()=>{
+    $('#modalBox').modal("hide");
+  })
+  let btn_toggle = document.getElementById("modal-btn-toggle");
   btn_toggle.addEventListener("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
-    makeRadarChart(is_nomalization);
+    makeModalRadarChart(is_nomalization);
     if(is_nomalization){
       e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/100 값입니다.");
       e.target.textContent = "raw";
@@ -56,8 +40,8 @@ window.onload = function () {
       e.target.textContent = "nomalize";
     }
   });
-  const div_activity_monthly = document.getElementById("activity-monthly");
-  let factor_grass = document.getElementById("factor-grass");
+  const div_activity_monthly = document.getElementById("modal-activity-monthly");
+  let factor_grass = document.getElementById("modal-factor-grass");
   let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
   console.log("monthly_contr", monthly_contr);
   let monthly_contribution = Array(12).fill(0);
@@ -165,7 +149,7 @@ window.onload = function () {
         rect.setAttributeNS(null,"height", grass_size);
         rect.setAttributeNS(null,"rx", "2");
         rect.setAttributeNS(null,"ry", "2");
-        rect.setAttributeNS(null,"class", "ContributionMonth");
+        rect.setAttributeNS(null,"class", "modal-ContributionMonth");
         rect.setAttributeNS(null,"data-level", level);
         mLabel.setAttributeNS(null, "x", fs);
         mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
@@ -194,7 +178,7 @@ window.onload = function () {
 
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
-              let month_elements = document.getElementsByClassName("ContributionMonth");
+              let month_elements = document.getElementsByClassName("modal-ContributionMonth");
               for(let rect of month_elements){
                 rect.setAttributeNS(null, "focus", 0);
                 rect.removeAttribute("stroke");
@@ -241,7 +225,7 @@ window.onload = function () {
       rect.setAttributeNS(null,"height", grass_size);
       rect.setAttributeNS(null,"rx", "2");
       rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"class", "ContributionFactor");
+      rect.setAttributeNS(null,"class", "modal-ContributionFactor");
       rect.setAttributeNS(null,"data-level", level);
       fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs)+fs);
       fLabel.setAttributeNS(null, "y", fs);
@@ -268,7 +252,7 @@ window.onload = function () {
         is_selected_factor = focus;
         if(is_selected_factor){
           chartFactor = (e.target.attributes[0].value).split("_")[0];
-          let factor_elements = document.getElementsByClassName("ContributionFactor");
+          let factor_elements = document.getElementsByClassName("modal-ContributionFactor");
           for(let rect of factor_elements){
             rect.setAttributeNS(null, "focus", 0);
             rect.removeAttribute("stroke");
@@ -286,18 +270,19 @@ window.onload = function () {
         }
         e.target.attributes[2].value = focus;
         if(factor_label[col].toLowerCase() == factorLables[col]){
-          destroyChart(chartObjList, chartObjList.length);
-          chartObjList = [];
+          modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
+          modalChartObjList = [];
           makePage(chart_data);
         }
       });
       factor_grass.appendChild(rect);
       factor_grass.appendChild(fLabel);
     }
-    destroyChart(chartObjList, chartObjList.length);
-    chartObjList = [];
+    modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
+    modalChartObjList = [];
     makePage(chart_data);
   }
+  
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
@@ -323,7 +308,7 @@ window.onload = function () {
       "#ffab21",
       "#ffe913",
     ];
-    makeRadarChart(is_nomalization);
+    makeModalRadarChart(is_nomalization);
     
     /* Chart 2: 분포도 히스토그램 */
     function newArrayRange(start, end, step=1, fix_point=0){
@@ -387,8 +372,8 @@ window.onload = function () {
       else paramColor.push(userColor);
     }
 
-    let dist_chart = makeChart(visual_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
-    chartObjList.push(dist_chart);
+    let dist_chart = makeChart(modal_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
+    modalChartObjList.push(dist_chart);
 
     /* Chart 3: 세부 점수 그래프 */
     const score_dataset= [];
@@ -412,7 +397,7 @@ window.onload = function () {
       total_score_data.push(score_data[y]["total_score"]);
     }
 
-    let specific_score_chart = new Chart(visual_ctx[2], {
+    let specific_score_chart = new Chart(modal_ctx[2], {
       type: "bar",
       data: {labels:yearLabel, datasets:score_dataset},
       options: {
@@ -457,10 +442,10 @@ window.onload = function () {
       },
       plugins: [ChartDataLabels],
     });
-    chartObjList.push(specific_score_chart);
+    modalChartObjList.push(specific_score_chart);
   }
 
-  function makeRadarChart(is_nomalization=0){
+  function makeModalRadarChart(is_nomalization=0){
     const annual_data = chart_data["annual_overview"];
     const student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
     const radar_labels = ["commits", "stars", "issues", "PRs"];
@@ -491,10 +476,10 @@ window.onload = function () {
     };
 
     /* Chart 1: 레이더 차트 */
-    if(chartObjList.length > 0){
-      destroyChart(chartObjList, 1);
+    if(modalChartObjList.length > 0){
+      modalChartObjList = destroyChart(modalChartObjList, 1);
     }
-    let radar_chart = new Chart(visual_ctx[0], {
+    let radar_chart = new Chart(modal_ctx[0], {
         data: {
           labels: radar_labels,
           datasets: [
@@ -514,9 +499,9 @@ window.onload = function () {
         },
         options: radarOption,
       });
-    console.log("chartObjList", chartObjList);
-    if (chartObjList.length > 0) chartObjList[0] = radar_chart;
-    else chartObjList.push(radar_chart);
+    console.log("modalChartObjList", modalChartObjList);
+    if (modalChartObjList.length > 0) modalChartObjList[0] = radar_chart;
+    else modalChartObjList.push(radar_chart);
   }
 
   function findDistIdx(label=[], value=0){
@@ -537,6 +522,7 @@ window.onload = function () {
     for (let i = 0; i < size; i++) {
       chart[i].destroy();
     }
+    return chart;
   }
 
   function makeChart(ctx, type, factor,
@@ -605,7 +591,7 @@ window.onload = function () {
       plugins: {
         legend: { display: false },
         title: {display: true, text: chartFactor.split("_")[0].toUpperCase(), 
-        font: { size: 20 }},
+        font: { size: 26 }},
         tooltip: {
           callbacks: {
             title: (items) => {
@@ -637,19 +623,30 @@ window.onload = function () {
     };
   }
   function showTooltip(evt, text) {
-    let tooltip = document.getElementById("task-tooltip");
+    let tooltip = document.getElementById("modal-task-tooltip");
     tooltip.innerHTML = text;
     tooltip.setAttribute("display", "block");
     tooltip.style.display = "block";
-    let scrollTop = document.getElementById("visualization").scrollTop
+    let scrollTop = document.getElementById("modal-visualization").scrollTop
     let scrollLeft = document.getElementById("visualization").scrollLeft
     tooltip.style.left = (evt.layerX - 20) + scrollLeft + "px";
     tooltip.style.top = (evt.layerY - 50) + scrollTop + "px";
   }
 
   function hideTooltip() {
-    let tooltip = document.getElementById("task-tooltip");
+    var tooltip = document.getElementById("modal-task-tooltip");
     tooltip.style.display = "none";
   }
-  setModal();
-};
+  let btn_year = document.getElementsByClassName("modal-btn-year");
+  for (let btn of btn_year) {
+    btn.addEventListener("click",function(){
+      select_year = btn.innerText;
+      $('.modal-btn-year.active').removeClass("active");
+      this.className += " active";
+      let start = new Date();
+      updateMonthly(select_year);
+      let end = new Date();
+      console.log("updateMonthly elapsed time", end-start);
+    });
+  }
+}
