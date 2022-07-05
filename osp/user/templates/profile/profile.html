@@ -53,13 +53,17 @@
               </table>
             </div>
             <div class="card" id="interests">
+              <h5 class="card-title">관심분야</h5>
               <div class="card-body">
-                <h5 class="card-title">관심분야</h5>
+                {% for row in data.inter %}
+                  <span class="badge rounded-pill text-bg-primary" style="height:20px">{{row.tag}}</span>
+                {% endfor %}
               </div>
             </div>
             <div class="card" id="languages">
+              <h5 class="card-title">사용언어/기술스택</h5>
               <div class="card-body">
-                <h5 class="card-title">사용언어/기술스택</h5>
+                
               </div>
             </div>
           </div>
@@ -78,8 +82,8 @@
             </div>
             <div class="col-sm">
               <div class="card">
-                <h5 class="card-title">Score</h5>
-                <div class="container-xs">
+                <h5 class="card-title" style="margin-bottom: 50px;">Score</h5>
+                <div class="container-xs" style="margin-bottom: 50px;">
                   <center><h1 class="display-3">{{data.score.total_score}}</h1></center>
                 </div>
                 <div class="container">
@@ -107,21 +111,13 @@
                     </div>
                     <div class="col">
                       <table class="table">
-                        <tbody>
-                          <tr>
-                            <th scope="row" style="width: 10%">Commit Lines</th>
-                            <td style="width: 10%">{{data.score.commit_line}}</td>
-      
-                          </tr>
                           <tr>
                             <th scope="row" style="width: 10%">Issues</th>
                             <td style="width: 10%">{{data.score.issue_cnt}}</td>
-      
                           </tr>
                           <tr>
                             <th scope="row" style="width: 10%">Stars</th>
-                            <td style="width: 10%">-</td>
-      
+                            <td style="width: 10%">-</td>      
                           </tr>
                         </tbody>
                       </table>
@@ -131,10 +127,59 @@
               </div>
             </div>
             <div class="col-sm">
-              <div class="card">
+              <div class="card" >
                 <h5 class="card-title">Recent Contributions</h5>
-                <div class="card-body">
-                  repository
+                <div class="card-body" style="margin: -16px">
+                  <div class="container-xs">
+                    <div class="card" id="repos">
+                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
+                        <h6>{{data.repos.0.repo_name}}</h6>
+                      </div>
+                      <div class="card-body" style="overflow: hidden">
+                        <div style="font-size: 13px">
+                          last commit : {{data.repos.0.committer_date}}
+                          <br>
+                          {{data.short.0.proj_short_desc}}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card" id="repos">
+                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
+                        <h6>{{data.repos.1.repo_name}}</h6>
+                      </div>
+                      <div class="card-body" style="overflow: hidden">                      
+                        <div style="font-size: 13px">
+                          last commit : {{data.repos.1.committer_date}}
+                          <br>
+                          {{data.short.1.proj_short_desc}}        
+                        </div>   
+                      </div>
+                    </div>
+                    <div class="card" id="repos">
+                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
+                        <h6>{{data.repos.2.repo_name}}</h6>
+                      </div>
+                      <div class="card-body" style="overflow: hidden">
+                        <div style="font-size: 13px">
+                          last commit : {{data.repos.2.committer_date}}
+                          <br>
+                          {{data.short.2.proj_short_desc}}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card" id="repos">
+                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
+                        <h6>{{data.repos.3.repo_name}}</h6>
+                      </div>
+                      <div class="card-body" style="overflow: hidden">
+                        <div style="font-size: 13px">
+                          last commit : {{data.repos.3.committer_date}}
+                          <br>
+                          {{data.short.3.proj_short_desc}}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -147,18 +192,90 @@
                 <h5 class="card-title">포트폴리오</h5>
                 <div class="card-body">
                   Portfolio
-
+                </div>
+              </div>
+            </div>
+            <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">기여내역 시각화</h5>
+                    <i id="closeModalIcon" class="bi bi-x-lg" data-dismiss="modal" aria-label="Close"></i>
+                    </button>
+                  </div>
+                  <div class="card-body justify-content-center mt-4" id="modal-visualization">
+                    <!--vertical scroll menu  -->
+                    <div class="vertical-menu">
+                      <button class="modal-btn-year">2022</button>
+                      <button class="modal-btn-year active">2021</button>
+                      <button class="modal-btn-year">2020</button>
+                      <button class="modal-btn-year">2019</button>
+                    </div>
+                    <svg id="modal-activity-monthly" class="grass double"></svg>
+                    <div style="height:0.1rem; width:6rem;"></div>
+                    <svg id="modal-activity-factor" class="grass half">
+                      <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                      </g>
+                    </svg>
+                    <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                    <div class="text-center">
+                      <button id="modal-btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
+                    </div>
+                    <div id="modal-task-tooltip" display="none" style="position: absolute; display: none;"></div>
+                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                  </div>
+                  <div class="modal-footer">
+                    <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  </div>
                 </div>
               </div>
             </div>
             <div class="col-sm-8" >
               <div class="card" id="visualization">
-                <h5 class="card-title">기여내역 시각화</h5>
-                <div class="card-body">
-                  <canvas id="canvas1" class="ctx-item"> </canvas>
-                  <canvas id="canvas2" class="ctx-item"> </canvas>
-                  <canvas id="canvas3" class="ctx-item"> </canvas>
-                  <canvas id="canvas4" class="ctx-item"> </canvas>
+                <h5 class="card-title d-flex justify-content-between">
+                  기여내역 시각화
+                  <i id="icon-modal" class="bi bi-arrow-up-right-square me-3 evt-icon" title="확대"></i>
+                </h5>
+                <ul class="nav nav-tabs mt-2 text-lg">
+                    <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pills-dist-tab">분포</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
+                  </ul>
+                <div class="card-body tab-content">
+                  <div class="tab-pane fade show active mt-2" id="pills-overview">
+                    <div class="d-flex">
+                      <!--vertical scroll menu  -->
+                      <div class="vertical-menu">
+                        <button class="btn-year">2022</button>
+                        <button class="btn-year active">2021</button>
+                        <button class="btn-year">2020</button>
+                        <button class="btn-year">2019</button>
+                      </div>
+                      <svg id="activity-monthly" class="grass double"></svg>
+                    </div>
+                    <div class="d-flex">
+                      <div style="height:6rem; width:6rem;"></div>
+                      <svg id="activity-factor" class="grass half">
+                        <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                        </g>
+                      </svg>
+                    </div>
+                    <div id="task-tooltip" display="none" style="position: absolute; display: none;"></div>
+                  </div>
+                  <div class="tab-pane fade mt-2" id="pills-radar">
+                    <canvas id="canvas1" class="ctx-item"></canvas>
+                    <div class="text-center">
+                      <button id="btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
+                    </div>
+                  </div>
+                  <div class="tab-pane fade mt-2" id="pills-dist">
+                    <canvas id="canvas2" class="ctx-item"></canvas>
+                  </div>
+                  <div class="tab-pane fade mt-2" id="pills-detail">
+                    <canvas id="canvas3" class="ctx-item"></canvas>
+                  </div>
                 </div>
               </div>
             </div>
@@ -176,7 +293,8 @@
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
   </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
-<link rel="stylesheet" href="{% static 'css/profile-style.css' %}">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 {% endblock %}

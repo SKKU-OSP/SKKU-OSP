@@ -50,6 +50,25 @@ class GithubStatsYymm(models.Model):
     num_of_prs = models.IntegerField(db_column='num_of_PRs')  # Field name made lowercase.
     num_of_issues = models.IntegerField()
     
+    class Meta:
+        managed = False
+        db_table = 'github_stats_yymm'
+        
+    def to_json(self):
+        return{
+            "github_id" : self.github_id,
+            "year" : self.start_yymm.year,
+            "month" : self.start_yymm.month,
+            "star" : self.stars,
+            "repo_cr" : self.num_of_cr_repos,
+            "repo_co": self.num_of_co_repos,
+            "commit" : self.num_of_commits,
+            "pr" : self.num_of_prs,
+            "issue" : self.num_of_issues,
+            "total" : self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
+        }
+        
+    
 class ScoreTable(models.Model):
     id = models.IntegerField(primary_key=True)
     year = models.IntegerField()
@@ -134,8 +153,54 @@ class GithubScore(models.Model):
             "year":self.year,
             "excellent_contributor":self.excellent_contributor,
             "best_repo":self.best_repo,
-            "contributor_score":self.contributor_score,
-            "owner_score": self.guideline_score + self.code_score +self.other_project_score,
-            "additional_score": self.star_score+self.contribution_score,
-            "total_score": (self.guideline_score + self.code_score +self.other_project_score) + (self.star_score+self.contribution_score) + self.contributor_score
+            "main_repo_score": self.repo_score_sum,
+            "other_repo_score": self.score_other_repo_sum,
+            "reputation_score": self.score_star+self.score_fork,
+            "guideline_score": self.guideline_score,
+            "additional_score": self.additional_score_sum,
+            "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork
         }
+
+class GithubRepoCommits(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    repo_name = models.CharField(max_length=100)
+    sha = models.CharField(max_length=40)
+    additions = models.IntegerField()
+    deletions = models.IntegerField()
+    author_date = models.DateTimeField()
+    committer_date = models.DateTimeField()
+    author = models.CharField(max_length=100, blank=True, null=True)
+    committer = models.CharField(max_length=100, blank=True, null=True)
+    author_github = models.CharField(max_length=50, blank=True, null=True)
+    committer_github = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'github_repo_commits'
+        unique_together = (('github_id', 'repo_name', 'sha'),)
+
+class GithubRepoStats(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    repo_name = models.CharField(max_length=100)
+    stargazers_count = models.IntegerField(blank=True, null=True)
+    forks_count = models.IntegerField(blank=True, null=True)
+    commits_count = models.IntegerField(blank=True, null=True)
+    prs_count = models.IntegerField(blank=True, null=True)
+    open_issue_count = models.IntegerField(blank=True, null=True)
+    close_issue_count = models.IntegerField(blank=True, null=True)
+    watchers_count = models.IntegerField(blank=True, null=True)
+    dependencies = models.IntegerField(blank=True, null=True)
+    language = models.CharField(max_length=45, blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True)
+    update_date = models.DateTimeField(blank=True, null=True)
+    contributors_count = models.IntegerField(blank=True, null=True)
+    release_ver = models.CharField(max_length=45, blank=True, null=True)
+    release_count = models.IntegerField(blank=True, null=True)
+    readme = models.IntegerField(blank=True, null=True)
+    license = models.CharField(max_length=45, blank=True, null=True)
+    proj_short_desc = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'github_repo_stats'
+        unique_together = (('github_id', 'repo_name'),)

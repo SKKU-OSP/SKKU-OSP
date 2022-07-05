@@ -1,19 +1,12 @@
 {% load static %}
 
+{% for row in data.tags %}
+<input type="checkbox" class="btn-check" id="btn-check-interest" autocomplete="off">
+<label class="btn btn-outline-primary m-1" style="padding: 2px; height: 25px" for="btn-check-interest"><span style="font-size: 8pt">{{row.name}}</span></label>
+{% endfor %}
+
 <input type="checkbox" class="btn-check checkbox" id="btn-check-language1" autocomplete="off">
 <label class="btn btn-outline-primary m-1" for="btn-check-language1">Language 1</label>
 
 <input type="checkbox" class="btn-check" id="btn-check-language2" autocomplete="off">
 <label class="btn btn-outline-primary m-1" for="btn-check-language2">Language 22</label>
-
-<input type="checkbox" class="btn-check" id="btn-check-language3" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-language3">Language 333</label>
-
-<input type="checkbox" class="btn-check" id="btn-check-language4" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-language4">Language 4444</label>
-
-<input type="checkbox" class="btn-check" id="btn-check-language5" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-language5">Language 55555</label>
-
-<input type="checkbox" class="btn-check" id="btn-check-language6" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-language6">Language 666666</label>
