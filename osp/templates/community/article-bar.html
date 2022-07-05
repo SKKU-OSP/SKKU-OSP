@@ -1,36 +1,91 @@
-{% if bartype == 'compact' %}
-<div class="d-flex article-bar bg-light p-1 border">
-    <div style="width: 1%; background-color: {{board_color}};"></div>
-    <div style="width: 1%;"></div>
-    <div style="width: 98%">
-        <div class="row">
-            <h5 class="article-bar-title my-1 fw-bold col-6">
-                예시 제목
-            </h5>
-            <div class="d-flex justify-content-between my-auto col-6">
-                <div class="fw-bold text-muted">작성자</div>
-                <div class="fw-bold text-muted">작성시간</div>
+{% load community_tag %}
+{% for article in article_list %}
+<div class="article-bar">
+    <div class="border">
+        <div class="d-flex bg-light p-1">
+            <div style="width: 1%; background-color: #{{board.board_color}};"></div>
+            <div style="width: 1%;"></div>
+            <div style="width: 98%">
+                <div class="row">
+                    {% if bartype == 'compact' %}
+                    <h5 class="article-bar-title my-1 fw-bold col-6">
+                    {% elif bartype == 'normal' %}
+                    <h5 class="article-bar-title my-1 fw-bold col-9">
+                    {% endif %}
+                        {{article.title}}
+                        {% if board.board_type == 'Team' and bartype == 'normal' %}
+                         - {{article.team.name}}
+                        {% endif %}
+                    </h5>
+                    {% if bartype == 'compact' %}
+                    <div class="d-flex justify-content-between my-auto col-6">
+                        <div class="fw-bold text-muted">
+                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                        </div>
+                        <div class="fw-bold text-muted">{{article.pub_date|time_left}}</div>
+                    {% elif bartype == 'normal' %}
+                    <div class="d-flex justify-content-between my-auto col-3">
+                        <div class="text-muted">
+                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                        </div>
+                        <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    {% if bartype == 'compact' %}
+                    <div class="col-6 overflow-hidden d-flex">
+                    {% elif bartype == 'normal' %}
+                    <div class="col-9 overflow-hidden d-flex">
+                    {% endif %}
+                    {% if board.board_type == 'Team' and bartype == 'normal' %}
+                        <div class="me-1">
+                            기간: {{article.period_start|date:'y/m/d H:m'}} ~ {{article.period_end|date:'y/m/d H:m'}}
+                        </div>
+                    {% endif %}
+                        <div>
+                        {% for tag in article.tags %}
+                            <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% if bartype == 'compact' %}
+                    <div class="col-6 d-flex justify-content-between">
+                    {% elif bartype == 'normal' %}
+                    <div class="col-3 d-flex justify-content-between">
+                    {% endif %}
+                        <div class="col-4">
+                            <i class="bi-chat-left-dots"></i> {{article.comment_cnt}}
+                        </div>
+                        <div class="col-4">
+                            <i class="bi-star"></i> {{article.like_cnt}}
+                        </div>
+                        <div class="col-4">
+                            <i class="bi-eye"></i> {{article.view_cnt}}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-6 overflow-hidden">
-                <span class="badge text-bg-primary">언어 태그</span>
-                <span class="badge text-bg-warning">Tool 태그</span>
-                <!-- <span class="badge text-bg-success">분야 태그</span> -->
-                <!-- <span class="badge text-bg-secondary">기타 태그</span> -->
+        {% if comment_visible %}
+        <div class="d-flex" style="background-color: lightgray;">
+            {% if article.comment %}
+            <div style="width: 2%;"></div>
+            <div class="text-muted">
+                {{article.comment.comment.body}}
             </div>
-            <div class="col-6 d-flex justify-content-between">
-                <div class="col-4">
-                    <i class="bi-chat-left-dots"></i> 10
-                </div>
-                <div class="col-4">
-                    <i class="bi-bookmark-star"></i> 100
-                </div>
-                <div class="col-4">
-                    <i class="bi-eye"></i> 2000
-                </div>
+            <div class="ms-auto">
+                <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
             </div>
+            <div class="mx-2">
+                <i class="bi-star"></i>
+                {{article.comment.like_cnt}}
+            </div>
+            {% else %}
+            <div class="m-auto text-muted">댓글이 없습니다</div>
+            {% endif %}
         </div>
+        {% endif %}
     </div>
 </div>
-{% endif %}
+{% endfor %}
