@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'rank',
     'common',
     'tag',
-    'community'
+    'community',
+    'team'
 ]
 
 MIDDLEWARE = [
@@ -106,7 +107,7 @@ LOGOUT_REDIRECT_URL = '/accounts/login'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -123,3 +124,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+
+MEDIA_URL = '/data/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'data/media')
