@@ -24,7 +24,17 @@
             </form>
             <div class="mb-3">
               <label for="exampleFormControlTextarea1" class="form-label">Self Introduction</label>
-              <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="1"></textarea>
+            </div>
+            <div>
+              <form method="POST" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+                <img src= {{data.photo_path}} alt="My Image" width="50" height="50">
+                <p><label for="id_photo">프로필 사진:</label> <input id="photo" name="photo" type="file" /></p>
+                <p>
+                    <button type="submit">저장</button>
+                </p>
+              </form>
             </div>
           </div>
         </div>
@@ -42,8 +52,13 @@
           <h5 class="card-title"> 포트폴리오 설정 </h5>
           <div class="card-body">
             <div class="mb-3">
-              <label for="exampleFormControlTextarea1" class="form-label"></label>
-              <textarea class="form-control" id="exampleFormControlTextarea1" rows="15"></textarea>
+              <form method="POST" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+                <p><textarea cols="50" id="id_portfolio" name="portfolio" rows="15">{{data.port}}</textarea></p>
+                <p>
+                    <button type="submit">저장</button>
+                </p>
+              </form>
             </div>
           </div>
         </div>
