@@ -139,6 +139,7 @@ a.nav-link {
   width: 30rem;
   border: 0px solid #aaaaaa ;
   border-radius: 0.3rem;
+  flex: 1 1 70%;
 }
 .grass.double {
   height: 12rem;
@@ -148,10 +149,10 @@ a.nav-link {
 }
 
 .vertical-menu{
-  width: 6rem ;
-  height: 12rem ;
+  width: 6rem;
   overflow-y: auto;
   text-align: end;
+  flex: 1 1 20%;
 }
 
 .vertical-menu button{
@@ -162,7 +163,7 @@ a.nav-link {
   background-color: white;
   color:black;
   display: block;
-  padding:10px;
+  padding: 10px;
   margin: 3px 0;
   border-radius: 0.2rem;
   text-decoration: none;

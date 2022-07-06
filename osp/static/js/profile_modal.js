@@ -157,7 +157,7 @@ function setModal(){
         rect.setAttributeNS(null,"month", mIdx+1);
         rect.setAttributeNS(null,"raw", ctb);
         rect.setAttributeNS(null,"focus", 0);
-        rect.setAttributeNS(null,"x", fs);
+        rect.setAttributeNS(null,"x", 0);
         rect.setAttributeNS(null,"y", (grass_size+fs)*row - fs*3);
         rect.setAttributeNS(null,"width", grass_size);
         rect.setAttributeNS(null,"height", grass_size);
@@ -165,7 +165,7 @@ function setModal(){
         rect.setAttributeNS(null,"ry", "2");
         rect.setAttributeNS(null,"class", "modal-ContributionMonth");
         rect.setAttributeNS(null,"data-level", level);
-        mLabel.setAttributeNS(null, "x", fs);
+        mLabel.setAttributeNS(null, "x", 0);
         mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
         mLabel.setAttributeNS(null, "font-family", "verdana");
         mLabel.setAttributeNS(null, "font-size", "15px");
@@ -233,7 +233,7 @@ function setModal(){
       rect.setAttributeNS(null,"factor", factorLables[col]);
       rect.setAttributeNS(null,"raw", ctb);
       rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", (col)*(grass_size+fs)+fs);
+      rect.setAttributeNS(null,"x", (col)*(grass_size+fs));
       rect.setAttributeNS(null,"y", fs);
       rect.setAttributeNS(null,"width", grass_size);
       rect.setAttributeNS(null,"height", grass_size);
@@ -241,7 +241,7 @@ function setModal(){
       rect.setAttributeNS(null,"ry", "2");
       rect.setAttributeNS(null,"class", "modal-ContributionFactor");
       rect.setAttributeNS(null,"data-level", level);
-      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs)+fs);
+      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs));
       fLabel.setAttributeNS(null, "y", fs);
       fLabel.setAttributeNS(null, "font-family", "verdana");
       fLabel.setAttributeNS(null, "font-size", "15px");
