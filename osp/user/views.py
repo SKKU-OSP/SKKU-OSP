@@ -60,13 +60,14 @@ class ProfileView(TemplateView):
         
         ints = AccountInterest.objects.filter(account=context['account'])
         # 프로필사진 경로
-        photo_path = '/data/media/' + str(Account.objects.get(user=22).photo)
+        
+        user = User.objects.get(username=context['username'])
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
             'inter': ints,
-            'photo_path': photo_path
+            'account':  Account.objects.get(user=user.id)
         }
         context['data'] = data
 
@@ -163,10 +164,12 @@ class ProfileEditView(TemplateView):
         username = context['username']
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
-
+        
         form = FileUploadForm(request.POST, request.FILES, instance=user_account)
+        print(form.errors)
         if form.is_valid():
-            obj = form.save()
+            print('It is valid form')
+            form.save()
             
         return redirect(f'/user/{username}/profile-edit/')
 
@@ -177,15 +180,11 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
-        
-    
-        photo_path = '/data/media/' + str(Account.objects.get(user=22).photo)
         form = FileUploadForm()
         data = {
-            'port': Account.objects.get(user=22).portfolio,
+            'account': Account.objects.get(user=user.id),
             'form': form,
             'info': student_info,
-            'photo_path': photo_path
         }
         return render(request, 'profile/profile-edit.html', {'data': data})
 
