@@ -6,7 +6,7 @@ from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInt
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Sum, Subquery
 import time
 import json
 
@@ -87,22 +87,29 @@ class ProfileView(TemplateView):
         chartdata["annual_overview"] = annual_overview.to_avg_json()
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
+        student = StudentTab.objects.all()
+        star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
-        star_data = GithubRepoStats.objects.extra(
-            tables=['github_repo_contributor'], 
-            where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id"]).values('github_id').annotate(star=Sum("stargazers_count")
-        )
-
+        own_star = {}
         own_star_list = []
+        star_sum = 0;
         for row in star_data:
             own_star_list.append(row)
-        
+            star_sum += row["star"]
+            if row["github_id"] == github_id:
+                own_star["star"] = row["star"]
+        own_star["avg"] = star_sum/len(star_data)
+        own_star["own_star_list"] = own_star_list
         monthly_contr = []
         monthly_avg = []
         for year in range(2019, 2022):
             # user MODEL GithubStatsYymm
             month_data = GithubStatsYymm.objects.filter(github_id=github_id, start_yymm__year=year)
-            monthly_contr.append(json.dumps([row.to_json() for row in month_data]))
+            month_json = [row.to_json() for row in month_data]
+            for row_json in month_json:
+                row_json['star'] = own_star["star"]
+            monthly_contr.append(json.dumps(month_json))
+            
             
             monthly_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).filter(start_yymm__year=year).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
             month_data = []
@@ -137,7 +144,7 @@ class ProfileView(TemplateView):
         chartdata["score_data"] = score_data_list
         chartdata["monthly_contr"] = monthly_contr
         chartdata["monthly_avg"] = monthly_avg
-        chartdata["own_star"] = own_star_list
+        chartdata["own_star"] = own_star
         
         context["chart_data"] = json.dumps(chartdata)
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
