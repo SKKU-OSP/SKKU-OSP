@@ -50,16 +50,16 @@
               </tbody>
             </table>
             <div class="card mt-2" id="interests">
-              <h5 class="card-title">관심분야</h5>
               <div class="card-body">
+                <h5 class="card-title">관심분야</h5>
                 {% for row in data.inter %}
                   <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
                 {% endfor %}
               </div>
             </div>
             <div class="card mt-2" id="languages">
-              <h5 class="card-title">사용언어/기술스택</h5>
               <div class="card-body">
+                <h5 class="card-title">사용언어/기술스택</h5>
               </div>
             </div>
           </div>
