@@ -4,11 +4,10 @@ from django.contrib.auth.models import User
 from django.views.generic import TemplateView
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
-from tag.models import Tag
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
+from django.db.models import Avg, Sum
 import time
-import datetime
 import json
 
 # Create your views here.
@@ -76,7 +75,10 @@ class ProfileView(TemplateView):
 
 
         # 관심 목록 리스트
-        interests = AccountInterest.objects.filter(account=User.objects.get(username=github_id).id).values('tag')
+
+        print(std[0].id)
+
+        ints = AccountInterest.objects.all()
 
         data = {}
 
@@ -84,8 +86,6 @@ class ProfileView(TemplateView):
         data['score'] = student_score
         data['repos'] = recent_repos
         data['short'] = recent_short_desc
-        data['inter'] = interests
-
 
         context['data'] = data
 
@@ -110,12 +110,28 @@ class ProfileView(TemplateView):
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         
+        star_data = GithubRepoStats.objects.extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
+
+        own_star_list = []
+        for row in star_data:
+            own_star_list.append(row)
+        
         monthly_contr = []
+        monthly_avg = []
         for year in range(2019, 2022):
             # user MODEL GithubStatsYymm
             month_data = GithubStatsYymm.objects.filter(github_id=github_id, start_yymm__year=year)
-            print("month_data len", len(month_data))
             monthly_contr.append(json.dumps([row.to_json() for row in month_data]))
+            
+            monthly_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).filter(start_yymm__year=year).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
+            month_data = []
+            for row in monthly_avg_queryset:
+                row["year"] = row["start_yymm"].year
+                row["month"] =  row["start_yymm"].month
+                row.pop('start_yymm', None)
+                month_data.append(row)
+                
+            monthly_avg.append(month_data)
             
             # home MODEL DistScore
             dist_score = DistScore.objects.get(case_num=0, year=year)
@@ -139,9 +155,11 @@ class ProfileView(TemplateView):
             score_data_list.append(score_data.to_json())
         chartdata["score_data"] = score_data_list
         chartdata["monthly_contr"] = monthly_contr
+        chartdata["monthly_avg"] = monthly_avg
+        chartdata["own_star"] = own_star_list
         
         context["chart_data"] = json.dumps(chartdata)
-        print("\ntime :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
+        print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
         
         return context
 
@@ -154,15 +172,8 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
-
-
-        tags = Tag.objects.filter(type='language')
-        print(tags)
         data = {}
         data['info'] = student_info
-        data['tags'] = tags
-        
-        
 
         return render(request, 'profile/profile-edit.html', {'data': data})
 
