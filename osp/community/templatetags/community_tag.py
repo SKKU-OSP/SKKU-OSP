@@ -1,4 +1,5 @@
 from django import template
+from django.contrib.auth.models import AnonymousUser
 from user.models import Account
 from community.models import ArticleComment, ArticleLike, Article
 from datetime import datetime, timedelta, timezone
@@ -20,15 +21,21 @@ def time_left(date):
 
 @register.filter
 def user_article(user_model):
+    if not user_model.is_authenticated:
+        return '로그인 필요'
     account = Account.objects.get(user=user_model)
     return len(Article.objects.filter(writer=account))
 
 @register.filter
 def user_comment(user_model):
+    if not user_model.is_authenticated:
+        return '로그인 필요'
     account = Account.objects.get(user=user_model)
     return len(ArticleComment.objects.filter(writer=account))
 
 @register.filter
 def user_like(user_model):
+    if not user_model.is_authenticated:
+        return '로그인 필요'
     account = Account.objects.get(user=user_model)
     return len(ArticleLike.objects.filter(account=account))

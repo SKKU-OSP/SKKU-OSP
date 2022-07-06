@@ -1,34 +1,43 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Q, Count
 from .models import *
-from team.models import TeamRecruitArticle
+from team.models import TeamRecruitArticle, TeamMember, Team
+from user.models import Account
 from datetime import datetime, timedelta
 import hashlib
 import math
 
 # Create your views here.
-@login_required
 def main(request):
     board_list = []
-    for board in Board.objects.all():
-        week_ago = datetime.now() - timedelta(days=7)
-        print(week_ago)
-        print(datetime.now())
-        article_list = Article.objects.filter(board_id=board, 
-                                              pub_date__range=[
-                                                  week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
-                                                  datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
-                                              ]
-                                              )
-        if len(article_list) > 0:
-            article_list = article_list.order_by('-view_cnt')
-            board.article_list = article_list[:min(3, len(article_list))]
-        else:
-            board.article_list = []
+    team_board_query = Q()
+    if request.user.is_authenticated:
+        user = User.objects.get(username=request.user)
+        account = Account.objects.get(user=user)
+        team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+        team_board_query = Q(name__in=team_list)
+    for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
+        # 주간 Hot 게시물
+        # week_ago = datetime.now() - timedelta(days=7)
+        # article_list = Article.objects.filter(board_id=board, 
+        #                                       pub_date__range=[
+        #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
+        #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
+        #                                       ]
+        #                                       )
+        # if len(article_list) > 0:
+        #     article_list = article_list.order_by('-view_cnt')
+        #     board.article_list = article_list[:min(3, len(article_list))]
+        # else:
+        #     board.article_list = []
+        # 최신 게시물
+        article_list = Article.objects.filter(board_id=board).order_by('-pub_date')
+        board.article_list = article_list[:min(3, len(article_list))]   
         for article in board.article_list:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
@@ -46,7 +55,7 @@ def board(request, board_name):
     context = {'board': board, 'board_color': board_color}
     if board.board_type == 'QnA':
         return render(request, 'community/qna-board.html', context)
-    if board.board_type == 'Team':
+    if board.board_type == 'Recruit':
         active_article = Article.objects.filter(board_id=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00'))
         for article in active_article:
@@ -54,7 +63,7 @@ def board(request, board_name):
             article.team = TeamRecruitArticle.objects.get(article=article).team
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-        return render(request, 'community/team-board.html', context)
+        return render(request, 'community/recruit-board.html', context)
     
     return render(request, 'community/board.html', context)
 
@@ -64,7 +73,7 @@ def article_list(request, board_name):
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
-    if board.board_type == 'Team':
+    if board.board_type == 'Recruit':
         PAGE_SIZE = 5
     elif board.board_type == 'QnA':
         PAGE_SIZE = 7
