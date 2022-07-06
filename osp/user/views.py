@@ -18,27 +18,21 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         context = self.get_context_data(request, *args, **kwargs)
-        student_id = context["student_id"]
-        std = StudentTab.objects.filter(id=student_id)
-        print(std)
-        # 화면 에러 처리
-        if std.count() < 1:
-            context['std'] = None
+        std = context['account'].student_data
 
         # 정보를 가져옴.
-        else:
-            # student info
-            context['std'] = std.get()
-            github_id = context['std'].github_id
-            # student score info
-            score = ScoreTable.objects.filter(name=github_id).filter(year=2021)
-            if score:
-                context['score'] = score.first().total_score
-            # student repository info
-            context['cur_repo_type'] = 'owned'
-            ## owned repository
-        student_info = StudentTab.objects.get(id=student_id)
-        student_score = ScoreTable.objects.get(id=student_id, year=2021)
+        # student info
+        context['std'] = std
+        github_id = context['std'].github_id
+        # student score info
+        score = ScoreTable.objects.filter(name=github_id).filter(year=2021)
+        if score:
+            context['score'] = score.first().total_score
+        # student repository info
+        context['cur_repo_type'] = 'owned'
+        ## owned repository
+        student_info = std
+        student_score = ScoreTable.objects.get(id=std.id, year=2021)
 
         
         # 최근 기여 리포지토리 목록
@@ -50,42 +44,32 @@ class ProfileView(TemplateView):
         cur = 0
 
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
-        while(cur < len(sorted_commit)):
-            if(len(recent_repos) == 4):
+        while cur < len(sorted_commit):
+            if len(recent_repos) == 4:
                 break
             cur_repo = sorted_commit[cur]
             flag = 1
             for i in range(len(recent_repos)):
-                if (recent_repos[i]['repo_name'] == cur_repo['repo_name']):
+                if recent_repos[i]['repo_name'] == cur_repo['repo_name']:
                     flag = 0
                     break
-            if(flag == 1):
+            if flag == 1:
                 cur_repo['committer_date'] = cur_repo['committer_date'].date()
+                cur_repo['desc'] = GithubRepoStats.objects.get(repo_name=cur_repo['repo_name']).proj_short_desc
                 recent_repos.append(cur_repo)
             cur = cur + 1
 
-        
-        # 최근 기여 리포지토리의 요약을 가져옴
-        recent_short_desc = []
-        for i in range(len(recent_repos)):
-            if i==4:
-                break
-            recent_short_desc.append(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
-
-
-
         # 관심 목록 리스트
 
-        print(std[0].id)
-
-        ints = AccountInterest.objects.all()
+        
+        ints = AccountInterest.objects.filter(account=context['account'])
 
         data = {}
 
         data['info'] = student_info
         data['score'] = student_score
         data['repos'] = recent_repos
-        data['short'] = recent_short_desc
+        data['inter'] = ints
 
         context['data'] = data
 
@@ -96,9 +80,10 @@ class ProfileView(TemplateView):
         start = time.time()  # 시작 시간 저장
         
         context = super().get_context_data(**kwargs)
-        print(context)
         user = User.objects.get(username=context["username"])
-        student_data = Account.objects.get(user=user).student_data
+        account = Account.objects.get(user=user)
+        context['account'] = account
+        student_data = account.student_data
         github_id = student_data.github_id
         
         chartdata = {}
@@ -110,7 +95,10 @@ class ProfileView(TemplateView):
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         
-        star_data = GithubRepoStats.objects.extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
+        star_data = GithubRepoStats.objects.extra(
+            tables=['github_repo_contributor'], 
+            where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id"]).values('github_id').annotate(star=Sum("stargazers_count")
+        )
 
         own_star_list = []
         for row in star_data:
