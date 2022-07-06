@@ -92,6 +92,9 @@ class ScoreTable(models.Model):
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='img/profile_img', default='default.jpg')
+    portfolio = models.TextField(default='')
+
     class Meta:
         ordering  = ['student_data']
 
