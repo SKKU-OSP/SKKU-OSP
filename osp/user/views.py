@@ -6,8 +6,10 @@ from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInt
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
-from django.db.models import Avg, Sum
+
 from user.forms import FileUploadForm
+from django.db.models import Avg, Sum, Subquery
+
 import time
 import json
 
@@ -19,73 +21,53 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         context = self.get_context_data(request, *args, **kwargs)
-        student_id = context["student_id"]
-        std = StudentTab.objects.filter(id=student_id)
-        print(std)
-        # 화면 에러 처리
-        if std.count() < 1:
-            context['std'] = None
+        std = context['account'].student_data
 
         # 정보를 가져옴.
-        else:
-            # student info
-            context['std'] = std.get()
-            github_id = context['std'].github_id
-            # student score info
-            score = ScoreTable.objects.filter(name=github_id).filter(year=2021)
-            if score:
-                context['score'] = score.first().total_score
-            # student repository info
-            context['cur_repo_type'] = 'owned'
-            ## owned repository
-        student_info = StudentTab.objects.get(id=student_id)
-        student_score = ScoreTable.objects.get(id=student_id, year=2021)
+        # student info
+        context['std'] = std
+        github_id = context['std'].github_id
+        # student score info
+        score = ScoreTable.objects.filter(name=github_id).filter(year=2021)
+        if score:
+            context['score'] = score.first().total_score
+        # student repository info
+        context['cur_repo_type'] = 'owned'
+        ## owned repository
+        student_info = std
+        student_score = ScoreTable.objects.get(id=std.id, year=2021)
 
         # 최근 기여 리포지토리 목록
-        commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("repo_name", "committer_date").order_by("repo_name").distinct()
-        commit_repos = commit_repos.values("repo_name", "committer_date")
+        commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("repo_name").distinct()
+        commit_repos = commit_repos.values("github_id", "repo_name", "committer_date")
         sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True) # committer_date 기준 정렬
 
-        # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
-        recent_repos = []
+        recent_repos = {}
         cur = 0
-        while(cur < len(sorted_commit)):
-            if(len(recent_repos) == 4):
-                break
-            cur_repo = sorted_commit[cur]
-            flag = 1
-            for i in range(len(recent_repos)):
-                if (recent_repos[i]['repo_name'] == cur_repo['repo_name']):
-                    flag = 0
-                    break
-            if(flag == 1):
-                cur_repo['committer_date'] = cur_repo['committer_date'].date()
-                recent_repos.append(cur_repo)
-            cur = cur + 1
 
-        
-        # 최근 기여 리포지토리의 요약을 가져옴
-        recent_short_desc = []
-        for i in range(len(recent_repos)):
-            if i==4:
+        # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
+        for commit in sorted_commit:
+            if len(recent_repos) == 4:
                 break
-            recent_short_desc.append(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
-
+            if commit['repo_name'] not in recent_repos:
+                recent_repos[commit['repo_name']] = {'repo_name': commit['repo_name']}
+            recent_repos[commit['repo_name']]['github_id'] = commit['github_id']
+            recent_repos[commit['repo_name']]['committer_date'] = commit['committer_date']
+            recent_repos[commit['repo_name']]['desc'] = GithubRepoStats.objects.get(github_id=commit['github_id'], repo_name=commit['repo_name']).proj_short_desc
+        recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
+       
         # 관심 목록 리스트
-        interests = AccountInterest.objects.filter(account=User.objects.get(username=github_id).id).values('tag')
-
+        
+        ints = AccountInterest.objects.filter(account=context['account'])
         # 프로필사진 경로
         photo_path = '/data/media/' + str(Account.objects.get(user=22).photo)
-
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
-            'short': recent_short_desc,
-            'inter': interests,
+            'inter': ints,
             'photo_path': photo_path
         }
-
         context['data'] = data
 
         return render(request=request, template_name=self.template_name, context=context)
@@ -95,9 +77,10 @@ class ProfileView(TemplateView):
         start = time.time()  # 시작 시간 저장
         
         context = super().get_context_data(**kwargs)
-        print(context)
         user = User.objects.get(username=context["username"])
-        student_data = Account.objects.get(user=user).student_data
+        account = Account.objects.get(user=user)
+        context['account'] = account
+        student_data = account.student_data
         github_id = student_data.github_id
         
         chartdata = {}
@@ -108,19 +91,29 @@ class ProfileView(TemplateView):
         chartdata["annual_overview"] = annual_overview.to_avg_json()
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
+        student = StudentTab.objects.all()
+        star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
-        star_data = GithubRepoStats.objects.extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
-
+        own_star = {}
         own_star_list = []
+        star_sum = 0;
         for row in star_data:
             own_star_list.append(row)
-        
+            star_sum += row["star"]
+            if row["github_id"] == github_id:
+                own_star["star"] = row["star"]
+        own_star["avg"] = star_sum/len(star_data)
+        own_star["own_star_list"] = own_star_list
         monthly_contr = []
         monthly_avg = []
         for year in range(2019, 2022):
             # user MODEL GithubStatsYymm
             month_data = GithubStatsYymm.objects.filter(github_id=github_id, start_yymm__year=year)
-            monthly_contr.append(json.dumps([row.to_json() for row in month_data]))
+            month_json = [row.to_json() for row in month_data]
+            for row_json in month_json:
+                row_json['star'] = own_star["star"]
+            monthly_contr.append(json.dumps(month_json))
+            
             
             monthly_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).filter(start_yymm__year=year).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
             month_data = []
@@ -155,7 +148,7 @@ class ProfileView(TemplateView):
         chartdata["score_data"] = score_data_list
         chartdata["monthly_contr"] = monthly_contr
         chartdata["monthly_avg"] = monthly_avg
-        chartdata["own_star"] = own_star_list
+        chartdata["own_star"] = own_star
         
         context["chart_data"] = json.dumps(chartdata)
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
