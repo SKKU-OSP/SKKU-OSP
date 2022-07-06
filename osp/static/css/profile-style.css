@@ -126,6 +126,10 @@ a.nav-link {
 }
 
 /* Canvas */
+.modal-body{
+  display: flex;
+	flex-wrap: wrap;
+}
 .ctx-item{
   margin: 16px 8px;
 }
