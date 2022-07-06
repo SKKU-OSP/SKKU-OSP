@@ -7,6 +7,7 @@ from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repo
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 from django.db.models import Avg, Sum
+from user.forms import FileUploadForm
 import time
 import json
 
@@ -40,16 +41,14 @@ class ProfileView(TemplateView):
         student_info = StudentTab.objects.get(id=student_id)
         student_score = ScoreTable.objects.get(id=student_id, year=2021)
 
-        
         # 최근 기여 리포지토리 목록
         commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("repo_name", "committer_date").order_by("repo_name").distinct()
         commit_repos = commit_repos.values("repo_name", "committer_date")
         sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True) # committer_date 기준 정렬
 
+        # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         recent_repos = []
         cur = 0
-
-        # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         while(cur < len(sorted_commit)):
             if(len(recent_repos) == 4):
                 break
@@ -72,20 +71,20 @@ class ProfileView(TemplateView):
                 break
             recent_short_desc.append(GithubRepoStats.objects.filter(repo_name=recent_repos[i]['repo_name']).values("proj_short_desc")[0])
 
-
-
         # 관심 목록 리스트
+        interests = AccountInterest.objects.filter(account=User.objects.get(username=github_id).id).values('tag')
 
-        print(std[0].id)
+        # 프로필사진 경로
+        photo_path = '/data/media/' + str(Account.objects.get(user=22).photo)
 
-        ints = AccountInterest.objects.all()
-
-        data = {}
-
-        data['info'] = student_info
-        data['score'] = student_score
-        data['repos'] = recent_repos
-        data['short'] = recent_short_desc
+        data = {
+            'info': student_info,
+            'score': student_score,
+            'repos': recent_repos,
+            'short': recent_short_desc,
+            'inter': interests,
+            'photo_path': photo_path
+        }
 
         context['data'] = data
 
@@ -165,6 +164,19 @@ class ProfileView(TemplateView):
 
 class ProfileEditView(TemplateView):
 
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+
+        username = context['username']
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+
+        form = FileUploadForm(request.POST, request.FILES, instance=user_account)
+        if form.is_valid():
+            obj = form.save()
+            
+        return redirect(f'/user/{username}/profile-edit/')
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
 
@@ -172,9 +184,16 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
-        data = {}
-        data['info'] = student_info
-
+        
+    
+        photo_path = '/data/media/' + str(Account.objects.get(user=22).photo)
+        form = FileUploadForm()
+        data = {
+            'port': Account.objects.get(user=22).portfolio,
+            'form': form,
+            'info': student_info,
+            'photo_path': photo_path
+        }
         return render(request, 'profile/profile-edit.html', {'data': data})
 
     def get_context_data(self, request, *args, **kwargs):
