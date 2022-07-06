@@ -36,31 +36,24 @@ class ProfileView(TemplateView):
 
         
         # 최근 기여 리포지토리 목록
-        commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("repo_name", "committer_date").order_by("repo_name").distinct()
-        commit_repos = commit_repos.values("repo_name", "committer_date")
+        commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("repo_name").distinct()
+        commit_repos = commit_repos.values("github_id", "repo_name", "committer_date")
         sorted_commit = sorted(commit_repos, key=lambda x:x['committer_date'], reverse=True) # committer_date 기준 정렬
 
-        recent_repos = []
+        recent_repos = {}
         cur = 0
 
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
-        while cur < len(sorted_commit):
+        for commit in sorted_commit:
             if len(recent_repos) == 4:
                 break
-            cur_repo = sorted_commit[cur]
-            flag = 1
-            for i in range(len(recent_repos)):
-                if recent_repos[i]['repo_name'] == cur_repo['repo_name']:
-                    flag = 0
-                    break
-            if flag == 1:
-                cur_repo['committer_date'] = cur_repo['committer_date'].date()
-                cur_repo['desc'] = GithubRepoStats.objects.get(repo_name=cur_repo['repo_name']).proj_short_desc
-                recent_repos.append(cur_repo)
-            cur = cur + 1
-
+            if commit['repo_name'] not in recent_repos:
+                recent_repos[commit['repo_name']] = {'repo_name': commit['repo_name']}
+            recent_repos[commit['repo_name']]['github_id'] = commit['github_id']
+            recent_repos[commit['repo_name']]['committer_date'] = commit['committer_date']
+            recent_repos[commit['repo_name']]['desc'] = GithubRepoStats.objects.get(github_id=commit['github_id'], repo_name=commit['repo_name']).proj_short_desc
+        recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
         # 관심 목록 리스트
-
         
         ints = AccountInterest.objects.filter(account=context['account'])
 
