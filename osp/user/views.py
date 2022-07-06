@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.views.generic import TemplateView
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
-from tag.models import Tag
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 import time
@@ -76,7 +75,10 @@ class ProfileView(TemplateView):
 
 
         # 관심 목록 리스트
-        interests = AccountInterest.objects.filter(account=User.objects.get(username=github_id).id).values('tag')
+
+        print(std[0].id)
+
+        ints = AccountInterest.objects.all()
 
         data = {}
 
@@ -84,8 +86,6 @@ class ProfileView(TemplateView):
         data['score'] = student_score
         data['repos'] = recent_repos
         data['short'] = recent_short_desc
-        data['inter'] = interests
-
 
         context['data'] = data
 
@@ -154,15 +154,8 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
-
-
-        tags = Tag.objects.filter(type='language')
-        print(tags)
         data = {}
         data['info'] = student_info
-        data['tags'] = tags
-        
-        
 
         return render(request, 'profile/profile-edit.html', {'data': data})
 
