@@ -46,18 +46,24 @@
 <script>
     var category_select;
     $(document).ready(function(){
-         //$('#article-tags').tagsinput({
-    //          maxTags: 3
-        //});
-         category_select = new SlimSelect({
-          select: '#multiple'
+        // $('#article-tags').tagsinput({
+        //          maxTags: 3
+        // });
+            category_select = new SlimSelect({
+            select: '#multiple',
+            onChange: (selected_list) => {
+                for(selected of selected_list){
+                    $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+                }
+            }
+            
         });
     });
-    //$(document).load(function(){
-         //$('#article-tags').tagsinput({
-    //          maxTags: 3
-        //});
-    //});
+    $(document).load(function(){
+        // $('#article-tags').tagsinput({
+        //     maxTags: 3
+        // });
+    });
     var li;
 
     function edit(){
@@ -75,7 +81,12 @@
                 success: function(data) {
                     $('#article-content').html(data['html']);
                     category_select = new SlimSelect({
-                          select: '#multiple'
+                        select: '#multiple',
+                        onChange: (selected_list) => {
+                            for(selected of selected_list){
+                                $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+                            }
+                        }
                     });
                     category_select.set(data['tags']);
                 },
