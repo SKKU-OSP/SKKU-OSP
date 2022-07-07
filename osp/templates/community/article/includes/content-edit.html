@@ -1,0 +1,35 @@
+{% load tag_templatetag %}
+{% load community_tag %}
+
+<form method="post" action=".." class="row" onSubmit="return false;" style="padding-left:10px;">
+
+    <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
+            <div class="d-flex flex-row justify-content-between">
+                <input type="text" id="article-title" value="{{ article.title }}" placeholder="제목" class="form-control" style="width:100%; height: 40px; padding-left:10px; margin-bottom:5px;" required autofocus>
+        </div>
+        <div>
+            <textarea name="" id="article-body" placeholder="게시글 내용" class="form-control" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;" required>{{ article.body }}</textarea>
+        </div>
+        <div style="margin-top:5px;width:100%;">
+            <select name="" id="multiple" multiple>
+                    {% category_tag request %}
+            </select>
+{#            <input id="article-tags" data-role="tagsinput" name='tags' value='good, hi' placeholder="게시판 관련 태그" class="form-control" style="width:100%;" >#}
+        </div>
+
+
+    </div>
+
+    <div class="d-flex flex-row justify-content-end" style="margin-top:10px;" >
+        {% if type == 'register' or article.anonymous_writer %}
+        <div><input id="is-anonymous" type="checkbox" style="line-height:35px;" checked ><span style="padding-left:3px;line-height:35px;">익명</span></div>
+        {% else %}
+        <div><input id="is-anonymous" type="checkbox" style="line-height:35px;" ><span style="padding-left:3px;line-height:35px;">익명</span></div>
+        {% endif %}
+        {% if type == 'register' %}
+        <div><button class="btn btn-outline-primary" type="submit" style="margin-left:20px;font-size:14px;" onclick="registerArticle();"> <i class="bi-pencil-square" style="font-size:14px;margin-left:3px;"></i> 등록</button></div>
+        {% elif type == 'edit' %}
+            <div><button class="btn btn-outline-primary" type="submit" style="margin-left:20px;font-size:14px;" onclick="editArticle();"> <i class="bi-pencil-square" style="font-size:14px;margin-left:3px;"></i> 수정</button></div>
+        {% endif %}
+    </div>
+</form>
