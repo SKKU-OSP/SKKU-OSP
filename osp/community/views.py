@@ -176,9 +176,6 @@ class ArticleView(TemplateView):
         except:
             return redirect('community:Community-Main')
 
-        #todo 주석처리 필요
-        context['user'] = User.objects.get(id=46)
-
         return render(request, 'community/article/article.html', context)
 
     def post(self, request, *args, **kwargs):
