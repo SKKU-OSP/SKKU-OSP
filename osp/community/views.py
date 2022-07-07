@@ -154,9 +154,6 @@ class ArticleRegisterView(TemplateView):
         except:
             return redirect('community:Community-Main')
 
-        #todo 주석처리 필요
-        context['user'] = User.objects.get(id=46)
-
         return render(request, 'community/article/article.html', context)
 
     def get_context_data(self, request, *args, **kwargs):
@@ -178,9 +175,6 @@ class ArticleView(TemplateView):
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
         except:
             return redirect('community:Community-Main')
-
-        #todo 주석처리 필요
-        context['user'] = User.objects.get(id=46)
 
         return render(request, 'community/article/article.html', context)
 
