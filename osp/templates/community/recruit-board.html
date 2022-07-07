@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+{% extends 'main.html' %}
+
+{% load static %}
+{% load tag_templatetag %}
+{% block content %}
+<div class="container my-4">
+  <div class="row">
+    <div class="col-3 border">
+      {% include "community/sidebar.html" %}
+    </div>
+    <div class="col-9">
+      <div id="active-article">
+        <div class="carousel slide" data-bs-ride="carousel" id="active-article-list">
+          <div class="carousel-inner" role="listbox">
+            {% for article in active_article %}
+            {% if forloop.first %}
+            <div class="carousel-item active">
+            {% else %}
+            <div class="carousel-item">
+            {% endif %}
+              <div class="col-3 p-2">
+                <div class="h-100 w-100 border p-1">
+                  <div class="team-profile d-flex">
+                    <img src="{{article.team.image.url}}" alt="profile" class="w-50">
+                    <div>
+                      <div>
+                        {{article.team.name}}
+                      </div>
+                      <div>
+                        {{article.team.description}}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fw-bold">{{article.title}}</div>
+                  <div>
+                    {% for tag in article.tags %}
+                    <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <a class="carousel-control-prev bg-transparent w-aut" href="#active-article-list" role="button" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </a>
+          <a class="carousel-control-next bg-transparent w-aut" href="#active-article-list" role="button" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </a>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between bg-light" id="board-title-bar">
+        <div class="d-flex col-8 justify-content-start">
+          <h2>{{ board.name }} 게시판</h2>
+          <div class="my-auto col-6" id="tag-filter">
+            <select class="mx-2" style="min-width: 25%;" id="tag-select" multiple>
+              {% category_tag request %}
+            </select>
+          </div>
+        </div>
+        <div class="my-auto">
+          <button class="btn btn-outline-secondary" id="">
+            글쓰기
+            <i class="bi-pencil"></i>
+          </button>
+        </div>
+      </div>
+      <div id="article-list-body">
+      </div>
+      {% include "community/footer.html" with board=board %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+  $(function(){
+    var tag_selector = new SlimSelect({
+      select: '#tag-select',
+      onChange: (selected_list) => {
+        for(selected of selected_list){
+          $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+        }
+        now_page = 1;
+        redraw();
+    }});
+    let items = document.querySelectorAll('.carousel .carousel-item')
+    items.forEach((el) => {
+        const minPerSlide = 4
+        let next = el.nextElementSibling
+        for (var i=1; i<minPerSlide; i++) {
+            if (!next) {
+                // wrap carousel by using first child
+              next = items[0]
+            }
+            let cloneChild = next.cloneNode(true)
+            el.appendChild(cloneChild.children[0])
+            next = next.nextElementSibling
+        }
+    })
+
+  });
+</script>
+{% endblock script %}
+
+</html>

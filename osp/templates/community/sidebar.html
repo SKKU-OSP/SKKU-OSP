@@ -5,17 +5,23 @@
 
     </div>
     <div class="col-6">
-{#        <a href="/user/{{user.username}}">{{user.username}}</a>#}
-{#        <br>#}
-{#        <i class="bi-card-text"></i>#}
-{#        {{user|user_article}}#}
-{#        <br>#}
-{#        <i class="bi-chat-left-dots"></i>#}
-{#        {{user|user_comment}}#}
-{#        <br>#}
-{#        <i class="bi-bookmark-star"></i>#}
-{#        {{user|user_like}}#}
-{#        <br>#}
+        {% if user.is_authenticated %}
+        <a href="/user/{{user.username}}">{{user.username}}</a>
+        <br>
+        <i class="bi-card-text"></i>
+        {{user|user_article}}
+        <br>
+        <i class="bi-chat-left-dots"></i>
+        {{user|user_comment}}
+        <br>
+        <i class="bi-bookmark-star"></i>
+        {{user|user_like}}
+        <br>
+        {% else %}
+        <a href="/accounts/login">로그인</a>
+        <br>
+        <a href="/accounts/register">회원가입</a>
+        {% endif %}
     </div>
 </div>
 <div class="row m-2" id="community-tab">
