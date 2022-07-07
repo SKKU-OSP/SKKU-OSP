@@ -91,7 +91,7 @@ def article_list(request, board_name):
     context['board'] = board
     context['bartype'] = 'normal'
     
-    sort_field = request.GET.get('sort', ('-pub_date', 'title'))
+    sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     
     page = int(request.GET.get('page', 1))
     # Filter Board
@@ -153,9 +153,6 @@ class ArticleRegisterView(TemplateView):
             context['board'] = Board.objects.get(name=board_name)
         except:
             return redirect('community:Community-Main')
-
-        #todo 주석처리 필요
-        context['user'] = User.objects.get(id=46)
 
         return render(request, 'community/article/article.html', context)
 

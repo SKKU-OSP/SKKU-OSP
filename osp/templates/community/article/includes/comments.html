@@ -1,3 +1,4 @@
+{% load community_tag %}
 <div class="d-flex flex-row justify-content-between" style="height:40px;margin-top:10px;">
     <div class="border rounded" style="padding-left:10px;padding-right:5px;height:40px;line-height:40px;margin-right:10px;font-weight:bold;">댓글쓰기</div>
     <input class="form-control" placeholder="댓글을 입력해주세요." style="flex:1;height:40px;line-height:40px;display:block;margin-right:10px;">
@@ -14,13 +15,12 @@
                     <!--todo: 1. comment_is deleted 추가, 2.로그인한계정별로 -->
                     <span style="cursor:pointer" onclick="removeComment();">삭제</span>
                 </div>
-                <!-- todo: 10분전, 이런거 적용하기 -->
                 <div style="height:40px;line-height:31px;padding-left:10px;" class="d-flex flex-column">
                 <div style="height:10px;font-size:5px;">
-                    {{ article.pub_date|date:"SHORT_DATE_FORMAT" }}
+                    {{ article.pub_date|time_before }}
                 </div>
                 <div style="height:10px;font-size:5px;">
-                    {{ article.pub_date|time:"h:1 a" }}
+                    {{ article.pub_date|time:"h:i a" }}
                 </div>
                 </div>
             </div>

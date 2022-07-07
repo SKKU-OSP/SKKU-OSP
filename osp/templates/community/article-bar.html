@@ -22,7 +22,7 @@
                         <div class="fw-bold text-muted">
                             <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
                         </div>
-                        <div class="fw-bold text-muted">{{article.pub_date|time_left}}</div>
+                        <div class="fw-bold text-muted">{{article.pub_date|time_before}}</div>
                     {% elif bartype == 'normal' %}
                     <div class="d-flex justify-content-between my-auto col-3">
                         <div class="text-muted">
