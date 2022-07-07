@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 @register.filter
 def time_left(date):
-    delta = datetime.now(timezone(timedelta(hours=9))) - date
+    delta = datetime.now() - date
     repr_string = ''
     if delta < timedelta(seconds=60):
         repr_string = '방금'
