@@ -30,9 +30,9 @@ function setModal(){
   let btn_toggle = document.getElementById("modal-btn-toggle");
   btn_toggle.addEventListener("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
-    makeModalRadarChart(is_nomalization);
+    makeModalRadarChart(is_nomalization, select_month);
     if(is_nomalization){
-      e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/100 값입니다.");
+      e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/10 값입니다.");
       e.target.textContent = "raw";
     }
     else{
@@ -43,12 +43,11 @@ function setModal(){
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
   let factor_grass = document.getElementById("modal-factor-grass");
   let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
-  console.log("monthly_contr", monthly_contr);
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
   let factor_contribution_level = Array(6).fill(0);
-  const factorLables = ["commit", "star", "pr", "issue", "repo_cr", "repo_co"];
+  const factorLables = ["star", "commit", "pr", "issue", "repo_cr", "repo_co"];
   
   let start = new Date();
   updateMonthly(select_year);
@@ -60,12 +59,13 @@ function setModal(){
     monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
     for(let i=0; i<monthly_contr.length; i++){
       let total = monthly_contr[i]["total"];
-      monthly_contribution[i] = total;
+      let mid = monthly_contr[i]['month']-1;
+      monthly_contribution[mid] = total;
       if(total<=30){
-        monthly_contribution_level[i] = Math.ceil(total / 10);
+        monthly_contribution_level[mid] = Math.ceil(total / 10);
       }
       else {
-        monthly_contribution_level[i] = 4;
+        monthly_contribution_level[mid] = 4;
       }
     }
     clearChildElement(div_activity_monthly);
@@ -90,15 +90,29 @@ function setModal(){
       for(let i=0; i<factorLables.length; i++) {
         factor_contribution[i] = 0;
       }
-      for(let i=0; i<monthly_contr.length; i++) {
-        for(let j=0; j<factorLables.length; j++) {
+      for(let j=0; j<factorLables.length; j++) {
+        for(let i=0; i<monthly_contr.length; i++){
           factor_contribution[j] += monthly_contr[i][factorLables[j]];
+        }
+        if(factorLables[j] == "star"){
+          factor_contribution[j] = monthly_contr[0][factorLables[j]];
         }
       }
     }
     else{
+      let mid = -1;
+      for(let i=0; i<monthly_contr.length;i++){
+        if(month == monthly_contr[i]['month']){
+          mid = i;
+        }
+      }
       for(let j=0; j<factorLables.length; j++){
-        factor_contribution[j] = monthly_contr[month-1][factorLables[j]];
+        if(mid != -1){
+          factor_contribution[j] = monthly_contr[mid][factorLables[j]];
+        }
+        else{
+          factor_contribution[j] = 0;
+        }
       }
     }
     for(let i=0; i<factorLables.length; i++){
@@ -111,14 +125,14 @@ function setModal(){
   function getDataLevel(value, type, isMonthly=true){
     let level = 0;
     if (isMonthly) {
-      if (type === 0) level = Math.ceil(value / 25);
-      else if (type === 2)  level = value;
+      if (type === 1) level = Math.ceil(value / 25);
+      else if (type === 0)  level = Math.ceil(value / 2);
       else if (type === 2)  level = Math.ceil(value / 3);
       else level = Math.ceil(value / 2);
     }
     else {
-      if (type === 0) level = Math.ceil(value / 100);
-      else if (type === 1)  level = Math.ceil(value / 2);
+      if (type === 1) level = Math.ceil(value / 100);
+      else if (type === 0)  level = Math.ceil(value / 2);
       else if (type === 2)  level = Math.ceil(value / 5);
       else level = Math.ceil(value / 4);
     }
@@ -143,7 +157,7 @@ function setModal(){
         rect.setAttributeNS(null,"month", mIdx+1);
         rect.setAttributeNS(null,"raw", ctb);
         rect.setAttributeNS(null,"focus", 0);
-        rect.setAttributeNS(null,"x", fs);
+        rect.setAttributeNS(null,"x", 0);
         rect.setAttributeNS(null,"y", (grass_size+fs)*row - fs*3);
         rect.setAttributeNS(null,"width", grass_size);
         rect.setAttributeNS(null,"height", grass_size);
@@ -151,7 +165,7 @@ function setModal(){
         rect.setAttributeNS(null,"ry", "2");
         rect.setAttributeNS(null,"class", "modal-ContributionMonth");
         rect.setAttributeNS(null,"data-level", level);
-        mLabel.setAttributeNS(null, "x", fs);
+        mLabel.setAttributeNS(null, "x", 0);
         mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
         mLabel.setAttributeNS(null, "font-family", "verdana");
         mLabel.setAttributeNS(null, "font-size", "15px");
@@ -209,7 +223,7 @@ function setModal(){
   /* Grass for Factor */
   function makeFactorGrass(){
     console.log("mFG: y",select_year,"m",select_month,"ftr_contr", factor_contribution);
-    const factor_label = ["COMMIT", "STAR", "PR", "ISSUE", "CR", "CO"];
+    const factor_label = ["STAR", "COMMIT", "PR", "ISSUE", "CR", "CO"];
     const fs = 15;
     for(let col = 0; col < 6; col++){
       let rect = document.createElementNS(NS,"rect");
@@ -219,7 +233,7 @@ function setModal(){
       rect.setAttributeNS(null,"factor", factorLables[col]);
       rect.setAttributeNS(null,"raw", ctb);
       rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", (col)*(grass_size+fs)+fs);
+      rect.setAttributeNS(null,"x", (col)*(grass_size+fs));
       rect.setAttributeNS(null,"y", fs);
       rect.setAttributeNS(null,"width", grass_size);
       rect.setAttributeNS(null,"height", grass_size);
@@ -227,7 +241,7 @@ function setModal(){
       rect.setAttributeNS(null,"ry", "2");
       rect.setAttributeNS(null,"class", "modal-ContributionFactor");
       rect.setAttributeNS(null,"data-level", level);
-      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs)+fs);
+      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs));
       fLabel.setAttributeNS(null, "y", fs);
       fLabel.setAttributeNS(null, "font-family", "verdana");
       fLabel.setAttributeNS(null, "font-size", "15px");
@@ -282,11 +296,10 @@ function setModal(){
     modalChartObjList = [];
     makePage(chart_data);
   }
-  
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
-    else if(label == "commit") return 1/100;
+    else if(label == "commit") return 1/10;
     else return 1;
   }
   function makePage(chart_data){
@@ -300,15 +313,7 @@ function setModal(){
     
     const baseColor = "#174adf";
     const userColor = "#ffe522";
-    const cc6 = [
-      "#4245cb",
-      "#c629b6",
-      "#ff268a",
-      "#ff6657",
-      "#ffab21",
-      "#ffe913",
-    ];
-    makeModalRadarChart(is_nomalization);
+    makeModalRadarChart(is_nomalization, select_month);
     
     /* Chart 2: 분포도 히스토그램 */
     function newArrayRange(start, end, step=1, fix_point=0){
@@ -445,32 +450,54 @@ function setModal(){
     modalChartObjList.push(specific_score_chart);
   }
 
-  function makeModalRadarChart(is_nomalization=0){
-    const annual_data = chart_data["annual_overview"];
-    const student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
+  function makeModalRadarChart(is_nomalization=0, month=0){
     const radar_labels = ["commits", "stars", "issues", "PRs"];
     const radar_label_keys = ["commit", "star", "issue", "pr"];
     const average_data = [];
     const coeffs = {};
-    radar_label_keys.forEach((label)=>{
-      let annual_value = annual_data[label][select_year-start_year];
-      let coeff = getNormalCoeff(annual_value, label, is_nomalization);
-      coeffs[label] = coeff;
-      average_data.push(coeff * annual_data[label][select_year-start_year]);
-    });
     const user_data = [];
-    radar_label_keys.forEach((label)=>{
-        user_data.push(coeffs[label] * student_data[label]);
-    });
+    let avg_data = {};
+    let student_data = {}
+    if(month == 0){
+      avg_data = chart_data["annual_overview"];
+      avg_data['star'] = chart_data['own_star']['avg'];
+      factorLables.forEach((label)=>{
+        if(Array.isArray(avg_data[label])){
+          avg_data[label] = avg_data[label][select_year-start_year];
+        }
+      });
+      factorLables.forEach((label, idx)=>{
+        student_data[label] = factor_contribution[idx];
+      })
+      student_data['star'] = monthly_contr[0]["star"];
+    }else{
+      avg_data = chart_data["monthly_avg"][select_year-start_year][month-1];
+      avg_data['star'] = chart_data['own_star']['avg'];
+      factorLables.forEach((label, idx)=>{
+        student_data[label] = factor_contribution[idx];
+      });
+      student_data['star'] = monthly_contr[0]["star"];
+    }
 
-    console.log("average_data", average_data);
-    console.log("user_data", user_data);
+    radar_label_keys.forEach((label)=>{
+      let factor_value = avg_data[label];
+      let coeff = getNormalCoeff(factor_value, label, is_nomalization);
+      coeffs[label] = coeff;
+      average_data.push(coeff * factor_value);
+    });
     
+    radar_label_keys.forEach((label)=>{
+      user_data.push(coeffs[label] * student_data[label]);
+    });
+    
+    let radar_title = select_year + "년 " + month + "월 기여도 비교";
+    if(month == 0) radar_title = select_year + "년 기여도 비교";
+    if(is_nomalization) radar_title = radar_title + "(정규화)";
     const radarOption = {
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
+        title: {display: true, text: radar_title, 
+          font: { size: 26 }},
       },
       responsive: true,
     };

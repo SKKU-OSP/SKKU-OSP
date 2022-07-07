@@ -79,10 +79,10 @@
           </div>
           <div class="col-4">
             <div class="card h-100">
-              <div class="card-body">
+              <div class="card-body d-flex flex-column">
                 <h5 class="card-title mb-4">Score</h5>
-                <h1 class="text-center">{{data.score.total_score}}</h1>
-                <table class="table">
+                <h1 class="text-center my-auto">{{data.score.total_score}}</h1>
+                <table class="table mt-auto">
                   <tbody>
                     <tr>
                       <th scope="row" colspan=2 style="width: 10%">Commits</th>
@@ -114,8 +114,8 @@
                   <div class="card-body">
                     <h6 class="card-title">{{recent_repo.repo_name}}</h6>
                     <div style="font-size: 13px">
-                      last commit : {{recent_repo.committer_date}}
-                      <br>
+                      <!-- last commit : {{recent_repo.committer_date}} -->
+                      <!-- <br> -->
                       {{recent_repo.desc}}
                     </div>
                   </div>
@@ -145,18 +145,20 @@
                   </button>
                 </div>
                 <div class="modal-body justify-content-center mt-4" id="modal-visualization">
-                  <div class="vertical-menu">
-                    <button class="modal-btn-year">2022</button>
-                    <button class="modal-btn-year active">2021</button>
-                    <button class="modal-btn-year">2020</button>
-                    <button class="modal-btn-year">2019</button>
+                  <div style="display:flex;flex-wrap: wrap;">
+                    <div class="vertical-menu">
+                      <button class="modal-btn-year">2022</button>
+                      <button class="modal-btn-year active">2021</button>
+                      <button class="modal-btn-year">2020</button>
+                      <button class="modal-btn-year">2019</button>
+                    </div>
+                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
+                    <div class="vertical-menu"></div>
+                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 480 96">
+                      <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                      </g>
+                    </svg>
                   </div>
-                  <svg id="modal-activity-monthly" class="grass double"></svg>
-                  <div style="height:0.1rem; width:6rem;"></div>
-                  <svg id="modal-activity-factor" class="grass half">
-                    <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
-                    </g>
-                  </svg>
                   <canvas id="modal-canvas1" class="ctx-item"></canvas>
                   <div class="text-center">
                     <button id="modal-btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
@@ -187,18 +189,17 @@
                 <div class="tab-content">
                   <div class="tab-pane fade show active mt-2" id="pills-overview">
                     <div class="d-flex">
-                      <!--vertical scroll menu  -->
                       <div class="vertical-menu">
                         <button class="btn-year">2022</button>
                         <button class="btn-year active">2021</button>
                         <button class="btn-year">2020</button>
                         <button class="btn-year">2019</button>
                       </div>
-                      <svg id="activity-monthly" class="grass double"></svg>
+                      <svg id="activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
                     </div>
                     <div class="d-flex">
-                      <div style="height:6rem; width:6rem;"></div>
-                      <svg id="activity-factor" class="grass half">
+                      <div class="vertical-menu"></div>
+                      <svg id="activity-factor" class="grass half" viewBox="0 0 480 96">
                         <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                         </g>
                       </svg>

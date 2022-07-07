@@ -47,7 +47,7 @@ class ProfileView(TemplateView):
 
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         for commit in sorted_commit:
-            if len(recent_repos) == 4:
+            if len(recent_repos) == 3:
                 break
             if commit['repo_name'] not in recent_repos:
                 recent_repos[commit['repo_name']] = {'repo_name': commit['repo_name']}
@@ -61,13 +61,12 @@ class ProfileView(TemplateView):
         ints = AccountInterest.objects.filter(account=context['account'])
         # 프로필사진 경로
         
-        user = User.objects.get(username=context['username'])
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
             'inter': ints,
-            'account':  Account.objects.get(user=user.id)
+            'account': context['account']
         }
         context['data'] = data
 
@@ -97,7 +96,7 @@ class ProfileView(TemplateView):
         
         own_star = {}
         own_star_list = []
-        star_sum = 0;
+        star_sum = 0
         for row in star_data:
             own_star_list.append(row)
             star_sum += row["star"]
