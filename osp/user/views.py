@@ -7,7 +7,7 @@ from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repo
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
-from user.forms import FileUploadForm
+from user.forms import PortfolioUploadForm, ProfileImgUploadForm
 from django.db.models import Avg, Sum, Subquery
 
 import time
@@ -165,11 +165,15 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
         
-        form = FileUploadForm(request.POST, request.FILES, instance=user_account)
-        print(form.errors)
-        if form.is_valid():
-            print('It is valid form')
-            form.save()
+        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+        if img_form.is_valid():
+            print('Image is valid form')
+            img_form.save()
+
+        port_form = PortfolioUploadForm(request.POST, request.FILES, instance=user_account)
+        if port_form.is_valid():
+            print('Portfolio is valid form')
+            port_form.save()
             
         return redirect(f'/user/{username}/profile-edit/')
 
@@ -180,7 +184,12 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
-        form = FileUploadForm()
+        img_form = ProfileImgUploadForm()
+        port_form = PortfolioUploadForm
+        form = {
+            'img_form': img_form,
+            'port_form': port_form
+        }
         data = {
             'account': Account.objects.get(user=user.id),
             'form': form,

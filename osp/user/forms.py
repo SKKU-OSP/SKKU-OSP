@@ -1,7 +1,12 @@
 from django.forms import ModelForm
 from .models import Account
 
-class FileUploadForm(ModelForm):
+class PortfolioUploadForm(ModelForm):
     class Meta:
         model = Account
-        fields = ['photo', 'portfolio']
+        fields = ['portfolio']
+
+class ProfileImgUploadForm(ModelForm):
+    class Meta:
+        model = Account
+        fields = ['photo']
