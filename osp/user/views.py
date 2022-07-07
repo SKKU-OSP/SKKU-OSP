@@ -12,6 +12,7 @@ from django.db.models import Avg, Sum, Subquery
 
 import time
 import json
+import os
 
 # Create your views here.
 class ProfileView(TemplateView):
@@ -169,15 +170,20 @@ class ProfileEditView(TemplateView):
   
         info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
         print(info_form)
-        
+
         if info_form.is_valid():
             print('Info is valid form')
             info_form.save()
-        
-        # 새로운 이미지 업로드 시 기존 이미지 삭제 하고 업데이트해야함
+
         # 이미지의 용량을 제한 해야함
+        pre_img = user_account.photo.path
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+
         if img_form.is_valid():
+            try:
+                os.remove(pre_img) # 가존 이미지 삭제
+            except: # 기존 파일이 없을 경우에 pass
+                pass
             print('Image is valid form')
             img_form.save()
 
