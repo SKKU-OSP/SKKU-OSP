@@ -10,3 +10,4 @@ pillow
 requests==2.28.0
 sqlparse==0.4.2
 urllib3==1.26.9
+markdown
