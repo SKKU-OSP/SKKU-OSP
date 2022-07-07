@@ -55,7 +55,7 @@ class ArticleComment(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
     body = models.TextField()
     pub_date = models.DateTimeField()
-    mod_date = models.DateTimeField()
+    del_date = models.DateTimeField()
     anonymous_writer = models.BooleanField()
     is_deleted = models.BooleanField(default=False)
     writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
