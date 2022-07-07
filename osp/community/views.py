@@ -172,7 +172,8 @@ class ArticleView(TemplateView):
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
         except:
             return redirect('community:Community-Main')
-
+        context['article'].view_cnt += 1
+        context['article'].save()
         return render(request, 'community/article/article.html', context)
 
     def post(self, request, *args, **kwargs):

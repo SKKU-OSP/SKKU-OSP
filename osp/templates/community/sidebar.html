@@ -1,7 +1,8 @@
 {% load community_tag %}
+{% load tag_templatetag %}
 <div class="row m-2" id="profile-tab">
     <div class="col-6"><img class="w-100">
-            <!--src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"-->
+        <!--src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"-->
 
     </div>
     <div class="col-6">
@@ -46,15 +47,48 @@
                 <h5 class="modal-title">팀 생성</h5>
             </div>
             <div class="modal-body">
-                <form class="needs-validation" novalidate>
-                    
+                <form class="needs-validation row" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="team-name-input" class="form-label">팀 이름</label>
+                        <input type="text" id="team-name-input" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="team-desc-input" class="form-label">팀 설명</label>
+                        <input type="text" id="team-desc-input" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="team-image-input" class="form-label">팀 프로필 이미지</label>
+                        <input class="form-control" type="file" id="team-image-input">
+                    </div>
+                    <div class="mb-3">
+                        <label for="tag-selector" class="form-label">팀 분야</label>
+                        <select name="" id="tag-selector" multiple>
+                            {% category_tag request %}
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="submit" class="btn btn-primary" id="team-submit">Submit</button>
             </div>
         </div>
     </div>
 </div>
+<script>
+$().ready(function() {
+    new_team_tag = new SlimSelect({
+        select: '#tag-selector',
+        onChange: (selected_list) => {
+            for (selected of selected_list) {
+                $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+            }
+        }
+    });
+    $('#team-submit').click(function(){
+        console.log('Submit');
+    });
+});
+</script>
 {% endif %}
