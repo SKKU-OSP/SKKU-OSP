@@ -29,17 +29,32 @@
         <li class="list-group-item">
             <a href="/community">Community Main</a>
         </li>
-        <li class="list-group-item">
-            <a href="/community/Notice">Information</a>
+        {% board_sidebar_items request %}
+        {% if user.is_authenticated %}
+        <li class="list-group-item text-primary" data-bs-toggle="modal" data-bs-target="#AddTeamModal">
+            <i class="bi-plus"></i>
+            Make Team
         </li>
-        <li class="list-group-item">
-            <a href="/community/Education">Education</a>
-        </li>
-        <li class="list-group-item">
-            <a href="/community/QnA">QnA</a>
-        </li>
-        <li class="list-group-item">
-            <a href="{% url 'community:Board' board_name='team' %}">Team</a>
-        </li>
+        {% endif %}
     </ul>
 </div>
+{% if user.is_authenticated %}
+<div class="modal fade" id="AddTeamModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">팀 생성</h5>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation" novalidate>
+                    
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
