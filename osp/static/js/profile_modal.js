@@ -42,7 +42,7 @@ function setModal(){
   });
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
   let factor_grass = document.getElementById("modal-factor-grass");
-  let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
+  let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
@@ -56,7 +56,7 @@ function setModal(){
 
   function updateMonthly(select_year){
     
-    monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
+    monthly_contr = chart_data["monthly_contr"][select_year-start_year];
     for(let i=0; i<monthly_contr.length; i++){
       let total = monthly_contr[i]["total"];
       let mid = monthly_contr[i]['month']-1;
