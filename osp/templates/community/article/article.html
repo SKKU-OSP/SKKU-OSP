@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+{% extends 'main.html' %}
+
+{% load static %}
+{% load tag_templatetag %}
+{% block content %}
+<div class="container my-4">
+  <div class="row">
+    <div class="col-3 border">
+      {% include "community/sidebar.html" %}
+    </div>
+    <div class="col-9">
+      <div class="d-flex justify-content-between bg-light rounded" id="board-title-bar" style="padding-left:10px;">
+        <div class="d-flex col-8 justify-content-start">
+          <h2>{{ board.name }} 게시판</h2>
+        </div>
+          <div class="d-flex flex-row justify-content-end">
+                 <div onclick="location.href='{% url 'community:Board' board.name %}'" class="border-2 rounded" style="height:100%;line-height:45px;font-size:18px;font-weight:bold;cursor:pointer;margin-right:10px;"><i class="bi-card-list"></i><span style="padding-left:4px;">리스트</span></div>
+          </div>
+      </div>
+      <!-- type은 세가지 값이 가능: view / register / edit -->
+        <br>
+        <div id="article-content">
+            {% if type == 'view' %}
+            <!-- article view -->
+                {% include 'community/article/includes/content-view.html' %}
+            {% else %}
+                <!-- article add or edit -->
+                {% include 'community/article/includes/content-edit.html' %}
+            {% endif %}
+        </div>
+
+
+        {% if type != 'register' %}
+            <!-- comment -->
+            {% include 'community/article/includes/comments.html' %}
+        {% endif %}
+
+
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+    var category_select;
+    $(document).ready(function(){
+         //$('#article-tags').tagsinput({
+    //          maxTags: 3
+        //});
+         category_select = new SlimSelect({
+          select: '#multiple'
+        });
+    });
+    //$(document).load(function(){
+         //$('#article-tags').tagsinput({
+    //          maxTags: 3
+        //});
+    //});
+    var li;
+
+    function edit(){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        if(confirm("글을 수정하시겠습니까?")){
+         $.ajax({
+                type: "POST",
+                url: window.location.href,
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    $('#article-content').html(data['html']);
+                    category_select = new SlimSelect({
+                          select: '#multiple'
+                    });
+                    category_select.set(data['tags']);
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+         });
+        }
+    }
+
+    function registerArticle(){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('title',$('#article-title').val());
+        ajax_form_data.append('body',$('#article-body').val());
+        ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
+        ajax_form_data.append('tags', category_select.selected().toString());
+        ajax_form_data.append('board_name','{{ board.name }}');
+
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if(confirm("글을 등록하시겠습니까?")){
+         $.ajax({
+                type: "POST",
+                url: "{% url 'community:article-c' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    console.log(data);
+                    if(data['status']=="success"){
+                        alert('등록이 완료되었습니다!')
+                        window.location.href = "{% url 'community:Board' board_name=board.name %}";
+                    }
+                    else{
+                      // alert( data['message'] );
+                    alert('Error Occured');
+                    }
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+         });
+        }
+    }
+    {% if article %}
+    function editArticle(){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('title',$('#article-title').val());
+        ajax_form_data.append('body',$('#article-body').val());
+        ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
+        ajax_form_data.append('tags', category_select.selected().toString());
+        ajax_form_data.append('board_name','{{ board.name }}');
+        ajax_form_data.append('article_id','{{ article.id }}');
+
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if(confirm("수정을 완료하시겠습니까?")){
+         $.ajax({
+                type: "POST",
+                url: "{% url 'community:article-u' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    if(data['status']=="success"){
+                        alert('수정이 완료되었습니다!')
+                        window.location.href = "{% url 'community:article-view' article_id=article.id %}";
+                    }
+                    else{
+                      // alert( data['message'] );
+                    alert('Error Occured');
+                    }
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+         });
+        }
+    }
+    function removeArticle(){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('article_id','{{ article.id }}');
+
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if(confirm("글을 삭제하시겠습니까?")){
+         $.ajax({
+                type: "POST",
+                url: "{% url 'community:article-u' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    if(data['status']=="success"){
+                        alert('삭제가 완료되었습니다!')
+                        window.location.href = "{% url 'community:Board' board_name=board.name %}";
+                    }
+                    else{
+                      // alert( data['message'] );
+                        alert('Error Occured');
+                    }
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+         });
+        }
+    }
+    {% endif %}
+</script>
+{% endblock script %}
+</html>

@@ -23,12 +23,20 @@ urlpatterns = [
     path('home/', include('home.urls')),
     path('admin/', admin.site.urls),
     path('rank/', include('rank.urls')),
-
     path('accounts/', include('common.urls')),
     path('user/', include('user.urls')),
     path('tag/', include('tag.urls')),
     path('community/', include('community.urls')),
     path('', lambda req: redirect('/community'))
 ]
+
+from django.conf import settings
+
+import debug_toolbar
+if DEBUG:
+    urlpatterns += [
+        path(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
+
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

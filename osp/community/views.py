@@ -1,34 +1,50 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db.models import Q, Count
 from .models import *
-from team.models import TeamRecruitArticle
+from tag.models import Tag
+
+from team.models import TeamRecruitArticle, TeamMember, Team
+from user.models import Account
 from datetime import datetime, timedelta
 import hashlib
 import math
+from django.views.generic import TemplateView
+from django.contrib.auth.models import User
+from datetime import datetime
+from django.db import DatabaseError, transaction
+
 
 # Create your views here.
-@login_required
 def main(request):
     board_list = []
-    for board in Board.objects.all():
-        week_ago = datetime.now() - timedelta(days=7)
-        print(week_ago)
-        print(datetime.now())
-        article_list = Article.objects.filter(board_id=board, 
-                                              pub_date__range=[
-                                                  week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
-                                                  datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
-                                              ]
-                                              )
-        if len(article_list) > 0:
-            article_list = article_list.order_by('-view_cnt')
-            board.article_list = article_list[:min(3, len(article_list))]
-        else:
-            board.article_list = []
+    team_board_query = Q()
+    if request.user.is_authenticated:
+        user = User.objects.get(username=request.user)
+        account = Account.objects.get(user=user)
+        team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+        team_board_query = Q(name__in=team_list)
+    for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
+        # 주간 Hot 게시물
+        # week_ago = datetime.now() - timedelta(days=7)
+        # article_list = Article.objects.filter(board_id=board,
+        #                                       pub_date__range=[
+        #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
+        #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
+        #                                       ]
+        #                                       )
+        # if len(article_list) > 0:
+        #     article_list = article_list.order_by('-view_cnt')
+        #     board.article_list = article_list[:min(3, len(article_list))]
+        # else:
+        #     board.article_list = []
+        # 최신 게시물
+        article_list = Article.objects.filter(board_id=board).order_by('-pub_date')
+        board.article_list = article_list[:min(3, len(article_list))]
         for article in board.article_list:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
@@ -46,15 +62,15 @@ def board(request, board_name):
     context = {'board': board, 'board_color': board_color}
     if board.board_type == 'QnA':
         return render(request, 'community/qna-board.html', context)
-    if board.board_type == 'Team':
+    if board.board_type == 'Recruit':
         active_article = Article.objects.filter(board_id=board)
-        active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00'))
+        active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.team = TeamRecruitArticle.objects.get(article=article).team
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-        return render(request, 'community/team-board.html', context)
+        return render(request, 'community/recruit-board.html', context)
     
     return render(request, 'community/board.html', context)
 
@@ -64,7 +80,7 @@ def article_list(request, board_name):
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
-    if board.board_type == 'Team':
+    if board.board_type == 'Recruit':
         PAGE_SIZE = 5
     elif board.board_type == 'QnA':
         PAGE_SIZE = 7
@@ -124,3 +140,123 @@ def article_list(request, board_name):
     result['html'] = render_to_string('community/article-bar.html', context)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
     return JsonResponse(result)
+
+
+class ArticleRegisterView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+
+        context['type'] = 'register'
+        board_name = kwargs.get('board_name')
+        try:
+            context['board'] = Board.objects.get(name=board_name)
+        except:
+            return redirect('community:Community-Main')
+
+        #todo 주석처리 필요
+        context['user'] = User.objects.get(id=46)
+
+        return render(request, 'community/article/article.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+
+class ArticleView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+        context['type'] = 'view'
+        article_id = kwargs.get('article_id')
+        try:
+            context['article'] = Article.objects.get(id=article_id)
+            context['tags'] = ArticleTag.objects.filter(article__id=article_id)
+            context['board'] = Board.objects.get(id=context['article'].board_id_id)
+            context['comments'] = ArticleComment.objects.filter(article_id=article_id)
+        except:
+            return redirect('community:Community-Main')
+
+        #todo 주석처리 필요
+        context['user'] = User.objects.get(id=46)
+
+        return render(request, 'community/article/article.html', context)
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+        context['type'] = 'edit'
+        article_id = kwargs.get('article_id')
+        context['article'] = Article.objects.get(id=article_id)
+        context['tags'] = ArticleTag.objects.filter(article__id=article_id)
+        result = {}
+        result['html'] = render_to_string('community/article/includes/content-edit.html', context)
+        result['tags'] = list(context['tags'].values_list('tag__name',flat=True))
+        return JsonResponse(result)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+def article_create(request):
+    message = ''
+
+    status = 'success'
+    board_name = request.POST.get('board_name')
+    board = Board.objects.get(name=board_name)
+    try:
+        with transaction.atomic():
+            #todo: writer 필드 값 추가해야함.
+            article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'), pub_date=datetime.now(), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true', board_id_id=board.id)
+            tag_list = request.POST.get('tags').split(',')
+            for tag_name in tag_list:
+                tag = Tag.objects.get(name=tag_name)
+                ArticleTag.objects.create(article=article, tag=tag)
+    except:
+        status = 'fail'
+
+    return JsonResponse({'status': status, 'message': message})
+
+def article_update(request):
+    message = ''
+
+    status = 'success'
+    board_name = request.POST.get('board_name')
+    article_id = request.POST.get('article_id')
+    board = Board.objects.get(name=board_name)
+    try:
+        with transaction.atomic():
+            article = Article.objects.get(id=article_id)
+            Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
+            tag_list = request.POST.get('tags').split(',')
+            tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
+            for tag_name in list(set(tag_list_old)-set(tag_list)):
+                ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
+            for tag_name in list(set(tag_list)-set(tag_list_old)):
+                tag = Tag.objects.get(name=tag_name)
+                ArticleTag.objects.create(article=article, tag=tag)
+    except:
+        status = 'fail'
+
+    return JsonResponse({'status': status, 'message': message})
+
+def article_delete(request):
+    message = ''
+
+    status = 'success'
+    article_id = request.POST.get('article_id')
+
+    try:
+        with transaction.atomic():
+            article = Article.objects.get(id=article_id)
+            # todo: article delete
+            # Article 삭제
+            # ArticleTag, ArticleLike, ArticleComment, CommentLike 삭제
+            # TeamRecruitArticle 삭제
+            # 또 삭제할 거 있나 봐야함.
+        # Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'), pub_date=datetime.now(), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true', board_id_id=board.id)
+    except:
+        status = 'fail'
+
+    return JsonResponse({'status': status, 'message': message})
