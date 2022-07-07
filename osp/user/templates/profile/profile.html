@@ -79,10 +79,10 @@
           </div>
           <div class="col-4">
             <div class="card h-100">
-              <div class="card-body">
+              <div class="card-body d-flex flex-column">
                 <h5 class="card-title mb-4">Score</h5>
-                <h1 class="text-center">{{data.score.total_score}}</h1>
-                <table class="table">
+                <h1 class="text-center my-auto">{{data.score.total_score}}</h1>
+                <table class="table mt-auto">
                   <tbody>
                     <tr>
                       <th scope="row" colspan=2 style="width: 10%">Commits</th>
@@ -114,8 +114,8 @@
                   <div class="card-body">
                     <h6 class="card-title">{{recent_repo.repo_name}}</h6>
                     <div style="font-size: 13px">
-                      last commit : {{recent_repo.committer_date}}
-                      <br>
+                      <!-- last commit : {{recent_repo.committer_date}} -->
+                      <!-- <br> -->
                       {{recent_repo.desc}}
                     </div>
                   </div>
