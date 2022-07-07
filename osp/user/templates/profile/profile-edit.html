@@ -3,6 +3,7 @@
 
 {% block content %}
 <body>
+  <form method="POST" action="" enctype="multipart/form-data">
   <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
   <div class="container-xl">
     <div class="row row-cols-2">
@@ -10,31 +11,44 @@
         <div class="card" id="visualization">
           <h5 class="card-title"> 개인정보 설정 </h5>
           <div class="card-body">
-            <form class="form-floating m-2">
-              <input type="email" class="form-control" id="floatingInputValue1" placeholder="name@example.com" value={{data.info.personal_email}}>
-              <label for="floatingInputValue1">Input with value</label>
-            </form>
-            <form class="form-floating mb-3 m-2" >
-              <input type="url" class="form-control" id="floatingInputValue2" placeholder="https://github.com/name" value="https://github.com/name">
-              <label for="floatingInputValue2">GitHub Link</label>
-            </form>
-            <form class="form-floating mb-3 m-2" >
-              <input type="url" class="form-control" id="floatingInputValue3" placeholder="name.github.io" value="name.github.io">
-              <label for="floatingInputValue3">Blog Link</label>
-            </form>
+            <div class="mb-3 row">
+              <label for="github_id" class="col-sm-2 col-form-label">GitHub ID</label>
+              <div class="col-sm-10">
+                <input type="text" readonly class="form-control-plaintext" id="github_id" value={{data.info.github_id}}>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="id_personal_email" class="col-sm-2 col-form-label">Per. Email</label>
+              <div class="col-sm-10">
+                <input type="email" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="id_plural_major" class="col-sm-2 col-form-label">Major</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="plural_major" name="plural_major" value={{data.info.plural_major}}>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="id_primary_email" class="col-sm-2 col-form-label">Primary</label>
+              <div class="col-sm-10">
+                <input type="email" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="id_secondary_email" class="col-sm-2 col-form-label">Secondary</label>
+              <div class="col-sm-10">
+                <input type="email" class="form-control" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
+              </div>
+            </div>
             <div class="mb-3">
               <label for="exampleFormControlTextarea1" class="form-label">Self Introduction</label>
               <textarea class="form-control" id="exampleFormControlTextarea1" rows="1"></textarea>
             </div>
             <div>
-              <form method="POST" action="" enctype="multipart/form-data">
-                {% csrf_token %}
-                <img src= {{data.account.photo.url}} alt="My Image" width="50" height="50">
-                <p><label for="id_photo">프로필 사진:</label> <input id="photo" name="photo" type="file" /></p>
-                <p>
-                    <button type="submit">저장</button>
-                </p>
-              </form>
+              {% csrf_token %}
+              <img src= {{data.account.photo.url}} alt="My Image" width="50" height="50">
+              <p><label for="id_photo">프로필 사진:</label> <input id="photo" name="photo" type="file" /></p>
             </div>
           </div>
         </div>
@@ -48,17 +62,12 @@
         </div>
       </div>
       <div class="col">
-        <div class="card" id="portfolio">
+        <div class="card" id="portfolio_card">
           <h5 class="card-title"> 포트폴리오 설정 </h5>
           <div class="card-body">
             <div class="mb-3">
-              <form method="POST" action="" enctype="multipart/form-data">
                 {% csrf_token %}
                 <p><textarea cols="50" id="id_portfolio" name="portfolio" rows="15">{{data.account.portfolio}}</textarea></p>
-                <p>
-                    <button type="submit">저장</button>
-                </p>
-              </form>
             </div>
           </div>
         </div>
@@ -72,10 +81,9 @@
         </div>
       </div>
     </div>
+    <button type="submit">저장</button>
   </div>
-  <div>
-    저장--------------버튼
-  </div>
+  </form>
 </body>
 
 {% endblock %}

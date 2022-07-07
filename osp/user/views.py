@@ -7,7 +7,7 @@ from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repo
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
-from user.forms import PortfolioUploadForm, ProfileImgUploadForm
+from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm
 from django.db.models import Avg, Sum, Subquery
 
 import time
@@ -159,11 +159,23 @@ class ProfileEditView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
-
         username = context['username']
+
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
+        student_id = Account.objects.get(user=user.id).student_data.id
+        user_tab = StudentTab.objects.get(id=student_id)
+
+  
+        info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
+        print(info_form)
         
+        if info_form.is_valid():
+            print('Info is valid form')
+            info_form.save()
+        
+        # 새로운 이미지 업로드 시 기존 이미지 삭제 하고 업데이트해야함
+        # 이미지의 용량을 제한 해야함
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
         if img_form.is_valid():
             print('Image is valid form')
@@ -178,14 +190,18 @@ class ProfileEditView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
-
+        
         username = context['username']
         user = User.objects.get(username=username)
         student_id = Account.objects.get(user=user.id).student_data.id
         student_info = StudentTab.objects.get(id=student_id)
+
+        info_form = ProfileInfoUploadForm()
         img_form = ProfileImgUploadForm()
-        port_form = PortfolioUploadForm
+        port_form = PortfolioUploadForm()
+
         form = {
+            'info_form': info_form,
             'img_form': img_form,
             'port_form': port_form
         }
