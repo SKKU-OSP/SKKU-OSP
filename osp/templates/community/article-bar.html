@@ -6,7 +6,7 @@
             <div style="width: 1%; background-color: #{{board.board_color}};"></div>
             <div style="width: 1%;"></div>
             <div style="width: 98%">
-                <div class="row">
+                <div class="row" onclick="location.href='{% url 'community:article-view' article.id %}'" style="cursor:pointer">
                     {% if bartype == 'compact' %}
                     <h5 class="article-bar-title my-1 fw-bold col-6">
                     {% elif bartype == 'normal' %}
