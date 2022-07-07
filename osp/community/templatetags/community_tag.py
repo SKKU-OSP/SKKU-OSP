@@ -2,6 +2,7 @@ from django import template
 from user.models import Account
 from community.models import ArticleComment, ArticleLike, Article
 from datetime import datetime, timedelta, timezone
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 @register.filter
@@ -32,3 +33,10 @@ def user_comment(user_model):
 def user_like(user_model):
     account = Account.objects.get(user=user_model)
     return len(ArticleLike.objects.filter(account=account))
+
+@register.filter
+def anonymous_checked(a_writer):
+    if a_writer:
+        return mark_safe('checked')
+    else:
+        return ''

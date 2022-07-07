@@ -30,5 +30,13 @@ urlpatterns = [
     path('community/', include('community.urls')),
     path('', lambda req: redirect('/community'))
 ]
+
+from django.conf import settings
+
+import debug_toolbar
+urlpatterns += [
+    path(r'^__debug__/', include(debug_toolbar.urls)),
+]
+
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
