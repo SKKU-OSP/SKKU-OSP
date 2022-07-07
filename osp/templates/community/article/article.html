@@ -122,6 +122,7 @@
          });
         }
     }
+    {% if article %}
     function editArticle(){
         ajax_form_data=new FormData();
         ajax_form_data.append('title',$('#article-title').val());
@@ -189,7 +190,7 @@
          });
         }
     }
-
+    {% endif %}
 </script>
 {% endblock script %}
 </html>
