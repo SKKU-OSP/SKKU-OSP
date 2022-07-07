@@ -62,6 +62,9 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
+INTERNAL_IPS = ('127.0.0.1')
+
+
 ROOT_URLCONF = 'osp.urls'
 
 TEMPLATES = [
