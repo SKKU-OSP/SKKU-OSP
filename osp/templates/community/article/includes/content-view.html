@@ -29,7 +29,7 @@
             <div class="ss-multi-selected">
                 <div class="ss-values">
                     {% for tag in tags %}
-                        <div class="ss-value">
+                        <div class="ss-value bg-tag-{{tag.tag.type}}">
                             <span class="ss-value-text"># {{ tag.tag.name }}</span>
                         </div>
                     {% empty %}
