@@ -62,9 +62,12 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("application/javascript", ".js", True)
+
 if DEBUG:
-    import mimetypes
-    mimetypes.add_type("application/javascript", ".js", True)
+
     DEBUG_TOOLBAR_PATCH_SETTINGS = False
     INTERNAL_IPS = ('127.0.0.1')
     def show_toolbar(request):

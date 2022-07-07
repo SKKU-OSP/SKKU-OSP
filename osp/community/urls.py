@@ -13,5 +13,9 @@ urlpatterns = [
     path('article/create/', views.article_create, name='article-c'),
     path('article/update/', views.article_update, name='article-u'),
     path('article/delete/', views.article_delete, name='article-d'),
+
+    # path('article/create/', views.comment_create, name='article-c'),
+    # path('article/create/', views.comment_delete, name='article-c'),
+
     # path('add/', views.TeamView.as_view(), name='Team'),
 ]
