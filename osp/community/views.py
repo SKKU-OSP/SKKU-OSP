@@ -64,7 +64,7 @@ def board(request, board_name):
         return render(request, 'community/qna-board.html', context)
     if board.board_type == 'Recruit':
         active_article = Article.objects.filter(board_id=board)
-        active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00'))
+        active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.team = TeamRecruitArticle.objects.get(article=article).team
