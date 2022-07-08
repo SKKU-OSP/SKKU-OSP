@@ -31,13 +31,12 @@
             {% endif %}
         </div>
 
-
+        <div id="comment-content">
         {% if type != 'register' %}
             <!-- comment -->
             {% include 'community/article/includes/comments.html' %}
         {% endif %}
-
-
+        </div>
     </div>
   </div>
 </div>
@@ -175,7 +174,7 @@
         ajax_form_data.append('article_id','{{ article.id }}');
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-
+        $('#article-form').submit();
         if(confirm("글을 삭제하시겠습니까?")){
          $.ajax({
                 type: "POST",
@@ -202,6 +201,73 @@
         }
     }
     {% endif %}
+
+    function registerComment(){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('body',$('#comment-body').val());
+        ajax_form_data.append('is_anonymous',$('#comment-is-anonymous').prop('checked'));
+        ajax_form_data.append('article_id','{{ article.id }}');
+
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if(confirm("댓글을 등록하시겠습니까?")){
+         $.ajax({
+                type: "POST",
+                url: "{% url 'community:comment-c' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+                success: function(data) {
+                    console.log(data);
+                    if(data['status']=="success"){
+                        alert('등록이 완료되었습니다!');
+                        $('#comment-content').html(data['html']);
+                    }
+                    else{
+                        alert('An error occured.\n 다시 시도해주세요.');
+                    }
+                },
+                error: function(data){
+                    alert('An error occured.\n 다시 시도해주세요.');
+                }
+         });
+        }
+    }
+
+        function removeComment(comment_id){
+        ajax_form_data=new FormData();
+        ajax_form_data.append('comment_id', comment_id);
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if(confirm("댓글을 삭제하시겠습니까?")){
+         $.ajax({
+                type: "POST",
+                url: "{% url 'community:comment-d' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+                success: function(data) {
+                    console.log(data);
+                    if(data['status']=="success"){
+                        alert('삭제가 완료되었습니다!');
+                        $('#comment-content').html(data['html']);
+                    }
+                    else{
+                        alert('An error occured.\n 다시 시도해주세요.');
+                    }
+                },
+                error: function(data){
+                    alert('An error occured.\n 다시 시도해주세요.');
+                }
+         });
+        }
+    }
 </script>
 {% endblock script %}
 </html>
