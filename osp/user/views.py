@@ -166,12 +166,10 @@ class ProfileEditView(TemplateView):
 
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
-        student_id = Account.objects.get(user=user.id).student_data.id
+        student_id = user_account.student_data.id
         user_tab = StudentTab.objects.get(id=student_id)
 
-  
         info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
-        print(info_form)
 
         if info_form.is_valid():
             print('Info is valid form')
@@ -180,11 +178,10 @@ class ProfileEditView(TemplateView):
         # 이미지의 용량을 제한 해야함
         pre_img = user_account.photo.path
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-
         if img_form.is_valid():
             try:
-                os.remove(pre_img) # 가존 이미지 삭제
-            except: # 기존 파일이 없을 경우에 pass
+                os.remove(pre_img) # 기존 이미지 삭제
+            except:                # 기존 이미지가 없을 경우에 pass
                 pass
             print('Image is valid form')
             img_form.save()
