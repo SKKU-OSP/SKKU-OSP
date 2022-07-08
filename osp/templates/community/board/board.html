@@ -11,6 +11,9 @@
       {% include "community/sidebar.html" %}
     </div>
     <div class="col-9">
+      {% if board.board_type == 'Recruit' %}
+        {% include "community/board/article-carousel.html" %}
+      {% endif %}
       <div class="d-flex justify-content-between bg-light" id="board-title-bar">
         <div class="d-flex col-8 justify-content-start">
           <h2>{{ board.name }} 게시판</h2>
@@ -29,7 +32,7 @@
       </div>
       <div id="article-list-body">
       </div>
-      {% include "community/footer.html" with board=board %}
+      {% include "community/board/board-footer.html" with board=board %}
     </div>
   </div>
 </div>
@@ -43,10 +46,10 @@
       for(selected of selected_list){
         $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
       }
-      now_page = 1;
       redraw();
     }
   })});
 </script>
 {% endblock script %}
+
 </html>

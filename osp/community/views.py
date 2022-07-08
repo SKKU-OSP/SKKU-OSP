@@ -60,8 +60,6 @@ def board(request, board_name):
         return redirect('/community')
     board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
     context = {'board': board, 'board_color': board_color}
-    if board.board_type == 'QnA':
-        return render(request, 'community/qna-board.html', context)
     if board.board_type == 'Recruit':
         active_article = Article.objects.filter(board_id=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -70,9 +68,8 @@ def board(request, board_name):
             article.team = TeamRecruitArticle.objects.get(article=article).team
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-        return render(request, 'community/recruit-board.html', context)
     
-    return render(request, 'community/board.html', context)
+    return render(request, 'community/board/board.html', context)
 
 def article_list(request, board_name):
     try:
@@ -175,7 +172,8 @@ class ArticleView(TemplateView):
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
         except:
             return redirect('community:Community-Main')
-
+        context['article'].view_cnt += 1
+        context['article'].save()
         return render(request, 'community/article/article.html', context)
 
     def post(self, request, *args, **kwargs):

@@ -45,18 +45,17 @@
 <script>
     var category_select;
     $(document).ready(function(){
-        // $('#article-tags').tagsinput({
-        //          maxTags: 3
-        // });
+        var view_type = "{{type}}";
+        if(view_type != 'view'){
             category_select = new SlimSelect({
-            select: '#multiple',
-            onChange: (selected_list) => {
-                for(selected of selected_list){
-                    $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+                select: '#multiple',
+                onChange: (selected_list) => {
+                    for(selected of selected_list){
+                        $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+                    }
                 }
-            }
-            
-        });
+            });
+        }
     });
     $(document).load(function(){
         // $('#article-tags').tagsinput({
