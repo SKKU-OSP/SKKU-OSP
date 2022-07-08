@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import User
 from tag.models import Tag
@@ -102,6 +103,7 @@ class AccountInterest(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Account, models.CASCADE)
     tag = models.ForeignKey(Tag, models.CASCADE)
+    level = models.IntegerField(default=0)
     
 class GithubScore(models.Model):
     yid =models.CharField(max_length=45, null=False, primary_key=True)
