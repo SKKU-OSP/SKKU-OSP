@@ -17,7 +17,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.db import DatabaseError, transaction
-
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def main(request):
@@ -254,3 +254,50 @@ def article_delete(request):
         status = 'fail'
 
     return JsonResponse({'status': status, 'message': message})
+
+@csrf_exempt
+def comment_create(request):
+
+    message = ''
+
+    status = 'success'
+    article_id = request.POST.get('article_id')
+    try:
+        with transaction.atomic():
+            #todo: writer 필드 값 추가해야함. 현재 임의의 writer_id=22
+            writer_id = 22
+            writer = Account.objects.get(user__id=writer_id)
+            article = Article.objects.get(id=article_id)
+            comment = ArticleComment.objects.create(article=article,body=request.POST.get('body'),pub_date=datetime.now(),del_date=datetime.now(),anonymous_writer=request.POST.get('is_anonymous') == 'true',writer=writer)
+    except:
+        status = 'fail'
+
+    html = ''
+    if status == 'success':
+        comments = ArticleComment.objects.filter(article=article)
+        context = {'article':article, 'comments':comments}
+        html = render_to_string('community/article/includes/comments.html',context, request=request)
+    print('hihibye')
+    return JsonResponse({'status': status, 'message': message, 'html':html})
+
+def comment_delete(request):
+    message = ''
+
+    status = 'success'
+    comment_id = request.POST.get('comment_id')
+    print(comment_id)
+    try:
+        with transaction.atomic():
+            comment_f = ArticleComment.objects.filter(id=comment_id)
+            comment_f.update(del_date=datetime.now(),is_deleted=True)
+            comment = comment_f.get()
+            article = Article.objects.get(id=comment.article.id)
+    except:
+        status = 'fail'
+
+    html = ''
+    if status == 'success':
+        comments = ArticleComment.objects.filter(article=article)
+        context = {'article':article, 'comments':comments}
+        html = render_to_string('community/article/includes/comments.html',context)
+    return JsonResponse({'status': status, 'message': message, 'html':html})
