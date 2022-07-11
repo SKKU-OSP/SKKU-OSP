@@ -8,7 +8,7 @@
       <div class="carousel-item">
       {% endif %}
         <div class="col-3 p-2">
-          <div class="h-100 w-100 border p-1">
+          <div class="h-100 w-100 border p-1" onclick="location.href='{% url 'community:article-view' article.id %}'" >
             <div class="team-profile d-flex">
               <img src="{{article.team.image.url}}" alt="profile" class="w-50">
               <div>
