@@ -136,3 +136,21 @@ a.nav-link {
   display: none;
 }
 
+.dropdown-scrollbar
+{
+    height: 400px;
+    overflow: scroll;
+
+}
+
+button.btn.btn-secondary{
+
+  margin: 3px;
+
+
+  padding-left: 3px;
+  padding-right: 1px;
+  padding-top: 2px;
+  padding-bottom: 1px;
+  
+}
