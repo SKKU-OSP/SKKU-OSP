@@ -64,7 +64,7 @@
         // });
     });
     var li;
-
+    {% if article.writer.user == user %}
     function edit(){
         ajax_form_data=new FormData();
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
@@ -95,7 +95,7 @@
          });
         }
     }
-
+    {% endif %}
     function registerArticle(){
         ajax_form_data=new FormData();
         ajax_form_data.append('title',$('#article-title').val());
