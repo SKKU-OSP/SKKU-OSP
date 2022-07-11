@@ -210,14 +210,14 @@
                   <div class="tab-pane fade mt-2" id="pills-radar">
                     <canvas id="canvas1" class="ctx-item"></canvas>
                     <div class="text-center">
-                      <button id="btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
-                      <button id="btn-post" class="btn btn-primary" style="width:95px;" onclick="sample_post()">post</button>
-                      <div style="width: 100%;">
+                      <div style="width:100%;display:flex;">
                         <select name="target" id="target-user">
                           <option value="" selected="selected">비교없음</option>
                           {% target_github_id request %}
                         </select>
+                        <button id="btn-compare" class="btn btn-primary" style="width:95px;">비교</button>
                       </div>
+                      <button id="btn-toggle" class="btn btn-primary" style="width:95px;">정규화</button>
                     </div>
                   </div>
                   <div class="tab-pane fade mt-2" id="pills-dist">
@@ -242,35 +242,41 @@
 {% block script %}
   <script>
     var category_select;
+    var target_yearly_contr = [];
     var target_monthly_contr = [];
+    var target_github_id = '';
     $(document).ready(function(){
       category_select = new SlimSelect({
         select: '#target-user'
       });
+      $("#target-user").change(function(){
+        data={"github_id":category_select.selected().toString()};
+        if(data["github_id"] != ''){ 
+          $.ajax({
+            type:"POST",
+            url: `{% url 'user:comparestat' username='${data["github_id"]}' %}`,
+            data:JSON.stringify(data),
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success:function(res){
+                console.log("data pass success",res);
+                if(res.hasOwnProperty('monthly_contr')){
+                  target_yearly_contr = res['monthly_contr'];
+                  target_github_id = res['github_id'];
+                }
+                console.log("res", target_yearly_contr);
+            },
+            error : function(data){
+              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            }
+          });
+        }else{
+          target_yearly_contr = [];
+          target_monthly_contr = [];
+        }
+      });
     });
-    function sample_post(){
-      data={"github_id":category_select.selected().toString()};
-      console.log("data", data);
-      if(data["github_id"] != ''){ 
-        $.ajax({
-          type:"POST",
-          url: `{% url 'user:comparestat' username='${data["github_id"]}' %}`,
-          data:JSON.stringify(data),
-          dataType: 'json',
-          processData: false,
-          contentType: false,
-          success:function(res){
-              console.log("data pass success",res);
-              if(res.hasOwnProperty('monthly_contr')){
-                target_monthly_contr = res['monthly_contr'];
-              }
-          },
-          error : function(data){
-            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-          }
-        });
-      }
-    }
   </script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <script type="text/javascript">
