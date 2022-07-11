@@ -249,7 +249,7 @@ a.nav-link {
   width: 60px;
   text-align: center;
 }
-#btn-toggle{
+#btn-toggle #btn-post{
   width:90px;
   margin-top: 10px;
   font-size: 14px;
@@ -264,4 +264,8 @@ a.nav-link {
 }
 .card-body.tab-content{
   display: block;
+}
+.ss-main .ss-single-selected > .placeholder{
+    cursor: pointer;
+    background-color: transparent;
 }

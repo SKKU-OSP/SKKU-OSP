@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView
+from django.views.decorators.csrf import csrf_exempt
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from django.contrib.auth.decorators import login_required
@@ -91,15 +92,12 @@ class ProfileView(TemplateView):
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
         own_star = {}
-        own_star_list = []
         star_sum = 0
         for row in star_data:
-            own_star_list.append(row)
             star_sum += row["star"]
             if row["github_id"] == github_id:
                 own_star["star"] = row["star"]
         own_star["avg"] = star_sum/len(star_data)
-        own_star["own_star_list"] = own_star_list
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -226,3 +224,34 @@ class ProfileEditView(TemplateView):
 def student_id_to_username(request, student_id):
     username = Account.objects.get(student_data=student_id).user.username
     return redirect(f'/user/{username}/')
+
+
+@csrf_exempt
+def compare_stat(request, username):
+    if request.method == 'POST':
+        end_year = 2021
+        start_year = 2019
+        data = json.loads(request.body)
+        #data에는 github_id 가 들어있어야한다.
+        github_id = data["github_id"]
+        own_star = 0
+        try:
+            star_data = GithubRepoStats.objects.filter(github_id=github_id).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
+            for sd in star_data:
+                own_star = sd['star']
+        except Exception as e:
+            print(e)
+        
+        monthly_contr = [ [] for i in range(end_year-start_year+1)]
+        gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
+        for row in gitstat_year:
+            row_json = row.to_json()
+            row_json['star'] = own_star
+            if row_json["year"] >= start_year :
+                monthly_contr[row_json["year"]-start_year].append(row_json)
+                
+        context = {
+            "monthly_contr":monthly_contr
+        }
+        
+        return JsonResponse(context)
