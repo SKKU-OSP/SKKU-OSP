@@ -11,6 +11,8 @@ window.onload = function () {
   let is_selected_month = 0;
   let is_selected_factor = 0;
   let is_nomalization = 0;
+  const palette = ["#EBEDF0","#a7e6f6","#49c8fd","#00a4ff","#0677ff"];
+  const factorLabels = ["star", "commit", "pr", "issue", "repo_cr", "repo_co"];
   let visual_ctx = new Array(4);
   for(let i=0; i<3; i++){
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
@@ -34,7 +36,6 @@ window.onload = function () {
       this.className += " active";
       let nav_id = e.target.attributes.id.value;
       let pane_id = nav_id.split("-tab")[0];
-      console.log("pane_id",pane_id);
       let chart_pane = $('#'+pane_id);
       before_pane = $('.tab-pane.show.active')
       before_pane.removeClass("active");
@@ -43,6 +44,33 @@ window.onload = function () {
       chart_pane.addClass("show");
     });
   }
+  $(".year-item").on("click", (e)=>{
+    $("#btnGroupDropYear").text(e.target.innerText);
+    select_year = e.target.innerText;
+    updateMonthly(select_year);
+  });
+  $(".month-item").on("click", (e)=>{
+    $("#btnGroupDropMonth").text(e.target.innerText);
+    select_month = Number(e.target.value);
+    $("rect.ContributionMonth").removeAttr("stroke");
+    $("rect.ContributionMonth").removeAttr("stroke-width");
+    $(`rect.ContributionMonth[month=${select_month}]`).attr({"stroke":"#fc2121", "stroke-width":"2px"});
+    hideTooltip();
+    updateFactor(factorLabels, select_month);
+  });
+  $(".factor-item").on("click", (e)=>{
+    $("#btnGroupDropFactor").text(e.target.innerText);
+    chartFactor = (e.target.innerText).toLowerCase();
+    if(chartFactor == "score"){
+      chartFactor = "score_sum";
+    }
+    $("rect.ContributionFactor").attr("focus", 0);
+    $("rect.ContributionFactor").removeAttr("stroke");
+    $("rect.ContributionFactor").removeAttr("stroke-width");
+    hideTooltip();
+    updateFactor(factorLabels, select_month);
+    $(`rect.ContributionFactor[factor="${chartFactor}"]`).attr({"stroke":"#fc2121", "stroke-width":"2px"});
+  });
   $("#btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
     makeRadarChart(is_nomalization, select_month);
@@ -71,7 +99,6 @@ window.onload = function () {
   let factor_contribution_level = Array(6).fill(0);
   let target_contribution = Array(6).fill(0);
   let target_contribution_level = Array(6).fill(0);
-  const factorLabels = ["star", "commit", "pr", "issue", "repo_cr", "repo_co"];
   
   let start = new Date();
   updateMonthly(select_year);
@@ -91,7 +118,6 @@ window.onload = function () {
       else {
         monthly_contribution_level[mid] = 4;
       }
-      
     }
     
     clearChildElement(div_activity_monthly);
@@ -141,6 +167,8 @@ window.onload = function () {
         if(month == monthly_contr[i]['month']){
           mid = i;
         }
+      }
+      for(let i=0; i<target_monthly_contr.length;i++){
         if(month == target_monthly_contr[i]['month']){
           tid = i;
         }
@@ -216,24 +244,14 @@ window.onload = function () {
         mLabel.setAttributeNS(null, "font-size", "15px");
         mLabel.style.fill = "black";
         mLabel.textContent = month_label[mIdx];
-        switch(level){
-          case 0:
-            rect.style.fill = "#EBEDF0"; break;
-          case 1:
-            rect.style.fill = "#9BE9A8"; break;
-          case 2:
-            rect.style.fill = "#40C463"; break;
-          case 3:
-            rect.style.fill = "#30A14E"; break;
-          case 4:
-            rect.style.fill = "#216E39"; break;
-        }
+        rect.style.fill = palette[level];
         if(monthly_contr.length>mIdx){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
             is_selected_month = focus;
             chartFactor="score_sum";
+            $("#btnGroupDropFactor").text("Score");
 
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
@@ -253,6 +271,7 @@ window.onload = function () {
               e.target.removeAttribute("stroke");
               e.target.removeAttribute("stroke-width");
             }
+            $("#btnGroupDropMonth").text($(`.month-item[value=${select_month}]`).text());
             e.target.attributes[2].value = focus;
             updateFactor(factorLabels, select_month);
           });
@@ -292,18 +311,7 @@ window.onload = function () {
       fLabel.setAttributeNS(null, "font-size", "15px");
       fLabel.style.fill = "black";
       fLabel.textContent = factor_label[col];
-      switch(level){
-        case 0:
-          rect.style.fill = "#EBEDF0"; break;
-        case 1:
-          rect.style.fill = "#9BE9A8"; break;
-        case 2:
-          rect.style.fill = "#40C463"; break;
-        case 3:
-          rect.style.fill = "#30A14E"; break;
-        case 4:
-          rect.style.fill = "#216E39"; break;
-      }
+      rect.style.fill = palette[level];
       
       rect.style.cursor = "pointer";
       rect.addEventListener("click",(e) =>{
@@ -697,7 +705,7 @@ window.onload = function () {
     return {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: chartFactor.split("_")[0].toUpperCase(), 
+        title: {display: true, text: String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포", 
         font: { size: 20 }},
         tooltip: {
           callbacks: {
