@@ -96,6 +96,9 @@ class Account(models.Model):
     photo = models.ImageField(upload_to='img/profile_img', default='default.jpg')
     portfolio = models.TextField(default='')
 
+    def __str__(self) -> str:
+        return f'{self.user.username}'
+    
     class Meta:
         ordering  = ['student_data']
 
