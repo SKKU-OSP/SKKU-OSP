@@ -249,7 +249,7 @@ a.nav-link {
   width: 60px;
   text-align: center;
 }
-#btn-toggle #btn-post{
+#btn-toggle #btn-compare{
   width:90px;
   margin-top: 10px;
   font-size: 14px;
@@ -267,6 +267,20 @@ a.nav-link {
 }
 
 .ss-main .ss-single-selected > .placeholder{
-    cursor: pointer;
-    background-color: transparent;
+  cursor: pointer;
+  background-color: transparent;
+  opacity: 1;
+}
+.btn-group-filter{
+  display: flex;
+  justify-content: flex-end;
+}
+.dropdown-toggle{
+  font-size: 14px;
+}
+.dropdown-item{
+  font-size: 12px;
+}
+.dropdown-menu{
+  --bs-dropdown-min-width: 7rem;
 }

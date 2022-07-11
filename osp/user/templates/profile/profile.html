@@ -188,18 +188,57 @@
                   <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
                 </ul>
                 <div class="tab-content">
+                  <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
+                    <div class="btn-group" role="group">
+                      <button id="btnGroupDropYear" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        2021
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropYear">
+                        <li><button class="dropdown-item year-item">2022</button></li>
+                        <li><button class="dropdown-item year-item">2021</button></li>
+                        <li><button class="dropdown-item year-item">2020</button></li>
+                        <li><button class="dropdown-item year-item">2019</button></li>
+                      </ul>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <button id="btnGroupDropMonth" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        ALL
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropMonth">
+                        <li><button class="dropdown-item month-item" value="0">ALL</button></li>
+                        <li><button class="dropdown-item month-item" value="1">JAN</button></li>
+                        <li><button class="dropdown-item month-item" value="2">FEB</button></li>
+                        <li><button class="dropdown-item month-item" value="3">MAR</button></li>
+                        <li><button class="dropdown-item month-item" value="4">APR</button></li>
+                        <li><button class="dropdown-item month-item" value="5">MAY</button></li>
+                        <li><button class="dropdown-item month-item" value="6">JUN</button></li>
+                        <li><button class="dropdown-item month-item" value="7">JUL</button></li>
+                        <li><button class="dropdown-item month-item" value="8">AUG</button></li>
+                        <li><button class="dropdown-item month-item" value="9">SEP</button></li>
+                        <li><button class="dropdown-item month-item" value="10">OCT</button></li>
+                        <li><button class="dropdown-item month-item" value="11">NOV</button></li>
+                        <li><button class="dropdown-item month-item" value="12">DEC</button></li>
+                      </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                      <button id="btnGroupDropFactor" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Score
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropFactor">
+                        <li><button class="dropdown-item factor-item">Score</button></li>
+                        <li><button class="dropdown-item factor-item">Star</button></li>
+                        <li><button class="dropdown-item factor-item">Commit</button></li>
+                        <li><button class="dropdown-item factor-item">PR</button></li>
+                        <li><button class="dropdown-item factor-item">Issue</button></li>
+                      </ul>
+                    </div>
+                  </div>
                   <div class="tab-pane fade show active mt-2" id="pills-overview">
                     <div class="d-flex">
-                      <div class="vertical-menu">
-                        <button class="btn-year">2022</button>
-                        <button class="btn-year active">2021</button>
-                        <button class="btn-year">2020</button>
-                        <button class="btn-year">2019</button>
-                      </div>
                       <svg id="activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
                     </div>
                     <div class="d-flex">
-                      <div class="vertical-menu"></div>
                       <svg id="activity-factor" class="grass half" viewBox="0 0 480 96">
                         <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                         </g>
