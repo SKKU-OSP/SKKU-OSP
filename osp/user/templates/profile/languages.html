@@ -1,12 +1,83 @@
 {% load static %}
+{% load tag_templatetag %}
+{% block content %}
+<div>
+    <p>LEVEL 3</p>
+    {% for row in data.ints %}
+        {% if row.level == 3 %}
+        <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
+            <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
+            <span class="badge badge-light">x</span>
+        </button>
+        {% endif %}
+    {% endfor %}
+</div>
+<div>
+    <p>LEVEL 2</p>
+    {% for row in data.ints %}
+        {% if row.level == 2 %}
+        <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
+            <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
+            <span class="badge badge-light">x</span>
+        </button>
+        {% endif %}
+    {% endfor %}
+</div>
+<div>
+    <p>LEVEL 1</p>
+    {% for row in data.ints %}
+        {% if row.level == 1 %}
+        <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
+            <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
+            <span class="badge badge-light">x</span>
+        </button>
+        {% endif %}
+    {% endfor %}
+</div>
+<div class="row">
+    <div class="col">
+        <div class="col-md-12 mb-3">
+            <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
+            <select name="preferLanguage" id="preferLanguage">
+                    {% category_tag request %}
+            </select>
+        </div>   
+    </div>
+    <div class="col">
+        <div class="col-md-12 mb-3">
+            <label for="tagLevel" class="form-label">Level</label>
+            <select name="tagLevel" id="tagLevel" >
+                <option value=1>Level 1</option>
+                <option value=2>Level 2</option>
+                <option value=3>Level 3</option>
+            </select>
+        </div> 
+    </div>
 
-{% for row in data.tags %}
-<input type="checkbox" class="btn-check" id="btn-check-interest" autocomplete="off">
-<label class="btn btn-outline-primary m-1" style="padding: 2px; height: 25px" for="btn-check-interest"><span style="font-size: 8pt">{{row.name}}</span></label>
-{% endfor %}
+    <div class="col">
+        <div class="col-md-12 mb-3">
+            <button type="submit" class="btn btn-secondary" name="action" value="append">추가</button>
+        </div>
+    </div>
+</div>
 
-<input type="checkbox" class="btn-check checkbox" id="btn-check-language1" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-language1">Language 1</label>
+{% endblock %}
 
-<input type="checkbox" class="btn-check" id="btn-check-language2" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-language2">Language 22</label>
+{% block script %}
+<script>
+    var category_select
+    $(document).ready(function(){
+        category_select = new SlimSelect({
+        select: '#preferLanguage'
+        })
+    });
+</script>
+<script>
+    var category_select
+    $(document).ready(function(){
+        category_select = new SlimSelect({
+        select: '#tagLevel'
+        })
+    });
+</script>
+{% endblock %}

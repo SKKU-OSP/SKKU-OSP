@@ -1,9 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.views.generic import TemplateView
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
+from tag.models import Tag
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
@@ -171,26 +173,51 @@ class ProfileEditView(TemplateView):
 
         info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
 
-        if info_form.is_valid():
-            print('Info is valid form')
-            info_form.save()
+        added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
+        added_level = request.POST.get('tagLevel') # 선택 된 레벨
+        added_tag = Tag.objects.get(name=added_preferLanguage)
 
-        # 이미지의 용량을 제한 해야함
-        pre_img = user_account.photo.path
-        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-        if img_form.is_valid():
+        if(request.POST.get('action') == 'append'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
             try:
-                os.remove(pre_img) # 기존 이미지 삭제
-            except:                # 기존 이미지가 없을 경우에 pass
-                pass
-            print('Image is valid form')
-            img_form.save()
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+                already_ints.delete()
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
 
-        port_form = PortfolioUploadForm(request.POST, request.FILES, instance=user_account)
-        if port_form.is_valid():
-            print('Portfolio is valid form')
-            port_form.save()
+        elif(request.POST.get('action') == 'save'): # 저장 버튼 눌렀을 경우
+            if info_form.is_valid():
+                print('Info is valid form')
             
+                info_form.save()
+
+            # 이미지의 용량을 제한 해야함
+            pre_img = user_account.photo.path
+            img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+            if img_form.is_valid():
+                if 'photo' in request.FILES: # 폼애 이미지가 있으면
+                    try:
+                        os.remove(pre_img) # 기존 이미지 삭제
+                    except:                # 기존 이미지가 없을 경우에 pass
+                        pass
+
+                print('Image is valid form')
+                img_form.save()
+
+            port_form = PortfolioUploadForm(request.POST, request.FILES, instance=user_account)
+            if port_form.is_valid():
+                print('Portfolio is valid form')
+                port_form.save()
+            
+            if info_form.is_valid() and img_form.is_valid() and port_form.is_valid(): # 저장 성공시 메세지
+                messages.add_message(request, messages.SUCCESS, '프로필이 성공적으로 저장되었습니다!')
+
+        elif(request.POST.get('action').split(maxsplit=1)[0] == 'delete'):
+            delete_requested_tagname = request.POST.get('action').split(maxsplit=1)[1]
+            delete_requested_tag = Tag.objects.get(name=delete_requested_tagname)
+            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+            print("Selected tag is successfully deleted")
+
         return redirect(f'/user/{username}/profile-edit/')
 
     def get(self, request, *args, **kwargs):
@@ -201,6 +228,13 @@ class ProfileEditView(TemplateView):
         student_account = Account.objects.get(user=user.id)
         student_id = student_account.student_data.id
         student_info = StudentTab.objects.get(id=student_id)
+        
+        # developing....
+        tags_all = Tag.objects
+        tags_lang = tags_all.filter(type='language').values('name')
+        ints = AccountInterest.objects.filter(account=student_account)
+        # developing....
+
 
         info_form = ProfileInfoUploadForm()
         img_form = ProfileImgUploadForm()
@@ -215,6 +249,8 @@ class ProfileEditView(TemplateView):
             'account': student_account,
             'form': form,
             'info': student_info,
+            'ints': ints,
+            'tags_lang' : tags_lang
         }
         return render(request, 'profile/profile-edit.html', {'data': data})
 

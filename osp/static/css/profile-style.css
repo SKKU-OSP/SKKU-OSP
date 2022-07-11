@@ -265,3 +265,8 @@ a.nav-link {
 .card-body.tab-content{
   display: block;
 }
+
+.ss-main .ss-single-selected > .placeholder{
+  cursor: pointer;
+  background-color: transparent;
+}
