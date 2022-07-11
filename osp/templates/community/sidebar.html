@@ -1,5 +1,5 @@
 {% load community_tag %}
-{% load tag_templatetag %}
+{% load static %}
 <div class="row m-2" id="profile-tab">
     <div class="col-6"><img class="w-100">
         <!--src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"-->
@@ -32,7 +32,7 @@
         </li>
         {% board_sidebar_items request %}
         {% if user.is_authenticated %}
-        <li class="list-group-item text-primary" data-bs-toggle="modal" data-bs-target="#AddTeamModal">
+        <li class="list-group-item text-primary" id="team-create">
             <i class="bi-plus"></i>
             Make Team
         </li>
@@ -41,54 +41,6 @@
 </div>
 {% if user.is_authenticated %}
 <div class="modal fade" id="AddTeamModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">팀 생성</h5>
-            </div>
-            <div class="modal-body">
-                <form class="needs-validation row" novalidate>
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="team-name-input" class="form-label">팀 이름</label>
-                        <input type="text" id="team-name-input" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="team-desc-input" class="form-label">팀 설명</label>
-                        <input type="text" id="team-desc-input" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="team-image-input" class="form-label">팀 프로필 이미지</label>
-                        <input class="form-control" type="file" id="team-image-input">
-                    </div>
-                    <div class="mb-3">
-                        <label for="tag-selector" class="form-label">팀 분야</label>
-                        <select name="" id="tag-selector" multiple>
-                            {% category_tag request %}
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary" id="team-submit">Submit</button>
-            </div>
-        </div>
-    </div>
 </div>
-<script>
-$().ready(function() {
-    new_team_tag = new SlimSelect({
-        select: '#tag-selector',
-        onChange: (selected_list) => {
-            for (selected of selected_list) {
-                $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
-            }
-        }
-    });
-    $('#team-submit').click(function(){
-        console.log('Submit');
-    });
-});
-</script>
+<script src="{% static 'js/community_sidebar.js' %}"></script>
 {% endif %}
