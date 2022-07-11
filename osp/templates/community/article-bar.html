@@ -43,7 +43,7 @@
                             기간: {{article.period_start|date:'y/m/d H:m'}} ~ {{article.period_end|date:'y/m/d H:m'}}
                         </div>
                     {% endif %}
-                        <div>
+                        <div style="white-space: nowrap;">
                         {% for tag in article.tags %}
                             <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
                         {% endfor %}
