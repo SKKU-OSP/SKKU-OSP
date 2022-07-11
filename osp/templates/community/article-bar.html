@@ -20,13 +20,21 @@
                     {% if bartype == 'compact' %}
                     <div class="d-flex justify-content-between my-auto col-6">
                         <div class="fw-bold text-muted">
-                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% if article.anonymous_writer %}
+                                익명
+                            {% else %}
+                                <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% endif %}
                         </div>
                         <div class="fw-bold text-muted">{{article.pub_date|time_before}}</div>
                     {% elif bartype == 'normal' %}
                     <div class="d-flex justify-content-between my-auto col-3">
                         <div class="text-muted">
-                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% if article.anonymous_writer %}
+                                익명
+                            {% else %}
+                                <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% endif %}     
                         </div>
                         <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
                     {% endif %}
