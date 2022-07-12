@@ -86,8 +86,6 @@ def board(request, board_name, board_id):
     return render(request, 'community/board/board.html', context)
 
 def article_list(request, board_name, board_id):
-    print(board_name)
-    print(board_id)
     try:
         # board = Board.objects.get(name=board_name)
         board = Board.objects.get(id=board_id)
@@ -158,7 +156,6 @@ def article_list(request, board_name, board_id):
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
-    print('done')
     return JsonResponse(result)
 
 
@@ -184,34 +181,23 @@ class ArticleRegisterView(TemplateView):
 
 
 class ArticleView(TemplateView):
-    print('hi')
+
+    @csrf_exempt
     def get(self, request, *args, **kwargs):
-        print('here3')
         context = self.get_context_data(request, *args, **kwargs)
-        print('here3')
         context['type'] = 'view'
-        print('here3')
         article_id = kwargs.get('article_id')
-        print('here1')
         try:
-            print('here')
-            print(article_id)
             context['article'] = Article.objects.get(id=article_id)
-            print('5')
             context['tags'] = ArticleTag.objects.filter(article__id=article_id)
-            print('4')
             context['board'] = Board.objects.get(id=context['article'].board_id_id)
-            print('3')
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
-            print('1')
             if context['board'].name == 'Team':
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
                     context['article'].team = teamrecruit.team
-            print('2')
         except:
             s = 1
-            print('hiih')
         context['article'].view_cnt += 1
         context['article'].save()
 
