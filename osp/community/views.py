@@ -49,6 +49,8 @@ def main(request):
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
+
+
         board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
         board_list.append(board)
     return render(request, 'community/main.html', {'boards': board_list})
@@ -131,8 +133,12 @@ def article_list(request, board_name):
         article.comment_cnt = comment_cnt
         article.like_cnt = like_cnt
         article.tags = tags
+        if board.name == 'Team':
+            article.team = TeamRecruitArticle.objects.get(article=article).team
+
         if board.board_type == 'Team':
             article.team = TeamRecruitArticle.objects.get(article=article).team
+
         if board.board_type == 'QnA':
             comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
                 ArticleComment.objects.filter(article=article).values('id'))\
@@ -182,7 +188,7 @@ class ArticleView(TemplateView):
             if context['board'].name == 'Team':
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
-                    context['team'] = Team.objects.filter(id=teamrecruit.team.id).first()
+                    context['article'].team = teamrecruit.team
         except:
             return redirect('community:Community-Main')
         context['article'].view_cnt += 1
@@ -201,7 +207,7 @@ class ArticleView(TemplateView):
         if context['board'].name == 'Team':
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
-                context['team'] = Team.objects.filter(id=teamrecruit.team.id).first()
+                context['article'].team = teamrecruit.team
 
         result = {}
         result['html'] = render_to_string('community/article/includes/content-edit.html', context)

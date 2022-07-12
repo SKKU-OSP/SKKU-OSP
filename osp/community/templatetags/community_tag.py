@@ -69,8 +69,9 @@ def board_sidebar_items(request):
 
 @register.simple_tag
 def team_options(user):
+    account = Account.objects.get(user=user)
     result = '<option value="" disabled selected>팀 선택</option>'
-    li = TeamMember.objects.filter(member=22).values_list('team_id')
+    li = TeamMember.objects.filter(member=account).values_list('team_id')
     teams = Team.objects.filter(id__in=li)
     for team in teams:
         result += f'<option value="{team.id}">{team.name}</option>'

@@ -25,9 +25,11 @@
                 </div>
                 <div style="flex:1">{{ comment.body }}</div>
                 <div class="d-flex flex-row justify-content-end" style="">
+                {% if request.user == comment.writer.user %}
                 <div style="line-height:40px;padding-left:10px;">
                     <span style="cursor:pointer" onclick="deleteComment({{ comment.id }});">삭제</span>
                 </div>
+                {% endif %}
                 <div style="height:40px;line-height:31px;padding-left:10px;" class="d-flex flex-column">
                 <div style="height:10px;font-size:5px;">
                     {{ article.pub_date|time_before }}
