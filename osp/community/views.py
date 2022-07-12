@@ -8,7 +8,7 @@ from django.db.models import Q, Count
 from .models import *
 from tag.models import Tag
 
-from team.models import TeamRecruitArticle, TeamMember, Team
+from team.models import TeamRecruitArticle, TeamMember, Team, TeamTag
 from user.models import Account
 from datetime import datetime, timedelta
 import hashlib
@@ -68,7 +68,16 @@ def board(request, board_name):
             article.team = TeamRecruitArticle.objects.get(article=article).team
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-    
+    if board.board_type == 'Team':
+        team = Team.objects.get(name=board.name)
+        team_tags = TeamTag.objects.filter(team=team)
+        team_members = TeamMember.objects.filter(team=team)
+        my_acc = Account.objects.get(user=request.user)
+        context['team_admin'] = team_members.get(member=my_acc).is_admin
+        context['team'] = team
+        context['team_tags'] = team_tags
+        context['team_members'] = team_members
+        context['team_admin']
     return render(request, 'community/board/board.html', context)
 
 def article_list(request, board_name):

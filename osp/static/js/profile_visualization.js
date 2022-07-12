@@ -11,6 +11,8 @@ window.onload = function () {
   let is_selected_month = 0;
   let is_selected_factor = 0;
   let is_nomalization = 0;
+  const palette = ["#EBEDF0","#a7e6f6","#49c8fd","#00a4ff","#0677ff"];
+  const factorLabels = ["star", "commit", "pr", "issue", "repo_cr", "repo_co"];
   let visual_ctx = new Array(4);
   for(let i=0; i<3; i++){
     visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
@@ -34,7 +36,6 @@ window.onload = function () {
       this.className += " active";
       let nav_id = e.target.attributes.id.value;
       let pane_id = nav_id.split("-tab")[0];
-      console.log("pane_id",pane_id);
       let chart_pane = $('#'+pane_id);
       before_pane = $('.tab-pane.show.active')
       before_pane.removeClass("active");
@@ -43,28 +44,61 @@ window.onload = function () {
       chart_pane.addClass("show");
     });
   }
-  let btn_toggle = document.getElementById("btn-toggle");
-  btn_toggle.addEventListener("click", (e)=>{
+  $(".year-item").on("click", (e)=>{
+    $("#btnGroupDropYear").text(e.target.innerText);
+    select_year = e.target.innerText;
+    updateMonthly(select_year);
+  });
+  $(".month-item").on("click", (e)=>{
+    $("#btnGroupDropMonth").text(e.target.innerText);
+    select_month = Number(e.target.value);
+    $("rect.ContributionMonth").removeAttr("stroke");
+    $("rect.ContributionMonth").removeAttr("stroke-width");
+    $(`rect.ContributionMonth[month=${select_month}]`).attr({"stroke":"#fc2121", "stroke-width":"2px"});
+    hideTooltip();
+    updateFactor(factorLabels, select_month);
+  });
+  $(".factor-item").on("click", (e)=>{
+    $("#btnGroupDropFactor").text(e.target.innerText);
+    chartFactor = (e.target.innerText).toLowerCase();
+    if(chartFactor == "score"){
+      chartFactor = "score_sum";
+    }
+    $("rect.ContributionFactor").attr("focus", 0);
+    $("rect.ContributionFactor").removeAttr("stroke");
+    $("rect.ContributionFactor").removeAttr("stroke-width");
+    hideTooltip();
+    updateFactor(factorLabels, select_month);
+    $(`rect.ContributionFactor[factor="${chartFactor}"]`).attr({"stroke":"#fc2121", "stroke-width":"2px"});
+  });
+  $("#btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
-    makeRadarChart(is_nomalization);
+    makeRadarChart(is_nomalization, select_month);
     if(is_nomalization){
-      e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/100 값입니다.");
-      e.target.textContent = "raw";
+      e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/10 값입니다.");
+      e.target.textContent = "raw 값";
     }
     else{
       e.target.setAttribute("title","평균을 10점으로 맞추어 자신의 점수를 비교하기 쉽게 만듭니다.");
-      e.target.textContent = "nomalize";
+      e.target.textContent = "정규화";
     }
+  });
+  $("#btn-compare").on("click", function(){
+    if(target_yearly_contr.length>0){
+      target_monthly_contr = target_yearly_contr[select_year-start_year];
+    }
+    updateMonthly(select_year);
   });
   const div_activity_monthly = document.getElementById("activity-monthly");
   let factor_grass = document.getElementById("factor-grass");
-  let monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
-  console.log("monthly_contr", monthly_contr);
+  let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
+
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
   let factor_contribution_level = Array(6).fill(0);
-  const factorLables = ["commit", "star", "pr", "issue", "repo_cr", "repo_co"];
+  let target_contribution = Array(6).fill(0);
+  let target_contribution_level = Array(6).fill(0);
   
   let start = new Date();
   updateMonthly(select_year);
@@ -73,24 +107,26 @@ window.onload = function () {
 
   function updateMonthly(select_year){
     
-    monthly_contr = JSON.parse(chart_data["monthly_contr"][select_year-start_year]);
+    monthly_contr = chart_data["monthly_contr"][select_year-start_year];
     for(let i=0; i<monthly_contr.length; i++){
       let total = monthly_contr[i]["total"];
-      monthly_contribution[i] = total;
+      let mid = monthly_contr[i]['month']-1;
+      monthly_contribution[mid] = total;
       if(total<=30){
-        monthly_contribution_level[i] = Math.ceil(total / 10);
+        monthly_contribution_level[mid] = Math.ceil(total / 10);
       }
       else {
-        monthly_contribution_level[i] = 4;
+        monthly_contribution_level[mid] = 4;
       }
     }
+    
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
     is_selected_factor = 0;
     hideTooltip();
     makeMonthGrass();
     select_month = 0;
-    updateFactor(factorLables, select_month);
+    updateFactor(factorLabels, select_month);
   }
   function clearChildElement(element){
     let child = element.lastElementChild;
@@ -99,26 +135,61 @@ window.onload = function () {
       child = element.lastElementChild;
     }
   }
-  function updateFactor(factorLables, month=0) { 
-    console.log("updateFactor")
+  function updateFactor(factorLabels, month=0) { 
+    if(target_yearly_contr.length > 0)
+      target_monthly_contr = target_yearly_contr[select_year-start_year];
+    console.log("updateFactor", target_monthly_contr);
     if(month == 0){
       //initialize
-      for(let i=0; i<factorLables.length; i++) {
+      for(let i=0; i<factorLabels.length; i++) {
         factor_contribution[i] = 0;
+        target_contribution[i] = 0;
       }
-      for(let i=0; i<monthly_contr.length; i++) {
-        for(let j=0; j<factorLables.length; j++) {
-          factor_contribution[j] += monthly_contr[i][factorLables[j]];
+      for(let j=0; j<factorLabels.length; j++) {
+        for(let i=0; i<monthly_contr.length; i++){
+          factor_contribution[j] += monthly_contr[i][factorLabels[j]];
+        }
+        if(factorLabels[j] == "star" && monthly_contr.length > 0){
+          factor_contribution[j] = monthly_contr[0][factorLabels[j]];
+        }
+        for(let i=0; i<target_monthly_contr.length; i++){
+          target_contribution[j] += target_monthly_contr[i][factorLabels[j]];
+        }
+        if(factorLabels[j] == "star" && target_monthly_contr.length > 0){
+          target_contribution[j] = target_monthly_contr[0][factorLabels[j]];
         }
       }
     }
     else{
-      for(let j=0; j<factorLables.length; j++){
-        factor_contribution[j] = monthly_contr[month-1][factorLables[j]];
+      let mid = -1;
+      let tid = -1;
+      for(let i=0; i<monthly_contr.length;i++){
+        if(month == monthly_contr[i]['month']){
+          mid = i;
+        }
+      }
+      for(let i=0; i<target_monthly_contr.length;i++){
+        if(month == target_monthly_contr[i]['month']){
+          tid = i;
+        }
+      }
+      for(let j=0; j<factorLabels.length; j++){
+        if(mid != -1){
+          factor_contribution[j] = monthly_contr[mid][factorLabels[j]];
+        }
+        else{
+          factor_contribution[j] = 0;
+        }
+        if(tid != -1){
+          target_contribution[j] = monthly_contr[tid][factorLabels[j]];
+        }else{
+          target_contribution[j] = 0;
+        }
       }
     }
-    for(let i=0; i<factorLables.length; i++){
+    for(let i=0; i<factorLabels.length; i++){
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
+      target_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
     }
     clearChildElement(factor_grass);
     makeFactorGrass();
@@ -127,14 +198,14 @@ window.onload = function () {
   function getDataLevel(value, type, isMonthly=true){
     let level = 0;
     if (isMonthly) {
-      if (type === 0) level = Math.ceil(value / 25);
-      else if (type === 2)  level = value;
+      if (type === 1) level = Math.ceil(value / 25);
+      else if (type === 0)  level = Math.ceil(value / 2);
       else if (type === 2)  level = Math.ceil(value / 3);
       else level = Math.ceil(value / 2);
     }
     else {
-      if (type === 0) level = Math.ceil(value / 100);
-      else if (type === 1)  level = Math.ceil(value / 2);
+      if (type === 1) level = Math.ceil(value / 100);
+      else if (type === 0)  level = Math.ceil(value / 2);
       else if (type === 2)  level = Math.ceil(value / 5);
       else level = Math.ceil(value / 4);
     }
@@ -173,24 +244,14 @@ window.onload = function () {
         mLabel.setAttributeNS(null, "font-size", "15px");
         mLabel.style.fill = "black";
         mLabel.textContent = month_label[mIdx];
-        switch(level){
-          case 0:
-            rect.style.fill = "#EBEDF0"; break;
-          case 1:
-            rect.style.fill = "#9BE9A8"; break;
-          case 2:
-            rect.style.fill = "#40C463"; break;
-          case 3:
-            rect.style.fill = "#30A14E"; break;
-          case 4:
-            rect.style.fill = "#216E39"; break;
-        }
+        rect.style.fill = palette[level];
         if(monthly_contr.length>mIdx){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
             is_selected_month = focus;
             chartFactor="score_sum";
+            $("#btnGroupDropFactor").text("Score");
 
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
@@ -210,8 +271,9 @@ window.onload = function () {
               e.target.removeAttribute("stroke");
               e.target.removeAttribute("stroke-width");
             }
+            $("#btnGroupDropMonth").text($(`.month-item[value=${select_month}]`).text());
             e.target.attributes[2].value = focus;
-            updateFactor(factorLables, select_month);
+            updateFactor(factorLabels, select_month);
           });
         }
         gr.appendChild(rect);
@@ -225,14 +287,14 @@ window.onload = function () {
   /* Grass for Factor */
   function makeFactorGrass(){
     console.log("mFG: y",select_year,"m",select_month,"ftr_contr", factor_contribution);
-    const factor_label = ["COMMIT", "STAR", "PR", "ISSUE", "CR", "CO"];
+    const factor_label = ["STAR", "COMMIT", "PR", "ISSUE", "CR", "CO"];
     const fs = 15;
     for(let col = 0; col < 6; col++){
       let rect = document.createElementNS(NS,"rect");
       let ctb = factor_contribution[col];
       let level = factor_contribution_level[col];
       let fLabel = document.createElementNS(NS,"text");
-      rect.setAttributeNS(null,"factor", factorLables[col]);
+      rect.setAttributeNS(null,"factor", factorLabels[col]);
       rect.setAttributeNS(null,"raw", ctb);
       rect.setAttributeNS(null,"focus", 0);
       rect.setAttributeNS(null,"x", (col)*(grass_size+fs)+fs);
@@ -249,18 +311,7 @@ window.onload = function () {
       fLabel.setAttributeNS(null, "font-size", "15px");
       fLabel.style.fill = "black";
       fLabel.textContent = factor_label[col];
-      switch(level){
-        case 0:
-          rect.style.fill = "#EBEDF0"; break;
-        case 1:
-          rect.style.fill = "#9BE9A8"; break;
-        case 2:
-          rect.style.fill = "#40C463"; break;
-        case 3:
-          rect.style.fill = "#30A14E"; break;
-        case 4:
-          rect.style.fill = "#216E39"; break;
-      }
+      rect.style.fill = palette[level];
       
       rect.style.cursor = "pointer";
       rect.addEventListener("click",(e) =>{
@@ -285,7 +336,7 @@ window.onload = function () {
           e.target.removeAttribute("stroke-width");
         }
         e.target.attributes[2].value = focus;
-        if(factor_label[col].toLowerCase() == factorLables[col]){
+        if(factor_label[col].toLowerCase() == factorLabels[col]){
           destroyChart(chartObjList, chartObjList.length);
           chartObjList = [];
           makePage(chart_data);
@@ -301,13 +352,13 @@ window.onload = function () {
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
-    else if(label == "commit") return 1/100;
+    else if(label == "commit") return 1/10;
     else return 1;
   }
   function makePage(chart_data){
     console.log("makePage");
-    let student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    console.log("student_data", student_data);
+    let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    console.log("user_data", user_data);
     let annual_data = chart_data["annual_overview"];
     console.log("annual_data", annual_data);
     let score_data = chart_data["score_data"];
@@ -315,15 +366,7 @@ window.onload = function () {
     
     const baseColor = "#174adf";
     const userColor = "#ffe522";
-    const cc6 = [
-      "#4245cb",
-      "#c629b6",
-      "#ff268a",
-      "#ff6657",
-      "#ffab21",
-      "#ffe913",
-    ];
-    makeRadarChart(is_nomalization);
+    makeRadarChart(is_nomalization, select_month);
     
     /* Chart 2: 분포도 히스토그램 */
     function newArrayRange(start, end, step=1, fix_point=0){
@@ -379,7 +422,7 @@ window.onload = function () {
     }
     let factor_scope_label = newArrayScope(factor_Xaxis_label);
     let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
-    let colorIdx = findDistIdx(factor_Xaxis_label, Number(student_data[chartFactor]));
+    let colorIdx = findDistIdx(factor_Xaxis_label, Number(user_data[chartFactor]));
     let paramColor = [];
 
     for(let i=0; i<factor_scope_label.length; i++){
@@ -460,35 +503,106 @@ window.onload = function () {
     chartObjList.push(specific_score_chart);
   }
 
-  function makeRadarChart(is_nomalization=0){
-    const annual_data = chart_data["annual_overview"];
-    const student_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
+  function makeRadarChart(is_nomalization=0, month=0){
     const radar_labels = ["commits", "stars", "issues", "PRs"];
     const radar_label_keys = ["commit", "star", "issue", "pr"];
     const average_data = [];
     const coeffs = {};
-    radar_label_keys.forEach((label)=>{
-      let annual_value = annual_data[label][select_year-start_year];
-      let coeff = getNormalCoeff(annual_value, label, is_nomalization);
-      coeffs[label] = coeff;
-      average_data.push(coeff * annual_data[label][select_year-start_year]);
-    });
-    const user_data = [];
-    radar_label_keys.forEach((label)=>{
-        user_data.push(coeffs[label] * student_data[label]);
-    });
+    const user_dataset = [];
+    const target_dataset = [];
+    let avg_data = {};
+    let user_data = {};
+    let target_data = {};
+    if(month == 0){
+      avg_data = chart_data["annual_overview"];
+      avg_data['star'] = chart_data['own_star']['avg'];
+      factorLabels.forEach((label)=>{
+        if(Array.isArray(avg_data[label])){
+          avg_data[label] = avg_data[label][select_year-start_year];
+        }
+      });
+      factorLabels.forEach((label, idx)=>{
+        user_data[label] = factor_contribution[idx];
+        target_data[label] = target_contribution[idx];
+      })
+    }else{
+      avg_data = chart_data["monthly_avg"][select_year-start_year][month-1];
+      avg_data['star'] = chart_data['own_star']['avg'];
+      factorLabels.forEach((label, idx)=>{
+        user_data[label] = factor_contribution[idx];
+        target_data[label] = target_contribution[idx];
+      });
+    }
 
-    console.log("average_data", average_data);
-    console.log("user_data", user_data);
+    radar_label_keys.forEach((label)=>{
+        let factor_value = avg_data[label];
+        let coeff = getNormalCoeff(factor_value, label, is_nomalization);
+        coeffs[label] = coeff;
+        average_data.push(coeff * factor_value);
+      });
     
+    radar_label_keys.forEach((label)=>{
+        user_dataset.push(coeffs[label] * user_data[label]);
+        target_dataset.push(coeffs[label] * target_data[label]);
+    });
+    
+    let radar_title = select_year + "년 " + month + "월 기여도 비교";
+    if(month == 0) radar_title = select_year + "년 기여도 비교";
+    if(is_nomalization) radar_title = radar_title + "(정규화)";
     const radarOption = {
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
+        title: {display: true, text: radar_title, 
+          font: { size: 20 }},
       },
       responsive: true,
     };
+    const radar_datasets = [];
+    radar_datasets.push({ // 전체 평균
+              type: "radar",
+              label: "average",
+              data: average_data,
+              backgroundColor: "rgba(0, 0, 200, 0.3)",
+              hoverBackgroundColor: "rgba(0, 0, 200, 0.9)",
+              borderColor: "rgba(0, 0, 200, 0.5)",
+              hoverBorderColor: "rgba(0, 0, 200, 1)",
+              borderWidth: 1,
+            });
+    radar_datasets.push({ // 유저
+              type: "radar",
+              label: chart_data['username'],
+              data: user_dataset,
+              backgroundColor: "rgba(200, 0, 0, 0.3)",
+              hoverBackgroundColor: "rgba(200, 0, 0, 0.9)",
+              borderColor: "rgba(200, 0, 0, 0.5)",
+              hoverBorderColor: "rgba(200, 0, 0, 1)",
+              borderWidth: 1,
+            });
+    if($(".placeholder").text() != chart_data["username"] && 
+    $(".placeholder").text() != "비교없음"){
+      radar_datasets.push({ // 비교 유저
+              type: "radar",
+              label: $(".placeholder").text(),
+              data: target_dataset,
+              backgroundColor: "rgba(0, 200, 0, 0.3)",
+              hoverBackgroundColor: "rgba(0, 200, 0, 0.9)",
+              borderColor: "rgba(0, 200, 0, 0.5)",
+              hoverBorderColor: "rgba(0, 200, 0, 1)",
+              borderWidth: 1,
+            });
+    }
+    radar_datasets.sort((d1, d2)=>{
+      let sum1 = 0;
+      let sum2 = 0;
+      d1['data'].forEach((ele)=>{
+        sum1 += ele
+      });
+      d2['data'].forEach((ele)=>{
+        sum2 += ele
+      });
+      return (sum1 - sum2);
+    })
+    console.log("radar_datasets", radar_datasets);
 
     /* Chart 1: 레이더 차트 */
     if(chartObjList.length > 0){
@@ -497,20 +611,7 @@ window.onload = function () {
     let radar_chart = new Chart(visual_ctx[0], {
         data: {
           labels: radar_labels,
-          datasets: [
-            { // 전체 평균
-              type: "radar",
-              label: "average",
-              data: average_data,
-              backgroundColor: "rgba(0, 0, 200, 0.5)"
-            },
-            { // 유저
-              type: "radar",
-              label: "you",
-              data: user_data,
-              backgroundColor: "rgba(200, 0, 0, 0.5)"
-            },
-          ],
+          datasets: radar_datasets,
         },
         options: radarOption,
       });
@@ -604,7 +705,7 @@ window.onload = function () {
     return {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: chartFactor.split("_")[0].toUpperCase(), 
+        title: {display: true, text: String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포", 
         font: { size: 20 }},
         tooltip: {
           callbacks: {

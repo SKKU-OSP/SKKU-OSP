@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import User
 from tag.models import Tag
@@ -56,10 +57,8 @@ class GithubStatsYymm(models.Model):
         
     def to_json(self):
         return{
-            "github_id" : self.github_id,
             "year" : self.start_yymm.year,
             "month" : self.start_yymm.month,
-            "star" : self.stars,
             "repo_cr" : self.num_of_cr_repos,
             "repo_co": self.num_of_co_repos,
             "commit" : self.num_of_commits,
@@ -95,6 +94,9 @@ class Account(models.Model):
     photo = models.ImageField(upload_to='img/profile_img', default='default.jpg')
     portfolio = models.TextField(default='')
 
+    def __str__(self) -> str:
+        return f'{self.user.username}'
+    
     class Meta:
         ordering  = ['student_data']
 
@@ -102,6 +104,7 @@ class AccountInterest(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Account, models.CASCADE)
     tag = models.ForeignKey(Tag, models.CASCADE)
+    level = models.IntegerField(default=0)
     
 class GithubScore(models.Model):
     yid =models.CharField(max_length=45, null=False, primary_key=True)

@@ -20,15 +20,23 @@
                     {% if bartype == 'compact' %}
                     <div class="d-flex justify-content-between my-auto col-6">
                         <div class="fw-bold text-muted">
-                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% if article.anonymous_writer %}
+                                익명
+                            {% else %}
+                                <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% endif %}
                         </div>
                         <div class="fw-bold text-muted">{{article.pub_date|time_before}}</div>
                     {% elif bartype == 'normal' %}
                     <div class="d-flex justify-content-between my-auto col-3">
                         <div class="text-muted">
-                            <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% if article.anonymous_writer %}
+                                익명
+                            {% else %}
+                                <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                            {% endif %}     
                         </div>
-                        <div class="text-muted">{{article.pub_date|date:'y/m/d H:m:s'}}</div>
+                        <div class="text-muted">{{article.pub_date|date:'y/m/d H:i:s'}}</div>
                     {% endif %}
                     </div>
                 </div>
@@ -43,7 +51,7 @@
                             기간: {{article.period_start|date:'y/m/d H:m'}} ~ {{article.period_end|date:'y/m/d H:m'}}
                         </div>
                     {% endif %}
-                        <div>
+                        <div style="white-space: nowrap;">
                         {% for tag in article.tags %}
                             <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
                         {% endfor %}
