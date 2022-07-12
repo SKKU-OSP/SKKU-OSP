@@ -89,7 +89,8 @@
             }
             $.ajax(
                 {
-                    url: '/community/article-list/{{board.name}}/',
+                    {#url: '/community/article-list/{{board.name}}/{{ board.id }}',#}
+                    url: "{% url 'community:Article_List' board_name=board.name board_id=board.id %}",
                     data: {
                         'page': now_page,
                         'keyword': $('#search-keyword').val(),
