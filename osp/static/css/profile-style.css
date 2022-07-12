@@ -9,66 +9,46 @@
     width: 20%;
   }
 }
-.container-lg {
-    margin-top: 10px;
-    margin-bottom: 10px;
-
-}
 
 #portfolio {
-
-    height: 500px;
+  min-height: 500px;
 }
 
 #visualization {
-    height: 500px;
-    overflow: scroll;
+  min-height: 500px;
+  overflow: scroll;
 }
-#languages {
-    height: 150px;
-}
-#interests {
-    height: 150px;
-}
-#repos{
-    height: 100px;
-    margin-bottom: 5px;
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 5px;
 
+#languages {
+  min-height: 150px;
 }
+
+#interests {
+  min-height: 150px;
+}
+
+.recent_repos{
+  min-height: 100px;
+}
+
 #last_commit{
   font-size: 10px;
 }
 
-.container-sm {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    height: 200px;
-    width: 250px;
-}
-
-
-
-
-
-div.card {
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
-
 td {
-    font-size: 11pt;
+  font-size: 11pt;
 }
 
-h5.card-title, h5.modal-title {
-    margin-top: 15px;
-    font: 16px;
-    font-family: "Noto Sans KR", sans-serif;
-    font-weight: 500;
-    text-indent: 20px;
+h5{
+  font-family: "Noto Sans KR", sans-serif;
+}
 
+h5.modal-title {
+  margin-top: 15px;
+  font: 16px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-weight: 500;
+  text-indent: 20px;
 }
 
 button.chosen {
@@ -104,9 +84,8 @@ button.unchosen {
   flex-direction: column;
   justify-content: space-between;
 }
+
 .card {
-  height: 100%;
-  margin-bottom: 50px;
   font-family: "Roboto", sans-serif;
 }
 
@@ -147,7 +126,7 @@ a.nav-link {
 }
 
 /* Canvas */
-.card-body{
+.modal-body{
   display: flex;
 	flex-wrap: wrap;
 }
@@ -160,6 +139,7 @@ a.nav-link {
   width: 30rem;
   border: 0px solid #aaaaaa ;
   border-radius: 0.3rem;
+  flex: 1 1 70%;
 }
 .grass.double {
   height: 12rem;
@@ -169,10 +149,10 @@ a.nav-link {
 }
 
 .vertical-menu{
-  width: 6rem ;
-  height: 12rem ;
+  width: 6rem;
   overflow-y: auto;
   text-align: end;
+  flex: 1 1 20%;
 }
 
 .vertical-menu button{
@@ -183,7 +163,7 @@ a.nav-link {
   background-color: white;
   color:black;
   display: block;
-  padding:10px;
+  padding: 10px;
   margin: 3px 0;
   border-radius: 0.2rem;
   text-decoration: none;
@@ -269,7 +249,7 @@ a.nav-link {
   width: 60px;
   text-align: center;
 }
-#btn-toggle{
+#btn-toggle #btn-compare{
   width:90px;
   margin-top: 10px;
   font-size: 14px;
@@ -284,4 +264,23 @@ a.nav-link {
 }
 .card-body.tab-content{
   display: block;
+}
+
+.ss-main .ss-single-selected > .placeholder{
+  cursor: pointer;
+  background-color: transparent;
+  opacity: 1;
+}
+.btn-group-filter{
+  display: flex;
+  justify-content: flex-end;
+}
+.dropdown-toggle{
+  font-size: 14px;
+}
+.dropdown-item{
+  font-size: 12px;
+}
+.dropdown-menu{
+  --bs-dropdown-min-width: 7rem;
 }

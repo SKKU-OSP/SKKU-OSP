@@ -26,6 +26,7 @@ urlpatterns = [
     path('accounts/', include('common.urls')),
     path('user/', include('user.urls')),
     path('tag/', include('tag.urls')),
+    path('team/', include('team.urls')),
     path('community/', include('community.urls')),
     path('', lambda req: redirect('/community'))
 ]
