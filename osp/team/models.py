@@ -54,7 +54,10 @@ class TeamRecruitArticle(models.Model):
         ]
 
 class TeamInviteMessage(models.Model):
-    team = models.ForeignKey(Team, models.CASCADE)
-    receiver = models.ForeignKey(Account, models.CASCADE)
+    id = models.AutoField(primary_key=True)
+    target_team = models.ForeignKey(Team, models.CASCADE)
+    target_account = models.ForeignKey(Account, models.CASCADE)
     message = models.TextField(max_length=200)
+    status = models.IntegerField()
+    is_apply = models.BooleanField()
     send_date = models.DateTimeField()
