@@ -6,6 +6,7 @@ from team.models import TeamMember, Team
 from community.models import ArticleComment, ArticleLike, Article, Board
 from datetime import datetime, timedelta, timezone
 from django.utils.safestring import mark_safe
+from django.shortcuts import resolve_url
 
 register = template.Library()
 @register.filter
@@ -52,6 +53,7 @@ def anonymous_checked(a_writer):
 
 @register.simple_tag
 def board_sidebar_items(request):
+
     team_board_query = Q()
     if request.user.is_authenticated:
         user = User.objects.get(username=request.user)
@@ -60,9 +62,11 @@ def board_sidebar_items(request):
         team_board_query = Q(name__in=team_list)
     result = ''
     for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
+        url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
+
         result += f'''
             <li class="list-group-item">
-            <a href="/community/{board.name}">{board.name.capitalize()}</a>
+            <a href="{url}">{board.name.capitalize()}</a>
             </li>
         '''
     return mark_safe(result)

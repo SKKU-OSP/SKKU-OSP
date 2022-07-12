@@ -104,6 +104,7 @@
         ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name','{{ board.name }}');
+        ajax_form_data.append('board_id','{{ board.id }}');
         {% if board.name == 'Team' %}
             ajax_form_data.append('team_id', $('#team-option').val());
         {% endif %}
@@ -144,6 +145,7 @@
         ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name','{{ board.name }}');
+        ajax_form_data.append('board_id','{{ board.id }}');
         ajax_form_data.append('article_id','{{ article.id }}');
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
@@ -191,7 +193,7 @@
                 success: function(data) {
                     if(data['status']=="success"){
                         alert('삭제가 완료되었습니다!')
-                        window.location.href = "{% url 'community:Board' board_name=board.name %}";
+                        window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
                     }
                     else{
                       alert( data['message'] );
