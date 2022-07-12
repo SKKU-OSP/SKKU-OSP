@@ -10,7 +10,7 @@
         <div class="d-flex justify-content-center">
             <img src="/static/images/logo.jpg" alt="Logo" class="w-25" />
         </div>
-        <form method="post" action="." class="row" onSubmit="return false;">
+        <form method="post" action="." class="row" onsubmit="ajaxSignIn(); return false;">
             {% csrf_token %}
             <div class="col-md-4 mb-3">
                 <label for="username" class="form-label">Username</label>
@@ -122,7 +122,7 @@
                 </select>
             </div>
             <div class="col-12">
-                <button class="btn btn-primary" onclick="ajaxSignIn();">Submit</button>
+                <button class="btn btn-primary">Submit</button>
             </div>
         </form>
     </div>

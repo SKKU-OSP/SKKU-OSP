@@ -191,6 +191,7 @@ class ArticleView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
+@csrf_exempt
 def article_create(request):
     message = ''
 
@@ -199,17 +200,27 @@ def article_create(request):
     board = Board.objects.get(name=board_name)
     try:
         with transaction.atomic():
-            #todo: writer 필드 값 추가해야함.
-            article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'), pub_date=datetime.now(), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true', board_id_id=board.id)
+            account = Account.objects.get(user=request.user)
+            article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
+                                             pub_date=datetime.now(), mod_date=datetime.now(),
+                                             anonymous_writer=request.POST.get('is_anonymous') == 'true',
+                                             board_id_id=board.id,
+                                             writer=account)
             tag_list = request.POST.get('tags').split(',')
             for tag_name in tag_list:
-                tag = Tag.objects.get(name=tag_name)
-                ArticleTag.objects.create(article=article, tag=tag)
-    except:
-        status = 'fail'
+                if tag_name:
+                    tag = Tag.objects.get(name=tag_name)
+                    ArticleTag.objects.create(article=article, tag=tag)
+    except Exception as e:
+            status = 'fail'
+            message = str(e)
+            if request.user.is_anonymous:
+                message = "로그인 후 이용해주세요."
+            # message = str(e) + "\n" + str(trace_back)
 
     return JsonResponse({'status': status, 'message': message})
 
+@csrf_exempt
 def article_update(request):
     message = ''
 
@@ -220,19 +231,25 @@ def article_update(request):
     try:
         with transaction.atomic():
             article = Article.objects.get(id=article_id)
-            Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
-            tag_list = request.POST.get('tags').split(',')
-            tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
-            for tag_name in list(set(tag_list_old)-set(tag_list)):
-                ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
-            for tag_name in list(set(tag_list)-set(tag_list_old)):
-                tag = Tag.objects.get(name=tag_name)
-                ArticleTag.objects.create(article=article, tag=tag)
+
+            if article.writer.user == request.user:
+                Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
+                tag_list = request.POST.get('tags').split(',')
+                tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
+                for tag_name in list(set(tag_list_old)-set(tag_list)):
+                    ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
+                for tag_name in list(set(tag_list)-set(tag_list_old)):
+                    tag = Tag.objects.get(name=tag_name)
+                    ArticleTag.objects.create(article=article, tag=tag)
+            else:
+                status = 'fail'
+                message = '작성자만 수정할 수 있습니다.'
     except:
         status = 'fail'
 
     return JsonResponse({'status': status, 'message': message})
 
+@csrf_exempt
 def article_delete(request):
     message = ''
 
@@ -241,13 +258,17 @@ def article_delete(request):
 
     try:
         with transaction.atomic():
+
             article = Article.objects.get(id=article_id)
-            # todo: article delete
-            # Article 삭제
-            # ArticleTag, ArticleLike, ArticleComment, CommentLike 삭제
-            # TeamRecruitArticle 삭제
-            # 또 삭제할 거 있나 봐야함.
-        # Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'), pub_date=datetime.now(), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true', board_id_id=board.id)
+            #cascade 달려있음.
+
+            if article.writer.user == request.user:
+                article.delete()
+
+            else:
+                status = 'fail'
+                message = '작성자만 삭제할 수 있습니다.'
+
     except:
         status = 'fail'
 
@@ -262,13 +283,14 @@ def comment_create(request):
     article_id = request.POST.get('article_id')
     try:
         with transaction.atomic():
-            #todo: writer 필드 값 추가해야함. 현재 임의의 writer_id=22
-            writer_id = 22
-            writer = Account.objects.get(user__id=writer_id)
+            writer = Account.objects.get(user=request.user)
             article = Article.objects.get(id=article_id)
             comment = ArticleComment.objects.create(article=article,body=request.POST.get('body'),pub_date=datetime.now(),del_date=datetime.now(),anonymous_writer=request.POST.get('is_anonymous') == 'true',writer=writer)
-    except:
-        status = 'fail'
+    except Exception as e:
+            status = 'fail'
+            message = str(e)
+            if request.user.is_anonymous:
+                message = "로그인 후 이용해주세요."
 
     html = ''
     if status == 'success':
@@ -278,6 +300,7 @@ def comment_create(request):
     print('hihibye')
     return JsonResponse({'status': status, 'message': message, 'html':html})
 
+@csrf_exempt
 def comment_delete(request):
     message = ''
 
@@ -290,6 +313,11 @@ def comment_delete(request):
             comment_f.update(del_date=datetime.now(),is_deleted=True)
             comment = comment_f.get()
             article = Article.objects.get(id=comment.article.id)
+            if comment.writer.user == request.user:
+                comment.delete()
+            else:
+                status = 'fail'
+                message = '작성자만 삭제할 수 있습니다.'
     except:
         status = 'fail'
 

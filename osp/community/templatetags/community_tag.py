@@ -66,3 +66,7 @@ def board_sidebar_items(request):
             </li>
         '''
     return mark_safe(result)
+
+# @register.simple_tag
+# def team_options(user):
+#     Team.objects.filter(user=user)
