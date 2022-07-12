@@ -5,6 +5,7 @@
 {% load static %}
 {% load tag_templatetag %}
 {% block content %}
+
 <div class="container my-4">
   <div class="row">
     <div class="col-3 border">
@@ -64,6 +65,8 @@
     });
     var li;
 
+
+
     function edit(){
         ajax_form_data=new FormData();
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
@@ -121,8 +124,8 @@
                         window.location.href = "{% url 'community:Board' board_name=board.name %}";
                     }
                     else{
-                      // alert( data['message'] );
-                    alert('Error Occured');
+                      alert( data['message'] );
+                    // alert('Error Occured');
                     }
                 },
                 error: function(data){
@@ -132,7 +135,7 @@
         }
     }
     {% if article %}
-    function editArticle(){
+    function updateArticle(){
         ajax_form_data=new FormData();
         ajax_form_data.append('title',$('#article-title').val());
         ajax_form_data.append('body',$('#article-body').val());
@@ -158,8 +161,8 @@
                         window.location.href = "{% url 'community:article-view' article_id=article.id %}";
                     }
                     else{
-                      // alert( data['message'] );
-                    alert('Error Occured');
+                      alert( data['message'] );
+                    //alert('Error Occured');
                     }
                 },
                 error: function(data){
@@ -168,7 +171,7 @@
          });
         }
     }
-    function removeArticle(){
+    function deleteArticle(){
         ajax_form_data=new FormData();
         ajax_form_data.append('article_id','{{ article.id }}');
 
@@ -177,7 +180,7 @@
         if(confirm("글을 삭제하시겠습니까?")){
          $.ajax({
                 type: "POST",
-                url: "{% url 'community:article-u' %}",
+                url: "{% url 'community:article-d' %}",
                 data: ajax_form_data,
                 dataType: 'json',
                 processData: false,
@@ -189,8 +192,8 @@
                         window.location.href = "{% url 'community:Board' board_name=board.name %}";
                     }
                     else{
-                      // alert( data['message'] );
-                        alert('Error Occured');
+                      alert( data['message'] );
+                        //alert('Error Occured');
                     }
                 },
                 error: function(data){
@@ -202,6 +205,7 @@
     {% endif %}
 
     function registerComment(){
+
         ajax_form_data=new FormData();
         ajax_form_data.append('body',$('#comment-body').val());
         ajax_form_data.append('is_anonymous',$('#comment-is-anonymous').prop('checked'));
@@ -221,16 +225,20 @@
 
                 success: function(data) {
                     console.log(data);
+                    console.log('2');
                     if(data['status']=="success"){
+                        console.log('3');
                         alert('등록이 완료되었습니다!');
                         $('#comment-content').html(data['html']);
                     }
                     else{
-                        alert('An error occured.\n 다시 시도해주세요.');
+                        console.log('4');
+                        alert('An error occured.\n다시 시도해주세요.');
                     }
                 },
                 error: function(data){
-                    alert('An error occured.\n 다시 시도해주세요.');
+                    console.log('5');
+                    alert('An error occured.\n다시 시도해주세요.');
                 }
          });
         }
