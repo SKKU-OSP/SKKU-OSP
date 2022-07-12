@@ -1,263 +1,245 @@
 {% extends 'main.html' %}
 {% load static %}
-
+{% load markdown_filter %}
+{% load user_templatetag %}
 {% block content %}
-<body>
-<link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
-  <div class="container-xl">
-    <div class="row">
-      <div class="col-sm-3">
-        <div class="container-sm">
-          <div class="card" >
-            <div class="card-body">
-            프로필 사진
+<div class="container my-4">
+  <div class="row">
+    <div class="col-3">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-body" style="min-height: 250px;">
+                <img src= {{data.account.photo.url}} alt="No Image now" width="200" height="200">
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-3">
-              <table class="table">
-                <tbody>
-                  <tr>
-                    <td scope="row">이름</td>
-                    <td>{{data.info.name}}</td>
-                  </tr>
-                  <tr>
-                    <td scope="row">학번</td>
-                    <td>{{data.info.id}}</td>
-                  </tr>
-                  <tr>
-                    <td scope="row">대학</td>
-                    <td>{{data.info.college}}</td>
-                  </tr>
-                  <tr>
-                    <td scope="row">학과</td>
-                    <td>{{data.info.dept}}</td>
-                  </tr>
-                  <tr>
-                    <td scope="row">전공</td>
-                    <td>{{data.info.plural_major}}</td>
-                  </tr>
-                  <tr>
-                    <td scope="row">GitHub</td>
-                    <td><a href="https://github.com/"></a></td>
-                  </tr>
-                  <tr>
-                    <td scope="row">개인 Email</td>
-                    <td>{{data.info.personal_email}}</td>
-                  </tr>
-                  <tr>
-                    <td scope="row">Github Email</td>
-                    <td>{{data.info.primary_email}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="card" id="interests">
-              <h5 class="card-title">관심분야</h5>
+            <table class="table w-100">
+              <tbody>
+                <tr>
+                  <td scope="row">이름</td>
+                  <td>{{data.info.name}}</td>
+                </tr>
+                <tr>
+                  <td scope="row">학번</td>
+                  <td>{{data.info.id}}</td>
+                </tr>
+                <tr>
+                  <td scope="row">대학</td>
+                  <td>{{data.info.college}}</td>
+                </tr>
+                <tr>
+                  <td scope="row">학과</td>
+                  <td>{{data.info.dept}}</td>
+                </tr>
+                <tr>
+                  <td scope="row">전공</td>
+                  <td>{{data.info.plural_major}}</td>
+                </tr>
+                <tr>
+                  <td scope="row">GitHub</td>
+                  <td><a href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a></td>
+                </tr>
+                <tr>
+                  <td scope="row">개인 Email</td>
+                  <td>{{data.info.personal_email}}</td>
+                </tr>
+                <tr>
+                  <td scope="row">Github Email</td>
+                  <td>{{data.info.primary_email}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="card mt-2" id="interests">
               <div class="card-body">
+                <h5 class="card-title">관심분야</h5>
                 {% for row in data.inter %}
-                  <span class="badge rounded-pill text-bg-primary" style="height:20px">{{row.tag}}</span>
+                  <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
                 {% endfor %}
               </div>
             </div>
-            <div class="card" id="languages">
-              <h5 class="card-title">사용언어/기술스택</h5>
+            <div class="card mt-2" id="languages">
               <div class="card-body">
-                
+                <h5 class="card-title">사용언어/기술스택</h5>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="col-sm-9">
-        <div class="container-lg">
-          <div class="row">
-            <div class="col-sm">
-              <div class="card" >
+    </div>
+    <div class="col-9">
+      <div class="container">
+        <div class="row mb-2">
+          <div class="col-4">
+            <div class="card h-100">
+              <div class="card-body">
                 <h5 class="card-title">개발자 성향</h5>
-                <div class="card-body">
-                  MBTI
-                </div>
+                <p class="card-text">MBTI</p>
               </div>
             </div>
-            <div class="col-sm">
-              <div class="card">
-                <h5 class="card-title" style="margin-bottom: 50px;">Score</h5>
-                <div class="container-xs" style="margin-bottom: 50px;">
-                  <center><h1 class="display-3">{{data.score.total_score}}</h1></center>
-                </div>
-                <div class="container">
-                  <div class="row">
-                    <div class="col">
-                      <table class="table">
-                        <tbody>
-                          <tr>
-                            <th scope="row" style="width: 10%">Commits</th>
-                            <td style="width: 10%">{{data.score.commit_cnt}}</td>
-      
-                          </tr>
-                          <tr>
-                            <th scope="row" style="width: 10%">Repositories</th>
-                            <td style="width: 10%">{{data.score.repo_cnt}}</td>
-      
-                          </tr>
-                          <tr>
-                            <th scope="row" style="width: 10%">Pull Requests</th>
-                            <td style="width: 10%">{{data.score.pr_cnt}}</td>
-      
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <div class="col">
-                      <table class="table">
-                          <tr>
-                            <th scope="row" style="width: 10%">Issues</th>
-                            <td style="width: 10%">{{data.score.issue_cnt}}</td>
-                          </tr>
-                          <tr>
-                            <th scope="row" style="width: 10%">Stars</th>
-                            <td style="width: 10%">-</td>      
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+          </div>
+          <div class="col-4">
+            <div class="card h-100">
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-4">Score</h5>
+                <h1 class="text-center my-auto">{{data.score.total_score}}</h1>
+                <table class="table mt-auto">
+                  <tbody>
+                    <tr>
+                      <th scope="row" colspan=2 style="width: 10%">Commits</th>
+                      <td style="width: 10%" colspan=2>{{data.score.commit_cnt}}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" style="width: 10%">Repositories</th>
+                      <td style="width: 10%">{{data.score.repo_cnt}}</td>
+                      <th scope="row" style="width: 10%">Issues</th>
+                      <td style="width: 10%">{{data.score.issue_cnt}}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" style="width: 10%">Pull Requests</th>
+                      <td style="width: 10%">{{data.score.pr_cnt}}</td>
+                      <th scope="row" style="width: 10%">Stars</th>
+                      <td style="width: 10%">-</td>      
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div class="col-sm">
-              <div class="card" >
+          </div>
+          <div class="col-4">
+            <div class="card h-100">
+              <div class="card-body">
                 <h5 class="card-title">Recent Contributions</h5>
-                <div class="card-body" style="margin: -16px">
-                  <div class="container-xs">
-                    <div class="card" id="repos">
-                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
-                        <h6>{{data.repos.0.repo_name}}</h6>
-                      </div>
-                      <div class="card-body" style="overflow: hidden">
-                        <div style="font-size: 13px">
-                          last commit : {{data.repos.0.committer_date}}
-                          <br>
-                          {{data.short.0.proj_short_desc}}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card" id="repos">
-                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
-                        <h6>{{data.repos.1.repo_name}}</h6>
-                      </div>
-                      <div class="card-body" style="overflow: hidden">                      
-                        <div style="font-size: 13px">
-                          last commit : {{data.repos.1.committer_date}}
-                          <br>
-                          {{data.short.1.proj_short_desc}}        
-                        </div>   
-                      </div>
-                    </div>
-                    <div class="card" id="repos">
-                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
-                        <h6>{{data.repos.2.repo_name}}</h6>
-                      </div>
-                      <div class="card-body" style="overflow: hidden">
-                        <div style="font-size: 13px">
-                          last commit : {{data.repos.2.committer_date}}
-                          <br>
-                          {{data.short.2.proj_short_desc}}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card" id="repos">
-                      <div class="card-title" style="padding-left:15px; padding-top:10px; margin-bottom:-15px">
-                        <h6>{{data.repos.3.repo_name}}</h6>
-                      </div>
-                      <div class="card-body" style="overflow: hidden">
-                        <div style="font-size: 13px">
-                          last commit : {{data.repos.3.committer_date}}
-                          <br>
-                          {{data.short.3.proj_short_desc}}
-                        </div>
-                      </div>
+                {% for recent_repo in data.repos %}
+                <div class="card w-100 mb-2 recent_repos" id="">
+                  <div class="card-body">
+                    <h6 class="card-title">{{recent_repo.repo_name}}</h6>
+                    <div style="font-size: 13px">
+                      <!-- last commit : {{recent_repo.committer_date}} -->
+                      <!-- <br> -->
+                      {{recent_repo.desc}}
                     </div>
                   </div>
                 </div>
+                {% endfor %}
               </div>
             </div>
           </div>
         </div>
-        <div class="container-lg" id="undercontainers">
-          <div class="row">
-            <div class="col-sm-4">
-              <div class="card" id="portfolio">
+      </div>
+      <div class="container" id="undercontainers">
+        <div class="row">
+          <div class="col-4">
+            <div class="card" id="portfolio">
+              <div class="card-body">
                 <h5 class="card-title">포트폴리오</h5>
-                <div class="card-body">
-                  Portfolio
-                </div>
+                {{ data.account.portfolio|mark }}
               </div>
             </div>
-            <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">기여내역 시각화</h5>
-                    <i id="closeModalIcon" class="bi bi-x-lg" data-dismiss="modal" aria-label="Close"></i>
-                    </button>
-                  </div>
-                  <div class="card-body justify-content-center mt-4" id="modal-visualization">
-                    <!--vertical scroll menu  -->
+          </div>
+          <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">기여내역 시각화</h5>
+                  <i id="closeModalIcon" class="bi-x-lg" data-dismiss="modal" aria-label="Close"></i>
+                  </button>
+                </div>
+                <div class="modal-body justify-content-center mt-4" id="modal-visualization">
+                  <div style="display:flex;flex-wrap: wrap;">
                     <div class="vertical-menu">
                       <button class="modal-btn-year">2022</button>
                       <button class="modal-btn-year active">2021</button>
                       <button class="modal-btn-year">2020</button>
                       <button class="modal-btn-year">2019</button>
                     </div>
-                    <svg id="modal-activity-monthly" class="grass double"></svg>
-                    <div style="height:0.1rem; width:6rem;"></div>
-                    <svg id="modal-activity-factor" class="grass half">
+                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
+                    <div class="vertical-menu"></div>
+                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 480 96">
                       <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                       </g>
                     </svg>
-                    <canvas id="modal-canvas1" class="ctx-item"></canvas>
-                    <div class="text-center">
-                      <button id="modal-btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
-                    </div>
-                    <div id="modal-task-tooltip" display="none" style="position: absolute; display: none;"></div>
-                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
-                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
                   </div>
-                  <div class="modal-footer">
-                    <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                  <div class="text-center">
+                    <button id="modal-btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
                   </div>
+                  <div id="modal-task-tooltip" display="none" style="position: absolute; display: none;"></div>
+                  <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                  <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                </div>
+                <div class="modal-footer">
+                  <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>
-            <div class="col-sm-8" >
-              <div class="card" id="visualization">
+          </div>
+          <div class="col-8">
+            <div class="card" id="visualization">
+              <div class="card-body">
                 <h5 class="card-title d-flex justify-content-between">
                   기여내역 시각화
-                  <i id="icon-modal" class="bi bi-arrow-up-right-square me-3 evt-icon" title="확대"></i>
+                  <i id="icon-modal" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
                 </h5>
                 <ul class="nav nav-tabs mt-2 text-lg">
-                    <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
-                    <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
-                    <li class="nav-item"><a class="nav-link" id="pills-dist-tab">분포</a></li>
-                    <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
-                  </ul>
-                <div class="card-body tab-content">
+                  <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
+                  <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
+                  <li class="nav-item"><a class="nav-link" id="pills-dist-tab">분포</a></li>
+                  <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
+                </ul>
+                <div class="tab-content">
+                  <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
+                    <div class="btn-group" role="group">
+                      <button id="btnGroupDropYear" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        2021
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropYear">
+                        <li><button class="dropdown-item year-item">2022</button></li>
+                        <li><button class="dropdown-item year-item">2021</button></li>
+                        <li><button class="dropdown-item year-item">2020</button></li>
+                        <li><button class="dropdown-item year-item">2019</button></li>
+                      </ul>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <button id="btnGroupDropMonth" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        ALL
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropMonth">
+                        <li><button class="dropdown-item month-item" value="0">ALL</button></li>
+                        <li><button class="dropdown-item month-item" value="1">JAN</button></li>
+                        <li><button class="dropdown-item month-item" value="2">FEB</button></li>
+                        <li><button class="dropdown-item month-item" value="3">MAR</button></li>
+                        <li><button class="dropdown-item month-item" value="4">APR</button></li>
+                        <li><button class="dropdown-item month-item" value="5">MAY</button></li>
+                        <li><button class="dropdown-item month-item" value="6">JUN</button></li>
+                        <li><button class="dropdown-item month-item" value="7">JUL</button></li>
+                        <li><button class="dropdown-item month-item" value="8">AUG</button></li>
+                        <li><button class="dropdown-item month-item" value="9">SEP</button></li>
+                        <li><button class="dropdown-item month-item" value="10">OCT</button></li>
+                        <li><button class="dropdown-item month-item" value="11">NOV</button></li>
+                        <li><button class="dropdown-item month-item" value="12">DEC</button></li>
+                      </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                      <button id="btnGroupDropFactor" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Score
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropFactor">
+                        <li><button class="dropdown-item factor-item">Score</button></li>
+                        <li><button class="dropdown-item factor-item">Star</button></li>
+                        <li><button class="dropdown-item factor-item">Commit</button></li>
+                        <li><button class="dropdown-item factor-item">PR</button></li>
+                        <li><button class="dropdown-item factor-item">Issue</button></li>
+                      </ul>
+                    </div>
+                  </div>
                   <div class="tab-pane fade show active mt-2" id="pills-overview">
                     <div class="d-flex">
-                      <!--vertical scroll menu  -->
-                      <div class="vertical-menu">
-                        <button class="btn-year">2022</button>
-                        <button class="btn-year active">2021</button>
-                        <button class="btn-year">2020</button>
-                        <button class="btn-year">2019</button>
-                      </div>
-                      <svg id="activity-monthly" class="grass double"></svg>
+                      <svg id="activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
                     </div>
                     <div class="d-flex">
-                      <div style="height:6rem; width:6rem;"></div>
-                      <svg id="activity-factor" class="grass half">
+                      <svg id="activity-factor" class="grass half" viewBox="0 0 480 96">
                         <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                         </g>
                       </svg>
@@ -267,7 +249,14 @@
                   <div class="tab-pane fade mt-2" id="pills-radar">
                     <canvas id="canvas1" class="ctx-item"></canvas>
                     <div class="text-center">
-                      <button id="btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
+                      <div style="width:100%;display:flex;">
+                        <select name="target" id="target-user">
+                          <option value="" selected="selected">비교없음</option>
+                          {% target_github_id request %}
+                        </select>
+                        <button id="btn-compare" class="btn btn-primary" style="width:95px;">비교</button>
+                      </div>
+                      <button id="btn-toggle" class="btn btn-primary" style="width:95px;">정규화</button>
                     </div>
                   </div>
                   <div class="tab-pane fade mt-2" id="pills-dist">
@@ -283,12 +272,53 @@
         </div>
       </div>
     </div>
+    <a href="./profile-edit" class="btn btn-primary" role="button" aria-disabled="true" style="margin-top: 20px">Profile Edit</a>
   </div>
-</body>
+</div>
+
 {% endblock %}
 
 
 {% block script %}
+  <script>
+    var category_select;
+    var target_yearly_contr = [];
+    var target_monthly_contr = [];
+    var target_github_id = '';
+    $(document).ready(function(){
+      category_select = new SlimSelect({
+        select: '#target-user'
+      });
+      $("#target-user").change(function(){
+        data={"github_id":category_select.selected().toString()};
+        if(data["github_id"] != ''){ 
+          $.ajax({
+            type:"POST",
+            url: `{% url 'user:comparestat' username='${data["github_id"]}' %}`,
+            data:JSON.stringify(data),
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success:function(res){
+                console.log("data pass success",res);
+                if(res.hasOwnProperty('monthly_contr')){
+                  target_yearly_contr = res['monthly_contr'];
+                  target_github_id = res['github_id'];
+                }
+                console.log("res", target_yearly_contr);
+            },
+            error : function(data){
+              console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+            }
+          });
+        }else{
+          target_yearly_contr = [];
+          target_monthly_contr = [];
+        }
+      });
+    });
+  </script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
   </script>

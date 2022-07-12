@@ -57,10 +57,8 @@ class GithubStatsYymm(models.Model):
         
     def to_json(self):
         return{
-            "github_id" : self.github_id,
             "year" : self.start_yymm.year,
             "month" : self.start_yymm.month,
-            "star" : self.stars,
             "repo_cr" : self.num_of_cr_repos,
             "repo_co": self.num_of_co_repos,
             "commit" : self.num_of_commits,
