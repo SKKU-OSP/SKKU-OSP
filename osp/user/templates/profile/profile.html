@@ -137,36 +137,48 @@
               </div>
             </div>
           </div>
-          <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+          <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">기여내역 시각화</h5>
-                  <i id="closeModalIcon" class="bi-x-lg" data-dismiss="modal" aria-label="Close"></i>
-                  </button>
+                  <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
+                  <button id="closeModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body justify-content-center mt-4" id="modal-visualization">
-                  <div style="display:flex;flex-wrap: wrap;">
+                <div class="modal-body justify-content-center" id="modal-visualization">
+                  <div class="modal-item modal-grass">
                     <div class="vertical-menu">
                       <button class="modal-btn-year">2022</button>
                       <button class="modal-btn-year active">2021</button>
                       <button class="modal-btn-year">2020</button>
                       <button class="modal-btn-year">2019</button>
                     </div>
-                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
-                    <div class="vertical-menu"></div>
-                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 480 96">
+                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
+                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
                       <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                       </g>
                     </svg>
+                    <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
                   </div>
-                  <canvas id="modal-canvas1" class="ctx-item"></canvas>
-                  <div class="text-center">
-                    <button id="modal-btn-toggle" class="btn btn-primary" style="width:95px;">nomalize</button>
+                  <div class="modal-item modal-radar">
+                      <h5 id="modal-radar-title">2021년 기여도 비교</h5>
+                      <select name="target" id="modal-target-user">
+                        <option value="" selected="selected">비교없음</option>
+                        {% target_github_id request %}
+                      </select>
+                      <button id="modal-btn-compare" class="btn btn-primary">비교</button>
+                    <div id="radar-canvas">
+                      <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                    </div>
+                    <div class="radar-normal">
+                      <button id="modal-btn-toggle" class="btn btn-primary" >정규화</button>
+                    </div>
                   </div>
-                  <div id="modal-task-tooltip" display="none" style="position: absolute; display: none;"></div>
-                  <canvas id="modal-canvas2" class="ctx-item"></canvas>
-                  <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                  <div class="modal-item">
+                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                  </div>
+                  <div class="modal-item">
+                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -226,38 +238,37 @@
                         Score
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="btnGroupDropFactor">
-                        <li><button class="dropdown-item factor-item">Score</button></li>
-                        <li><button class="dropdown-item factor-item">Star</button></li>
-                        <li><button class="dropdown-item factor-item">Commit</button></li>
-                        <li><button class="dropdown-item factor-item">PR</button></li>
-                        <li><button class="dropdown-item factor-item">Issue</button></li>
+                        <li><button class="dropdown-item factor-item" value="score">Score</button></li>
+                        <li><button class="dropdown-item factor-item" value="star">Star</button></li>
+                        <li><button class="dropdown-item factor-item" value="commit">Commit</button></li>
+                        <li><button class="dropdown-item factor-item" value="pr">PR</button></li>
+                        <li><button class="dropdown-item factor-item" value="issue">Issue</button></li>
                       </ul>
                     </div>
                   </div>
                   <div class="tab-pane fade show active mt-2" id="pills-overview">
                     <div class="d-flex">
-                      <svg id="activity-monthly" class="grass double" viewBox="0 0 480 192"></svg>
+                      <svg id="activity-monthly" class="grass double" viewBox="0 0 465 190"></svg>
                     </div>
                     <div class="d-flex">
-                      <svg id="activity-factor" class="grass half" viewBox="0 0 480 96">
+                      <svg id="activity-factor" class="grass half" viewBox="0 0 465 95">
                         <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                         </g>
                       </svg>
                     </div>
-                    <div id="task-tooltip" display="none" style="position: absolute; display: none;"></div>
+                    <div id="task-tooltip" style="position: absolute; display: none;"></div>
                   </div>
                   <div class="tab-pane fade mt-2" id="pills-radar">
+                    <h5 id="radar-title">2021년 기여도 비교</h5>
                     <canvas id="canvas1" class="ctx-item"></canvas>
-                    <div class="text-center">
-                      <div style="width:100%;display:flex;">
+                      <div id="target-search">
                         <select name="target" id="target-user">
                           <option value="" selected="selected">비교없음</option>
                           {% target_github_id request %}
                         </select>
-                        <button id="btn-compare" class="btn btn-primary" style="width:95px;">비교</button>
+                        <button id="btn-compare" class="btn btn-primary">비교</button>
                       </div>
-                      <button id="btn-toggle" class="btn btn-primary" style="width:95px;">정규화</button>
-                    </div>
+                      <button id="btn-toggle" class="btn btn-primary">정규화</button>
                   </div>
                   <div class="tab-pane fade mt-2" id="pills-dist">
                     <canvas id="canvas2" class="ctx-item"></canvas>
@@ -282,6 +293,7 @@
 {% block script %}
   <script>
     var category_select;
+    var modal_category_select;
     var target_yearly_contr = [];
     var target_monthly_contr = [];
     var target_github_id = '';
@@ -289,9 +301,21 @@
       category_select = new SlimSelect({
         select: '#target-user'
       });
+      modal_category_select = new SlimSelect({
+        select: '#modal-target-user'
+      });
       $("#target-user").change(function(){
-        data={"github_id":category_select.selected().toString()};
-        if(data["github_id"] != ''){ 
+        let data={"github_id":category_select.selected().toString()};
+        post_github_user(data);
+      });
+      $("#modal-target-user").change(function(){
+        let data={"github_id":modal_category_select.selected().toString()};
+        post_github_user(data);
+      });
+      function post_github_user(data={}){
+        if(data.hasOwnProperty("github_id") 
+        && data["github_id"] != ''
+        && data["github_id"] != '비교없음'){ 
           $.ajax({
             type:"POST",
             url: `{% url 'user:comparestat' username='${data["github_id"]}' %}`,
@@ -305,7 +329,7 @@
                   target_yearly_contr = res['monthly_contr'];
                   target_github_id = res['github_id'];
                 }
-                console.log("res", target_yearly_contr);
+                console.log("res", target_github_id, target_yearly_contr);
             },
             error : function(data){
               console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
@@ -315,7 +339,7 @@
           target_yearly_contr = [];
           target_monthly_contr = [];
         }
-      });
+      }
     });
   </script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">

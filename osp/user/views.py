@@ -287,7 +287,8 @@ def compare_stat(request, username):
                 monthly_contr[row_json["year"]-start_year].append(row_json)
                 
         context = {
-            "monthly_contr":monthly_contr
+            "monthly_contr":monthly_contr,
+            "github_id":github_id,
         }
         
         return JsonResponse(context)
