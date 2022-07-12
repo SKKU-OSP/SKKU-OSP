@@ -179,10 +179,15 @@ class ArticleView(TemplateView):
             context['tags'] = ArticleTag.objects.filter(article__id=article_id)
             context['board'] = Board.objects.get(id=context['article'].board_id_id)
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
+            if context['board'].name == 'Team':
+                teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
+                if teamrecruit:
+                    context['team'] = Team.objects.filter(id=teamrecruit.team.id).first()
         except:
             return redirect('community:Community-Main')
         context['article'].view_cnt += 1
         context['article'].save()
+
         return render(request, 'community/article/article.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -191,9 +196,17 @@ class ArticleView(TemplateView):
         article_id = kwargs.get('article_id')
         context['article'] = Article.objects.get(id=article_id)
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
+
+        context['board'] = Board.objects.get(id=context['article'].board_id.id)
+        if context['board'].name == 'Team':
+            teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
+            if teamrecruit:
+                context['team'] = Team.objects.filter(id=teamrecruit.team.id).first()
+
         result = {}
         result['html'] = render_to_string('community/article/includes/content-edit.html', context)
-        result['tags'] = list(context['tags'].values_list('tag__name',flat=True))
+        result['tags'] = list(context['tags'].values_list('tag__name', flat=True))
+
         return JsonResponse(result)
 
     def get_context_data(self, request, *args, **kwargs):
@@ -207,6 +220,7 @@ def article_create(request):
     status = 'success'
     board_name = request.POST.get('board_name')
     board = Board.objects.get(name=board_name)
+
     try:
         with transaction.atomic():
             account = Account.objects.get(user=request.user)
@@ -220,6 +234,10 @@ def article_create(request):
                 if tag_name:
                     tag = Tag.objects.get(name=tag_name)
                     ArticleTag.objects.create(article=article, tag=tag)
+            if board.name == 'Team':
+                team = Team.objects.get(id=request.POST.get('team_id'))
+                TeamRecruitArticle.objects.create(team=team,article=article)
+
     except Exception as e:
             status = 'fail'
             message = str(e)
@@ -315,7 +333,7 @@ def comment_delete(request):
 
     status = 'success'
     comment_id = request.POST.get('comment_id')
-    print(comment_id)
+
     try:
         with transaction.atomic():
             comment_f = ArticleComment.objects.filter(id=comment_id)

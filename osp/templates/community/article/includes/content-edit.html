@@ -9,12 +9,19 @@
 {% endif %}
 
     <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
-        <div class="d-flex flex-row justify-content-between">
+        <div class="d-flex flex-row justify-content-between" style="margin-bottom:5px;">
             <input style="flex:1" type="text" id="article-title" value="{{ article.title }}" placeholder="제목" class="form-control" style="width:100%; height: 40px; padding-left:10px;" required autofocus>
-            <select style="width:150px;height: 40px; padding-left:10px;border: 1px solid #ced4da;"name="" id="" class="form-check" required>
-                <option value="">팀1</option>
-            </select>
-
+            {% if board.name == 'Team' %}
+                {% if type == 'register' %}
+                    <select id="team-option" style="width:150px;height: 40px; padding-left:10px;border: 1px solid #ced4da;"name="" id="" class="form-check" required>
+                        {% team_options request.user %}
+                    </select>
+                {% elif type == 'edit' %}
+                    <select id="team-option" style="width:150px;height: 40px; padding-left:10px;border: 1px solid #ced4da;"name="" id="" class="form-check" required>
+                        <option value="{{ team.id }}" disabled selected>{{ team.name }}</option>
+                    </select>
+                {% endif %}
+            {% endif %}
         </div>
         <div>
             <textarea name="" id="article-body" placeholder="게시글 내용" class="form-control"
@@ -46,13 +53,9 @@
             {% endif %}
         {% endif %}
         {% if type == 'register' %}
-        <div><button class="btn btn-outline-primary" type="submit" style="margin-left:20px;font-size:14px;"
-                onclick="registerArticle();"> <i class="bi-pencil-square" style="font-size:14px;margin-left:3px;"></i>
-                등록</button></div>
+        <div><button class="btn btn-outline-primary" type="submit" style="margin-left:20px;font-size:14px;"> <i class="bi-pencil-square" style="font-size:14px;margin-left:3px;"></i>등록</button></div>
         {% elif type == 'edit' %}
-        <div><button class="btn btn-outline-primary" type="submit" style="margin-left:20px;font-size:14px;"
-                onclick="editArticle();"> <i class="bi-pencil-square" style="font-size:14px;margin-left:3px;"></i>
-                수정</button></div>
+        <div><button class="btn btn-outline-primary" type="submit" style="margin-left:20px;font-size:14px;"> <i class="bi-pencil-square" style="font-size:14px;margin-left:3px;"></i>수정</button></div>
         {% endif %}
     </div>
 </form>

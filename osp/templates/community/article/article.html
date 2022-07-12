@@ -104,6 +104,9 @@
         ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name','{{ board.name }}');
+        {% if board.name == 'Team' %}
+            ajax_form_data.append('team_id', $('#team-option').val());
+        {% endif %}
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
@@ -243,7 +246,7 @@
         }
     }
 
-        function removeComment(comment_id){
+        function deleteComment(comment_id){
         ajax_form_data=new FormData();
         ajax_form_data.append('comment_id', comment_id);
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
