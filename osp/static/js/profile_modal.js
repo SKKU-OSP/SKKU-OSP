@@ -11,9 +11,9 @@ function setModal(){
   let is_selected_month = 0;
   let is_selected_factor = 0;
   let is_nomalization = 0;
+  const palette = ["#EBEDF0","#a7e6f6","#49c8fd","#00a4ff","#0677ff"];
   let modal_ctx = new Array(4);
   for(let i=0; i<3; i++){
-    console.log(document.getElementById(`modal-canvas${String(i+1)}`));
     modal_ctx[i] = document.getElementById(`modal-canvas${String(i+1)}`).getContext("2d");
   }
   let icon_modal = document.getElementById("icon-modal");
@@ -33,11 +33,11 @@ function setModal(){
     makeModalRadarChart(is_nomalization, select_month);
     if(is_nomalization){
       e.target.setAttribute("title","raw값을 표시합니다. 단, commit은 1/10 값입니다.");
-      e.target.textContent = "raw";
+      e.target.textContent = "raw 값";
     }
     else{
       e.target.setAttribute("title","평균을 10점으로 맞추어 자신의 점수를 비교하기 쉽게 만듭니다.");
-      e.target.textContent = "nomalize";
+      e.target.textContent = "정규화";
     }
   });
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
@@ -171,18 +171,7 @@ function setModal(){
         mLabel.setAttributeNS(null, "font-size", "15px");
         mLabel.style.fill = "black";
         mLabel.textContent = month_label[mIdx];
-        switch(level){
-          case 0:
-            rect.style.fill = "#EBEDF0"; break;
-          case 1:
-            rect.style.fill = "#9BE9A8"; break;
-          case 2:
-            rect.style.fill = "#40C463"; break;
-          case 3:
-            rect.style.fill = "#30A14E"; break;
-          case 4:
-            rect.style.fill = "#216E39"; break;
-        }
+        rect.style.fill = palette[level];
         if(monthly_contr.length>mIdx){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
@@ -247,18 +236,7 @@ function setModal(){
       fLabel.setAttributeNS(null, "font-size", "15px");
       fLabel.style.fill = "black";
       fLabel.textContent = factor_label[col];
-      switch(level){
-        case 0:
-          rect.style.fill = "#EBEDF0"; break;
-        case 1:
-          rect.style.fill = "#9BE9A8"; break;
-        case 2:
-          rect.style.fill = "#40C463"; break;
-        case 3:
-          rect.style.fill = "#30A14E"; break;
-        case 4:
-          rect.style.fill = "#216E39"; break;
-      }
+      rect.style.fill = palette[level];
       
       rect.style.cursor = "pointer";
       rect.addEventListener("click",(e) =>{
@@ -493,11 +471,10 @@ function setModal(){
     let radar_title = select_year + "년 " + month + "월 기여도 비교";
     if(month == 0) radar_title = select_year + "년 기여도 비교";
     if(is_nomalization) radar_title = radar_title + "(정규화)";
+    $("#modal-radar-title").text(radar_title);
     const radarOption = {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: radar_title, 
-          font: { size: 26 }},
       },
       responsive: true,
     };
@@ -618,7 +595,7 @@ function setModal(){
       plugins: {
         legend: { display: false },
         title: {display: true, text: chartFactor.split("_")[0].toUpperCase(), 
-        font: { size: 26 }},
+        font: { size: 20 }},
         tooltip: {
           callbacks: {
             title: (items) => {

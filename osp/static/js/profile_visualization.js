@@ -181,7 +181,7 @@ window.onload = function () {
           factor_contribution[j] = 0;
         }
         if(tid != -1){
-          target_contribution[j] = monthly_contr[tid][factorLabels[j]];
+          target_contribution[j] = target_monthly_contr[tid][factorLabels[j]];
         }else{
           target_contribution[j] = 0;
         }
@@ -189,7 +189,7 @@ window.onload = function () {
     }
     for(let i=0; i<factorLabels.length; i++){
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
-      target_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
+      target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
     }
     clearChildElement(factor_grass);
     makeFactorGrass();
@@ -336,11 +336,15 @@ window.onload = function () {
           e.target.removeAttribute("stroke-width");
         }
         e.target.attributes[2].value = focus;
-        if(factor_label[col].toLowerCase() == factorLabels[col]){
-          destroyChart(chartObjList, chartObjList.length);
-          chartObjList = [];
-          makePage(chart_data);
+        let textFactor = $(`.factor-item[value=${chartFactor}]`).text()
+        if(textFactor == '') textFactor = "Score"
+        $("#btnGroupDropFactor").text(textFactor);
+        if(factor_label[col].toLowerCase() != factorLabels[col]){
+          chartFactor = "score_sum";
         }
+        destroyChart(chartObjList, chartObjList.length);
+        chartObjList = [];
+        makePage(chart_data);
       });
       factor_grass.appendChild(rect);
       factor_grass.appendChild(fLabel);
@@ -535,25 +539,24 @@ window.onload = function () {
     }
 
     radar_label_keys.forEach((label)=>{
-        let factor_value = avg_data[label];
-        let coeff = getNormalCoeff(factor_value, label, is_nomalization);
-        coeffs[label] = coeff;
-        average_data.push(coeff * factor_value);
-      });
+      let factor_value = avg_data[label];
+      let coeff = getNormalCoeff(factor_value, label, is_nomalization);
+      coeffs[label] = coeff;
+      average_data.push(coeff * factor_value);
+    });
     
     radar_label_keys.forEach((label)=>{
-        user_dataset.push(coeffs[label] * user_data[label]);
-        target_dataset.push(coeffs[label] * target_data[label]);
+      user_dataset.push(coeffs[label] * user_data[label]);
+      target_dataset.push(coeffs[label] * target_data[label]);
     });
     
     let radar_title = select_year + "년 " + month + "월 기여도 비교";
     if(month == 0) radar_title = select_year + "년 기여도 비교";
     if(is_nomalization) radar_title = radar_title + "(정규화)";
+    $("#radar-title").text(radar_title);
     const radarOption = {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: radar_title, 
-          font: { size: 20 }},
       },
       responsive: true,
     };
@@ -578,11 +581,12 @@ window.onload = function () {
               hoverBorderColor: "rgba(200, 0, 0, 1)",
               borderWidth: 1,
             });
-    if($(".placeholder").text() != chart_data["username"] && 
-    $(".placeholder").text() != "비교없음"){
+    let target = $("#target-search").find(".placeholder");
+    if(target.text() != chart_data["username"] && 
+    target.text() != "비교없음"){
       radar_datasets.push({ // 비교 유저
               type: "radar",
-              label: $(".placeholder").text(),
+              label: target.text(),
               data: target_dataset,
               backgroundColor: "rgba(0, 200, 0, 0.3)",
               hoverBackgroundColor: "rgba(0, 200, 0, 0.9)",
