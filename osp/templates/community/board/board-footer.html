@@ -90,7 +90,9 @@
             $.ajax(
                 {
                     {#url: '/community/article-list/{{board.name}}/{{ board.id }}',#}
+                    {% if board %}
                     url: "{% url 'community:Article_List' board_name=board.name board_id=board.id %}",
+                    {% endif %}
                     data: {
                         'page': now_page,
                         'keyword': $('#search-keyword').val(),
