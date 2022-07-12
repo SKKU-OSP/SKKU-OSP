@@ -2,7 +2,7 @@ from django import template
 from django.db.models import Q
 from django.utils.safestring import mark_safe
 from user.models import Account, User
-from team.models import TeamMember
+from team.models import TeamMember, Team
 from community.models import ArticleComment, ArticleLike, Article, Board
 from datetime import datetime, timedelta, timezone
 from django.utils.safestring import mark_safe
@@ -67,6 +67,11 @@ def board_sidebar_items(request):
         '''
     return mark_safe(result)
 
-# @register.simple_tag
-# def team_options(user):
-#     Team.objects.filter(user=user)
+@register.simple_tag
+def team_options(user):
+    result = '<option value="" disabled selected>팀 선택</option>'
+    li = TeamMember.objects.filter(member=22).values_list('team_id')
+    teams = Team.objects.filter(id__in=li)
+    for team in teams:
+        result += f'<option value="{team.id}">{team.name}</option>'
+    return mark_safe(result)
