@@ -234,8 +234,7 @@
                         $('#comment-content').html(data['html']);
                     }
                     else{
-                        console.log('4');
-                        alert('An error occured.\n다시 시도해주세요.');
+                        alert(data['message']);
                     }
                 },
                 error: function(data){

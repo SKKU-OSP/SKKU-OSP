@@ -12,10 +12,13 @@
                     {% elif bartype == 'normal' %}
                     <h5 class="article-bar-title my-1 fw-bold col-9">
                     {% endif %}
-                        {{article.title}}
-                        {% if board.board_type == 'Team' and bartype == 'normal' %}
-                         - {{article.team.name}}
+                        {% if board.name == 'Team' %}
+                            [{{ article.team.name }}]
                         {% endif %}
+                        {{article.title}}
+{#                        {% if board.board_type == 'Team' and bartype == 'normal' %}#}
+{#                         - {{article.team.name}}#}
+{#                        {% endif %}#}
                     </h5>
                     {% if bartype == 'compact' %}
                     <div class="d-flex justify-content-between my-auto col-6">
