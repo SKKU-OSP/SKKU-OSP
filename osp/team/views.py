@@ -1,3 +1,4 @@
+from django.db import transaction, DatabaseError
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.files.images import get_image_dimensions
@@ -45,33 +46,38 @@ def TeamCreate(request):
                 is_valid = False
                 field_check_list['image'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}'
         if is_valid:
-            if team_img:
-                new_team = Team.objects.create(
-                    name=team_name,
-                    description=team_desc,
-                    image=team_img,
-                    create_date=datetime.now()
-                )
-            else:
-                new_team = Team.objects.create(
-                    name=team_name,
-                    description=team_desc,
-                    create_date=datetime.now()
-                )
-            new_team.save()
-            account = Account.objects.get(user=request.user)
-            team_member = TeamMember.objects.create(
-                team=new_team,
-                member=account,
-                is_admin=True
-            )
-            team_member.save()
-            Board.objects.create(
-                name=team_name,
-                board_type='Team',
-                anonymous_writer=False
-            )
-            return JsonResponse({'status': 'success'})
+            try:
+                with transaction.atomic():
+                    if team_img:
+                        new_team = Team.objects.create(
+                            name=team_name,
+                            description=team_desc,
+                            image=team_img,
+                            create_date=datetime.now()
+                        )
+                    else:
+                        new_team = Team.objects.create(
+                            name=team_name,
+                            description=team_desc,
+                            create_date=datetime.now()
+                        )
+                    new_team.save()
+                    account = Account.objects.get(user=request.user)
+                    team_member = TeamMember.objects.create(
+                        team=new_team,
+                        member=account,
+                        is_admin=True
+                    )
+                    team_member.save()
+                    Board.objects.create(
+                        name=team_name,
+                        board_type='Team',
+                        anonymous_writer=False
+                    )
+                    return JsonResponse({'status': 'success'})
+            except DatabaseError:
+                field_check_list['DB'] = 'DB Error'
+                return JsonResponse({'status': 'fail', 'errors': field_check_list})
         else:
             print(field_check_list)
             return JsonResponse({'status': 'fail', 'errors': field_check_list})
