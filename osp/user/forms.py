@@ -16,5 +16,10 @@ class PortfolioUploadForm(ModelForm):
         model = Account
         fields = ['portfolio']
 
+class IntroductionUploadForm(ModelForm):
+    class Meta:
+        model = Account
+        fields = ['introduction']
+
 
 
