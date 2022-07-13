@@ -3,87 +3,87 @@
 
 {% block content %}
 <body>
-  <form method="POST" action="" enctype="multipart/form-data">
-  <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
-  <div class="container-xl">
-    <div class="row row-cols-2">
-      <div class="col">
-        <div class="card" id="visualization">
-          <h5 class="card-title"> 개인정보 설정 </h5>
-          <div class="card-body">
-            <div class="mb-3 row">
-              <label for="github_id" class="col-sm-2 col-form-label">GitHub ID</label>
-              <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" id="github_id" value={{data.info.github_id}}>
+  <form method="POST" action=""  enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container-xl">
+      <div class="row row-cols-2">
+        <div class="col">
+          <div class="card" id="visualization">
+            <h5 class="card-title"> 개인정보 설정 </h5>
+            <div class="card-body">
+              <div class="mb-3 row">
+                <label for="github_id" class="col-sm-2 col-form-label">GitHub ID</label>
+                <div class="col-sm-10">
+                  <input type="text" readonly class="form-control-plaintext" id="github_id" value={{data.info.github_id}}>
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label for="id_personal_email" class="col-sm-2 col-form-label">Per. Email</label>
-              <div class="col-sm-10">
-                <input type="email" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+              <div class="mb-3 row">
+                <label for="id_personal_email" class="col-sm-2 col-form-label">Per. Email</label>
+                <div class="col-sm-10">
+                  <input type="email" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label for="id_plural_major" class="col-sm-2 col-form-label">Major</label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" id="plural_major" name="plural_major" value={{data.info.plural_major}}>
+              <div class="mb-3 row">
+                <label for="id_plural_major" class="col-sm-2 col-form-label">Major</label>
+                <div class="col-sm-10">
+                  <input type="text " class="form-control" id="plural_major" name="plural_major" value={{data.info.plural_major}}>
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label for="id_primary_email" class="col-sm-2 col-form-label">Primary</label>
-              <div class="col-sm-10">
-                <input type="email" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+              <div class="mb-3 row">
+                <label for="id_primary_email" class="col-sm-2 col-form-label">Primary</label>
+                <div class="col-sm-10">
+                  <input type="email" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label for="id_secondary_email" class="col-sm-2 col-form-label">Secondary</label>
-              <div class="col-sm-10">
-                <input type="email" class="form-control" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
+              <div class="mb-3 row">
+                <label for="id_secondary_email" class="col-sm-2 col-form-label">Secondary</label>
+                <div class="col-sm-10">
+                  <input type="email" class="form-control" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
+                </div>
               </div>
-            </div>
-            <div class="mb-3">
-              <label for="exampleFormControlTextarea1" class="form-label">Self Introduction</label>
-              <textarea class="form-control" id="exampleFormControlTextarea1" rows="1"></textarea>
-            </div>
-            <div>
-              {% csrf_token %}
-              <img src= {{data.account.photo.url}} alt="My Image" width="50" height="50">
-              <p><label for="id_photo">프로필 사진:</label> <input id="photo" name="photo" type="file" /></p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card" id="visualization">
-          <h5 class="card-title"> 관심분야 설정 </h5>
-          <div class="card-body">
-            {% include 'profile/interests.html' %}
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card" id="portfolio">
-          <h5 class="card-title"> 포트폴리오 설정 </h5>
-          <div class="card-body">
-            <div class="mb-3">
+              <div class="mb-3">
                 {% csrf_token %}
-                <p><textarea cols="55" id="id_portfolio" name="portfolio" rows="15">{{data.account.portfolio}}</textarea></p>
+                <label for="id_introduction" class="form-label">Introduction</label>
+                <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+              </div>
+              <div>
+                {% csrf_token %}
+                <img src= {{data.account.photo.url}} alt="My Image" width="50" height="50">
+                <p><label for="id_photo">프로필 사진:</label> <input id="photo" name="photo" type="file" /></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" id="visualization">
+            <h5 class="card-title"> 관심분야 설정 </h5>
+            <div class="card-body">
+              {% include 'profile/interests.html' %}
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" id="portfolio">
+            <h5 class="card-title"> 포트폴리오 설정 </h5>
+            <div class="card-body">
+              <div class="mb-3">
+                <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="15">{{data.account.portfolio}}</textarea></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" id="visualization">
+            <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
+            <div class="card-body">
+              {% csrf_token %}
+              {% include 'profile/languages.html' %}
             </div>
           </div>
         </div>
       </div>
-      <div class="col">
-        <div class="card" id="visualization">
-            <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
-          <div class="card-body">
-            {% include 'profile/languages.html' %}
-          </div>
-
-        </div>
-      </div>
+      <button type="submit" class="btn btn-primary" name="action" value="save">저장</button>
     </div>
-    <button type="submit" class="btn btn-primary" name="action" value="save">저장</button>
-  </div>
   </form>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -103,17 +103,15 @@
       
         <div {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
           <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-
           {{ message }}
-          
         </div>
       {% endfor %}
   </div>
   {% endif %}
 </body>
-
 {% endblock %}
 
 {% block script %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
+  <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
 {% endblock %}
