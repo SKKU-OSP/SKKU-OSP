@@ -9,7 +9,7 @@ class Team(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=150)
-    image = models.ImageField(default='default.jpg', upload_to='img/team/')
+    image = models.ImageField(default='img/team/default.jpg', upload_to='img/team/')
     create_date = models.DateTimeField()
     
     def __str__(self) -> str:

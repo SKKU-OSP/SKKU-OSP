@@ -53,6 +53,7 @@ def main(request):
         board_list.append(board)
     return render(request, 'community/main.html', {'boards': board_list})
 
+@login_required
 def board(request, board_name):
     try:
         board = Board.objects.get(name=board_name)
