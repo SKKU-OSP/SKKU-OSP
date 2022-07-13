@@ -17,7 +17,12 @@
             <div class="card-body">
               <div class="d-flex justify-content-between">
                 <h4 class="card-title fw-bold">{{board.name}} 게시판</h4>
-                <a href="/community/{{board.name}}">
+{#                  /community/{{board.name}}#}
+                <a
+                        {% if board %}
+                        href="{% url 'community:Board' board_name=board.name board_id=board.id %}"
+                        {% endif %}
+                >
                   더보기
                   <i class="bi-chevron-right"></i>
                 </a>

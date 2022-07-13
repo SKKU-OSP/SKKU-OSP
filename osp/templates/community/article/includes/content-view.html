@@ -6,7 +6,12 @@
     <!--article content-->
     <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
         <div class="d-flex flex-row justify-content-between" style="height:40px;">
-            <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;line-height:40px;">{{ article.title }}</div>
+            <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;line-height:40px;">
+                {% if board.name == 'Team' %}
+                    [{{ article.team.name }}]
+                {% endif %}
+                {{ article.title }}
+            </div>
             <div class="d-flex flex-row justify-content-end">
                 <div style="line-height:40px;padding-left:10px;">
                     {% if user == article.writer.user %}
@@ -49,9 +54,9 @@
 </form>
 {% if board.name == 'Team' %}
 <div class="form-control d-flex flex-row" style="width:100%;padding-bottom:10px;margin-top:5px;">
-    {% if team %}
+    {% if article.team %}
     <div class="f-bold">팀 정보 |</div>
-    <div>{{ team.name }} <br> {{ team.description }}</div>
+    <div>{{ article.team.name }} <br> {{ article.team.description }}</div>
     {% else %}
     <div>
         팀 정보가 없습니다.

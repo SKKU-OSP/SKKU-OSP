@@ -27,7 +27,11 @@
           </div>
         </div>
         <div class="my-auto">
-          <a class="btn btn-outline-secondary" href="{% url 'community:article-register' board_name=board.name %}">
+          <a class="btn btn-outline-secondary"
+             {% if board %}
+             href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"
+             {% endif %}
+          >
             글쓰기
             <i class="bi-pencil"></i>
           </a>
