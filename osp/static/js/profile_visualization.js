@@ -706,11 +706,11 @@ window.onload = function () {
   }
 
   function histogramOption(offset) {
+    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
+    $("#histogram-title").text(histogram_title);
     return {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포", 
-        font: { size: 20 }},
         tooltip: {
           callbacks: {
             title: (items) => {

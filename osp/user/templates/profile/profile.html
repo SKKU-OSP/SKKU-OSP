@@ -52,7 +52,9 @@
             </table>
             <div class="card mt-2" id="interests">
               <div class="card-body">
-                <h5 class="card-title">관심분야</h5>
+                <h5 class="card-title d-flex justify-content-between">관심분야
+                  <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
+                </h5>
                 {% for row in data.inter %}
                   <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
                 {% endfor %}
@@ -60,7 +62,9 @@
             </div>
             <div class="card mt-2" id="languages">
               <div class="card-body">
-                <h5 class="card-title">사용언어/기술스택</h5>
+                <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
+                  <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
+                </h5>
               </div>
             </div>
           </div>
@@ -109,7 +113,9 @@
           <div class="col-4">
             <div class="card h-100">
               <div class="card-body">
-                <h5 class="card-title">Recent Contributions</h5>
+                <h5 class="card-title d-flex justify-content-between">Recent Contributions
+                  <i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i>
+                </h5>
                 {% for recent_repo in data.repos %}
                 <div class="card w-100 mb-2 recent_repos" id="">
                   <div class="card-body">
@@ -132,7 +138,9 @@
           <div class="col-4">
             <div class="card" id="portfolio">
               <div class="card-body">
-                <h5 class="card-title">포트폴리오</h5>
+                <h5 class="card-title d-flex justify-content-between">포트폴리오
+                  <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+                </h5>
                 {{ data.account.portfolio|mark }}
               </div>
             </div>
@@ -174,9 +182,11 @@
                     </div>
                   </div>
                   <div class="modal-item">
+                    <h5 id="modal-histogram-title">분포</h5>
                     <canvas id="modal-canvas2" class="ctx-item"></canvas>
                   </div>
                   <div class="modal-item">
+                    <h5 id="modal-stacked-title">세부점수</h5>
                     <canvas id="modal-canvas3" class="ctx-item"></canvas>
                   </div>
                 </div>
@@ -271,9 +281,11 @@
                       <button id="btn-toggle" class="btn btn-primary">정규화</button>
                   </div>
                   <div class="tab-pane fade mt-2" id="pills-dist">
+                    <h5 id="histogram-title">분포</h5>
                     <canvas id="canvas2" class="ctx-item"></canvas>
                   </div>
                   <div class="tab-pane fade mt-2" id="pills-detail">
+                    <h5 id="stacked-title">세부점수</h5>
                     <canvas id="canvas3" class="ctx-item"></canvas>
                   </div>
                 </div>
