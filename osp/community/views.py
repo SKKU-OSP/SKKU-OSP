@@ -49,14 +49,18 @@ def main(request):
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
+            if board.name == 'Team':
+                article.team = TeamRecruitArticle.objects.get(article=article).team
+
+
         board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
         board_list.append(board)
     return render(request, 'community/main.html', {'boards': board_list})
 
-@login_required
-def board(request, board_name):
+def board(request, board_name, board_id):
     try:
-        board = Board.objects.get(name=board_name)
+        # board = Board.objects.get(name=board_name)
+        board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
     board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
@@ -81,9 +85,11 @@ def board(request, board_name):
         context['team_admin']
     return render(request, 'community/board/board.html', context)
 
-def article_list(request, board_name):
+def article_list(request, board_name, board_id):
     try:
-        board = Board.objects.get(name=board_name)
+        # board = Board.objects.get(name=board_name)
+        board = Board.objects.get(id=board_id)
+        print(board)
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
@@ -132,8 +138,12 @@ def article_list(request, board_name):
         article.comment_cnt = comment_cnt
         article.like_cnt = like_cnt
         article.tags = tags
+        if board.name == 'Team':
+            article.team = TeamRecruitArticle.objects.get(article=article).team
+
         if board.board_type == 'Team':
             article.team = TeamRecruitArticle.objects.get(article=article).team
+
         if board.board_type == 'QnA':
             comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
                 ArticleComment.objects.filter(article=article).values('id'))\
@@ -156,8 +166,9 @@ class ArticleRegisterView(TemplateView):
 
         context['type'] = 'register'
         board_name = kwargs.get('board_name')
+        board_id = kwargs.get('board_id')
         try:
-            context['board'] = Board.objects.get(name=board_name)
+            context['board'] = Board.objects.get(id=board_id)
         except:
             return redirect('community:Community-Main')
 
@@ -171,6 +182,7 @@ class ArticleRegisterView(TemplateView):
 
 class ArticleView(TemplateView):
 
+    @csrf_exempt
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         context['type'] = 'view'
@@ -183,15 +195,16 @@ class ArticleView(TemplateView):
             if context['board'].name == 'Team':
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
-                    context['team'] = Team.objects.filter(id=teamrecruit.team.id).first()
+                    context['article'].team = teamrecruit.team
         except:
-            return redirect('community:Community-Main')
+            s = 1
         context['article'].view_cnt += 1
         context['article'].save()
 
         return render(request, 'community/article/article.html', context)
 
     def post(self, request, *args, **kwargs):
+        print('sdkfljasf;lkjsda;l')
         context = self.get_context_data(request, *args, **kwargs)
         context['type'] = 'edit'
         article_id = kwargs.get('article_id')
@@ -202,7 +215,7 @@ class ArticleView(TemplateView):
         if context['board'].name == 'Team':
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
-                context['team'] = Team.objects.filter(id=teamrecruit.team.id).first()
+                context['article'].team = teamrecruit.team
 
         result = {}
         result['html'] = render_to_string('community/article/includes/content-edit.html', context)
@@ -220,7 +233,8 @@ def article_create(request):
 
     status = 'success'
     board_name = request.POST.get('board_name')
-    board = Board.objects.get(name=board_name)
+    board_id = request.POST.get('board_id')
+    board = Board.objects.get(name=board_id)
 
     try:
         with transaction.atomic():
@@ -254,8 +268,9 @@ def article_update(request):
 
     status = 'success'
     board_name = request.POST.get('board_name')
+    board_id = request.POST.get('board_id')
     article_id = request.POST.get('article_id')
-    board = Board.objects.get(name=board_name)
+    board = Board.objects.get(id=board_id)
     try:
         with transaction.atomic():
             article = Article.objects.get(id=article_id)

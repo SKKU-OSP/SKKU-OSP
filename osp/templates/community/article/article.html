@@ -17,7 +17,9 @@
           <h2>{{ board.name }} 게시판</h2>
         </div>
           <div class="d-flex flex-row justify-content-end">
-                 <div onclick="location.href='{% url 'community:Board' board.name %}'" class="border-2 rounded" style="height:100%;line-height:45px;font-size:18px;font-weight:bold;cursor:pointer;margin-right:10px;"><i class="bi-card-list"></i><span style="padding-left:4px;">리스트</span></div>
+              {% if board %}
+                 <div onclick="location.href='{% url 'community:Board' board.name board.id %}'" class="border-2 rounded" style="height:100%;line-height:45px;font-size:18px;font-weight:bold;cursor:pointer;margin-right:10px;"><i class="bi-card-list"></i><span style="padding-left:4px;">리스트</span></div>
+                {% endif %}
           </div>
       </div>
       <!-- type은 세가지 값이 가능: view / register / edit -->
@@ -104,6 +106,7 @@
         ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name','{{ board.name }}');
+        ajax_form_data.append('board_id','{{ board.id }}');
         {% if board.name == 'Team' %}
             ajax_form_data.append('team_id', $('#team-option').val());
         {% endif %}
@@ -123,7 +126,9 @@
                     console.log(data);
                     if(data['status']=="success"){
                         alert('등록이 완료되었습니다!')
-                        window.location.href = "{% url 'community:Board' board_name=board.name %}";
+                        {% if board %}
+                        window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
+                        {% endif %}
                     }
                     else{
                       alert( data['message'] );
@@ -144,6 +149,7 @@
         ajax_form_data.append('is_anonymous',$('#is-anonymous').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name','{{ board.name }}');
+        ajax_form_data.append('board_id','{{ board.id }}');
         ajax_form_data.append('article_id','{{ article.id }}');
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
@@ -160,7 +166,9 @@
                 success: function(data) {
                     if(data['status']=="success"){
                         alert('수정이 완료되었습니다!')
+                        {% if article %}
                         window.location.href = "{% url 'community:article-view' article_id=article.id %}";
+                        {% endif %}
                     }
                     else{
                       alert( data['message'] );
@@ -191,7 +199,9 @@
                 success: function(data) {
                     if(data['status']=="success"){
                         alert('삭제가 완료되었습니다!')
-                        window.location.href = "{% url 'community:Board' board_name=board.name %}";
+                        {% if board %}
+                        window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
+                        {% endif %}
                     }
                     else{
                       alert( data['message'] );
@@ -234,8 +244,7 @@
                         $('#comment-content').html(data['html']);
                     }
                     else{
-                        console.log('4');
-                        alert('An error occured.\n다시 시도해주세요.');
+                        alert(data['message']);
                     }
                 },
                 error: function(data){

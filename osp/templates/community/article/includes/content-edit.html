@@ -18,7 +18,7 @@
                     </select>
                 {% elif type == 'edit' %}
                     <select id="team-option" style="width:150px;height: 40px; padding-left:10px;border: 1px solid #ced4da;"name="" id="" class="form-check" required>
-                        <option value="{{ team.id }}" disabled selected>{{ team.name }}</option>
+                        <option value="{{ article.team.id }}" disabled selected>{{ article.team.name }}</option>
                     </select>
                 {% endif %}
             {% endif %}
