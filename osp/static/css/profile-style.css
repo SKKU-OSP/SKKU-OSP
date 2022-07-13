@@ -138,7 +138,9 @@ a.nav-link {
   width: 50%;
   height: 25vw;
 }
-
+.tab-pane, .modal-item{
+  text-align: center;
+}
 .grass{
   display: block;
   border: 0px solid #aaaaaa ;
@@ -225,9 +227,6 @@ a.nav-link {
 }
 #modal-canvas1{
   height: 100%;
-}
-#pills-radar{
-  text-align: center;
 }
 #target-search{
   width:100%;

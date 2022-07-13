@@ -671,12 +671,11 @@ function setModal(){
   }
 
   function histogramOption(offset) {
-    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포"
+    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
+    $("#modal-histogram-title").text(histogram_title);
     return {
       plugins: {
         legend: { display: false },
-        title: {display: true, text: histogram_title, 
-        font: { size: 20 }},
         tooltip: {
           callbacks: {
             title: (items) => {
