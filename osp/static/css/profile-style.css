@@ -44,7 +44,6 @@ h5{
 }
 
 h5.modal-title {
-  margin-top: 15px;
   font: 16px;
   font-family: "Noto Sans KR", sans-serif;
   font-weight: 500;
@@ -130,29 +129,40 @@ a.nav-link {
   display: flex;
 	flex-wrap: wrap;
 }
-.ctx-item{
-  margin: 16px 8px;
+.modal-grass{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
 }
-
+.modal-item{
+  width: 50%;
+  height: 25vw;
+}
+.tab-pane, .modal-item{
+  text-align: center;
+}
 .grass{
   display: block;
-  width: 30rem;
   border: 0px solid #aaaaaa ;
   border-radius: 0.3rem;
-  flex: 1 1 70%;
 }
 .grass.double {
-  height: 12rem;
+  height: 16vw;
+  grid-column: 2 / 6;
+	grid-row: 1 / 3;
 }
 .grass.half {
-  height: 6rem;
+  height: 8vw;
+  grid-column: 2 / 6;
+	grid-row: 3 / 4;
 }
 
 .vertical-menu{
-  width: 6rem;
+  height: 16vw;
   overflow-y: auto;
   text-align: end;
-  flex: 1 1 20%;
+  grid-column: 1 / 2;
+  grid-row:1 / 3;
 }
 
 .vertical-menu button{
@@ -175,6 +185,55 @@ a.nav-link {
 .vertical-menu button.active{
   background-color: #0969da;
   color:white;
+}
+.modal-radar{
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+#modal-radar-title{
+  grid-row: 1/2;
+  grid-column: 1/6;
+  vertical-align: baseline;
+  text-align: center;
+  margin: 0;
+}
+#modal-target-user, .modal-radar > .ss-main{
+  font-size: 14px;
+  height: fit-content;
+  width: 100%;
+  grid-row: 1 / 2;
+  grid-column: 6 / 8;
+}
+#modal-btn-compare{
+  font-size: 14px;
+  padding: 6px;
+  height: fit-content;
+  width: 100%;
+  grid-row: 2 / 3;
+  grid-column: 7 / 8;
+}
+.radar-normal, #modal-btn-toggle{
+  text-align: center;
+  font-size: 14px;
+  height: fit-content;
+  width: 100%;
+  grid-row: 8 / 9;
+  grid-column: 3 / 4;
+}
+#radar-canvas{
+  grid-column: 1 / 6;
+  grid-row: 2 / 7;
+}
+#modal-canvas1{
+  height: 100%;
+}
+#target-search{
+  width:100%;
+  display:flex;
+}
+#target-search > .ss-main{
+  width: calc(100% - 95px);
 }
 
 /* Scroll bar Custom */
@@ -249,9 +308,8 @@ a.nav-link {
   width: 60px;
   text-align: center;
 }
-#btn-toggle #btn-compare{
-  width:90px;
-  margin-top: 10px;
+#btn-toggle, #btn-compare{
+  width:95px;
   font-size: 14px;
 }
 .evt-icon, #closeModalBtn, #closeModalIcon{
@@ -261,6 +319,9 @@ a.nav-link {
 }
 .modal-content{
   font-family: "Roboto", sans-serif;
+}
+.modal-footer{
+  padding: 0 calc(var(--bs-modal-padding) - var(--bs-modal-footer-gap) * .5);;
 }
 .card-body.tab-content{
   display: block;
@@ -274,6 +335,12 @@ a.nav-link {
 .btn-group-filter{
   display: flex;
   justify-content: flex-end;
+}
+#btnGroupDropMonth{
+  min-width: 70px;
+}
+#btnGroupDropFactor{
+  min-width: 88px;
 }
 .dropdown-toggle{
   font-size: 14px;
