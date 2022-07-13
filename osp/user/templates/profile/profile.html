@@ -4,307 +4,296 @@
 {% load user_templatetag %}
 {% block content %}
 <div class="container my-4">
+  <div class="d-flex justify-content-end mb-1">
+    <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true" >프로필 수정</a>
+  </div>
   <div class="row">
-    <div class="col-3">
-      <div class="container">
-        <div class="row">
-          <div class="col">
-            <div class="card">
-              <div class="card-body" style="min-height: 250px;">
-                <img src= {{data.account.photo.url}} alt="No Image now" width="200" height="200">
-              </div>
-            </div>
-            <table class="table w-100">
-              <tbody>
-                <tr>
-                  <td scope="row">이름</td>
-                  <td>{{data.info.name}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">학번</td>
-                  <td>{{data.info.id}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">대학</td>
-                  <td>{{data.info.college}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">학과</td>
-                  <td>{{data.info.dept}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">전공</td>
-                  <td>{{data.info.plural_major}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">GitHub</td>
-                  <td><a href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a></td>
-                </tr>
-                <tr>
-                  <td scope="row">개인 Email</td>
-                  <td>{{data.info.personal_email}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">Github Email</td>
-                  <td>{{data.info.primary_email}}</td>
-                </tr>
-                <tr>
-                  <td scope="row">소개</td>
-                  <td>{{data.account.introduction}}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="card mt-2" id="interests">
-              <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between">관심분야
-                  <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
-                </h5>
-                {% for row in data.inter %}
-                  <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
-                {% endfor %}
-              </div>
-            </div>
-            <div class="card mt-2" id="languages">
-              <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
-                  <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
-                </h5>
-              </div>
-            </div>
-          </div>
+    <div class="col-md-3 col-12 profile-info">
+      <div class="d-flex flex-column justify-content-end text-center user-info">
+          <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+        <div class="info-body">
+          <p class="font-focus">{{data.info.name}}</p>
+          <p>{{data.info.github_id}}</p>
+        </div>
+      </div>
+      <div class="d-flex flex-column user-detail">
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">학번</span>
+          <span class="row-txt">{{data.info.id}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">대학</span>
+          <span class="row-txt">{{data.info.college}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">학과</span>
+          <span class="row-txt">{{data.info.dept}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">전공</span>
+          <span class="row-txt">{{data.info.plural_major}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">GitHub</span>
+          <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">개인 Email</span>
+          <span class="row-txt">{{data.info.personal_email}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">Github Email</span>
+          <span class="row-txt">{{data.info.primary_email}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">소개</span>
+          <span class="row-txt">{{data.account.introduction}}</span>
         </div>
       </div>
     </div>
-    <div class="col-9">
-      <div class="container">
-        <div class="row mb-2">
-          <div class="col-4">
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title">개발자 성향</h5>
-                <p class="card-text">MBTI</p>
+    <div class="col-md-9 col-12">
+      <div class="row mb-3">
+        <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
+          <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
+                <button id="closeModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="card h-100">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title mb-4">Score</h5>
-                <h1 class="text-center my-auto">{{data.score.total_score}}</h1>
-                <table class="table mt-auto">
-                  <tbody>
-                    <tr>
-                      <th scope="row" colspan=2 style="width: 10%">Commits</th>
-                      <td style="width: 10%" colspan=2>{{data.score.commit_cnt}}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" style="width: 10%">Repositories</th>
-                      <td style="width: 10%">{{data.score.repo_cnt}}</td>
-                      <th scope="row" style="width: 10%">Issues</th>
-                      <td style="width: 10%">{{data.score.issue_cnt}}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" style="width: 10%">Pull Requests</th>
-                      <td style="width: 10%">{{data.score.pr_cnt}}</td>
-                      <th scope="row" style="width: 10%">Stars</th>
-                      <td style="width: 10%">-</td>      
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between">Recent Contributions
-                  <i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i>
-                </h5>
-                {% for recent_repo in data.repos %}
-                <div class="card w-100 mb-2 recent_repos" id="">
-                  <div class="card-body">
-                    <h6 class="card-title">{{recent_repo.repo_name}}</h6>
-                    <div style="font-size: 13px">
-                      <!-- last commit : {{recent_repo.committer_date}} -->
-                      <!-- <br> -->
-                      {{recent_repo.desc}}
-                    </div>
+              <div class="modal-body justify-content-center" id="modal-visualization">
+                <div class="modal-item modal-grass">
+                  <div class="vertical-menu">
+                    <button class="modal-btn-year">2022</button>
+                    <button class="modal-btn-year active">2021</button>
+                    <button class="modal-btn-year">2020</button>
+                    <button class="modal-btn-year">2019</button>
+                  </div>
+                  <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
+                  <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
+                    <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                    </g>
+                  </svg>
+                  <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
+                </div>
+                <div class="modal-item modal-radar">
+                    <h5 id="modal-radar-title">2021년 기여도 비교</h5>
+                    <select name="target" id="modal-target-user">
+                      <option value="" selected="selected">비교없음</option>
+                      {% target_github_id request %}
+                    </select>
+                    <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
+                  <div id="radar-canvas">
+                    <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                  </div>
+                  <div class="radar-normal">
+                    <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
                   </div>
                 </div>
-                {% endfor %}
+                <div class="modal-item">
+                  <h5 id="modal-histogram-title">분포</h5>
+                  <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                </div>
+                <div class="modal-item">
+                  <h5 id="modal-stacked-title">세부점수</h5>
+                  <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="container" id="undercontainers">
-        <div class="row">
-          <div class="col-4">
-            <div class="card" id="portfolio">
-              <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between">포트폴리오
-                  <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
-                </h5>
-                {{ data.account.portfolio|mark }}
-              </div>
-            </div>
-          </div>
-          <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
-            <div class="modal-dialog modal-fullscreen">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
-                  <button id="closeModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="col-8">
+          <div class="card" id="visualization">
+            <div class="card-body">
+              <h5 class="card-title d-flex justify-content-between">
+                기여내역 시각화
+                <i id="icon-modal" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+              </h5>
+              <ul class="nav nav-tabs mt-2 text-lg">
+                <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
+                <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
+                <li class="nav-item"><a class="nav-link" id="pills-dist-tab">분포</a></li>
+                <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
+              </ul>
+              <div class="tab-content">
+                <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
+                  <div class="btn-group" role="group">
+                    <button id="btnGroupDropYear" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      2021
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="btnGroupDropYear">
+                      <li><button class="dropdown-item year-item">2022</button></li>
+                      <li><button class="dropdown-item year-item">2021</button></li>
+                      <li><button class="dropdown-item year-item">2020</button></li>
+                      <li><button class="dropdown-item year-item">2019</button></li>
+                    </ul>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button id="btnGroupDropMonth" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      ALL
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="btnGroupDropMonth">
+                      <li><button class="dropdown-item month-item" value="0">ALL</button></li>
+                      <li><button class="dropdown-item month-item" value="1">JAN</button></li>
+                      <li><button class="dropdown-item month-item" value="2">FEB</button></li>
+                      <li><button class="dropdown-item month-item" value="3">MAR</button></li>
+                      <li><button class="dropdown-item month-item" value="4">APR</button></li>
+                      <li><button class="dropdown-item month-item" value="5">MAY</button></li>
+                      <li><button class="dropdown-item month-item" value="6">JUN</button></li>
+                      <li><button class="dropdown-item month-item" value="7">JUL</button></li>
+                      <li><button class="dropdown-item month-item" value="8">AUG</button></li>
+                      <li><button class="dropdown-item month-item" value="9">SEP</button></li>
+                      <li><button class="dropdown-item month-item" value="10">OCT</button></li>
+                      <li><button class="dropdown-item month-item" value="11">NOV</button></li>
+                      <li><button class="dropdown-item month-item" value="12">DEC</button></li>
+                    </ul>
+                  </div>
+
+                  <div class="btn-group" role="group">
+                    <button id="btnGroupDropFactor" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      Score
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="btnGroupDropFactor">
+                      <li><button class="dropdown-item factor-item" value="score">Score</button></li>
+                      <li><button class="dropdown-item factor-item" value="star">Star</button></li>
+                      <li><button class="dropdown-item factor-item" value="commit">Commit</button></li>
+                      <li><button class="dropdown-item factor-item" value="pr">PR</button></li>
+                      <li><button class="dropdown-item factor-item" value="issue">Issue</button></li>
+                    </ul>
+                  </div>
                 </div>
-                <div class="modal-body justify-content-center" id="modal-visualization">
-                  <div class="modal-item modal-grass">
-                    <div class="vertical-menu">
-                      <button class="modal-btn-year">2022</button>
-                      <button class="modal-btn-year active">2021</button>
-                      <button class="modal-btn-year">2020</button>
-                      <button class="modal-btn-year">2019</button>
-                    </div>
-                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
-                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
-                      <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                <div class="tab-pane fade show active mt-2" id="pills-overview">
+                  <div class="d-flex">
+                    <svg id="activity-monthly" class="grass double" viewBox="0 0 465 190"></svg>
+                  </div>
+                  <div class="d-flex">
+                    <svg id="activity-factor" class="grass half" viewBox="0 0 465 95">
+                      <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
                       </g>
                     </svg>
-                    <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
                   </div>
-                  <div class="modal-item modal-radar">
-                      <h5 id="modal-radar-title">2021년 기여도 비교</h5>
-                      <select name="target" id="modal-target-user">
+                  <div id="task-tooltip" style="position: absolute; display: none;"></div>
+                </div>
+                <div class="tab-pane fade mt-2" id="pills-radar">
+                  <h5 id="radar-title">2021년 기여도 비교</h5>
+                  <canvas id="canvas1" class="ctx-item"></canvas>
+                    <div id="target-search">
+                      <select name="target" id="target-user">
                         <option value="" selected="selected">비교없음</option>
                         {% target_github_id request %}
                       </select>
-                      <button id="modal-btn-compare" class="btn btn-primary">비교</button>
-                    <div id="radar-canvas">
-                      <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                      <button id="btn-compare" class="btn btn-primary">비교</button>
                     </div>
-                    <div class="radar-normal">
-                      <button id="modal-btn-toggle" class="btn btn-primary" >정규화</button>
-                    </div>
-                  </div>
-                  <div class="modal-item">
-                    <h5 id="modal-histogram-title">분포</h5>
-                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
-                  </div>
-                  <div class="modal-item">
-                    <h5 id="modal-stacked-title">세부점수</h5>
-                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
-                  </div>
+                    <button id="btn-toggle" class="btn btn-primary">정규화</button>
                 </div>
-                <div class="modal-footer">
-                  <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="tab-pane fade mt-2" id="pills-dist">
+                  <h5 id="histogram-title">분포</h5>
+                  <canvas id="canvas2" class="ctx-item"></canvas>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-8">
-            <div class="card" id="visualization">
-              <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between">
-                  기여내역 시각화
-                  <i id="icon-modal" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
-                </h5>
-                <ul class="nav nav-tabs mt-2 text-lg">
-                  <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
-                  <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
-                  <li class="nav-item"><a class="nav-link" id="pills-dist-tab">분포</a></li>
-                  <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
-                </ul>
-                <div class="tab-content">
-                  <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
-                    <div class="btn-group" role="group">
-                      <button id="btnGroupDropYear" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        2021
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropYear">
-                        <li><button class="dropdown-item year-item">2022</button></li>
-                        <li><button class="dropdown-item year-item">2021</button></li>
-                        <li><button class="dropdown-item year-item">2020</button></li>
-                        <li><button class="dropdown-item year-item">2019</button></li>
-                      </ul>
-                    </div>
-                    <div class="btn-group" role="group">
-                      <button id="btnGroupDropMonth" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        ALL
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropMonth">
-                        <li><button class="dropdown-item month-item" value="0">ALL</button></li>
-                        <li><button class="dropdown-item month-item" value="1">JAN</button></li>
-                        <li><button class="dropdown-item month-item" value="2">FEB</button></li>
-                        <li><button class="dropdown-item month-item" value="3">MAR</button></li>
-                        <li><button class="dropdown-item month-item" value="4">APR</button></li>
-                        <li><button class="dropdown-item month-item" value="5">MAY</button></li>
-                        <li><button class="dropdown-item month-item" value="6">JUN</button></li>
-                        <li><button class="dropdown-item month-item" value="7">JUL</button></li>
-                        <li><button class="dropdown-item month-item" value="8">AUG</button></li>
-                        <li><button class="dropdown-item month-item" value="9">SEP</button></li>
-                        <li><button class="dropdown-item month-item" value="10">OCT</button></li>
-                        <li><button class="dropdown-item month-item" value="11">NOV</button></li>
-                        <li><button class="dropdown-item month-item" value="12">DEC</button></li>
-                      </ul>
-                    </div>
-
-                    <div class="btn-group" role="group">
-                      <button id="btnGroupDropFactor" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        Score
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="btnGroupDropFactor">
-                        <li><button class="dropdown-item factor-item" value="score">Score</button></li>
-                        <li><button class="dropdown-item factor-item" value="star">Star</button></li>
-                        <li><button class="dropdown-item factor-item" value="commit">Commit</button></li>
-                        <li><button class="dropdown-item factor-item" value="pr">PR</button></li>
-                        <li><button class="dropdown-item factor-item" value="issue">Issue</button></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="tab-pane fade show active mt-2" id="pills-overview">
-                    <div class="d-flex">
-                      <svg id="activity-monthly" class="grass double" viewBox="0 0 465 190"></svg>
-                    </div>
-                    <div class="d-flex">
-                      <svg id="activity-factor" class="grass half" viewBox="0 0 465 95">
-                        <g id="factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
-                        </g>
-                      </svg>
-                    </div>
-                    <div id="task-tooltip" style="position: absolute; display: none;"></div>
-                  </div>
-                  <div class="tab-pane fade mt-2" id="pills-radar">
-                    <h5 id="radar-title">2021년 기여도 비교</h5>
-                    <canvas id="canvas1" class="ctx-item"></canvas>
-                      <div id="target-search">
-                        <select name="target" id="target-user">
-                          <option value="" selected="selected">비교없음</option>
-                          {% target_github_id request %}
-                        </select>
-                        <button id="btn-compare" class="btn btn-primary">비교</button>
-                      </div>
-                      <button id="btn-toggle" class="btn btn-primary">정규화</button>
-                  </div>
-                  <div class="tab-pane fade mt-2" id="pills-dist">
-                    <h5 id="histogram-title">분포</h5>
-                    <canvas id="canvas2" class="ctx-item"></canvas>
-                  </div>
-                  <div class="tab-pane fade mt-2" id="pills-detail">
-                    <h5 id="stacked-title">세부점수</h5>
-                    <canvas id="canvas3" class="ctx-item"></canvas>
-                  </div>
+                <div class="tab-pane fade mt-2" id="pills-detail">
+                  <h5 id="stacked-title">세부점수</h5>
+                  <canvas id="canvas3" class="ctx-item"></canvas>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div class="col-4">
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title mb-4">Score</h5>
+              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score}}</span>
+              <div class="row-contr justify-content-between">
+                <span class="row-title" style="width:50%;">Repositories</span>
+                <span class="row-raw">{{data.score.repo_cnt}}</span>
+              </div>
+              <div class="row-contr justify-content-between">
+                <span class="row-title">Commits</span>
+                <span class="row-raw">{{data.score.commit_cnt}}</span>
+                <span class="row-title">Issues</span>
+                <span class="row-raw">{{data.score.issue_cnt}}</span>
+              </div>
+              <div class="row-contr justify-content-between">
+                <span class="row-title">Pull Requests</span>
+                <span class="row-raw">{{data.score.pr_cnt}}</span>
+                <span class="row-title">Stars</span>
+                <span class="row-raw">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-4">
+          <div class="card h-100" id="interests">
+            <div class="card-body">
+              <h5 class="card-title d-flex justify-content-between">관심분야
+                <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
+              </h5>
+              {% for row in data.inter %}
+                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card h-100" id="languages">
+            <div class="card-body">
+              <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
+                <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
+              </h5>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card" id="portfolio">
+            <div class="card-body">
+              <h5 class="card-title d-flex justify-content-between">포트폴리오
+                <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+              </h5>
+              {{ data.account.portfolio|mark }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-7">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title d-flex justify-content-between">최근 기여활동
+                <i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i>
+              </h5>
+              {% for recent_repo in data.repos %}
+              <div class="card w-100 mb-2 recent_repos">
+                <div class="card-body">
+                  <h6 class="card-title">{{recent_repo.repo_name}}</h6>
+                  <div style="font-size: 13px">
+                    <!-- last commit : {{recent_repo.committer_date}} -->
+                    <!-- <br> -->
+                    {{recent_repo.desc}}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="col-5">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">개발자 성향</h5>
+              <p class="card-text">MBTI</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <a href="./profile-edit" class="btn btn-primary" role="button" aria-disabled="true" style="margin-top: 20px">Profile Edit</a>
   </div>
 </div>
 
 {% endblock %}
-
 
 {% block script %}
   <script>
