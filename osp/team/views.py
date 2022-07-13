@@ -2,15 +2,18 @@ from django.db import transaction, DatabaseError
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.files.images import get_image_dimensions
-from .models import Team, TeamMember
+
+from .models import Team, TeamMember, TeamTag
+from tag.models import Tag
 from user.models import Account
 from community.models import Board
+
 from datetime import datetime
 
 # Create your views here.
 def TeamCreate(request):
     if request.method == 'GET':
-        return render(request, 'team/create_form.html')
+        return render(request, 'team/create-form.html')
     if request.method == 'POST':
         print(request.POST)
         is_valid = True
@@ -81,3 +84,49 @@ def TeamCreate(request):
         else:
             print(field_check_list)
             return JsonResponse({'status': 'fail', 'errors': field_check_list})
+
+def TeamUpdate(request):
+    if request.method == 'GET':
+        context = {}
+        team_name = request.GET.get('team')
+        team = Team.objects.get(name=team_name)
+        context['team'] = team
+        context['team_members'] = TeamMember.objects.filter(team=team).select_related('member')
+        return render(request, 'team/update-form.html', context)
+    if request.method == 'POST':
+        team_name = request.POST.get('team')
+        team = Team.objects.get(name=team_name)
+        try:
+            with transaction.atomic():
+                for key in request.POST.keys():
+                    if key[:key.find('-')] == 'tagadd':
+                        target_tag = key[key.find('-') + 1:]
+                        target_tag = Tag.objects.get(name=target_tag)
+                        TeamTag.objects.create(
+                            team=team,
+                            tag=target_tag
+                        )
+                    if key[:key.find('-')] == 'tagdelete':
+                        target_tag = key[key.find('-') + 1:]
+                        TeamTag.objects.filter(
+                            team=team,
+                            tag=target_tag
+                        ).delete()
+                    if key[:key.find('-')] == 'admin':
+                        target_member = key[key.find('-') + 1:]
+                        target_member = TeamMember.objects.get(id=target_member)
+                        target_member.is_admin = True
+                        target_member.save()
+                    if key[:key.find('-')] == 'admindelete':
+                        target_member = int(key[key.find('-') + 1:])
+                        target_member = TeamMember.objects.get(id=target_member)
+                        target_member.is_admin = False
+                        target_member.save()
+                    if key[:key.find('-')] == 'delete':
+                        target_member = int(key[key.find('-') + 1:])
+                        TeamMember.objects.filter(id=target_member).delete()
+                if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
+                    raise DatabaseError('팀 관리자는 0명이 될 수 없습니다.')
+                return JsonResponse({'status': 'success'})
+        except DatabaseError as e:
+            return JsonResponse({'status': 'fail', 'message': str(e)})
