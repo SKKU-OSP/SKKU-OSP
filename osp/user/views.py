@@ -10,7 +10,9 @@ from tag.models import Tag
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
-from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm
+from django.core.files.images import get_image_dimensions
+
+from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
 from django.db.models import Avg, Sum, Subquery
 
 import time
@@ -169,13 +171,14 @@ class ProfileEditView(TemplateView):
         student_id = user_account.student_data.id
         user_tab = StudentTab.objects.get(id=student_id)
 
-        info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
 
-        added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-        added_level = request.POST.get('tagLevel') # 선택 된 레벨
-        added_tag = Tag.objects.get(name=added_preferLanguage)
+        print(request.POST.get("action"))
+
 
         if(request.POST.get('action') == 'append'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
+            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
+            added_level = request.POST.get('tagLevel') # 선택 된 레벨
+            added_tag = Tag.objects.get(name=added_preferLanguage)
             try:
                 already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
                 already_ints.delete()
@@ -184,16 +187,36 @@ class ProfileEditView(TemplateView):
                 AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
 
         elif(request.POST.get('action') == 'save'): # 저장 버튼 눌렀을 경우
+            # 기본정보 폼
+            info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
             if info_form.is_valid():
                 print('Info is valid form')
             
                 info_form.save()
 
-            # 이미지의 용량을 제한 해야함
+            # 소개 폼
+            intro_form = IntroductionUploadForm(request.POST, request.FILES, instance=user_account)
+            if intro_form.is_valid():
+                print('Intro is valid form')
+            
+                intro_form.save()
+
+
+
+            # 프로필 사진 폼
             pre_img = user_account.photo.path
+            field_check_list = {}
+            profile_img = request.FILES.get('photo', False)
+            is_valid = True
+            if profile_img:
+                img_width, img_height = get_image_dimensions(profile_img)
+                if img_width > 500 or img_height > 500:
+                    is_valid = False
+                    field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+
             img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-            if img_form.is_valid():
-                if 'photo' in request.FILES: # 폼애 이미지가 있으면
+            if bool(img_form.is_valid()) and is_valid:
+                if 'photo' in request.FILES: # 폼에 이미지가 있으면
                     try:
                         os.remove(pre_img) # 기존 이미지 삭제
                     except:                # 기존 이미지가 없을 경우에 pass
@@ -201,6 +224,10 @@ class ProfileEditView(TemplateView):
 
                 print('Image is valid form')
                 img_form.save()
+
+            else:
+                print(field_check_list['photo'])
+
 
             port_form = PortfolioUploadForm(request.POST, request.FILES, instance=user_account)
             if port_form.is_valid():
@@ -210,7 +237,7 @@ class ProfileEditView(TemplateView):
             if info_form.is_valid() and img_form.is_valid() and port_form.is_valid(): # 저장 성공시 메세지
                 messages.add_message(request, messages.SUCCESS, '프로필이 성공적으로 저장되었습니다!')
 
-        elif(request.POST.get('action').split(maxsplit=1)[0] == 'delete'):
+        else:
             delete_requested_tagname = request.POST.get('action').split(maxsplit=1)[1]
             delete_requested_tag = Tag.objects.get(name=delete_requested_tagname)
             tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
@@ -237,11 +264,13 @@ class ProfileEditView(TemplateView):
         info_form = ProfileInfoUploadForm()
         img_form = ProfileImgUploadForm()
         port_form = PortfolioUploadForm()
+        intro_form = IntroductionUploadForm()
 
         form = {
             'info_form': info_form,
             'img_form': img_form,
-            'port_form': port_form
+            'port_form': port_form,
+            'intro_form': intro_form
         }
         data = {
             'account': student_account,
@@ -250,6 +279,11 @@ class ProfileEditView(TemplateView):
             'ints': ints,
             'tags_lang' : tags_lang
         }
+
+        if(str(request.user) != username): # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
+            print("허용되지 않는 접근 입니다.")
+            return redirect(f'/user/{username}/')
+
         return render(request, 'profile/profile-edit.html', {'data': data})
 
     def get_context_data(self, request, *args, **kwargs):
@@ -287,7 +321,8 @@ def compare_stat(request, username):
                 monthly_contr[row_json["year"]-start_year].append(row_json)
                 
         context = {
-            "monthly_contr":monthly_contr
+            "monthly_contr":monthly_contr,
+            "github_id":github_id,
         }
         
         return JsonResponse(context)
