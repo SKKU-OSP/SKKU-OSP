@@ -58,6 +58,7 @@
           <div class="card" id="visualization">
             <h5 class="card-title"> 관심분야 설정 </h5>
             <div class="card-body">
+              {% csrf_token %}
               {% include 'profile/interests.html' %}
             </div>
           </div>

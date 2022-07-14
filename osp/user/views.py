@@ -174,8 +174,17 @@ class ProfileEditView(TemplateView):
 
         print(request.POST.get("action"))
 
+        if(request.POST.get('action') == 'append_ints'): # 관심분야 추가 버튼 눌렀을 경우
+            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
+            added_tag = Tag.objects.get(name=added_preferLanguage)
+            try:
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+                already_ints.delete()
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
 
-        if(request.POST.get('action') == 'append'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
+        elif(request.POST.get('action') == 'append_lang'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
             added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
             added_level = request.POST.get('tagLevel') # 선택 된 레벨
             added_tag = Tag.objects.get(name=added_preferLanguage)
@@ -256,10 +265,13 @@ class ProfileEditView(TemplateView):
         
         # developing....
         tags_all = Tag.objects
-        tags_lang = tags_all.filter(type='language').values('name')
-        ints = AccountInterest.objects.filter(account=student_account)
+        tags_lang = tags_all.filter(type='language')
+        tags_domain = tags_all.filter(type='domain')
+        print(tags_lang)
+        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
+        lang = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_lang)
         # developing....
-
+        print(ints)
 
         info_form = ProfileInfoUploadForm()
         img_form = ProfileImgUploadForm()
@@ -277,7 +289,7 @@ class ProfileEditView(TemplateView):
             'form': form,
             'info': student_info,
             'ints': ints,
-            'tags_lang' : tags_lang
+            'tags_lang' : lang
         }
 
         if(str(request.user) != username): # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
