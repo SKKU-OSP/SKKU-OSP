@@ -232,7 +232,7 @@
               <h5 class="card-title d-flex justify-content-between">관심분야
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              {% for row in data.inter %}
+              {% for row in data.ints %}
                 <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
               {% endfor %}
             </div>
@@ -244,6 +244,9 @@
               <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
+              {% for row in data.lang %}
+                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+              {% endfor %}
             </div>
           </div>
         </div>
