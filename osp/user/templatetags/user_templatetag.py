@@ -31,5 +31,8 @@ def target_github_id(request):
 
 @register.filter
 def user_profile_image_url(user):
-    acc = Account.objects.get(user=user)
-    return mark_safe(acc.photo.url)
+    if user.is_authenticated:
+        acc = Account.objects.get(user=user)
+        return mark_safe(acc.photo.url)
+    else:
+        return mark_safe('')
