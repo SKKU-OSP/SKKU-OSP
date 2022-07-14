@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
 {% extends 'main.html' %}
 
 {% load static %}
 {% block content %}
 <div class="container mt-4">
   <div class="row">
-    <div class="col-3 border h-100">
-      {% include "community/sidebar.html" %}
-    </div>
+    {% include "community/sidebar.html" %}
     <div class="col-9">
       <div class="row">
         {% for board in boards %}
@@ -39,6 +35,5 @@
 </div>
 {% endblock content %}
 {% block script %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
-
-</html>

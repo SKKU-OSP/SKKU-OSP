@@ -1,0 +1,77 @@
+@import url("/static/css/color.css");
+
+#community-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px 0px 10px;
+    margin-top: 62.5px;
+    background: #FFFFFF;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+#profile-tab {
+    background: var(--main-point-color);
+}
+
+#profile-image-wrap {
+    width: fit-content;
+}
+
+#profile-image {
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -62.5px;
+    padding: 0;
+
+    z-index: 5;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    border: 2px solid var(--main-point-color);
+}
+
+#profile-sum {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 10px 30px;
+    gap: 10px;
+    background: var(--main-point-color);
+    color: #FFFFFF;
+}
+
+#profile-username{
+    font-family: 'Roboto' !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 25px;
+    text-align: center;
+}
+
+#community-stat div{
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    text-align: center;
+    text-decoration-line: underline;
+}
+
+.boardgroup-title{
+    padding: 0.5rem;
+    background-color: var(--main-bg-color);
+    text-align: left;
+}
+
+.boardgroup-item{
+    padding: 0.5rem;
+    text-align: center;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px !important;
+
+    background: #FFFFFF;
+    border-top: 1px solid #9D9D9D;
+}
