@@ -56,17 +56,23 @@ class ProfileView(TemplateView):
                 recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
                 recent_repos[commit_repo_name]['desc'] = GithubRepoStats.objects.get(github_id=commit['github_id'], repo_name=commit_repo_name).proj_short_desc
         recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
-       
+
         # 관심 목록 리스트
-        
-        ints = AccountInterest.objects.filter(account=context['account'])
-        # 프로필사진 경로
-        
+        user = User.objects.get(username=context['account'])
+        student_account = context['account']
+        tags_all = Tag.objects
+
+        tags_domain = tags_all.filter(type='domain')
+
+        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain) # 관심분야  
+        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain) # 사용언어, 기술스택
+
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
-            'inter': ints,
+            'ints': ints,
+            'lang': lang,
             'account': context['account']
         }
         context['data'] = data
@@ -265,13 +271,11 @@ class ProfileEditView(TemplateView):
         
         # developing....
         tags_all = Tag.objects
-        tags_lang = tags_all.filter(type='language')
         tags_domain = tags_all.filter(type='domain')
-        print(tags_lang)
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        lang = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_lang)
+        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
         # developing....
-        print(ints)
+
 
         info_form = ProfileInfoUploadForm()
         img_form = ProfileImgUploadForm()
