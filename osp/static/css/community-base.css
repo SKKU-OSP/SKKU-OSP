@@ -90,6 +90,23 @@
     text-align: center;
 }
 
+.article-head{
+    margin-top : auto;
+    margin-bottom: auto;
+}
+
+.article-meta{
+    margin-left: auto;
+    text-align: end;
+    font-size: 14px;
+}
+
+.article-meta-stat{
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    text-align: end;
+}
+
 .accordion-item, .accordion-button{
     border-radius: 0 !important;
 }
