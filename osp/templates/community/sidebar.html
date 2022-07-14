@@ -1,9 +1,9 @@
 {% load community_tag %}
+{% load user_templatetag %}
 {% load static %}
 <div class="row m-2" id="profile-tab">
-    <div class="col-6"><img class="w-100">
-        <!--src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"-->
-
+    <div class="col-6">
+        <img class="w-100" src="{{user|user_profile_image_url}}">
     </div>
     <div class="col-6">
         {% if user.is_authenticated %}
