@@ -7,10 +7,8 @@
 {% block content %}
 
 <div class="container my-4">
-  <div class="row">
-    <div class="col-3 border">
-      {% include "community/sidebar.html" %}
-    </div>
+  <div id="community-container" class="row">
+    {% include "community/sidebar.html" %}
     <div class="col-9">
       <div class="d-flex justify-content-between bg-light rounded" id="board-title-bar" style="padding-left:10px;">
         <div class="d-flex col-8 justify-content-start">
@@ -287,5 +285,6 @@
         }
     }
 </script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
 </html>

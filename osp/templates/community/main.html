@@ -2,28 +2,25 @@
 
 {% load static %}
 {% block content %}
-<div class="container mt-4">
-  <div class="row">
+<div class="container my-4">
+  <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-9">
       <div class="row">
         {% for board in boards %}
-        <div class="col-6 my-2">
-          <div class="card">
-            <div class="card-body">
-              <div class="d-flex justify-content-between">
-                <h4 class="card-title fw-bold">{{board.name}} 게시판</h4>
-{#                  /community/{{board.name}}#}
-                <a
-                        {% if board %}
-                        href="{% url 'community:Board' board_name=board.name board_id=board.id %}"
-                        {% endif %}
-                >
-                  더보기
-                  <i class="bi-chevron-right"></i>
-                </a>
+        <div class="col-6 mb-2">
+          <div class="accordion" id="accordion-{{board.id}}">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
+                  {{board.name}} 게시판
+                </button>
+              </h2>
+              <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div>
+                  {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
+                </div>
               </div>
-              {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
             </div>
           </div>
         </div>
