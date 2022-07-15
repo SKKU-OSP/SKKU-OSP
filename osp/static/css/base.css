@@ -57,10 +57,82 @@ html, body {
   color: #000000;
 }
 
+div.vr{
+  background-color: var(--main-border-color);
+  opacity: 100;
+}
 
-/* 
-#main-navbar .notification{
-} */
+#message-modal-body{
+  padding: 0;
+  min-height: 40rem;
+}
+
+#opponent-list{
+  padding-inline-start: 0;
+  list-style-type: none;
+}
+
+.opponent-item{
+  border-bottom: solid 0.5px var(--main-border-color);
+}
+.opponent-item.selected{
+  background-color: var(--main-bg-color);
+}
+
+.modal-header{
+  background-color: var(--main-point-color);
+  border-color: var(--main-border-color);
+  border-radius: 0;
+  color: #FFFFFF;
+}
+
+.modal-header button{
+  background-color: transparent;
+  border: 0;
+  color: #FFFFFF;
+}
+
+.modal-header button span{
+  
+  vertical-align: middle;
+  display: inline-block;
+}
+
+
+.modal-tab{
+  width: 50%;
+}
+
+.modal-content{
+  border-radius: 0;
+}
+
+img.opponent-profile{
+  height: 4rem;
+  width: 4rem;
+  border-radius: 50%;
+  border: solid 0.5px var(--main-border-color);
+}
+
+.unread-count{
+  border-radius: 1em;
+  padding: .25em;
+  color: #FFFFFF;
+  background-color: var(--sub-point-color);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.opponent-name{
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.opponent-last-msg{
+  font-size: 16px;
+  text-overflow: ellipsis;
+  color: var(--main-border-color);
+}
 
 .text-flex {
   display: flex;
