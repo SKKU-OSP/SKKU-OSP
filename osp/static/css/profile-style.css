@@ -289,23 +289,23 @@ a.nav-link {
 
 /* Scroll bar Custom */
 /* width */
-::-webkit-scrollbar {
+div > ::-webkit-scrollbar {
   width: 10px;
 }
 
 /* Track */
-::-webkit-scrollbar-track {
+div > ::-webkit-scrollbar-track {
   border-radius: 10px;
 }
 
 /* Handle */
-::-webkit-scrollbar-thumb {
+div > ::-webkit-scrollbar-thumb {
   background: #eeeeee;
   border-radius: 10px;
 }
 
 /* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
+div > ::-webkit-scrollbar-thumb:hover {
   background: #dddddd;
 }
 

@@ -243,7 +243,7 @@
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               {% for row in data.ints %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+                <span class="badge bg-tag-{{row.type}} me-1" style="height:20px">{{row.name}}</span>
               {% endfor %}
             </div>
           </div>
@@ -255,7 +255,7 @@
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               {% for row in data.lang %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+              <span class="badge bg-tag-{{row.type}} me-1" style="height:20px">{{row.name}}</span>
               {% endfor %}
             </div>
           </div>
