@@ -90,13 +90,13 @@ window.onload = function () {
     updateMonthly(select_year);
   });
   $("#icon-interests").on("click", function(){
-    $(".expandable:nth-child(2)").toggleClass("semi-expanded");
-    $(".expandable:nth-child(3)").toggleClass("semi-expanded");
+    $(".expandable:nth-child(2)").toggleClass("semi-expanded-0");
+    $(".expandable:nth-child(3)").toggleClass("semi-expanded-1");
     $(".expandable:nth-child(1)").toggleClass("expanded");
   })
   $("#icon-lang").on("click", function(){
-    $(".expandable:nth-child(1)").toggleClass("semi-expanded");
-    $(".expandable:nth-child(3)").toggleClass("semi-expanded");
+    $(".expandable:nth-child(1)").toggleClass("semi-expanded-0");
+    $(".expandable:nth-child(3)").toggleClass("semi-expanded-2");
     $(".expandable:nth-child(2)").toggleClass("expanded");
   })
   const div_activity_monthly = document.getElementById("activity-monthly");
