@@ -7,7 +7,7 @@
   font-size: 12px;
 }
 .guideline-step{
-  background-color: #28a745;
+  background-color: #0094ff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -64,7 +64,7 @@
   content: "";
   width: 30px;
   height: 30px;
-  background: #28a745;
+  background: #0094ff;
 
   position: absolute;
   left: 50%;
@@ -77,7 +77,7 @@
   content: "";
   width: 16px;
   height: 8px;
-  background: #28a745;
+  background: #0094ff;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -104,5 +104,5 @@
 }
 .unfinished-item .progress-count:after{
   background: white;
-  border: 2px solid #28a745;
+  border: 2px solid #0094ff;
 }
