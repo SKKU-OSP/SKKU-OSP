@@ -1,4 +1,5 @@
-<div id="team-tab" class="d-flex">
+{% load static %}
+<div id="team-tab" class="d-flex" team-name="{{team.name}}" style="height: 200px;">
     <div class="col-3">
         <img src="{{team.image.url}}" alt="team-image" style="height: 150px;">
     </div>
@@ -9,7 +10,9 @@
         <div class="overflow-y-auto">
             {% for member in team_members %}
             <div>
-                {{member.member.user.username}}
+                <a href="{% url 'user:profile' member.member.user.username %}">
+                    {{member.member.user.username}}
+                </a>
                 {% if member.is_admin %}
                 <i class="bi-star"></i>
                 {% endif %}
@@ -23,13 +26,91 @@
         </div>
         <div id="team-tag">
             {% for tag in team_tags %}
-                <span class="badge bg-tag-{{tag.tag.type}} me-1">{{tag.tag.name}}</span>
+                <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
             {% endfor %}
         </div>
     </div>
     {% if team_admin %}
-    <div class="ms-auto">
-        <i class="bi-pencil"></i>
+    <div class="ms-auto" id="team-update">
+        <button id="team-update" class="btn">
+            <i class="bi-pencil"></i>
+        </button>
     </div>
     {% endif %}
 </div>
+<div class="modal fade" id="team-update-modal">
+</div>
+<script>
+    var admin_list = [];
+    var tag_list = [];
+    function submit_update_form(){
+        var form_data = new FormData($('#team-update-form')[0]);
+        form_data.append('team', $('#team-tab').attr('team-name'));
+        for(member of admin_list){
+            if($(`[name=admin-${member}]`).is(':checked') == false){
+                form_data.append('admindelete-' + member, ['on']);
+            }
+            form_data.delete('admin-' + member);
+        }
+        var new_tag_list = team_tag_select.selected();
+        console.log(tag_list)
+        console.log(new_tag_list)
+        for(tag of new_tag_list){
+            form_data.append('tagadd-'+ tag, 'on');
+        }
+        for(tag of tag_list){
+            if(!new_tag_list.includes(tag)){
+                form_data.append('tagdelete-'+ tag, 'on');
+            }
+            form_data.delete('tagadd-'+ tag);
+        }
+        $.ajax({
+            url: "{% url 'team:team-update' %}",
+            type: "POST",
+            data: form_data,
+            dataType: 'JSON',
+            cache: false,
+            contentType: false,
+            processData: false
+        }).done(function(data){
+            if(data['status'] == 'fail'){
+                alert(data['message'])
+            }
+            else{
+                window.location.reload();
+            }
+        });
+    }
+    $().ready(function () {
+        $('#team-update').click(function () {
+            $('.team-tag').each(function(){
+                tag_list.push($(this).attr('name'))
+            });
+            $.ajax({
+                url: "{% url 'team:team-update' %}",
+                type: "GET",
+                data: {
+                    team: $('#team-tab').attr('team-name')
+                },
+                dataType: 'HTML'
+            }).done(function(data){
+                $('#team-update-modal').html(data);
+                $('#team-update-modal').modal('show');
+                team_tag_select = new SlimSelect({
+                    select: 'select[name=tag]',
+                    onChange: (selected_list) => {
+                        for (selected of selected_list) {
+                            $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+                        }
+                    }
+                });
+                team_tag_select.set(tag_list);
+                admin_list = [];
+                $('.admin-select:checked').each(function(){
+                    admin_list.push($(this).attr('member-id'))
+                })
+                $('#team-update-submit').click(submit_update_form);
+            })
+        });
+    });
+</script>

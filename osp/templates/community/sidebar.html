@@ -1,46 +1,42 @@
 {% load community_tag %}
+{% load user_templatetag %}
 {% load static %}
-<div class="row m-2" id="profile-tab">
-    <div class="col-6"><img class="w-100">
-        <!--src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"-->
-
+<div class="col-3 border h-100" id="community-sidebar">
+    <div id="profile-tab" class="w-100">
+        <div id="profile-image-wrap" class="m-auto">
+            <img src="{{user|user_profile_image_url}}" id="profile-image">
+        </div>
+        <div id="profile-sum">
+            {% if user.is_authenticated %}
+            <div id="profile-username">{{user.username}}</div>
+            <div id="community-stat" class="d-flex">
+                <div class="mx-3"><i class="bi-card-text me-1"></i>{{user|user_article}}</div>
+                <div class="mx-3"><i class="bi-chat-left-dots me-1"></i>{{user|user_comment}}</div>
+                <div class="mx-3"><i class="bi-bookmark-star me-1"></i>{{user|user_like}}</div>
+            </div>
+            {% else %}
+            {% endif %}
+        </div>
     </div>
-    <div class="col-6">
-        {% if user.is_authenticated %}
-        <a href="/user/{{user.username}}">{{user.username}}</a>
-        <br>
-        <i class="bi-card-text"></i>
-        {{user|user_article}}
-        <br>
-        <i class="bi-chat-left-dots"></i>
-        {{user|user_comment}}
-        <br>
-        <i class="bi-bookmark-star"></i>
-        {{user|user_like}}
-        <br>
-        {% else %}
-        <a href="/accounts/login">로그인</a>
-        <br>
-        <a href="/accounts/register">회원가입</a>
-        {% endif %}
-    </div>
-</div>
-<div class="row m-2" id="community-tab">
-    <ul class="list-group">
-        <li class="list-group-item">
+    <div id="community-tab" class="w-100">
+        <div class="boardgroup-title">
+            게시판
+        </div>
+        <div class="boardgroup-item">
             <a href="/community">Community Main</a>
-        </li>
-        {% board_sidebar_items request %}
-        {% if user.is_authenticated %}
-        <li class="list-group-item text-primary" id="team-create">
-            <i class="bi-plus"></i>
-            Make Team
-        </li>
-        {% endif %}
-    </ul>
+        </div>
+        {% board_sidebar_normal_board request %}
+        <div class="boardgroup-title d-flex justify-content-between">
+            <div>팀 게시판</div>
+            {% if user.is_authenticated %}
+            <div id="team-create" style="cursor:pointer;"><i class="bi-plus"></i></div>
+            {% endif %}
+        </div>
+        {% board_sidebar_team_board request %}  
+    </div>
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="AddTeamModal">
+    </div>
+    <script src="{% static 'js/community_sidebar.js' %}"></script>
+    {% endif %}
 </div>
-{% if user.is_authenticated %}
-<div class="modal fade" id="AddTeamModal">
-</div>
-<script src="{% static 'js/community_sidebar.js' %}"></script>
-{% endif %}
