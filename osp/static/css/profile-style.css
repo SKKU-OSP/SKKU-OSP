@@ -489,13 +489,18 @@ span.row-raw{
   -o-transition: width 300ms;
   transition: width 300ms;
 }
-.semi-expanded{
+.semi-expanded-0, .semi-expanded-1, .semi-expanded-2{
   width: 50% !important;
 }
-.semi-expanded:nth-child(n){
+.semi-expanded-1.semi-expanded-2:nth-child(n){
+  order: 3;
+}
+.semi-expanded-0:nth-child(n), 
+.semi-expanded-1:nth-child(n), 
+.semi-expanded-2:nth-child(n){
   order: 2;
 }
-.expanded{
+.expanded, .semi-expanded-1.semi-expanded-2{
   width: 100% !important;
 }
 .expanded:nth-child(1){
