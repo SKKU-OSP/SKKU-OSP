@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'tag',
     'community',
     'team',
+    'message',
     'debug_toolbar'
 ]
 
