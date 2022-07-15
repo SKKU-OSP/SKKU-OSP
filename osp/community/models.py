@@ -50,6 +50,19 @@ class ArticleLike(models.Model):
             )
         ]
 
+class ArticleBookmark(models.Model):
+    id = models.AutoField(primary_key=True)
+    article = models.ForeignKey(Article, models.CASCADE)
+    account = models.ForeignKey(Account, models.CASCADE)
+    bookmark_date = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['article', 'account'],
+                name='unique_account_article_bookmark'
+            )
+        ]
+
 class ArticleComment(models.Model):
     id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, models.CASCADE)

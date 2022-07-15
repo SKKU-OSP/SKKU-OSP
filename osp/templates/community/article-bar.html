@@ -27,12 +27,16 @@
                 <div class="fw-bold text-muted">{{article.pub_date|time_before}}</div>
                 <div class="d-flex justify-content-between">
                     <div class="article-meta-stat">
+                        <i class="bi-hand-thumbs-up"></i> 
+                        {{article.like_cnt}}
+                    </div>
+                    <div class="article-meta-stat">
                         <i class="bi-chat-left-dots"></i> 
                         {{article.comment_cnt}}
                     </div>
                     <div class="article-meta-stat">
-                        <i class="bi-star"></i> 
-                        {{article.like_cnt}}
+                        <i class="bi-bookmark"></i> 
+                        {{article.bookmark_cnt}}
                     </div>
                     <div class="article-meta-stat">
                         <i class="bi-eye"></i> 
