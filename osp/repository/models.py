@@ -55,6 +55,19 @@ class GithubRepoStats(models.Model):
         managed = False
         db_table = 'github_repo_stats'
         unique_together = (('github_id', 'repo_name'),)
+        
+    def get_guideline(self):
+        return{
+            "repo_name":self.repo_name,
+            "create_date":self.create_date,
+            "update_date":self.update_date,
+            "contributors_count":self.contributors_count,
+            "release_ver":self.release_ver,
+            "release_count":self.release_count,
+            "readme":self.readme,
+            "license":self.license,
+            "proj_short_desc":self.proj_short_desc
+        }
 
 
 class GithubIssues(models.Model):
