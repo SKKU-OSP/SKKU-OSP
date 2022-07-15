@@ -8,4 +8,5 @@ urlpatterns = [
     path('<username>/', views.ProfileView.as_view(), name='profile'),
     path('<username>/profile-edit/', views.ProfileEditView.as_view(), name='profile-edit'),
     path('<username>/comparestat', views.compare_stat, name='comparestat'),
+    path('<username>/repo', views.ProfileRepoView.as_view(), name='repo'),
 ]

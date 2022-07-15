@@ -342,3 +342,28 @@ def compare_stat(request, username):
         }
         
         return JsonResponse(context)
+    
+    
+class ProfileRepoView(TemplateView):
+    
+    template_name = 'profile/repo.html'
+    def get_context_data(self, *args, **kwargs):
+        
+        start = time.time()
+        context = super().get_context_data(**kwargs)
+        
+        user = User.objects.get(username=context["username"])
+        account = Account.objects.get(user=user)
+        context['account'] = account
+        student_data = account.student_data
+        github_id = student_data.github_id
+        context['account'] = github_id
+        repo_stats = GithubRepoStats.objects.filter(github_id=github_id).order_by('update_date')
+        ctx_repo_stats = []
+        for repo in repo_stats:
+            ctx_repo_stats.append(repo.get_guideline())
+        context["guideline"] = ctx_repo_stats
+        
+        print("\ProfileRepoView time :", time.time() - start)
+        
+        return context
