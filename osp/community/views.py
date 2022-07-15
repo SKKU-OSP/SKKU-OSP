@@ -4,20 +4,20 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.db import DatabaseError, transaction
 from django.db.models import Q, Count
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import *
 from tag.models import Tag
-
 from team.models import TeamRecruitArticle, TeamMember, Team, TeamTag
 from user.models import Account
-from datetime import datetime, timedelta
+
 import hashlib
 import math
 from django.views.generic import TemplateView
 from django.contrib.auth.models import User
-from datetime import datetime
-from django.db import DatabaseError, transaction
-from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime, timedelta
 
 # Create your views here.
 def main(request):
@@ -49,6 +49,7 @@ def main(request):
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
+            article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
             if board.name == 'Team':
                 article.team = TeamRecruitArticle.objects.get(article=article).team
 
