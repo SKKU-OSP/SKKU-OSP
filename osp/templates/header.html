@@ -26,11 +26,11 @@
             </ul>
             {% if user.is_authenticated %}
             <ul class="navbar-nav">
-                <li id="unread-notification" class="nav-item me-4 notification">
-                    <i class="bi-bell"></i>
+                <li id="notification" class="nav-item me-4 notification material-icons-outlined">
+                    notifications
                 </li>
-                <li id="unread-message" class="nav-item me-4 notification">
-                    <i class="bi-envelope"></i>
+                <li id="message" class="nav-item me-4 notification material-icons-outlined">
+                    email
                 </li>
             </ul>
             <div class="d-flex">
@@ -56,3 +56,5 @@
         </div>
     </div>
 </nav>
+<div class="modal modal-lg fade" id="message-modal">
+</div>

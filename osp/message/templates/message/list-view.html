@@ -1,0 +1,42 @@
+<div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">메시지</h5>
+      <button type="button" data-bs-dismiss="modal" aria-label="Close">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+    <div id="message-modal-body" class="modal-body d-flex">
+      <div class="modal-tab">
+        <ul id="opponent-list" class="opponent-list">
+          {% for oppo, data in msg_opponent.items %}
+          <li class="opponent-item">
+            <div class="d-flex p-2">
+              <div class="opponent-account me-2">
+                <img src="{{oppo.photo.url}}" class="opponent-profile">
+              </div>
+              <div class="my-auto">
+                <div class="opponent-name">
+                  {{oppo}}
+                </div>
+                <div class="opponent-last-msg">
+                  {{data.last_msg.body}}
+                </div>
+              </div>
+              {% if data.unread %}
+              <div class="ms-auto my-auto me-2 unread-count">
+                {{data.unread}}
+              </div>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="vr"></div>
+      <div id="chat-view-tab" class="modal-tab">
+        Chat
+      </div>
+    </div>
+  </div>
+</div>
