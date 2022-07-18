@@ -3,7 +3,7 @@
 {% block content %}
 <div>
     <p>LEVEL 3</p>
-    {% for row in data.ints %}
+    {% for row in data.tags_lang %}
         {% if row.level == 3 %}
         <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
             <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
@@ -14,7 +14,7 @@
 </div>
 <div>
     <p>LEVEL 2</p>
-    {% for row in data.ints %}
+    {% for row in data.tags_lang %}
         {% if row.level == 2 %}
         <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
             <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
@@ -25,7 +25,7 @@
 </div>
 <div>
     <p>LEVEL 1</p>
-    {% for row in data.ints %}
+    {% for row in data.tags_lang %}
         {% if row.level == 1 %}
         <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
             <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
@@ -39,7 +39,7 @@
         <div class="col-md-12 mb-3">
             <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
             <select name="preferLanguage" id="preferLanguage">
-                    {% category_tag request %}
+                    {% category_tag_language request %}
             </select>
         </div>   
     </div>
@@ -56,7 +56,7 @@
 
     <div class="col">
         <div class="col-md-12 mb-3">
-            <button type="submit" class="btn btn-secondary" name="action" value="append">추가</button>
+            <button type="submit" class="btn btn-secondary" name="action" value="append_lang">추가</button>
         </div>
     </div>
 </div>
