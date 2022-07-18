@@ -50,7 +50,7 @@ def main(request):
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
             article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
-            if board.name == 'Team':
+            if board.board_type == 'Team':
                 article.team = TeamRecruitArticle.objects.get(article=article).team
 
 
@@ -139,8 +139,8 @@ def article_list(request, board_name, board_id):
         article.comment_cnt = comment_cnt
         article.like_cnt = like_cnt
         article.tags = tags
-        if board.name == 'Team':
-            article.team = TeamRecruitArticle.objects.get(article=article).team
+        # if board.name == 'Team':
+        #     article.team = TeamRecruitArticle.objects.get(article=article).team
 
         if board.board_type == 'Team':
             article.team = TeamRecruitArticle.objects.get(article=article).team
@@ -235,7 +235,7 @@ def article_create(request):
     status = 'success'
     board_name = request.POST.get('board_name')
     board_id = request.POST.get('board_id')
-    board = Board.objects.get(name=board_id)
+    board = Board.objects.get(id=board_id)
 
     try:
         with transaction.atomic():
