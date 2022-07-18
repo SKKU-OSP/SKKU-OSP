@@ -2,20 +2,18 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.0/font/bootstrap-icons.css");
 
 #community-container {
-    margin-top: 75px;
+    margin-top: 59px;
 }
 
 #community-sidebar {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0px 0px 10px;
-    background: #FFFFFF;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 #profile-tab {
     background: var(--main-point-color);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 #profile-image-wrap {
@@ -26,12 +24,12 @@
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
-    margin-top: -62.5px;
+    margin-top: -40px;
     padding: 0;
 
     z-index: 5;
-    width: 250px;
-    height: 250px;
+    width: 160px;
+    height: 160px;
     border-radius: 50%;
     border: 2px solid var(--main-point-color);
 }
@@ -53,6 +51,10 @@
     font-weight: 400;
     font-size: 25px;
     text-align: center;
+}
+
+#community-tab{
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 #community-stat div{

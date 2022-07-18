@@ -1,10 +1,10 @@
 {% load community_tag %}
 {% load user_templatetag %}
 {% load static %}
-<div class="col-3 border h-100" id="community-sidebar">
+<div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         <div id="profile-image-wrap" class="m-auto">
-            <img src="{{user|user_profile_image_url}}" id="profile-image">
+            <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
@@ -29,7 +29,11 @@
         <div class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
             {% if user.is_authenticated %}
-            <div id="team-create" style="cursor:pointer;"><i class="bi-plus"></i></div>
+            <div id="team-create" style="cursor:pointer;">
+                <span class="material-icons">
+                    group_add
+                </span> 
+            </div>
             {% endif %}
         </div>
         {% board_sidebar_team_board request %}  
