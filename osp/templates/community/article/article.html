@@ -114,7 +114,7 @@
         {% if board.board_type == 'Recruit' %}
             ajax_form_data.append('team_id', $('#team-option').val());
         {% elif board.board_type == 'Team' %}
-            ajax_form_data.append('team_id', {{ article.team.id }});
+            ajax_form_data.append('team_id', {{ board.team.id }});
         {% endif %}
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
