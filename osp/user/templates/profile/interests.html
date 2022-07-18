@@ -1,20 +1,42 @@
 {% load static %}
+{% load tag_templatetag %}
 
 
-<input type="checkbox" class="btn-check" id="btn-check-interest1" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-interest1">Interest 1</label>
+{% block content %}
+<div>
+    {% for row in data.ints %}
+        <button type="submit" class="btn btn-secondary" name="action" value="delete {{row.tag.name}}">
+            <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px">{{row.tag.name}}</span>
+            <span class="badge badge-light">x</span>
+        </button>
+    {% endfor %}
+</div>
+<div class="row">
+    <div class="col">
+        <div class="col-md-12 mb-3">
+            <label for="interestDomain" class="form-label">관심분야</label>
+            <select name="interestDomain" id="interestDomain">
+                {% category_tag_domain request %}
+            </select>
+        </div>   
+    </div>
 
-<input type="checkbox" class="btn-check" id="btn-check-interest2" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-interest2">Interest 22</label>
+    <div class="col">
+        <div class="col-md-12 mb-3">
+            <button type="submit" class="btn btn-secondary" name="action" value="append_ints">추가</button>
+        </div>
+    </div>
+</div>
 
-<input type="checkbox" class="btn-check" id="btn-check-interest3" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-interest3">Interest 333</label>
+{% endblock %}
 
-<input type="checkbox" class="btn-check" id="btn-check-interest4" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-interest4">Interest 4444</label>
-
-<input type="checkbox" class="btn-check" id="btn-check-interest5" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-interest5">Interest 55555</label>
-
-<input type="checkbox" class="btn-check" id="btn-check-interest6" autocomplete="off">
-<label class="btn btn-outline-primary m-1" for="btn-check-interest6">Interest 666666</label>
+{% block script %}
+<script>
+    var category_select
+    $(document).ready(function(){
+        category_select = new SlimSelect({
+        select: '#interestDomain'
+        })
+    });
+</script>
+{% endblock %}
