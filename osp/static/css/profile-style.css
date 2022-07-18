@@ -95,20 +95,19 @@ button.unchosen {
 }
 .nav-tabs {
   color: #495057;
-  border-bottom: 1.5px solid #9d9d9d9d;
 }
-.nav-item{
+.nav-tabs > .nav-item{
   margin-left: 2px;
   margin-right: 2px;
 }
-.nav-item > .nav-link {
+.nav-tabs > .nav-item > .nav-link {
   color: black;
+  border-bottom: 0;
   border-color: #9d9d9d9d;
-  margin-bottom: -2px;
   padding-left: 12px;
   padding-right: 12px;
 }
-.nav-item > .nav-link.active{
+.nav-tabs > .nav-item > .nav-link.active{
   color: #0d62fd;
   border-width: 1.5px;
 }
