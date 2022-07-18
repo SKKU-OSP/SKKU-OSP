@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import *
-from team.models import TeamRecruitArticle
+from community.models import TeamRecruitArticle
 
 # Register your models here.
 
