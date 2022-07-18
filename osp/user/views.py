@@ -68,7 +68,6 @@ class ProfileView(TemplateView):
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
         # 사용언어, 기술스택
         lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
-        print(lang)
         data = {
             'info': student_info,
             'score': student_score,
@@ -357,12 +356,25 @@ class ProfileRepoView(TemplateView):
         student_data = account.student_data
         github_id = student_data.github_id
         context['account'] = github_id
-        repo_stats = GithubRepoStats.objects.filter(github_id=github_id).order_by('-update_date')
+        repo_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+        repos = {}
+        id_reponame_pair_list = []
+        for commit in repo_commits:
+            commit_repo_name = commit['repo_name']
+            if commit_repo_name not in repos:
+                repos[commit_repo_name] = {'repo_name': commit_repo_name}
+                repos[commit_repo_name]['github_id'] = commit['github_id']
+                repos[commit_repo_name]['committer_date'] = commit['committer_date']
+                id_reponame_pair_list.append((commit['github_id'], commit_repo_name))
         ctx_repo_stats = []
-        for repo in repo_stats:
-            ctx_repo_stats.append(repo.get_guideline())
+        contr_repo_queryset = GithubRepoStats.objects.extra(where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+        for contr_repo in contr_repo_queryset:
+            repo_stat = contr_repo.get_guideline()
+            repo_stat['committer_date'] = repos[contr_repo.repo_name]['committer_date'] 
+            ctx_repo_stats.append(repo_stat)
+        ctx_repo_stats = sorted(ctx_repo_stats, key=lambda x:x['committer_date'], reverse=True)
         context["guideline"] = ctx_repo_stats
         
-        print("\ProfileRepoView time :", time.time() - start)
+        print("\nProfileRepoView time :", time.time() - start)
         
         return context
