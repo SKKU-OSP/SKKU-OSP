@@ -1,6 +1,8 @@
 from django.contrib import admin
 from community.models import Article
-from .models import Team, TeamMember, TeamRecruitArticle, TeamTag
+from .models import Team, TeamMember, TeamTag
+from community.models import TeamRecruitArticle
+
 # Register your models here.
 
 class TeamTagInline(admin.TabularInline):

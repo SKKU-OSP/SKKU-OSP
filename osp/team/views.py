@@ -74,13 +74,14 @@ def TeamCreate(request):
                     team_member = TeamMember.objects.create(
                         team=new_team,
                         member=account,
-                        is_admin=True
+                        is_admin=True,
                     )
                     team_member.save()
                     Board.objects.create(
                         name=team_name,
                         board_type='Team',
-                        anonymous_writer=False
+                        anonymous_writer=False,
+                        team=new_team,
                     )
                     return JsonResponse({'status': 'success'})
             except DatabaseError:

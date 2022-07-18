@@ -58,13 +58,19 @@
             });
         }
     });
-    $(document).load(function(){
-        // $('#article-tags').tagsinput({
-        //     maxTags: 3
-        // });
+
+    $(function(){
+        $('#article-form').submit(function(event){
+            event.preventDefault();
+            {% if type == 'register' %}
+            registerArticle();
+            {% else %}
+            updateArticle();
+            {% endif %}
+        });
+
     });
-    var li;
-    
+
     {% if article.writer.user == user %}
     function edit(){
         ajax_form_data=new FormData();
@@ -107,6 +113,8 @@
         ajax_form_data.append('board_id','{{ board.id }}');
         {% if board.board_type == 'Recruit' %}
             ajax_form_data.append('team_id', $('#team-option').val());
+        {% elif board.board_type == 'Team' %}
+            ajax_form_data.append('team_id', {{ article.team.id }});
         {% endif %}
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
