@@ -105,7 +105,7 @@
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name','{{ board.name }}');
         ajax_form_data.append('board_id','{{ board.id }}');
-        {% if board.name == 'Team' %}
+        {% if board.board_type == 'Recruit' %}
             ajax_form_data.append('team_id', $('#team-option').val());
         {% endif %}
 
