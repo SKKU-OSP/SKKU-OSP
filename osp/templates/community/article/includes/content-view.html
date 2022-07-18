@@ -54,28 +54,28 @@
 </form>
 {% if board.board_type == 'Recruit' %}
 <div class="form-control d-flex flex-row justify-content-between" style="width:100%;padding-bottom:10px;margin-top:5px;">
+    {% if article.team %}
     <div class="d-flex flex-row">
-        {% if article.team %}
         <div class="f-bold">팀 정보 |</div>
         <div>{{ article.team.name }} <br> {{ article.team.description }}</div>
-        {% else %}
+    </div>
+        {% is_teammember article.team request.user as is_teammember %}
+        {% if not is_teammember %}
+            {% teaminvitemessage article.team request.user as teaminvitemessage %}
+            {% if not teaminvitemessage %}
+            <div>
+                <button id="team-apply" data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
+            </div>
+            {% else %}
+            <div>
+                <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>
+            </div>
+            {% endif %}
+        {% endif %}
+    {% else %}
         <div>
             팀 정보가 없습니다.
         </div>
-        {% endif %}
-    </div>
-    {% is_teammember article.team request.user as is_teammember %}
-    {% if not is_teammember %}
-        {% teaminvitemessage article.team request.user as teaminvitemessage %}
-        {% if not teaminvitemessage %}
-        <div>
-            <button id="team-apply" data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
-        </div>
-        {% else %}
-        <div>
-            <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>
-        </div>
-        {% endif %}
     {% endif %}
 </div>
 
