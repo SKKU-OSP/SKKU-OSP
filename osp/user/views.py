@@ -58,15 +58,12 @@ class ProfileView(TemplateView):
         recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
 
         # 관심 목록 리스트
-        user = User.objects.get(username=context['account'])
         student_account = context['account']
-        tags_all = Tag.objects
-
-        tags_domain = tags_all.filter(type='domain')
-
-        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain) # 관심분야  
-        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain) # 사용언어, 기술스택
-
+        # 관심분야
+        ints = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account, tag__type='domain').values("tag")) 
+        # 사용언어, 기술스택
+        lang = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag"))
+        
         data = {
             'info': student_info,
             'score': student_score,
@@ -147,16 +144,14 @@ class ProfileView(TemplateView):
         
         monthly_avg = []
         for year in range(self.start_year, self.end_year+1):
-            
-            monthly_avg_queryset = total_avg_queryset.filter(start_yymm__year=year)
-            month_data = []
-            for row in monthly_avg_queryset:
-                row["year"] = row["start_yymm"].year
-                row["month"] =  row["start_yymm"].month
-                row.pop('start_yymm', None)
-                month_data.append(row)
-            monthly_avg.append(month_data)
-            
+            monthly_avg.append([])
+        for avg in total_avg_queryset:
+            yid = avg["start_yymm"].year - self.start_year
+            if yid >= 0 :
+                avg["year"] = avg["start_yymm"].year
+                avg["month"] =  avg["start_yymm"].month
+                avg.pop('start_yymm', None)
+                monthly_avg[yid].append(avg)
         chartdata["monthly_contr"] = monthly_contr
         chartdata["own_star"] = own_star
         chartdata["monthly_avg"] = monthly_avg
@@ -342,3 +337,27 @@ def compare_stat(request, username):
         }
         
         return JsonResponse(context)
+    
+    
+class ProfileRepoView(TemplateView):
+    
+    template_name = 'profile/repo.html'
+    def get_context_data(self, *args, **kwargs):
+        
+        start = time.time()
+        context = super().get_context_data(**kwargs)
+        
+        user = User.objects.get(username=context["username"])
+        account = Account.objects.get(user=user)
+        student_data = account.student_data
+        github_id = student_data.github_id
+        context['account'] = github_id
+        repo_stats = GithubRepoStats.objects.filter(github_id=github_id).order_by('-update_date')
+        ctx_repo_stats = []
+        for repo in repo_stats:
+            ctx_repo_stats.append(repo.get_guideline())
+        context["guideline"] = ctx_repo_stats
+        
+        print("\ProfileRepoView time :", time.time() - start)
+        
+        return context
