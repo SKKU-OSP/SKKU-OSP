@@ -1,5 +1,8 @@
-from django.db.models import Q, F, Max
+
+from django.dispatch import receiver
+from django.http import JsonResponse
 from django.shortcuts import render
+from django.db.models import Q, F, Max
 from django.contrib.auth.decorators import login_required
 
 from .models import Message
@@ -49,27 +52,25 @@ def message_list_view(request):
     return render(request, 'message/list-view.html', data)
 
 @login_required
-def message_chat_view(request):
-    # msg_query = (Q(receiver=my_acc) & ~Q(sender=None)) | Q(sender=my_acc)
-    # msg_list = Message.objects.filter(msg_query).order_by('send_date')
-    # msg_by_opponent = {}
-    # for msg in msg_list:
-    #     opponent = msg.sender if msg.sender != my_acc else msg.receiver
-    #     if opponent not in msg_by_opponent:
-    #         msg_by_opponent[opponent] = {'msgs': [], 'unread': 0}
-    #     msg_by_opponent[opponent]['send_date'] = msg.send_date
-    #     msg_by_opponent[opponent]['msgs'].append(msg)
-    #     if not msg.receiver_read:
-    #         msg_by_opponent[opponent]['unread'] += 1
-    #     if msg.sender == my_acc:
-    #         msg_by_opponent[opponent]['unread'] = 0
-    
-    # for oppo, data in msg_by_opponent.items():
-    #     print(oppo, data['send_date'], data['unread'])
-    #     for msg in data['msgs']:
-    #         print(msg.send_date, msg.body, msg.sender, '->', msg.receiver, msg.receiver_read)
-    # data['msg_opponent'] = msg_by_opponent
-    pass
+def message_chat_view(request, opponent):
+    oppo_acc = Account.objects.get(user=opponent)
+    my_acc = Account.objects.get(user=request.user)
+    raw_msg_list = Message.objects.filter(
+        Q(sender=oppo_acc, receiver=my_acc) | Q(sender=my_acc, receiver=oppo_acc)
+    ).order_by('send_date')[:10]
+    msg_list = []
+    for msg in raw_msg_list:
+        print(msg.sender, '->', msg.receiver, msg.body, msg.send_date)
+        msg_list.append({
+            'sender': str(msg.sender),
+            'sender_id': msg.sender.user_id,
+            'receiver': str(msg.receiver),
+            'receiver_id': msg.receiver.user_id,
+            'body': str(msg.body),
+            'send_date': str(msg.send_date),
+            'unread': str(msg.receiver_read)
+        })
+    return JsonResponse({'data': msg_list})
 
 def message_send(request):
     pass

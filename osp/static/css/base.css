@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Merriweather&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 @import url("/static/css/color.css");
 
 li,
@@ -84,7 +85,7 @@ div.vr{
 }
 
 .opponent-item{
-  border-bottom: solid 0.5px var(--main-border-color);
+  padding: 1rem;
 }
 .opponent-item.selected{
   background-color: var(--main-bg-color);
@@ -109,9 +110,18 @@ div.vr{
   display: inline-block;
 }
 
+#oppo-list{
+  width: 40%;
+  z-index: 1;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+}
 
-.modal-tab{
-  width: 50%;
+#chat-view-tab{
+  width: 60%;
+  padding: 1rem;
+  background-color: var(--main-bg-color);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-content{
@@ -119,8 +129,8 @@ div.vr{
 }
 
 img.opponent-profile{
-  height: 4rem;
-  width: 4rem;
+  height: 2rem;
+  width: 2rem;
   border-radius: 50%;
   border: solid 0.5px var(--main-border-color);
 }
@@ -135,14 +145,71 @@ img.opponent-profile{
 }
 
 .opponent-name{
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 400;
 }
 
-.opponent-last-msg{
-  font-size: 16px;
-  text-overflow: ellipsis;
-  color: var(--main-border-color);
+#chat-view{
+  overflow: auto;
+}
+
+.chat-box{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.25rem;
+}
+
+.chat-box.send{
+  align-items: flex-end;
+}
+
+.chat-box.receive{
+  display: flex;
+  align-items: flex-start;
+}
+
+.chat-text{
+  max-width: 80%;
+  padding: 0.5rem;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.send .chat-text{
+  background-color: var(--chat-send-color);
+}
+
+.receive .chat-text{
+  background-color: var(--chat-receive-color);
+}
+
+.chat-date{
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--main-icon-color);
+}
+
+#chat-input-form{
+  display: flex;
+}
+
+#chat-input{
+  flex: 2;
+  margin-right: 0.25rem;
+  background: #FFFFFF;
+  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 0.5rem;
+  border: none;
+}
+#chat-input:focus{
+  outline: 0.0625rem solid var(--sub-point-color);
+}
+
+#chat-submit{
+  border: 0;
+  border-radius: 10%;
+  background-color: var(--sub-point-color);
+  color: #FFFFFF;
 }
 
 .text-flex {
