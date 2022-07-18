@@ -1,12 +1,16 @@
 {% load tag_templatetag %}
 {% load community_tag %}
-{% if type == 'register' %}
-<form id="article-form" method="post" action=".." onsubmit="registerArticle(); return false;" class="row" style="padding-left:10px;">
-    {% csrf_token %}
-{% elif type == 'edit' %}
-    <form id="article-form" method="post" action=".." onsubmit="updateArticle();return false;" class="row" style="padding-left:10px;">
-    {% csrf_token %}
-{% endif %}
+
+<form id="article-form" method="post" action=".."
+      {% if type == 'register' %}
+      onsubmit="registerArticle();
+      return false;"
+      {% else %}
+      onsubmit="updateArticle();
+      return false;"
+      {% endif %}
+      class="row" style="padding-left:10px;">
+{#    {% csrf_token %}#}
 
     <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
         <div class="d-flex flex-row justify-content-between" style="margin-bottom:5px;">

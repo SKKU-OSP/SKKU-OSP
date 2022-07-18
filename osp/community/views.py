@@ -90,7 +90,7 @@ def article_list(request, board_name, board_id):
     try:
         # board = Board.objects.get(name=board_name)
         board = Board.objects.get(id=board_id)
-        print(board)
+        # print(board)
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
@@ -155,7 +155,7 @@ def article_list(request, board_name, board_id):
         context['comment_visible'] = True
     context['article_list'] = article_list
     result = {}
-    result['html'] = render_to_string('community/article-bar.html', context)
+    result['html'] = render_to_string('community/article-bar.html', context,request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
     return JsonResponse(result)
 
@@ -219,7 +219,7 @@ class ArticleView(TemplateView):
                 context['article'].team = teamrecruit.team
 
         result = {}
-        result['html'] = render_to_string('community/article/includes/content-edit.html', context)
+        result['html'] = render_to_string('community/article/includes/content-edit.html', context, request=request)
         result['tags'] = list(context['tags'].values_list('tag__name', flat=True))
 
         return JsonResponse(result)
@@ -266,7 +266,6 @@ def article_create(request):
 @csrf_exempt
 def article_update(request):
     message = ''
-
     status = 'success'
     board_name = request.POST.get('board_name')
     board_id = request.POST.get('board_id')
@@ -341,7 +340,7 @@ def comment_create(request):
         comments = ArticleComment.objects.filter(article=article)
         context = {'article':article, 'comments':comments}
         html = render_to_string('community/article/includes/comments.html',context, request=request)
-    print('hihibye')
+
     return JsonResponse({'status': status, 'message': message, 'html':html})
 
 @csrf_exempt
@@ -369,5 +368,5 @@ def comment_delete(request):
     if status == 'success':
         comments = ArticleComment.objects.filter(article=article)
         context = {'article':article, 'comments':comments}
-        html = render_to_string('community/article/includes/comments.html',context)
+        html = render_to_string('community/article/includes/comments.html',context,request=request)
     return JsonResponse({'status': status, 'message': message, 'html':html})

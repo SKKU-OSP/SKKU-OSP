@@ -3,6 +3,8 @@ from django import template
 register = template.Library()
 from django.utils.safestring import mark_safe
 from tag.models import Tag
+from team.models import TeamMember,TeamInviteMessage
+from user.models import Account
 
 @register.simple_tag
 def category_tag(request):
@@ -20,3 +22,17 @@ def category_tag(request):
         result += '</optgroup>'
 
     return mark_safe(result)
+
+@register.simple_tag
+def is_teammember(team, user):
+    account = Account.objects.get(user=user)
+    if TeamMember.objects.filter(team=team,member=account):
+        return True
+    else:
+        return False
+
+@register.simple_tag
+def teaminvitemessage(team, user):
+    account = Account.objects.get(user=user)
+    return TeamInviteMessage.objects.filter(team=team,account=account).first()
+
