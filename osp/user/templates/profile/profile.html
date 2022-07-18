@@ -184,9 +184,9 @@
                         <option value="" selected="selected">비교없음</option>
                         {% target_github_id request %}
                       </select>
-                      <button id="btn-compare" class="btn btn-primary">비교</button>
+                      <button id="btn-compare" class="btn btn-primary btn-sm">비교</button>
                     </div>
-                    <button id="btn-toggle" class="btn btn-primary">정규화</button>
+                    <button id="btn-toggle" class="btn btn-primary btn-sm">정규화</button>
                 </div>
                 <div class="tab-pane fade mt-2" id="pills-dist">
                   <h5 id="histogram-title">분포</h5>
@@ -203,43 +203,53 @@
         <div class="col-4">
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
-              <h5 class="card-title mb-4">Score</h5>
+              <h5 class="card-title mb-2">Score</h5>
               <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score}}</span>
-              <div class="row-contr justify-content-between">
-                <span class="row-title" style="width:50%;">Repositories</span>
-                <span class="row-raw">{{data.score.repo_cnt}}</span>
+              <div class="row-complex">
+                <div class="row-contr">
+                  <span class="row-title" style="width:70%;">Repositories</span>
+                  <span class="row-raw">{{data.score.repo_cnt}}</span>
+                </div>
               </div>
-              <div class="row-contr justify-content-between">
-                <span class="row-title">Commits</span>
-                <span class="row-raw">{{data.score.commit_cnt}}</span>
-                <span class="row-title">Issues</span>
-                <span class="row-raw">{{data.score.issue_cnt}}</span>
+              <div class="row-complex">
+                <div class="row-contr">
+                  <span class="row-title">Commits</span>
+                  <span class="row-raw">{{data.score.commit_cnt}}</span>
+                </div>
+                <div class="row-contr">
+                  <span class="row-title">Issues</span>
+                  <span class="row-raw">{{data.score.issue_cnt}}</span>
+                </div>
               </div>
-              <div class="row-contr justify-content-between">
-                <span class="row-title">Pull Requests</span>
-                <span class="row-raw">{{data.score.pr_cnt}}</span>
-                <span class="row-title">Stars</span>
-                <span class="row-raw">-</span>
+              <div class="row-complex">
+                <div class="row-contr">
+                  <span class="row-title">Pull Requests</span>
+                  <span class="row-raw">{{data.score.pr_cnt}}</span>
+                </div>
+                <div class="row-contr">
+                  <span class="row-title">Stars</span>
+                  <span class="row-raw">-</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="row mb-3">
-        <div class="col-4">
-          <div class="card h-100" id="interests">
+      <div class="row">
+        <div class="col-4 expandable">
+          <div class="card mb-3" id="interests">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">관심분야
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               {% for row in data.ints %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+                <span class="badge bg-tag-{{row.type}} me-1" style="height:20px">{{row.name}}</span>
               {% endfor %}
             </div>
           </div>
         </div>
-        <div class="col-4">
-          <div class="card h-100" id="languages">
+        <div class="col-4 expandable">
+          <div class="card mb-3" id="languages">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
@@ -253,8 +263,8 @@
             </div>
           </div>
         </div>
-        <div class="col-4">
-          <div class="card" id="portfolio">
+        <div class="col-4 expandable">
+          <div class="card mb-3" id="portfolio">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">포트폴리오
                 <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
@@ -269,7 +279,7 @@
           <div class="card h-100">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">최근 기여활동
-                <i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i>
+                <a href="./repo" target="_blank"><i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i></a>
               </h5>
               {% for recent_repo in data.repos %}
               <div class="card w-100 mb-2 recent_repos">

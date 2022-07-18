@@ -6,10 +6,8 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
-  <div class="row">
-    <div class="col-3 border">
-      {% include "community/sidebar.html" %}
-    </div>
+  <div id="community-container" class="row">
+    {% include "community/sidebar.html" %}
     <div class="col-9">
       {% if board.board_type == 'Recruit' %}
         {% include "community/board/article-carousel.html" %}
@@ -27,7 +25,11 @@
           </div>
         </div>
         <div class="my-auto">
-          <a class="btn btn-outline-secondary" href="{% url 'community:article-register' board_name=board.name %}">
+          <a class="btn btn-outline-secondary"
+             {% if board %}
+             href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"
+             {% endif %}
+          >
             글쓰기
             <i class="bi-pencil"></i>
           </a>
@@ -53,6 +55,7 @@
     }
   })});
 </script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
 
 </html>

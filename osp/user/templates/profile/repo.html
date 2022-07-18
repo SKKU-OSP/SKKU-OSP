@@ -1,0 +1,111 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<body>
+  <div class="container my-4">
+    <h5><i class="bi bi-flag"></i>가이드라인</h5>
+    {% for repo in guideline %}
+    <div class="guideline-check">
+      <div class="card w-50 mb-2">
+        <div class="card-body">
+          <h6 class="card-title d-flex justify-content-between">
+            {{repo.repo_name}}
+            <span class="weak-text">
+              업데이트일자: {{repo.update_date}}
+            </span>
+          </h6>
+          {% if repo.release_ver != none %}
+            <span class="weak-text"><i class="bi bi-tag"></i> {{repo.release_ver}}</span>
+          {% endif %}
+
+          {%if repo.contributors_count > 1 %}
+            <p class="weak-text">팀프로젝트</p>
+          {%else%}
+            <p class="weak-text">개인프로젝트</p>
+          {%endif%}
+
+          {%if repo.proj_short_desc == none%}
+            <p class="weak-text">프로젝트 설명이 없습니다.</p>
+          {%else%}
+            <p>{{repo.proj_short_desc}}</p>
+          {%endif%}
+        </div>
+      </div>
+      <div class="card w-50 mb-2">
+        <div class="card-body d-flex">
+          <div>
+            <div>
+              <i class="bi bi-card-heading"></i>
+              {%if repo.proj_short_desc == none%}
+                <span class="weak-text">프로젝트 설명이 없습니다.</span>
+              {%else%}
+                <span>{{repo.proj_short_desc}}</span>
+              {%endif%}
+            </div>
+            <div>
+              <i class="bi bi-book"></i>
+              {%if repo.readme == 0 %}
+                <span class="weak-text">README 파일이 없습니다.</span>
+              {%else%}
+                <span>README 작성완료</span>
+              {%endif%}
+            </div>
+            <div>
+              <i class="bi bi-key"></i>
+              {%if repo.license == none %}
+                <span class="weak-text">License가 없습니다.</span>
+              {%else%}
+                <span>{{repo.license}}</span>
+              {%endif%}
+            </div>
+          </div>
+        </div>
+        <div class="guideline-step">
+          <ul class="guideline-step-list">
+            {% if repo.proj_short_desc == none %}
+            <li class="guideline-step-item unfinished-item">
+            {% else %}
+            <li class="guideline-step-item">
+            {% endif %}
+              <span class="progress-count">1</span>
+              <span class="progress-label">
+                <i class="bi bi-card-heading"></i>
+                Short_desc
+              </span>
+            </li>
+            {% if repo.readme == 0 %}
+            <li class="guideline-step-item unfinished-item">
+            {% else %}
+            <li class="guideline-step-item">
+            {% endif %}
+              <span class="progress-count">2</span>
+              <span class="progress-label">
+                <i class="bi bi-book"></i>
+                Read me
+              </span>
+            </li>
+            {% if repo.license == none %}
+            <li class="guideline-step-item unfinished-item">
+            {% else %}
+            <li class="guideline-step-item">
+            {% endif %}
+              <span class="progress-count">3</span>
+              <span class="progress-label">
+                <i class="bi bi-key"></i>
+                license
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</body>
+{% endblock %}
+
+{% block script %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/guideline.css' %}">
+{% endblock %}

@@ -1,32 +1,57 @@
-<!DOCTYPE html>
-<html lang="ko">
 {% extends 'main.html' %}
 
 {% load static %}
 {% block content %}
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-3 border h-100">
-      {% include "community/sidebar.html" %}
-    </div>
+<div class="container my-4">
+  <div id="community-container" class="row">
+    {% include "community/sidebar.html" %}
     <div class="col-9">
       <div class="row">
-        {% for board in boards %}
-        <div class="col-6 my-2">
-          <div class="card">
-            <div class="card-body">
-              <div class="d-flex justify-content-between">
-                <h4 class="card-title fw-bold">{{board.name}} 게시판</h4>
-                <a href="/community/{{board.name}}">
-                  더보기
-                  <i class="bi-chevron-right"></i>
-                </a>
+        <div class="col-6">
+          {% for board in boards %}
+          {% if forloop.counter|divisibleby:2 %}
+          {% else %}
+          <div class="mb-2">
+            <div class="accordion" id="accordion-{{board.id}}">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
+                    {{board.name}} 게시판
+                  </button>
+                </h2>
+                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                  <div>
+                    {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
+                  </div>
+                </div>
               </div>
-              {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
             </div>
           </div>
+          {% endif %}
+          {% endfor %}
         </div>
-        {% endfor %}
+        <div class="col-6">
+          {% for board in boards %}
+          {% if forloop.counter|divisibleby:2 %}
+          <div class="mb-2">
+            <div class="accordion" id="accordion-{{board.id}}">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
+                    {{board.name}} 게시판
+                  </button>
+                </h2>
+                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                  <div>
+                    {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
@@ -34,6 +59,5 @@
 </div>
 {% endblock content %}
 {% block script %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
-
-</html>
