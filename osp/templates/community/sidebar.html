@@ -1,10 +1,10 @@
 {% load community_tag %}
 {% load user_templatetag %}
 {% load static %}
-<div class="col-md-3 border h-100" id="community-sidebar">
+<div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         <div id="profile-image-wrap" class="m-auto">
-            <img src="{{user|user_profile_image_url}}" id="profile-image">
+            <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
