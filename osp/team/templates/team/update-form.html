@@ -1,0 +1,72 @@
+{% load static %}
+{% load tag_templatetag %}
+
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">
+        팀 정보 수정
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <form id="team-update-form">
+        {% csrf_token %}
+        <div>
+          <img src="{{team.image.url}}" alt="team-image" style="height: 100px;">
+          <br>
+          <label class="mb-2" for="team-image">팀 이미지 변경</label>
+          <input type="file" name="team-image" id="team-image-submit" class="form-control">
+        </div>
+        <div id="team-member">
+          <div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>
+                    팀원
+                  </th>
+                  <th>
+                    <i class="bi-person-fill"></i>
+                  </th>
+                  <th>
+                    <i class="bi-trash"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for member in team_members %}
+                <tr>
+                  <td>
+                    <a href="{% url 'user:profile' member.member.user.username %}">
+                      {{member.member.user.username}}
+                    </a>
+                  </td>
+                  <td>
+                    {% if member.is_admin %}
+                    <input type="checkbox" member-id="{{member.id}}" name="admin-{{member.id}}" class="admin-select" checked>
+                    {% else %}
+                    <input type="checkbox" member-id="{{member.id}}" name="admin-{{member.id}}" class="admin-select">
+                    {% endif %}
+                  </td>
+                  <td>
+                    <input type="checkbox" member-id="{{member.id}}" name="delete-{{member.id}}" class="member-delete">
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <select name="tag" id="team-tag" multiple required>
+            {% category_tag request %}
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" id="team-update-submit">저장</button>
+    </div>
+  </div>
+</div>

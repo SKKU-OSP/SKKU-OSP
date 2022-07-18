@@ -1,20 +1,35 @@
 {% load community_tag %}
-<div class="d-flex flex-row justify-content-between" style="height:40px;margin-top:10px;">
-    <div class="border rounded" style="padding-left:10px;padding-right:5px;height:40px;line-height:40px;margin-right:10px;font-weight:bold;">댓글쓰기</div>
-    <input class="form-control" placeholder="댓글을 입력해주세요." style="flex:1;height:40px;line-height:40px;display:block;margin-right:10px;">
-    <div><button class="rounded-circle border-2" style="background:none;font-size:20px;"><i class="bi-chat-left-dots"></i></button></div>
-</div>
+<form id="comment-form" method="post" action="." class="row" onsubmit="registerComment();return false;">
+    {% csrf_token %}
+    <div class="d-flex flex-row justify-content-between" style="height:40px;margin-top:10px;">
+        <div class="border rounded" style="padding-left:10px;padding-right:5px;height:40px;line-height:40px;margin-right:10px;font-weight:bold;">댓글쓰기</div>
+        <input id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." style="flex:1;height:40px;line-height:40px;display:block;margin-right:10px;" required>
+        <div><input id="comment-is-anonymous" type="checkbox" style="line-height:35px;" checked><span style="padding-left:3px;line-height:40px;">익명</span></div>
+        <div><button type="submit" class="rounded-circle border-2" style="background:none;font-size:20px;margin-left:5px;"><i class="bi-chat-left-dots"></i></button></div>
+    </div>
+</form>
 <div class="list-group" style="border-radius:0px;width:100%;margin-top:10px;">
     {% for comment in comments %}
         <div class="list-group-item w-100" style="padding-top:5px;padding-left:3px;padding-right:3px;">
-            <div class="bg-light d-flex flex-row justify-content-between w-100">
-                <div><image></image><span>{{ comment.writer_id }}</span></div>
+        <div class="bg-light d-flex flex-row justify-content-between w-100">
+        {% if comment.is_deleted %}
+            삭제된 댓글입니다.
+        {% else %}
+                <div>
+                {% if comment.anonymous_writer %}
+                    <image></image><span>익명</span>
+
+                {% else %}
+                    <image></image><span>{{ comment.writer_id }}</span>
+                {% endif %}
+                </div>
                 <div style="flex:1">{{ comment.body }}</div>
                 <div class="d-flex flex-row justify-content-end" style="">
+                {% if request.user == comment.writer.user %}
                 <div style="line-height:40px;padding-left:10px;">
-                    <!--todo: 1. comment_is deleted 추가, 2.로그인한계정별로 -->
-                    <span style="cursor:pointer" onclick="removeComment();">삭제</span>
+                    <span style="cursor:pointer" onclick="deleteComment({{ comment.id }});">삭제</span>
                 </div>
+                {% endif %}
                 <div style="height:40px;line-height:31px;padding-left:10px;" class="d-flex flex-column">
                 <div style="height:10px;font-size:5px;">
                     {{ article.pub_date|time_before }}
@@ -24,7 +39,9 @@
                 </div>
                 </div>
             </div>
-            </div>
+
+        {% endif %}
+        </div>
         </div>
     {% empty %}
         <div>댓글을 등록해주세요.</div>
