@@ -1,27 +1,33 @@
 {% load static %}
-<div id="team-tab" class="d-flex" team-name="{{team.name}}" style="height: 200px;">
-    <div class="col-3">
-        <img src="{{team.image.url}}" alt="team-image" style="height: 150px;">
+<div id="team-tab" class="d-flex " team-name="{{team.name}}" style="">
+    <div class="col-3" >
+{#        <div>#}
+            <img src="{{team.image.url}}" alt="team-image">
+{#        </div>#}
     </div>
-    <div id="team-member" class="col-3">
-        <h5>
-            Member
-        </h5>
-        <div class="overflow-y-auto">
+    <div id="team-members" class="col-3" class="d-flex flex-column">
+        <div>{{ team.name }} <i class="bi-edit"></i></div>
+        <div>
+            Members
+        </div>
+        <div style="max-width:200px;overflow-x:scroll;border-right:1px solid white;">
+            <div style="height:93px;" class="d-flex flex-column flex-wrap">
             {% for member in team_members %}
-            <div>
-                <a href="{% url 'user:profile' member.member.user.username %}">
+            <div id="team-member">
+                <a href="{% url 'user:profile' member.member.user.username %}" style="color:white;">
                     {{member.member.user.username}}
                 </a>
                 {% if member.is_admin %}
+                    <!--todo: bootsrap: military-tech로 변경-->
                 <i class="bi-star"></i>
                 {% endif %}
             </div>
             {% endfor %}
         </div>
+        </div>
     </div>
-    <div class="col-3">
-        <div>
+    <div id="team-info" class="col-3 d-flex flex-column flex-wrap" >
+        <div id="team-desc">
             {{team.description}}
         </div>
         <div id="team-tag">

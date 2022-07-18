@@ -84,7 +84,7 @@ def board(request, board_name, board_id):
         # team = Team.objects.get(name=board.name)
         team = board.team
         team_tags = TeamTag.objects.filter(team=team)
-        team_members = TeamMember.objects.filter(team=team)
+        team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
         my_acc = Account.objects.get(user=request.user)
         context['team_admin'] = team_members.get(member=my_acc).is_admin
         context['team'] = team
