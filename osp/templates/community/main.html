@@ -3,11 +3,11 @@
 {% load static %}
 {% block content %}
 <div class="container my-4">
-  <div id="community-container" class="d-flex">
+  <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
-    <div class="col-md-9">
-      <div class="d-flex">
-        <div class="col-6 px-2">
+    <div class="col-md-9 col-12">
+      <div class="row">
+        <div class="col-6">
           {% for board in boards %}
           {% if forloop.counter|divisibleby:2 %}
           {% else %}
@@ -15,11 +15,13 @@
             <div class="accordion" id="accordion-{{board.id}}">
               <div class="accordion-item">
                 <h2 class="accordion-header">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
                     {{board.name}} 게시판
                   </button>
                 </h2>
-                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                  data-bs-parent="#accordionExample">
                   <div>
                     {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
                   </div>
@@ -30,18 +32,20 @@
           {% endif %}
           {% endfor %}
         </div>
-        <div class="col-6 px-2">
+        <div class="col-6">
           {% for board in boards %}
           {% if forloop.counter|divisibleby:2 %}
           <div class="mb-2">
             <div class="accordion" id="accordion-{{board.id}}">
               <div class="accordion-item">
                 <h2 class="accordion-header">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{board.id}}" aria-expanded="true" aria-controls="collapse-{{board.id}}">
                     {{board.name}} 게시판
                   </button>
                 </h2>
-                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                  data-bs-parent="#accordionExample">
                   <div>
                     {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
                   </div>

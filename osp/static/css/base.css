@@ -17,6 +17,14 @@ html, body {
 }
 body{
   background-color: #F5F5F5;
+  -ms-overflow-style: none;
+}
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.row {
+  --bs-gutter-x: 0.8rem !important;
 }
 
 #body-wrapper {
