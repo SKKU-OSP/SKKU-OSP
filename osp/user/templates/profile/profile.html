@@ -8,7 +8,7 @@
     <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true" >프로필 수정</a>
   </div>
   <div class="row">
-    <div class="col-md-3 col-12 profile-info">
+    <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info">
           <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
         <div class="info-body">
@@ -104,7 +104,7 @@
             </div>
           </div>
         </div>
-        <div class="col-8">
+        <div id="profile-content" class="col-8">
           <div class="card" id="visualization">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">
