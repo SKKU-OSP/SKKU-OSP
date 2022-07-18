@@ -56,17 +56,23 @@ class ProfileView(TemplateView):
                 recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
                 recent_repos[commit_repo_name]['desc'] = GithubRepoStats.objects.get(github_id=commit['github_id'], repo_name=commit_repo_name).proj_short_desc
         recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
-       
+
         # 관심 목록 리스트
-        
-        ints = AccountInterest.objects.filter(account=context['account'])
-        # 프로필사진 경로
-        
+        user = User.objects.get(username=context['account'])
+        student_account = context['account']
+        tags_all = Tag.objects
+
+        tags_domain = tags_all.filter(type='domain')
+
+        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain) # 관심분야  
+        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain) # 사용언어, 기술스택
+
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
-            'inter': ints,
+            'ints': ints,
+            'lang': lang,
             'account': context['account']
         }
         context['data'] = data
@@ -174,8 +180,17 @@ class ProfileEditView(TemplateView):
 
         print(request.POST.get("action"))
 
+        if(request.POST.get('action') == 'append_ints'): # 관심분야 추가 버튼 눌렀을 경우
+            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
+            added_tag = Tag.objects.get(name=added_preferLanguage)
+            try:
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+                already_ints.delete()
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
 
-        if(request.POST.get('action') == 'append'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
+        elif(request.POST.get('action') == 'append_lang'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
             added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
             added_level = request.POST.get('tagLevel') # 선택 된 레벨
             added_tag = Tag.objects.get(name=added_preferLanguage)
@@ -256,8 +271,9 @@ class ProfileEditView(TemplateView):
         
         # developing....
         tags_all = Tag.objects
-        tags_lang = tags_all.filter(type='language').values('name')
-        ints = AccountInterest.objects.filter(account=student_account)
+        tags_domain = tags_all.filter(type='domain')
+        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
+        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
         # developing....
 
 
@@ -277,7 +293,7 @@ class ProfileEditView(TemplateView):
             'form': form,
             'info': student_info,
             'ints': ints,
-            'tags_lang' : tags_lang
+            'tags_lang' : lang
         }
 
         if(str(request.user) != username): # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
