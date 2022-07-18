@@ -51,7 +51,7 @@ def main(request):
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
             article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
-            if board.board_type == 'Team':
+            if board.board_type == 'Recruit':
                 article.team = TeamRecruitArticle.objects.get(article=article).team
 
 
@@ -72,11 +72,17 @@ def board(request, board_name, board_id):
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-            article.team = TeamRecruitArticle.objects.get(article=article).team
+            teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
+            if teamrecruitarticle:
+                article.team = teamrecruitarticle.team
+            else:
+                article.team = None
+
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
-        team = Team.objects.get(name=board.name)
+        # team = Team.objects.get(name=board.name)
+        team = board.team
         team_tags = TeamTag.objects.filter(team=team)
         team_members = TeamMember.objects.filter(team=team)
         my_acc = Account.objects.get(user=request.user)
@@ -143,7 +149,7 @@ def article_list(request, board_name, board_id):
         # if board.name == 'Team':
         #     article.team = TeamRecruitArticle.objects.get(article=article).team
 
-        if board.board_type == 'Team':
+        if board.board_type == 'Recruit':
             article.team = TeamRecruitArticle.objects.get(article=article).team
 
         if board.board_type == 'QnA':
@@ -194,7 +200,7 @@ class ArticleView(TemplateView):
             context['tags'] = ArticleTag.objects.filter(article__id=article_id)
             context['board'] = Board.objects.get(id=context['article'].board_id_id)
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
-            if context['board'].name == 'Team':
+            if context['board'].board_type == 'Recruit':
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
                     context['article'].team = teamrecruit.team
@@ -214,7 +220,7 @@ class ArticleView(TemplateView):
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
 
         context['board'] = Board.objects.get(id=context['article'].board_id.id)
-        if context['board'].name == 'Team':
+        if context['board'].board_type == 'Recruit':
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
                 context['article'].team = teamrecruit.team
@@ -251,7 +257,7 @@ def article_create(request):
                 if tag_name:
                     tag = Tag.objects.get(name=tag_name)
                     ArticleTag.objects.create(article=article, tag=tag)
-            if board.board_type == 'Team':
+            if board.board_type == 'Recruit':
                 team = Team.objects.get(id=request.POST.get('team_id'))
                 TeamRecruitArticle.objects.create(team=team,article=article)
 
