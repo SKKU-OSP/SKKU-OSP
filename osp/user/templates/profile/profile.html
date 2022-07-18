@@ -251,7 +251,7 @@
         <div class="col-4 expandable">
           <div class="card mb-3" id="languages">
             <div class="card-body">
-              <h5 class="card-title justify-content-between">사용언어/기술스택
+              <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               <div class="d-inline-flex flex-wrap">
@@ -268,6 +268,22 @@
           </div>
         </div>
         <div class="col-4 expandable">
+          <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfoliModal" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 id="portfoliModal" class="modal-title">포트폴리오</h5>
+                  <button id="closePortfolioModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body-markdown">
+                  {{ data.account.portfolio|mark }}
+                </div>
+                <div class="modal-footer">
+                  <button id="closePortfolioModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="card mb-3" id="portfolio">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">포트폴리오

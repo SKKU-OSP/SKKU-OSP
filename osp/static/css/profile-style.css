@@ -36,25 +36,8 @@
     margin-top: 0 !important;
   }
 }
-
-#languages {
-  min-height: 150px;
-}
-
-#interests {
-  min-height: 150px;
-}
-
 .recent_repos{
   min-height: 100px;
-}
-
-#last_commit{
-  font-size: 10px;
-}
-
-td {
-  font-size: 11pt;
 }
 
 h5{
@@ -63,7 +46,6 @@ h5{
 
 h5.modal-title {
   font: 16px;
-  font-family: "Noto Sans KR", sans-serif;
   font-weight: 500;
   text-indent: 20px;
 }
@@ -263,7 +245,9 @@ a.nav-link {
 #target-search > .ss-main{
   width: calc(100% - 95px);
 }
-
+.modal-body-markdown{
+  padding: var(--bs-modal-header-padding);
+}
 /* Scroll bar Custom */
 div > ::-webkit-scrollbar {
   width: 10px;
@@ -477,6 +461,9 @@ span.row-raw{
 }
 .expanded, .semi-expanded-1.semi-expanded-2{
   width: 100% !important;
+}
+.expanded .card{
+  height: max-content !important;
 }
 .expanded:nth-child(1){
   order:-1;
