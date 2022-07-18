@@ -85,8 +85,7 @@
 
 #team-create{
     cursor: pointer;
-    background: var(--main-border-color);
-    border-radius: 50%;
+    color: var(--main-icon-color);
     height: 1.5em;
     width: 1.5em;
     text-align: center;
