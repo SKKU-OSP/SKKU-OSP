@@ -12,6 +12,7 @@
     <div class="modal-body">
       <form id="team-update-form">
         {% csrf_token %}
+        <input style="display:none" name="team-id" val="{{ team.id }}">
         <div>
           <img src="{{team.image.url}}" alt="team-image" style="height: 100px;">
           <br>

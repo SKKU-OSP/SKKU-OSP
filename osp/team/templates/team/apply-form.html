@@ -1,0 +1,38 @@
+{% load tag_templatetag %}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">지원하기</h5>
+        </div>
+        <div class="modal-body">
+                <div class="mb-3">
+                    <div class="form-label">지원하는 팀: {{ team.name }}</div>
+                    <div class="">"{{ team.description }}"</div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-label">지원자 정보: {{ request.user.username }}</div>
+                </div>
+            <form class="needs-validation row" id="team-apply-form" enctype="multipart/form-data" onsubmit="teamApply({{ team.id }});return false;" >
+                {% csrf_token %}
+                <input type="text" style="display:none;" name="team_id" val="{{ team.id }}">
+                <div class="mb-3">
+                    <label for="team-desc" class="form-label">지원 이유</label>
+                    <textarea id="team-desc" placeholder="지원 이유를 작성해주세요." name="desc" class="form-control" rows="3" required></textarea>
+                    <div class="valid-feedback" for="team-desc"></div>
+                    <div class="invalid-feedback" for="team-desc"></div>
+                </div>
+                <div class="mb-3">
+                    <div>
+                        <span style="padding-right:3px;line-height:40px;">지원 시 지원한 팀의 사용자 프로필 열람에 동의합니다.</span>
+                        <input id="required-checkbox" type="checkbox" style="line-height:35px;" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="team-apply-submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
