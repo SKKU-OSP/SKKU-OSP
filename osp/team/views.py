@@ -24,13 +24,13 @@ def TeamCreate(request):
         if not team_name:
             is_valid = False
             field_check_list['name'] = '필수 입력값입니다.'
-        else:
-            if len(Team.objects.filter(name=team_name)):
-                is_valid = False
-                field_check_list['name'] = f'{team_name} 팀은 이미 존재합니다.'
-            if len(Board.objects.filter(name=team_name)):
-                is_valid = False
-                field_check_list['name'] = f'{team_name}은 이름으로 사용할 수 없습니다.'
+        # else:
+        #     if len(Team.objects.filter(name=team_name)):
+        #         is_valid = False
+        #         field_check_list['name'] = f'{team_name} 팀은 이미 존재합니다.'
+        #     if len(Board.objects.filter(name=team_name)):
+        #         is_valid = False
+        #         field_check_list['name'] = f'{team_name}은 이름으로 사용할 수 없습니다.'
         
         team_desc = request.POST.get('desc', False)
         if not team_desc:
@@ -89,13 +89,17 @@ def TeamUpdate(request):
     if request.method == 'GET':
         context = {}
         team_name = request.GET.get('team')
-        team = Team.objects.get(name=team_name)
+        # team = Team.objects.get(name=team_name)
+        team_id=request.GET.get('team-id')
+        team = Team.objects.get(id=team_id)
         context['team'] = team
         context['team_members'] = TeamMember.objects.filter(team=team).select_related('member')
         return render(request, 'team/update-form.html', context)
     if request.method == 'POST':
         team_name = request.POST.get('team')
-        team = Team.objects.get(name=team_name)
+        # team = Team.objects.get(name=team_name)
+        team_id=request.GET.get('team-id')
+        team = Team.objects.get(id=team_id)
         try:
             with transaction.atomic():
                 for key in request.POST.keys():
