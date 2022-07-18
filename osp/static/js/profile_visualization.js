@@ -767,4 +767,25 @@ window.onload = function () {
     tooltip.style.display = "none";
   }
   setModal();
+  let sideHeight = 0;
+  const sideCol = document.getElementById("profile-info");
+  for(let i=0; i<sideCol.children.length;i++){
+    sideHeight += sideCol.children[i].getBoundingClientRect().height;
+  }
+  const article = document.getElementById("body-content");
+  window.addEventListener("scroll", function() {
+    let bodyHeight = 0;
+    let contents = document.getElementsByClassName("profile-content");
+    for(let i=0; i<contents.length; i++){
+      let ele = contents.item(i);
+      bodyHeight += ele.getBoundingClientRect().height;
+    }
+    mt = document.documentElement.scrollTop-article.offsetTop;
+    sideCol.style.marginTop = mt+'px';
+    if(mt+sideHeight > bodyHeight){
+      mt = Math.floor(bodyHeight - sideHeight + 16);
+      sideCol.style.marginTop = mt+'px';
+    }
+    if(mt<0 || document.documentElement.scrollTop == 0) sideCol.style.marginTop = '0px';
+  });
 };

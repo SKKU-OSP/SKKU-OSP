@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
-@import url("static/css/color.css");
+@import url("/static/css/color.css");
 .row {
   --bs-gutter-x: 0.8rem !important;
 }
@@ -32,7 +32,7 @@
   }
 }
 @media (max-width: 768px) {
-  .profile-info {
+  #profile-info {
     margin-top: 0 !important;
   }
 }
