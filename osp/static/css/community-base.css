@@ -2,7 +2,7 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.0/font/bootstrap-icons.css");
 
 #community-container {
-    margin-top: 75px;
+    margin-top: 59px;
 }
 
 #community-sidebar {
@@ -26,12 +26,12 @@
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
-    margin-top: -62.5px;
+    margin-top: -40px;
     padding: 0;
 
     z-index: 5;
-    width: 250px;
-    height: 250px;
+    width: 160px;
+    height: 160px;
     border-radius: 50%;
     border: 2px solid var(--main-point-color);
 }
