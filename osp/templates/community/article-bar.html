@@ -5,7 +5,7 @@
         <div class="d-flex bg-light p-2">
             <div class="article-head" onclick="location.href='{% url 'community:article-view' article.id %}'" style="cursor:pointer">
                 <h5 class="article-bar-title my-1 fw-bold">
-                    {% if board.name == 'Team' %}
+                    {% if board.board_type == 'Team' %}
                         [{{ article.team.name }}]
                     {% endif %}
                     {{article.title}}

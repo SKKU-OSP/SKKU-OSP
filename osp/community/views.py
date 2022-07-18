@@ -250,7 +250,7 @@ def article_create(request):
                 if tag_name:
                     tag = Tag.objects.get(name=tag_name)
                     ArticleTag.objects.create(article=article, tag=tag)
-            if board.name == 'Team':
+            if board.board_type == 'Recruit':
                 team = Team.objects.get(id=request.POST.get('team_id'))
                 TeamRecruitArticle.objects.create(team=team,article=article)
 
