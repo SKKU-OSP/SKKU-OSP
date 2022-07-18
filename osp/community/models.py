@@ -1,7 +1,7 @@
 from django.db import models
 from user.models import Account
 from tag.models import Tag
-
+from team.models import Team
 # Create your models here.
 class Board(models.Model):
     DEFAULT_BOARDNAME = ['QnA','Team','Education','Notice']
@@ -9,6 +9,7 @@ class Board(models.Model):
     name = models.CharField(max_length=20)
     board_type = models.CharField(max_length=10)
     anonymous_writer = models.BooleanField()
+    team = models.ForeignKey(Team, models.CASCADE, blank=True, null=True)
     
     def __str__(self) -> str:
         return f'{self.id:03d}:{self.name}({self.board_type})'
@@ -85,5 +86,16 @@ class ArticleCommentLike(models.Model):
             models.UniqueConstraint(
                 fields=['comment', 'account'],
                 name='unique_account_comment'
+            )
+        ]
+
+class TeamRecruitArticle(models.Model):
+    team = models.ForeignKey(Team, models.CASCADE)
+    article = models.ForeignKey(Article, models.CASCADE)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['team', 'article'],
+                name='unique_team_article'
             )
         ]

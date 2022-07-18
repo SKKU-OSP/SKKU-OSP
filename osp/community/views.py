@@ -10,8 +10,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
 from tag.models import Tag
-from team.models import TeamRecruitArticle, TeamMember, Team, TeamTag
+from team.models import TeamMember, Team, TeamTag
 from user.models import Account
+from community.models import TeamRecruitArticle
 
 import hashlib
 import math
@@ -250,7 +251,7 @@ def article_create(request):
                 if tag_name:
                     tag = Tag.objects.get(name=tag_name)
                     ArticleTag.objects.create(article=article, tag=tag)
-            if board.board_type == 'Recruit':
+            if board.board_type == 'Team':
                 team = Team.objects.get(id=request.POST.get('team_id'))
                 TeamRecruitArticle.objects.create(team=team,article=article)
 

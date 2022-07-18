@@ -1,8 +1,8 @@
 from django.db import models
 from django.dispatch import receiver
 from tag.models import Tag
+# from community.models import Article
 from user.models import Account
-from community.models import Article
 
 # Create your models here.
 class Team(models.Model):
@@ -42,16 +42,7 @@ class TeamMember(models.Model):
             )
         ]
 
-class TeamRecruitArticle(models.Model):
-    team = models.ForeignKey(Team, models.CASCADE)
-    article = models.ForeignKey(Article, models.CASCADE)
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['team', 'article'],
-                name='unique_team_article'
-            )
-        ]
+
 
 class TeamInviteMessage(models.Model):
     STATUS_CHOICES = (
