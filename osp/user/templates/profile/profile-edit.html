@@ -41,11 +41,6 @@
                   <input type="email" class="form-control" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
                 </div>
               </div>
-              <div class="mb-3">
-                {% csrf_token %}
-                <label for="id_introduction" class="form-label">Introduction</label>
-                <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
-              </div>
               <div>
                 {% csrf_token %}
                 <img src= {{data.account.photo.url}} alt="My Image" width="50" height="50">
@@ -67,6 +62,11 @@
           <div class="card" id="portfolio">
             <h5 class="card-title"> 포트폴리오 설정 </h5>
             <div class="card-body">
+              <div class="mb-3">
+                {% csrf_token %}
+                <label for="id_introduction" class="form-label">Introduction</label>
+                <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+              </div>
               <div class="mb-3">
                 <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="15">{{data.account.portfolio}}</textarea></p>
               </div>
@@ -101,7 +101,6 @@
   {% if messages %}
   <div class="messages">
       {% for message in messages %}
-      
         <div {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
           <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
           {{ message }}
