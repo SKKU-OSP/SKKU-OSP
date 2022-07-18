@@ -10,8 +10,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
 from tag.models import Tag
-from team.models import TeamRecruitArticle, TeamMember, Team, TeamTag
+from team.models import TeamMember, Team, TeamTag
 from user.models import Account
+from community.models import TeamRecruitArticle
 
 import hashlib
 import math
@@ -50,7 +51,7 @@ def main(request):
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
             article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
-            if board.name == 'Team':
+            if board.board_type == 'Team':
                 article.team = TeamRecruitArticle.objects.get(article=article).team
 
 
@@ -139,8 +140,8 @@ def article_list(request, board_name, board_id):
         article.comment_cnt = comment_cnt
         article.like_cnt = like_cnt
         article.tags = tags
-        if board.name == 'Team':
-            article.team = TeamRecruitArticle.objects.get(article=article).team
+        # if board.name == 'Team':
+        #     article.team = TeamRecruitArticle.objects.get(article=article).team
 
         if board.board_type == 'Team':
             article.team = TeamRecruitArticle.objects.get(article=article).team
@@ -235,7 +236,7 @@ def article_create(request):
     status = 'success'
     board_name = request.POST.get('board_name')
     board_id = request.POST.get('board_id')
-    board = Board.objects.get(name=board_id)
+    board = Board.objects.get(id=board_id)
 
     try:
         with transaction.atomic():
@@ -250,7 +251,7 @@ def article_create(request):
                 if tag_name:
                     tag = Tag.objects.get(name=tag_name)
                     ArticleTag.objects.create(article=article, tag=tag)
-            if board.name == 'Team':
+            if board.board_type == 'Team':
                 team = Team.objects.get(id=request.POST.get('team_id'))
                 TeamRecruitArticle.objects.create(team=team,article=article)
 

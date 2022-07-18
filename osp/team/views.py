@@ -24,13 +24,18 @@ def TeamCreate(request):
         if not team_name:
             is_valid = False
             field_check_list['name'] = '필수 입력값입니다.'
-        # else:
-        #     if len(Team.objects.filter(name=team_name)):
-        #         is_valid = False
-        #         field_check_list['name'] = f'{team_name} 팀은 이미 존재합니다.'
-        #     if len(Board.objects.filter(name=team_name)):
-        #         is_valid = False
-        #         field_check_list['name'] = f'{team_name}은 이름으로 사용할 수 없습니다.'
+        else:
+            for default_name in Board.DEFAULT_BOARDNAME:
+                if default_name == team_name:
+                    is_valid = False
+                    field_check_list['name']= f'{team_name}은 이름으로 사용할 수 없습니다.'
+                    break
+            # if len(Team.objects.filter(name=team_name)):
+            #     is_valid = False
+            #     field_check_list['name'] = f'{team_name} 팀은 이미 존재합니다.'
+            # if len(Board.objects.filter(name=team_name)):
+            #     is_valid = False
+            #     field_check_list['name'] = f'{team_name}은 이름으로 사용할 수 없습니다.'
         
         team_desc = request.POST.get('desc', False)
         if not team_desc:
@@ -69,13 +74,14 @@ def TeamCreate(request):
                     team_member = TeamMember.objects.create(
                         team=new_team,
                         member=account,
-                        is_admin=True
+                        is_admin=True,
                     )
                     team_member.save()
                     Board.objects.create(
                         name=team_name,
                         board_type='Team',
-                        anonymous_writer=False
+                        anonymous_writer=False,
+                        team=new_team,
                     )
                     return JsonResponse({'status': 'success'})
             except DatabaseError:
