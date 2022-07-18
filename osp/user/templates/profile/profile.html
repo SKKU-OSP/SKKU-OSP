@@ -8,7 +8,7 @@
     <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true" >프로필 수정</a>
   </div>
   <div class="row">
-    <div class="col-md-3 col-12 profile-info">
+    <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info">
           <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
         <div class="info-body">
@@ -104,7 +104,7 @@
             </div>
           </div>
         </div>
-        <div class="col-8">
+        <div id="profile-content" class="col-8">
           <div class="card" id="visualization">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">
@@ -243,7 +243,7 @@
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               {% for row in data.ints %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+                <span class="badge bg-tag-{{row.type}} me-1" style="height:20px">{{row.name}}</span>
               {% endfor %}
             </div>
           </div>
@@ -255,7 +255,7 @@
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               {% for row in data.lang %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+              <span class="badge bg-tag-{{row.type}} me-1" style="height:20px">{{row.name}}</span>
               {% endfor %}
             </div>
           </div>
@@ -276,7 +276,7 @@
           <div class="card h-100">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">최근 기여활동
-                <i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i>
+                <a href="./repo" target="_blank"><i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i></a>
               </h5>
               {% for recent_repo in data.repos %}
               <div class="card w-100 mb-2 recent_repos">
