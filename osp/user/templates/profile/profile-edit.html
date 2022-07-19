@@ -7,8 +7,8 @@
     {% csrf_token %}
     <div class="container-xl">
       <div class="row row-cols-2">
-        <div class="col">
-          <div class="card" id="information">
+        <div class="col edit-container">
+          <div class="card edit-card">
             <h5 class="card-title"> 개인정보 설정 </h5>
             <div class="card-body">
               <div class="mb-3 row">
@@ -49,8 +49,8 @@
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="card" id="visualization">
+        <div class="col edit-container">
+          <div class="card edit-card">
             <h5 class="card-title"> 관심분야 설정 </h5>
             <div class="card-body">
               {% csrf_token %}
@@ -58,8 +58,8 @@
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="card" id="portfolio">
+        <div class="col edit-container">
+          <div class="card edit-card">
             <h5 class="card-title"> 포트폴리오 설정 </h5>
             <div class="card-body">
               <div class="mb-3">
@@ -68,13 +68,13 @@
                 <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
               </div>
               <div class="mb-3">
-                <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="15">{{data.account.portfolio}}</textarea></p>
+                <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="12">{{data.account.portfolio}}</textarea></p>
               </div>
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="card" id="visualization">
+        <div class="col edit-container">
+          <div class="card edit-card">
             <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
             <div class="card-body">
               {% csrf_token %}
