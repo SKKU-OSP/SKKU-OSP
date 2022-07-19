@@ -45,9 +45,13 @@
                       <i class="bi-star"></i>
                   </td>
                   <td class="text-left">
+                      {% if request.user.is_anonymous %}
+                          <a href="">사용자</a>
+                      {% else %}
                       <a href="{% url 'user:profile' member.member.user.username %}">
                           {{member.member.user.username}}
-                        </a>
+                      </a>
+                      {% endif %}
                   </td>
                   <td class="text-center">
                     <i class="bi-dash-circle"></i>
