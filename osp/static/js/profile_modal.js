@@ -1,4 +1,4 @@
-function setModal(){
+function setVisualModal(){
   const start_year = 2019;
   const end_year = 2021;
   const grass_size = 60;
@@ -325,11 +325,8 @@ function setModal(){
   function makePage(chart_data){
     console.log("makePage");
     let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    console.log("user_data", user_data);
     let annual_data = chart_data["annual_overview"];
-    console.log("annual_data", annual_data);
     let score_data = chart_data["score_data"];
-    console.log("score_data", score_data);
     
     const baseColor = "#174adf";
     const userColor = "#ffe522";
@@ -545,7 +542,6 @@ function setModal(){
               borderWidth: 1,
             });
     let target = $(".modal-radar").find(".placeholder");
-    console.log(target);
     if(target.text() != chart_data["username"] && 
     target.text() != "비교없음"){
       radar_datasets.push({ // 비교 유저
@@ -583,7 +579,6 @@ function setModal(){
         },
         options: radarOption,
       });
-    console.log("modalChartObjList", modalChartObjList);
     if (modalChartObjList.length > 0) modalChartObjList[0] = radar_chart;
     else modalChartObjList.push(radar_chart);
   }
@@ -642,7 +637,6 @@ function setModal(){
   }
 
   function makeHistogramJson(dist, label) {
-    console.log("makeHistogramJson", label[0]);
     let offset = 0;
     //label expect NUM1~NUM2 or NUM
     let newDist = new Array(dist.length);
@@ -721,4 +715,16 @@ function setModal(){
     var tooltip = document.getElementById("modal-task-tooltip");
     tooltip.style.display = "none";
   }
+}
+function setPortfolioModal(){
+  let icon_portfolio_modal = document.getElementById("icon-portfolio");
+  icon_portfolio_modal.addEventListener("click", (e)=>{
+    $('#modalPortfolioBox').modal('show');
+  });
+  document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
+    $('#modalPortfolioBox').modal("hide");
+  })
+  document.getElementById("closePortfolioModalBtn").addEventListener("click", ()=>{
+    $('#modalPortfolioBox').modal("hide");
+  })
 }
