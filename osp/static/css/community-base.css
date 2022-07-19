@@ -150,14 +150,15 @@
     border-radius:10px;
 }
 #team-tab > div:first-child > img{
-    height:155px;
-    width:155px;
+    height:100%;
+    width:100%;
     border: 1px solid #9D9D9D;
     border-radius:10px;
 }
 
 #team-tab > #team-members{
     margin-left:15px;
+    border-right: 1px solid white;
 }
 #team-tab > #team-members > div:first-child{
     font-weight:500;
