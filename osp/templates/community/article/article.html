@@ -57,9 +57,7 @@
                 }
             });
         }
-    });
 
-    $(function(){
         $('#article-form').submit(function(event){
             event.preventDefault();
             var t = $(this).attr('edit-type');
@@ -73,8 +71,8 @@
             }
             return false;
         });
-
     });
+
 
     {% if article.writer.user == user %}
     function edit(){
