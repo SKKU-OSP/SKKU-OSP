@@ -26,17 +26,19 @@
             <a href="/community">Community Main</a>
         </div>
         {% board_sidebar_normal_board request %}
+        {% if user.is_authenticated %}
         <div class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
-            {% if user.is_authenticated %}
+
             <div id="team-create" style="cursor:pointer;">
                 <span class="material-icons">
                     group_add
                 </span> 
             </div>
-            {% endif %}
+
         </div>
-        {% board_sidebar_team_board request %}  
+        {% board_sidebar_team_board request %}
+        {% endif %}
     </div>
 
     {% if user.is_authenticated %}
