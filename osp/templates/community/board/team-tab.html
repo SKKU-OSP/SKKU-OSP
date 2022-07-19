@@ -2,15 +2,24 @@
 <div id="team-tab" class="d-flex " team-name="{{team.name}}" style="">
     <div class="col-3" >
 {#        <div>#}
-            <img src="{{team.image.url}}" alt="team-image">
+            <img src="{{ team.image.url }}" alt="team-image">
 {#        </div>#}
     </div>
     <div id="team-members" class="col-4" class="d-flex flex-column">
-        <div>{{ team.name }} <i class="bi-edit"></i></div>
+        <div>
+            {{ team.name }}
+            {% if team_admin %}
+{#                <div class="ms-auto" id="team-update">#}
+                    <button id="team-update" style="background:none;border:none;padding-left:4px;font-size:17px;">
+                        <i  class="bi-pencil text-white" ></i>
+                    </button>
+{#                </div>#}
+            {% endif %}
+        </div>
         <div>
             Members
         </div>
-        <div style="overflow-y:auto;border-right:1px solid white;">
+        <div style="overflow-y:auto;">
             <div style="height:93px;" class="d-flex flex-row flex-wrap">
             {% for member in team_members %}
             <div id="team-member" style="width:45%;">
