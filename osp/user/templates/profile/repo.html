@@ -12,7 +12,7 @@
           <h6 class="card-title d-flex justify-content-between">
             {{repo.repo_name}}
             <span class="weak-text">
-              업데이트일자: {{repo.update_date}}
+              최근 커밋일자: {{repo.committer_date}}
             </span>
           </h6>
           {% if repo.release_ver != none %}
@@ -20,9 +20,9 @@
           {% endif %}
 
           {%if repo.contributors_count > 1 %}
-            <p class="weak-text">팀프로젝트</p>
+            <p class="weak-text">팀프로젝트 created by {{repo.owner_id}}</p>
           {%else%}
-            <p class="weak-text">개인프로젝트</p>
+            <p class="weak-text">개인프로젝트 created by {{repo.owner_id}}</p>
           {%endif%}
 
           {%if repo.proj_short_desc == none%}
