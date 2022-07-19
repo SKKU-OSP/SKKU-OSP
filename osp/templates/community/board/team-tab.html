@@ -1,5 +1,5 @@
 {% load static %}
-<div id="team-tab" class="d-flex " team-name="{{team.name}}" style="">
+<div id="team-tab" class="d-flex " team-id="{{team.id}}" style="">
     <div class="col-3" >
 {#        <div>#}
             <img src="{{ team.image.url }}" alt="team-image">
@@ -53,7 +53,7 @@
     var tag_list = [];
     function submit_update_form(){
         var form_data = new FormData($('#team-update-form')[0]);
-        form_data.append('team', $('#team-tab').attr('team-name'));
+        form_data.append('team_id', $('#team-tab').attr('team-id'));
         for(member of admin_list){
             if($(`[name=admin-${member}]`).is(':checked') == false){
                 form_data.append('admindelete-' + member, ['on']);
@@ -98,7 +98,7 @@
                 url: "{% url 'team:team-update' %}",
                 type: "GET",
                 data: {
-                    team: $('#team-tab').attr('team-name')
+                    team_id: $('#team-tab').attr('team-id')
                 },
                 dataType: 'HTML'
             }).done(function(data){
