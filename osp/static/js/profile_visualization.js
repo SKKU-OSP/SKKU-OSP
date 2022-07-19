@@ -372,11 +372,8 @@ window.onload = function () {
   function makePage(chart_data){
     console.log("makePage");
     let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    console.log("user_data", user_data);
     let annual_data = chart_data["annual_overview"];
-    console.log("annual_data", annual_data);
     let score_data = chart_data["score_data"];
-    console.log("score_data", score_data);
     
     const baseColor = "#174adf";
     const userColor = "#ffe522";
@@ -629,7 +626,6 @@ window.onload = function () {
         },
         options: radarOption,
       });
-    console.log("chartObjList", chartObjList);
     if (chartObjList.length > 0) chartObjList[0] = radar_chart;
     else chartObjList.push(radar_chart);
   }
@@ -687,7 +683,6 @@ window.onload = function () {
   }
 
   function makeHistogramJson(dist, label) {
-    console.log("makeHistogramJson", label[0]);
     let offset = 0;
     //label expect NUM1~NUM2 or NUM
     let newDist = new Array(dist.length);
@@ -766,5 +761,27 @@ window.onload = function () {
     let tooltip = document.getElementById("task-tooltip");
     tooltip.style.display = "none";
   }
-  setModal();
+  setVisualModal();
+  setPortfolioModal();
+  let sideHeight = 0;
+  const sideCol = document.getElementById("profile-info");
+  for(let i=0; i<sideCol.children.length;i++){
+    sideHeight += sideCol.children[i].getBoundingClientRect().height;
+  }
+  const article = document.getElementById("body-content");
+  window.addEventListener("scroll", function() {
+    let bodyHeight = 0;
+    let contents = document.getElementsByClassName("profile-content");
+    for(let i=0; i<contents.length; i++){
+      let ele = contents.item(i);
+      bodyHeight += ele.getBoundingClientRect().height;
+    }
+    mt = document.documentElement.scrollTop-article.offsetTop;
+    sideCol.style.marginTop = mt+'px';
+    if(mt+sideHeight > bodyHeight){
+      mt = Math.floor(bodyHeight - sideHeight + 16);
+      sideCol.style.marginTop = mt+'px';
+    }
+    if(mt<0 || document.documentElement.scrollTop == 0) sideCol.style.marginTop = '0px';
+  });
 };
