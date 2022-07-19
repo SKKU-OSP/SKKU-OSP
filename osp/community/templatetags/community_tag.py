@@ -66,19 +66,21 @@ def board_sidebar_normal_board(request):
 @register.simple_tag
 def board_sidebar_team_board(request):
     team_board_query = Q()
+    result = ''
     if request.user.is_authenticated:
         user = User.objects.get(username=request.user)
         account = Account.objects.get(user=user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    result = ''
-    for board in Board.objects.filter(team_board_query):
-        url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
-        result += f'''
-            <div class="boardgroup-item">
-            <a href="{url}">{board.name.capitalize()}</a>
-            </div>
-        '''
+
+        for board in Board.objects.filter(team_board_query):
+            url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
+            result += f'''
+                <div class="boardgroup-item">
+                <a href="{url}">{board.name.capitalize()}</a>
+                </div>
+            '''
+
     return mark_safe(result)
 
 @register.simple_tag

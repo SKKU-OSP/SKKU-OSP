@@ -90,7 +90,6 @@ def board(request, board_name, board_id):
         context['team'] = team
         context['team_tags'] = team_tags
         context['team_members'] = team_members
-        context['team_admin']
     return render(request, 'community/board/board.html', context)
 
 def article_list(request, board_name, board_id):
