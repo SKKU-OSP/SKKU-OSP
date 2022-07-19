@@ -13,64 +13,56 @@
       <form id="team-update-form">
         {% csrf_token %}
         <input style="display:none" name="team-id" val="{{ team.id }}">
-{#        <div>#}
-{#          <img src="{{team.image.url}}" alt="team-image" style="height: 100px;">#}
-{#          <br>#}
-{#          <label class="mb-2" for="team-image">팀 이미지 변경</label>#}
-{#          <input type="file" name="team-image" id="team-image-submit" class="form-control">#}
-{#        </div>#}
 
-      <div>
-          <label class="mb-2" for="team-image">팀 이미지 변경</label>
+      <div style="margin-bottom:5px;">
+          <label for="team-name">팀 이름:</label>
+          <input type="text" name="team-name" class="form-control" val="{{ team.name }}">
+      </div>
+      <div style="margin-bottom:5px;">
+          <label for="team-desc">팀 설명</label>
+          <input type="text" name="team-desc" class="form-control" val="{{ team.description }}">
+      </div>
+
+      <div style="margin-bottom:5px;">
+          <label for="team-image">팀 대표 이미지</label>
           <input type="file" name="team-image" id="team-image-submit" class="form-control">
       </div>
 
-        <div id="team-member">
-          <div>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>
-                    팀원
-                  </th>
-                  <th>
-                    <i class="bi-person-fill"></i>
-                  </th>
-                  <th>
-                    <i class="bi-trash"></i>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for member in team_members %}
-                <tr>
-                  <td>
-                    <a href="{% url 'user:profile' member.member.user.username %}">
-                      {{member.member.user.username}}
-                    </a>
+      <div class="w-100 d-flex flex-row justify-content-between" style="width:400px;">
+            <div><label for="">팀 멤버</label></div>
+            <div><i class="bi-arrow-clockwise"></i></div>
+      </div>
+      <div class="w-100 text-left">
+          <table style="width:300px;max-width:300px;height:200px;max-height:200px;overflow-y:auto;margin-bottom:5px;">
+              <colgroup>
+                   <col width="20%">
+                   <col width="60%">
+                   <col width="20%">
+               </colgroup>
+              {% for member in team_members %}
+                  <tr style="height:50px;">
+                  <td class="text-center" >
+                      <i class="bi-star"></i>
                   </td>
-                  <td>
-                    {% if member.is_admin %}
-                    <input type="checkbox" member-id="{{member.id}}" name="admin-{{member.id}}" class="admin-select" checked>
-                    {% else %}
-                    <input type="checkbox" member-id="{{member.id}}" name="admin-{{member.id}}" class="admin-select">
-                    {% endif %}
+                  <td class="text-left">
+                      <a href="{% url 'user:profile' member.member.user.username %}">
+                          {{member.member.user.username}}
+                        </a>
                   </td>
-                  <td>
-                    <input type="checkbox" member-id="{{member.id}}" name="delete-{{member.id}}" class="member-delete">
+                  <td class="text-center">
+                    <i class="bi-dash-circle"></i>
                   </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-            <div>관련 분야</div>
-          <select name="tag" id="team-tag" multiple required>
-            {% category_tag request %}
-          </select>
-        </div>
+                  </tr>
+              {% endfor %}
+          </table>
+      </div>
+
+    <div>
+        <div>관련 분야</div>
+      <select name="tag" id="team-tag" multiple required>
+        {% category_tag request %}
+      </select>
+    </div>
       </form>
     </div>
     <div class="modal-footer">

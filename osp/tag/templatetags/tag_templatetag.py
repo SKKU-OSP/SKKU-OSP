@@ -25,9 +25,9 @@ def category_tag(request):
     return mark_safe(result)
 
 @register.simple_tag
-
 def is_teammember(team, user):
-    account = Account.objects.get(user=user)
+    if user.is_anonymous: user = None
+    account = Account.objects.filter(user=user).first()
     if TeamMember.objects.filter(team=team,member=account):
         return True
     else:
@@ -35,7 +35,8 @@ def is_teammember(team, user):
 
 @register.simple_tag
 def teaminvitemessage(team, user):
-    account = Account.objects.get(user=user)
+    if user.is_anonymous: user = None
+    account = Account.objects.filter(user=user).first()
     return TeamInviteMessage.objects.filter(team=team,account=account).first()
 
 
