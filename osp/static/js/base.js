@@ -3,6 +3,17 @@ function select_oppo(){
         $(this).removeClass('selected');
     });
     $(this).addClass('selected');
+    $('#chat-view').html('')
+    .append(
+        $('<div></div')
+        .addClass('spinner-border')
+        .addClass('m-auto')
+        .append(
+            $('<span></span>')
+            .addClass('visually-hidden')
+            .html('Loading...')
+        )
+    );
     var oppo_id = $(this).attr('value');
     $.ajax({
         url: '/message/chat/' + $(this).attr('value'),
@@ -10,6 +21,7 @@ function select_oppo(){
         dataType: 'JSON'
     }).done(function(data){
         $('#chat-view').html('');
+        $('#chat-input').removeAttr('disabled');
         for(msg of data['data']){
             msg_date = new Date(msg.send_date);
             console.log(msg_date)
@@ -36,6 +48,11 @@ function select_oppo(){
         }
     });
     console.log($(this).attr('value'));
+}
+
+function send_msg(event){
+    var form_data = new FormData($('#chat-input-form')[0])
+    console.log(form_data)
 }
 
 $().ready(function(){
