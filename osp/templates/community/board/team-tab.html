@@ -35,7 +35,7 @@
         </div>
         </div>
     </div>
-    <div id="team-info" class="col-5 d-flex flex-column flex-wrap" >
+    <div id="team-info" class="col-5 d-flex flex-column flex-wrap" style="overflow:hidden;" >
         <div id="team-desc">
             {{team.description}}
         </div>
@@ -120,5 +120,6 @@
                 $('#team-update-submit').click(submit_update_form);
             })
         });
+        $('#team-update').click();
     });
 </script>
