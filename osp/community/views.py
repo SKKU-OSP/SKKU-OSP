@@ -24,7 +24,8 @@ from datetime import datetime, timedelta
 def main(request):
     board_list = []
     team_board_query = Q()
-    if request.user.is_authenticated:
+
+    if request.user and request.user.is_authenticated:
         user = User.objects.get(username=request.user)
         account = Account.objects.get(user=user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
@@ -85,7 +86,7 @@ def board(request, board_name, board_id):
         team = board.team
         team_tags = TeamTag.objects.filter(team=team)
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
-        my_acc = Account.objects.get(user=request.user)
+        if request.user: my_acc = Account.objects.get(user=request.user)
         context['team_admin'] = team_members.get(member=my_acc).is_admin
         context['team'] = team
         context['team_tags'] = team_tags
@@ -285,6 +286,8 @@ def article_update(request):
                 Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
                 tag_list = request.POST.get('tags').split(',')
                 tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
+
+
                 for tag_name in list(set(tag_list_old)-set(tag_list)):
                     ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
                 for tag_name in list(set(tag_list)-set(tag_list_old)):
@@ -293,8 +296,12 @@ def article_update(request):
             else:
                 status = 'fail'
                 message = '작성자만 수정할 수 있습니다.'
-    except:
-        status = 'fail'
+    except Exception as e:
+            status = 'fail'
+            message = str(e)
+            if request.user.is_anonymous:
+                message = "로그인 후 이용해주세요."
+
 
     return JsonResponse({'status': status, 'message': message})
 
@@ -318,8 +325,12 @@ def article_delete(request):
                 status = 'fail'
                 message = '작성자만 삭제할 수 있습니다.'
 
-    except:
+
+    except Exception as e:
         status = 'fail'
+        message = str(e)
+        if request.user.is_anonymous:
+            message = "로그인 후 이용해주세요."
 
     return JsonResponse({'status': status, 'message': message})
 
