@@ -541,7 +541,7 @@ function setVisualModal(){
               hoverBorderColor: "rgba(200, 0, 0, 1)",
               borderWidth: 1,
             });
-    let target = $(".modal-radar").find(".placeholder");
+    let target = $(".select-compare").find(".placeholder");
     if(target.text() != chart_data["username"] && 
     target.text() != "비교없음"){
       radar_datasets.push({ // 비교 유저

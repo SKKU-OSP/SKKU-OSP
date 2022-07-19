@@ -56,42 +56,49 @@
                 <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
                 <button id="closeModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
+              <div class="horizontal-menu">
+                <button class="modal-btn-year">2019</button>
+                <button class="modal-btn-year">2020</button>
+                <button class="modal-btn-year active">2021</button>
+                <button class="modal-btn-year">2022</button>
+              </div>
+              <div class="select-compare">
+                <select name="target" id="modal-target-user">
+                  <option value="" selected="selected">비교없음</option>
+                  {% target_github_id request %}
+                </select>
+                <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
+              </div>
               <div class="modal-body justify-content-center" id="modal-visualization">
-                <div class="modal-item modal-grass">
-                  <div class="vertical-menu">
-                    <button class="modal-btn-year">2022</button>
-                    <button class="modal-btn-year active">2021</button>
-                    <button class="modal-btn-year">2020</button>
-                    <button class="modal-btn-year">2019</button>
+                <div class="row justify-content-between">
+                  <div class="modal-item modal-grass">
+                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
+                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
+                      <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                      </g>
+                    </svg>
+                    <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
                   </div>
-                  <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
-                  <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
-                    <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
-                    </g>
-                  </svg>
-                  <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
-                </div>
-                <div class="modal-item modal-radar">
+                  <div class="modal-item modal-radar">
                     <h5 id="modal-radar-title">2021년 기여도 비교</h5>
-                    <select name="target" id="modal-target-user">
-                      <option value="" selected="selected">비교없음</option>
-                      {% target_github_id request %}
-                    </select>
-                    <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
-                  <div id="radar-canvas">
-                    <canvas id="modal-canvas1" class="ctx-item"></canvas>
-                  </div>
-                  <div class="radar-normal">
-                    <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
+                    <div id="radar-canvas">
+                      <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                    </div>
+                    <div class="radar-normal">
+                      <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
+                    </div>
                   </div>
                 </div>
-                <div class="modal-item">
-                  <h5 id="modal-histogram-title">분포</h5>
-                  <canvas id="modal-canvas2" class="ctx-item"></canvas>
-                </div>
-                <div class="modal-item">
-                  <h5 id="modal-stacked-title">세부점수</h5>
-                  <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                <div class="modal-line"></div>
+                <div class="row justify-content-between">
+                  <div class="modal-item">
+                    <h5 id="modal-histogram-title">분포</h5>
+                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                  </div>
+                  <div class="modal-item">
+                    <h5 id="modal-stacked-title">세부점수</h5>
+                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                  </div>
                 </div>
               </div>
               <div class="modal-footer">
@@ -146,7 +153,6 @@
                       <li><button class="dropdown-item month-item" value="12">DEC</button></li>
                     </ul>
                   </div>
-
                   <div class="btn-group" role="group">
                     <button id="btnGroupDropFactor" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       Score
