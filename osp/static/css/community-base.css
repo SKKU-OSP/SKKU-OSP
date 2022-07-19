@@ -115,6 +115,15 @@
     text-align: end;
     color:#2F2F2F;
 }
+.article-meta-stat-icon{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    text-align: end;
+    font-size: 14px;
+    color:#2F2F2F;
+}
 
 .accordion-item, .accordion-button{
     border: none;
