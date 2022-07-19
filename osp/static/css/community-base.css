@@ -100,6 +100,7 @@
 .article-head{
     margin-top : auto;
     margin-bottom: auto;
+    overflow: hidden;
 }
 
 .article-meta{
@@ -210,9 +211,8 @@
 }
 
 .article-bar-title{
-    display:inline-block;
-    white-space: nowrap;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 
