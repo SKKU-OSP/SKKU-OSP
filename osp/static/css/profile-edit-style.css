@@ -9,20 +9,11 @@
     width: 20%;
   }
 }
-.container-lg {
-    margin-top: 10px;
-    margin-bottom: 10px;
-
+#information {
+  height: 500px;
 }
-
 #portfolio {
-
     height: 500px;
-}
-
-#visualization {
-    height: 500px;
-
 }
 #languages {
     height: 150px;
