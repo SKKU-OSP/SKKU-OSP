@@ -2,8 +2,8 @@
 {% for article in article_list %}
 <div class="article-bar" onclick="location.href='{% url 'community:article-view' article.id %}'" style="cursor:pointer">
     <div class="d-flex p-2">
-        <div class="article-head flex-fill">
-            <span class="article-bar-title my-1 ">
+        <div class="article-head flex-grow-1">
+            <div class="article-bar-title my-1 ">
                 {% if board.board_type == 'Recruit' %}
                 {% if article.team %}
                 [{{ article.team.name }}]
@@ -12,7 +12,7 @@
                 {% endif %}
                 {% endif %}
                 {{article.title}}
-            </span>
+            </div>
             <div style="white-space: nowrap;">
                 {% for tag in article.tags %}
                 <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
