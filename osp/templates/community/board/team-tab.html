@@ -5,15 +5,15 @@
             <img src="{{team.image.url}}" alt="team-image">
 {#        </div>#}
     </div>
-    <div id="team-members" class="col-3" class="d-flex flex-column">
+    <div id="team-members" class="col-4" class="d-flex flex-column">
         <div>{{ team.name }} <i class="bi-edit"></i></div>
         <div>
             Members
         </div>
-        <div style="max-width:200px;overflow-x:scroll;border-right:1px solid white;">
-            <div style="height:93px;" class="d-flex flex-column flex-wrap">
+        <div style="overflow-y:auto;border-right:1px solid white;">
+            <div style="height:93px;" class="d-flex flex-row flex-wrap">
             {% for member in team_members %}
-            <div id="team-member">
+            <div id="team-member" style="width:45%;">
                 <a href="{% url 'user:profile' member.member.user.username %}" style="color:white;">
                     {{member.member.user.username}}
                 </a>
@@ -26,7 +26,7 @@
         </div>
         </div>
     </div>
-    <div id="team-info" class="col-3 d-flex flex-column flex-wrap" >
+    <div id="team-info" class="col-5 d-flex flex-column flex-wrap" >
         <div id="team-desc">
             {{team.description}}
         </div>
@@ -36,13 +36,6 @@
             {% endfor %}
         </div>
     </div>
-    {% if team_admin %}
-    <div class="ms-auto" id="team-update">
-        <button id="team-update" class="btn">
-            <i class="bi-pencil"></i>
-        </button>
-    </div>
-    {% endif %}
 </div>
 <div class="modal fade" id="team-update-modal">
 </div>
