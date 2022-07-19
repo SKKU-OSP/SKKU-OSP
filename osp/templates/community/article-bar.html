@@ -30,20 +30,20 @@
             </div>
             <div class=" color-b">{{article.pub_date|time_before}}</div>
             <div class="d-flex justify-content-between">
-                <div class="article-meta-stat color-b">
-                    <i class="bi-hand-thumbs-up"></i>
-                    {{article.like_cnt}}
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+                    <div>{{article.like_cnt}}</div>
                 </div>
-                <div class="article-meta-stat color-b">
-                    <i class="bi-chat-left-dots"></i>
-                    {{article.comment_cnt}}
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
+                    <div>{{article.comment_cnt}}</div>
                 </div>
-                <div class="article-meta-stat color-b">
-                    <i class="bi-bookmark"></i>
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
                     {{article.bookmark_cnt}}
                 </div>
-                <div class="article-meta-stat color-b">
-                    <i class="bi-eye "></i>
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
                     {{article.view_cnt}}
                 </div>
             </div>
