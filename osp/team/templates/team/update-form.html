@@ -13,12 +13,18 @@
       <form id="team-update-form">
         {% csrf_token %}
         <input style="display:none" name="team-id" val="{{ team.id }}">
-        <div>
-          <img src="{{team.image.url}}" alt="team-image" style="height: 100px;">
-          <br>
+{#        <div>#}
+{#          <img src="{{team.image.url}}" alt="team-image" style="height: 100px;">#}
+{#          <br>#}
+{#          <label class="mb-2" for="team-image">팀 이미지 변경</label>#}
+{#          <input type="file" name="team-image" id="team-image-submit" class="form-control">#}
+{#        </div>#}
+
+      <div>
           <label class="mb-2" for="team-image">팀 이미지 변경</label>
           <input type="file" name="team-image" id="team-image-submit" class="form-control">
-        </div>
+      </div>
+
         <div id="team-member">
           <div>
             <table class="table">
@@ -60,6 +66,7 @@
           </div>
         </div>
         <div>
+            <div>관련 분야</div>
           <select name="tag" id="team-tag" multiple required>
             {% category_tag request %}
           </select>
