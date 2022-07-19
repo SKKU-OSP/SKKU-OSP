@@ -104,7 +104,7 @@ def TeamUpdate(request):
     if request.method == 'POST':
         # team_name = request.POST.get('team')
         # team = Team.objects.get(name=team_name)
-        team_id=request.GET.get('team_id-id')
+        team_id=request.POST.get('team_id')
         team = Team.objects.get(id=team_id)
         try:
             with transaction.atomic():
