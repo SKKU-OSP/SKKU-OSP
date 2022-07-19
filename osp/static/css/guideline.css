@@ -1,20 +1,22 @@
+@import url("/static/css/color.css");
 .guideline-check{
   display: flex;
   flex-wrap: wrap;
+  color:black;
 }
 .weak-text{
-  color: #6c757d;
+  color: var(--main-icon-color);
   font-size: 12px;
 }
 .guideline-step{
-  background-color: #0094ff;
+  background-color: var(--sub-point-color);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .guideline-step-list{
   background-color: white;
-  color: #6c757d;
+  color: var(--main-icon-color);
   list-style-type: none;
   display: flex;
   padding: 20px 10px;
@@ -28,7 +30,6 @@
   padding: 0 20px;
   flex-basis: 0;
   -webkit-box-flex: 1;
-  /* -ms-flex-positive:1; */
   flex-grow: 1;
   max-width: 100%;
   display: flex;
@@ -41,31 +42,31 @@
   position: absolute;
   left: 0;
   top: 19px;
-  background: #6c757d;
+  background: var(--guideline-inactive);
   width: 100%;
   height: 2px;
   transform: translateX(-50%);
   z-index: -10;
 }
-.progress-count{
+.progress-check{
   height: 40px;
   width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-weight: 600;
+  font-weight: 400;
   margin: 0 auto;
   position: relative;
   z-index: 10;
   color: transparent;
 }
-.progress-count:after{
+.progress-check:after{
   content: "";
   width: 30px;
   height: 30px;
-  background: #0094ff;
-
+  background: white;
+  border: 3px solid var(--sub-point-color);
   position: absolute;
   left: 50%;
   top: 50%;
@@ -73,36 +74,101 @@
   border-radius: 50%;
   z-index: -10;
 }
-.progress-count:before{
+.progress-check:before{
   content: "";
   width: 16px;
   height: 8px;
-  background: #0094ff;
+  background: white;
   position: absolute;
   left: 50%;
   top: 50%;
-  border-left: 3px solid white;
-  border-bottom: 3px solid white;
+  border-left: 3px solid var(--sub-point-color);
+  border-bottom: 3px solid var(--sub-point-color);
   position: absolute;
   transform: translate(-50%, -60%) rotate(-45deg);
   transform-origin: center center;
 }
 .progress-label{
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
   margin-top: 10px;
+  color: var(--sub-point-color);
 }
-.unfinished-item > .progress-count:before{
-  display: none;
+.unfinished-item > .progress-check:before{
+  border-left: 3px solid var(--tag-bg-ect);
+  border-bottom: 3px solid var(--tag-bg-ect);
 }
-.unfinished-item > .progress-count:after{
-  height:10px;
-  width:10px;
+.unfinished-item > .progress-check:after{
+  height:30px;
+  width:30px;
+  border: 3px solid var(--tag-bg-ect);
 }
 .unfinished-item > .progress-label{
   opacity: 0.5;
+  color: black;
 }
-.unfinished-item .progress-count:after{
-  background: white;
-  border: 2px solid #0094ff;
+
+.progress-check-sm, .progress-uncheck-sm{
+  height: 20px;
+  width: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 15px;
+  position: relative;
+  z-index: 10;
+  color: transparent;
+}
+.progress-check-sm:after, .progress-uncheck-sm:after{
+  content: "";
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: -10;
+}
+.progress-check-sm:before, .progress-uncheck-sm:before{
+  content: "";
+  width: 9px;
+  height: 5px;
+  position: absolute;
+  left: 48%;
+  top: 48%;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  position: absolute;
+  transform: translate(-50%, -60%) rotate(-45deg);
+  transform-origin: center center;
+}
+.progress-check-sm:after{
+  background: var(--sub-point-color);
+}
+.progress-check-sm:before{
+  background: var(--sub-point-color);
+}
+.progress-uncheck-sm:after{
+  background: var(--guideline-inactive);
+}
+.progress-uncheck-sm:before{
+  background: var(--guideline-inactive);
+}
+.card-title-block{
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+.card-title-block.text-right{
+  text-align: right;
+}
+.repo-info{
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.repo-info > span{
+  margin-right: 1rem;
 }
