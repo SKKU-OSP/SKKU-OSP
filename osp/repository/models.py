@@ -58,6 +58,7 @@ class GithubRepoStats(models.Model):
         
     def get_guideline(self):
         return{
+            "owner_id":self.github_id,
             "repo_name":self.repo_name,
             "create_date":self.create_date,
             "update_date":self.update_date,
