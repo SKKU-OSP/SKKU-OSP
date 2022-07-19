@@ -94,17 +94,17 @@ def TeamCreate(request):
 def TeamUpdate(request):
     if request.method == 'GET':
         context = {}
-        team_name = request.GET.get('team')
+        # team_name = request.GET.get('team')
         # team = Team.objects.get(name=team_name)
-        team_id=request.GET.get('team-id')
+        team_id=request.GET.get('team_id')
         team = Team.objects.get(id=team_id)
         context['team'] = team
         context['team_members'] = TeamMember.objects.filter(team=team).select_related('member')
         return render(request, 'team/update-form.html', context)
     if request.method == 'POST':
-        team_name = request.POST.get('team')
+        # team_name = request.POST.get('team')
         # team = Team.objects.get(name=team_name)
-        team_id=request.GET.get('team-id')
+        team_id=request.GET.get('team_id-id')
         team = Team.objects.get(id=team_id)
         try:
             with transaction.atomic():
