@@ -62,11 +62,16 @@
     $(function(){
         $('#article-form').submit(function(event){
             event.preventDefault();
-            {% if type == 'register' %}
-            registerArticle();
-            {% else %}
-            updateArticle();
-            {% endif %}
+            var t = $(this).attr('edit-type');
+            if(t == 'register'){
+                console.log('1');
+                registerArticle();
+            }
+            else{
+                console.log('2');
+                updateArticle();
+            }
+            return false;
         });
 
     });
