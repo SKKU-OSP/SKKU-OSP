@@ -1,4 +1,4 @@
-
+from django.db import DatabaseError, transaction
 from django.dispatch import receiver
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -55,22 +55,34 @@ def message_list_view(request):
 def message_chat_view(request, opponent):
     oppo_acc = Account.objects.get(user=opponent)
     my_acc = Account.objects.get(user=request.user)
-    raw_msg_list = Message.objects.filter(
-        Q(sender=oppo_acc, receiver=my_acc) | Q(sender=my_acc, receiver=oppo_acc)
-    ).order_by('send_date')[:10]
-    msg_list = []
-    for msg in raw_msg_list:
-        print(msg.sender, '->', msg.receiver, msg.body, msg.send_date)
-        msg_list.append({
-            'sender': str(msg.sender),
-            'sender_id': msg.sender.user_id,
-            'receiver': str(msg.receiver),
-            'receiver_id': msg.receiver.user_id,
-            'body': str(msg.body),
-            'send_date': str(msg.send_date),
-            'unread': str(msg.receiver_read)
-        })
-    return JsonResponse({'data': msg_list})
-
-def message_send(request):
-    pass
+    if request.method == 'GET':
+        raw_msg_list = Message.objects.filter(
+            Q(sender=oppo_acc, receiver=my_acc) | Q(sender=my_acc, receiver=oppo_acc)
+        ).order_by('send_date')[:10]
+        msg_list = []
+        for msg in raw_msg_list:
+            msg_list.append({
+                'sender': str(msg.sender),
+                'sender_id': msg.sender.user_id,
+                'receiver': str(msg.receiver),
+                'receiver_id': msg.receiver.user_id,
+                'body': str(msg.body),
+                'send_date': str(msg.send_date),
+                'unread': str(msg.receiver_read)
+            })
+        return JsonResponse({'data': msg_list})
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                new_msg = Message.objects.create(
+                    sender=my_acc,
+                    receiver=oppo_acc,
+                    body=request.POST.get('body', ''),
+                    receiver_read=False,
+                    sender_delete=False,
+                    receiver_delete=False
+                )
+                new_msg.save()
+        except DatabaseError:
+            err_msg = 'Internal Database Error'
+        return JsonResponse({'status': 'success'})
