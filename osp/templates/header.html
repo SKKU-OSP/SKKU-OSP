@@ -26,11 +26,11 @@
             </ul>
             {% if user.is_authenticated %}
             <ul class="navbar-nav">
-                <li id="unread-notification" class="nav-item me-4 notification">
-                    <i class="bi-bell"></i>
+                <li id="notification" class="nav-item me-4 notification material-icons-outlined">
+                    notifications
                 </li>
-                <li id="unread-message" class="nav-item me-4 notification">
-                    <i class="bi-envelope"></i>
+                <li id="message" class="nav-item me-4 notification material-icons-outlined">
+                    email
                 </li>
             </ul>
             <div class="d-flex">
@@ -56,3 +56,20 @@
         </div>
     </div>
 </nav>
+<div id="message-modal" class="modal modal-lg fade">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">메시지</h5>
+                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div id="message-modal-body" class="modal-body d-flex">
+                <div class="spinner-border m-auto" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

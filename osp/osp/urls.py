@@ -28,7 +28,8 @@ urlpatterns = [
     path('tag/', include('tag.urls')),
     path('team/', include('team.urls')),
     path('community/', include('community.urls')),
-    path('', lambda req: redirect('/community'))
+    path('message/', include('message.urls')),
+    path('', lambda req: redirect('/community/'))
 ]
 
 from django.conf import settings
