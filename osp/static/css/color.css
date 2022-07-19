@@ -2,10 +2,13 @@
     --main-bg-color: #EBEBEB;
     --main-border-color: #9D9D9D;
     --main-point-color: #002743;
+    --sub-point-color: #0094FF;
     --main-icon-color: #747474;
     --profile-nav-font:#495057;
     --profile-nav-border:#9D9D9D9D;
     --card-box-shadow:#00000040;
     --bootstrap-primary:#0D6EFD;
     --profile-btn-inactive:#DDDDDD;
+    --chat-send-color: #9AD5FF;
+    --chat-receive-color: #FFFFFF;
 }
