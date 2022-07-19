@@ -273,10 +273,7 @@ def article_create(request):
 def article_update(request):
     message = ''
     status = 'success'
-    board_name = request.POST.get('board_name')
-    board_id = request.POST.get('board_id')
     article_id = request.POST.get('article_id')
-    board = Board.objects.get(id=board_id)
     try:
         with transaction.atomic():
             article = Article.objects.get(id=article_id)
@@ -285,6 +282,10 @@ def article_update(request):
                 Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
                 tag_list = request.POST.get('tags').split(',')
                 tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
+                for tag in tag_list:
+                    if not tag:
+                        tag_list = []
+                        break
                 for tag_name in list(set(tag_list_old)-set(tag_list)):
                     ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
                 for tag_name in list(set(tag_list)-set(tag_list_old)):
@@ -293,8 +294,9 @@ def article_update(request):
             else:
                 status = 'fail'
                 message = '작성자만 수정할 수 있습니다.'
-    except:
+    except DatabaseError:
         status = 'fail'
+        message = 'Internal Database Error'
 
     return JsonResponse({'status': status, 'message': message})
 
