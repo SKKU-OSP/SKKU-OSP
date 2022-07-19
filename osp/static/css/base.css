@@ -151,6 +151,9 @@ img.opponent-profile{
 
 #chat-view{
   overflow: auto;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .chat-box{
@@ -198,6 +201,7 @@ img.opponent-profile{
   margin-right: 0.25rem;
   background: #FFFFFF;
   box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 0.5em;
   border-radius: 0.5rem;
   border: none;
 }
