@@ -1,6 +1,6 @@
-$().ready(function () {
-  $('#team-apply').click(function () {
-    if (!$('#AddTeamApplyModal').hasClass('ready')) {
+
+function openTeamApplyModal(){
+  if (!$('#AddTeamApplyModal').hasClass('ready')) {
       var id = $(this).data('team-id');
       $.ajax({
         url: "/team/api/team-apply"+"/"+id,
@@ -13,8 +13,7 @@ $().ready(function () {
     } else {
       $('#AddTeamModal').modal('show');
     }
-  });
-});
+}
 
 function teamApply(team_id){
 

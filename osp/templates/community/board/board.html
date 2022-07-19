@@ -25,14 +25,16 @@
           </div>
         </div>
         <div class="my-auto text-white">
-          <a class="btn btn-outline-secondary text-white"
-             {% if board %}
-             href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"
+          <button class="btn btn-outline-secondary text-white"
+             {% if request.user.is_anonymous %}
+                  onclick="alert('로그인 후 이용해주세요')"
+              {% elif board %}
+             onclick='href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
              {% endif %}
-          >
+            >
             글쓰기
             <i class="bi-pencil text-white"></i>
-          </a>
+          </button>
         </div>
       </div>
       <div id="article-list-body">
