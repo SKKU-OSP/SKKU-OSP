@@ -161,6 +161,8 @@ class ProfileView(TemplateView):
         chartdata["monthly_avg"] = monthly_avg
         chartdata["username"] = github_id
         context["chart_data"] = json.dumps(chartdata)
+        context["this_year"] = self.end_year
+        context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
         
         return context
