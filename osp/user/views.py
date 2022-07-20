@@ -80,8 +80,6 @@ class ProfileView(TemplateView):
         relations = []
         remain_children = list(ints_child_layer)
         print(remain_children)
-        appended_child = []
-
         for par in ints_parent_layer:
             relation = {
                 'parent' :'',
