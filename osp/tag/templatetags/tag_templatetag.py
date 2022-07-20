@@ -37,7 +37,7 @@ def is_teammember(team, user):
 def teaminvitemessage(team, user):
     if user.is_anonymous: user = None
     account = Account.objects.filter(user=user).first()
-    return TeamInviteMessage.objects.filter(team=team,account=account).first()
+    return TeamInviteMessage.objects.filter(team=team,account=account,status=0).first()
 
 
 def category_tag_domain(request):

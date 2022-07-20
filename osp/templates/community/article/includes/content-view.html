@@ -63,17 +63,17 @@
     </div>
         {% is_teammember article.team request.user as is_teammember %}
         {% if not is_teammember %}
-            {% teaminvitemessage article.team request.user as teaminvitemessage %}
-            {% if not teaminvitemessage %}
+            {% teaminvitemessage article.team request.user as waited_teaminvitemessage %}
+            {% if not waited_teaminvitemessage %}
             <div>
                 <button id="team-apply"
                         {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')"{% else %}onclick="openTeamApplyModal();" {% endif %}
                         data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
             </div>
-            {% else %}
-            <div>
-                <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>
-            </div>
+{#            {% else %}#}
+{#            <div>#}
+{#                <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>#}
+{#            </div>#}
             {% endif %}
         {% endif %}
     {% else %}
