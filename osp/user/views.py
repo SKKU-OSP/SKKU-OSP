@@ -18,6 +18,7 @@ from django.db.models import Avg, Sum, Subquery
 import time
 import json
 import os
+import math
 
 # Create your views here.
 class ProfileView(TemplateView):
@@ -132,11 +133,10 @@ class ProfileView(TemplateView):
         github_id = student_data.github_id
         
         chartdata = {}
-        score_data_list = []
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
         annual_overview = AnnualOverview.objects.get(case_num=0)
-        chartdata["annual_overview"] = annual_overview.to_avg_json()
+        chartdata["annual_overview"] = annual_overview.to_json()
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         student = StudentTab.objects.all()
@@ -144,11 +144,20 @@ class ProfileView(TemplateView):
         
         own_star = {}
         star_sum = 0
+        star_temp_dist = []
         for row in star_data:
             star_sum += row["star"]
+            star_temp_dist.append(row["star"])
             if row["github_id"] == github_id:
                 own_star["star"] = row["star"]
         own_star["avg"] = star_sum/len(star_data)
+        star_temp_dist.sort()
+        
+        dev_total = 0
+        for nStar in star_temp_dist:
+            dev_total += math.pow(nStar - own_star["avg"], 2)
+        own_star["std"] = '{:0.4f}'.format(math.sqrt(dev_total/star_sum))
+        star_dist = [star_temp_dist for i in range(self.end_year-self.start_year+1)]
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -169,13 +178,46 @@ class ProfileView(TemplateView):
         for annual_key in annual_dist.keys():
             key_name = "year"+str(annual_key)
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
-            
-        score_data = GithubScore.objects.filter(github_id=github_id)
+
+        score_data_list = []
+        total_factor_data_list = []
+        score_data = GithubScore.objects.all()
         for row in score_data:
-            score_data_list.append(row.to_json())
+            total_factor_data_list.append(row.factor_to_json())
+            if(row.github_id == github_id):
+                score_data_list.append(row.to_json())
         chartdata["score_data"] = score_data_list
         
-        # #여기에 star정보만 얹으면 됨
+        score_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        commit_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        pr_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        issue_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        fork_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        for factor_data in total_factor_data_list:
+            if factor_data["year"] >= self.start_year :
+                yid = factor_data["year"]-self.start_year
+                score_dist[yid].append(factor_data["total_score"])
+                commit_dist[yid].append(factor_data["commit_count"])
+                pr_dist[yid].append(factor_data["pr_count"])
+                issue_dist[yid].append(factor_data["issue_count"])
+                fork_dist[yid].append(factor_data["fork_count"])
+        for sub_dist in score_dist:
+            sub_dist.sort()
+        for sub_dist in commit_dist:
+            sub_dist.sort()
+        for sub_dist in pr_dist:
+            sub_dist.sort()
+        for sub_dist in issue_dist:
+            sub_dist.sort()
+        for sub_dist in fork_dist:
+            sub_dist.sort()
+        chartdata["score_dist"] = score_dist
+        chartdata["star_dist"] = star_dist
+        chartdata["commit_dist"] = commit_dist
+        chartdata["pr_dist"] = pr_dist
+        chartdata["issue_dist"] = issue_dist
+        chartdata["fork_dist"] = fork_dist
+        
         monthly_contr = [ [] for i in range(self.end_year-self.start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
@@ -186,9 +228,7 @@ class ProfileView(TemplateView):
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
-        monthly_avg = []
-        for year in range(self.start_year, self.end_year+1):
-            monthly_avg.append([])
+        monthly_avg = [ [] for i in range(self.end_year-self.start_year+1)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
             if yid >= 0 :

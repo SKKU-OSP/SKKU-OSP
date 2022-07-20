@@ -37,9 +37,6 @@ function setVisualModal(){
   document.getElementById("closeModalIcon").addEventListener("click", ()=>{
     $('#modalBox').modal("hide");
   })
-  document.getElementById("closeModalBtn").addEventListener("click", ()=>{
-    $('#modalBox').modal("hide");
-  })
   $("#modal-btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
     makeModalRadarChart(is_nomalization, select_month);
