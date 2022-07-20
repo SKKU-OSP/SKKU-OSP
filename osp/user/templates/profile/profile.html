@@ -65,7 +65,8 @@
               <div class="select-compare">
                 <select name="target" id="modal-target-user">
                   <option value="" selected="selected">비교없음</option>
-                  {% target_github_id request %}
+                  {% target_github_id request as target_option%}
+                  {{target_option}}
                 </select>
                 <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
               </div>
@@ -184,7 +185,7 @@
                     <div id="target-search">
                       <select name="target" id="target-user">
                         <option value="" selected="selected">비교없음</option>
-                        {% target_github_id request %}
+                        {{target_option}}
                       </select>
                       <button id="btn-compare" class="btn btn-primary btn-sm">비교</button>
                     </div>
@@ -270,7 +271,7 @@
                   <div class="container">
                     <div class="row">
                       <div class="col">
-                        <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; min-width: 80px;">{{row.tag.name}}</span>
+                        <span class="badge bg-tag-{{row.type}} me-1" style="height:20px; min-width: 80px;">{{row.name}}</span>
                       </div>
                       <div class="col">
                         <span class="progress span_language" level={{row.level}}></span>

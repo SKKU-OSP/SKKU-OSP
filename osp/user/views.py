@@ -44,7 +44,7 @@ class ProfileView(TemplateView):
         # 최근 기여 리포지토리 목록
         commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
         recent_repos = {}
-
+        id_reponame_pair_list = []
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         for commit in commit_repos:
             commit_repo_name = commit['repo_name']
@@ -54,22 +54,33 @@ class ProfileView(TemplateView):
                 recent_repos[commit_repo_name] = {'repo_name': commit_repo_name}
                 recent_repos[commit_repo_name]['github_id'] = commit['github_id']
                 recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
-                recent_repos[commit_repo_name]['desc'] = GithubRepoStats.objects.get(github_id=commit['github_id'], repo_name=commit_repo_name).proj_short_desc
+                id_reponame_pair_list.append((commit['github_id'], commit_repo_name))
+        contr_repo_queryset = GithubRepoStats.objects.extra(where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+        for contr_repo in contr_repo_queryset:
+            recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
         recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
-
-        user = User.objects.get(username=context['account'])
 
         tags_all = Tag.objects # 태그 전체
         tags_domain = tags_all.filter(type='domain') # 분야 태그
 
         # 유저의 관심분야
-        student_account = Account.objects.get(user=user.id)
+        student_account = context['account'] 
 
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
 
         # 유저의 사용언어, 기술스택
-        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
-
+        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
+        account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
+        level_list = []
+        for al in account_lang:
+            level_list.append(al.level)
+        lang = []
+        for tag in lang_tags:
+            lang_tag_dict = {}
+            lang_tag_dict["name"] = tag.name
+            lang_tag_dict["type"] = tag.type
+            lang_tag_dict["level"] = level_list[len(lang)]
+            lang.append(lang_tag_dict)
         domain_layer = DomainLayer.objects
         
         ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
