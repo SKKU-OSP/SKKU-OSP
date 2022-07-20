@@ -13,4 +13,9 @@
     --chat-receive-color: #FFFFFF;
     --profile-btn-active:#D9D9D9;
     --profile-btn-border:#2F2F2F;
+    --tag-bg-domain:burlywood;
+    --tag-bg-language:#9AD5FF;
+    --tag-bg-tool: #9AFFE7;
+    --tag-bg-ect: #CDCDCD;
+    --guideline-inactive: #E2E2E2;
 }
