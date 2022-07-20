@@ -1,0 +1,29 @@
+{% load static %}
+{% load tag_templatetag %}
+
+{% is_teammember_admin team request.user as is_teammember_admin %}
+{% apply_messages team as apply_messages %}
+{% if is_teammember_admin and apply_messages %}
+  <div class="w-100 d-flex flex-row" style="overflow-x:scroll;height:100px;margin-bottom:10px;">
+  {% for apply_message in apply_messages  %}
+      <div class="h-100 d-flex flex-column border rounded" style="width:150px;min-width:150px;padding:5px 10px;margin-right:10px;">
+          <div class="w-100"
+               style="text-decoration:underline; color:dodgerblue;font-size: 14px;"
+               onclick="location.href='/user/{{apply_message.account.user.username}}'">
+              {{ apply_message.account.user.username }}
+          </div>
+          <div class="w-100 h-100" style="font-size:5px;overflow:scroll;">
+                {{ apply_message.message }}
+          </div>
+          <div class="d-flex flex-row justify-content-between w-100" >
+              <button onclick="apply_result({{ team.id }},'{{ apply_message.account.user.username  }}',true)" class="btn btn-primary" style="width:49%;font-size:12px;">수락</button>
+              <button onclick="apply_result({{ team.id }},'{{ apply_message.account.user.username  }}',false)" class="btn btn-danger" style="width:49%; font-size:12px;">거절</button>
+          </div>
+      </div>
+  {% empty %}
+{#  <div class="w-100 d-flex flex-row" style="overflow-x:scroll;height:100px;margin-bottom:10px;">#}
+{#    지원자가 없습니다.#}
+{#  </div>#}
+  {% endfor %}
+  </div>
+{% endif %}

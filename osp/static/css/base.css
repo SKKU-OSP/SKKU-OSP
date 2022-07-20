@@ -295,3 +295,9 @@ footer {
 transform: translateX(0);
 }
 
+.pointer{
+  cursor:pointer;
+}
+.opacity-hover:hover{
+  opacity:60%;
+}
