@@ -244,8 +244,15 @@
               <h5 class="card-title d-flex justify-content-between">관심분야
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              {% for row in data.ints %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+              {% for row in data.relations %}
+                <span class="badge bg-tag-domain me-1" style="height:20px">{{row.parent}}</span>
+                {% for child in row.children %}
+                  <span class="badge bg-tag-domain me-1" style="height:20px">{{child}}</span>
+                {% endfor %}
+                <hr>
+              {% endfor %}
+              {% for row in data.remains %}
+                <span class="badge bg-tag-domain me-1" style="height:20px">{{row.child_tag}}</span>
               {% endfor %}
             </div>
           </div>
@@ -410,6 +417,12 @@
       }
     });
   </script>
+    <script>
+      $(document).ready(function() {
+        var level_value = 0;
+        var contains = $('.span_language');
+      });
+    </script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
