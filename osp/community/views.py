@@ -25,8 +25,7 @@ def main(request):
     board_list = []
     team_board_query = Q()
     if request.user.is_authenticated:
-        user = User.objects.get(username=request.user)
-        account = Account.objects.get(user=user)
+        account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
     for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
