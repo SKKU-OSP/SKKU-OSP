@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
-from tag.models import Tag
+from tag.models import Tag, DomainLayer
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
@@ -59,21 +59,52 @@ class ProfileView(TemplateView):
 
         user = User.objects.get(username=context['account'])
 
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-        # 관심 목록 리스트
-        
-        # 관심분야
+        tags_all = Tag.objects # 태그 전체
+        tags_domain = tags_all.filter(type='domain') # 분야 태그
+
+        # 유저의 관심분야
         student_account = Account.objects.get(user=user.id)
+
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        # 사용언어, 기술스택
+
+        # 유저의 사용언어, 기술스택
         lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
+
+        domain_layer = DomainLayer.objects
+        
+        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
+        ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
+        relation_origin = domain_layer.values('parent_tag', 'child_tag')
+
+
+        relations = []
+        remain_children = list(ints_child_layer)
+        print(remain_children)
+        appended_child = []
+
+        for par in ints_parent_layer:
+            relation = {
+                'parent' :'',
+                'children' : [],
+            }
+            relation['parent'] = par['parent_tag']
+            for chi in ints_child_layer:
+                if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
+                    print('It is True')
+                    relation['children'].append(chi['child_tag'])
+                    remain_children.remove({'child_tag' : chi['child_tag']})
+            relations.append(relation)
+
+        print(relations)
+        print(remain_children)
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
             'ints': ints,
             'lang': lang,
+            'relations': relations,
+            'remains': remain_children,
             'account': context['account']
         }
         context['data'] = data
