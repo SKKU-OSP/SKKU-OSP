@@ -1,19 +1,15 @@
 {% load static %}
-<div id="team-tab" class="d-flex " team-id="{{team.id}}" style="">
-    <div class="col-3" >
-{#        <div>#}
-            <img src="{{ team.image.url }}" alt="team-image">
-{#        </div>#}
+<div id="team-tab" class="d-flex" team-id="{{team.id}}">
+    <div id="team-image-container" class="col-3">
+        <img id="team-image" src="{{ team.image.url }}" alt="team-image">
     </div>
-    <div id="team-members" class="col-4" class="d-flex flex-column">
-        <div>
+    <div id="team-data" class="col-9" class="d-flex flex-column">
+        <div id="team-name">
             {{ team.name }}
             {% if team_admin %}
-{#                <div class="ms-auto" id="team-update">#}
-                    <button id="team-update" style="background:none;border:none;padding-left:4px;font-size:17px;">
-                        <i  class="bi-pencil text-white" ></i>
-                    </button>
-{#                </div>#}
+            <button id="team-update">
+                <i class="bi-pencil text-white"></i>
+            </button>
             {% endif %}
             {% if team_members.count == 1 or not team_admin %}
                 <button id="team-out" style="background:none;border:none;padding-left:4px;">
@@ -22,33 +18,36 @@
             {% endif %}
 
         </div>
-        <div>
-            Members
-        </div>
-        <div style="overflow-y:auto;">
-            <div style="height:93px;" class="d-flex flex-row flex-wrap">
-            {% for member in team_members %}
-            <div id="team-member" style="width:45%;">
-                <a href="{% url 'user:profile' member.member.user.username %}" style="color:white;">
-                    {{member.member.user.username}}
-                </a>
-                {% if member.is_admin %}
-                    <!--todo: bootsrap: military-tech로 변경-->
-                <i class="material-icons">military_tech</i>
-                {% endif %}
+        <div class="d-flex">
+            <div id="team-members">
+                <div id="team-members-title">
+                    Members
+                </div>
+                <div id="team-member-list" style="overflow-y:auto;">
+                    <div class="d-flex flex-row flex-wrap">
+                        {% for member in team_members %}
+                        <div id="team-member" style="width:45%;">
+                            <a href="{% url 'user:profile' member.member.user.username %}">{{member.member.user.username}}</a>
+                            {% if member.is_admin %}
+                            <span class="material-icons-outlined team-admin-icon">
+                                military_tech
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-            {% endfor %}
-        </div>
-        </div>
-    </div>
-    <div id="team-info" class="col-5 d-flex flex-column flex-wrap" style="overflow:hidden;" >
-        <div id="team-desc">
-            {{team.description}}
-        </div>
-        <div id="team-tag">
-            {% for tag in team_tags %}
-                <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
-            {% endfor %}
+            <div id="team-info" class="d-flex flex-column flex-wrap">
+                <div id="team-desc">
+                    {{team.description}}
+                </div>
+                <div id="team-tag">
+                    {% for tag in team_tags %}
+                    <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
