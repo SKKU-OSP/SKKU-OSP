@@ -74,9 +74,31 @@ div.vr{
   opacity: 100;
 }
 
+#message-modal .modal-dialog,
+#message-modal .modal-content {
+    height: 70%;
+}
+
+#message-modal .modal-body{
+  height: 1%;
+}
+
+div > ::-webkit-scrollbar {
+  width: 10px;
+}
+div > ::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+div > ::-webkit-scrollbar-thumb {
+  background: var(--profile-btn-inactive);
+  border-radius: 10px;
+}
+div > ::-webkit-scrollbar-thumb:hover {
+  background: var(--profile-btn-inactive);
+}
+
 #message-modal-body{
   padding: 0;
-  min-height: 40rem;
 }
 
 #opponent-list{
@@ -105,7 +127,6 @@ div.vr{
 }
 
 .modal-header button span{
-  
   vertical-align: middle;
   display: inline-block;
 }
@@ -150,7 +171,7 @@ img.opponent-profile{
 }
 
 #chat-view{
-  overflow: auto;
+  overflow-y: auto;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -160,6 +181,10 @@ img.opponent-profile{
   display: flex;
   flex-direction: column;
   margin-bottom: 0.25rem;
+}
+
+.chat-box.pending{
+  opacity: 50%;
 }
 
 .chat-box.send{
@@ -172,17 +197,39 @@ img.opponent-profile{
 }
 
 .chat-text{
+  display: flex;
+  width: 100%;
+}
+.send .chat-text{
+  flex-direction: row-reverse;
+}
+.receive .chat-text{
+  flex-direction: row;
+}
+.receive .chat-unread{
+  display: none;
+}
+.send .chat-unread{
+  background: var(--main-point-color);
+  border-radius: 50%;
+  height: 0.5em;
+  width: 0.5em;
+  margin-top: auto;
+  margin-right: 0.25em;
+}
+
+.chat-text-body{
   max-width: 80%;
   padding: 0.5rem;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
   border-radius: 10px;
 }
 
-.send .chat-text{
+.send .chat-text-body{
   background-color: var(--chat-send-color);
 }
 
-.receive .chat-text{
+.receive .chat-text-body{
   background-color: var(--chat-receive-color);
 }
 
@@ -208,6 +255,10 @@ img.opponent-profile{
 #chat-input:focus{
   outline: 0.0625rem solid var(--sub-point-color);
 }
+#chat-input:disabled{
+  background-color: var(--main-bg-color);
+}
+
 
 #chat-submit{
   border: 0;
