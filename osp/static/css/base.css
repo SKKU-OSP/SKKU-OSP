@@ -210,7 +210,7 @@ img.opponent-profile{
   display: none;
 }
 .send .chat-unread{
-  background: var(--main-point-color);
+  background: var(--sub-point-color);
   border-radius: 50%;
   height: 0.5em;
   width: 0.5em;
