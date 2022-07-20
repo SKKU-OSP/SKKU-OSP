@@ -38,7 +38,7 @@ def teaminvitemessage(team, user):
     account = Account.objects.get(user=user)
     return TeamInviteMessage.objects.filter(team=team,account=account).first()
 
-
+@register.simple_tag
 def category_tag_domain(request):
     result = ''
 
