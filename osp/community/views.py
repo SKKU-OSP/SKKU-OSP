@@ -62,7 +62,6 @@ def main(request):
 
 def board(request, board_name, board_id):
     try:
-        # board = Board.objects.get(name=board_name)
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
@@ -82,7 +81,6 @@ def board(request, board_name, board_id):
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
-        # team = Team.objects.get(name=board.name)
         team = board.team
         team_tags = TeamTag.objects.filter(team=team)
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
