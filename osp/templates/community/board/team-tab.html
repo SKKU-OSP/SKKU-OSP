@@ -15,6 +15,12 @@
                     </button>
 {#                </div>#}
             {% endif %}
+            {% if team_members.count == 1 or not team_admin %}
+                <button id="team-out" style="background:none;border:none;padding-left:4px;">
+                    <i onclick="teamOut({{ team.id }},'{{ request.user.username }}')" class="material-icons text-white" style="font-size:16px;" >logout</i>
+                </button>
+            {% endif %}
+
         </div>
         <div>
             Members
@@ -128,6 +134,38 @@
             }
             $(id).remove();
         }
+    }
+    function teamOut(team_id, username){
+        if(!confirm("팀을 탈퇴하시겠습니까?")){
+            return;
+        }
+
+      ajax_form_data=new FormData();
+      ajax_form_data.append('team_id',team_id);
+      ajax_form_data.append('username',username);
+      ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+      $.ajax({
+            type: "POST",
+            url: "{% url 'team:team-out' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+
+            success: function(data) {
+                if(data['status']=="success"){
+                    alert('탈퇴가 완료되었습니다.');
+                    window.location.href = "{% url 'community:Community-Main' %}";
+                }
+                else{
+                  alert( data['message'] );
+                }
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+     });
     }
     $().ready(function () {
         $('#team-update').click(function () {

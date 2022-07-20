@@ -200,6 +200,29 @@ def TeamApply(request, team_id):
         else:
             return JsonResponse({'status': 'fail', 'message': "기존 팀원은 지원할 수 없습니다."})
 
+def TeamOut(request):
+    if request.method == 'POST':
+        team = Team.objects.get(id=request.POST.get('team_id'))
+        account = Account.objects.get(user__username=request.POST.get('username'))
+        teammember = TeamMember.objects.get(team=team,member=account)
+        teammembers = TeamMember.objects.filter(team=team)
+
+        # 탈퇴 가능 조건: 팀에 멤버가 한명(자기자신), 팀멤버가 여러명이나 admin이 아님
+        if teammembers.count()>1 and teammember.is_admin:
+            return JsonResponse({'status': 'fail', 'message': '멤버가 여러명일 경우 admin은 탈퇴가 불가능합니다.\nadmin을 해제해주세요.'})
+
+        try:
+            with transaction.atomic():
+                teammember.delete()
+
+                if teammembers.count()==1:
+                    team.delete()
+            return JsonResponse({'status': 'success'})
+
+        except DatabaseError as e:
+            return JsonResponse({'status': 'fail', 'message': str(e)})
+
+
 def TeamInviteUpdate(request):
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
@@ -220,7 +243,5 @@ def TeamInviteUpdate(request):
                 return JsonResponse({'status': 'success','data':data})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
-        else:
-            return JsonResponse({'status': 'fail', 'message': "기존 팀원은 지원할 수 없습니다."})
 
 

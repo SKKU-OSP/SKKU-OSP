@@ -87,7 +87,12 @@ def board(request, board_name, board_id):
         team_tags = TeamTag.objects.filter(team=team)
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
         if request.user: my_acc = Account.objects.get(user=request.user)
-        context['team_admin'] = team_members.get(member=my_acc).is_admin
+
+        tm = team_members.filter(member=my_acc).first()
+        if not tm:
+            return redirect('/community')
+
+        context['team_admin'] = tm.is_admin
         context['team'] = team
         context['team_tags'] = team_tags
         context['team_members'] = team_members
