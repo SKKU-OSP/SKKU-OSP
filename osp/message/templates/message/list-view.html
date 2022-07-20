@@ -26,9 +26,9 @@
 
   </div>
   <div id="chat-input-tab" class="mt-auto">
-    <form id="chat-input-form" onsubmit="send_msg(event);">
+    <form id="chat-input-form">
       {% csrf_token %}
-      <input type="text" id="chat-input" disabled>
+      <input type="text" id="chat-input" name="chat-input" disabled>
       <button id="chat-submit"> 
         <span class="material-icons-round" style="vertical-align: middle;">send</span>
       </button>
