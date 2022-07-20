@@ -75,3 +75,20 @@ def category_tag_language(request):
 
     return mark_safe(result)
 
+
+@register.simple_tag
+def is_teammember_admin(team, user):
+    if not user.is_anonymous:
+        tm =  TeamMember.objects.filter(team=team, member__user=user).first()
+        if tm and tm.is_admin:
+            return True
+    return False
+
+@register.simple_tag
+def apply_messages(team):
+    apply_messages = TeamInviteMessage.objects.filter(
+        team=team,
+        direction=False,
+        status=0
+    )
+    return apply_messages
