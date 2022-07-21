@@ -371,9 +371,16 @@ window.onload = function () {
   }
   function makePage(chart_data){
     console.log("makePage");
-    let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    let user_data = {
+      "score_sum": user_data_total["total_score"],
+      "commit": user_data_total["commit_cnt"],
+      "pr": user_data_total["pr_cnt"],
+      "issue": user_data_total["issue_cnt"],
+      "repo": user_data_total["repo_cnt"],
+    }
     user_data["star"] = chart_data["own_star"]["star"];
-    let annual_data = chart_data["annual_overview"][0];
+    let annual_data = JSON.parse(chart_data["annual_overview"])[0];
     let score_data = chart_data["score_data"];
     let dist_data = {
       "score_sum" : chart_data["score_dist"][select_year-start_year],
@@ -381,7 +388,7 @@ window.onload = function () {
       "commit" : chart_data["commit_dist"][select_year-start_year],
       "pr" : chart_data["pr_dist"][select_year-start_year],
       "issue" : chart_data["issue_dist"][select_year-start_year],
-      "fork" : chart_data["fork_dist"][select_year-start_year]
+      "repo" : chart_data["repo_dist"][select_year-start_year]
     }
     dist_data["num"] = chart_data["score_dist"][select_year-start_year].length;
     if(dist_data["num"] == 0) dist_data["num"] = 1;
@@ -411,7 +418,7 @@ window.onload = function () {
         let x = (dist_data["num"] - idx)/dist_data["num"]*100;
         let y = gaussian(Number(val));
         normal_dist_data.push({x:(s+x)/2, y:y*scaleFactor, tooltip:Number(val).toFixed(3)});
-        if(Number(user_data[chartFactor]) === Number(val)){
+        if(Number(user_data[chartFactor]).toFixed(3) === Number(val).toFixed(3)){
           dist_x = (s+x)/2;
           dist_text = String((100-dist_x).toFixed(2))+"%";
         }
