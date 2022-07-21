@@ -13,7 +13,10 @@
         {% include "community/board/article-carousel.html" %}
       {% endif %}
       {% if board.board_type == 'Team' %}
-        {% include "community/board/team-tab.html" %}
+          {% include "community/board/team-tab.html" %}
+          <div id="apply-tab">
+          {% include "community/board/apply-tab.html" %}
+          </div>
       {% endif %}
       <div class="d-flex justify-content-between" id="board-title-bar">
         <div class="d-flex col-8 justify-content-start">
@@ -25,14 +28,16 @@
           </div>
         </div>
         <div class="my-auto text-white">
-          <a class="btn btn-outline-secondary text-white"
-             {% if board %}
-             href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"
+          <button class="btn btn-outline-secondary text-white"
+             {% if request.user.is_anonymous %}
+                  onclick="alert('로그인 후 이용해주세요')"
+              {% elif board %}
+             onclick='href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
              {% endif %}
-          >
+            >
             글쓰기
             <i class="bi-pencil text-white"></i>
-          </a>
+          </button>
         </div>
       </div>
       <div id="article-list-body">
@@ -54,6 +59,45 @@
       redraw();
     }
   })});
+
+  function apply_result(team_id, username, is_okay){
+
+      var status = is_okay ? "수락" : "거절";
+
+      if(!confirm(username+": "+status+"하시겠습니까?")){
+          return;
+      }
+
+      ajax_form_data=new FormData();
+      ajax_form_data.append('team_id',team_id);
+      ajax_form_data.append('username',username);
+      ajax_form_data.append('is_okay',is_okay);
+      ajax_form_data.append('direction','TO_TEAM');
+      ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+
+      $.ajax({
+            type: "POST",
+            url: "{% url 'team:invite-update' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+
+            success: function(data) {
+                if(data['status']=="success"){
+                    console.log(data)
+                    $('#apply-tab').html(data['data']);
+                }
+                else{
+                  alert( data['message'] );
+                }
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+     });
+  }
 </script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}

@@ -1,75 +1,92 @@
 {% load static %}
-<div id="team-tab" class="d-flex " team-name="{{team.name}}" style="">
-    <div class="col-3" >
-{#        <div>#}
-            <img src="{{team.image.url}}" alt="team-image">
-{#        </div>#}
+<div id="team-tab" class="d-flex" team-id="{{team.id}}">
+    <div id="team-image-container" class="col-3">
+        <img id="team-image" src="{{ team.image.url }}" alt="team-image">
     </div>
-    <div id="team-members" class="col-3" class="d-flex flex-column">
-        <div>{{ team.name }} <i class="bi-edit"></i></div>
-        <div>
-            Members
+    <div id="team-data" class="col-9" class="d-flex flex-column">
+        <div id="team-name">
+            {{ team.name }}
+            {% if team_admin %}
+            <button id="team-update">
+                <i class="bi-pencil text-white"></i>
+            </button>
+            {% endif %}
+            {% if team_members.count == 1 or not team_admin %}
+                <button id="team-out" style="background:none;border:none;padding-left:4px;">
+                    <i onclick="teamOut({{ team.id }},'{{ request.user.username }}')" class="material-icons text-white" style="font-size:16px;" >logout</i>
+                </button>
+            {% endif %}
+
         </div>
-        <div style="max-width:200px;overflow-x:scroll;border-right:1px solid white;">
-            <div style="height:93px;" class="d-flex flex-column flex-wrap">
-            {% for member in team_members %}
-            <div id="team-member">
-                <a href="{% url 'user:profile' member.member.user.username %}" style="color:white;">
-                    {{member.member.user.username}}
-                </a>
-                {% if member.is_admin %}
-                    <!--todo: bootsrap: military-tech로 변경-->
-                <i class="bi-star"></i>
-                {% endif %}
+        <div class="d-flex">
+            <div id="team-members">
+                <div id="team-members-title">
+                    Members
+                </div>
+                <div id="team-member-list" style="overflow-y:auto;">
+                    <div class="d-flex flex-row flex-wrap">
+                        {% for member in team_members %}
+                        <div id="team-member" style="width:45%;">
+                            <a href="{% url 'user:profile' member.member.user.username %}">{{member.member.user.username}}</a>
+                            {% if member.is_admin %}
+                            <span class="material-icons-outlined team-admin-icon">
+                                military_tech
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-            {% endfor %}
-        </div>
-        </div>
-    </div>
-    <div id="team-info" class="col-3 d-flex flex-column flex-wrap" >
-        <div id="team-desc">
-            {{team.description}}
-        </div>
-        <div id="team-tag">
-            {% for tag in team_tags %}
-                <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
-            {% endfor %}
+            <div id="team-info" class="d-flex flex-column flex-wrap">
+                <div id="team-desc">
+                    {{team.description}}
+                </div>
+                <div id="team-tag">
+                    {% for tag in team_tags %}
+                    <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
-    {% if team_admin %}
-    <div class="ms-auto" id="team-update">
-        <button id="team-update" class="btn">
-            <i class="bi-pencil"></i>
-        </button>
-    </div>
-    {% endif %}
 </div>
 <div class="modal fade" id="team-update-modal">
 </div>
 <script>
     var admin_list = [];
     var tag_list = [];
-    function submit_update_form(){
+    function submit_update_form(event){
+        event.preventDefault();
+        let isFormValid = $('#team-update-form')[0].checkValidity()
+        if(!isFormValid) {
+           $('#team-update-form')[0].reportValidity();
+            return;
+        }
+        if(!confirm("저장하시겠습니까?")){
+            return;
+        }
+
+        var admin_li = [];
+        var member_li = [];
+
+        $('.member-tr').each(function(index, element){
+            var name = element.id.replace("member-id-","");
+            var c = element.children[0].children[0].style.color;
+            if (c.split(" ").join("")=="rgb(0,0,0)" || c=="black"){ admin_li.push(name);}
+            member_li.push(name);
+        });
+        if(!admin_li.length){
+            alert('admin은 1명 이상이어야 합니다.');
+            return ;
+        }
+
         var form_data = new FormData($('#team-update-form')[0]);
-        form_data.append('team', $('#team-tab').attr('team-name'));
-        for(member of admin_list){
-            if($(`[name=admin-${member}]`).is(':checked') == false){
-                form_data.append('admindelete-' + member, ['on']);
-            }
-            form_data.delete('admin-' + member);
-        }
-        var new_tag_list = team_tag_select.selected();
-        console.log(tag_list)
-        console.log(new_tag_list)
-        for(tag of new_tag_list){
-            form_data.append('tagadd-'+ tag, 'on');
-        }
-        for(tag of tag_list){
-            if(!new_tag_list.includes(tag)){
-                form_data.append('tagdelete-'+ tag, 'on');
-            }
-            form_data.delete('tagadd-'+ tag);
-        }
+        form_data.append('team_id', $('#team-tab').attr('team-id'));
+        form_data.append('category_tag_list', team_tag_select.selected().toString());
+        form_data.append('admin_list', admin_li.toString());
+        form_data.append('member_list', member_li.toString());
+
         $.ajax({
             url: "{% url 'team:team-update' %}",
             type: "POST",
@@ -87,6 +104,68 @@
             }
         });
     }
+
+    function toggleIsAdmin(member_name){
+        var id = "#admin-"+member_name;
+
+        var color = $(id).css('color');
+        var username = $('#username').attr('val');
+
+        if (color == "rgb(0, 0, 0)"){
+            if(member_name==username){
+                if(!confirm('본인을 admin에서 해제하시겠습니까?')){
+                    return;
+                }
+            }
+            $(id).css('color', "rgb(205,205,205)");
+        }
+        else{
+            $(id).css('color',"rgb(0,0,0)");
+        }
+    }
+    function removeMember(member_name){
+        var username = $('#username').attr('val');
+        var id = "#member-id-"+member_name;
+        if(confirm(member_name+"을 삭제하시겠습니까?")){
+            if(member_name==username){
+                alert('자기 자신은 삭제할 수 없습니다.\n 팀을 탈퇴하려면 탈퇴 버튼을 이용해주세요.');
+                return;
+            }
+            $(id).remove();
+        }
+    }
+    function teamOut(team_id, username){
+        if(!confirm("팀을 탈퇴하시겠습니까?")){
+            return;
+        }
+
+      ajax_form_data=new FormData();
+      ajax_form_data.append('team_id',team_id);
+      ajax_form_data.append('username',username);
+      ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+      $.ajax({
+            type: "POST",
+            url: "{% url 'team:team-out' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+
+            success: function(data) {
+                if(data['status']=="success"){
+                    alert('탈퇴가 완료되었습니다.');
+                    window.location.href = "{% url 'community:Community-Main' %}";
+                }
+                else{
+                  alert( data['message'] );
+                }
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+     });
+    }
     $().ready(function () {
         $('#team-update').click(function () {
             $('.team-tag').each(function(){
@@ -96,7 +175,7 @@
                 url: "{% url 'team:team-update' %}",
                 type: "GET",
                 data: {
-                    team: $('#team-tab').attr('team-name')
+                    team_id: $('#team-tab').attr('team-id')
                 },
                 dataType: 'HTML'
             }).done(function(data){
@@ -111,11 +190,23 @@
                     }
                 });
                 team_tag_select.set(tag_list);
+                var members_initial = $('#members-list').html();
+                $('#refresh-members').click(function(){
+                    $('#members-list').html(members_initial);
+                });
                 admin_list = [];
-                $('.admin-select:checked').each(function(){
-                    admin_list.push($(this).attr('member-id'))
-                })
-                $('#team-update-submit').click(submit_update_form);
+
+
+
+                $('#team-update-submit').click(function(){
+                    var desc_length=$('input[name="team-desc"]').val().length
+                    if((desc_length<30)&&(desc_length>150)){
+                        alert('팀 설명은 30자 이상 150자 이하여야합니다.\n현재 '+desc_length+'자 입니다.');
+                        return;
+                    }
+                    $("#team-update-form").submit();
+                }
+                );
             })
         });
     });
