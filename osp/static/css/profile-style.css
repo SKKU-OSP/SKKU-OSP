@@ -318,11 +318,18 @@ div > ::-webkit-scrollbar-thumb:hover {
 #btn-toggle, #btn-compare{
   width:95px;
 }
-.evt-icon, #closeModalBtn, #closeModalIcon{
+.evt-icon, #closeModalBtn{
   cursor: pointer;
   display: inline;
   text-indent: 0;
   color: var(--main-icon-color);
+}
+#closeModalIcon{
+  cursor: pointer;
+  display: inline;
+  text-indent: 0;
+  color: white;
+  font-size: 20px;
 }
 .modal-content{
   font-family: "Roboto", sans-serif;
