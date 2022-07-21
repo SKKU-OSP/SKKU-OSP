@@ -43,9 +43,8 @@ class AnnualOverview(models.Model):
             "score_diff" : json.loads(self.score_diff),
             "score_sum" : json.loads(self.score_sum),
             "score_std" : json.loads(self.score_std),
-            "score_std_diff" : json.loads(self.score_std_diff),
-            "score_std_sum" : json.loads(self.score_std_sum),
-            
+            "score_diff_std" : json.loads(self.score_std_diff),
+            "score_sum_std" : json.loads(self.score_std_sum),
             "commit" : json.loads(self.commit),
             "commit_std" : json.loads(self.commit_std),
             "star" : json.loads(self.star),

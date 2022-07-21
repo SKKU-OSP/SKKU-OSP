@@ -374,12 +374,72 @@ window.onload = function () {
     let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
     let annual_data = chart_data["annual_overview"];
     let score_data = chart_data["score_data"];
+    let dist_data = {
+      "score_sum" : chart_data["score_dist"][select_year-start_year],
+      "star" : chart_data["star_dist"][select_year-start_year],
+      "commit" : chart_data["commit_dist"][select_year-start_year],
+      "pr" : chart_data["pr_dist"][select_year-start_year],
+      "issue" : chart_data["issue_dist"][select_year-start_year],
+      "fork" : chart_data["fork_dist"][select_year-start_year]
+    }
+    dist_data["num"] = chart_data["score_dist"][select_year-start_year].length;
+    if(dist_data["num"] == 0) dist_data["num"] = 1;
     
     const baseColor = "#174adf";
     const userColor = "#ffe522";
     makeRadarChart(is_nomalization, select_month);
-    
+    let mean = 0;
+    let sigma = 1;
     /* Chart 2: 분포도 히스토그램 */
+    var data = [];
+    if(chartFactor == "star") {
+      mean= chart_data["own_star"]["avg"];
+      sigma = chart_data["own_star"]["std"];
+    }else{
+      mean= annual_data[chartFactor][select_year-start_year];
+      sigma = annual_data[chartFactor+"_std"][select_year-start_year];
+      console.log("ms", mean, sigma);
+    }
+    var scaleFactor = 100;
+    let s=100, beforeVal=-1;
+    dist_data[chartFactor].reverse().forEach((val, idx)=>{
+      if(beforeVal != Number(val).toFixed(3)){
+        let x = (dist_data["num"] - idx)/dist_data["num"]*100;
+        let y = gaussian(Number(val));
+        data.push({x:(s+x)/2, y:y*scaleFactor, tooltip:Number(val).toFixed(3)});
+        beforeVal = Number(val).toFixed(3);
+        s=x;
+      }
+    });
+    dist_data[chartFactor].reverse();
+    function gaussian(x) {
+      // 확률밀도함수
+      let gaussianConstant = 1 / Math.sqrt(2 * Math.PI);
+      x = (x - mean) / sigma;
+      return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
+    };
+    var dist_chart = new Chart(visual_ctx[1], {
+      type: 'scatter',
+      data: { datasets: [{data:data}] },
+      options:{
+        elements:{
+          point:{radius:2, borderColor: "rgba(0, 148, 255, 1)",backgroundColor:"rgba(0, 148, 255, 1)"}
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                return String((100-items[0].raw.x).toFixed(2))+"%";
+              },
+              label: (item) => {
+                return String(parseFloat(item.raw.tooltip));
+              },
+            },
+          },
+        },
+      },
+    });
     function newArrayRange(start, end, step=1, fix_point=0){
       let arr = [];
       for(let i=start; i<=end; i = i+step){
@@ -441,7 +501,7 @@ window.onload = function () {
       else paramColor.push(userColor);
     }
 
-    let dist_chart = makeChart(visual_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
+    // let dist_chart = makeChart(visual_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     chartObjList.push(dist_chart);
 
     /* Chart 3: 세부 점수 그래프 */

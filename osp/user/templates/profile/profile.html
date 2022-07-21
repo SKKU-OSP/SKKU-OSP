@@ -45,10 +45,6 @@
           <span class="row-title text-center">Github Email</span>
           <span class="row-txt">{{data.info.primary_email}}</span>
         </div>
-        <div class="d-flex row-userdata">
-          <span class="row-title text-center">소개</span>
-          <span class="row-txt">{{data.account.introduction}}</span>
-        </div>
       </div>
     </div>
     <div class="col-md-9 col-12">
@@ -60,46 +56,51 @@
                 <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
                 <button id="closeModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body justify-content-center" id="modal-visualization">
-                <div class="modal-item modal-grass">
-                  <div class="vertical-menu">
-                    <button class="modal-btn-year">2022</button>
-                    <button class="modal-btn-year active">2021</button>
-                    <button class="modal-btn-year">2020</button>
-                    <button class="modal-btn-year">2019</button>
-                  </div>
-                  <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
-                  <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
-                    <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
-                    </g>
-                  </svg>
-                  <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
-                </div>
-                <div class="modal-item modal-radar">
-                    <h5 id="modal-radar-title">2021년 기여도 비교</h5>
-                    <select name="target" id="modal-target-user">
-                      <option value="" selected="selected">비교없음</option>
-                      {% target_github_id request %}
-                    </select>
-                    <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
-                  <div id="radar-canvas">
-                    <canvas id="modal-canvas1" class="ctx-item"></canvas>
-                  </div>
-                  <div class="radar-normal">
-                    <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
-                  </div>
-                </div>
-                <div class="modal-item">
-                  <h5 id="modal-histogram-title">분포</h5>
-                  <canvas id="modal-canvas2" class="ctx-item"></canvas>
-                </div>
-                <div class="modal-item">
-                  <h5 id="modal-stacked-title">세부점수</h5>
-                  <canvas id="modal-canvas3" class="ctx-item"></canvas>
-                </div>
+              <div class="horizontal-menu">
+                <button class="modal-btn-year">2019</button>
+                <button class="modal-btn-year">2020</button>
+                <button class="modal-btn-year active">2021</button>
+                <button class="modal-btn-year">2022</button>
               </div>
-              <div class="modal-footer">
-                <button id="closeModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <div class="select-compare">
+                <select name="target" id="modal-target-user">
+                  <option value="" selected="selected">비교없음</option>
+                  {% target_github_id request as target_option%}
+                  {{target_option}}
+                </select>
+                <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
+              </div>
+              <div class="modal-body justify-content-center" id="modal-visualization">
+                <div class="row justify-content-between">
+                  <div class="modal-item modal-grass">
+                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
+                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
+                      <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
+                      </g>
+                    </svg>
+                    <div id="modal-task-tooltip" style="position: absolute; display: none;"></div>
+                  </div>
+                  <div class="modal-item modal-radar">
+                    <h5 id="modal-radar-title">2021년 기여도 비교</h5>
+                    <div id="radar-canvas">
+                      <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                    </div>
+                    <div class="radar-normal">
+                      <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-line"></div>
+                <div class="row justify-content-between">
+                  <div class="modal-item">
+                    <h5 id="modal-histogram-title">분포</h5>
+                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                  </div>
+                  <div class="modal-item">
+                    <h5 id="modal-stacked-title">세부점수</h5>
+                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -150,7 +151,6 @@
                       <li><button class="dropdown-item month-item" value="12">DEC</button></li>
                     </ul>
                   </div>
-
                   <div class="btn-group" role="group">
                     <button id="btnGroupDropFactor" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       Score
@@ -182,7 +182,7 @@
                     <div id="target-search">
                       <select name="target" id="target-user">
                         <option value="" selected="selected">비교없음</option>
-                        {% target_github_id request %}
+                        {{target_option}}
                       </select>
                       <button id="btn-compare" class="btn btn-primary btn-sm">비교</button>
                     </div>
@@ -203,7 +203,7 @@
         <div class="col-4">
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
-              <h5 class="card-title mb-2">Score</h5>
+              <h5 class="card-title mb-2">{{this_year}} Score</h5>
               <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score}}</span>
               <div class="row-complex">
                 <div class="row-contr">
@@ -228,7 +228,7 @@
                 </div>
                 <div class="row-contr">
                   <span class="row-title">Stars</span>
-                  <span class="row-raw">-</span>
+                  <span class="row-raw">{{star}}</span>
                 </div>
               </div>
             </div>
@@ -242,8 +242,15 @@
               <h5 class="card-title d-flex justify-content-between">관심분야
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              {% for row in data.ints %}
-                <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px">{{row.tag.name}}</span>
+              {% for row in data.relations %}
+                <span class="badge bg-tag-domain me-1" style="height:20px">{{row.parent}}</span>
+                {% for child in row.children %}
+                  <span class="badge bg-tag-domain me-1" style="height:20px">{{child}}</span>
+                {% endfor %}
+                <hr>
+              {% endfor %}
+              {% for row in data.remains %}
+                <span class="badge bg-tag-domain me-1" style="height:20px">{{row.child_tag}}</span>
               {% endfor %}
             </div>
           </div>
@@ -254,14 +261,21 @@
               <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              <div class="d-inline-flex flex-wrap">
+
+              <div class="d-flex flex-wrap">
                 {% for row in data.lang %}
-                <div class="flex-fill">
-                  <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; min-width: 80px;">{{row.tag.name}}</span>
-                  <span class="span_language" level={{row.level}}></span>
-                  <hr>
-                </div>
-                
+                <div class="flex-fill" style="min-width: 100px;">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col">
+                        <span class="badge bg-tag-{{row.type}} me-1" style="height:20px; min-width: 80px;">{{row.name}}</span>
+                      </div>
+                      <div class="col">
+                        <span class="progress span_language" level={{row.level}}></span>
+                      </div>
+                    </div>
+                  </div>
+                </div> 
                 {% endfor %}
               </div>
             </div>
@@ -286,10 +300,11 @@
           </div>
           <div class="card mb-3" id="portfolio">
             <div class="card-body">
-              <h5 class="card-title d-flex justify-content-between">포트폴리오
+              <h5 class="card-title d-flex justify-content-between">
+                자기소개
                 <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
               </h5>
-              {{ data.account.portfolio|mark }}
+              {{data.account.introduction}}
             </div>
           </div>
         </div>
@@ -390,23 +405,18 @@
       for(contain of contains){
         level_value = $(contain).attr('level')
         console.log(level_value)
-        for(var cnt = 1; cnt <= level_value; cnt += 1){
-          $(contain).append(`
-            <span style='margin-right:15px;'>
-            <svg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'>
-            <circle r='9' transform='matrix(1 0 0 -1 9 9)' fill='#0094FF'/>
-            </svg></span>`);
-        }
-        for(var cnt = 1; cnt <= 5-level_value; cnt += 1){
-          $(contain).append(`
-            <span style='margin-right:15px;'>
-            <svg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'>
-            <circle r='9' transform='matrix(1 0 0 -1 9 9)' fill='#9D9D9D'/>
-            </svg></span>`);
-        }
-      }
+
+        $(contain).append('<span class="progress-bar bg-info" role="progressbar" style=width:' + String(level_value*20) +'%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></span>')
+
+      } 
     });
   </script>
+    <script>
+      $(document).ready(function() {
+        var level_value = 0;
+        var contains = $('.span_language');
+      });
+    </script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
