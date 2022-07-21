@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
-from tag.models import Tag
+from tag.models import Tag, DomainLayer
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
@@ -18,6 +18,7 @@ from django.db.models import Avg, Sum, Subquery
 import time
 import json
 import os
+import math
 
 # Create your views here.
 class ProfileView(TemplateView):
@@ -44,7 +45,7 @@ class ProfileView(TemplateView):
         # 최근 기여 리포지토리 목록
         commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
         recent_repos = {}
-
+        id_reponame_pair_list = []
         # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
         for commit in commit_repos:
             commit_repo_name = commit['repo_name']
@@ -54,26 +55,66 @@ class ProfileView(TemplateView):
                 recent_repos[commit_repo_name] = {'repo_name': commit_repo_name}
                 recent_repos[commit_repo_name]['github_id'] = commit['github_id']
                 recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
-                recent_repos[commit_repo_name]['desc'] = GithubRepoStats.objects.get(github_id=commit['github_id'], repo_name=commit_repo_name).proj_short_desc
+                id_reponame_pair_list.append((commit['github_id'], commit_repo_name))
+        contr_repo_queryset = GithubRepoStats.objects.extra(where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+        for contr_repo in contr_repo_queryset:
+            recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
         recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
 
-        user = User.objects.get(username=context['account'])
+        tags_all = Tag.objects # 태그 전체
+        tags_domain = tags_all.filter(type='domain') # 분야 태그
 
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-        # 관심 목록 리스트
-        
-        # 관심분야
-        student_account = Account.objects.get(user=user.id)
+        # 유저의 관심분야
+        student_account = context['account'] 
+
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        # 사용언어, 기술스택
-        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
+
+        # 유저의 사용언어, 기술스택
+        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
+        account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
+        level_list = []
+        for al in account_lang:
+            level_list.append(al.level)
+        lang = []
+        for tag in lang_tags:
+            lang_tag_dict = {}
+            lang_tag_dict["name"] = tag.name
+            lang_tag_dict["type"] = tag.type
+            lang_tag_dict["level"] = level_list[len(lang)]
+            lang.append(lang_tag_dict)
+        domain_layer = DomainLayer.objects
+        
+        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
+        ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
+        relation_origin = domain_layer.values('parent_tag', 'child_tag')
+
+
+        relations = []
+        remain_children = list(ints_child_layer)
+        print(remain_children)
+        for par in ints_parent_layer:
+            relation = {
+                'parent' :'',
+                'children' : [],
+            }
+            relation['parent'] = par['parent_tag']
+            for chi in ints_child_layer:
+                if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
+                    print('It is True')
+                    relation['children'].append(chi['child_tag'])
+                    remain_children.remove({'child_tag' : chi['child_tag']})
+            relations.append(relation)
+
+        print(relations)
+        print(remain_children)
         data = {
             'info': student_info,
             'score': student_score,
             'repos': recent_repos,
             'ints': ints,
             'lang': lang,
+            'relations': relations,
+            'remains': remain_children,
             'account': context['account']
         }
         context['data'] = data
@@ -92,11 +133,10 @@ class ProfileView(TemplateView):
         github_id = student_data.github_id
         
         chartdata = {}
-        score_data_list = []
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
         annual_overview = AnnualOverview.objects.get(case_num=0)
-        chartdata["annual_overview"] = annual_overview.to_avg_json()
+        chartdata["annual_overview"] = annual_overview.to_json()
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         student = StudentTab.objects.all()
@@ -104,11 +144,20 @@ class ProfileView(TemplateView):
         
         own_star = {}
         star_sum = 0
+        star_temp_dist = []
         for row in star_data:
             star_sum += row["star"]
+            star_temp_dist.append(row["star"])
             if row["github_id"] == github_id:
                 own_star["star"] = row["star"]
         own_star["avg"] = star_sum/len(star_data)
+        star_temp_dist.sort()
+        
+        dev_total = 0
+        for nStar in star_temp_dist:
+            dev_total += math.pow(nStar - own_star["avg"], 2)
+        own_star["std"] = '{:0.4f}'.format(math.sqrt(dev_total/star_sum))
+        star_dist = [star_temp_dist for i in range(self.end_year-self.start_year+1)]
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -129,13 +178,46 @@ class ProfileView(TemplateView):
         for annual_key in annual_dist.keys():
             key_name = "year"+str(annual_key)
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
-            
-        score_data = GithubScore.objects.filter(github_id=github_id)
+
+        score_data_list = []
+        total_factor_data_list = []
+        score_data = GithubScore.objects.all()
         for row in score_data:
-            score_data_list.append(row.to_json())
+            total_factor_data_list.append(row.factor_to_json())
+            if(row.github_id == github_id):
+                score_data_list.append(row.to_json())
         chartdata["score_data"] = score_data_list
         
-        # #여기에 star정보만 얹으면 됨
+        score_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        commit_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        pr_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        issue_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        fork_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        for factor_data in total_factor_data_list:
+            if factor_data["year"] >= self.start_year :
+                yid = factor_data["year"]-self.start_year
+                score_dist[yid].append(factor_data["total_score"])
+                commit_dist[yid].append(factor_data["commit_count"])
+                pr_dist[yid].append(factor_data["pr_count"])
+                issue_dist[yid].append(factor_data["issue_count"])
+                fork_dist[yid].append(factor_data["fork_count"])
+        for sub_dist in score_dist:
+            sub_dist.sort()
+        for sub_dist in commit_dist:
+            sub_dist.sort()
+        for sub_dist in pr_dist:
+            sub_dist.sort()
+        for sub_dist in issue_dist:
+            sub_dist.sort()
+        for sub_dist in fork_dist:
+            sub_dist.sort()
+        chartdata["score_dist"] = score_dist
+        chartdata["star_dist"] = star_dist
+        chartdata["commit_dist"] = commit_dist
+        chartdata["pr_dist"] = pr_dist
+        chartdata["issue_dist"] = issue_dist
+        chartdata["fork_dist"] = fork_dist
+        
         monthly_contr = [ [] for i in range(self.end_year-self.start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
@@ -146,9 +228,7 @@ class ProfileView(TemplateView):
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
-        monthly_avg = []
-        for year in range(self.start_year, self.end_year+1):
-            monthly_avg.append([])
+        monthly_avg = [ [] for i in range(self.end_year-self.start_year+1)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
             if yid >= 0 :
@@ -161,6 +241,8 @@ class ProfileView(TemplateView):
         chartdata["monthly_avg"] = monthly_avg
         chartdata["username"] = github_id
         context["chart_data"] = json.dumps(chartdata)
+        context["this_year"] = self.end_year
+        context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
         
         return context

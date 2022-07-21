@@ -309,19 +309,19 @@ footer {
 }
 
 .bg-tag-tool {
-  background-color: skyblue !important; 
+  background-color: var(--tag-bg-tool) !important; 
 }
 
 .bg-tag-domain {
-  background-color: burlywood !important; 
+  background-color: var(--tag-bg-domain) !important; 
 }
 
 .bg-tag-language {
-  background-color: lightsalmon !important; 
+  background-color: var(--tag-bg-language) !important; 
 }
 
 .bg-tag-etc {
-  background-color: lightgray !important; 
+  background-color: var(--tag-bg-ect) !important; 
   color: black;
 }
 

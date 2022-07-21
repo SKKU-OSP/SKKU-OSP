@@ -167,6 +167,17 @@ class GithubScore(models.Model):
             "additional_score": self.additional_score_sum,
             "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork
         }
+    def factor_to_json(self):
+        return {
+            "yid": self.yid,
+            "github_id":self.github_id,
+            "year":self.year,
+            "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork,
+            "commit_count": self.commit_count,
+            "pr_count": self.pr_count,
+            "issue_count": self.issue_count,
+            "fork_count": self.fork_owner_count
+        }
 
 class GithubRepoCommits(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)

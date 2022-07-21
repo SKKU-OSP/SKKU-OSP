@@ -67,7 +67,15 @@ class GithubRepoStats(models.Model):
             "release_count":self.release_count,
             "readme":self.readme,
             "license":self.license,
-            "proj_short_desc":self.proj_short_desc
+            "proj_short_desc":self.proj_short_desc,
+            "star_count":self.stargazers_count,
+            "commit_count":self.commits_count,
+            "watcher_count":self.watchers_count,
+            "fork_count":self.forks_count,
+            "pr_count":self.prs_count,
+            "open_issue_count":self.open_issue_count,
+            "close_issue_count":self.close_issue_count,
+            "dependency_count":self.dependencies
         }
 
 
