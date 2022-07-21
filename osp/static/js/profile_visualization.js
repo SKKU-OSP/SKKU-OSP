@@ -372,7 +372,7 @@ window.onload = function () {
   function makePage(chart_data){
     console.log("makePage");
     let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    let annual_data = chart_data["annual_overview"];
+    let annual_data = chart_data["annual_overview"][0];
     let score_data = chart_data["score_data"];
     let dist_data = {
       "score_sum" : chart_data["score_dist"][select_year-start_year],
@@ -393,13 +393,15 @@ window.onload = function () {
     /* Chart 2: 분포도 히스토그램 */
     var data = [];
     if(chartFactor == "star") {
-      mean= chart_data["own_star"]["avg"];
-      sigma = chart_data["own_star"]["std"];
+      mean= Number(chart_data["own_star"]["avg"]);
+      sigma = Number(chart_data["own_star"]["std"]);
     }else{
-      mean= annual_data[chartFactor][select_year-start_year];
-      sigma = annual_data[chartFactor+"_std"][select_year-start_year];
+      mean= Number(annual_data[chartFactor][select_year-start_year]);
+      sigma = Number(annual_data[chartFactor+"_std"][select_year-start_year]);
       console.log("ms", mean, sigma);
     }
+    if(isNaN(mean)) mean = 0;
+    if(isNaN(sigma)) sigma = 1;
     var scaleFactor = 100;
     let s=100, beforeVal=-1;
     dist_data[chartFactor].reverse().forEach((val, idx)=>{
