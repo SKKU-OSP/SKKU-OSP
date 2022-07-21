@@ -24,7 +24,8 @@ from datetime import datetime, timedelta
 def main(request):
     board_list = []
     team_board_query = Q()
-    if request.user.is_authenticated:
+
+    if request.user and request.user.is_authenticated:
         user = User.objects.get(username=request.user)
         account = Account.objects.get(user=user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
@@ -61,7 +62,6 @@ def main(request):
 
 def board(request, board_name, board_id):
     try:
-        # board = Board.objects.get(name=board_name)
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
@@ -81,16 +81,19 @@ def board(request, board_name, board_id):
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
-        # team = Team.objects.get(name=board.name)
         team = board.team
         team_tags = TeamTag.objects.filter(team=team)
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
-        my_acc = Account.objects.get(user=request.user)
-        context['team_admin'] = team_members.get(member=my_acc).is_admin
+        if request.user: my_acc = Account.objects.get(user=request.user)
+
+        tm = team_members.filter(member=my_acc).first()
+        if not tm:
+            return redirect('/community')
+
+        context['team_admin'] = tm.is_admin
         context['team'] = team
         context['team_tags'] = team_tags
         context['team_members'] = team_members
-        context['team_admin']
     return render(request, 'community/board/board.html', context)
 
 def article_list(request, board_name, board_id):
@@ -274,10 +277,7 @@ def article_create(request):
 def article_update(request):
     message = ''
     status = 'success'
-    board_name = request.POST.get('board_name')
-    board_id = request.POST.get('board_id')
     article_id = request.POST.get('article_id')
-    board = Board.objects.get(id=board_id)
     try:
         with transaction.atomic():
             article = Article.objects.get(id=article_id)
@@ -286,6 +286,11 @@ def article_update(request):
                 Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
                 tag_list = request.POST.get('tags').split(',')
                 tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
+
+                for tag in tag_list:
+                    if not tag:
+                        tag_list = []
+                        break
                 for tag_name in list(set(tag_list_old)-set(tag_list)):
                     ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
                 for tag_name in list(set(tag_list)-set(tag_list_old)):
@@ -294,8 +299,10 @@ def article_update(request):
             else:
                 status = 'fail'
                 message = '작성자만 수정할 수 있습니다.'
-    except:
+
+    except DatabaseError:
         status = 'fail'
+        message = 'Internal Database Error'
 
     return JsonResponse({'status': status, 'message': message})
 
@@ -319,8 +326,12 @@ def article_delete(request):
                 status = 'fail'
                 message = '작성자만 삭제할 수 있습니다.'
 
-    except:
+
+    except Exception as e:
         status = 'fail'
+        message = str(e)
+        if request.user.is_anonymous:
+            message = "로그인 후 이용해주세요."
 
     return JsonResponse({'status': status, 'message': message})
 

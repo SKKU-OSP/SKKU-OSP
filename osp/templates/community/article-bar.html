@@ -1,77 +1,84 @@
 {% load community_tag %}
 {% for article in article_list %}
 <div class="article-bar" onclick="location.href='{% url 'community:article-view' article.id %}'" style="cursor:pointer">
-    <div class="border">
-        <div class="d-flex  p-2">
-            <div class="article-head" >
-                <span class="article-bar-title my-1 ">
-                    {% if board.board_type == 'Recruit' %}
-                        {% if article.team %}
-                        [{{ article.team.name }}]
-                        {% else %}
-                        [팀이 더이상 존재하지 않습니다.]
-                        {% endif %}
-                    {% endif %}
-                    {{article.title}}
-                </span>
-                <div style="white-space: nowrap;">
+    <div class="d-flex p-2">
+        <div class="article-head flex-grow-1">
+            <div class="article-bar-title my-1 ">
+                {% if board.board_type == 'Recruit' %}
+                {% if article.team %}
+                [{{ article.team.name }}]
+                {% else %}
+                [팀이 더이상 존재하지 않습니다.]
+                {% endif %}
+                {% endif %}
+                {{article.title}}
+            </div>
+            <div style="white-space: nowrap;">
                 {% for tag in article.tags %}
-                    <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
+                <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
                 {% endfor %}
-                </div>
             </div>
-            <div class="article-meta">
-                <div class=" color-b">
-                    {% if article.anonymous_writer %}
-                        익명
-                    {% else %}
-                        <a class="article-bar-writer" href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
-                    {% endif %}
+        </div>
+        <div class="article-meta">
+            <div class=" color-b">
+                {% if article.anonymous_writer %}
+                익명
+                {% elif request.user.is_anonymous %}
+                    <a class="article-bar-writer" href="">사용자</a>
+                {% else %}
+                <a class="article-bar-writer"
+                    href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
+                {% endif %}
+            </div>
+            <div class=" color-b">{{article.pub_date|time_before}}</div>
+            <div class="d-flex justify-content-between">
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+                    <div>{{article.like_cnt}}</div>
                 </div>
-                <div class=" color-b">{{article.pub_date|time_before}}</div>
-                <div class="d-flex justify-content-between">
-                    <div class="article-meta-stat color-b">
-                        <i class="bi-hand-thumbs-up"></i> 
-                        {{article.like_cnt}}
-                    </div>
-                    <div class="article-meta-stat color-b">
-                        <i class="bi-chat-left-dots"></i> 
-                        {{article.comment_cnt}}
-                    </div>
-                    <div class="article-meta-stat color-b">
-                        <i class="bi-bookmark"></i> 
-                        {{article.bookmark_cnt}}
-                    </div>
-                    <div class="article-meta-stat color-b">
-                        <i class="bi-eye "></i>
-                        {{article.view_cnt}}
-                    </div>
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
+                    <div>{{article.comment_cnt}}</div>
+                </div>
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
+                    {{article.bookmark_cnt}}
+                </div>
+                <div class="article-meta-stat color-b d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
+                    {{article.view_cnt}}
                 </div>
             </div>
         </div>
-        {% if comment_visible %}
-        <div class="d-flex" style="background-color: lightgray;">
-            {% if article.comment %}
-            <div style="width: 2%;"></div>
-            <div class="color-b">
-                {{article.comment.comment.body}}
-            </div>
-            <div class="ms-auto">
-                <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
-            </div>
-            <div class="mx-2">
-                <i class="bi-star"></i>
-                {{article.comment.like_cnt}}
-            </div>
-            {% else %}
-            <div class="m-auto color-b">댓글이 없습니다</div>
-            {% endif %}
+    </div>
+    {% if comment_visible %}
+    <div class="d-flex" style="background-color: lightgray;">
+        {% if article.comment %}
+        <div style="width: 2%;"></div>
+        <div class="color-b">
+            {{article.comment.comment.body}}
         </div>
+        <div class="ms-auto">
+        {% if request.user.is_anonymous %}
+          <a href="">사용자</a>
+        {% else %}
+            <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
+        {% endif %}
+        </div>
+        <div class="mx-2">
+            <i class="bi-star"></i>
+            {{article.comment.like_cnt}}
+        </div>
+        {% else %}
+        <div class="m-auto color-b">댓글이 없습니다</div>
         {% endif %}
     </div>
+    {% endif %}
 </div>
 {% empty %}
-    <div class="article-bar">
+<div class="article-bar empty">
+    <div class="m-auto">
         등록된 글이 없습니다.
     </div>
+</div>
 {% endfor %}

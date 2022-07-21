@@ -11,7 +11,7 @@
           {% for board in boards %}
           {% if forloop.counter|divisibleby:2 %}
           {% else %}
-          <div class="mb-2">
+          <div class="mb-2 boardgroup">
             <div class="accordion" id="accordion-{{board.id}}">
               <div class="accordion-item">
                 <h2 class="accordion-header">
@@ -35,7 +35,7 @@
         <div class="col-6">
           {% for board in boards %}
           {% if forloop.counter|divisibleby:2 %}
-          <div class="mb-2">
+          <div class="mb-2 boardgroup">
             <div class="accordion" id="accordion-{{board.id}}">
               <div class="accordion-item">
                 <h2 class="accordion-header">

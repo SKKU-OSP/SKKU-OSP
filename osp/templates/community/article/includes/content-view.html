@@ -5,8 +5,8 @@
 <form method="post" action=".." class="" onSubmit="return false;" style="">
     <!--article content-->
     <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
-        <div class="d-flex flex-row justify-content-between" style="height:40px;">
-            <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;line-height:40px;">
+        <div class="d-flex flex-row justify-content-between">
+            <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;">
                 {% if board.board_type == 'Recruit' %}
                     [{{ article.team.name }}]
                 {% endif %}
@@ -17,6 +17,8 @@
                     {% if user == article.writer.user %}
                     <span style="cursor:pointer" onclick="edit()">수정</span> 
                     <span style="cursor:pointer" onclick="deleteArticle();">삭제</span>
+                    {% elif request.user.is_anonymous %}
+                          <a href="">사용자</a>
                     {% elif not article.anonymous_writer %}
                         <a href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
                     {% endif %}
@@ -61,15 +63,17 @@
     </div>
         {% is_teammember article.team request.user as is_teammember %}
         {% if not is_teammember %}
-            {% teaminvitemessage article.team request.user as teaminvitemessage %}
-            {% if not teaminvitemessage %}
+            {% teaminvitemessage article.team request.user as waited_teaminvitemessage %}
+            {% if not waited_teaminvitemessage %}
             <div>
-                <button id="team-apply" data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
+                <button id="team-apply"
+                        {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')"{% else %}onclick="openTeamApplyModal();" {% endif %}
+                        data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
             </div>
-            {% else %}
-            <div>
-                <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>
-            </div>
+{#            {% else %}#}
+{#            <div>#}
+{#                <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>#}
+{#            </div>#}
             {% endif %}
         {% endif %}
     {% else %}

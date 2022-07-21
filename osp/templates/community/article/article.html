@@ -59,17 +59,20 @@
         }
     });
 
-    $(function(){
-        $('#article-form').submit(function(event){
-            event.preventDefault();
-            {% if type == 'register' %}
+    function edit_submit(event){
+        console.log('TESt');
+        event.preventDefault();
+        var t = $('#article-form').attr('edit-type');
+        if(t == 'register'){
+            console.log('1');
             registerArticle();
-            {% else %}
+        }
+        else{
+            console.log('2');
             updateArticle();
-            {% endif %}
-        });
-
-    });
+        }
+        return false;
+    }
 
     {% if article.writer.user == user %}
     function edit(){

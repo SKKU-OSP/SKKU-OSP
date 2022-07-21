@@ -25,9 +25,9 @@ def category_tag(request):
     return mark_safe(result)
 
 @register.simple_tag
-
 def is_teammember(team, user):
-    account = Account.objects.get(user=user)
+    if user.is_anonymous: user = None
+    account = Account.objects.filter(user=user).first()
     if TeamMember.objects.filter(team=team,member=account):
         return True
     else:
@@ -35,8 +35,9 @@ def is_teammember(team, user):
 
 @register.simple_tag
 def teaminvitemessage(team, user):
-    account = Account.objects.get(user=user)
-    return TeamInviteMessage.objects.filter(team=team,account=account).first()
+    if user.is_anonymous: user = None
+    account = Account.objects.filter(user=user).first()
+    return TeamInviteMessage.objects.filter(team=team,account=account,status=0).first()
 
 
 def category_tag_domain(request):
@@ -74,3 +75,20 @@ def category_tag_language(request):
 
     return mark_safe(result)
 
+
+@register.simple_tag
+def is_teammember_admin(team, user):
+    if not user.is_anonymous:
+        tm =  TeamMember.objects.filter(team=team, member__user=user).first()
+        if tm and tm.is_admin:
+            return True
+    return False
+
+@register.simple_tag
+def apply_messages(team):
+    apply_messages = TeamInviteMessage.objects.filter(
+        team=team,
+        direction=False,
+        status=0
+    )
+    return apply_messages
