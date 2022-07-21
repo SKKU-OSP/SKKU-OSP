@@ -372,6 +372,7 @@ window.onload = function () {
   function makePage(chart_data){
     console.log("makePage");
     let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    user_data["star"] = chart_data["own_star"]["star"];
     let annual_data = chart_data["annual_overview"][0];
     let score_data = chart_data["score_data"];
     let dist_data = {
@@ -388,17 +389,18 @@ window.onload = function () {
     const baseColor = "#174adf";
     const userColor = "#ffe522";
     makeRadarChart(is_nomalization, select_month);
+
+    /* Chart 2: 정규분포 확률밀도함수 */
     let mean = 0;
     let sigma = 1;
-    /* Chart 2: 분포도 히스토그램 */
-    var data = [];
+    var normal_dist_data = [];
+    let dist_x= 0, dist_width, dist_text;
     if(chartFactor == "star") {
       mean= Number(chart_data["own_star"]["avg"]);
       sigma = Number(chart_data["own_star"]["std"]);
     }else{
       mean= Number(annual_data[chartFactor][select_year-start_year]);
       sigma = Number(annual_data[chartFactor+"_std"][select_year-start_year]);
-      console.log("ms", mean, sigma);
     }
     if(isNaN(mean)) mean = 0;
     if(isNaN(sigma)) sigma = 1;
@@ -408,7 +410,11 @@ window.onload = function () {
       if(beforeVal != Number(val).toFixed(3)){
         let x = (dist_data["num"] - idx)/dist_data["num"]*100;
         let y = gaussian(Number(val));
-        data.push({x:(s+x)/2, y:y*scaleFactor, tooltip:Number(val).toFixed(3)});
+        normal_dist_data.push({x:(s+x)/2, y:y*scaleFactor, tooltip:Number(val).toFixed(3)});
+        if(Number(user_data[chartFactor]) === Number(val)){
+          dist_x = (s+x)/2;
+          dist_text = String((100-dist_x).toFixed(2))+"%";
+        }
         beforeVal = Number(val).toFixed(3);
         s=x;
       }
@@ -420,9 +426,43 @@ window.onload = function () {
       x = (x - mean) / sigma;
       return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
     };
+    const clickableLines = {
+      id: 'clickableLines',
+      afterDatasetsDraw(chart, args, pluginOptions){
+        for(let i = 0; i<chart._metasets[0].data.length; i++){
+          let target = chart._metasets[0].data[i];
+          let findX = target["$context"].raw.x;
+          if(findX.toFixed(3) === dist_x.toFixed(3)){
+            dist_width = target.x;
+          }
+        }
+        const {ctx, chartArea: {top, bottom}} = chart;
+        class Line {
+          constructor(xCoor, text){
+            this.width = xCoor;
+            this.text = text;
+          };
+          draw(ctx){
+            ctx.restore();
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+            ctx.moveTo(this.width, top+2);
+            ctx.lineTo(this.width, bottom);
+            ctx.stroke();
+            ctx.font = '12px Helvetica Neue, Helvetica, Arial, sans-serif';
+            ctx.fillText(this.text, this.width-20, top)
+            ctx.fillText("you", this.width-10, bottom+10)
+            ctx.save();
+          }
+        }
+        let drawLine = new Line(dist_width, dist_text);
+        drawLine.draw(ctx);
+      },
+    };
     var dist_chart = new Chart(visual_ctx[1], {
       type: 'scatter',
-      data: { datasets: [{data:data}] },
+      data: { datasets: [{data:normal_dist_data}] },
       options:{
         elements:{
           point:{radius:2, borderColor: "rgba(0, 148, 255, 1)",backgroundColor:"rgba(0, 148, 255, 1)"}
@@ -441,6 +481,7 @@ window.onload = function () {
           },
         },
       },
+      plugins: [clickableLines]
     });
     function newArrayRange(start, end, step=1, fix_point=0){
       let arr = [];
