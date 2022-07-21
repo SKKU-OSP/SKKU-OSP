@@ -17,6 +17,22 @@
             {% else %}
             {% endif %}
         </div>
+        {% if user.is_authenticated %}
+        <div id="team-manage-tab" class="d-flex justify-content-center">
+            <div id="team-apply">
+                <span class="material-icons">
+                assignment_ind
+                </span>
+                지원서 목록
+            </div>
+            <div id="team-create">
+                <span class="material-icons">
+                    group_add
+                </span> 
+                팀 만들기
+            </div>
+        </div>
+        {% endif %}
     </div>
     <div id="community-tab" class="w-100">
         <div class="boardgroup-title">
@@ -33,11 +49,6 @@
         {% if user.is_authenticated %}
         <div class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
-            <div id="team-create" style="cursor:pointer;">
-                <span class="material-icons">
-                    group_add
-                </span> 
-            </div>
         </div>
         {% board_sidebar_team_board request %}
         {% endif %}

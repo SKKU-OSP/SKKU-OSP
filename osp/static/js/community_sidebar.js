@@ -45,7 +45,7 @@ $().ready(function () {
         });
       })
     } else {
-      $('#AddTeamApplyModal').modal('show');
+      $('#AddTeamModal').modal('show');
     }
   });
 });
