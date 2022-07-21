@@ -33,7 +33,7 @@ function message_box_builder(msg, is_receive){
 
 function LoadMoreMessage(){
     var oppo_id = $($('.opponent-item.selected')[0]).attr('value');
-    var last_date = $('#chat-view').attr('last_date')
+    var oldest_date = $('#chat-view').attr('oldest')
     // $('#chat-view').prepend(
     //     $('<div></div>')
     //     .addClass('spinner-grow')
@@ -48,17 +48,23 @@ function LoadMoreMessage(){
     // );
     $.ajax({
         url: '/message/chat/' + oppo_id,
-        data: {'last_date': last_date},
+        data: {'oldest': oldest_date},
         method: 'GET',
         dataType: 'JSON'
     }).done(function(data){
         for(msg of data['data']){
             is_receive = (msg.sender_id == oppo_id);
-            $('#chat-view').prepend(message_box_builder(msg, is_receive))
-            $('#chat-view').attr('last_date', msg.send_date)
+            var new_chat_box = message_box_builder(msg, is_receive)
+            $('#chat-view').prepend(new_chat_box)
+            $('#chat-view').scrollTop($('#chat-view').scrollTop() + new_chat_box.height())
+            $('#chat-view').attr('oldest', msg.send_date)
         }
         // $('#chat-load').remove()
     });
+}
+
+function RefreshNewMessage(){
+
 }
 
 function select_oppo(){
@@ -88,7 +94,7 @@ function select_oppo(){
         for(msg of data['data']){
             is_receive = (msg.sender_id == oppo_id);
             $('#chat-view').prepend(message_box_builder(msg, is_receive))
-            $('#chat-view').attr('last_date', msg.send_date)
+            $('#chat-view').attr('oldest', msg.send_date)
         }
         $('#chat-view').scrollTop($('#chat-view').height());
     });
@@ -114,6 +120,7 @@ function send_msg(event){
                 'read': 'False',
             }
             $('#chat-view').append(message_box_builder(msg, false).addClass('pending'));
+            $('#chat-input').val('')
         }
     }).done(function(data){
         console.log(data);
@@ -143,6 +150,9 @@ $().ready(function(){
             $('#chat-view').scroll(function(){
                 if($(this).scrollTop() === 0){
                     LoadMoreMessage();
+                }
+                if($(this).scrollTop() === $(this).height()){
+                    RefreshNewMessage();
                 }
             });
         })
