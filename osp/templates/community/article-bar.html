@@ -23,6 +23,8 @@
             <div class=" color-b">
                 {% if article.anonymous_writer %}
                 익명
+                {% elif request.user.is_anonymous %}
+                    <a class="article-bar-writer" href="">사용자</a>
                 {% else %}
                 <a class="article-bar-writer"
                     href="/user/{{article.writer.user.username}}">{{article.writer.user.username}}</a>
@@ -57,8 +59,11 @@
             {{article.comment.comment.body}}
         </div>
         <div class="ms-auto">
-            <a
-                href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
+        {% if request.user.is_anonymous %}
+          <a href="">사용자</a>
+        {% else %}
+            <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
+        {% endif %}
         </div>
         <div class="mx-2">
             <i class="bi-star"></i>
