@@ -22,20 +22,22 @@
         <div class="boardgroup-title">
             게시판
         </div>
+        {% if board %}
         <div class="boardgroup-item">
+        {% else %}
+        <div class="boardgroup-item selected">
+        {% endif %}
             <a href="/community">Community Main</a>
         </div>
         {% board_sidebar_normal_board request %}
         {% if user.is_authenticated %}
         <div class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
-
             <div id="team-create" style="cursor:pointer;">
                 <span class="material-icons">
                     group_add
                 </span> 
             </div>
-
         </div>
         {% board_sidebar_team_board request %}
         {% endif %}

@@ -86,7 +86,26 @@
     font-size: 15px !important;
 
     background: #FFFFFF;
+    border-top: 1px solid var(--main-border-color);
+}
+
+.boardgroup-item > a{
+    color: #000000;
+}
+
+.boardgroup-item.selected{
+    padding: 0.5rem;
+    text-align: center;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px !important;
+
+    background: var(--main-bg-color);
     border-top: 1px solid #9D9D9D;
+}
+
+.boardgroup-item.selected > a{
+    color: var(--sub-point-color);
 }
 
 #team-create{
