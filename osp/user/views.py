@@ -136,7 +136,7 @@ class ProfileView(TemplateView):
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
         annual_overview = AnnualOverview.objects.get(case_num=0)
-        chartdata["annual_overview"] = annual_overview.to_json()
+        chartdata["annual_overview"] = [annual_overview.to_json()]
         user_data = Student.objects.filter(github_id=github_id)
         chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         student = StudentTab.objects.all()
