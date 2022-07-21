@@ -67,7 +67,7 @@ def board_sidebar_normal_board(request):
 def board_sidebar_team_board(request):
     team_board_query = Q()
     result = ''
-    if request.user.is_authenticated:
+    if request.user and request.user.is_authenticated:
         user = User.objects.get(username=request.user)
         account = Account.objects.get(user=user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
