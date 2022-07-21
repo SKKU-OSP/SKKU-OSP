@@ -587,7 +587,7 @@ window.onload = function () {
     let user_data = {};
     let target_data = {};
     if(month == 0){
-      avg_data = chart_data["annual_overview"];
+      avg_data = chart_data["annual_overview"][0];
       avg_data['star'] = chart_data['own_star']['avg'];
       factorLabels.forEach((label)=>{
         if(Array.isArray(avg_data[label])){

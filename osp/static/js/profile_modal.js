@@ -322,7 +322,7 @@ function setVisualModal(){
   function makePage(chart_data){
     console.log("makePage");
     let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    let annual_data = chart_data["annual_overview"];
+    let annual_data = chart_data["annual_overview"][0];
     let score_data = chart_data["score_data"];
     
     const baseColor = "#174adf";
@@ -475,7 +475,7 @@ function setVisualModal(){
     let user_data = {};
     let target_data = {};
     if(month == 0){
-      avg_data = chart_data["annual_overview"];
+      avg_data = chart_data["annual_overview"][0];
       avg_data['star'] = chart_data['own_star']['avg'];
       factorLabels.forEach((label)=>{
         if(Array.isArray(avg_data[label])){
