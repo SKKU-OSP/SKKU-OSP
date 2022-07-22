@@ -100,7 +100,6 @@ window.onload = function () {
     $(".expandable:nth-child(2)").toggleClass("expanded");
   })
   const div_activity_monthly = document.getElementById("activity-monthly");
-  let factor_grass = document.getElementById("factor-grass");
   let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
 
   let monthly_contribution = Array(12).fill(0);
@@ -201,8 +200,9 @@ window.onload = function () {
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
       target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
     }
-    clearChildElement(factor_grass);
-    makeFactorGrass();
+    destroyChart(chartObjList, chartObjList.length);
+    chartObjList = [];
+    makePage(chart_data);
   }
   
   function getDataLevel(value, type, isMonthly=true){
@@ -293,75 +293,6 @@ window.onload = function () {
       gr.setAttribute("stroke", "#aaaaaa");
       div_activity_monthly.appendChild(gr);
     }
-  }
-  /* Grass for Factor */
-  function makeFactorGrass(){
-    console.log("mFG: y",select_year,"m",select_month,"ftr_contr", factor_contribution);
-    const factor_label = ["STAR", "COMMIT", "PR", "ISSUE", "CR", "CO"];
-    const fs = 15;
-    for(let col = 0; col < 6; col++){
-      let rect = document.createElementNS(NS,"rect");
-      let ctb = factor_contribution[col];
-      let level = factor_contribution_level[col];
-      let fLabel = document.createElementNS(NS,"text");
-      rect.setAttributeNS(null,"factor", factorLabels[col]);
-      rect.setAttributeNS(null,"raw", ctb);
-      rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", (col)*(grass_size+fs)+fs);
-      rect.setAttributeNS(null,"y", fs);
-      rect.setAttributeNS(null,"width", grass_size);
-      rect.setAttributeNS(null,"height", grass_size);
-      rect.setAttributeNS(null,"rx", "2");
-      rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"class", "ContributionFactor");
-      rect.setAttributeNS(null,"data-level", level);
-      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs)+fs);
-      fLabel.setAttributeNS(null, "y", fs);
-      fLabel.setAttributeNS(null, "font-family", "verdana");
-      fLabel.setAttributeNS(null, "font-size", "15px");
-      fLabel.style.fill = "black";
-      fLabel.textContent = factor_label[col];
-      rect.style.fill = palette[level];
-      
-      rect.style.cursor = "pointer";
-      rect.addEventListener("click",(e) =>{
-        let focus = 1 - e.target.attributes[2].value;
-        is_selected_factor = focus;
-        if(is_selected_factor){
-          chartFactor = (e.target.attributes[0].value).split("_")[0];
-          let factor_elements = document.getElementsByClassName("ContributionFactor");
-          for(let rect of factor_elements){
-            rect.setAttributeNS(null, "focus", 0);
-            rect.removeAttribute("stroke");
-            rect.removeAttribute("stroke-width");
-          }
-          showTooltip(e, String(e.target.attributes[0].value)+": "+e.target.attributes[1].value);
-          e.target.setAttribute("stroke", "#fc2121");
-          e.target.setAttribute("stroke-width", "2px");
-        }
-        else {
-          chartFactor = "score_sum";
-          hideTooltip();
-          e.target.removeAttribute("stroke");
-          e.target.removeAttribute("stroke-width");
-        }
-        e.target.attributes[2].value = focus;
-        let textFactor = $(`.factor-item[value=${chartFactor}]`).text()
-        if(textFactor == '') textFactor = "Score"
-        $("#btnGroupDropFactor").text(textFactor);
-        if(factor_label[col].toLowerCase() != factorLabels[col]){
-          chartFactor = "score_sum";
-        }
-        destroyChart(chartObjList, chartObjList.length);
-        chartObjList = [];
-        makePage(chart_data);
-      });
-      factor_grass.appendChild(rect);
-      factor_grass.appendChild(fLabel);
-    }
-    destroyChart(chartObjList, chartObjList.length);
-    chartObjList = [];
-    makePage(chart_data);
   }
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
