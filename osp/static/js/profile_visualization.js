@@ -86,8 +86,8 @@ window.onload = function () {
   $("#btn-compare").on("click", function(){
     if(target_yearly_contr.length>0){
       target_monthly_contr = target_yearly_contr[select_year-start_year];
+      updateFactor(factorLabels, select_month);
     }
-    updateMonthly(select_year);
   });
   $("#icon-interests").on("click", function(){
     $(".expandable:nth-child(2)").toggleClass("semi-expanded-0");
@@ -393,14 +393,12 @@ window.onload = function () {
     dist_data["num"] = chart_data["score_dist"][select_year-start_year].length;
     if(dist_data["num"] == 0) dist_data["num"] = 1;
     
-    const baseColor = "#174adf";
-    const userColor = "#ffe522";
     makeRadarChart(is_nomalization, select_month);
 
     /* Chart 2: 정규분포 확률밀도함수 */
     let mean = 0;
     let sigma = 1;
-    var normal_dist_data = [];
+    const normal_dist_data = [];
     let dist_x= 0, dist_width, dist_text;
     if(chartFactor == "star") {
       mean= Number(chart_data["own_star"]["avg"]);
@@ -411,7 +409,7 @@ window.onload = function () {
     }
     if(isNaN(mean)) mean = 0;
     if(isNaN(sigma)) sigma = 1;
-    var scaleFactor = 100;
+    const scaleFactor = 100;
     let s=100, beforeVal=-1;
     dist_data[chartFactor].reverse().forEach((val, idx)=>{
       if(beforeVal != Number(val).toFixed(3)){
@@ -490,6 +488,8 @@ window.onload = function () {
       },
       plugins: [clickableLines]
     });
+    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
+    $("#histogram-title").text(histogram_title);
     function newArrayRange(start, end, step=1, fix_point=0){
       let arr = [];
       for(let i=start; i<=end; i = i+step){
@@ -497,61 +497,8 @@ window.onload = function () {
       }
       return arr;
     }
-    function newArrayScope(range_arr=[]){
-      let arr = [];
-      for (let i = 1; i < range_arr.length; i++) {
-        arr.push(range_arr[i-1]+"~"+range_arr[i]);
-      }
-      return arr;
-    }
-
-    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    if(typeof(dist[chartFactor]) =="undefined"){
-      chartFactor = "score_sum";
-    }
-    console.log("chartFactor",chartFactor);
     const yearLabel = newArrayRange(start_year, end_year);
-    let factor_Xaxis_label = [];
-    let factor_option = {}
-    switch(chartFactor){
-      case "score_sum":
-        factor_Xaxis_label = newArrayRange(0, 5, 0.5, 1);
-        factor_option = histogramOption(0.25);
-        break;
-      case "commit":
-        factor_Xaxis_label = newArrayRange(0, 500, 100);
-        factor_option = histogramOption(50);
-        break;
-      case "star":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      case "pr":
-        factor_Xaxis_label = newArrayRange(0, 25, 5);
-        factor_option = histogramOption(2.5);
-        break;
-      case "issue":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      case "repo":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      default:
-        console.error("unknown factor");
-    }
-    let factor_scope_label = newArrayScope(factor_Xaxis_label);
-    let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
-    let colorIdx = findDistIdx(factor_Xaxis_label, Number(user_data[chartFactor]));
-    let paramColor = [];
 
-    for(let i=0; i<factor_scope_label.length; i++){
-      if(i != colorIdx) paramColor.push(baseColor);
-      else paramColor.push(userColor);
-    }
-
-    // let dist_chart = makeChart(visual_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     chartObjList.push(dist_chart);
 
     /* Chart 3: 세부 점수 그래프 */
@@ -635,7 +582,7 @@ window.onload = function () {
     let user_data = {};
     let target_data = {};
     if(month == 0){
-      avg_data = chart_data["annual_overview"][0];
+      avg_data = JSON.parse(chart_data["annual_overview"])[0];
       avg_data['star'] = chart_data['own_star']['avg'];
       factorLabels.forEach((label)=>{
         if(Array.isArray(avg_data[label])){
@@ -760,102 +707,6 @@ window.onload = function () {
     }
   }
 
-  function makeChart(ctx, type, factor,
-      labels, data, color, options, topdata = []) {
-    let chart;
-    console.log("makechart");
-    if (type === "bar") {
-      //Histogram
-      const borderWidth = 1;
-      const barPercentage = 1;
-      const categoryPercentage = 1;
-
-      chart = new Chart(ctx, {
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: type,
-              label: "num",
-              data: data,
-              backgroundColor: color,
-              borderWidth: borderWidth,
-              barPercentage: barPercentage,
-              categoryPercentage: categoryPercentage,
-            },
-          ],
-        },
-        options: options,
-      });
-    }
-
-    return chart;
-  }
-
-  function makeHistogramJson(dist, label) {
-    let offset = 0;
-    //label expect NUM1~NUM2 or NUM
-    let newDist = new Array(dist.length);
-    let newLabel = new Array(label.length);
-    if (dist.length === label.length) {
-      for (let i = 0; i < dist.length; i++) {
-        if (label[i].indexOf("~") === -1) {
-          newLabel[i] = label[i];
-        } else {
-          newLabel[i] = label[i].split("~")[1];
-          if (offset === 0) {
-            let temp = label[i].split("~");
-            offset = (Number(temp[1]) - Number(temp[0])) / 2;
-          }
-        }
-      }
-    } else return dist;
-    for (let j = 0; j < dist.length; j++) {
-      newDist[j] = {
-        x: Number(newLabel[j]) - offset,
-        y: dist[j],
-      };
-    }
-    console.log("NEW DIST", newDist);
-    return newDist;
-  }
-
-  function histogramOption(offset) {
-    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
-    $("#histogram-title").text(histogram_title);
-    return {
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => {
-              if (!items.length) {
-                return "";
-              }
-              const item = items[0];
-              const x = item.parsed.x;
-              let min = x - offset <= 0 ? 0 : x - offset;
-              let max = x + offset;
-              if (x === 0) {
-                min = 0;
-                max = 0;
-              }
-              return `${min}~${max}`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          type: "linear",
-          offset: false,
-          grid: { offset: false },
-          ticks: { stepSize: offset * 2 },
-        },
-        y: { beginAtZero: true },
-      },
-    };
-  }
   function showTooltip(evt, text) {
     let tooltip = document.getElementById("task-tooltip");
     tooltip.innerHTML = text;

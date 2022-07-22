@@ -52,8 +52,8 @@ function setVisualModal(){
   $("#modal-btn-compare").on("click", function(){
     if(target_yearly_contr.length>0){
       target_monthly_contr = target_yearly_contr[select_year-start_year];
+      updateFactor(factorLabels, select_month);
     }
-    updateFactor(factorLabels, select_month);
   });
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
   let factor_grass = document.getElementById("modal-factor-grass");
@@ -85,6 +85,7 @@ function setVisualModal(){
         monthly_contribution_level[mid] = 4;
       }
     }
+
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
     is_selected_factor = 0;
@@ -321,15 +322,125 @@ function setVisualModal(){
   }
   function makePage(chart_data){
     console.log("makePage");
-    let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    let annual_data = chart_data["annual_overview"][0];
+    let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    let user_data = {
+      "score_sum": user_data_total["total_score"],
+      "commit": user_data_total["commit_cnt"],
+      "pr": user_data_total["pr_cnt"],
+      "issue": user_data_total["issue_cnt"],
+      "repo": user_data_total["repo_cnt"],
+    }
+    user_data["star"] = chart_data["own_star"]["star"];
+    let annual_data = JSON.parse(chart_data["annual_overview"])[0];
     let score_data = chart_data["score_data"];
+    let dist_data = {
+      "score_sum" : chart_data["score_dist"][select_year-start_year],
+      "star" : chart_data["star_dist"][select_year-start_year],
+      "commit" : chart_data["commit_dist"][select_year-start_year],
+      "pr" : chart_data["pr_dist"][select_year-start_year],
+      "issue" : chart_data["issue_dist"][select_year-start_year],
+      "repo" : chart_data["repo_dist"][select_year-start_year]
+    }
+    dist_data["num"] = chart_data["score_dist"][select_year-start_year].length;
+    if(dist_data["num"] == 0) dist_data["num"] = 1;
     
-    const baseColor = "#174adf";
-    const userColor = "#ffe522";
     makeModalRadarChart(is_nomalization, select_month);
     
-    /* Chart 2: 분포도 히스토그램 */
+    /* Chart 2: 정규분포 확률밀도함수 */
+    let mean = 0;
+    let sigma = 1;
+    const normal_dist_data = [];
+    let dist_x= 0, dist_width, dist_text;
+    if(chartFactor == "star") {
+      mean= Number(chart_data["own_star"]["avg"]);
+      sigma = Number(chart_data["own_star"]["std"]);
+    }else{
+      mean= Number(annual_data[chartFactor][select_year-start_year]);
+      sigma = Number(annual_data[chartFactor+"_std"][select_year-start_year]);
+    }
+    if(isNaN(mean)) mean = 0;
+    if(isNaN(sigma)) sigma = 1;
+    const scaleFactor = 100;
+    let s=100, beforeVal=-1;
+    dist_data[chartFactor].reverse().forEach((val, idx)=>{
+      if(beforeVal != Number(val).toFixed(3)){
+        let x = (dist_data["num"] - idx)/dist_data["num"]*100;
+        let y = gaussian(Number(val));
+        normal_dist_data.push({x:(s+x)/2, y:y*scaleFactor, tooltip:Number(val).toFixed(3)});
+        if(Number(user_data[chartFactor]).toFixed(3) === Number(val).toFixed(3)){
+          dist_x = (s+x)/2;
+          dist_text = String((100-dist_x).toFixed(2))+"%";
+        }
+        beforeVal = Number(val).toFixed(3);
+        s=x;
+      }
+    });
+    dist_data[chartFactor].reverse();
+    function gaussian(x) {
+      // 확률밀도함수
+      let gaussianConstant = 1 / Math.sqrt(2 * Math.PI);
+      x = (x - mean) / sigma;
+      return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
+    };
+    const clickableLines = {
+      id: 'clickableLines',
+      afterDatasetsDraw(chart, args, pluginOptions){
+        for(let i = 0; i<chart._metasets[0].data.length; i++){
+          let target = chart._metasets[0].data[i];
+          let findX = target["$context"].raw.x;
+          if(findX.toFixed(3) === dist_x.toFixed(3)){
+            dist_width = target.x;
+          }
+        }
+        const {ctx, chartArea: {top, bottom}} = chart;
+        class Line {
+          constructor(xCoor, text){
+            this.width = xCoor;
+            this.text = text;
+          };
+          draw(ctx){
+            ctx.restore();
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+            ctx.moveTo(this.width, top+2);
+            ctx.lineTo(this.width, bottom);
+            ctx.stroke();
+            ctx.font = '12px Helvetica Neue, Helvetica, Arial, sans-serif';
+            ctx.fillText(this.text, this.width-20, top)
+            ctx.fillText("you", this.width-10, bottom+10)
+            ctx.save();
+          }
+        }
+        let drawLine = new Line(dist_width, dist_text);
+        drawLine.draw(ctx);
+      },
+    };
+    var dist_chart = new Chart(modal_ctx[1], {
+      type: 'scatter',
+      data: { datasets: [{data:normal_dist_data}] },
+      options:{
+        elements:{
+          point:{radius:2, borderColor: "rgba(0, 148, 255, 1)",backgroundColor:"rgba(0, 148, 255, 1)"}
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                return String((100-items[0].raw.x).toFixed(2))+"%";
+              },
+              label: (item) => {
+                return String(parseFloat(item.raw.tooltip));
+              },
+            },
+          },
+        },
+      },
+      plugins: [clickableLines]
+    });
+    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
+    $("#modal-histogram-title").text(histogram_title);
     function newArrayRange(start, end, step=1, fix_point=0){
       let arr = [];
       for(let i=start; i<=end; i = i+step){
@@ -337,61 +448,8 @@ function setVisualModal(){
       }
       return arr;
     }
-    function newArrayScope(range_arr=[]){
-      let arr = [];
-      for (let i = 1; i < range_arr.length; i++) {
-        arr.push(range_arr[i-1]+"~"+range_arr[i]);
-      }
-      return arr;
-    }
-
-    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    if(typeof(dist[chartFactor]) =="undefined"){
-      chartFactor = "score_sum";
-    }
-    console.log("chartFactor",chartFactor);
     const yearLabel = newArrayRange(start_year, end_year);
-    let factor_Xaxis_label = [];
-    let factor_option = {}
-    switch(chartFactor){
-      case "score_sum":
-        factor_Xaxis_label = newArrayRange(0, 5, 0.5, 1);
-        factor_option = histogramOption(0.25);
-        break;
-      case "commit":
-        factor_Xaxis_label = newArrayRange(0, 500, 100);
-        factor_option = histogramOption(50);
-        break;
-      case "star":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      case "pr":
-        factor_Xaxis_label = newArrayRange(0, 25, 5);
-        factor_option = histogramOption(2.5);
-        break;
-      case "issue":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      case "repo":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      default:
-        console.error("unknown factor");
-    }
-    let factor_scope_label = newArrayScope(factor_Xaxis_label);
-    let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
-    let colorIdx = findDistIdx(factor_Xaxis_label, Number(user_data[chartFactor]));
-    let paramColor = [];
 
-    for(let i=0; i<factor_scope_label.length; i++){
-      if(i != colorIdx) paramColor.push(baseColor);
-      else paramColor.push(userColor);
-    }
-
-    let dist_chart = makeChart(modal_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     modalChartObjList.push(dist_chart);
 
     /* Chart 3: 세부 점수 그래프 */
@@ -475,7 +533,7 @@ function setVisualModal(){
     let user_data = {};
     let target_data = {};
     if(month == 0){
-      avg_data = chart_data["annual_overview"][0];
+      avg_data = JSON.parse(chart_data["annual_overview"])[0];
       avg_data['star'] = chart_data['own_star']['avg'];
       factorLabels.forEach((label)=>{
         if(Array.isArray(avg_data[label])){
@@ -601,102 +659,6 @@ function setVisualModal(){
     return chart;
   }
 
-  function makeChart(ctx, type, factor,
-      labels, data, color, options, topdata = []) {
-    let chart;
-    console.log("makechart");
-    if (type === "bar") {
-      //Histogram
-      const borderWidth = 1;
-      const barPercentage = 1;
-      const categoryPercentage = 1;
-
-      chart = new Chart(ctx, {
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: type,
-              label: "num",
-              data: data,
-              backgroundColor: color,
-              borderWidth: borderWidth,
-              barPercentage: barPercentage,
-              categoryPercentage: categoryPercentage,
-            },
-          ],
-        },
-        options: options,
-      });
-    }
-
-    return chart;
-  }
-
-  function makeHistogramJson(dist, label) {
-    let offset = 0;
-    //label expect NUM1~NUM2 or NUM
-    let newDist = new Array(dist.length);
-    let newLabel = new Array(label.length);
-    if (dist.length === label.length) {
-      for (let i = 0; i < dist.length; i++) {
-        if (label[i].indexOf("~") === -1) {
-          newLabel[i] = label[i];
-        } else {
-          newLabel[i] = label[i].split("~")[1];
-          if (offset === 0) {
-            let temp = label[i].split("~");
-            offset = (Number(temp[1]) - Number(temp[0])) / 2;
-          }
-        }
-      }
-    } else return dist;
-    for (let j = 0; j < dist.length; j++) {
-      newDist[j] = {
-        x: Number(newLabel[j]) - offset,
-        y: dist[j],
-      };
-    }
-    console.log("NEW DIST", newDist);
-    return newDist;
-  }
-
-  function histogramOption(offset) {
-    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
-    $("#modal-histogram-title").text(histogram_title);
-    return {
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => {
-              if (!items.length) {
-                return "";
-              }
-              const item = items[0];
-              const x = item.parsed.x;
-              let min = x - offset <= 0 ? 0 : x - offset;
-              let max = x + offset;
-              if (x === 0) {
-                min = 0;
-                max = 0;
-              }
-              return `${min}~${max}`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          type: "linear",
-          offset: false,
-          grid: { offset: false },
-          ticks: { stepSize: offset * 2 },
-        },
-        y: { beginAtZero: true },
-      },
-    };
-  }
   function showTooltip(evt, text) {
     let tooltip = document.getElementById("modal-task-tooltip");
     tooltip.innerHTML = text;
