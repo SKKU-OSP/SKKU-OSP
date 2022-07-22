@@ -163,6 +163,12 @@ a.nav-link {
   text-align: center;
   padding: 0 8%;
 }
+#pills-overview.active{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 50%;
+}
 .grass{
   display: block;
   border: 0px solid var(--profile-nav-border) ;
@@ -174,7 +180,35 @@ a.nav-link {
 .grass.half {
 	grid-row: 3 / 4;
 }
-
+.grass-color{
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--profile-nav-border);
+  margin: 0 2px;
+}
+.grass-color[data-level="0"]{
+  background-color: var(--data-level-0);
+}
+.grass-color[data-level="1"]{
+  background-color: var(--data-level-1);
+}
+.grass-color[data-level="2"]{
+  background-color: var(--data-level-2);
+}
+.grass-color[data-level="3"]{
+  background-color: var(--data-level-3);
+}
+.grass-color[data-level="4"]{
+  background-color: var(--data-level-4);
+}
+.grass-group{
+  display: flex;
+  justify-content: end;
+  font-size: 12px;
+  align-items: center;
+  margin-top: 5px;
+}
 .horizontal-menu{
   display: flex;
   align-items: center;
@@ -337,8 +371,14 @@ div > ::-webkit-scrollbar-thumb:hover {
 .modal-footer{
   padding: 0 calc(var(--bs-modal-padding) - var(--bs-modal-footer-gap) * .5);;
 }
-.card-body.tab-content{
-  display: block;
+#visualization > .card-body{
+  display: flex;
+  flex-direction: column;
+}
+.card-body .tab-content{
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 50%;
 }
 
 .ss-main .ss-single-selected > .placeholder{
@@ -349,6 +389,7 @@ div > ::-webkit-scrollbar-thumb:hover {
 .btn-group-filter{
   display: flex;
   justify-content: flex-end;
+  flex: 0;
 }
 #btnGroupDropMonth{
   min-width: 70px;
