@@ -12,7 +12,7 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 
 from django.core.files.images import get_image_dimensions
 
-from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
+from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm, LanguageForm
 from django.db.models import Avg, Sum, Subquery
 
 import time
@@ -277,7 +277,8 @@ class ProfileEditView(TemplateView):
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
         user_tab = StudentTab.objects.get(id=student_id)
-
+        tags_all = Tag.objects
+        tags_domain = tags_all.filter(type='domain')
 
         print(request.POST.get("action"))
 
@@ -292,22 +293,19 @@ class ProfileEditView(TemplateView):
                 AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
 
         elif(request.POST.get('action') == 'append_lang'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
+            print(request.POST.get('preferLanguage'))
             added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-            added_level = request.POST.get('tagLevel') # 선택 된 레벨
             added_tag = Tag.objects.get(name=added_preferLanguage)
             try:
                 already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-                already_ints.delete()
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
             except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
 
         elif(request.POST.get('action') == 'save'): # 저장 버튼 눌렀을 경우
             # 기본정보 폼
             info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
             if info_form.is_valid():
                 print('Info is valid form')
-            
                 info_form.save()
 
             # 소개 폼
@@ -316,8 +314,6 @@ class ProfileEditView(TemplateView):
                 print('Intro is valid form')
             
                 intro_form.save()
-
-
 
             # 프로필 사진 폼
             pre_img = user_account.photo.path
@@ -331,6 +327,16 @@ class ProfileEditView(TemplateView):
                     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
 
             img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+
+
+            # 사용언어 추가
+            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+            for l in lang:
+                if "tag_" + l.tag.name in request.POST:
+                    added_tag = Tag.objects.get(name=l.tag.name)
+                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+
+            
             if bool(img_form.is_valid()) and is_valid:
                 if 'photo' in request.FILES: # 폼에 이미지가 있으면
                     try:
@@ -352,6 +358,9 @@ class ProfileEditView(TemplateView):
             
             if info_form.is_valid() and img_form.is_valid() and port_form.is_valid(): # 저장 성공시 메세지
                 messages.add_message(request, messages.SUCCESS, '프로필이 성공적으로 저장되었습니다!')
+
+
+
 
         else:
             delete_requested_tagname = request.POST.get('action').split(maxsplit=1)[1]
