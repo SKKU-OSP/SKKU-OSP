@@ -37,6 +37,27 @@ function setVisualModal(){
   document.getElementById("closeModalIcon").addEventListener("click", ()=>{
     $('#modalBox').modal("hide");
   })
+  $(".modal-month-item").on("click", (e)=>{
+    $("#modal-btnGroupDropMonth").text(e.target.innerText);
+    select_month = Number(e.target.value);
+    console.log("select_mont", select_month);
+    $("rect.modal-ContributionMonth").removeAttr("stroke");
+    $("rect.modal-ContributionMonth").removeAttr("stroke-width");
+    hideTooltip();
+    if(select_month != 0){
+      let rect_target = $(`rect.modal-ContributionMonth[month=${select_month}]`);
+      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px"});
+      showTooltipByPos(rect_target.offset().left, rect_target.offset().top-grass_size/2, String(rect_target.attr("month"))+"월: "+rect_target.attr("raw"));
+    }
+    updateFactor(factorLabels, select_month);
+  });
+  $(".modal-modal-factor-item").on("click", (e)=>{
+    $("#btnGroupDropFactor").text(e.target.innerText);
+    chartFactor = (e.target.innerText).toLowerCase();
+    if(chartFactor == "score"){
+      chartFactor = "score_sum";
+    }
+  });
   $("#modal-btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
     makeModalRadarChart(is_nomalization, select_month);
@@ -157,8 +178,9 @@ function setVisualModal(){
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
       target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
     }
-    clearChildElement(factor_grass);
-    makeFactorGrass();
+    modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
+    modalChartObjList = [];
+    makePage(chart_data);
   }
   
   function getDataLevel(value, type, isMonthly=true){
@@ -247,72 +269,6 @@ function setVisualModal(){
       gr.setAttribute("stroke", "#aaaaaa");
       div_activity_monthly.appendChild(gr);
     }
-  }
-  /* Grass for Factor */
-  function makeFactorGrass(){
-    console.log("mFG: y",select_year,"m",select_month,"ftr_contr", factor_contribution);
-    const factor_label = ["STAR", "COMMIT", "PR", "ISSUE", "CR", "CO"];
-    const fs = 15;
-    for(let col = 0; col < 6; col++){
-      let rect = document.createElementNS(NS,"rect");
-      let ctb = factor_contribution[col];
-      let level = factor_contribution_level[col];
-      let fLabel = document.createElementNS(NS,"text");
-      rect.setAttributeNS(null,"factor", factorLabels[col]);
-      rect.setAttributeNS(null,"raw", ctb);
-      rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", (col)*(grass_size+fs));
-      rect.setAttributeNS(null,"y", fs);
-      rect.setAttributeNS(null,"width", grass_size);
-      rect.setAttributeNS(null,"height", grass_size);
-      rect.setAttributeNS(null,"rx", "2");
-      rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"class", "modal-ContributionFactor");
-      rect.setAttributeNS(null,"data-level", level);
-      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs));
-      fLabel.setAttributeNS(null, "y", fs);
-      fLabel.setAttributeNS(null, "font-family", "verdana");
-      fLabel.setAttributeNS(null, "font-size", "15px");
-      fLabel.style.fill = "black";
-      fLabel.textContent = factor_label[col];
-      rect.style.fill = palette[level];
-      
-      rect.style.cursor = "pointer";
-      rect.addEventListener("click",(e) =>{
-        let focus = 1 - e.target.attributes[2].value;
-        is_selected_factor = focus;
-        if(is_selected_factor){
-          chartFactor = (e.target.attributes[0].value).split("_")[0];
-          let factor_elements = document.getElementsByClassName("modal-ContributionFactor");
-          for(let rect of factor_elements){
-            rect.setAttributeNS(null, "focus", 0);
-            rect.removeAttribute("stroke");
-            rect.removeAttribute("stroke-width");
-          }
-          showTooltip(e, String(e.target.attributes[0].value)+": "+e.target.attributes[1].value);
-          e.target.setAttribute("stroke", "#fc2121");
-          e.target.setAttribute("stroke-width", "2px");
-        }
-        else {
-          chartFactor = "score_sum";
-          hideTooltip();
-          e.target.removeAttribute("stroke");
-          e.target.removeAttribute("stroke-width");
-        }
-        e.target.attributes[2].value = focus;
-        if(factor_label[col].toLowerCase() != factorLabels[col]){
-          chartFactor = "score_sum";
-        }
-        modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
-        modalChartObjList = [];
-        makePage(chart_data);
-      });
-      factor_grass.appendChild(rect);
-      factor_grass.appendChild(fLabel);
-    }
-    modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
-    modalChartObjList = [];
-    makePage(chart_data);
   }
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
@@ -668,6 +624,15 @@ function setVisualModal(){
     let scrollLeft = document.getElementById("visualization").scrollLeft
     tooltip.style.left = (evt.layerX - 20) + scrollLeft + "px";
     tooltip.style.top = (evt.layerY - 50) + scrollTop + "px";
+    console.log(tooltip.style.left, tooltip.style.top);
+  }
+  function showTooltipByPos(X=0, Y=0, text="") {
+    let tooltip = document.getElementById("modal-task-tooltip");
+    tooltip.innerHTML = text;
+    tooltip.setAttribute("display", "block");
+    tooltip.style.display = "block";
+    tooltip.style.left = X + "px";
+    tooltip.style.top = Y + "px";
   }
 
   function hideTooltip() {

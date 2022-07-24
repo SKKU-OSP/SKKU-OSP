@@ -42,6 +42,23 @@ window.onload = function () {
       before_pane.removeClass("show");
       chart_pane.addClass("active");
       chart_pane.addClass("show");
+      console.log("pane_id",pane_id);
+      if(pane_id == "pills-overview"){
+        $("#btnGroupDropMonth").attr("disabled", false);
+        $("#btnGroupDropFactor").attr("disabled", true);
+      }
+      else if(pane_id == "pills-radar"){
+        $("#btnGroupDropMonth").attr("disabled", false);
+        $("#btnGroupDropFactor").attr("disabled", true);
+      }
+      else if(pane_id == "pills-dist"){
+        $("#btnGroupDropMonth").attr("disabled", true);
+        $("#btnGroupDropFactor").attr("disabled", false);
+      }
+      else if(pane_id == "pills-detail"){
+        $("#btnGroupDropMonth").attr("disabled", true);
+        $("#btnGroupDropFactor").attr("disabled", true);
+      }
     });
   }
   $(".year-item").on("click", (e)=>{
@@ -54,8 +71,13 @@ window.onload = function () {
     select_month = Number(e.target.value);
     $("rect.ContributionMonth").removeAttr("stroke");
     $("rect.ContributionMonth").removeAttr("stroke-width");
-    $(`rect.ContributionMonth[month=${select_month}]`).attr({"stroke":"#fc2121", "stroke-width":"2px"});
     hideTooltip();
+    if(select_month != 0){
+      let rect_target = $(`rect.ContributionMonth[month=${select_month}]`);
+      console.log("click", rect_target.offset().left, rect_target.offset().top);
+      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px"});
+      // showTooltipByPos(rect_target.offset().left, rect_target.offset().top-grass_size/2, String(rect_target.attr("month"))+"월: "+rect_target.attr("raw"));
+    }
     updateFactor(factorLabels, select_month);
   });
   $(".factor-item").on("click", (e)=>{
@@ -647,6 +669,15 @@ window.onload = function () {
     let scrollLeft = document.getElementById("visualization").scrollLeft
     tooltip.style.left = (evt.layerX - 20) + scrollLeft + "px";
     tooltip.style.top = (evt.layerY - 50) + scrollTop + "px";
+    console.log("tooltip",tooltip.style.left , tooltip.style.top);
+  }
+  function showTooltipByPos(X=0, Y=0, text="") {
+    let tooltip = document.getElementById("task-tooltip");
+    tooltip.innerHTML = text;
+    tooltip.setAttribute("display", "block");
+    tooltip.style.display = "block";
+    tooltip.style.left = X + "px";
+    tooltip.style.top = Y + "px";
   }
 
   function hideTooltip() {
