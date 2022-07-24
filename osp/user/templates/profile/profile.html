@@ -57,10 +57,47 @@
                 <i id="closeModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
               </div>
               <div class="horizontal-menu">
-                <button class="modal-btn-year">2019</button>
-                <button class="modal-btn-year">2020</button>
-                <button class="modal-btn-year active">2021</button>
-                <button class="modal-btn-year">2022</button>
+                <div id="modal-btnGroupYear">
+                  <button class="modal-btn-year">2019</button>
+                  <button class="modal-btn-year">2020</button>
+                  <button class="modal-btn-year active">2021</button>
+                  <button class="modal-btn-year">2022</button>
+                </div>
+                <div>
+                  <div class="btn-group" role="group">
+                    <button id="modal-btnGroupDropMonth" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      ALL
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropMonth">
+                      <li><button class="dropdown-item modal-month-item" value="0">ALL</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="1">JAN</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="2">FEB</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="3">MAR</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="4">APR</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="5">MAY</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="6">JUN</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="7">JUL</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="8">AUG</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="9">SEP</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="10">OCT</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="11">NOV</button></li>
+                      <li><button class="dropdown-item modal-month-item" value="12">DEC</button></li>
+                    </ul>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button id="modal-btnGroupDropFactor" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      Score
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropFactor">
+                      <li><button class="dropdown-item modal-factor-item" value="score">Score</button></li>
+                      <li><button class="dropdown-item modal-factor-item" value="star">Star</button></li>
+                      <li><button class="dropdown-item modal-factor-item" value="commit">Commit</button></li>
+                      <li><button class="dropdown-item modal-factor-item" value="pr">PR</button></li>
+                      <li><button class="dropdown-item modal-factor-item" value="issue">Issue</button></li>
+                      <li><button class="dropdown-item modal-factor-item" value="issue">Repo</button></li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <div class="select-compare">
                 <select name="target" id="modal-target-user">
@@ -74,10 +111,6 @@
                 <div class="row justify-content-between">
                   <div class="modal-item modal-grass">
                     <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
-                    <svg id="modal-activity-factor" class="grass half" viewBox="0 0 440 96">
-                      <g id="modal-factor-grass" transform="translate(0, 0)" stroke="#aaaaaa">
-                      </g>
-                    </svg>
                     <div class="grass-group">
                       Less
                       <span class="grass-color" data-level="0"></span>
@@ -161,7 +194,7 @@
                     </ul>
                   </div>
                   <div class="btn-group" role="group">
-                    <button id="btnGroupDropFactor" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button id="btnGroupDropFactor" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled>
                       Score
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="btnGroupDropFactor">

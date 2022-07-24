@@ -133,6 +133,9 @@ a.nav-link {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.modal-body{
+  position: static; 
+}
 .modal-body > .row{
   padding: 1rem;
 }
@@ -174,6 +177,9 @@ a.nav-link {
   border: 0px solid var(--profile-nav-border) ;
   border-radius: 0.3rem;
 }
+#grass-radio {
+	grid-row: 1 / 2;
+}
 .grass.double {
 	grid-row: 1 / 3;
 }
@@ -211,26 +217,35 @@ a.nav-link {
 }
 .horizontal-menu{
   display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem 0.5rem 2rem;
   gap: 0.5rem;
   width: 100%;
   height: max-content;
   background: white;
+  z-index: 5000;
+}
+#modal-btnGroupYear{
   overflow-x: auto;
   overflow-y: hidden;
 }
 
-.horizontal-menu button{
+.horizontal-menu > div > button{
   padding: 0.3rem 1.4rem;
   background: white;
   border: 1.5px solid var(--profile-btn-border);
 }
+.horizontal-menu > div > div > button{
+  padding: 0.3rem 1.4rem;
+  background: white;
+  border: 1.5px solid var(--profile-btn-border) !important;
+}
 
-.horizontal-menu button:hover{
+.horizontal-menu > div > button:hover{
   background-color: var(--profile-btn-inactive);
 }
-.horizontal-menu button.active{
+.horizontal-menu > div > button.active{
   background-color: var(--profile-btn-active);
   color: var(--bootstrap-primary);
 }
