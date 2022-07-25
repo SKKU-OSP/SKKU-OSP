@@ -307,8 +307,7 @@
               <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-
-              <div class="d-flex flex-wrap">
+              <div class="d-flex flex-wrap overflow-auto">
                 {% for row in data.lang %}
                 <div class="flex-fill" style="min-width: 100px;">
                   <div class="container">
@@ -317,9 +316,10 @@
                         <span class="badge bg-tag-{{row.type}} me-1" style="height:20px; min-width: 80px;">{{row.name}}</span>
                       </div>
                       <div class="col">
-                        <span class="progress span_language" level={{row.level}}></span>
+                        <span class="span_language" level={{row.level}}></span>
                       </div>
                     </div>
+                    <hr>
                   </div>
                 </div> 
                 {% endfor %}
@@ -451,10 +451,21 @@
       for(contain of contains){
         level_value = $(contain).attr('level')
         console.log(level_value)
-
-        $(contain).append('<span class="progress-bar bg-info" role="progressbar" style=width:' + String(level_value*20) +'%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></span>')
-
-      } 
+        for(var cnt = 1; cnt <= level_value; cnt += 1){
+          $(contain).append(`
+            <span style='margin-right:10px;'>
+              <svg width='10' height='10' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <circle r='9' transform='matrix(1 0 0 -1 9 9)' fill='#0094FF'/>
+            </svg></span>`);
+        }
+        for(var cnt = 1; cnt <= 5-level_value; cnt += 1){
+          $(contain).append(`
+            <span style='margin-right:10px;'>
+              <svg width='10' height='10' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <circle r='9' transform='matrix(1 0 0 -1 9 9)' fill='#9D9D9D'/>
+            </svg></span>`);
+        }
+      }
     });
   </script>
     <script>
