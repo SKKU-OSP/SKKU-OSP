@@ -40,23 +40,20 @@ function setVisualModal(){
   $(".modal-month-item").on("click", (e)=>{
     $("#modal-btnGroupDropMonth").text(e.target.innerText);
     select_month = Number(e.target.value);
-    console.log("select_mont", select_month);
+    $("rect.modal-ContributionMonth").attr("focus", 0);
     $("rect.modal-ContributionMonth").removeAttr("stroke");
     $("rect.modal-ContributionMonth").removeAttr("stroke-width");
-    hideTooltip();
-    if(select_month != 0){
-      let rect_target = $(`rect.modal-ContributionMonth[month=${select_month}]`);
-      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px"});
-      showTooltipByPos(rect_target.offset().left, rect_target.offset().top-grass_size/2, String(rect_target.attr("month"))+"월: "+rect_target.attr("raw"));
-    }
+    $(".modal-grass-tooltip").remove();
+    showTooltip(select_month);
     updateFactor(factorLabels, select_month);
   });
-  $(".modal-modal-factor-item").on("click", (e)=>{
-    $("#btnGroupDropFactor").text(e.target.innerText);
+  $(".modal-factor-item").on("click", (e)=>{
+    $("#modal-btnGroupDropFactor").text(e.target.innerText);
     chartFactor = (e.target.innerText).toLowerCase();
     if(chartFactor == "score"){
       chartFactor = "score_sum";
     }
+    updateFactor(factorLabels, select_month);
   });
   $("#modal-btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
@@ -77,7 +74,6 @@ function setVisualModal(){
     }
   });
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
-  let factor_grass = document.getElementById("modal-factor-grass");
   let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
 
   let monthly_contribution = Array(12).fill(0);
@@ -106,11 +102,9 @@ function setVisualModal(){
         monthly_contribution_level[mid] = 4;
       }
     }
-
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
     is_selected_factor = 0;
-    hideTooltip();
     makeMonthGrass();
     select_month = 0;
     updateFactor(factorLabels, select_month);
@@ -230,7 +224,7 @@ function setVisualModal(){
         mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
         mLabel.setAttributeNS(null, "font-family", "verdana");
         mLabel.setAttributeNS(null, "font-size", "15px");
-        mLabel.style.fill = "black";
+        mLabel.style.strokeWidth = "0px";
         mLabel.textContent = month_label[mIdx];
         rect.style.fill = palette[level];
         if(monthly_contr.length>mIdx){
@@ -238,8 +232,6 @@ function setVisualModal(){
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
             is_selected_month = focus;
-            chartFactor="score_sum";
-
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
               let month_elements = document.getElementsByClassName("modal-ContributionMonth");
@@ -248,13 +240,13 @@ function setVisualModal(){
                 rect.removeAttribute("stroke");
                 rect.removeAttribute("stroke-width");
               }
-              showTooltip(e, String(e.target.attributes[0].value)+"월: "+e.target.attributes[1].value);
+              showTooltip(select_month);
               e.target.setAttribute("stroke", "#fc2121");
               e.target.setAttribute("stroke-width", "2px");
             }
             else {
               select_month = 0;
-              hideTooltip();
+              $(".modal-grass-tooltip").remove();
               e.target.removeAttribute("stroke");
               e.target.removeAttribute("stroke-width");
             }
@@ -277,7 +269,6 @@ function setVisualModal(){
     else return 1;
   }
   function makePage(chart_data){
-    console.log("makePage");
     let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
     let user_data = {
       "score_sum": user_data_total["total_score"],
@@ -301,7 +292,7 @@ function setVisualModal(){
     if(dist_data["num"] == 0) dist_data["num"] = 1;
     
     makeModalRadarChart(is_nomalization, select_month);
-    
+
     /* Chart 2: 정규분포 확률밀도함수 */
     let mean = 0;
     let sigma = 1;
@@ -614,30 +605,21 @@ function setVisualModal(){
     }
     return chart;
   }
-
-  function showTooltip(evt, text) {
-    let tooltip = document.getElementById("modal-task-tooltip");
-    tooltip.innerHTML = text;
-    tooltip.setAttribute("display", "block");
-    tooltip.style.display = "block";
-    let scrollTop = document.getElementById("modal-visualization").scrollTop
-    let scrollLeft = document.getElementById("visualization").scrollLeft
-    tooltip.style.left = (evt.layerX - 20) + scrollLeft + "px";
-    tooltip.style.top = (evt.layerY - 50) + scrollTop + "px";
-    console.log(tooltip.style.left, tooltip.style.top);
-  }
-  function showTooltipByPos(X=0, Y=0, text="") {
-    let tooltip = document.getElementById("modal-task-tooltip");
-    tooltip.innerHTML = text;
-    tooltip.setAttribute("display", "block");
-    tooltip.style.display = "block";
-    tooltip.style.left = X + "px";
-    tooltip.style.top = Y + "px";
-  }
-
-  function hideTooltip() {
-    var tooltip = document.getElementById("modal-task-tooltip");
-    tooltip.style.display = "none";
+  function showTooltip(select_month = 0){
+    $(".modal-grass-tooltip").remove();
+    if(select_month!=0){
+      let rect_target = $(`rect.modal-ContributionMonth[month=${select_month}]`).first();
+      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px", "focus":1});
+      let mLabel = document.createElementNS(NS,"text");
+      mLabel.setAttributeNS(null, "class", "modal-grass-tooltip");
+      mLabel.setAttributeNS(null, "x", Number(rect_target.attr("x"))+2);
+      mLabel.setAttributeNS(null, "y", Number(rect_target.attr("y")) + grass_size/2);
+      mLabel.setAttributeNS(null, "font-family", "verdana");
+      mLabel.setAttributeNS(null, "font-size", "12px");
+      mLabel.style.strokeWidth = "0px";
+      mLabel.textContent = String(rect_target.attr("month"))+"월: "+rect_target.attr("raw");
+      rect_target.parent().append(mLabel);
+    }
   }
 }
 function setPortfolioModal(){
