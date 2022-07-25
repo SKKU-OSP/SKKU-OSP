@@ -648,14 +648,32 @@ window.onload = function () {
     if(select_month!=0){
       let rect_target = $(`rect.ContributionMonth[month=${select_month}]`).first();
       rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px", "focus":1});
+      let rect_x = Number(rect_target.attr("x"));
+      let rect_y = Number(rect_target.attr("y"));
       let mLabel = document.createElementNS(NS,"text");
+      mLabel.textContent = String(rect_target.attr("month"))+"월: "+rect_target.attr("raw");
+      let label_len = (mLabel.textContent).length;
       mLabel.setAttributeNS(null, "class", "grass-tooltip");
-      mLabel.setAttributeNS(null, "x", Number(rect_target.attr("x"))+2);
-      mLabel.setAttributeNS(null, "y", Number(rect_target.attr("y")) + grass_size/2);
+      mLabel.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
+      mLabel.setAttributeNS(null, "y", rect_y + grass_size/2);
       mLabel.setAttributeNS(null, "font-family", "verdana");
       mLabel.setAttributeNS(null, "font-size", "12px");
       mLabel.style.strokeWidth = "0px";
-      mLabel.textContent = String(rect_target.attr("month"))+"월: "+rect_target.attr("raw");
+      let mBack = document.createElementNS(NS, "rect");
+      mBack.setAttributeNS(null, "class", "grass-tooltip");
+      mBack.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
+      mBack.setAttributeNS(null, "y", rect_y-grass_size*3/4 + grass_size);
+      mBack.setAttributeNS(null,"width", label_len*8);
+      mBack.setAttributeNS(null,"height", grass_size/3+4);
+      mBack.style.strokeWidth = "0px";
+      mBack.style.fill ="white";
+      let mPath = document.createElementNS(NS, "path");
+      mPath.setAttributeNS(null, "class", "grass-tooltip");
+      mPath.setAttributeNS(null, "d", `M ${15+label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
+      mPath.style.strokeWidth = "0px";
+      mPath.style.fill ="white";
+      rect_target.parent().append(mBack);
+      rect_target.parent().append(mPath);
       rect_target.parent().append(mLabel);
     }
   }
