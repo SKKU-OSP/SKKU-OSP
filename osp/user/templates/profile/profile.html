@@ -56,90 +56,92 @@
                 <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
                 <i id="closeModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
               </div>
-              <div class="horizontal-menu">
-                <div id="modal-btnGroupYear">
-                  <button class="modal-btn-year">2019</button>
-                  <button class="modal-btn-year">2020</button>
-                  <button class="modal-btn-year active">2021</button>
-                  <button class="modal-btn-year">2022</button>
-                </div>
-                <div>
-                  <div class="btn-group" role="group">
-                    <button id="modal-btnGroupDropMonth" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                      ALL
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropMonth">
-                      <li><button class="dropdown-item modal-month-item" value="0">ALL</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="1">JAN</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="2">FEB</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="3">MAR</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="4">APR</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="5">MAY</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="6">JUN</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="7">JUL</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="8">AUG</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="9">SEP</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="10">OCT</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="11">NOV</button></li>
-                      <li><button class="dropdown-item modal-month-item" value="12">DEC</button></li>
-                    </ul>
+              <div class="container">
+                <div class="horizontal-menu">
+                  <div id="modal-btnGroupYear">
+                    <button class="modal-btn-year">2019</button>
+                    <button class="modal-btn-year">2020</button>
+                    <button class="modal-btn-year active">2021</button>
+                    <button class="modal-btn-year">2022</button>
                   </div>
-                  <div class="btn-group" role="group">
-                    <button id="modal-btnGroupDropFactor" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                      Score
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropFactor">
-                      <li><button class="dropdown-item modal-factor-item" value="score">Score</button></li>
-                      <li><button class="dropdown-item modal-factor-item" value="star">Star</button></li>
-                      <li><button class="dropdown-item modal-factor-item" value="commit">Commit</button></li>
-                      <li><button class="dropdown-item modal-factor-item" value="pr">PR</button></li>
-                      <li><button class="dropdown-item modal-factor-item" value="issue">Issue</button></li>
-                      <li><button class="dropdown-item modal-factor-item" value="issue">Repo</button></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="select-compare">
-                <select name="target" id="modal-target-user">
-                  <option value="" selected="selected">비교없음</option>
-                  {% target_github_id request as target_option%}
-                  {{target_option}}
-                </select>
-                <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
-              </div>
-              <div class="modal-body justify-content-center" id="modal-visualization">
-                <div class="row justify-content-between">
-                  <div class="modal-item modal-grass">
-                    <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
-                    <div class="grass-group">
-                      Less
-                      <span class="grass-color" data-level="0"></span>
-                      <span class="grass-color" data-level="1"></span>
-                      <span class="grass-color" data-level="2"></span>
-                      <span class="grass-color" data-level="3"></span>
-                      <span class="grass-color" data-level="4"></span>
-                      More
+                  <div>
+                    <div class="btn-group" role="group">
+                      <button id="modal-btnGroupDropMonth" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        ALL
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropMonth">
+                        <li><button class="dropdown-item modal-month-item" value="0">ALL</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="1">JAN</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="2">FEB</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="3">MAR</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="4">APR</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="5">MAY</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="6">JUN</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="7">JUL</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="8">AUG</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="9">SEP</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="10">OCT</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="11">NOV</button></li>
+                        <li><button class="dropdown-item modal-month-item" value="12">DEC</button></li>
+                      </ul>
                     </div>
-                  </div>
-                  <div class="modal-item modal-radar">
-                    <h5 id="modal-radar-title">2021년 기여도 비교</h5>
-                    <div id="radar-canvas">
-                      <canvas id="modal-canvas1" class="ctx-item"></canvas>
-                    </div>
-                    <div class="radar-normal">
-                      <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
+                    <div class="btn-group" role="group">
+                      <button id="modal-btnGroupDropFactor" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Score
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropFactor">
+                        <li><button class="dropdown-item modal-factor-item" value="score">Score</button></li>
+                        <li><button class="dropdown-item modal-factor-item" value="star">Star</button></li>
+                        <li><button class="dropdown-item modal-factor-item" value="commit">Commit</button></li>
+                        <li><button class="dropdown-item modal-factor-item" value="pr">PR</button></li>
+                        <li><button class="dropdown-item modal-factor-item" value="issue">Issue</button></li>
+                        <li><button class="dropdown-item modal-factor-item" value="issue">Repo</button></li>
+                      </ul>
                     </div>
                   </div>
                 </div>
-                <div class="modal-line"></div>
-                <div class="row justify-content-between">
-                  <div class="modal-item">
-                    <h5 id="modal-histogram-title">분포</h5>
-                    <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                <div class="select-compare">
+                  <select name="target" id="modal-target-user">
+                    <option value="" selected="selected">비교없음</option>
+                    {% target_github_id request as target_option%}
+                    {{target_option}}
+                  </select>
+                  <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
+                </div>
+                <div class="modal-body justify-content-center" id="modal-visualization">
+                  <div class="row justify-content-between">
+                    <div class="modal-item modal-grass">
+                      <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
+                      <div class="grass-group">
+                        Less
+                        <span class="grass-color" data-level="0"></span>
+                        <span class="grass-color" data-level="1"></span>
+                        <span class="grass-color" data-level="2"></span>
+                        <span class="grass-color" data-level="3"></span>
+                        <span class="grass-color" data-level="4"></span>
+                        More
+                      </div>
+                    </div>
+                    <div class="modal-item modal-radar">
+                      <h5 id="modal-radar-title">2021년 기여도 비교</h5>
+                      <div id="radar-canvas">
+                        <canvas id="modal-canvas1" class="ctx-item"></canvas>
+                      </div>
+                      <div class="radar-normal">
+                        <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
+                      </div>
+                    </div>
                   </div>
-                  <div class="modal-item">
-                    <h5 id="modal-stacked-title">세부점수</h5>
-                    <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                  <div class="modal-line"></div>
+                  <div class="row justify-content-between">
+                    <div class="modal-item">
+                      <h5 id="modal-histogram-title">분포</h5>
+                      <canvas id="modal-canvas2" class="ctx-item"></canvas>
+                    </div>
+                    <div class="modal-item">
+                      <h5 id="modal-stacked-title">세부점수</h5>
+                      <canvas id="modal-canvas3" class="ctx-item"></canvas>
+                    </div>
                   </div>
                 </div>
               </div>
