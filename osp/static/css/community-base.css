@@ -74,7 +74,7 @@
     vertical-align: middle;
 }
 
-#team-apply{
+#team-apply-list{
     cursor: pointer;
     color: #FFFFFF;
     text-align: center;
@@ -86,7 +86,7 @@
     flex-grow: 0;
 }
 
-#team-apply > span{
+#team-apply-list > span{
     vertical-align: middle;
 }
 
