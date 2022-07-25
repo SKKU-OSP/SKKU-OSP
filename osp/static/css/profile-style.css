@@ -128,10 +128,17 @@ a.nav-link {
 }
 
 /* Canvas */
+#modalBox{
+  padding: 0 !important;
+  overflow: hidden;
+}
 #modal-visualization{
   padding: 0 !important;
-  overflow-y: auto;
+  overflow: hidden;
+}
+.modal-content{
   overflow-x: hidden;
+  overflow-y: auto;
 }
 .modal-body{
   position: static; 
