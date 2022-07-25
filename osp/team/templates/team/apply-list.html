@@ -1,0 +1,52 @@
+{% load tag_templatetag %}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">팀 지원 목록</h5>
+        </div>
+        <div class="modal-body w-100" style="min-height:400px;overflow-y:auto;">
+            <table class="w-100 table">
+                <colgroup>
+                    <col width="30%">
+                    <col width="40%">
+                    <col width="30%">
+                </colgroup>
+                <tr>
+                    <td>지원 팀</td>
+                    <td>지원자</td>
+                    <td></td>
+                </tr>
+                {% get_admin_team request.user as admin_teams %}
+                {% for admin_team in admin_teams %}
+                    {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
+                    {% for applymsg in waitedapplymessages %}
+                        <tr>
+                        <td>
+                            <i val="{{ applymsg.id }}" class="bi bi-caret-down-fill" style="cursor:pointer; display:inline-block;"></i>
+                            {{ applymsg.team.name }}
+                        </td>
+                        <td onclick="location.href='/user/{{applymsg.account.user.username}}'"
+                            style="text-decoration: underline; cursor:pointer;"
+                        >
+                              {{ applymsg.account.user.username }}
+                        </td>
+                        <td class="d-flex flex-row justify-content-between w-100">
+                            <button onclick="apply_result({{ applymsg.team.id }},'{{ applymsg.account.user.username  }}',false)" class="btn btn-secondary" style="width:49%; font-size:12px;">거절</button>
+                            <button onclick="apply_result({{ applymsg.team.id }},'{{ applymsg.account.user.username  }}',true)" class="btn btn-primary" style="width:49%;font-size:12px;">수락</button>
+                        </td>
+                        </tr>
+                        <tr id="msg-id-{{ applymsg.id }}" class="d-none" style="border-bottom:none;">
+                            <td style="border-bottom:none; background: #dee2e6; ">지원동기</td>
+                            <td colspan="2" style="border-bottom:none;background: #dee2e6;">
+                                {{ applymsg.message }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>

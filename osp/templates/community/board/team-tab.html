@@ -23,7 +23,7 @@
                 <div id="team-members-title">
                     Members
                 </div>
-                <div id="team-member-list" style="overflow-y:auto;">
+                <div id="team-member-list" style="overflow-y:auto;height:100px;">
                     <div class="d-flex flex-row flex-wrap">
                         {% for member in team_members %}
                         <div id="team-member" style="width:45%;">
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div id="team-info" class="d-flex flex-column flex-wrap">
+            <div id="team-info" class="d-flex flex-column flex-wrap" style="height:120px;overflow-y:auto;overflow-x:hidden;">
                 <div id="team-desc">
                     {{team.description}}
                 </div>
