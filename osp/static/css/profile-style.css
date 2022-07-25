@@ -313,52 +313,6 @@ div > ::-webkit-scrollbar-thumb {
 div > ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
 }
-
-/* 출처: https://devbirdfeet.tistory.com/152 [새발개발자:티스토리] */
-#task-tooltip, #modal-task-tooltip{
-  font-family: "Roboto", sans-serif;
-  background-color: var(--main-bg-color);
-  border: var(--bootstrap-primary) solid 1px;
-  border-radius: 5px;
-  color: var(--bootstrap-primary);
-  font-size: 12px;
-  font-weight: 500;
-  height: auto;
-  letter-spacing: -0.25px;
-  margin-top: 6.8px;
-  padding: 5px 11px;
-  position: relative;
-  width: fit-content;
-}
-#modal-task-tooltip{
-  z-index: 1100;
-}
-#task-tooltip::after, #modal-task-tooltip::after {
-  border-color: var(--main-bg-color) transparent;
-  border-style: solid;
-  border-width: 8px 6px 0 6.5px;
-  content: '';
-  display: block;
-  position: absolute;
-  bottom: -7px;
-  width: 0;
-}
-#modal-task-tooltip::after {
-  z-index: 1099;
-}
-#task-tooltip::before, #modal-task-tooltip::before{
-  border-color: var(--bootstrap-primary) transparent;
-  border-style: solid;
-  border-width: 8px 6px 0 6.5px;
-  content: '';
-  display: block;
-  position: absolute;
-  bottom: -8px;
-  width: 0;
-}
-#modal-task-tooltip::before{
-  z-index: 1098;
-}
 .month-label{
   display: inline-block;
   width: 60px;
