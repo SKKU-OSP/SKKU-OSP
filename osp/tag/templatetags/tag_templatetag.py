@@ -5,6 +5,8 @@ from django.utils.safestring import mark_safe
 from tag.models import Tag
 from team.models import TeamMember,TeamInviteMessage, Team
 from user.models import Account
+from message.models import Message
+import json
 
 @register.simple_tag
 def category_tag(request):
@@ -106,5 +108,22 @@ def get_admin_team(user):
         team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
         return Team.objects.filter(id__in=team_li)
     return None
+
+@register.simple_tag
+def get_notifications(user):
+    if user.is_anonymous:
+        return None
+
+    msgs = Message.objects.filter(sender__isnull=True, receiver__user=user)
+    for msg in msgs:
+        try:
+            tmp = json.loads(msg.body)
+            msg.body = tmp
+        except:
+            tmp = msg.body
+            msg.body={"body":tmp}
+
+    return msgs
+
 
 

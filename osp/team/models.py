@@ -61,3 +61,15 @@ class TeamInviteMessage(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     direction = models.BooleanField(choices=DIRECTION_CHOICES, default=True)
     send_date = models.DateTimeField()
+
+    # __original_mode = None
+    #
+    # def __init__(self, *args, **kwargs):
+    #     super(Mode, self).__init__(*args, **kwargs)
+    #     self.__original_mode = self.mode
+    #
+    # def save(self, force_insert=False, force_update=False, *args, **kwargs):
+    #     if self.mode != self.__original_mode:  # then do this
+    #     else:  # do that
+    #         super(Mode, self).save(force_insert, force_update, *args, **kwargs)
+    #     self.__original_mode = self.mode

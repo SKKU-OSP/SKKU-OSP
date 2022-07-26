@@ -1,3 +1,4 @@
+{% load tag_templatetag %}
 <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light">
     <div class="container">
         <a class="navbar-brand" href="#">SKKU OSP</a>
@@ -26,9 +27,35 @@
             </ul>
             {% if user.is_authenticated %}
             <ul class="navbar-nav">
-                <li id="notification" class="nav-item me-4 notification material-icons-outlined pointer" >
-                    notifications
-                </li>
+
+
+                <div class="dropdown noti-dropdown">
+                    <button class="noti-dropdown dropdown-toggle default-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:white;">
+                        <li id="notification" class="nav-item me-4 notification material-icons-outlined pointer">
+                            notifications
+                        </li>
+                    </button>
+                    {% get_notifications request.user as notifications %}
+                    <ul class="dropdown-menu">
+                        {% for noti in notifications %}
+                            <li class="nav-item d-flex flex-row justify-content-between" style="width:300px;padding-left:10px;padding-right:5px;">
+                            <div>
+                                {{ noti.body.body }}
+                            </div>
+                            <div>
+                                {% if noti.body.type == "comment" %}
+                                    <i onclick="location.href='{% url 'community:article-view' noti.body.article_id %}'"
+                                       class="bi bi-box-arrow-up-right pointer"
+                                    ></i>
+                                {% endif %}
+                            </div>
+                            </li>
+
+                        {% endfor %}
+                    </ul>
+                </div>
+
+
                 <li id="message" class="nav-item me-4 notification material-icons-outlined pointer">
                     email
                 </li>
