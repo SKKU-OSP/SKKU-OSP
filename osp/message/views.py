@@ -11,11 +11,15 @@ from user.models import Account
 
 # Create your views here.
 @login_required
-def message_list_view(request):
+def message_list_view(request, selected_oppo):
     data = {}
     data['notification'] = []
     data['msg'] = {}
     my_acc = Account.objects.get(user=request.user)
+
+    selected_opponent = None
+    if selected_oppo!=0:
+        selected_opponent = Account.objects.get(user__id=selected_oppo)
     
     msg_opponent = {}
     # 내가 가장 마지막에 보낸 메시지의 시간
@@ -46,6 +50,12 @@ def message_list_view(request):
             )
         msg_opponent[opponent] = {'unread': len(msg_list) }
     data['msg_opponent'] = msg_opponent
+    if selected_opponent in msg_opponent or not selected_opponent:
+        data['selected_new_opponent'] = None
+    else:
+        data['selected_new_opponent'] = selected_opponent
+
+
     return render(request, 'message/list-view.html', data)
 
 @login_required
