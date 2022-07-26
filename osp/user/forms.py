@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import Account, StudentTab
+from .models import Account, AccountInterest, StudentTab
 
 class ProfileInfoUploadForm(ModelForm):
     class Meta:
