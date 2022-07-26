@@ -299,6 +299,16 @@
     text-decoration:underline;
 }
 
+.noti-dropdown::after,
+.msg-dropdown::after{
+    content: none;
+}
+
+.default-btn{
+    border:none;
+    background:none;
+}
+
 .writer-dropdown-btn{
     border: none;
     color: var(--sub-point-color);
