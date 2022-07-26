@@ -2,91 +2,106 @@
 {% load static %}
 
 {% block content %}
+
 <body>
   <form method="POST" action=""  enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="container-xl">
-      <div class="row row-cols-2">
-        <div class="col edit-container">
-          <div class="card edit-card">
-            <h5 class="card-title"> 개인정보 설정 </h5>
-            <div class="card-body">
-              <div class="mb-3 row">
-                <label for="github_id" class="col-sm-2 col-form-label">GitHub ID</label>
-                <div class="col-sm-10">
-                  <input type="text" readonly class="form-control-plaintext" id="github_id" value={{data.info.github_id}}>
-                </div>
-              </div>
-              <div class="mb-3 row">
-                <label for="id_personal_email" class="col-sm-2 col-form-label">Per. Email</label>
-                <div class="col-sm-10">
-                  <input type="email" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
-                </div>
-              </div>
-              <div class="mb-3 row">
-                <label for="id_plural_major" class="col-sm-2 col-form-label">Major</label>
-                <div class="col-sm-10">
-                  <input type="text " class="form-control" id="plural_major" name="plural_major" value={{data.info.plural_major}}>
-                </div>
-              </div>
-              <div class="mb-3 row">
-                <label for="id_primary_email" class="col-sm-2 col-form-label">Primary</label>
-                <div class="col-sm-10">
-                  <input type="email" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
-                </div>
-              </div>
-              <div class="mb-3 row">
-                <label for="id_secondary_email" class="col-sm-2 col-form-label">Secondary</label>
-                <div class="col-sm-10">
-                  <input type="email" class="form-control" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
-                </div>
-              </div>
-              <div>
-                {% csrf_token %}
-                <img src= {{data.account.photo.url}} alt="My Image" width="50" height="50">
-                <p><label for="id_photo">프로필 사진:</label> <input id="photo" name="photo" type="file" /></p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col edit-container">
-          <div class="card edit-card">
-            <h5 class="card-title"> 관심분야 설정 </h5>
-            <div class="card-body">
-              {% csrf_token %}
-              {% include 'profile/interests.html' %}
-            </div>
-          </div>
-        </div>
-        <div class="col edit-container">
-          <div class="card edit-card">
-            <h5 class="card-title"> 포트폴리오 설정 </h5>
-            <div class="card-body">
-              <div class="mb-3">
-                {% csrf_token %}
-                <label for="id_introduction" class="form-label">Introduction</label>
-                <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
-              </div>
-              <div class="mb-3">
-                <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="12">{{data.account.portfolio}}</textarea></p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col edit-container">
-          <div class="card edit-card">
-            <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
-            <div class="card-body">
-              {% csrf_token %}
-              {% include 'profile/languages.html' %}
-            </div>
-          </div>
-        </div>
+    <div class="container my-4">
+      <div class="d-flex justify-content-end mb-1">
+        <button type="submit" class="btn btn-primary" name="action" value="save">저장</button>
       </div>
-      <button type="submit" class="btn btn-primary" name="action" value="save">저장</button>
-    </div>
-  </form>
+      <div class="row">
+        <div id="profile-info" class="col-md-3 col-12">
+          <div class="d-flex flex-column justify-content-end text-center user-info">
+              <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+              <input id="photo" name="photo" type="file" />
+            <div class="info-body">
+              <p class="font-focus">{{data.info.name}}</p>
+              <p>{{data.info.github_id}}</p>
+            </div>
+          </div>
+          <div class="d-flex flex-column user-detail">
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">학번</span>
+              <span class="row-txt">{{data.info.id}}</span>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">대학</span>
+              <span class="row-txt">{{data.info.college}}</span>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">학과</span>
+              <span class="row-txt">{{data.info.dept}}</span>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">전공</span>
+              <input type="text" class="form-control" id="personal_email" name="plural_major" value={{data.info.plural_major}}>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">GitHub</span>
+              <input type="text" readonly class="form-control-plaintext" id="github_id" value={{data.info.github_id}}>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">개인 Email</span>
+              <input type="email" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">Github Email</span>
+              <input type="email" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+            </div>
+            <div class="d-flex row-userdata">
+              <span class="row-title text-center">Secondary Email</span>
+              <input type="email" class="form-control" id="primary_email" name="secondary_email" value={{data.info.secondary_email}}>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-9">
+          <div class="row">
+            <div class="col">
+              <div class="col edit-container">
+                <div class="card edit-card">
+                  <h5 class="card-title"> 관심분야 설정 </h5>
+                  <div class="card-body">
+                    {% csrf_token %}
+                    {% include 'profile/interests.html' %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="col edit-container">
+                <div class="card edit-card">
+                  <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
+                  <div class="card-body">
+                    {% csrf_token %}
+                    {% include 'profile/languages.html' %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col edit-container">
+              <div class="card edit-card">
+                <h5 class="card-title"> 포트폴리오 설정 </h5>
+                <div class="card-body">
+                  <div class="mb-3">
+                    {% csrf_token %}
+                    <label for="id_introduction" class="form-label">Introduction</label>
+                    <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+                  </div>
+                  <div class="mb-3">
+                    <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="12">{{data.account.portfolio}}</textarea></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
 
+    {% csrf_token %}
+  </form>
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
       <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>

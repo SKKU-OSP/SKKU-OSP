@@ -200,6 +200,10 @@ def TeamApply(request, team_id):
         else:
             return JsonResponse({'status': 'fail', 'message': "기존 팀원은 지원할 수 없습니다."})
 
+def TeamApplyList(request):
+    if request.method == 'GET':
+        return render(request, 'team/apply-list.html')
+
 def TeamOut(request):
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
@@ -228,18 +232,19 @@ def TeamInviteUpdate(request):
         team = Team.objects.get(id=request.POST.get('team_id'))
         account = Account.objects.get(user__username=request.POST.get('username'))
         direction = request.POST.get('direction') == 'TO_ACCOUNT'
-        apply_msg = TeamInviteMessage.objects.get(team=team,account=account,direction=direction)
+        apply_msg = TeamInviteMessage.objects.filter(team=team,account=account,direction=direction, status=0).first()
         try:
             with transaction.atomic():
                 if request.POST.get('is_okay'):
                     status = 1  # 승인
+                    TeamMember.objects.create(team=team,member=account)
                 else:
                     status = 2  # 거절
 
                 apply_msg.status = status
                 apply_msg.save()
 
-                data = render_to_string('community/board/apply-tab.html',{'team':team},request=request)
+                data = render_to_string('team/apply-list.html',request=request)
                 return JsonResponse({'status': 'success','data':data})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
