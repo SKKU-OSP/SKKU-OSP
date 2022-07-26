@@ -67,11 +67,9 @@ function RefreshNewMessage(){
 
 }
 
-function select_oppo(){
-    $('.opponent-item').each(function(){
-        $(this).removeClass('selected');
-    });
-    $(this).addClass('selected');
+
+function refreshChatroom(oppo_id){
+    console.log(oppo_id);
     $('#chat-view').html('')
     .append(
         $('<div></div')
@@ -83,9 +81,9 @@ function select_oppo(){
             .html('Loading...')
         )
     );
-    var oppo_id = $(this).attr('value');
+
     $.ajax({
-        url: '/message/chat/' + $(this).attr('value'),
+        url: '/message/chat/' + oppo_id,
         method: 'GET',
         dataType: 'JSON'
     }).done(function(data){
@@ -98,6 +96,24 @@ function select_oppo(){
         }
         $('#chat-view').scrollTop($('#chat-view').height());
     });
+}
+
+
+function select_oppo(){
+    $('.opponent-item').each(function(){
+        $(this).removeClass('selected');
+    });
+    var tmp, unread_count;
+
+    unread_count = $(this)[0].children[0].children[2];
+    if(unread_count){
+        unread_count.remove();
+    }
+
+    $(this).addClass('selected');
+    var oppo_id = $(this).attr('value');
+
+    refreshChatroom(oppo_id);
 }
 
 function send_msg(event){
@@ -157,5 +173,5 @@ $().ready(function(){
             });
         })
     })
-    
+    $('#message').click();
 });

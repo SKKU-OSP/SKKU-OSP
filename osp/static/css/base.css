@@ -349,6 +349,9 @@ footer {
 .carousel-inner .carousel-item-start { 
 transform: translateX(0);
 }
+.default-cursor{
+  cursor:default;
+}
 
 .pointer{
   cursor:pointer;
