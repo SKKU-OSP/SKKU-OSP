@@ -214,11 +214,10 @@ def TeamOut(request):
         # 탈퇴 가능 조건: 팀에 멤버가 한명(자기자신), 팀멤버가 여러명이나 admin이 아님
         if teammembers.count()>1 and teammember.is_admin:
             return JsonResponse({'status': 'fail', 'message': '멤버가 여러명일 경우 admin은 탈퇴가 불가능합니다.\nadmin을 해제해주세요.'})
-
         try:
             with transaction.atomic():
                 teammember.delete()
-
+                teammembers = TeamMember.objects.filter(team=team)
                 if teammembers.count()==1:
                     team.delete()
             return JsonResponse({'status': 'success'})
@@ -235,7 +234,8 @@ def TeamInviteUpdate(request):
         apply_msg = TeamInviteMessage.objects.filter(team=team,account=account,direction=direction, status=0).first()
         try:
             with transaction.atomic():
-                if request.POST.get('is_okay'):
+                if request.POST.get('is_okay')=="true":
+                    print(request.POST.get('is_okay'))
                     status = 1  # 승인
                     TeamMember.objects.create(team=team,member=account)
                 else:

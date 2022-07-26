@@ -51,7 +51,11 @@ def main(request):
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
             article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
             if board.board_type == 'Recruit':
-                article.team = TeamRecruitArticle.objects.get(article=article).team
+                tr = TeamRecruitArticle.objects.filter(article=article).first()
+                if tr:
+                    article.team = tr.team
+                else:
+                    article.team = None
 
 
         board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
@@ -151,7 +155,11 @@ def article_list(request, board_name, board_id):
         #     article.team = TeamRecruitArticle.objects.get(article=article).team
 
         if board.board_type == 'Recruit':
-            article.team = TeamRecruitArticle.objects.get(article=article).team
+            tr = TeamRecruitArticle.objects.filter(article=article).first()
+            if tr:
+                article.team = tr.team
+            else:
+                article.team = None
 
         if board.board_type == 'QnA':
             comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
