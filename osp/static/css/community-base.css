@@ -251,6 +251,12 @@
     text-decoration:underline;
 }
 
+.writer-dropdown-btn{
+    border: none;
+    color: var(--sub-point-color);
+    background: none;
+}
+
 .color-b{
     color:#2F2F2F;
 }
