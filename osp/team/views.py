@@ -232,11 +232,12 @@ def TeamInviteUpdate(request):
         team = Team.objects.get(id=request.POST.get('team_id'))
         account = Account.objects.get(user__username=request.POST.get('username'))
         direction = request.POST.get('direction') == 'TO_ACCOUNT'
-        apply_msg = TeamInviteMessage.objects.get(team=team,account=account,direction=direction)
+        apply_msg = TeamInviteMessage.objects.filter(team=team,account=account,direction=direction, status=0).first()
         try:
             with transaction.atomic():
                 if request.POST.get('is_okay'):
                     status = 1  # 승인
+                    TeamMember.objects.create(team=team,member=account)
                 else:
                     status = 2  # 거절
 
