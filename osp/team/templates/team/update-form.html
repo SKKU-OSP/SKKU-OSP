@@ -13,67 +13,62 @@
       <form id="team-update-form" onsubmit="submit_update_form(event);">
         {% csrf_token %}
         <input style="display:none" name="team-id" val="{{ team.id }}">
-
-      <div style="margin-bottom:5px;">
+        <div style="margin-bottom:5px;">
           <label for="team-name">팀 이름:</label>
           <input type="text" name="team-name" class="form-control" value="{{ team.name }}" required>
-      </div>
-      <div style="margin-bottom:5px;">
+        </div>
+        <div style="margin-bottom:5px;">
           <label for="team-desc">팀 설명</label>
           <input type="text" name="team-desc" class="form-control" value="{{ team.description }}" required>
-      </div>
-
-      <div style="margin-bottom:5px;">
+        </div>
+        <div style="margin-bottom:5px;">
           <label for="team-image">팀 대표 이미지</label>
           <input type="file" name="team-image" id="team-image-submit" class="form-control">
-      </div>
-
-      <div class="w-100 d-flex flex-row justify-content-between" style="">
-            <div><label for="">팀 멤버</label></div>
-            <div><i id="refresh-members" class="material-icons pointer opacity-hover" style="padding-top:5px;">autorenew</i></div>
-      </div>
-      <div id="members-list" class="w-100 text-left" style="height:200px;max-height:200px;overflow-y:auto;margin-bottom:5px;">
+        </div>
+        <div class="w-100 d-flex flex-row justify-content-between">
+          <div><label for="">팀 멤버</label></div>
+          <div><i id="refresh-members" class="material-icons pointer opacity-hover"
+              style="padding-top:5px;">autorenew</i></div>
+        </div>
+        <div id="members-list" class="w-100 text-left"
+          style="height:200px;max-height:200px;overflow-y:auto;margin-bottom:5px;">
           <table class="w-100" id="username" val="{{ request.user.username }}">
-              <colgroup>
-                   <col width="10%">
-                   <col width="80%">
-                   <col width="10%">
-               </colgroup>
-              {% for member in team_members %}
-                  <tr class="member-tr" id="member-id-{{ member.member.user.username }}"  style="height:50px;">
-                  <td class="text-center">
-                      <i    id="admin-{{ member.member.user.username }}"
-                            onclick="toggleIsAdmin('{{ member.member.user.username }}')"
-                            class="material-icons opacity-hover pointer"
-                      {% if member.is_admin %}
-                              style="color:black"
-                      {% else %}
-                              style="color:#CDCDCD"
-                      {% endif %}
-                      >military_tech
-                      </i>
-                  </td>
-                  <td class="text-left">
-                      <a href="{% url 'user:profile' member.member.user.username %}" style="text-decoration:underline;color:black;">
-                          {{member.member.user.username}}
-                      </a>
-                  </td>
-                  <td class="text-center">
-                    {% if member.member.user != request.user %}
-                    <i onclick="removeMember('{{ member.member.user.username }}')" class="material-icons opacity-hover pointer" style="color:#CDCDCD;" >delete</i>
-                    {% endif %}
-                  </td>
-                  </tr>
-              {% endfor %}
+            <colgroup>
+              <col width="10%">
+              <col width="80%">
+              <col width="10%">
+            </colgroup>
+            {% for member in team_members %}
+            <tr class="member-tr" id="member-id-{{ member.member.user.username }}" style="height:50px;">
+              <td class="text-center">
+                <i id="admin-{{ member.member.user.username }}"
+                  onclick="toggleIsAdmin('{{ member.member.user.username }}')"
+                  class="material-icons opacity-hover pointer" {% if member.is_admin %} style="color:black" {% else %}
+                  style="color:#CDCDCD" {% endif %}>military_tech
+                </i>
+              </td>
+              <td class="text-left">
+                <a href="{% url 'user:profile' member.member.user.username %}"
+                  style="text-decoration:underline;color:black;">
+                  {{member.member.user.username}}
+                </a>
+              </td>
+              <td class="text-center">
+                {% if member.member.user != request.user %}
+                <i onclick="removeMember('{{ member.member.user.username }}')"
+                  class="material-icons opacity-hover pointer" style="color:#CDCDCD;">delete</i>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
           </table>
-      </div>
-
-    <div>
-        <div>관련 분야</div>
-      <select name="tag" id="team-tag" multiple>
-        {% category_tag request %}
-      </select>
-    </div>
+        </div>
+        <div>
+          <div>관련 분야</div>
+          <select name="tag" id="team-tag" multiple>
+            {% category_tag request %}
+          </select>
+        </div>
       </form>
     </div>
     <div class="modal-footer">
