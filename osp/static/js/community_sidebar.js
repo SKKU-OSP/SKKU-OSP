@@ -45,7 +45,40 @@ $().ready(function () {
         });
       })
     } else {
-      $('#AddTeamApplyModal').modal('show');
+      $('#AddTeamModal').modal('show');
+    }
+  });
+
+  $('#team-apply-list').click(function () {
+    if (!$('#AddTeamModal').hasClass('ready')) {
+      $.ajax({
+        url: "/team/api/team-apply-list",
+        type: "GET",
+        dataType: 'HTML'
+      }).done(function (data) {
+        $('#AddTeamModal').addClass('ready').html(data)
+        $('#AddTeamModal').modal('show');
+        $('.bi-caret-down-fill').click(function(){
+          if(this.style.transform==''){
+            this.style.transform = 'rotate(180deg)';
+          }
+          else{
+            this.style.transform = '';
+          }
+          var tr_id = '#msg-id-'+this.attributes.val.value;
+           if($(tr_id).css('display') === 'none')
+            {
+                $(tr_id).removeClass("d-none");
+            }
+            else
+            {
+              $(tr_id).addClass("d-none");
+
+            }
+        });
+      })
+    } else {
+      $('#AddTeamModal').modal('show');
     }
   });
 });

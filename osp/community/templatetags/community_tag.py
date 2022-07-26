@@ -51,20 +51,28 @@ def anonymous_checked(a_writer):
     else:
         return ''
 
-@register.simple_tag
-def board_sidebar_normal_board(request):
+@register.simple_tag(takes_context=True)
+def board_sidebar_normal_board(context, request):
     result = ''
     for board in Board.objects.filter(~Q(board_type='Team')):
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
-        result += f'''
+        if board == context['board']:
+            result += f'''
+            <div class="boardgroup-item selected">
+            <a href="{url}">{board.name.capitalize()}</a>
+            </div>
+            '''
+        else:
+            result += f'''
             <div class="boardgroup-item">
             <a href="{url}">{board.name.capitalize()}</a>
             </div>
-        '''
+            '''
+        
     return mark_safe(result)
 
-@register.simple_tag
-def board_sidebar_team_board(request):
+@register.simple_tag(takes_context=True)
+def board_sidebar_team_board(context, request):
     team_board_query = Q()
     result = ''
     if request.user and request.user.is_authenticated:
@@ -75,12 +83,18 @@ def board_sidebar_team_board(request):
 
         for board in Board.objects.filter(team_board_query):
             url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
-            result += f'''
+            if board == context['board']:
+                result += f'''
+                <div class="boardgroup-item selected">
+                <a href="{url}">{board.name.capitalize()}</a>
+                </div>
+                '''
+            else:
+                result += f'''
                 <div class="boardgroup-item">
                 <a href="{url}">{board.name.capitalize()}</a>
                 </div>
-            '''
-
+                '''
     return mark_safe(result)
 
 @register.simple_tag

@@ -21,13 +21,13 @@
                 </div>
                 <div class="mb-3">
                     <label for="team-image" class="form-label">팀 대표 이미지</label>
-                    <input type="file" id="team-image" name="image" class="form-control" required>
+                    <input type="file" id="team-image-input" name="image" class="form-control" required>
                     <div class="valid-feedback" for="team-image"></div>
                     <div class="invalid-feedback" for="team-image"></div>
                 </div>
                 <div class="mb-3">
                     <label for="team-tag" class="form-label">팀 분야</label>
-                    <select name="tag" id="team-tag" multiple required>
+                    <select name="tag" id="team-tag-input" multiple required>
                         {% category_tag request %}
                     </select>
                     <div class="valid-feedback" for="team-tag"></div>

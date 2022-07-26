@@ -23,7 +23,7 @@
                 <div id="team-members-title">
                     Members
                 </div>
-                <div id="team-member-list" style="overflow-y:auto;">
+                <div id="team-member-list" style="overflow-y:auto;height:100px;">
                     <div class="d-flex flex-row flex-wrap">
                         {% for member in team_members %}
                         <div id="team-member" style="width:45%;">
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div id="team-info" class="d-flex flex-column flex-wrap">
+            <div id="team-info" class="d-flex flex-column flex-wrap" style="height:120px;overflow-y:auto;overflow-x:hidden;">
                 <div id="team-desc">
                     {{team.description}}
                 </div>
@@ -60,7 +60,7 @@
         event.preventDefault();
         let isFormValid = $('#team-update-form')[0].checkValidity()
         if(!isFormValid) {
-           $('#team-update-form')[0].reportValidity();
+            $('#team-update-form')[0].reportValidity();
             return;
         }
         if(!confirm("저장하시겠습니까?")){
@@ -139,12 +139,12 @@
             return;
         }
 
-      ajax_form_data=new FormData();
-      ajax_form_data.append('team_id',team_id);
-      ajax_form_data.append('username',username);
-      ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        ajax_form_data=new FormData();
+        ajax_form_data.append('team_id',team_id);
+        ajax_form_data.append('username',username);
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
-      $.ajax({
+        $.ajax({
             type: "POST",
             url: "{% url 'team:team-out' %}",
             data: ajax_form_data,
@@ -158,13 +158,13 @@
                     window.location.href = "{% url 'community:Community-Main' %}";
                 }
                 else{
-                  alert( data['message'] );
+                    alert( data['message'] );
                 }
             },
             error: function(data){
                 alert('Error Occured');
             }
-     });
+        });
     }
     $().ready(function () {
         $('#team-update').click(function () {
@@ -182,7 +182,7 @@
                 $('#team-update-modal').html(data);
                 $('#team-update-modal').modal('show');
                 team_tag_select = new SlimSelect({
-                    select: 'select[name=tag]',
+                    select: 'select#team-tag',
                     onChange: (selected_list) => {
                         for (selected of selected_list) {
                             $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
@@ -195,9 +195,6 @@
                     $('#members-list').html(members_initial);
                 });
                 admin_list = [];
-
-
-
                 $('#team-update-submit').click(function(){
                     var desc_length=$('input[name="team-desc"]').val().length
                     if((desc_length<30)&&(desc_length>150)){

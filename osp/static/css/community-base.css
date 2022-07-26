@@ -39,7 +39,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px 10px 30px;
+    padding: 20px 10px 10px;
     gap: 10px;
     background: var(--main-point-color);
     color: #FFFFFF;
@@ -51,6 +51,43 @@
     font-weight: 400;
     font-size: 25px;
     text-align: center;
+}
+
+#team-manage-tab{
+    padding-bottom: 20px;
+    gap: 10px;
+}
+
+#team-create{
+    cursor: pointer;
+    color: #FFFFFF;
+    text-align: center;
+    border: 1px solid #FFFFFF;
+    border-radius: .5rem;
+    padding: 0.4rem 0.6rem;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+#team-create > span{
+    vertical-align: middle;
+}
+
+#team-apply-list{
+    cursor: pointer;
+    color: #FFFFFF;
+    text-align: center;
+    border: 1px solid #FFFFFF;
+    border-radius: .5rem;
+    padding: 0.4rem 0.6rem;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+#team-apply-list > span{
+    vertical-align: middle;
 }
 
 #community-tab{
@@ -86,15 +123,26 @@
     font-size: 15px !important;
 
     background: #FFFFFF;
+    border-top: 1px solid var(--main-border-color);
+}
+
+.boardgroup-item > a{
+    color: #000000;
+}
+
+.boardgroup-item.selected{
+    padding: 0.5rem;
+    text-align: center;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px !important;
+
+    background: var(--main-bg-color);
     border-top: 1px solid #9D9D9D;
 }
 
-#team-create{
-    cursor: pointer;
-    color: var(--main-icon-color);
-    height: 1.5em;
-    width: 1.5em;
-    text-align: center;
+.boardgroup-item.selected > a{
+    color: var(--sub-point-color);
 }
 
 .article-head{
