@@ -78,10 +78,10 @@
                         {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')"{% else %}onclick="openTeamApplyModal();" {% endif %}
                         data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
             </div>
-{#            {% else %}#}
-{#            <div>#}
-{#                <div class="btn btn-secondary h-100" style="font-size:13px;">{{ teaminvitemessage.get_status_display }}</div>#}
-{#            </div>#}
+            {% else %}
+            <div>
+                <div class="btn btn-secondary" style="font-size:13px; cursor:default;">{{ waited_teaminvitemessage.get_status_display }}</div>
+            </div>
             {% endif %}
         {% endif %}
     {% else %}

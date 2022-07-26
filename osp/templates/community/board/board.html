@@ -14,9 +14,9 @@
       {% endif %}
       {% if board.board_type == 'Team' %}
           {% include "community/board/team-tab.html" %}
-          <div id="apply-tab">
-          {% include "community/board/apply-tab.html" %}
-          </div>
+{#          <div id="apply-tab">#}
+{#          {% include "community/board/apply-tab.html" %}#}
+{#          </div>#}
       {% endif %}
       <div class="d-flex justify-content-between" id="board-title-bar">
         <div class="d-flex col-8 justify-content-start">
@@ -87,7 +87,7 @@
             success: function(data) {
                 if(data['status']=="success"){
                     console.log(data)
-                    $('#apply-tab').html(data['data']);
+                    $('#AddTeamModal').html(data['data']);
                 }
                 else{
                   alert( data['message'] );

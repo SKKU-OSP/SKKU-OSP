@@ -3,7 +3,7 @@ from django import template
 register = template.Library()
 from django.utils.safestring import mark_safe
 from tag.models import Tag
-from team.models import TeamMember,TeamInviteMessage
+from team.models import TeamMember,TeamInviteMessage, Team
 from user.models import Account
 
 @register.simple_tag
@@ -33,11 +33,18 @@ def is_teammember(team, user):
     else:
         return False
 
+
+
+
 @register.simple_tag
 def teaminvitemessage(team, user):
     if user.is_anonymous: user = None
     account = Account.objects.filter(user=user).first()
     return TeamInviteMessage.objects.filter(team=team,account=account,status=0).first()
+
+@register.simple_tag
+def get_teamappliedmessage_waited(team):
+    return TeamInviteMessage.objects.filter(team=team,status=0)
 
 @register.simple_tag
 def category_tag_domain(request):
@@ -92,3 +99,12 @@ def apply_messages(team):
         status=0
     )
     return apply_messages
+
+@register.simple_tag
+def get_admin_team(user):
+    if not user.is_anonymous:
+        team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
+        return Team.objects.filter(id__in=team_li)
+    return None
+
+
