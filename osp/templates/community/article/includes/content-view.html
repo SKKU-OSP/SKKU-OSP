@@ -67,7 +67,7 @@
             {% if not waited_teaminvitemessage %}
             <div>
                 <button id="team-apply"
-                        {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')"{% else %}onclick="openTeamApplyModal();" {% endif %}
+                        {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')"{% else %}onclick="openTeamApplyModal({{ article.team.id }});" {% endif %}
                         data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
             </div>
             {% else %}

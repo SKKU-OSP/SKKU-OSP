@@ -1,9 +1,9 @@
 
-function openTeamApplyModal(){
+function openTeamApplyModal(team_id){
   if (!$('#AddTeamApplyModal').hasClass('ready')) {
-      var id = $(this).data('team-id');
+      // var id = $(this).data('team-id');
       $.ajax({
-        url: "/team/api/team-apply"+"/"+id,
+        url: "/team/api/team-apply"+"/"+team_id,
         type: "GET",
         dataType: 'HTML'
       }).done(function (data) {
