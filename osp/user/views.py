@@ -12,7 +12,7 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 
 from django.core.files.images import get_image_dimensions
 
-from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm, LanguageForm
+from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
 from django.db.models import Avg, Sum, Subquery
 
 import time
