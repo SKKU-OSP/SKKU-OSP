@@ -5,41 +5,42 @@
 {% load static %}
 {% load tag_templatetag %}
 {% block content %}
-
 <div class="container my-4">
-  <div id="community-container" class="row">
-    {% include "community/sidebar.html" %}
-    <div class="col-md-9">
-      <div id="board-title-bar" class="d-flex justify-content-between rounded" id="board-title-bar">
-        <div class="d-flex col-8 justify-content-start">
-          <h2>{{ board.name }} 게시판</h2>
-        </div>
-          <div class="d-flex flex-row justify-content-end">
-              {% if board %}
-                 <div onclick="location.href='{% url 'community:Board' board.name board.id %}'" class="border-2 rounded" style="height:100%;line-height:45px;font-size:18px;font-weight:bold;cursor:pointer;margin-right:10px;"><i class="bi-card-list"></i><span style="padding-left:4px;">리스트</span></div>
-                {% endif %}
-          </div>
-      </div>
-      <!-- type은 세가지 값이 가능: view / register / edit -->
-        <br>
-        <div id="article-content">
-            {% if type == 'view' %}
-            <!-- article view -->
+    <div id="community-container" class="row">
+        {% include "community/sidebar.html" %}
+        <div class="col-md-9">
+            <div id="board-title-bar" class="d-flex justify-content-between rounded" id="board-title-bar">
+                <div class="d-flex col-8 justify-content-start">
+                    <h2>{{ board.name }} 게시판</h2>
+                </div>
+                <div class="d-flex flex-row justify-content-end">
+                    {% if board %}
+                    <div onclick="location.href='{% url 'community:Board' board.name board.id %}'" class="border-2 rounded" style="height:100%;line-height:45px;font-size:18px;font-weight:bold;cursor:pointer;margin-right:10px;">
+                        <i class="bi-card-list"></i>
+                        <span style="padding-left:4px;">리스트</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- type은 세가지 값이 가능: view / register / edit -->
+            <br>
+            <div id="article-content">
+                {% if type == 'view' %}
+                <!-- article view -->
                 {% include 'community/article/includes/content-view.html' %}
-            {% else %}
+                {% else %}
                 <!-- article add or edit -->
                 {% include 'community/article/includes/content-edit.html' %}
-            {% endif %}
-        </div>
-
-        <div id="comment-content">
-        {% if type != 'register' %}
-            <!-- comment -->
-            {% include 'community/article/includes/comments.html' %}
-        {% endif %}
+                {% endif %}
+            </div>
+            <div id="comment-content">
+                {% if type != 'register' %}
+                <!-- comment -->
+                {% include 'community/article/includes/comments.html' %}
+                {% endif %}
+            </div>
         </div>
     </div>
-  </div>
 </div>
 {% endblock content %}
 {% block script %}
