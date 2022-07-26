@@ -37,6 +37,24 @@ function setVisualModal(){
   document.getElementById("closeModalIcon").addEventListener("click", ()=>{
     $('#modalBox').modal("hide");
   })
+  $(".modal-month-item").on("click", (e)=>{
+    $("#modal-btnGroupDropMonth").text(e.target.innerText);
+    select_month = Number(e.target.value);
+    $("rect.modal-ContributionMonth").attr("focus", 0);
+    $("rect.modal-ContributionMonth").removeAttr("stroke");
+    $("rect.modal-ContributionMonth").removeAttr("stroke-width");
+    $(".modal-grass-tooltip").remove();
+    showTooltip(select_month);
+    updateFactor(factorLabels, select_month);
+  });
+  $(".modal-factor-item").on("click", (e)=>{
+    $("#modal-btnGroupDropFactor").text(e.target.innerText);
+    chartFactor = (e.target.innerText).toLowerCase();
+    if(chartFactor == "score"){
+      chartFactor = "score_sum";
+    }
+    updateFactor(factorLabels, select_month);
+  });
   $("#modal-btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
     makeModalRadarChart(is_nomalization, select_month);
@@ -52,11 +70,10 @@ function setVisualModal(){
   $("#modal-btn-compare").on("click", function(){
     if(target_yearly_contr.length>0){
       target_monthly_contr = target_yearly_contr[select_year-start_year];
+      updateFactor(factorLabels, select_month);
     }
-    updateFactor(factorLabels, select_month);
   });
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
-  let factor_grass = document.getElementById("modal-factor-grass");
   let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
 
   let monthly_contribution = Array(12).fill(0);
@@ -88,7 +105,6 @@ function setVisualModal(){
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
     is_selected_factor = 0;
-    hideTooltip();
     makeMonthGrass();
     select_month = 0;
     updateFactor(factorLabels, select_month);
@@ -156,8 +172,9 @@ function setVisualModal(){
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
       target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
     }
-    clearChildElement(factor_grass);
-    makeFactorGrass();
+    modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
+    modalChartObjList = [];
+    makePage(chart_data);
   }
   
   function getDataLevel(value, type, isMonthly=true){
@@ -207,7 +224,7 @@ function setVisualModal(){
         mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
         mLabel.setAttributeNS(null, "font-family", "verdana");
         mLabel.setAttributeNS(null, "font-size", "15px");
-        mLabel.style.fill = "black";
+        mLabel.style.strokeWidth = "0px";
         mLabel.textContent = month_label[mIdx];
         rect.style.fill = palette[level];
         if(monthly_contr.length>mIdx){
@@ -215,8 +232,6 @@ function setVisualModal(){
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
             is_selected_month = focus;
-            chartFactor="score_sum";
-
             if(is_selected_month) {
               select_month = e.target.attributes[0].value;
               let month_elements = document.getElementsByClassName("modal-ContributionMonth");
@@ -225,13 +240,13 @@ function setVisualModal(){
                 rect.removeAttribute("stroke");
                 rect.removeAttribute("stroke-width");
               }
-              showTooltip(e, String(e.target.attributes[0].value)+"월: "+e.target.attributes[1].value);
+              showTooltip(select_month);
               e.target.setAttribute("stroke", "#fc2121");
               e.target.setAttribute("stroke-width", "2px");
             }
             else {
               select_month = 0;
-              hideTooltip();
+              $(".modal-grass-tooltip").remove();
               e.target.removeAttribute("stroke");
               e.target.removeAttribute("stroke-width");
             }
@@ -247,72 +262,6 @@ function setVisualModal(){
       div_activity_monthly.appendChild(gr);
     }
   }
-  /* Grass for Factor */
-  function makeFactorGrass(){
-    console.log("mFG: y",select_year,"m",select_month,"ftr_contr", factor_contribution);
-    const factor_label = ["STAR", "COMMIT", "PR", "ISSUE", "CR", "CO"];
-    const fs = 15;
-    for(let col = 0; col < 6; col++){
-      let rect = document.createElementNS(NS,"rect");
-      let ctb = factor_contribution[col];
-      let level = factor_contribution_level[col];
-      let fLabel = document.createElementNS(NS,"text");
-      rect.setAttributeNS(null,"factor", factorLabels[col]);
-      rect.setAttributeNS(null,"raw", ctb);
-      rect.setAttributeNS(null,"focus", 0);
-      rect.setAttributeNS(null,"x", (col)*(grass_size+fs));
-      rect.setAttributeNS(null,"y", fs);
-      rect.setAttributeNS(null,"width", grass_size);
-      rect.setAttributeNS(null,"height", grass_size);
-      rect.setAttributeNS(null,"rx", "2");
-      rect.setAttributeNS(null,"ry", "2");
-      rect.setAttributeNS(null,"class", "modal-ContributionFactor");
-      rect.setAttributeNS(null,"data-level", level);
-      fLabel.setAttributeNS(null, "x", (col)*(grass_size+fs));
-      fLabel.setAttributeNS(null, "y", fs);
-      fLabel.setAttributeNS(null, "font-family", "verdana");
-      fLabel.setAttributeNS(null, "font-size", "15px");
-      fLabel.style.fill = "black";
-      fLabel.textContent = factor_label[col];
-      rect.style.fill = palette[level];
-      
-      rect.style.cursor = "pointer";
-      rect.addEventListener("click",(e) =>{
-        let focus = 1 - e.target.attributes[2].value;
-        is_selected_factor = focus;
-        if(is_selected_factor){
-          chartFactor = (e.target.attributes[0].value).split("_")[0];
-          let factor_elements = document.getElementsByClassName("modal-ContributionFactor");
-          for(let rect of factor_elements){
-            rect.setAttributeNS(null, "focus", 0);
-            rect.removeAttribute("stroke");
-            rect.removeAttribute("stroke-width");
-          }
-          showTooltip(e, String(e.target.attributes[0].value)+": "+e.target.attributes[1].value);
-          e.target.setAttribute("stroke", "#fc2121");
-          e.target.setAttribute("stroke-width", "2px");
-        }
-        else {
-          chartFactor = "score_sum";
-          hideTooltip();
-          e.target.removeAttribute("stroke");
-          e.target.removeAttribute("stroke-width");
-        }
-        e.target.attributes[2].value = focus;
-        if(factor_label[col].toLowerCase() != factorLabels[col]){
-          chartFactor = "score_sum";
-        }
-        modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
-        modalChartObjList = [];
-        makePage(chart_data);
-      });
-      factor_grass.appendChild(rect);
-      factor_grass.appendChild(fLabel);
-    }
-    modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
-    modalChartObjList = [];
-    makePage(chart_data);
-  }
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
@@ -320,16 +269,125 @@ function setVisualModal(){
     else return 1;
   }
   function makePage(chart_data){
-    console.log("makePage");
-    let user_data = JSON.parse(chart_data["user_data"])[select_year-start_year];
-    let annual_data = chart_data["annual_overview"];
+    let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
+    let user_data = {
+      "score_sum": user_data_total["total_score"],
+      "commit": user_data_total["commit_cnt"],
+      "pr": user_data_total["pr_cnt"],
+      "issue": user_data_total["issue_cnt"],
+      "repo": user_data_total["repo_cnt"],
+    }
+    user_data["star"] = chart_data["own_star"]["star"];
+    let annual_data = JSON.parse(chart_data["annual_overview"])[0];
     let score_data = chart_data["score_data"];
+    let dist_data = {
+      "score_sum" : chart_data["score_dist"][select_year-start_year],
+      "star" : chart_data["star_dist"][select_year-start_year],
+      "commit" : chart_data["commit_dist"][select_year-start_year],
+      "pr" : chart_data["pr_dist"][select_year-start_year],
+      "issue" : chart_data["issue_dist"][select_year-start_year],
+      "repo" : chart_data["repo_dist"][select_year-start_year]
+    }
+    dist_data["num"] = chart_data["score_dist"][select_year-start_year].length;
+    if(dist_data["num"] == 0) dist_data["num"] = 1;
     
-    const baseColor = "#174adf";
-    const userColor = "#ffe522";
     makeModalRadarChart(is_nomalization, select_month);
-    
-    /* Chart 2: 분포도 히스토그램 */
+
+    /* Chart 2: 정규분포 확률밀도함수 */
+    let mean = 0;
+    let sigma = 1;
+    const normal_dist_data = [];
+    let dist_x= 0, dist_width, dist_text;
+    if(chartFactor == "star") {
+      mean= Number(chart_data["own_star"]["avg"]);
+      sigma = Number(chart_data["own_star"]["std"]);
+    }else{
+      mean= Number(annual_data[chartFactor][select_year-start_year]);
+      sigma = Number(annual_data[chartFactor+"_std"][select_year-start_year]);
+    }
+    if(isNaN(mean)) mean = 0;
+    if(isNaN(sigma)) sigma = 1;
+    const scaleFactor = 100;
+    let s=100, beforeVal=-1;
+    dist_data[chartFactor].reverse().forEach((val, idx)=>{
+      if(beforeVal != Number(val).toFixed(3)){
+        let x = (dist_data["num"] - idx)/dist_data["num"]*100;
+        let y = gaussian(Number(val));
+        normal_dist_data.push({x:(s+x)/2, y:y*scaleFactor, tooltip:Number(val).toFixed(3)});
+        if(Number(user_data[chartFactor]).toFixed(3) === Number(val).toFixed(3)){
+          dist_x = (s+x)/2;
+          dist_text = String((100-dist_x).toFixed(2))+"%";
+        }
+        beforeVal = Number(val).toFixed(3);
+        s=x;
+      }
+    });
+    dist_data[chartFactor].reverse();
+    function gaussian(x) {
+      // 확률밀도함수
+      let gaussianConstant = 1 / Math.sqrt(2 * Math.PI);
+      x = (x - mean) / sigma;
+      return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
+    };
+    const clickableLines = {
+      id: 'clickableLines',
+      afterDatasetsDraw(chart, args, pluginOptions){
+        for(let i = 0; i<chart._metasets[0].data.length; i++){
+          let target = chart._metasets[0].data[i];
+          let findX = target["$context"].raw.x;
+          if(findX.toFixed(3) === dist_x.toFixed(3)){
+            dist_width = target.x;
+          }
+        }
+        const {ctx, chartArea: {top, bottom}} = chart;
+        class Line {
+          constructor(xCoor, text){
+            this.width = xCoor;
+            this.text = text;
+          };
+          draw(ctx){
+            ctx.restore();
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+            ctx.moveTo(this.width, top+2);
+            ctx.lineTo(this.width, bottom);
+            ctx.stroke();
+            ctx.font = '12px Helvetica Neue, Helvetica, Arial, sans-serif';
+            ctx.fillText(this.text, this.width-20, top)
+            ctx.fillText("you", this.width-10, bottom+10)
+            ctx.save();
+          }
+        }
+        let drawLine = new Line(dist_width, dist_text);
+        drawLine.draw(ctx);
+      },
+    };
+    var dist_chart = new Chart(modal_ctx[1], {
+      type: 'scatter',
+      data: { datasets: [{data:normal_dist_data}] },
+      options:{
+        elements:{
+          point:{radius:2, borderColor: "rgba(0, 148, 255, 1)",backgroundColor:"rgba(0, 148, 255, 1)"}
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                return String((100-items[0].raw.x).toFixed(2))+"%";
+              },
+              label: (item) => {
+                return String(parseFloat(item.raw.tooltip));
+              },
+            },
+          },
+        },
+      },
+      plugins: [clickableLines]
+    });
+    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
+    $("#modal-histogram-title").text(histogram_title);
     function newArrayRange(start, end, step=1, fix_point=0){
       let arr = [];
       for(let i=start; i<=end; i = i+step){
@@ -337,61 +395,8 @@ function setVisualModal(){
       }
       return arr;
     }
-    function newArrayScope(range_arr=[]){
-      let arr = [];
-      for (let i = 1; i < range_arr.length; i++) {
-        arr.push(range_arr[i-1]+"~"+range_arr[i]);
-      }
-      return arr;
-    }
-
-    let dist = JSON.parse(chart_data[`year${select_year}`])[0];
-    if(typeof(dist[chartFactor]) =="undefined"){
-      chartFactor = "score_sum";
-    }
-    console.log("chartFactor",chartFactor);
     const yearLabel = newArrayRange(start_year, end_year);
-    let factor_Xaxis_label = [];
-    let factor_option = {}
-    switch(chartFactor){
-      case "score_sum":
-        factor_Xaxis_label = newArrayRange(0, 5, 0.5, 1);
-        factor_option = histogramOption(0.25);
-        break;
-      case "commit":
-        factor_Xaxis_label = newArrayRange(0, 500, 100);
-        factor_option = histogramOption(50);
-        break;
-      case "star":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      case "pr":
-        factor_Xaxis_label = newArrayRange(0, 25, 5);
-        factor_option = histogramOption(2.5);
-        break;
-      case "issue":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      case "repo":
-        factor_Xaxis_label = newArrayRange(0, 10, 2);
-        factor_option = histogramOption(1);
-        break;
-      default:
-        console.error("unknown factor");
-    }
-    let factor_scope_label = newArrayScope(factor_Xaxis_label);
-    let dist_dataset = makeHistogramJson(dist[chartFactor], factor_scope_label);
-    let colorIdx = findDistIdx(factor_Xaxis_label, Number(user_data[chartFactor]));
-    let paramColor = [];
 
-    for(let i=0; i<factor_scope_label.length; i++){
-      if(i != colorIdx) paramColor.push(baseColor);
-      else paramColor.push(userColor);
-    }
-
-    let dist_chart = makeChart(modal_ctx[1], "bar", chartFactor, factor_Xaxis_label, dist_dataset, paramColor, factor_option);
     modalChartObjList.push(dist_chart);
 
     /* Chart 3: 세부 점수 그래프 */
@@ -475,7 +480,7 @@ function setVisualModal(){
     let user_data = {};
     let target_data = {};
     if(month == 0){
-      avg_data = chart_data["annual_overview"];
+      avg_data = JSON.parse(chart_data["annual_overview"])[0];
       avg_data['star'] = chart_data['own_star']['avg'];
       factorLabels.forEach((label)=>{
         if(Array.isArray(avg_data[label])){
@@ -600,117 +605,39 @@ function setVisualModal(){
     }
     return chart;
   }
-
-  function makeChart(ctx, type, factor,
-      labels, data, color, options, topdata = []) {
-    let chart;
-    console.log("makechart");
-    if (type === "bar") {
-      //Histogram
-      const borderWidth = 1;
-      const barPercentage = 1;
-      const categoryPercentage = 1;
-
-      chart = new Chart(ctx, {
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: type,
-              label: "num",
-              data: data,
-              backgroundColor: color,
-              borderWidth: borderWidth,
-              barPercentage: barPercentage,
-              categoryPercentage: categoryPercentage,
-            },
-          ],
-        },
-        options: options,
-      });
+  function showTooltip(select_month = 0){
+    $(".modal-grass-tooltip").remove();
+    if(select_month!=0){
+      let rect_target = $(`rect.modal-ContributionMonth[month=${select_month}]`).first();
+      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px", "focus":1});
+      let rect_x = Number(rect_target.attr("x"));
+      let rect_y = Number(rect_target.attr("y"));
+      let mLabel = document.createElementNS(NS,"text");
+      mLabel.textContent = String(rect_target.attr("month"))+"월: "+rect_target.attr("raw");
+      let label_len = (mLabel.textContent).length;
+      mLabel.setAttributeNS(null, "class", "modal-grass-tooltip");
+      mLabel.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
+      mLabel.setAttributeNS(null, "y", rect_y + grass_size/2);
+      mLabel.setAttributeNS(null, "font-family", "verdana");
+      mLabel.setAttributeNS(null, "font-size", "12px");
+      mLabel.style.strokeWidth = "0px";
+      let mBack = document.createElementNS(NS, "rect");
+      mBack.setAttributeNS(null, "class", "modal-grass-tooltip");
+      mBack.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
+      mBack.setAttributeNS(null, "y", rect_y-grass_size*3/4 + grass_size);
+      mBack.setAttributeNS(null,"width", label_len*8);
+      mBack.setAttributeNS(null,"height", grass_size/3+4);
+      mBack.style.strokeWidth = "0px";
+      mBack.style.fill ="white";
+      let mPath = document.createElementNS(NS, "path");
+      mPath.setAttributeNS(null, "class", "modal-grass-tooltip");
+      mPath.setAttributeNS(null, "d", `M ${label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
+      mPath.style.strokeWidth = "0px";
+      mPath.style.fill ="white";
+      rect_target.parent().append(mBack);
+      rect_target.parent().append(mPath);
+      rect_target.parent().append(mLabel);
     }
-
-    return chart;
-  }
-
-  function makeHistogramJson(dist, label) {
-    let offset = 0;
-    //label expect NUM1~NUM2 or NUM
-    let newDist = new Array(dist.length);
-    let newLabel = new Array(label.length);
-    if (dist.length === label.length) {
-      for (let i = 0; i < dist.length; i++) {
-        if (label[i].indexOf("~") === -1) {
-          newLabel[i] = label[i];
-        } else {
-          newLabel[i] = label[i].split("~")[1];
-          if (offset === 0) {
-            let temp = label[i].split("~");
-            offset = (Number(temp[1]) - Number(temp[0])) / 2;
-          }
-        }
-      }
-    } else return dist;
-    for (let j = 0; j < dist.length; j++) {
-      newDist[j] = {
-        x: Number(newLabel[j]) - offset,
-        y: dist[j],
-      };
-    }
-    console.log("NEW DIST", newDist);
-    return newDist;
-  }
-
-  function histogramOption(offset) {
-    let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
-    $("#modal-histogram-title").text(histogram_title);
-    return {
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => {
-              if (!items.length) {
-                return "";
-              }
-              const item = items[0];
-              const x = item.parsed.x;
-              let min = x - offset <= 0 ? 0 : x - offset;
-              let max = x + offset;
-              if (x === 0) {
-                min = 0;
-                max = 0;
-              }
-              return `${min}~${max}`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          type: "linear",
-          offset: false,
-          grid: { offset: false },
-          ticks: { stepSize: offset * 2 },
-        },
-        y: { beginAtZero: true },
-      },
-    };
-  }
-  function showTooltip(evt, text) {
-    let tooltip = document.getElementById("modal-task-tooltip");
-    tooltip.innerHTML = text;
-    tooltip.setAttribute("display", "block");
-    tooltip.style.display = "block";
-    let scrollTop = document.getElementById("modal-visualization").scrollTop
-    let scrollLeft = document.getElementById("visualization").scrollLeft
-    tooltip.style.left = (evt.layerX - 20) + scrollLeft + "px";
-    tooltip.style.top = (evt.layerY - 50) + scrollTop + "px";
-  }
-
-  function hideTooltip() {
-    var tooltip = document.getElementById("modal-task-tooltip");
-    tooltip.style.display = "none";
   }
 }
 function setPortfolioModal(){
