@@ -1,7 +1,24 @@
+{% load static %}
 <div id="oppo-list">
   <ul id="opponent-list" class="opponent-list">
+    {% if selected_new_opponent %}
+        {% with selected_new_opponent as oppo %}
+        <li id="opo-id-{{ oppo.user.id }}" class="opponent-item pointer opacity-hover" value="{{oppo.user.id}}">
+          <div class="d-flex">
+            <div class="opponent-account me-2">
+              <img src="{{oppo.photo.url}}" class="opponent-profile">
+            </div>
+            <div class="my-auto">
+              <div class="opponent-name">
+                {{oppo.user.username}}
+              </div>
+            </div>
+          </div>
+        </li>
+        {% endwith %}
+    {% endif %}
     {% for oppo, data in msg_opponent.items %}
-    <li class="opponent-item pointer opacity-hover" value="{{oppo.user.id}}">
+    <li id="opo-id-{{ oppo.user.id }}" class="opponent-item pointer opacity-hover" value="{{oppo.user.id}}">
       <div class="d-flex">
         <div class="opponent-account me-2">
           <img src="{{oppo.photo.url}}" class="opponent-profile">

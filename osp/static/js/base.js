@@ -150,6 +150,7 @@ function select_oppo(){
     }
 
     $(this).addClass('selected');
+    console.dir($(this));
     var oppo_id = $(this).attr('value');
 
     refreshChatroom(oppo_id);
@@ -191,16 +192,20 @@ function send_msg(event){
     return false;
 }
 
-$().ready(function(){
-    $('#message').click(function(){
-        $('#message-modal').modal('show');
+function msgModalOpen(selected_oppo=0){
+    $('#message-modal').modal('show');
         $.ajax({
-            url: '/message/list',
+            url: '/message/list/'+selected_oppo,
             method: 'GET',
             dataType: 'HTML'
         }).done(function(data){
             $('#message-modal-body').html(data);
             $('.opponent-item').click(select_oppo);
+            if(selected_oppo!=0){
+                // console.log('#opo-id-'+selected_oppo);
+                // console.log($('#opo-id-'+selected_oppo));
+                $('#opo-id-'+selected_oppo).click();
+            }
             $('#chat-submit').click(send_msg);
             $('#chat-view').scroll(function(){
                 if($(this).scrollTop() === 0){
@@ -211,6 +216,11 @@ $().ready(function(){
                 }
             });
         })
-    })
+}
 
+$().ready(function(){
+    $('#message').click(function(){
+        msgModalOpen();
+    })
 });
+
