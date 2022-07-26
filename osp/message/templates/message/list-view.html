@@ -1,7 +1,7 @@
 <div id="oppo-list">
   <ul id="opponent-list" class="opponent-list">
     {% for oppo, data in msg_opponent.items %}
-    <li class="opponent-item" value="{{oppo.user.id}}">
+    <li class="opponent-item pointer opacity-hover" value="{{oppo.user.id}}">
       <div class="d-flex">
         <div class="opponent-account me-2">
           <img src="{{oppo.photo.url}}" class="opponent-profile">
@@ -23,7 +23,7 @@
 </div>
 <div id="chat-view-tab">
   <div id="chat-view">
-
+    사용자를 선택하세요.
   </div>
   <div id="chat-input-tab" class="mt-auto">
     <form id="chat-input-form">
