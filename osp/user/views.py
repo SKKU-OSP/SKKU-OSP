@@ -131,32 +131,24 @@ class ProfileView(TemplateView):
         context['account'] = account
         student_data = account.student_data
         github_id = student_data.github_id
-        
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
-        annual_overview = AnnualOverview.objects.get(case_num=0)
-        chartdata["annual_overview"] = annual_overview.to_json()
-        user_data = Student.objects.filter(github_id=github_id)
-        chartdata["user_data"] = json.dumps([row.to_json() for row in user_data])
         student = StudentTab.objects.all()
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
         own_star = {}
-        star_sum = 0
         star_temp_dist = []
         for row in star_data:
-            star_sum += row["star"]
             star_temp_dist.append(row["star"])
             if row["github_id"] == github_id:
                 own_star["star"] = row["star"]
-        own_star["avg"] = star_sum/len(star_data)
         star_temp_dist.sort()
-        
-        dev_total = 0
-        for nStar in star_temp_dist:
-            dev_total += math.pow(nStar - own_star["avg"], 2)
-        own_star["std"] = '{:0.4f}'.format(math.sqrt(dev_total/star_sum))
+
+        mean = sum(star_temp_dist)/len(star_temp_dist)
+        own_star["avg"] = mean
+        sigma = math.sqrt(sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
+        own_star["std"] = sigma
         star_dist = [star_temp_dist for i in range(self.end_year-self.start_year+1)]
         
         annual_dist = {}
@@ -180,43 +172,71 @@ class ProfileView(TemplateView):
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
 
         score_data_list = []
-        total_factor_data_list = []
-        score_data = GithubScore.objects.all()
-        for row in score_data:
-            total_factor_data_list.append(row.factor_to_json())
-            if(row.github_id == github_id):
-                score_data_list.append(row.to_json())
+        score_detail_data = GithubScore.objects.filter(github_id=github_id)
+        
+        for row in score_detail_data:
+            score_data_list.append(row.to_json())
         chartdata["score_data"] = score_data_list
         
+        score_data = ScoreTable.objects.all()
+        total_factor_data_list = []
+        user_data_list = []
+        for row in score_data:
+            total_factor_data_list.append(row.to_json())
+            if row.name == github_id:
+                user_data_list.append(row.to_json())
+        chartdata["user_data"] = json.dumps(user_data_list)
         score_dist = [[] for i in range(self.end_year-self.start_year+1)]
         commit_dist = [[] for i in range(self.end_year-self.start_year+1)]
         pr_dist = [[] for i in range(self.end_year-self.start_year+1)]
         issue_dist = [[] for i in range(self.end_year-self.start_year+1)]
-        fork_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        repo_dist = [[] for i in range(self.end_year-self.start_year+1)]
         for factor_data in total_factor_data_list:
             if factor_data["year"] >= self.start_year :
                 yid = factor_data["year"]-self.start_year
                 score_dist[yid].append(factor_data["total_score"])
-                commit_dist[yid].append(factor_data["commit_count"])
-                pr_dist[yid].append(factor_data["pr_count"])
-                issue_dist[yid].append(factor_data["issue_count"])
-                fork_dist[yid].append(factor_data["fork_count"])
+                commit_dist[yid].append(factor_data["commit_cnt"])
+                pr_dist[yid].append(factor_data["pr_cnt"])
+                issue_dist[yid].append(factor_data["issue_cnt"])
+                repo_dist[yid].append(factor_data["repo_cnt"])
+        annual_dist_data = {"score_sum":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_sum_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
         for sub_dist in score_dist:
             sub_dist.sort()
+            mean = sum(sub_dist)/len(sub_dist)
+            annual_dist_data["score_sum"].append(mean)
+            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
+            annual_dist_data["score_sum_std"].append(sigma)
         for sub_dist in commit_dist:
             sub_dist.sort()
+            mean = sum(sub_dist)/len(sub_dist)
+            annual_dist_data["commit"].append(mean)
+            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
+            annual_dist_data["commit_std"].append(sigma)
         for sub_dist in pr_dist:
             sub_dist.sort()
+            mean = sum(sub_dist)/len(sub_dist)
+            annual_dist_data["pr"].append(mean)
+            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
+            annual_dist_data["pr_std"].append(sigma)
         for sub_dist in issue_dist:
             sub_dist.sort()
-        for sub_dist in fork_dist:
+            mean = sum(sub_dist)/len(sub_dist)
+            annual_dist_data["issue"].append(mean)
+            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
+            annual_dist_data["issue_std"].append(sigma)
+        for sub_dist in repo_dist:
             sub_dist.sort()
+            mean = sum(sub_dist)/len(sub_dist)
+            annual_dist_data["repo"].append(mean)
+            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
+            annual_dist_data["repo_std"].append(sigma)
+        chartdata["annual_overview"] = json.dumps([annual_dist_data])
         chartdata["score_dist"] = score_dist
         chartdata["star_dist"] = star_dist
         chartdata["commit_dist"] = commit_dist
         chartdata["pr_dist"] = pr_dist
         chartdata["issue_dist"] = issue_dist
-        chartdata["fork_dist"] = fork_dist
+        chartdata["repo_dist"] = repo_dist
         
         monthly_contr = [ [] for i in range(self.end_year-self.start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
@@ -257,7 +277,8 @@ class ProfileEditView(TemplateView):
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
         user_tab = StudentTab.objects.get(id=student_id)
-
+        tags_all = Tag.objects
+        tags_domain = tags_all.filter(type='domain')
 
         print(request.POST.get("action"))
 
@@ -272,22 +293,19 @@ class ProfileEditView(TemplateView):
                 AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
 
         elif(request.POST.get('action') == 'append_lang'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
+            print(request.POST.get('preferLanguage'))
             added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-            added_level = request.POST.get('tagLevel') # 선택 된 레벨
             added_tag = Tag.objects.get(name=added_preferLanguage)
             try:
                 already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-                already_ints.delete()
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
             except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=added_level)
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
 
         elif(request.POST.get('action') == 'save'): # 저장 버튼 눌렀을 경우
             # 기본정보 폼
             info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
             if info_form.is_valid():
                 print('Info is valid form')
-            
                 info_form.save()
 
             # 소개 폼
@@ -296,8 +314,6 @@ class ProfileEditView(TemplateView):
                 print('Intro is valid form')
             
                 intro_form.save()
-
-
 
             # 프로필 사진 폼
             pre_img = user_account.photo.path
@@ -311,6 +327,16 @@ class ProfileEditView(TemplateView):
                     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
 
             img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+
+
+            # 사용언어 추가
+            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+            for l in lang:
+                if "tag_" + l.tag.name in request.POST:
+                    added_tag = Tag.objects.get(name=l.tag.name)
+                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+
+            
             if bool(img_form.is_valid()) and is_valid:
                 if 'photo' in request.FILES: # 폼에 이미지가 있으면
                     try:
@@ -332,6 +358,9 @@ class ProfileEditView(TemplateView):
             
             if info_form.is_valid() and img_form.is_valid() and port_form.is_valid(): # 저장 성공시 메세지
                 messages.add_message(request, messages.SUCCESS, '프로필이 성공적으로 저장되었습니다!')
+
+
+
 
         else:
             delete_requested_tagname = request.POST.get('action').split(maxsplit=1)[1]
