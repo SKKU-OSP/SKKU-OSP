@@ -87,6 +87,23 @@ class ScoreTable(models.Model):
         managed = False
         db_table = 'score_table_sum'
         unique_together = (('id', 'year'),)
+    
+    def to_json(self):
+        return {
+            "id":self.id,
+            "year":self.year,
+            "name":self.github_id,
+            "github_id":self.name,
+            "total_score":self.total_score,
+            "commit_cnt":self.commit_cnt,
+            "commit_line":self.commit_line,
+            "issue_cnt":self.issue_cnt,
+            "pr_cnt":self.pr_cnt,
+            "repo_cnt":self.repo_cnt,
+            "dept":self.dept,
+            "absence":self.absence,
+            "plural_major":self.plural_major,
+        }
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -166,17 +183,6 @@ class GithubScore(models.Model):
             "guideline_score": self.guideline_score,
             "additional_score": self.additional_score_sum,
             "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork
-        }
-    def factor_to_json(self):
-        return {
-            "yid": self.yid,
-            "github_id":self.github_id,
-            "year":self.year,
-            "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork,
-            "commit_count": self.commit_count,
-            "pr_count": self.pr_count,
-            "issue_count": self.issue_count,
-            "fork_count": self.fork_owner_count
         }
 
 class GithubRepoCommits(models.Model):
