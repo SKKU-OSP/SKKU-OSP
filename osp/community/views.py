@@ -69,6 +69,10 @@ def board(request, board_name, board_id):
         return redirect('/community')
     board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
     context = {'board': board, 'board_color': board_color}
+
+    if board.board_type == 'User':
+        return render(request, 'community/board/board.html', context)
+
     if board.board_type == 'Recruit':
         active_article = Article.objects.filter(board_id=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

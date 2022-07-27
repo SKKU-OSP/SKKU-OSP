@@ -4,7 +4,7 @@ from tag.models import Tag
 from team.models import Team
 # Create your models here.
 class Board(models.Model):
-    DEFAULT_BOARDNAME = ['QnA','Team','Education','Notice']
+    DEFAULT_BOARDNAME = ['QnA','User','Team','Education','Notice']
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=20)
     board_type = models.CharField(max_length=10)
