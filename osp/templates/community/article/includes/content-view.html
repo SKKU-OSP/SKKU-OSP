@@ -33,7 +33,7 @@
                 </div>
                 <div style="height:40px;line-height:31px;padding-left:10px;" class="d-flex flex-column">
                 <div style="height:10px;font-size:5px;">
-                    {{ article.pub_date|time_before }}
+                    {{ article.pub_date|date:"Y-m-d" }}
                 </div>
                 <div style="height:10px;font-size:5px;">
                     {{ article.pub_date|time:"h:i a" }}
