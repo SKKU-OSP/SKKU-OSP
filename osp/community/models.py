@@ -51,29 +51,15 @@ class ArticleLike(models.Model):
                 name='unique_account_article'
             )
         ]
-#todo scrap
 
-# class ArticleScrap(models.Model):
-#     article = models.ForeignKey(Article, models.CASCADE)
-#     account = models.ForeignKey(Account, models.CASCADE)
-#     class Meta:
-#         constraints = [
-#             models.UniqueConstraint(
-#                 fields=['article', 'account'],
-#                 name='unique_account_article'
-#             )
-#         ]
-
-class ArticleBookmark(models.Model):
-    id = models.AutoField(primary_key=True)
+class ArticleScrap(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
     account = models.ForeignKey(Account, models.CASCADE)
-    bookmark_date = models.DateTimeField(auto_now_add=True)
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['article', 'account'],
-                name='unique_account_article_bookmark'
+                name='unique_account_article_Scrap'
             )
         ]
 
