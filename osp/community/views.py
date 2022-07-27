@@ -49,7 +49,7 @@ def main(request):
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
-            article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
+            article.scrap_cnt = len(ArticleScrap.objects.filter(article=article))
             if board.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
@@ -414,18 +414,17 @@ def article_like(request):
     except:
         return JsonResponse({'status':'false'})
 
-# todo scrap
-# def article_scrap(request):
-#     try:
-#         article_id = request.POST.get('article_id')
-#         user = request.user
-#         article = Article.objects.get(id=article_id)
-#         account = Account.objects.get(user=user)
-#
-#         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
-#
-#         if not created:
-#             obj.delete()
-#         return JsonResponse({'status': 'success'})
-#     except:
-#         return JsonResponse({'status':'false'})
+def article_scrap(request):
+    try:
+        article_id = request.POST.get('article_id')
+        user = request.user
+        article = Article.objects.get(id=article_id)
+        account = Account.objects.get(user=user)
+
+        obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
+
+        if not created:
+            obj.delete()
+        return JsonResponse({'status': 'success'})
+    except:
+        return JsonResponse({'status':'false'})

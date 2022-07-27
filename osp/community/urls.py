@@ -18,8 +18,7 @@ urlpatterns = [
 
 
     path('api/article/like/', views.article_like, name='article-like'),
-    # todo scrap
-    # path('api/article/scrap/', views.article_scrap, name='article-scrap'),
+    path('api/article/scrap/', views.article_scrap, name='article-scrap'),
 
     path('api/comment/create/', views.comment_create, name='comment-c'),
     path('api/comment/delete/', views.comment_delete, name='comment-d'),
