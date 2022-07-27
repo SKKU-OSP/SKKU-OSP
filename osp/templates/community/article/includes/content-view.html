@@ -39,13 +39,17 @@
                     {{ article.pub_date|time:"h:i a" }}
                 </div>
                 </div>
+                <div class="d-flex flex-row">
+                    <div style="height:40px;line-height:40px;font-size:18px;padding-left:3px;" class="material-icons-outlined">visibility</div>
+                    <div style="height:40px;line-height:40px;font-size:12px;padding-left:3px;padding-right:3px;">{{ article.view_cnt }}</div>
+                </div>
             </div>
 
         </div>
         <div>
             <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body }}</div>
         </div>
-        <div style="margin-top:5px;" class="ss-97888 ss-main" style>
+        <div style="margin-top:5px;" class="ss-97888 ss-main d-flex flex-row" >
             <div class="ss-multi-selected">
                 <div class="ss-values">
                     {% for tag in tags %}
@@ -55,6 +59,29 @@
                     {% empty %}
                         <span style="padding-left:5px;">태그 없음</span>
                     {% endfor %}
+                </div>
+            </div>
+            <div class="d-flex flex-row justify-content-between" style="width:65px;height:30px;">
+                <div onclick="ArticleThumbUp(this, {{ article.id }},{{ request.user.id | default_if_none:-1 }})"
+                    {% is_article_thumb_up article request.user as is_thumb_up %}
+                    {% if not is_thumb_up %}
+                         class="material-icons-outlined h-100 pointer opacity-hover"
+                     {% else %}
+                        class="material-icons h-100 pointer opacity-hover"
+                     {% endif %}
+                     style="line-height:30px;font-size:21px;padding-left:5px;">
+                    thumb_up
+                </div>
+                <div onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
+                    {% is_article_scrap article request.user as is_scrap %}
+                    {% if not is_scrap %}
+                         class="material-icons-outlined h-100 pointer opacity-hover"
+                     {% else %}
+                        class="material-icons h-100 pointer opacity-hover"
+                     {% endif %}
+                     class="material-icons-outlined h-100 pointer opacity-hover"
+                     style="line-height:30px;font-size:23px;padding-right:3px;">
+                    bookmark_border
                 </div>
             </div>
 {#            <input name='tags' value='tag1,tag2' placeholder="게시판 관련 태그" style="border-top:none;border-left:none;border-right:none;" readonly >#}

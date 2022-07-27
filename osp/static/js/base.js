@@ -1,3 +1,52 @@
+function ArticleThumbUp(obj, article_id,user_id){
+   if(user_id == -1){
+       alert("로그인 후 이용해주세요.");
+       return;
+   }
+    ajax_form_data=new FormData();
+    ajax_form_data.append('article_id',article_id);
+    ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+    $.ajax({
+        type: "POST",
+        url: "/community/api/article/like/",
+        data: ajax_form_data,
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+
+        success: function(data) {
+            if(data['status']=='success'){
+             $(obj).toggleClass('material-icons-outlined');
+             $(obj).toggleClass('material-icons');
+            }
+        },
+    });
+}
+
+function ArticleScrap(article_id,user_id){
+   if(user_id == -1){
+       alert("로그인 후 이용해주세요.");
+       return;
+   }
+    ajax_form_data=new FormData();
+    ajax_form_data.append('article_id',article_id);
+    ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+    $.ajax({
+        type: "POST",
+        url: "/community/api/article/scrap/",
+        data: ajax_form_data,
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+
+        success: function(data) {
+            if(data['status']=='success'){
+             $(obj).toggleClass('material-icons-outlined');
+             $(obj).toggleClass('material-icons');
+            }
+        },
+    });
+}
 function apply_result(team_id, username, is_okay){
 
       var status = is_okay ? "수락" : "거절";

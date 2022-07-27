@@ -39,13 +39,18 @@ def articlecomment_create_alert(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ArticleLike)
 def articlelike_create_alert(sender, instance, created, **kwargs):
     if created:
-        comment = instance
-        comment_writer = comment.writer
-        article_writer = comment.article.writer
-        if comment_writer == article_writer:
+        articlelike = instance
+        article = articlelike.article
+        like_account = articlelike.account
+        article_writer = article.writer
+        if like_account == article_writer:
             return
 
-        body = "게시글에 공감을 받았습니다."
+        body_dict = {}
+        body_dict["type"] = "articlelike"
+        body_dict["body"] = "게시글에 공감을 받았습니다."
+        body_dict["article_id"] = "" + str(article.id)
+        body = json.dumps(body_dict)
 
         Message.objects.create(
             receiver=article_writer, body=body, send_date=datetime.now(),
