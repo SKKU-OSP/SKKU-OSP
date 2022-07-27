@@ -6,7 +6,7 @@ from tag.models import Tag
 from team.models import TeamMember,TeamInviteMessage, Team
 from user.models import Account
 from message.models import Message
-from community.models import ArticleLike
+from community.models import *
 import json
 
 @register.simple_tag
@@ -135,13 +135,11 @@ def is_article_thumb_up(article, user):
     else:
         return False
 
-#todo scrap
 @register.simple_tag
 def is_article_scrap(article, user):
     if user.is_anonymous:
         return False
-    # if ArticleScrap.objects.filter(article=article, account__user=user):
-    #     return True
-    # else:
-    #     return False
-    return False
+    if ArticleScrap.objects.filter(article=article, account__user=user):
+        return True
+    else:
+        return False

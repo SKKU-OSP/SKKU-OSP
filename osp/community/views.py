@@ -410,18 +410,17 @@ def article_like(request):
     except:
         return JsonResponse({'status':'false'})
 
-# todo scrap
-# def article_scrap(request):
-#     try:
-#         article_id = request.POST.get('article_id')
-#         user = request.user
-#         article = Article.objects.get(id=article_id)
-#         account = Account.objects.get(user=user)
-#
-#         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
-#
-#         if not created:
-#             obj.delete()
-#         return JsonResponse({'status': 'success'})
-#     except:
-#         return JsonResponse({'status':'false'})
+def article_scrap(request):
+    try:
+        article_id = request.POST.get('article_id')
+        user = request.user
+        article = Article.objects.get(id=article_id)
+        account = Account.objects.get(user=user)
+
+        obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
+
+        if not created:
+            obj.delete()
+        return JsonResponse({'status': 'success'})
+    except:
+        return JsonResponse({'status':'false'})

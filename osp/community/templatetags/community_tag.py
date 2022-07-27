@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 from user.models import Account, User
 from team.models import TeamMember, Team
-from community.models import ArticleBookmark, ArticleComment, Article, Board
+from community.models import ArticleComment, Article, ArticleScrap, Board
 from datetime import datetime, timedelta, timezone
 
 register = template.Library()
@@ -42,7 +42,7 @@ def user_bookmark(user_model):
     if not user_model.is_authenticated:
         return '로그인 필요'
     account = Account.objects.get(user=user_model)
-    return len(ArticleBookmark.objects.filter(account=account))
+    return len(ArticleScrap.objects.filter(account=account))
 
 @register.filter
 def anonymous_checked(a_writer):
