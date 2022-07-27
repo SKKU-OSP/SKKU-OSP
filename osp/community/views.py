@@ -49,7 +49,7 @@ def main(request):
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
             article.like_cnt = len(ArticleLike.objects.filter(article=article))
             article.comment_cnt = len(ArticleComment.objects.filter(article=article))
-            article.bookmark_cnt = len(ArticleBookmark.objects.filter(article=article))
+            article.scrap_cnt = len(ArticleScrap.objects.filter(article=article))
             if board.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
