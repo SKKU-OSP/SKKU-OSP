@@ -38,7 +38,7 @@ def user_comment(user_model):
     return len(ArticleComment.objects.filter(writer=account))
 
 @register.filter
-def user_bookmark(user_model):
+def user_scrap(user_model):
     if not user_model.is_authenticated:
         return '로그인 필요'
     account = Account.objects.get(user=user_model)
