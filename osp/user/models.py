@@ -230,3 +230,35 @@ class GithubRepoStats(models.Model):
         managed = False
         db_table = 'github_repo_stats'
         unique_together = (('github_id', 'repo_name'),)
+
+
+class GithubUserFollowing(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    following_id = models.CharField(max_length=40)
+
+    class Meta:
+        managed = False
+        db_table = 'github_user_following'
+        unique_together = (('github_id', 'following_id'),)
+
+
+class GithubUserStarred(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    starred_repo_owner = models.CharField(max_length=40)
+    starred_repo_name = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'github_user_starred'
+        unique_together = (('github_id', 'starred_repo_owner', 'starred_repo_name'),)
+
+
+class GithubRepoContributor(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    owner_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'github_repo_contributor'
+        unique_together = (('github_id', 'repo_name', 'owner_id'),)
