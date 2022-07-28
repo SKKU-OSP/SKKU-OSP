@@ -112,6 +112,7 @@
     padding: 0.5rem;
     font-size: 15px !important;
     background-color: var(--main-bg-color);
+    border-top: 1px solid var(--main-border-color);
     text-align: left;
 }
 
@@ -279,7 +280,7 @@
 }
 
 .article-bar{
-    min-height: 79px;
+    min-height: 82px;
     border-bottom: 0.03rem solid var(--main-border-color);
     background:white;
 }
