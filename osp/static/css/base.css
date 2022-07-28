@@ -68,15 +68,30 @@ body::-webkit-scrollbar {
   color: #000000;
 }
 
-#main-navbar .dropdown-menu{
-  border-radius: 0;
-  min-width: inherit;
-  color: #000000;
+#main-navbar .icon{
+  vertical-align: middle;
+  color: #FFFFFF;
 }
 
 div.vr{
   background-color: var(--main-border-color);
   opacity: 100;
+}
+
+.noti-item{
+  width: 20em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: solid 0.5px var(--main-border-color);
+}
+.noti-item:first-child{
+  padding-top: 0;
+}
+.noti-item:last-child{
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 #message-modal .modal-dialog,
