@@ -319,3 +319,11 @@
 .color-b{
     color:#2F2F2F;
 }
+
+#active-article{
+    min-height: 10em;
+}
+
+#no-active-article{
+    text-align: center;
+}
