@@ -38,8 +38,13 @@
                     <ul class="dropdown-menu noti-dropdown">
                         {% for noti in notifications %}
                         <li class="nav-item d-flex flex-row justify-content-between noti-item">
-                            <div>
-                                {{ noti.body.body }}
+                            <div class="d-flex">
+                                <div class="material-icons-outlined me-2">
+                                    {{noti.icon}}
+                                </div>
+                                <div>
+                                    {{ noti.body.body }}
+                                </div>
                             </div>
                             <div>
                                 {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
