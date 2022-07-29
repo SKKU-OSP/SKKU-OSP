@@ -642,7 +642,7 @@ function setVisualModal(){
 }
 function setPortfolioModal(){
   let icon_portfolio_modal = document.getElementById("icon-portfolio");
-  icon_portfolio_modal.addEventListener("click", (e)=>{
+  icon_portfolio_modal.addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal('show');
   });
   document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
@@ -650,5 +650,17 @@ function setPortfolioModal(){
   })
   document.getElementById("closePortfolioModalBtn").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
+  })
+}
+function setGbtiModal(){
+  let icon_portfolio_modal = document.getElementById("icon-gbti");
+  icon_portfolio_modal.addEventListener("click", ()=>{
+    $('#modalGbtiBox').modal('show');
+  });
+  document.getElementById("closeGbtiModalIcon").addEventListener("click", ()=>{
+    $('#modalGbtiBox').modal("hide");
+  })
+  document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
+    $('#modalGbtiBox').modal("hide");
   })
 }
