@@ -1,4 +1,9 @@
 <div id="active-article">
+  {% if active_article|length == 0 %}
+  <div id="no-active-article">
+    모집중 게시물이 없습니다.
+  </div>
+  {% else %}
   <div class="carousel slide" data-bs-ride="carousel" id="active-article-list">
     <div class="carousel-inner" role="listbox">
       {% for article in active_article %}
@@ -38,6 +43,7 @@
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
     </a>
   </div>
+  {% endif %}
 </div>
 <script>
   $(function() {
