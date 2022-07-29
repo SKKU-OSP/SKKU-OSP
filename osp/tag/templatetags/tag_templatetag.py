@@ -119,6 +119,14 @@ def get_notifications(user):
     for msg in msgs:
         try:
             tmp = json.loads(msg.body)
+            if tmp['type'] == 'comment':
+                msg.icon = 'comment'
+            if tmp['type'] == 'articlelike':
+                msg.icon = 'thumb_up'
+            if tmp['type'] == 'team_apply' or tmp['type'] == 'team_apply_result':
+                msg.icon = 'assignment_ind'
+            if tmp['type'] == 'team_invite' or tmp['type'] == 'team_invite_result':
+                msg.icon = 'group_add'
             msg.body = tmp
         except:
             tmp = msg.body

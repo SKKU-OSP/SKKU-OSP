@@ -345,7 +345,7 @@ a.nav-link {
 #btnGroupDropFactor{
   min-width: 88px;
 }
-.dropdown-item{
+.card .dropdown-item{
   font-size: 12px;
 }
 .dropdown-menu{
