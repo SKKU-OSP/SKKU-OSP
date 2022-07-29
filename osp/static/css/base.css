@@ -383,3 +383,13 @@ transform: translateX(0);
 .opacity-hover:hover{
   opacity:60%;
 }
+
+.noti-dropdown::after,
+.msg-dropdown::after{
+    content: none;
+}
+
+.default-btn{
+    border:none;
+    background:none;
+}
