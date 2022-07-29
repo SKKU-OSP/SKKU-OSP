@@ -251,8 +251,6 @@ function msgModalOpen(selected_oppo = 0) {
         $('#message-modal-body').html(data);
         $('.opponent-item').click(select_oppo);
         if (selected_oppo != 0) {
-            // console.log('#opo-id-'+selected_oppo);
-            // console.log($('#opo-id-'+selected_oppo));
             $('#opo-id-' + selected_oppo).click();
         }
         $('#chat-submit').click(send_msg);
