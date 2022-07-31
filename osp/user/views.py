@@ -13,6 +13,7 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 from django.core.files.images import get_image_dimensions
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
+from user.templatetags.gbti import getGBTI
 from django.db.models import Avg, Sum, Subquery
 
 import time
@@ -261,6 +262,15 @@ class ProfileView(TemplateView):
         chartdata["monthly_avg"] = monthly_avg
         chartdata["username"] = github_id
         context["chart_data"] = json.dumps(chartdata)
+        
+        #GBTI test
+        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30}
+        gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
+        gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
+        gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
+        gbti_data["typeA0"] = 100 - gbti_data["typeA1"] - gbti_data["typeA2"]
+        gbti_data.update(getGBTI(gbti_data["typeA1"]-gbti_data["typeA2"], gbti_data["typeB1"]-gbti_data["typeB2"], gbti_data["typeC1"]-gbti_data["typeC2"], gbti_data["typeD1"]-gbti_data["typeD2"]))
+        context["gbti"] = gbti_data
         context["this_year"] = self.end_year
         context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
