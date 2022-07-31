@@ -264,7 +264,7 @@ class ProfileView(TemplateView):
         context["chart_data"] = json.dumps(chartdata)
         
         #GBTI test
-        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30}
+        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
         gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
         gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
         gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
