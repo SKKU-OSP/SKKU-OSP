@@ -495,15 +495,21 @@ span.row-raw{
 }
 .gbti-card{
   box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  display: flex;
+  flex-direction: column;
 }
 .gbti-textbox{
   margin-bottom: 0.2rem;
   padding: 20px 20px 10px;
+  background-color: white;
 }
 .gbti-text{
   font-size: 18px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-weight: 500;
   margin-bottom: 0.2rem;
 }
+
 .weak-text{
   color: var(--main-icon-color);
   font-size: 12px;
@@ -563,4 +569,30 @@ span.row-raw{
 }
 .btn-gbti-group{
   margin: 15px 30px;
+}
+.gbti-harmony{
+  display: flex;
+  justify-content: center;
+  margin: 20px 5.5rem 10px;
+}
+.harmony{
+  flex: 1 1 auto;
+  padding: 2rem 2rem 1rem;
+}
+.gbti-analysis{
+  display: flex;
+  margin: 5px 6rem 5px;
+  gap: 15px
+}
+.gbti-analysis span{
+  font-size: 18px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-weight: 500;
+}
+.gbti-analysis-container{
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  justify-content: center;
+  margin: auto;
 }

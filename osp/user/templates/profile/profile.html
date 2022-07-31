@@ -397,9 +397,9 @@
                 </div>
                 <h4 class="text-center mt-3">GBTI(개발자 유형 지표) 검사 결과</h4>
                 <div class="d-flex justify-content-center">
-                  <span class = "endpoint left"></span>
-                  <span class = "line-connect"></span>
-                  <span class = "endpoint right"></span>
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
                 </div>
                 <div class="modal-gbti-card">
                   <span class="weak-text ms-3 mt-3">GBTI ID CARD</span>
@@ -456,6 +456,127 @@
                   <button class="btn-gbti pb-active">ID CARD 저장</button>
                   <button class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
                 </div>
+                <h4 class="text-center mt-3">다른 유형과의 조화</h4>
+                <div class="d-flex justify-content-center">
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
+                </div>
+                <div class="gbti-harmony">
+                  <div class="harmony">
+                    <h4>상생 파트너</h4>
+                    <div>
+                      {% if gbti.pos|length == 0 %}
+                        <span class="weak-text">상생 파트너가 없습니다</span>
+                      {% endif %}
+                      <div id="carouselPosGbtiControls">
+                          {% for pos in gbti.pos%}
+                          {% if gbti.pos|first == pos %}
+                          <div class="carousel-gbti">
+                          {%else%}
+                          <div class="carousel-gbti none">
+                          {% endif %}
+                            <div class="gbti-card">
+                              <div class="gbti-img">
+                                <img src= "/data/media/img/gbti/{{pos.code}}.png" alt="No Image now">
+                              </div>
+                              <div class="gbti-textbox">
+                                <p class="gbti-text bold">
+                                  <i id="gbti-pos-prev" class="bi bi-caret-left-fill evt-icon"></i>
+                                  {{pos.nicknameKR}}
+                                  <i id="gbti-pos-next" class="bi bi-caret-right-fill evt-icon" style="float: right;"></i>
+                                </p>
+                                <p class="gbti-text">{{pos.descKR}}</p>
+                              </div>
+                            </div>
+                          </div>
+                          {% endfor%}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="harmony">
+                    <h4>상극 파트너</h4>
+                    {% if gbti.neg|length == 0 %}
+                      <span class="weak-text">상극 파트너가 없습니다</span>
+                    {% endif %}
+                    <div id="carouselNegGbtiControls">
+                      {% for neg in gbti.neg%}
+                      {% if gbti.neg|first == neg %}
+                      <div class="carousel-gbti">
+                      {%else%}
+                      <div class="carousel-gbti none">
+                      {% endif %}
+                        <div class="gbti-card">
+                          <div class="gbti-img">
+                            <img src= "/data/media/img/gbti/{{neg.code}}.png" alt="No Image now">
+                          </div>
+                          <div class="gbti-textbox">
+                            <p class="gbti-text bold">
+                              <i id="gbti-neg-prev" class="bi bi-caret-left-fill evt-icon"></i>
+                              {{neg.nicknameKR}}
+                              <i id="gbti-neg-next" class="bi bi-caret-right-fill evt-icon" style="float: right;"></i>
+                            </p>
+                            <p class="gbti-text">{{neg.descKR}}</p>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor%}
+                    </div>
+                  </div>
+                </div>
+                <h4 class="text-center mt-3">개발 성향 분석</h4>
+                <div class="d-flex justify-content-center">
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
+                </div>
+                <div class="gbti-analysis-container">
+                  <div class="gbti-analysis">
+                    {% if gbti.typeE1 >= gbti.typeE2 %}
+                    <i class="bi bi-sun-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Sunflower</span>
+                      <span>주로 낮에 활동합니다.</span>
+                    </div>
+                    {% else %}
+                    <i class="bi bi-moon-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Night Owl</span>
+                      <span>주로 밤에 활동합니다.</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="gbti-analysis">
+                    {% if gbti.typeF1 >= gbti.typeF2 %}
+                    <i class="bi bi-grid-3x3-gap-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Frequent Commit</span>
+                      <span>커밋을 자주 합니다</span>
+                    </div>
+                    {% else %}
+                    <i class="bi bi-square icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Infrequent Commit</span>
+                      <span>커밋을 드물게 합니다</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="gbti-analysis">
+                    {% if gbti.typeG1 >= gbti.typeG2 %}
+                    <i class="bi bi-people-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Together</span>
+                      <span>함께 작업하는 편입니다</span>
+                    </div>
+                    {% else %}
+                    <i class="bi bi-person-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Independent</span>
+                      <span>혼자서 작업하는 편입니다</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
                 <div class="modal-footer">
                   <button id="closeGbtiModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
@@ -479,9 +600,21 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-between">
+                  {% if gbti.typeE1 >= gbti.typeE2 %}
                   <i class="bi bi-sun-fill icon-lg"></i>
+                  {% else %}
+                  <i class="bi bi-moon-fill icon-lg"></i>
+                  {% endif %}
+                  {% if gbti.typeF1 >= gbti.typeF2 %}
                   <i class="bi bi-grid-3x3-gap-fill icon-lg"></i>
+                  {% else %}
+                  <i class="bi bi-square icon-lg"></i>
+                  {% endif %}
+                  {% if gbti.typeG1 >= gbti.typeG2 %}
                   <i class="bi bi-people-fill icon-lg"></i>
+                  {% else %}
+                  <i class="bi bi-person-fill icon-lg"></i>
+                  {% endif %}
                 </div>
               </div>
             </div>
