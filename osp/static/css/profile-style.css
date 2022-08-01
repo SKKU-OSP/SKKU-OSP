@@ -28,6 +28,18 @@
     padding: 5px;
     font-size: 12px;
   }
+  .gbti-content div.progress {
+    margin-bottom: 2px !important;
+    height: 10px;
+  }
+  .gbti-content p.text-label{
+    margin-bottom: 2px !important;
+    font-size: 10px;
+  }
+  .gbti-content > h4{
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
 }
 @media (max-width: 768px) {
   #profile-info {
@@ -467,10 +479,6 @@ span.row-raw{
 .expanded:nth-child(1){
   order:-1;
 }
-.gbti-content{
-  display: flex;
-  flex-direction: column;
-}
 .gbti-content > div.progress{
   margin: 0 0 1rem;
 }
@@ -481,6 +489,10 @@ span.row-raw{
 .p-sm{
   padding: 5% 5%;
   width: 50%;
+}
+.gbti-content > .gbti-img{
+  max-width: 300px;
+  max-height: 300px;
 }
 .gbti-img img{
   width: 100%;
@@ -577,7 +589,7 @@ span.row-raw{
 }
 .harmony{
   flex: 1 1 auto;
-  padding: 2rem 2rem 1rem;
+  padding: 2rem 1rem 1rem;
 }
 .gbti-analysis{
   display: flex;

@@ -47,7 +47,7 @@ def getGBTI(type1, type2, type3, type4):
         "INFJ":{"pos":["ENFP", "ENTP"], "neg":["ISFP", "ESFP", "ISTP","ESTP","ISFJ", "ESFJ", "ISTJ", "ESTJ"]},
         "ESFP":{"pos":["ISFJ", "ISTJ"], "neg":["INFP", "ENFP", "INFJ","ENFJ"]},
         "ISFP":{"pos":["ENFJ", "ESFJ", "ESTJ"], "neg":["INFP", "ENFP","INFJ"]},
-        "ENTJ":{"pos":["INFP", "INTP"], "neg":[]},
+        "ENTJ":{"pos":["INFP", "INTP"], "neg":["ISFP", "ESFP", "ISTP","ESTP","ISFJ", "ESFJ", "ISTJ", "ESTJ"]},
         "INTP":{"pos":["ENTJ", "ESTJ"], "neg":["ISFJ", "ESFJ", "ISTJ"]},
         "ESTJ":{"pos":["INTP", "ISFP", "ISTP"], "neg":["INFP", "ENFP", "INFJ", "ENFJ"]},
         "ESTP":{"pos":["ISFJ"], "neg":["INFP", "ENFP", "INFJ", "ENFJ"]},
