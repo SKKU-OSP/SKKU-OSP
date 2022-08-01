@@ -403,13 +403,13 @@
                 </div>
                 <div id="gbti-id-card" class="modal-gbti-card">
                   <span class="weak-text ms-3 mt-3">GBTI ID CARD</span>
-                  <div class="d-flex justify-content-between">
-                    <div class="gbti-content p-sm">
+                  <div class="d-flex justify-content-center">
+                    <div class="gbti-content d-flex justify-content-center p-sm">
                       <div class="gbti-img">
                         <img src= "/data/media/img/gbti/{{gbti.code}}.png" alt="No Image now">
                       </div>
                     </div>
-                    <div class="gbti-content p-sm">
+                    <div class="gbti-content d-flex flex-column p-sm">
                       <p class="text-center text-label mb-3">{{gbti.desc}}</p>
                       <h4 class="text-center">{{gbti.nickname}}</h3>
                       <h4 class="text-center">{{gbti.nicknameKR}}</h3>
@@ -465,7 +465,8 @@
                 <div class="gbti-harmony">
                   <div class="harmony">
                     <h4>상생 파트너</h4>
-                    <div>
+                    <div class="d-flex">
+                      <i id="gbti-pos-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
                       {% if gbti.pos|length == 0 %}
                         <span class="weak-text">상생 파트너가 없습니다</span>
                       {% endif %}
@@ -482,9 +483,7 @@
                               </div>
                               <div class="gbti-textbox">
                                 <p class="gbti-text bold">
-                                  <i id="gbti-pos-prev" class="bi bi-caret-left-fill evt-icon"></i>
                                   {{pos.nicknameKR}}
-                                  <i id="gbti-pos-next" class="bi bi-caret-right-fill evt-icon" style="float: right;"></i>
                                 </p>
                                 <p class="gbti-text">{{pos.descKR}}</p>
                               </div>
@@ -492,35 +491,38 @@
                           </div>
                           {% endfor%}
                       </div>
+                      <i id="gbti-pos-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
                     </div>
                   </div>
                   <div class="harmony">
                     <h4>상극 파트너</h4>
-                    {% if gbti.neg|length == 0 %}
+                    <div class="d-flex">
+                      <i id="gbti-neg-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
+                      {% if gbti.neg|length == 0 %}
                       <span class="weak-text">상극 파트너가 없습니다</span>
-                    {% endif %}
-                    <div id="carouselNegGbtiControls">
-                      {% for neg in gbti.neg%}
-                      {% if gbti.neg|first == neg %}
-                      <div class="carousel-gbti">
-                      {%else%}
-                      <div class="carousel-gbti none">
                       {% endif %}
-                        <div class="gbti-card">
-                          <div class="gbti-img">
-                            <img src= "/data/media/img/gbti/{{neg.code}}.png" alt="No Image now">
-                          </div>
-                          <div class="gbti-textbox">
-                            <p class="gbti-text bold">
-                              <i id="gbti-neg-prev" class="bi bi-caret-left-fill evt-icon"></i>
-                              {{neg.nicknameKR}}
-                              <i id="gbti-neg-next" class="bi bi-caret-right-fill evt-icon" style="float: right;"></i>
-                            </p>
-                            <p class="gbti-text">{{neg.descKR}}</p>
+                      <div id="carouselNegGbtiControls">
+                        {% for neg in gbti.neg%}
+                        {% if gbti.neg|first == neg %}
+                        <div class="carousel-gbti">
+                        {%else%}
+                        <div class="carousel-gbti none">
+                        {% endif %}
+                          <div class="gbti-card">
+                            <div class="gbti-img">
+                              <img src= "/data/media/img/gbti/{{neg.code}}.png" alt="No Image now">
+                            </div>
+                            <div class="gbti-textbox">
+                              <p class="gbti-text bold">
+                                {{neg.nicknameKR}}
+                              </p>
+                              <p class="gbti-text">{{neg.descKR}}</p>
+                            </div>
                           </div>
                         </div>
+                        {% endfor%}
                       </div>
-                      {% endfor%}
+                      <i id="gbti-neg-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
                     </div>
                   </div>
                 </div>
