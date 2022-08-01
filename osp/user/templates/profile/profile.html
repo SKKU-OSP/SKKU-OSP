@@ -288,6 +288,9 @@
               <h5 class="card-title d-flex justify-content-between">관심분야
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
+              {% if data.relations|length == 0 and data.remains|length == 0 %}
+                <span class="weak-text">관심분야를 설정해주세요</span>
+              {% endif %}
               {% for row in data.relations %}
                 <span class="badge bg-tag-domain me-1" style="height:20px">{{row.parent}}</span>
                 {% for child in row.children %}
@@ -308,6 +311,9 @@
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               <div class="d-flex flex-wrap overflow-auto">
+                {% if data.lang|length == 0%}
+                  <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
+                {% endif %}
                 {% for row in data.lang %}
                 <div class="flex-fill" style="min-width: 100px;">
                   <div class="container">
@@ -328,14 +334,17 @@
           </div>
         </div>
         <div class="col-4 expandable">
-          <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfoliModal" aria-hidden="true">
+          <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfolioModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 id="portfoliModal" class="modal-title">포트폴리오</h5>
+                  <h5 id="portfolioModal" class="modal-title">포트폴리오</h5>
                   <i id="closePortfolioModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
                 <div class="modal-body-markdown">
+                  {% if data.account.portfolio == '' %}
+                    <span class="weak-text">포트폴리오를 설정해주세요</span>
+                  {% endif %}
                   {{ data.account.portfolio|mark }}
                 </div>
                 <div class="modal-footer">
@@ -350,6 +359,9 @@
                 자기소개
                 <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
               </h5>
+              {% if data.account.introduction == '' %}
+                <span class="weak-text">자기소개를 설정해주세요</span>
+              {% endif %}
               {{data.account.introduction}}
             </div>
           </div>
@@ -367,8 +379,6 @@
                 <div class="card-body">
                   <h6 class="card-title">{{recent_repo.repo_name}}</h6>
                   <div style="font-size: 13px">
-                    <!-- last commit : {{recent_repo.committer_date}} -->
-                    <!-- <br> -->
                     {{recent_repo.desc}}
                   </div>
                 </div>
@@ -378,10 +388,237 @@
           </div>
         </div>
         <div class="col-5">
+          <div id="modalGbtiBox" class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="gbtiModal" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+              <div class="modal-content gbti-bg">
+                <div class="modal-header">
+                  <h5 id="gbtiModal" class="modal-title">GBTI</h5>
+                  <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                </div>
+                <h4 class="text-center mt-3">GBTI(개발자 유형 지표) 검사 결과</h4>
+                <div class="d-flex justify-content-center">
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
+                </div>
+                <div id="gbti-id-card" class="modal-gbti-card">
+                  <span class="weak-text ms-3 mt-3">GBTI ID CARD</span>
+                  <div class="d-flex justify-content-center">
+                    <div class="gbti-content d-flex justify-content-center p-sm">
+                      <div class="gbti-img">
+                        <img src={% static "images/"|add:gbti.code|add:".png" %} alt="No Image now">
+                      </div>
+                    </div>
+                    <div class="gbti-content d-flex flex-column p-sm">
+                      <p class="text-center text-label mb-3">{{gbti.desc}}</p>
+                      <h4 class="text-center">{{gbti.nickname}}</h3>
+                      <h4 class="text-center">{{gbti.nicknameKR}}</h3>
+                      <div class="d-flex justify-content-between text-label">
+                        <span>Steady</span>
+                        <span>Fluid</span>
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeD1}}%" aria-valuenow={{gbti.typeD1}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeD0}}%" aria-valuenow={{gbti.typeD0}}  aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeD2}}%" aria-valuenow={{gbti.typeD2}} aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="d-flex justify-content-between text-label">
+                        <span>CoolHead</span>
+                        <span>WarmHeart</span>
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeC1}}%" aria-valuenow={{gbti.typeC1}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeC0}}%" aria-valuenow={{gbti.typeC0}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeC2}}%" aria-valuenow={{gbti.typeC2}} aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="d-flex justify-content-between text-label">
+                        <span>Creative</span>
+                        <span>Efficient</span>
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeB1}}%" aria-valuenow={{gbti.typeB1}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeB0}}%" aria-valuenow={{gbti.typeB0}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeB2}}%" aria-valuenow={{gbti.typeB2}} aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="d-flex justify-content-between text-label">
+                        <span>MultiPlay</span>
+                        <span>SinglePlay</span>
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeA1}}%" aria-valuenow={{gbti.typeA1}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeA0}}%" aria-valuenow={{gbti.typeA0}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeA2}}%" aria-valuenow={{gbti.typeA2}} aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end btn-gbti-group">
+                  <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
+                  <button class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
+                </div>
+                <h4 class="text-center mt-3">다른 유형과의 조화</h4>
+                <div class="d-flex justify-content-center">
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
+                </div>
+                <div class="gbti-harmony">
+                  <div class="harmony">
+                    <h4>상생 파트너</h4>
+                    <div class="d-flex">
+                      <i id="gbti-pos-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
+                      {% if gbti.pos|length == 0 %}
+                        <span class="weak-text">상생 파트너가 없습니다</span>
+                      {% endif %}
+                      <div id="carouselPosGbtiControls">
+                          {% for pos in gbti.pos%}
+                          {% if gbti.pos|first == pos %}
+                          <div class="carousel-gbti">
+                          {%else%}
+                          <div class="carousel-gbti none">
+                          {% endif %}
+                            <div class="gbti-card">
+                              <div class="gbti-img">
+                                <img src={% static "images/"|add:pos.code|add:".png" %} alt="No Image now">
+                              </div>
+                              <div class="gbti-textbox">
+                                <p class="gbti-text bold">
+                                  {{pos.nicknameKR}}
+                                </p>
+                                <p class="gbti-text">{{pos.descKR}}</p>
+                              </div>
+                            </div>
+                          </div>
+                          {% endfor%}
+                      </div>
+                      <i id="gbti-pos-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
+                    </div>
+                  </div>
+                  <div class="harmony">
+                    <h4>상극 파트너</h4>
+                    <div class="d-flex">
+                      <i id="gbti-neg-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
+                      {% if gbti.neg|length == 0 %}
+                      <span class="weak-text">상극 파트너가 없습니다</span>
+                      {% endif %}
+                      <div id="carouselNegGbtiControls">
+                        {% for neg in gbti.neg%}
+                        {% if gbti.neg|first == neg %}
+                        <div class="carousel-gbti">
+                        {%else%}
+                        <div class="carousel-gbti none">
+                        {% endif %}
+                          <div class="gbti-card">
+                            <div class="gbti-img">
+                              <img src={% static "images/"|add:neg.code|add:".png" %} alt="No Image now">
+                            </div>
+                            <div class="gbti-textbox">
+                              <p class="gbti-text bold">
+                                {{neg.nicknameKR}}
+                              </p>
+                              <p class="gbti-text">{{neg.descKR}}</p>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor%}
+                      </div>
+                      <i id="gbti-neg-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
+                    </div>
+                  </div>
+                </div>
+                <h4 class="text-center mt-3">개발 성향 분석</h4>
+                <div class="d-flex justify-content-center">
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
+                </div>
+                <div class="gbti-analysis-container">
+                  <div class="gbti-analysis">
+                    {% if gbti.typeE1 >= gbti.typeE2 %}
+                    <i class="bi bi-sun-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Sunflower</span>
+                      <span>주로 낮에 활동합니다.</span>
+                    </div>
+                    {% else %}
+                    <i class="bi bi-moon-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Night Owl</span>
+                      <span>주로 밤에 활동합니다.</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="gbti-analysis">
+                    {% if gbti.typeF1 >= gbti.typeF2 %}
+                    <i class="bi bi-grid-3x3-gap-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Frequent Commit</span>
+                      <span>커밋을 자주 합니다</span>
+                    </div>
+                    {% else %}
+                    <i class="bi bi-square icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Infrequent Commit</span>
+                      <span>커밋을 드물게 합니다</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="gbti-analysis">
+                    {% if gbti.typeG1 >= gbti.typeG2 %}
+                    <i class="bi bi-people-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Together</span>
+                      <span>함께 작업하는 편입니다</span>
+                    </div>
+                    {% else %}
+                    <i class="bi bi-person-fill icon-lg" style="float: left;"></i>
+                    <div class="d-flex flex-column justify-content-center">
+                      <span>Independent</span>
+                      <span>혼자서 작업하는 편입니다</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button id="closeGbtiModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="card h-100">
             <div class="card-body">
-              <h5 class="card-title">개발자 성향</h5>
-              <p class="card-text">MBTI</p>
+              <h5 class="card-title d-flex justify-content-between">
+                개발자 성향
+                <i id="icon-gbti" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+              </h5>
+              <div class="gbti-content p-lg">
+                <div class="gbti-card">
+                  <div class="gbti-img">
+                    <img src={% static "images/"|add:gbti.code|add:".png" %} alt="No Image now">
+                  </div>
+                  <div class="gbti-textbox">
+                    <p id="gbti-name" class="gbti-text bold">{{gbti.nicknameKR}}</p>
+                    <p id="gbti-desc" class="gbti-text">{{gbti.descKR}}</p>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  {% if gbti.typeE1 >= gbti.typeE2 %}
+                  <i class="bi bi-sun-fill icon-lg"></i>
+                  {% else %}
+                  <i class="bi bi-moon-fill icon-lg"></i>
+                  {% endif %}
+                  {% if gbti.typeF1 >= gbti.typeF2 %}
+                  <i class="bi bi-grid-3x3-gap-fill icon-lg"></i>
+                  {% else %}
+                  <i class="bi bi-square icon-lg"></i>
+                  {% endif %}
+                  {% if gbti.typeG1 >= gbti.typeG2 %}
+                  <i class="bi bi-people-fill icon-lg"></i>
+                  {% else %}
+                  <i class="bi bi-person-fill icon-lg"></i>
+                  {% endif %}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -433,7 +670,7 @@
                 }
                 console.log("res", target_github_id, target_yearly_contr);
             },
-            error : function(data){                                 
+            error : function(data){ 
               console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
             }
           });
@@ -468,12 +705,13 @@
       }
     });
   </script>
-    <script>
-      $(document).ready(function() {
-        var level_value = 0;
-        var contains = $('.span_language');
-      });
-    </script>
+  <script>
+    $(document).ready(function() {
+      var level_value = 0;
+      var contains = $('.span_language');
+    });
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
