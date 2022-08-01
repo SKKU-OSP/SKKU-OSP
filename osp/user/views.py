@@ -24,6 +24,7 @@ import math
 # Create your views here.
 class ProfileView(TemplateView):
 
+    # TODO: start_year, end_year에 기반하지 않는 수식 필요
     template_name = 'profile/profile.html'
     start_year = 2019
     end_year = 2021
@@ -239,20 +240,22 @@ class ProfileView(TemplateView):
         chartdata["issue_dist"] = issue_dist
         chartdata["repo_dist"] = repo_dist
         
+        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_contr = [ [] for i in range(self.end_year-self.start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
             row_json = row.to_json()
             row_json['star'] = own_star["star"]
-            if row_json["year"] >= self.start_year :
-                monthly_contr[row_json["year"]-self.start_year].append(row_json)
+            if row_json["year"] >= self.start_year and row_json["year"] <= self.end_year:
+                monthly_contr[row_json["year"] - self.start_year].append(row_json)
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
+        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_avg = [ [] for i in range(self.end_year-self.start_year+1)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
-            if yid >= 0 :
+            if avg["start_yymm"].year >= self.start_year and avg["start_yymm"].year <= self.end_year :
                 avg["year"] = avg["start_yymm"].year
                 avg["month"] =  avg["start_yymm"].month
                 avg.pop('start_yymm', None)
