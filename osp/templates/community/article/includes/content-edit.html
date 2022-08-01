@@ -3,7 +3,7 @@
 
 <form id="article-form" method="post" edit-type="{{ type }}" action=".." class="" style="" onsubmit="edit_submit(event);">
     {% csrf_token %}
-    <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
+    <div class="d-flex flex-column border border-2" style="padding:10px;">
         <div class="d-flex flex-row justify-content-between" style="margin-bottom:5px;">
             <input style="flex:1" type="text" id="article-title" value="{{ article.title }}" placeholder="제목" class="form-control" style="width:100%; height: 40px; padding-left:10px;" required autofocus>
             {% if board.board_type == 'Recruit' %}

@@ -4,7 +4,7 @@
 
 <form method="post" action=".." class="" onSubmit="return false;" style="">
     <!--article content-->
-    <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
+    <div class="d-flex flex-column border border-2" style="padding:10px;">
         <div class="d-flex flex-row justify-content-between">
             <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;">
                 {% if board.board_type == 'Recruit' %}
@@ -65,22 +65,22 @@
                 <div onclick="ArticleThumbUp(this, {{ article.id }},{{ request.user.id | default_if_none:-1 }})"
                     {% is_article_thumb_up article request.user as is_thumb_up %}
                     {% if not is_thumb_up %}
-                         class="material-icons-outlined h-100 pointer opacity-hover"
-                     {% else %}
+                        class="material-icons-outlined h-100 pointer opacity-hover"
+                    {% else %}
                         class="material-icons h-100 pointer opacity-hover"
-                     {% endif %}
-                     style="line-height:30px;font-size:21px;padding-left:5px;">
+                    {% endif %}
+                        style="line-height:30px;font-size:21px;padding-left:5px;">
                     thumb_up
                 </div>
                 <div onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
                     {% is_article_scrap article request.user as is_scrap %}
                     {% if not is_scrap %}
-                         class="material-icons-outlined h-100 pointer opacity-hover"
-                     {% else %}
+                        class="material-icons-outlined h-100 pointer opacity-hover"
+                    {% else %}
                         class="material-icons h-100 pointer opacity-hover"
-                     {% endif %}
-                     class="material-icons-outlined h-100 pointer opacity-hover"
-                     style="line-height:30px;font-size:23px;padding-right:3px;">
+                    {% endif %}
+                    class="material-icons-outlined h-100 pointer opacity-hover"
+                    style="line-height:30px;font-size:23px;padding-right:3px;">
                     bookmark_border
                 </div>
             </div>
