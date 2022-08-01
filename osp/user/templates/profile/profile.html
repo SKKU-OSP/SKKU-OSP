@@ -406,7 +406,7 @@
                   <div class="d-flex justify-content-center">
                     <div class="gbti-content d-flex justify-content-center p-sm">
                       <div class="gbti-img">
-                        <img src= "/data/media/img/gbti/{{gbti.code}}.png" alt="No Image now">
+                        <img src={% static "images/"|add:gbti.code|add:".png" %} alt="No Image now">
                       </div>
                     </div>
                     <div class="gbti-content d-flex flex-column p-sm">
@@ -479,7 +479,7 @@
                           {% endif %}
                             <div class="gbti-card">
                               <div class="gbti-img">
-                                <img src= "/data/media/img/gbti/{{pos.code}}.png" alt="No Image now">
+                                <img src={% static "images/"|add:pos.code|add:".png" %} alt="No Image now">
                               </div>
                               <div class="gbti-textbox">
                                 <p class="gbti-text bold">
@@ -510,7 +510,7 @@
                         {% endif %}
                           <div class="gbti-card">
                             <div class="gbti-img">
-                              <img src= "/data/media/img/gbti/{{neg.code}}.png" alt="No Image now">
+                              <img src={% static "images/"|add:neg.code|add:".png" %} alt="No Image now">
                             </div>
                             <div class="gbti-textbox">
                               <p class="gbti-text bold">
@@ -594,7 +594,7 @@
               <div class="gbti-content p-lg">
                 <div class="gbti-card">
                   <div class="gbti-img">
-                    <img src= "/data/media/img/gbti/{{gbti.code}}.png" alt="No Image now">
+                    <img src={% static "images/"|add:gbti.code|add:".png" %} alt="No Image now">
                   </div>
                   <div class="gbti-textbox">
                     <p id="gbti-name" class="gbti-text bold">{{gbti.nicknameKR}}</p>
