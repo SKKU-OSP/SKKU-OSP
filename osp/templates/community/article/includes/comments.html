@@ -26,34 +26,41 @@
         {% if comment.is_deleted %}
         삭제된 댓글입니다.
         {% else %}
-        <div class="comment-item-writer">
-            <!-- <image></image> -->
-            {% if comment.anonymous_writer %}
-            <span>익명</span>
-            {% else %}
-            <span>{{ comment.writer }}</span>
-            {% endif %}
-        </div>
-        <div class="vr"></div>
-        <div class="comment-item-body">
-            {{ comment.body }}
-        </div>
         <div class="comment-item-meta">
+            <div class="comment-item-writer">
+                <!-- <image></image> -->
+                {% if comment.anonymous_writer %}
+                <span>익명</span>
+                {% else %}
+                <div class="dropdown writer-dropdown">
+                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{article.writer.user.username}}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
             {% if request.user == comment.writer.user %}
             <div class="comment-item-delete">
                 <span onclick="deleteComment({{ comment.id }});">삭제</span>
             </div>
             {% endif %}
-            <div class="comment-item-datetime">
-                <div>
-                    {{ comment.pub_date|date:"Y-m-d" }}
-                </div>
-                <div>
-                    {{ comment.pub_date|time:"h:i a" }}
-                </div>
-            </div>
-        {% endif %}
         </div>
+        <div class="comment-item-body">
+            {{ comment.body }}
+        </div>
+        <div class="comment-item-datetime">
+            <div>
+                {{ comment.pub_date|date:"Y-m-d" }}
+            </div>
+            <div>
+                {{ comment.pub_date|time:"h:i a" }}
+            </div>
+        </div>
+        {% endif %}
     </div>
     {% empty %}
     <div>댓글을 등록해주세요.</div>

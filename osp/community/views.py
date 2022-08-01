@@ -221,7 +221,6 @@ class ArticleView(TemplateView):
         return render(request, 'community/article/article.html', context)
 
     def post(self, request, *args, **kwargs):
-        print('sdkfljasf;lkjsda;l')
         context = self.get_context_data(request, *args, **kwargs)
         context['type'] = 'edit'
         article_id = kwargs.get('article_id')
@@ -289,7 +288,18 @@ def article_update(request):
             article = Article.objects.get(id=article_id)
 
             if article.writer.user == request.user:
-                Article.objects.filter(id=article_id).update(title=request.POST.get('title'), body=request.POST.get('body'), mod_date=datetime.now(), anonymous_writer=request.POST.get('is_anonymous') == 'true')
+                target_article = Article.objects.filter(id=article_id)
+                target_article.update(
+                    title=request.POST.get('title'), 
+                    body=request.POST.get('body'), 
+                    mod_date=datetime.now(), 
+                    anonymous_writer=request.POST.get('is_anonymous') == 'true'
+                )
+                if request.POST.get('period_start', False):
+                    target_article.update(
+                        period_start=request.POST.get('period_start')[:-1],
+                        period_end=request.POST.get('period_end')[:-1]
+                    )
                 tag_list = request.POST.get('tags').split(',')
                 tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
 

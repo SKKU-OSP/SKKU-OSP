@@ -325,40 +325,39 @@
 }
 
 .comment-item{
-    padding: 0px;
+    padding: 0.5rem;
     width: 100%;
+    min-height: 2.5rem;
+}
+
+
+.comment-item-body{
+    flex: 1;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.comment-item-meta{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    min-height: 2.5rem;
 }
 
 .comment-item-writer{
     text-align: center;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 0.25em;
-    margin-right: 0.25em;
-    min-width: 5em;
-}
-
-.comment-item-body{
     flex: 1;
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 0.25em;
-    margin-right: 0.25em;
+    text-align: left;
 }
 
-.comment-item-meta{
-    display: flex;
-    flex-direction: row;
+.comment-item-writer > div > button{
+    padding: 0;
 }
 
 .comment-item-delete{
     margin-top: auto;
     margin-bottom: auto;
-    margin-right: 0.5em;
 }
 
 .comment-item-delete > span{
@@ -367,13 +366,23 @@
 
 .comment-item-datetime{
     display: flex;
-    flex-direction: column;
     margin-top: auto;
     margin-bottom: auto;
-    margin-right: 0.5em;
 }
 
 .comment-item-datetime > div{
     height: 3em;
     font-size:5px;
+    margin-right: 0.5em;
+    color: var(--main-border-color);
+}
+
+#recruit-team-info-image > img{
+    width: 5em;
+    height: 5em;
+}
+
+#recruit-team-info-period{
+    width: 5em;
+    text-align: center;
 }
