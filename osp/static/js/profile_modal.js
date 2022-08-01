@@ -647,10 +647,10 @@ function setPortfolioModal(){
   });
   document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
-  })
+  });
   document.getElementById("closePortfolioModalBtn").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
-  })
+  });
 }
 function setGbtiModal(){
   let icon_portfolio_modal = document.getElementById("icon-gbti");
@@ -659,8 +659,19 @@ function setGbtiModal(){
   });
   document.getElementById("closeGbtiModalIcon").addEventListener("click", ()=>{
     $('#modalGbtiBox').modal("hide");
-  })
+  });
   document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
     $('#modalGbtiBox').modal("hide");
-  })
+  });
+  document.getElementById("btn-save-id-card").addEventListener("click", ()=>{
+    const screenshotTarget = document.getElementById("gbti-id-card");
+    html2canvas(screenshotTarget).then((canvas)=>{
+      const base64image = canvas.toDataURL("image/png");
+      var anchor = document.createElement('a');
+      anchor.setAttribute("href", base64image);
+      anchor.setAttribute("download", "my-image.png");
+      anchor.click();
+      anchor.remove();
+    });
+  });
 }

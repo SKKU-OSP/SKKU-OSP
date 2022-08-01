@@ -401,7 +401,7 @@
                   <span class="line-connect"></span>
                   <span class="endpoint right"></span>
                 </div>
-                <div class="modal-gbti-card">
+                <div id="gbti-id-card" class="modal-gbti-card">
                   <span class="weak-text ms-3 mt-3">GBTI ID CARD</span>
                   <div class="d-flex justify-content-between">
                     <div class="gbti-content p-sm">
@@ -453,7 +453,7 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
-                  <button class="btn-gbti pb-active">ID CARD 저장</button>
+                  <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
                   <button class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
                 </div>
                 <h4 class="text-center mt-3">다른 유형과의 조화</h4>
@@ -703,12 +703,13 @@
       }
     });
   </script>
-    <script>
-      $(document).ready(function() {
-        var level_value = 0;
-        var contains = $('.span_language');
-      });
-    </script>
+  <script>
+    $(document).ready(function() {
+      var level_value = 0;
+      var contains = $('.span_language');
+    });
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
