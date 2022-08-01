@@ -5,7 +5,7 @@
 <div class="container my-4">
   <div class="d-flex justify-content-between">
     <h5>도전과제</h5>
-    <button id="refresh">
+    <button id="challenge-refresh">
       <span class="material-icons-outlined">
         refresh
       </span>
@@ -51,7 +51,7 @@
                     {{item.challenge.description}}
                   </div>
                   <div class="challenge-date">
-                    {{item.acheive_date}}
+                    {{item.acheive_date|date:"Y-m-d h:i a"}}
                   </div>
                 </div>
                 <div class="challenge-progress progress">
@@ -136,10 +136,13 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/challenge-base.css' %}">
 <script>
   $(function () {
-    $('#refresh').click(function () {
+    $('#challenge-refresh').click(function () {
+      $('#challenge-refresh span').addClass('rotation');
       $.ajax({
         url: 'check',
         method: 'GET',
+      }).done(function(){
+        window.location.reload();
       })
     });
   });

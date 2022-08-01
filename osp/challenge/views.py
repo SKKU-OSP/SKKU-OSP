@@ -13,7 +13,7 @@ def challenge_list_view(request):
     my_acc = Account.objects.get(user=request.user)
     new_challenge = achieve_list.values_list('challenge', flat=True)
     for challenge in Challenge.objects.exclude(id__in=new_challenge):
-        acheivement_check(my_acc, challenge)
+        achievement_check(my_acc, challenge)
         achieve_list = ChallengeAchieve.objects.filter(account__user=request.user).select_related('challenge')
     context = {
         'achieved_list': [],
@@ -73,7 +73,7 @@ def challenge_acheive_update(request):
             return JsonResponse({'status': 'fail', 'message': 'DB Fail'})
     return JsonResponse({'status': 'success'})
 
-def acheivement_check(user: Account, challenge: Challenge):
+def achievement_check(user: Account, challenge: Challenge):
     sql_with_format = challenge.sql.replace('{{github_id}}', user.student_data.github_id)
     acheive_list = ChallengeAchieve.objects.filter(account=user)
     acheive_id_list = acheive_list.values_list('challenge__id', flat=True)
