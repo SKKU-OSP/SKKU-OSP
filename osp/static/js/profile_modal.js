@@ -642,13 +642,82 @@ function setVisualModal(){
 }
 function setPortfolioModal(){
   let icon_portfolio_modal = document.getElementById("icon-portfolio");
-  icon_portfolio_modal.addEventListener("click", (e)=>{
+  icon_portfolio_modal.addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal('show');
   });
   document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
-  })
+  });
   document.getElementById("closePortfolioModalBtn").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
-  })
+  });
+}
+function setGbtiModal(){
+  let icon_portfolio_modal = document.getElementById("icon-gbti");
+  icon_portfolio_modal.addEventListener("click", ()=>{
+    $('#modalGbtiBox').modal('show');
+  });
+  document.getElementById("closeGbtiModalIcon").addEventListener("click", ()=>{
+    $('#modalGbtiBox').modal("hide");
+  });
+  document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
+    $('#modalGbtiBox').modal("hide");
+  });
+  document.getElementById("btn-save-id-card").addEventListener("click", ()=>{
+    const screenshotTarget = document.getElementById("gbti-id-card");
+    html2canvas(screenshotTarget).then((canvas)=>{
+      const base64image = canvas.toDataURL("image/png");
+      var anchor = document.createElement('a');
+      anchor.setAttribute("href", base64image);
+      anchor.setAttribute("download", "my-image.png");
+      anchor.click();
+      anchor.remove();
+    });
+  });
+  $("#gbti-pos-prev").on("click", ()=>{
+    let target = 0;
+    const cards = $("#carouselPosGbtiControls").children('.carousel-gbti');
+    cards.each((i)=>{
+      if (!$(cards[i]).hasClass("none")) {
+        target = i-1 >= 0 ? i-1 : cards.length-1;
+        console.log("target", target);
+      }
+    });
+    cards.not(".none").addClass("none");
+    $(cards[target]).removeClass("none");
+  });
+  $("#gbti-pos-next").on("click", ()=>{
+    let target = 0;
+    const cards = $("#carouselPosGbtiControls").children('.carousel-gbti');
+    cards.each((i)=>{
+      if (!$(cards[i]).hasClass("none")) {
+        target = (i+1)%(cards.length);
+      }
+    });
+    cards.not(".none").addClass("none");
+    $(cards[target]).removeClass("none");
+  });
+  $("#gbti-neg-prev").on("click", ()=>{
+    let target = 0;
+    const cards = $("#carouselNegGbtiControls").children('.carousel-gbti');
+    cards.each((i)=>{
+      if (!$(cards[i]).hasClass("none")) {
+        target = i-1 >= 0 ? i-1 : cards.length-1;
+        console.log("target", target);
+      }
+    });
+    cards.not(".none").addClass("none");
+    $(cards[target]).removeClass("none");
+  });
+  $("#gbti-neg-next").on("click", ()=>{
+    let target = 0;
+    const cards = $("#carouselNegGbtiControls").children('.carousel-gbti');
+    cards.each((i)=>{
+      if (!$(cards[i]).hasClass("none")) {
+        target = (i+1)%(cards.length);
+      }
+    });
+    cards.not(".none").addClass("none");
+    $(cards[target]).removeClass("none");
+  });
 }

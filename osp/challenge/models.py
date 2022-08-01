@@ -14,4 +14,6 @@ class Challenge(models.Model):
 class ChallengeAchieve(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Account, models.CASCADE)
-    acheive_date = models.DateTimeField()
+    challenge = models.ForeignKey(Challenge, models.CASCADE)
+    progress = models.IntegerField(default=0)
+    acheive_date = models.DateTimeField(blank=True, null=True, default=True)

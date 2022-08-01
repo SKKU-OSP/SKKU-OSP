@@ -679,6 +679,7 @@ window.onload = function () {
   }
   setVisualModal();
   setPortfolioModal();
+  setGbtiModal();
   let sideHeight = 0;
   const sideCol = document.getElementById("profile-info");
   for(let i=0; i<sideCol.children.length;i++){
