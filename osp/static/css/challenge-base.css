@@ -1,57 +1,86 @@
 @import url("/static/css/color.css");
 
 
-.accordion-body{
+.accordion-body {
     padding: 0;
 }
 
-.accordion-item, .accordion-button{
+.accordion-item,
+.accordion-button {
     border: none;
     border-radius: 0 !important;
 }
 
-.accordion-button:focus{
+.accordion-button:focus {
     box-shadow: none;
 }
 
-.accordion-button:not(.collapsed){
+.accordion-button:not(.collapsed) {
     background-color: var(--main-point-color) !important;
     color: #FFFFFF;
 }
 
-.accordion-button::after{
+.accordion-button::after {
     font-family: bootstrap-icons;
     background-image: none;
     width: fit-content;
     content: "\F229";
 }
 
-.accordion-button:not(.collapsed):after{
+.accordion-button:not(.collapsed):after {
     background-image: none;
 }
 
-.acheive-item{
+.acheive-item {
     background-color: #FFFFFF;
     padding: 0.5rem 1rem 0.5rem 1rem;
     border-bottom: 0.5px solid var(--main-border-color);
 }
 
-.acheive-item:last-child{
+.acheive-item:last-child {
     border-bottom: none;
 }
 
-.challenge-name{
+.challenge-name {
     font-size: 24px;
     font-weight: 600;
 }
 
-.challenge-description, .challenge-date{
+.challenge-description,
+.challenge-date {
     color: var(--main-icon-color);
 }
 
-#total-challenge-head{
+.progress-bar{
+    background-color: var(--sub-point-color);
+}
+
+#total-challenge-head {
     background-color: var(--main-point-color) !important;
     color: #FFFFFF;
     padding: 1rem 1.25rem;
     font-size: 1rem;
+}
+
+#challenge-refresh {
+    background-color: transparent;
+    border: none;
+}
+
+@keyframes rotate {
+    from {
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+.rotation{
+    animation: rotate 3s;
 }
