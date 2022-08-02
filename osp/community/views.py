@@ -483,9 +483,7 @@ def article_scrap(request):
         user = request.user
         article = Article.objects.get(id=article_id)
         account = Account.objects.get(user=user)
-
         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
-
         if not created:
             obj.delete()
         return JsonResponse({'status': 'success'})
