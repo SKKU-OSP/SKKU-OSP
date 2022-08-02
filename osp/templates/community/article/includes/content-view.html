@@ -101,9 +101,9 @@
     </div>
 </form>
 {% if board.board_type == 'Recruit' %}
-<div class="form-control d-flex flex-row justify-content-between" style="margin-top:5px;">
+<div class="form-control d-flex flex-row justify-content-between w-100" style="margin-top:5px;">
     {% if article.team %}
-    <div>
+    <div class="w-100">
         <div id="recruit-team-info" class="d-flex flex-row">
             <div id="recruit-team-info-image">
                 <img src="{{article.team.image.url}}" alt="team-image">
@@ -114,11 +114,25 @@
                 {{ article.team.description }}
             </div>
         </div>
-        <div class="d-flex">
-            <div id="recruit-team-info-period">
-                모집기간
+        <div class="d-flex flex-row justify-content-between w-100">
+            <div class="d-flex flex-row">
+                <div id="recruit-team-info-period">
+                    모집기간
+                </div>
+                <div>
+                    {{article.period_start|date:'Y-m-d H:i'}} ~ {{article.period_end|date:'Y-m-d H:i'}}
+                </div>
             </div>
-            {{article.period_start|date:'Y-m-d H:i'}} ~ {{article.period_end|date:'Y-m-d H:i'}}
+            <div>
+                {% is_period_end article.period_end as is_end %}
+                {% if not article.team %}
+                    -
+                {% elif not is_end %}
+                    <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중</span>
+                {% else %}
+                    <span class="badge" style="font-size:13px;background:#fec89a;">모집 마감</span>
+                {% endif %}
+            </div>
         </div>
     </div>
         {% is_teammember article.team request.user as is_teammember %}
