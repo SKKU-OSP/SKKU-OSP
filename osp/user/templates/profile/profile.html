@@ -250,7 +250,7 @@
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
               <h5 class="card-title mb-2">{{this_year}} Score</h5>
-              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score}}</span>
+              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score|floatformat:2}}</span>
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title" style="width:70%;">Repositories</span>
@@ -465,65 +465,39 @@
                 <div class="gbti-harmony">
                   <div class="harmony">
                     <h4>상생 파트너</h4>
-                    <div class="d-flex">
-                      <i id="gbti-pos-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
-                      {% if gbti.pos|length == 0 %}
-                        <span class="weak-text">상생 파트너가 없습니다</span>
-                      {% endif %}
-                      <div id="carouselPosGbtiControls">
-                          {% for pos in gbti.pos%}
-                          {% if gbti.pos|first == pos %}
-                          <div class="carousel-gbti">
-                          {%else%}
-                          <div class="carousel-gbti none">
-                          {% endif %}
-                            <div class="gbti-card">
-                              <div class="gbti-img">
-                                <img src={% static "images/"|add:pos.code|add:".png" %} alt="No Image now">
-                              </div>
-                              <div class="gbti-textbox">
-                                <p class="gbti-text bold">
-                                  {{pos.nicknameKR}}
-                                </p>
-                                <p class="gbti-text">{{pos.descKR}}</p>
-                              </div>
-                            </div>
-                          </div>
-                          {% endfor%}
+                    {% for pos in gbti.pos%}
+                    <div class="carousel-gbti">
+                      <div class="gbti-card">
+                        <div class="gbti-img">
+                          <img src={% static "images/"|add:pos.code|add:".png" %} alt="No Image now">
+                        </div>
+                        <div class="gbti-textbox">
+                          <p class="gbti-text bold">
+                            {{pos.nicknameKR}}
+                          </p>
+                          <p class="gbti-text">{{pos.descKR}}</p>
+                        </div>
                       </div>
-                      <i id="gbti-pos-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
                     </div>
+                    {% endfor%}
                   </div>
                   <div class="harmony">
                     <h4>상극 파트너</h4>
-                    <div class="d-flex">
-                      <i id="gbti-neg-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
-                      {% if gbti.neg|length == 0 %}
-                      <span class="weak-text">상극 파트너가 없습니다</span>
-                      {% endif %}
-                      <div id="carouselNegGbtiControls">
-                        {% for neg in gbti.neg%}
-                        {% if gbti.neg|first == neg %}
-                        <div class="carousel-gbti">
-                        {%else%}
-                        <div class="carousel-gbti none">
-                        {% endif %}
-                          <div class="gbti-card">
-                            <div class="gbti-img">
-                              <img src={% static "images/"|add:neg.code|add:".png" %} alt="No Image now">
-                            </div>
-                            <div class="gbti-textbox">
-                              <p class="gbti-text bold">
-                                {{neg.nicknameKR}}
-                              </p>
-                              <p class="gbti-text">{{neg.descKR}}</p>
-                            </div>
-                          </div>
+                    {% for neg in gbti.neg%}
+                    <div class="carousel-gbti">
+                      <div class="gbti-card">
+                        <div class="gbti-img">
+                          <img src={% static "images/"|add:neg.code|add:".png" %} alt="No Image now">
                         </div>
-                        {% endfor%}
+                        <div class="gbti-textbox">
+                          <p class="gbti-text bold">
+                            {{neg.nicknameKR}}
+                          </p>
+                          <p class="gbti-text">{{neg.descKR}}</p>
+                        </div>
                       </div>
-                      <i id="gbti-neg-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
                     </div>
+                    {% endfor%}
                   </div>
                 </div>
                 <h4 class="text-center mt-3">개발 성향 분석</h4>
