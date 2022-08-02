@@ -202,10 +202,11 @@
         ajax_form_data.append('article_id','{{ article.id }}');
 
         {% if board.board_type == 'Recruit' %}
-        var period_start_date = new Date($('#PeriodPickerStartInput').val());
-        var period_end_date = new Date($('#PeriodPickerEndInput').val());
-        ajax_form_data.append('period_start', period_start_date.toISOString());
-        ajax_form_data.append('period_end', period_end_date.toISOString());
+        const offset = new Date().getTimezoneOffset() * 60000;
+        var period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
+        var period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
+        ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
+        ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         {% endif %}
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
