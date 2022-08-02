@@ -22,7 +22,7 @@ html, body {
   height: 100%;
 }
 body{
-  background-color: #F5F5F5;
+  background-color: var(--main-bg-color);
   -ms-overflow-style: none;
 }
 body::-webkit-scrollbar {
