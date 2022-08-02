@@ -140,7 +140,13 @@ def main(mask):
         deptSize = create2DArray(nYear, nDept)
         sidSize = create2DArray(nYear, nSid)
         
-        scoreClassCnt, commitClassCnt, starClassCnt, prClassCnt, issueClassCnt, forkClassCnt = 10, 5, 5, 5, 5, 5
+        scoreClassCnt, commitClassCnt, starClassCnt, prClassCnt, issueClassCnt = 10, 5, 5, 5, 5
+        scoreClassGap, commitClassGap, starClassGap, prClassGap, issueClassGap = 0.5, 100, 2, 5, 2
+        
+        # 임시로 구간을 fork에 저장
+        forkYearStd = [scoreClassCnt, commitClassCnt, starClassCnt, prClassCnt, issueClassCnt]
+        forkMean = [scoreClassGap, commitClassGap, starClassGap, prClassGap, issueClassGap]
+        
         # About Score
         scoreDist = create2DArray(nYear, scoreClassCnt)
         scoreDept = create2DArray(nYear, nDept)
@@ -170,7 +176,6 @@ def main(mask):
         issueDept = create2DArray(nYear, nDept)
         issueSid = create2DArray(nYear, nSid)
         # About Forks
-        forkDist = create2DArray(nYear, forkClassCnt)
         forkDept = create2DArray(nYear, nDept)
         forkSid = create2DArray(nYear, nSid)
 
@@ -234,20 +239,16 @@ def main(mask):
             scoreSumDist[yid][classIdx] += 1
             scoreSumMore3[yid] += 1 if total_score_sum >= 3 else 0
 
-            ClassCnt = 100
-            classIdx = math.floor(row['commit_cnt']/ClassCnt) if math.floor(row['commit_cnt']/ClassCnt) <= commitClassCnt-1 else commitClassCnt-1
+            classIdx = math.floor(row['commit_cnt']/commitClassGap) if math.floor(row['commit_cnt']/commitClassGap) <= commitClassCnt-1 else commitClassCnt-1
             commitDist[yid][classIdx] += 1
             
-            ClassCnt = 2
-            classIdx = math.floor(row['star_count']/ClassCnt) if math.floor(row['star_count']/ClassCnt) <= starClassCnt-1 else starClassCnt-1
+            classIdx = math.floor(row['star_count']/starClassGap) if math.floor(row['star_count']/starClassGap) <= starClassCnt-1 else starClassCnt-1
             starDist[yid][classIdx] += 1
             
-            ClassCnt = 5
-            classIdx = math.floor(row['pr_cnt']/ClassCnt) if math.floor(row['pr_cnt']/ClassCnt) <= prClassCnt-1 else prClassCnt-1
+            classIdx = math.floor(row['pr_cnt']/prClassGap) if math.floor(row['pr_cnt']/prClassGap) <= prClassCnt-1 else prClassCnt-1
             prDist[yid][classIdx] += 1
             
-            ClassCnt = 2
-            classIdx = math.floor(row['issue_cnt']/ClassCnt) if math.floor(row['issue_cnt']/ClassCnt) <= issueClassCnt-1 else issueClassCnt-1
+            classIdx = math.floor(row['issue_cnt']/issueClassGap) if math.floor(row['issue_cnt']/issueClassGap) <= issueClassCnt-1 else issueClassCnt-1
             issueDist[yid][classIdx] += 1
 
             # annual Total sum
@@ -455,7 +456,7 @@ def main(mask):
         starMean = calculateMeanOfArray(starAnnual)
         prMean = calculateMeanOfArray(prAnnual)
         issueMean = calculateMeanOfArray(issueAnnual)
-        forkMean = calculateMeanOfArray(forkAnnual)
+        
 
         # 학번별, 학과별, 연도별에 대해 점수, 커밋, 스타, 풀리, 이슈 등 각각의 분산과 표준편차 계산 
         scoreSidDevTotal = create2DArray(nYear, nSid)
@@ -538,7 +539,6 @@ def main(mask):
         starYearStd = [ 0 for i in range(nYear)]
         prYearStd = [ 0 for i in range(nYear)]
         issueYearStd = [ 0 for i in range(nYear)]
-        forkYearStd = [ 0 for i in range(nYear)]
         
         for (i, j) in [ (i, j) for i in range(nYear) for j in range(nSid) ]:
             if sidSize[i][j] == 0:
@@ -597,7 +597,6 @@ def main(mask):
                 starYearStd[i] = '{:0.4f}'.format(math.sqrt(starYearDevTotal[i] / annualCnt[i]))
                 prYearStd[i] = '{:0.4f}'.format(math.sqrt(prYearDevTotal[i] / annualCnt[i]))
                 issueYearStd[i] = '{:0.4f}'.format(math.sqrt(issueYearDevTotal[i] / annualCnt[i]))
-                forkYearStd[i] = '{:0.4f}'.format(math.sqrt(forkYearDevTotal[i] / annualCnt[i]))
         
         # MODEL1: insert_annualoverview_sql
         if mask & 1:
