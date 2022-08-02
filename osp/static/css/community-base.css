@@ -421,6 +421,7 @@
 #recruit-team-info-image > img{
     width: 5em;
     height: 5em;
+    margin-right:10px;
 }
 
 #recruit-team-info-period{
