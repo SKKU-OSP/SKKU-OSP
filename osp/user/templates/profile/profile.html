@@ -250,7 +250,7 @@
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
               <h5 class="card-title mb-2">{{this_year}} Score</h5>
-              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score}}</span>
+              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score|floatformat:2}}</span>
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title" style="width:70%;">Repositories</span>

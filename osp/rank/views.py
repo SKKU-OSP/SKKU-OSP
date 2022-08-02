@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from user.models import ScoreTable, StudentTab
+from user.models import GitHubScoreTable, StudentTab
 from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 
@@ -9,7 +9,7 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 def user_rank(request):
     # Split by Year
     score_by_year = {}
-    for student in ScoreTable.objects.all():
+    for student in GitHubScoreTable.objects.all():
         if student.year not in score_by_year:
             score_by_year[student.year] = []
         score_by_year[student.year].append(student)
