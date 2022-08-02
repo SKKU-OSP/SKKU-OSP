@@ -22,45 +22,10 @@ h5.card-title {
   font-family: "Noto Sans KR", sans-serif;
   font-weight: 500;
   text-indent: 20px;
-
 }
 
-button.chosen {
-  font-family: "Roboto", sans-serif;
-}
-button.unchosen {
-  font-family: "Roboto", sans-serif;
-  color: RGB(13, 110, 253);
-}
-
-.kpi {
-  font-size: 2rem;
-  /* font-size: 2vw; */
-}
-@media (max-width: 768px) {
-  .kpi {
-    font-size: 2rem !important;
-  }
-}
-
-.percent-wrapper {
-  opacity: 0.5;
-  font-size: 1rem;
-  margin-left: 0.25rem;
-}
-
-.tab-container {
-  margin: 10px 0px;
-}
-
-#overviewChart > .col-md-3 > .card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
 .card {
-  height: 100%;
-  margin-bottom: 50px;
+  height: 500px;
   font-family: "Roboto", sans-serif;
 }
 
@@ -87,6 +52,7 @@ a.nav-link {
   font-weight: bold;
   color: black;
 }
+
 .none {
   display: none;
 }
@@ -105,5 +71,15 @@ button.btn.btn-secondary{
   padding-right: 1px;
   padding-top: 2px;
   padding-bottom: 1px;
+  
+}
+
+button.btn.btn-outline-dark{
+  margin: 2px;
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+
   
 }

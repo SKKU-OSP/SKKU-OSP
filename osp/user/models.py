@@ -69,7 +69,8 @@ class GithubStatsYymm(models.Model):
         
     
 class ScoreTable(models.Model):
-    id = models.IntegerField(primary_key=True)
+    a_id = models.AutoField(primary_key=True)
+    id = models.IntegerField()
     year = models.IntegerField()
     name = models.CharField(max_length=20)
     github_id = models.CharField(max_length=40)
@@ -84,9 +85,8 @@ class ScoreTable(models.Model):
     plural_major = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed=False
         db_table = 'score_table_sum'
-        unique_together = (('id', 'year'),)
     
     def to_json(self):
         return {
@@ -283,3 +283,43 @@ class DevType(models.Model):
     typeG2 = models.IntegerField()
     typeF1 = models.IntegerField()
     typeF2 = models.IntegerField()
+    
+class GitHubScoreTable(models.Model):
+    a_id = models.AutoField(primary_key=True)
+    id = models.IntegerField()
+    year = models.IntegerField()
+    name = models.CharField(max_length=20)
+    github_id = models.CharField(max_length=40)
+    total_score = models.FloatField()
+    commit_cnt = models.IntegerField()
+    commit_line = models.IntegerField()
+    issue_cnt = models.IntegerField()
+    pr_cnt = models.IntegerField()
+    repo_cnt = models.IntegerField()
+    dept = models.CharField(max_length=45)
+    absence = models.IntegerField()
+    plural_major = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['id', 'year'],
+                name='id_year_constraint'
+            )]
+    
+    def to_json(self):
+        return {
+            "id":self.id,
+            "year":self.year,
+            "name":self.github_id,
+            "github_id":self.name,
+            "total_score":self.total_score,
+            "commit_cnt":self.commit_cnt,
+            "commit_line":self.commit_line,
+            "issue_cnt":self.issue_cnt,
+            "pr_cnt":self.pr_cnt,
+            "repo_cnt":self.repo_cnt,
+            "dept":self.dept,
+            "absence":self.absence,
+            "plural_major":self.plural_major,
+        }
