@@ -2,9 +2,9 @@
 {% load community_tag %}
 {% load static %}
 
-<form method="post" action=".." class="" onSubmit="return false;" style="">
+<form method="post" action=".." class="" onSubmit="return false;">
     <!--article content-->
-    <div class="d-flex flex-column border border-2 rounded" style="padding:10px;">
+    <div class="d-flex flex-column border border-2" style="padding:10px;">
         <div class="d-flex flex-row justify-content-between">
             <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;">
                 {% if board.board_type == 'Recruit' %}
@@ -65,22 +65,22 @@
                 <div onclick="ArticleThumbUp(this, {{ article.id }},{{ request.user.id | default_if_none:-1 }})"
                     {% is_article_thumb_up article request.user as is_thumb_up %}
                     {% if not is_thumb_up %}
-                         class="material-icons-outlined h-100 pointer opacity-hover"
-                     {% else %}
+                        class="material-icons-outlined h-100 pointer opacity-hover"
+                    {% else %}
                         class="material-icons h-100 pointer opacity-hover"
-                     {% endif %}
-                     style="line-height:30px;font-size:21px;padding-left:5px;">
+                    {% endif %}
+                        style="line-height:30px;font-size:21px;padding-left:5px;">
                     thumb_up
                 </div>
                 <div onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
                     {% is_article_scrap article request.user as is_scrap %}
                     {% if not is_scrap %}
-                         class="material-icons-outlined h-100 pointer opacity-hover"
-                     {% else %}
+                        class="material-icons-outlined h-100 pointer opacity-hover"
+                    {% else %}
                         class="material-icons h-100 pointer opacity-hover"
-                     {% endif %}
-                     class="material-icons-outlined h-100 pointer opacity-hover"
-                     style="line-height:30px;font-size:23px;padding-right:3px;">
+                    {% endif %}
+                    class="material-icons-outlined h-100 pointer opacity-hover"
+                    style="line-height:30px;font-size:23px;padding-right:3px;">
                     bookmark_border
                 </div>
             </div>
@@ -90,11 +90,25 @@
     </div>
 </form>
 {% if board.board_type == 'Recruit' %}
-<div class="form-control d-flex flex-row justify-content-between" style="width:100%;padding-bottom:10px;margin-top:5px;">
+<div class="form-control d-flex flex-row justify-content-between" style="margin-top:5px;">
     {% if article.team %}
-    <div class="d-flex flex-row">
-        <div class="f-bold">팀 정보 |</div>
-        <div>{{ article.team.name }} <br> {{ article.team.description }}</div>
+    <div>
+        <div id="recruit-team-info" class="d-flex flex-row">
+            <div id="recruit-team-info-image">
+                <img src="{{article.team.image.url}}" alt="team-image">
+            </div>
+            <div>
+                {{ article.team.name }} 
+                <br> 
+                {{ article.team.description }}
+            </div>
+        </div>
+        <div class="d-flex">
+            <div id="recruit-team-info-period">
+                모집기간
+            </div>
+            {{article.period_start|date:'Y-m-d H:i'}} ~ {{article.period_end|date:'Y-m-d H:i'}}
+        </div>
     </div>
         {% is_teammember article.team request.user as is_teammember %}
         {% if not is_teammember %}
@@ -102,7 +116,11 @@
             {% if not waited_teaminvitemessage %}
             <div>
                 <button id="team-apply"
-                        {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')"{% else %}onclick="openTeamApplyModal({{ article.team.id }});" {% endif %}
+                        {% if request.user.is_anonymous %}
+                        onclick="alert('로그인 후 이용해주세요.')"
+                        {% else %}
+                        onclick="openTeamApplyModal({{ article.team.id }});" 
+                        {% endif %}
                         data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
             </div>
             {% else %}
