@@ -674,4 +674,144 @@ function setGbtiModal(){
       anchor.remove();
     });
   });
+  const main = document.querySelector('#main');
+  const qna = document.querySelector('#qna');
+  const result = document.querySelector('#result');
+  const selection=[];
+  const endPoint=15;
+  const factor=[0,0,0,0];
+  function getResult(){
+      qna.style.WebkitAnimation = "fadeOut 0.5s";
+      qna.style.animation = "fadeOut 0.5s";
+      setTimeout(()=>{
+          result.style.WebkitAnimation = "fadeIn 0.5s";
+          result.style.animation = "fadeIn 0.5s"; 
+          setTimeout(()=>{
+              qna.style.display="none";
+              result.style.display = "block";
+          },200)
+          for (let k = 0; k < endPoint; k++){
+              if(qnaList[k].answer[selection[k]].factor.length>1){
+                  if(qnaList[k].answer[selection[k]].factor[1]=='N') {
+                      factor[2]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='S') {
+                      factor[2]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='T') {
+                      factor[1]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='F') {
+                      factor[1]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='E') {
+                      factor[3]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='I') {
+                      factor[3]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='P') {
+                      factor[0]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='J') {
+                      factor[0]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+              }
+
+              if(qnaList[k].answer[selection[k]].factor[0]=='N') {
+                  factor[2]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='S') {
+                  factor[2]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='T') {
+                  factor[1]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='F') {
+                  factor[1]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='E') {
+                  factor[3]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='I') {
+                  factor[3]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='P') {
+                  factor[0]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='J') {
+                  factor[0]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              
+          }
+          console.log(factor);
+      }, 200);
+      
+  }
+  function addA(aTxt,qIdx,idx){
+      
+      var abox = document.querySelector('.abox');
+      var answer = document.createElement('div');
+      answer.className = 'answerbtn';
+      answer.classList.add('my-2');
+      answer.classList.add('mx-auto');
+      answer.classList.add('answerList');
+      //answer.classList.add('fadeIn');
+      abox.appendChild(answer);
+      answer.innerHTML = aTxt;
+
+      answer.addEventListener("click",function(){
+          selection[qIdx] = idx;
+          var children = document.querySelectorAll('.answerList');
+          for (let k =0; k<children.length; k++){
+              children[k].disabled = true;
+              //children[k].style.WebkitAnimation = "fadeOut 0.3s";
+              //children[k].style.animation = "fadeOut 0.3s";
+              
+              children[k].style.display = 'none';
+          }
+          /*setTimeout(()=>{
+              for (let k =0; k<children.length; k++){
+                  children[k].style.display = 'none';
+              }
+          },100)*/
+          if(qIdx<endPoint-1) nextQ(++qIdx);
+          else {
+              getResult();
+          }
+          
+      },false);
+
+  }
+  function nextQ(qIdx){
+      var qbox = document.querySelector('.qbox');
+      qbox.innerHTML = qnaList[qIdx].q;
+      for (let k in qnaList[qIdx].answer){
+          addA(qnaList[qIdx].answer[k].a,qIdx,k);
+      }
+      var status = document.querySelector('.statusBar');
+      status.style.width= (100/endPoint) * qIdx + '%';
+  }
+  const btn_start = document.getElementById("gbti-test-start");
+  const btn_restart = document.getElementById("gbti-test-restart");
+  btn_start.addEventListener("click", ()=>{
+    begin();
+  });
+  btn_restart.addEventListener("click", ()=>{
+    begin();
+  });
+  function begin(){
+      main.style.WebkitAnimation = "fadeOut 0.5s";
+      main.style.animation = "fadeOut 0.5s";
+      setTimeout(()=>{
+          qna.style.WebkitAnimation = "fadeIn 0.5s";
+          qna.style.animation = "fadeIn 0.5s"; 
+          setTimeout(()=>{
+              main.style.display="none";
+              qna.style.display = "block";
+          },200)
+          let qIdx=0;
+          nextQ(qIdx);
+      }, 200);
+  }
 }
