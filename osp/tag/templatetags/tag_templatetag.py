@@ -4,7 +4,7 @@ register = template.Library()
 from django.utils.safestring import mark_safe
 from tag.models import Tag
 from team.models import TeamMember,TeamInviteMessage, Team
-from user.models import Account
+from user.models import Account, AccountInterest
 from message.models import Message
 from community.models import *
 import json
@@ -143,3 +143,7 @@ def is_article_scrap(article, user):
         return True
     else:
         return False
+#
+@register.simple_tag
+def get_account_tags(account):
+    return AccountInterest.objects.filter(account=account)

@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag
-from user.models import Account
+from user.models import Account, AccountInterest
 from community.models import TeamRecruitArticle
 
 import hashlib
@@ -28,7 +28,8 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
+    for board in Board.objects.filter(team_board_query | Q(name__in=Board.DEFAULT_BOARDNAME)):
+    # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
         # week_ago = datetime.now() - timedelta(days=7)
         # article_list = Article.objects.filter(board_id=board,
@@ -71,7 +72,9 @@ def board(request, board_name, board_id):
     context = {'board': board, 'board_color': board_color}
 
     if board.board_type == 'User':
-        return render(request, 'community/board/board.html', context)
+        context['accounts'] = Account.objects.all()[:9]
+        # context['account_all_cnt'] = Account.objects.all()
+        return render(request, 'community/board/user-board.html', context)
 
     if board.board_type == 'Recruit':
         active_article = Article.objects.filter(board_id=board)
@@ -101,6 +104,56 @@ def board(request, board_name, board_id):
         context['team_tags'] = team_tags
         context['team_members'] = team_members
     return render(request, 'community/board/board.html', context)
+
+
+def account_cards(request):
+
+    PAGE_SIZE = 9
+
+    context = {}
+    context['board'] = Board.objects.get(board_type="User")
+    # sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
+
+    page = int(request.GET.get('page', 1))
+    # Filter Board
+    article_list = Account.objects.filter()
+    # Filter Keyword
+    keyword = request.GET.get('keyword', '')
+    if keyword != '':
+        article_list = article_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
+        print(keyword, type(keyword), article_list)
+    # Filter Tag
+    tag_list = request.GET.get('tag', False)
+    if tag_list:
+        tag_list = tag_list.split(',')
+        tag_query = Q()
+        for tag in tag_list:
+            tag_query = tag_query | Q(tag=tag)
+        article_with_tag = AccountInterest.objects.filter(tag_query).values('account__user')
+        article_list = article_list.filter(user__in=article_with_tag)
+
+    total_len = len(article_list)
+    # Order
+    # article_list = article_list.order_by(*sort_field)
+    # Slice to Page
+    article_list = article_list[PAGE_SIZE * (page - 1):]
+    article_list = article_list[:PAGE_SIZE]
+    # Get Article Metadata
+    # for article in article_list:
+        # comment_cnt = len(ArticleComment.objects.filter(article=article))
+        # like_cnt = len(ArticleLike.objects.filter(article=article))
+        # tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+        # article.comment_cnt = comment_cnt
+        # article.like_cnt = like_cnt
+        # article.tags = tags
+        # if board.name == 'Team':
+        #     article.team = TeamRecruitArticle.objects.get(article=article).team
+    context['article_list'] = article_list
+    result = {}
+    result['html'] = render_to_string('community/account-card.html', context, request=request)
+    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+    return JsonResponse(result)
+
 
 def article_list(request, board_name, board_id):
     try:

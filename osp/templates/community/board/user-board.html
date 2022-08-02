@@ -19,20 +19,10 @@
             </select>
           </div>
         </div>
-        <div class="my-auto text-white">
-          <button class="btn btn-outline-secondary text-white"
-             {% if request.user.is_anonymous %}
-                  onclick="alert('로그인 후 이용해주세요')"
-              {% elif board %}
-             onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-             {% endif %}
-            >
-            글쓰기
-            <i class="bi-pencil text-white"></i>
-          </button>
-        </div>
+
       </div>
-      <div id="article-list-body">
+      <div id="article-card-body">
+      {% include "community/account-card.html" %}
       </div>
       {% include "community/board/board-footer.html" with board=board %}
     </div>
