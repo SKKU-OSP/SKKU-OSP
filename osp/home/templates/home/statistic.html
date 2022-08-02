@@ -55,17 +55,13 @@
   </div>
   <div class="d-flex text-lg">
     <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle me-2" id="dropdownMenuButton1" type="button" data-bs-toggle="dropdown" aria-expanded="false">2021 </button>
+      <button class="btn btn-primary dropdown-toggle me-2" id="dropdownMenuButton1" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{ end_year }} </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        {% for year in year_list %}
         <li>
-          <button class="dropdown-item" id="dropdownBtn2021">2021</button>
+          <button class="dropdown-item" id="dropdownBtn{{year}}">{{year}}</button>
         </li>
-        <li> 
-          <button class="dropdown-item" id="dropdownBtn2020">2020</button>
-        </li>
-        <li> 
-          <button class="dropdown-item" id="dropdownBtn2019">2019</button>
-        </li>
+        {% endfor %}
       </ul>
     </div>
     <div class="form-check form-switch"> 
@@ -141,6 +137,13 @@
     let chartdata_1 = JSON.parse("{{ chartdata_1 | escapejs }}");
     let chartdata_2 = JSON.parse("{{ chartdata_2 | escapejs }}");
     let chartdata_3 = JSON.parse("{{ chartdata_3 | escapejs }}");
+    const end_year = {{end_year}};
+    
+    const classGap = {{ classGap }};
+    const classCnt = {{ classCnt }};
+    const deptLabel = JSON.parse("{{dept_list | escapejs }}");
+    console.log("deptLabel", deptLabel);
+
   </script>
   <script type="text/javascript" src="{% static 'js/statistic.js' %}"></script>
   <script src="http://code.jquery.com/jquery-latest.js"></script>
