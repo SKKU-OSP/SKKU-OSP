@@ -13,6 +13,7 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 from django.core.files.images import get_image_dimensions
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
+from user.templatetags.gbti import getGBTI
 from django.db.models import Avg, Sum, Subquery
 
 import time
@@ -23,6 +24,7 @@ import math
 # Create your views here.
 class ProfileView(TemplateView):
 
+    # TODO: start_year, end_year에 기반하지 않는 수식 필요
     template_name = 'profile/profile.html'
     start_year = 2019
     end_year = 2021
@@ -238,20 +240,22 @@ class ProfileView(TemplateView):
         chartdata["issue_dist"] = issue_dist
         chartdata["repo_dist"] = repo_dist
         
+        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_contr = [ [] for i in range(self.end_year-self.start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
             row_json = row.to_json()
             row_json['star'] = own_star["star"]
-            if row_json["year"] >= self.start_year :
-                monthly_contr[row_json["year"]-self.start_year].append(row_json)
+            if row_json["year"] >= self.start_year and row_json["year"] <= self.end_year:
+                monthly_contr[row_json["year"] - self.start_year].append(row_json)
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
+        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_avg = [ [] for i in range(self.end_year-self.start_year+1)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
-            if yid >= 0 :
+            if avg["start_yymm"].year >= self.start_year and avg["start_yymm"].year <= self.end_year :
                 avg["year"] = avg["start_yymm"].year
                 avg["month"] =  avg["start_yymm"].month
                 avg.pop('start_yymm', None)
@@ -261,6 +265,15 @@ class ProfileView(TemplateView):
         chartdata["monthly_avg"] = monthly_avg
         chartdata["username"] = github_id
         context["chart_data"] = json.dumps(chartdata)
+        
+        #GBTI test
+        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
+        gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
+        gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
+        gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
+        gbti_data["typeA0"] = 100 - gbti_data["typeA1"] - gbti_data["typeA2"]
+        gbti_data.update(getGBTI(gbti_data["typeA1"]-gbti_data["typeA2"], gbti_data["typeB1"]-gbti_data["typeB2"], gbti_data["typeC1"]-gbti_data["typeC2"], gbti_data["typeD1"]-gbti_data["typeD2"]))
+        context["gbti"] = gbti_data
         context["this_year"] = self.end_year
         context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
