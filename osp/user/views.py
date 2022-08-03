@@ -183,8 +183,6 @@ class ProfileView(TemplateView):
             key_name = "year"+str(annual_key)
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
 
-        
-        
         score_data = GitHubScoreTable.objects.all()
         total_factor_data_list = []
         user_data_list = []
@@ -442,11 +440,12 @@ def student_id_to_username(request, student_id):
 @csrf_exempt
 def compare_stat(request, username):
     if request.method == 'POST':
-        end_year = 2021
         start_year = 2019
         data = json.loads(request.body)
         #data에는 github_id 가 들어있어야한다.
         github_id = data["github_id"]
+        latest_data = GithubScore.objects.filter(github_id=github_id).order_by("year").last()
+        end_year = latest_data.year
         own_star = 0
         try:
             star_data = GithubRepoStats.objects.filter(github_id=github_id).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))

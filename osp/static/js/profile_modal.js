@@ -4,7 +4,7 @@ function setVisualModal(){
   const NS = "http://www.w3.org/2000/svg";
   let modalChartObjList = [];
   let year_intvl = end_year-start_year;
-  let select_year = 2021;
+  let select_year = end_year;
   let select_month = 0;
   let chartFactor = "score_sum";
   let is_selected_month = 0;
