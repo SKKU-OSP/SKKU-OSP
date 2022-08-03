@@ -117,7 +117,7 @@ window.onload = function () {
 
   function makePage(chartdata) {
     let annual_overview = JSON.parse(chartdata["annual_overview"])[0];
-    console.log("annual_overview",annual_overview)
+    console.log("annual_overview",annual_overview);
     let annual_total = JSON.parse(chartdata["annual_total"])[0];
     let annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
     console.log("annual_dist",annual_dist);
@@ -451,7 +451,7 @@ window.onload = function () {
     });
     btn_year.forEach((btn_obj, i)=>{
       btn_obj.addEventListener("click", function(){
-        let annual = start_year+i;
+        annual = btn_obj.innerText;
         setAnnualDistData(annual, chartFactor);
         setOverallStat(
           annual_total,
