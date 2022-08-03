@@ -20,6 +20,9 @@ import time
 import json
 import os
 import math
+import pandas as pd
+from user import update_act
+
 
 # Create your views here.
 class ProfileView(TemplateView):
@@ -30,6 +33,10 @@ class ProfileView(TemplateView):
     end_year = 2021
     # 새로 고침 시 GET 요청으로 처리됨.
     def get(self, request, *args, **kwargs):
+
+        # update_act.update_commmit_time() committer time 업데이트
+        # update_act.update_individual() individual 
+        update_act.update_frequency()
 
         context = self.get_context_data(request, *args, **kwargs)
         std = context['account'].student_data
@@ -267,12 +274,40 @@ class ProfileView(TemplateView):
         context["chart_data"] = json.dumps(chartdata)
         
         #GBTI test
+        committer_time_circmean = pd.read_csv(os.getcwd() + '/static/data/committer_time_circmean.csv')
+        committer_time_guide = pd.read_csv(os.getcwd() + '/static/data/time_sector.csv')
+        major_act = pd.read_csv(os.getcwd() + '/static/data/major_act.csv')
+
+
+        student_time_circmean = committer_time_circmean[committer_time_circmean['author_github'] == context["username"]].iloc[0, 2]
+        time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
+        time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
+        student_major_act = major_act[major_act['author_github'] == context["username"]].iloc[0, 0]
+
         gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
         gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
         gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
         gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
         gbti_data["typeA0"] = 100 - gbti_data["typeA1"] - gbti_data["typeA2"]
         gbti_data.update(getGBTI(gbti_data["typeA1"]-gbti_data["typeA2"], gbti_data["typeB1"]-gbti_data["typeB2"], gbti_data["typeC1"]-gbti_data["typeC2"], gbti_data["typeD1"]-gbti_data["typeD2"]))
+        
+        print(student_time_circmean)
+        print(time_sector_min)
+        if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
+            gbti_data["typeE1"] = 30
+            gbti_data["typeE2"] = 20
+        else: # 밤에 활동
+            gbti_data["typeE1"] = 20
+            gbti_data["typeE2"] = 30
+
+        if(student_major_act == 'individual'): # 혼자 작업
+            gbti_data["typeG1"] = 20
+            gbti_data["typeG2"] = 30
+        else: # 함께 작업
+            gbti_data["typeG1"] = 30
+            gbti_data["typeG2"] = 20
+
+        
         context["gbti"] = gbti_data
         context["this_year"] = self.end_year
         context["star"] = own_star["star"]
