@@ -5,10 +5,6 @@ window.onload = function () {
   const switchMajor = document.getElementById("majorSwitch");
   // 점수 산정 방식 버튼 그룹
   const btnScore = document.getElementsByClassName("btn-score");
-  // 연도 선택 드롭다운
-  const btn21 = document.getElementById("dropdownBtn2021");
-  const btn20 = document.getElementById("dropdownBtn2020");
-  const btn19 = document.getElementById("dropdownBtn2019");
   // 개별 합계 스위치
   const switchTotal = document.getElementById("totalSwitch");
   // factor 선택 탭
@@ -23,9 +19,8 @@ window.onload = function () {
   let switchChecked = true;
   let scoreIdx = 0;
   let chartFactor = "score";
-  let annual = 2021;
+  let annual = end_year;
   const start_year = 2019;
-  const end_year = 2021;
   let annual_list = [];
   for (let year=start_year; year<=end_year; year++){
     annual_list.push(String(year));
@@ -46,7 +41,7 @@ window.onload = function () {
     $("#pills-pr-tab").removeClass("active");
     $("#pills-issue-tab").removeClass("active");
     $("#totalSwitch").classList;
-    annual = 2021;
+    annual = end_year;
     document.getElementById("dropdownMenuButton1").textContent = annual;
     chartFactor = "score";
     changeCardTitle(chartFactor);
@@ -71,7 +66,7 @@ window.onload = function () {
     $("#pills-pr-tab").removeClass("active");
     $("#pills-issue-tab").removeClass("active");
     $("#totalSwitch").classList;
-    annual = 2021;
+    annual = end_year;
     document.getElementById("dropdownMenuButton1").textContent = annual;
     chartFactor = "score";
     changeCardTitle(chartFactor);
@@ -122,8 +117,10 @@ window.onload = function () {
 
   function makePage(chartdata) {
     let annual_overview = JSON.parse(chartdata["annual_overview"])[0];
+    console.log("annual_overview",annual_overview)
     let annual_total = JSON.parse(chartdata["annual_total"])[0];
     let annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
+    console.log("annual_dist",annual_dist);
     let annual_student = JSON.parse(chartdata[`student${annual}`]);
     const annual_repo = [];
     for(let i = start_year; i <= end_year; i++){
@@ -144,36 +141,37 @@ window.onload = function () {
       issueAnnual,
     ];
 
-    //default annual setting 2021
     let dist = annual_dist["score"];
     let sidData = annual_dist["score_sid"];
     let deptData = annual_dist["score_dept"];
     let sidTopData = annual_dist["score_sid_pct"];
     let deptTopData = annual_dist["score_dept_pct"];
     // 바깥쪽에 두면 싱크가 안맞아서 그래프가 안 나타난다.
-    const scoreDistLabel = new Array(10);
-    const scoreDistLineLabel = new Array(10);
-    for (let i = 0; i < 10; i++) {
-      scoreDistLabel[i] = `${((5 * i) / 10).toFixed(1)}~${(
-        (5 * i) / 10 +
-        0.5
-      ).toFixed(1)}`;
-      scoreDistLineLabel[i] = `${((5 * i) / 10).toFixed(1)}`;
-    }
 
-    const commitDistLabel = [
-      "0~100",
-      "100~200",
-      "200~300",
-      "300~400",
-      "400~500",
-    ];
-    const starDistLabel = ["0~2", "2~4", "4~6", "6~8", "8~10"]; //contain over 10
-    const prDistLabel = ["0~5", "5~10", "10~15", "15~20", "20~25"];
-    const issueDistLabel = ["0~2", "2~4", "4~6", "6~8", "8~10"];
-    const sidLabel = ["21", "20", "19", "18", "17", "16"];
-    const deptLabel = ["소프트웨어", "글로벌융합", "컴퓨터공학"];
     const yearFactorList = ["score", "commit", "star", "pr", "issue"];
+    let factorDistLabelDict = {};
+    classCnt.forEach((list_len, i)=>{
+      factorDistLabelDict[yearFactorList[i]] = []
+      let gap = classGap[i];
+      for(let k=0; k<list_len; k++){
+        factorDistLabelDict[yearFactorList[i]].push( String(gap*k)+"~"+String(gap*(k+1)));
+      }
+    });
+    console.log("factorDistLabelDict", factorDistLabelDict);
+    const scoreDistLineLabel = [];
+    const scoreDistLabel = factorDistLabelDict["score"];
+    scoreDistLabel.forEach((label)=>{
+      scoreDistLineLabel.push(Number(label.split("~")[0]));
+    })
+    const commitDistLabel = factorDistLabelDict["commit"];
+    const starDistLabel = factorDistLabelDict["star"];
+    const prDistLabel = factorDistLabelDict["pr"];
+    const issueDistLabel = factorDistLabelDict["issue"];
+    console.log("scoreDistLineLabel", scoreDistLineLabel);
+    const sidLabel = [];
+    for(let i=end_year; i>end_year-sidData.length;i--){
+      sidLabel.push(String(i).substring(2));
+    }
     let labelList = [scoreDistLabel, sidLabel, deptLabel];
     let sidStd = annual_dist[`${chartFactor}_sid_std`];
     let deptStd = annual_dist[`${chartFactor}_dept_std`];
@@ -211,19 +209,19 @@ window.onload = function () {
         .getElementById(`${canvasNameRule[i]}ScoreDist`)
         .getContext("2d");
     }
-    
-
     setOverallStat(annual_total);
     /* color pallet ref: 
       https://learnui.design/tools/data-color-picker.html#palette*/
     const bsPrimary = "#0d6efd";
     const cc3 = ["#4245cb", "#ff4470", "#ffe913"];
-    const cc6 = [
+    const cc8 = [
       "#4245cb",
-      "#c629b6",
-      "#ff268a",
-      "#ff6657",
-      "#ffab21",
+      "#aa33bf",
+      "#e91ca5",
+      "#ff2e83",
+      "#ff5c5e",
+      "#ff8e39",
+      "#ffbd0e",
       "#ffe913",
     ];
     const noLegendOption = {
@@ -308,7 +306,7 @@ window.onload = function () {
       );
     }
     const chartTypeRule = ["bar", "barWithErrorBars", "barWithErrorBars"];
-    let chartColorRule = [bsPrimary, cc6, cc3];
+    let chartColorRule = [bsPrimary, cc8, cc3];
     let chartOptions = [histogramOption(0.25), scoreOption, scoreOption];
     let topdataRule = [
       [],
@@ -347,7 +345,7 @@ window.onload = function () {
           annual_list,
           makeErrorJson(
             annual_overview[`score${scoreList[scoreIdx]}`],
-            annual_overview[`score_std${scoreList[scoreIdx]}`]
+            annual_overview[`score${scoreList[scoreIdx]}_std`]
           ),
           bsPrimary,
           {
@@ -446,33 +444,21 @@ window.onload = function () {
         }
       });
     }
-    btn21.addEventListener("click", function () {
-      $("#totalSwitch").classList;
-      annual = 2021;
-      setAnnualDistData(annual, chartFactor);
-      setOverallStat(
-        annual_total,
-        switchChecked ? 1 : annual_total["student_total"][annual - start_year]
-      );
-      reloadChart(annual, chartFactor);
+      // 연도 선택 드롭다운
+    let btn_year = []
+    annual_list.forEach((year)=>{
+      btn_year.push(document.getElementById(`dropdownBtn${year}`));
     });
-    btn20.addEventListener("click", function () {
-      annual = 2020;
-      setAnnualDistData(annual, chartFactor);
-      setOverallStat(
-        annual_total,
-        switchChecked ? 1 : annual_total["student_total"][annual - start_year]
-      );
-      reloadChart(annual, chartFactor);
-    });
-    btn19.addEventListener("click", function () {
-      annual = 2019;
-      setAnnualDistData(annual, chartFactor);
-      setOverallStat(
-        annual_total,
-        switchChecked ? 1 : annual_total["student_total"][annual - start_year]
-      );
-      reloadChart(annual, chartFactor);
+    btn_year.forEach((btn_obj, i)=>{
+      btn_obj.addEventListener("click", function(){
+        let annual = start_year+i;
+        setAnnualDistData(annual, chartFactor);
+        setOverallStat(
+          annual_total,
+          switchChecked ? 1 : annual_total["student_total"][i]
+        );
+        reloadChart(annual, chartFactor);
+      });
     });
     scoreTab.addEventListener("click", function () {
       unchosenBtn();
@@ -920,7 +906,7 @@ window.onload = function () {
 
     function reloadChart(annual, factor) {
       destroyChart(chart, 3);
-      chartColorRule = [bsPrimary, cc6, cc3];
+      chartColorRule = [bsPrimary, cc8, cc3];
       switch (factor) {
         case "score":
           labelList[0] = scoreDistLabel;
@@ -945,9 +931,8 @@ window.onload = function () {
         default:
           console.log("reloadChart factor error");
       }
+      annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
       if (chartFactor === "score") {
-        annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-
         dist = annual_dist[`${factor}${scoreList[scoreIdx]}`];
         sidData = annual_dist[`${factor}_sid${scoreList[scoreIdx]}`];
         deptData = annual_dist[`${factor}_dept${scoreList[scoreIdx]}`];
@@ -964,7 +949,6 @@ window.onload = function () {
         sidTopData = annual_dist[`${factor}_sid_pct`];
         deptTopData = annual_dist[`${factor}_dept_pct`];
       }
-
       topdataRule = [
         [],
         makeScatterData(sidTopData, sidLabel),
@@ -1008,7 +992,6 @@ window.onload = function () {
     }
 
     function makeErrorJson(dataArr, stdArr) {
-
       let newData = new Array(dataArr.length);
       for (let i = 0; i < dataArr.length; i++) {
         let errorJson = {};

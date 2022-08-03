@@ -1,11 +1,10 @@
 function setVisualModal(){
   const start_year = 2019;
-  const end_year = 2021;
   const grass_size = 60;
   const NS = "http://www.w3.org/2000/svg";
   let modalChartObjList = [];
   let year_intvl = end_year-start_year;
-  let select_year = 2021;
+  let select_year = end_year;
   let select_month = 0;
   let chartFactor = "score_sum";
   let is_selected_month = 0;
@@ -403,7 +402,7 @@ function setVisualModal(){
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
     const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
-    for(let i = 0; i <= year_intvl; i++){
+    for(let i = 0; i < specific_score_label.length; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
       for(let y = 0; y <= year_intvl; y++){
@@ -584,21 +583,6 @@ function setVisualModal(){
     if (modalChartObjList.length > 0) modalChartObjList[0] = radar_chart;
     else modalChartObjList.push(radar_chart);
   }
-
-  function findDistIdx(label=[], value=0){
-    let ret_idx = 0;
-    try{
-      label.forEach((cmpVal, idx) => {
-        if(Number(cmpVal)<=value) ret_idx = idx;
-      });
-    }catch(error){
-      console.error(error)
-      return -1;
-    }
-    if (ret_idx >= label.length-1) ret_idx = label.length-2;
-    return ret_idx;
-  }
-
   function destroyChart(chart=[], size=0) {
     for (let i = 0; i < size; i++) {
       chart[i].destroy();
@@ -663,7 +647,7 @@ function setGbtiModal(){
   document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
     $('#modalGbtiBox').modal("hide");
   });
-  document.getElementById("btn-save-id-card").addEventListener("click", ()=>{
+  $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
     html2canvas(screenshotTarget).then((canvas)=>{
       const base64image = canvas.toDataURL("image/png");
@@ -674,50 +658,142 @@ function setGbtiModal(){
       anchor.remove();
     });
   });
-  $("#gbti-pos-prev").on("click", ()=>{
-    let target = 0;
-    const cards = $("#carouselPosGbtiControls").children('.carousel-gbti');
-    cards.each((i)=>{
-      if (!$(cards[i]).hasClass("none")) {
-        target = i-1 >= 0 ? i-1 : cards.length-1;
-        console.log("target", target);
+  const main = document.querySelector('#main');
+  const qna = document.querySelector('#qna');
+  const result = document.querySelector('#result');
+  const selection=[];
+  const endPoint=15;
+  const factor=[0,0,0,0];
+  function getResult(){
+      qna.style.WebkitAnimation = "fadeOut 0.5s";
+      qna.style.animation = "fadeOut 0.5s";
+      setTimeout(()=>{
+          result.style.WebkitAnimation = "fadeIn 0.5s";
+          result.style.animation = "fadeIn 0.5s"; 
+          setTimeout(()=>{
+              qna.style.display="none";
+              result.style.display = "block";
+          },200)
+          for (let k = 0; k < endPoint; k++){
+              if(qnaList[k].answer[selection[k]].factor.length>1){
+                  if(qnaList[k].answer[selection[k]].factor[1]=='N') {
+                      factor[2]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='S') {
+                      factor[2]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='T') {
+                      factor[1]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='F') {
+                      factor[1]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='E') {
+                      factor[3]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='I') {
+                      factor[3]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='P') {
+                      factor[0]+=qnaList[k].answer[selection[k]].val[1];
+                  }
+                  else if(qnaList[k].answer[selection[k]].factor[1]=='J') {
+                      factor[0]-=qnaList[k].answer[selection[k]].val[1];
+                  }
+              }
+
+              if(qnaList[k].answer[selection[k]].factor[0]=='N') {
+                  factor[2]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='S') {
+                  factor[2]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='T') {
+                  factor[1]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='F') {
+                  factor[1]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='E') {
+                  factor[3]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='I') {
+                  factor[3]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='P') {
+                  factor[0]+=qnaList[k].answer[selection[k]].val[0];
+              }
+              else if(qnaList[k].answer[selection[k]].factor[0]=='J') {
+                  factor[0]-=qnaList[k].answer[selection[k]].val[0];
+              }
+              
+          }
+          console.log(factor);
+      }, 200);
+      
+  }
+  function addA(aTxt,qIdx,idx){
+      
+      var abox = document.querySelector('.abox');
+      var answer = document.createElement('div');
+      answer.className = 'answerbtn';
+      answer.classList.add('my-2');
+      answer.classList.add('mx-auto');
+      answer.classList.add('answerList');
+      //answer.classList.add('fadeIn');
+      abox.appendChild(answer);
+      answer.innerHTML = aTxt;
+
+      answer.addEventListener("click",function(){
+          selection[qIdx] = idx;
+          var children = document.querySelectorAll('.answerList');
+          for (let k =0; k<children.length; k++){
+              children[k].disabled = true;
+              //children[k].style.WebkitAnimation = "fadeOut 0.3s";
+              //children[k].style.animation = "fadeOut 0.3s";
+              
+              children[k].style.display = 'none';
+          }
+          /*setTimeout(()=>{
+              for (let k =0; k<children.length; k++){
+                  children[k].style.display = 'none';
+              }
+          },100)*/
+          if(qIdx<endPoint-1) nextQ(++qIdx);
+          else {
+              getResult();
+          }
+          
+      },false);
+
+  }
+  function nextQ(qIdx){
+      var qbox = document.querySelector('.qbox');
+      qbox.innerHTML = qnaList[qIdx].q;
+      for (let k in qnaList[qIdx].answer){
+          addA(qnaList[qIdx].answer[k].a,qIdx,k);
       }
-    });
-    cards.not(".none").addClass("none");
-    $(cards[target]).removeClass("none");
+      var status = document.querySelector('.statusBar');
+      status.style.width= (100/endPoint) * qIdx + '%';
+  }
+  $("#gbti-test-start").on("click", ()=>{
+    begin();
   });
-  $("#gbti-pos-next").on("click", ()=>{
-    let target = 0;
-    const cards = $("#carouselPosGbtiControls").children('.carousel-gbti');
-    cards.each((i)=>{
-      if (!$(cards[i]).hasClass("none")) {
-        target = (i+1)%(cards.length);
-      }
-    });
-    cards.not(".none").addClass("none");
-    $(cards[target]).removeClass("none");
+  $("#gbti-test-restart").on("click", ()=>{
+    begin();
   });
-  $("#gbti-neg-prev").on("click", ()=>{
-    let target = 0;
-    const cards = $("#carouselNegGbtiControls").children('.carousel-gbti');
-    cards.each((i)=>{
-      if (!$(cards[i]).hasClass("none")) {
-        target = i-1 >= 0 ? i-1 : cards.length-1;
-        console.log("target", target);
-      }
-    });
-    cards.not(".none").addClass("none");
-    $(cards[target]).removeClass("none");
-  });
-  $("#gbti-neg-next").on("click", ()=>{
-    let target = 0;
-    const cards = $("#carouselNegGbtiControls").children('.carousel-gbti');
-    cards.each((i)=>{
-      if (!$(cards[i]).hasClass("none")) {
-        target = (i+1)%(cards.length);
-      }
-    });
-    cards.not(".none").addClass("none");
-    $(cards[target]).removeClass("none");
-  });
+  function begin(){
+      main.style.WebkitAnimation = "fadeOut 0.5s";
+      main.style.animation = "fadeOut 0.5s";
+      setTimeout(()=>{
+          qna.style.WebkitAnimation = "fadeIn 0.5s";
+          qna.style.animation = "fadeIn 0.5s"; 
+          setTimeout(()=>{
+              main.style.display="none";
+              qna.style.display = "block";
+          },200)
+          let qIdx=0;
+          nextQ(qIdx);
+      }, 200);
+  }
 }

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
-from user.models import ScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from tag.models import Tag, DomainLayer
 from django.contrib.auth.decorators import login_required
@@ -30,7 +30,6 @@ class ProfileView(TemplateView):
     # TODO: start_year, end_year에 기반하지 않는 수식 필요
     template_name = 'profile/profile.html'
     start_year = 2019
-    end_year = 2021
     # 새로 고침 시 GET 요청으로 처리됨.
     def get(self, request, *args, **kwargs):
 
@@ -49,7 +48,7 @@ class ProfileView(TemplateView):
         context['cur_repo_type'] = 'owned'
         ## owned repository
         student_info = std
-        student_score = ScoreTable.objects.get(id=std.id, year=2021)
+        student_score = GitHubScoreTable.objects.filter(id=std.id).order_by('-year').first()
 
         # 최근 기여 리포지토리 목록
         commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
@@ -143,6 +142,17 @@ class ProfileView(TemplateView):
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
+        
+        score_data_list = []
+        score_detail_data = GithubScore.objects.filter(github_id=github_id).order_by("year")
+        latest_data = score_detail_data.last()
+        end_year = latest_data.year
+        for row in score_detail_data:
+            score_data_list.append(row.to_json())
+        context["end_year"] = end_year
+        context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
+        chartdata["score_data"] = score_data_list
+        
         student = StudentTab.objects.all()
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
@@ -158,7 +168,7 @@ class ProfileView(TemplateView):
         own_star["avg"] = mean
         sigma = math.sqrt(sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
         own_star["std"] = sigma
-        star_dist = [star_temp_dist for i in range(self.end_year-self.start_year+1)]
+        star_dist = [star_temp_dist for i in range(end_year-self.start_year+1)]
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -180,26 +190,19 @@ class ProfileView(TemplateView):
             key_name = "year"+str(annual_key)
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
 
-        score_data_list = []
-        score_detail_data = GithubScore.objects.filter(github_id=github_id)
-        
-        for row in score_detail_data:
-            score_data_list.append(row.to_json())
-        chartdata["score_data"] = score_data_list
-        
-        score_data = ScoreTable.objects.all()
+        score_data = GitHubScoreTable.objects.all()
         total_factor_data_list = []
         user_data_list = []
         for row in score_data:
             total_factor_data_list.append(row.to_json())
-            if row.name == github_id:
+            if row.github_id == github_id:
                 user_data_list.append(row.to_json())
         chartdata["user_data"] = json.dumps(user_data_list)
-        score_dist = [[] for i in range(self.end_year-self.start_year+1)]
-        commit_dist = [[] for i in range(self.end_year-self.start_year+1)]
-        pr_dist = [[] for i in range(self.end_year-self.start_year+1)]
-        issue_dist = [[] for i in range(self.end_year-self.start_year+1)]
-        repo_dist = [[] for i in range(self.end_year-self.start_year+1)]
+        score_dist = [[] for i in range(end_year-self.start_year+1)]
+        commit_dist = [[] for i in range(end_year-self.start_year+1)]
+        pr_dist = [[] for i in range(end_year-self.start_year+1)]
+        issue_dist = [[] for i in range(end_year-self.start_year+1)]
+        repo_dist = [[] for i in range(end_year-self.start_year+1)]
         for factor_data in total_factor_data_list:
             if factor_data["year"] >= self.start_year :
                 yid = factor_data["year"]-self.start_year
@@ -248,21 +251,21 @@ class ProfileView(TemplateView):
         chartdata["repo_dist"] = repo_dist
         
         # TODO: start_year, end_year에 기반하지 않는 수식 필요
-        monthly_contr = [ [] for i in range(self.end_year-self.start_year+1)]
+        monthly_contr = [ [] for i in range(end_year-self.start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
             row_json = row.to_json()
             row_json['star'] = own_star["star"]
-            if row_json["year"] >= self.start_year and row_json["year"] <= self.end_year:
+            if row_json["year"] >= self.start_year and row_json["year"] <= end_year:
                 monthly_contr[row_json["year"] - self.start_year].append(row_json)
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
         # TODO: start_year, end_year에 기반하지 않는 수식 필요
-        monthly_avg = [ [] for i in range(self.end_year-self.start_year+1)]
+        monthly_avg = [ [] for i in range(end_year-self.start_year+1)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
-            if avg["start_yymm"].year >= self.start_year and avg["start_yymm"].year <= self.end_year :
+            if avg["start_yymm"].year >= self.start_year and avg["start_yymm"].year <= end_year :
                 avg["year"] = avg["start_yymm"].year
                 avg["month"] =  avg["start_yymm"].month
                 avg.pop('start_yymm', None)
@@ -309,7 +312,6 @@ class ProfileView(TemplateView):
 
         
         context["gbti"] = gbti_data
-        context["this_year"] = self.end_year
         context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
         
@@ -473,11 +475,12 @@ def student_id_to_username(request, student_id):
 @csrf_exempt
 def compare_stat(request, username):
     if request.method == 'POST':
-        end_year = 2021
         start_year = 2019
         data = json.loads(request.body)
         #data에는 github_id 가 들어있어야한다.
         github_id = data["github_id"]
+        latest_data = GithubScore.objects.filter(github_id=github_id).order_by("year").last()
+        end_year = latest_data.year
         own_star = 0
         try:
             star_data = GithubRepoStats.objects.filter(github_id=github_id).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))

@@ -59,10 +59,13 @@
               <div class="container">
                 <div class="horizontal-menu">
                   <div id="modal-btnGroupYear">
-                    <button class="modal-btn-year">2019</button>
-                    <button class="modal-btn-year">2020</button>
-                    <button class="modal-btn-year active">2021</button>
-                    <button class="modal-btn-year">2022</button>
+                    {% for year in year_list %}
+                      {% if year == end_year%}
+                      <button class="modal-btn-year active">{{year}}</button>
+                      {% else %}
+                      <button class="modal-btn-year">{{year}}</button>
+                      {% endif %}
+                    {% endfor %}
                   </div>
                   <div>
                     <div class="btn-group" role="group">
@@ -123,7 +126,7 @@
                       </div>
                     </div>
                     <div class="modal-item modal-radar">
-                      <h5 id="modal-radar-title">2021년 기여도 비교</h5>
+                      <h5 id="modal-radar-title">{{end_year}}년 기여도 비교</h5>
                       <div id="radar-canvas">
                         <canvas id="modal-canvas1" class="ctx-item"></canvas>
                       </div>
@@ -165,13 +168,14 @@
                 <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
                   <div class="btn-group" role="group">
                     <button id="btnGroupDropYear" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                      2021
+                      {{end_year}}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="btnGroupDropYear">
-                      <li><button class="dropdown-item year-item">2022</button></li>
-                      <li><button class="dropdown-item year-item">2021</button></li>
-                      <li><button class="dropdown-item year-item">2020</button></li>
-                      <li><button class="dropdown-item year-item">2019</button></li>
+                      {% for year in year_list %}
+                      <li>
+                        <button class="dropdown-item year-item">{{year}}</button>
+                      </li>
+                      {% endfor %}
                     </ul>
                   </div>
                   <div class="btn-group" role="group">
@@ -223,7 +227,7 @@
                   </div>
                 </div>
                 <div class="tab-pane fade mt-2" id="pills-radar">
-                  <h5 id="radar-title">2021년 기여도 비교</h5>
+                  <h5 id="radar-title">{{end_year}}년 기여도 비교</h5>
                   <canvas id="canvas1" class="ctx-item"></canvas>
                     <div id="target-search">
                       <select name="target" id="target-user">
@@ -249,8 +253,8 @@
         <div class="col-4">
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
-              <h5 class="card-title mb-2">{{this_year}} Score</h5>
-              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score}}</span>
+              <h5 class="card-title mb-2">{{end_year}} Score</h5>
+              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score|floatformat:2}}</span>
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title" style="width:70%;">Repositories</span>
@@ -395,7 +399,38 @@
                   <h5 id="gbtiModal" class="modal-title">GBTI</h5>
                   <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
-                <h4 class="text-center mt-3">GBTI(개발자 유형 지표) 검사 결과</h4>
+                {% if gbti %}
+                <div class="container">
+                  <section id ="main" class="mx-auto mt-5" >
+                    <h3>GBTI 개발자 유형 지표 검사</h3>
+                    <div class="d-flex justify-content-center">
+                      <span class="endpoint left"></span>
+                      <span class="line-connect"></span>
+                      <span class="endpoint right"></span>
+                    </div>
+                    <p>
+                      위 검사는 mbti를 기반으로 개발자의 성향을 분류한 것입니다. <br>
+                      과학적인 조사나 통계를 기반으로 하지 않으므로
+                      검사 결과는 재미로 즐겨 주시길 바랍니다.
+                    </p>
+                    <p>
+                      <span id="gbti-test-start" class="navybtn">시작하기</span>
+                    </p>
+                  </section>
+                  <section id ="qna" class="m-0">
+                    <div class="qbox my-5 py-3"></div>
+                    <div class="abox"></div>
+                    <div class="status mx-auto mt-3">
+                      <div class="statusBar">
+                      </div>
+                    </div>
+                  </section>
+                  <section id="result">
+                    <h3>GBTI 개발자 유형 지표 검사 결과</h3>
+                  </section>
+                </div>
+                {%else %}
+                <h4 class="text-center mt-3">GBTI 개발자 유형 지표 검사 결과</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
                   <span class="line-connect"></span>
@@ -454,8 +489,9 @@
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
-                  <button class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
+                  <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
                 </div>
+                {% endif %}
                 <h4 class="text-center mt-3">다른 유형과의 조화</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
@@ -465,65 +501,39 @@
                 <div class="gbti-harmony">
                   <div class="harmony">
                     <h4>상생 파트너</h4>
-                    <div class="d-flex">
-                      <i id="gbti-pos-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
-                      {% if gbti.pos|length == 0 %}
-                        <span class="weak-text">상생 파트너가 없습니다</span>
-                      {% endif %}
-                      <div id="carouselPosGbtiControls">
-                          {% for pos in gbti.pos%}
-                          {% if gbti.pos|first == pos %}
-                          <div class="carousel-gbti">
-                          {%else%}
-                          <div class="carousel-gbti none">
-                          {% endif %}
-                            <div class="gbti-card">
-                              <div class="gbti-img">
-                                <img src={% static "images/"|add:pos.code|add:".png" %} alt="No Image now">
-                              </div>
-                              <div class="gbti-textbox">
-                                <p class="gbti-text bold">
-                                  {{pos.nicknameKR}}
-                                </p>
-                                <p class="gbti-text">{{pos.descKR}}</p>
-                              </div>
-                            </div>
-                          </div>
-                          {% endfor%}
+                    {% for pos in gbti.pos%}
+                    <div class="carousel-gbti">
+                      <div class="gbti-card">
+                        <div class="gbti-img">
+                          <img src={% static "images/"|add:pos.code|add:".png" %} alt="No Image now">
+                        </div>
+                        <div class="gbti-textbox">
+                          <p class="gbti-text bold">
+                            {{pos.nicknameKR}}
+                          </p>
+                          <p class="gbti-text">{{pos.descKR}}</p>
+                        </div>
                       </div>
-                      <i id="gbti-pos-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
                     </div>
+                    {% endfor%}
                   </div>
                   <div class="harmony">
                     <h4>상극 파트너</h4>
-                    <div class="d-flex">
-                      <i id="gbti-neg-prev" class="bi bi-caret-left-fill evt-icon d-flex flex-column justify-content-center"></i>
-                      {% if gbti.neg|length == 0 %}
-                      <span class="weak-text">상극 파트너가 없습니다</span>
-                      {% endif %}
-                      <div id="carouselNegGbtiControls">
-                        {% for neg in gbti.neg%}
-                        {% if gbti.neg|first == neg %}
-                        <div class="carousel-gbti">
-                        {%else%}
-                        <div class="carousel-gbti none">
-                        {% endif %}
-                          <div class="gbti-card">
-                            <div class="gbti-img">
-                              <img src={% static "images/"|add:neg.code|add:".png" %} alt="No Image now">
-                            </div>
-                            <div class="gbti-textbox">
-                              <p class="gbti-text bold">
-                                {{neg.nicknameKR}}
-                              </p>
-                              <p class="gbti-text">{{neg.descKR}}</p>
-                            </div>
-                          </div>
+                    {% for neg in gbti.neg%}
+                    <div class="carousel-gbti">
+                      <div class="gbti-card">
+                        <div class="gbti-img">
+                          <img src={% static "images/"|add:neg.code|add:".png" %} alt="No Image now">
                         </div>
-                        {% endfor%}
+                        <div class="gbti-textbox">
+                          <p class="gbti-text bold">
+                            {{neg.nicknameKR}}
+                          </p>
+                          <p class="gbti-text">{{neg.descKR}}</p>
+                        </div>
                       </div>
-                      <i id="gbti-neg-next" class="bi bi-caret-right-fill evt-icon d-flex flex-column justify-content-center" style="float: right;"></i>
                     </div>
+                    {% endfor%}
                   </div>
                 </div>
                 <h4 class="text-center mt-3">개발 성향 분석</h4>
@@ -713,11 +723,15 @@
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/gbti-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/gbti-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
+    const end_year = {{end_year}}
   </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/gbti_test_data.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
