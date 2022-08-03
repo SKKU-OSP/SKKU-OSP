@@ -1,6 +1,5 @@
 function setVisualModal(){
   const start_year = 2019;
-  const end_year = 2021;
   const grass_size = 60;
   const NS = "http://www.w3.org/2000/svg";
   let modalChartObjList = [];
@@ -403,7 +402,7 @@ function setVisualModal(){
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
     const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
-    for(let i = 0; i <= year_intvl; i++){
+    for(let i = 0; i < specific_score_label.length; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
       for(let y = 0; y <= year_intvl; y++){
@@ -584,21 +583,6 @@ function setVisualModal(){
     if (modalChartObjList.length > 0) modalChartObjList[0] = radar_chart;
     else modalChartObjList.push(radar_chart);
   }
-
-  function findDistIdx(label=[], value=0){
-    let ret_idx = 0;
-    try{
-      label.forEach((cmpVal, idx) => {
-        if(Number(cmpVal)<=value) ret_idx = idx;
-      });
-    }catch(error){
-      console.error(error)
-      return -1;
-    }
-    if (ret_idx >= label.length-1) ret_idx = label.length-2;
-    return ret_idx;
-  }
-
   function destroyChart(chart=[], size=0) {
     for (let i = 0; i < size; i++) {
       chart[i].destroy();
@@ -663,7 +647,7 @@ function setGbtiModal(){
   document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
     $('#modalGbtiBox').modal("hide");
   });
-  document.getElementById("btn-save-id-card").addEventListener("click", ()=>{
+  $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
     html2canvas(screenshotTarget).then((canvas)=>{
       const base64image = canvas.toDataURL("image/png");
@@ -792,12 +776,10 @@ function setGbtiModal(){
       var status = document.querySelector('.statusBar');
       status.style.width= (100/endPoint) * qIdx + '%';
   }
-  const btn_start = document.getElementById("gbti-test-start");
-  const btn_restart = document.getElementById("gbti-test-restart");
-  btn_start.addEventListener("click", ()=>{
+  $("#gbti-test-start").on("click", ()=>{
     begin();
   });
-  btn_restart.addEventListener("click", ()=>{
+  $("#gbti-test-restart").on("click", ()=>{
     begin();
   });
   function begin(){
