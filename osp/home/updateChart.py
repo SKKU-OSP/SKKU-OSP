@@ -51,7 +51,6 @@ def main(mask):
     repo_result = cursor.fetchall()
     try:
         endYear = repo_result[0]["create_date"].year
-        print(repo_result[0]["create_date"].year)
     except:
         endYear = datetime.datetime.today().year
     nYear = endYear - startYear + 1
@@ -86,7 +85,6 @@ def main(mask):
             print("insert_repo_sql: ", e)
 
     for case in range(nCase):
-        print("run ", case)
         suffix = ""
         if case == 1:
             suffix = " where st.plural_major = 0"
@@ -113,8 +111,21 @@ def main(mask):
         for row in result:
             if int(str(row["id"])[:4]) >= startSid:
                 nSid = endYear - int(str(row["id"])[:4]) + 1
-                print("startSid", int(str(row["id"])[:4]), nSid)
                 break
+        select_star_sql = """SELECT A.github_id, YEAR(B.create_date) as year, SUM(B.stargazers_count) as star
+        FROM github_repo_contributor A
+        LEFT JOIN github_repo_stats B ON A.owner_id = B.github_id and A.repo_name = B.repo_name
+        WHERE A.github_id IN (SELECT github_id FROM student_tab as st"""
+        group_by_date =""")GROUP BY A.github_id, YEAR(B.create_date) ORDER BY A.github_id ASC"""
+        cursor.execute(select_star_sql+suffix+group_by_date)
+        star_result = cursor.fetchall()
+        star_github_id_dict = {}
+        for star_data in star_result:
+            if star_data["github_id"] in star_github_id_dict:
+                star_github_id_dict[star_data["github_id"]][star_data["year"]] = int(star_data["star"])
+            else :
+                star_github_id_dict[star_data["github_id"]] = {star_data["year"]:int(star_data["star"])}
+        
         studentData = [ [] for i in range(nYear)]
         studentRepo = [ {} for i in range(nYear)]
         
@@ -187,24 +198,27 @@ def main(mask):
             sid = endYear - int(str(row['id'])[:4])
             deptid = deptDict[row['dept']]
             totalCommit[yid] += row['commit_cnt']
-            totalStar[yid] += row['star_count']
             row['total_score_sum'] = row["total_score_sum"]
-            
-            studentData[yid].append({
-                "year": str(row['year']),
-                "github_id": str(row["github_id"]),
-                "absence": str(row["absence"]),
+            student_dict = {
+                "year": str(row['year']), 
+                "github_id": row["github_id"],
+                "absence": str(row["absence"]), 
                 "plural_major": str(row["plural_major"]),
-                "score": str(row['total_score_sum']),
+                "score": str(row['total_score_sum']), 
                 "score_diff": str(row['total_score_sum']),
                 "score_sum": str(row['total_score_sum']),
-                "commit": str(row["commit_cnt"]),
-                "star": str(row["star_count"]),
-                "pr": str(row["pr_cnt"]),
+                "commit": str(row["commit_cnt"]), 
+                "pr": str(row["pr_cnt"]), 
                 "issue": str(row["issue_cnt"]),
                 "fork": '0',
-            })
-            
+            }
+            row['star_count'] = 0
+            if row["github_id"] in star_github_id_dict:
+                if row['year'] in star_github_id_dict[row["github_id"]]:
+                    row['star_count'] = star_github_id_dict[row["github_id"]][row["year"]]
+            student_dict["star"] = row['star_count']
+            totalStar[yid] += row['star_count']
+            studentData[yid].append(student_dict)
             total_score = float(row['total_score_sum'])
             total_score_sub = float(row['total_score_sum'])
             total_score_sum = float(row['total_score_sum'])
