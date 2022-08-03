@@ -46,6 +46,10 @@
     margin-top: 0 !important;
   }
 }
+body{
+  background-color: var(--sub-bg-color);
+}
+
 .recent_repos{
   min-height: 100px;
 }
