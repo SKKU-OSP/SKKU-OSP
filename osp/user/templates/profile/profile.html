@@ -59,10 +59,13 @@
               <div class="container">
                 <div class="horizontal-menu">
                   <div id="modal-btnGroupYear">
-                    <button class="modal-btn-year">2019</button>
-                    <button class="modal-btn-year">2020</button>
-                    <button class="modal-btn-year active">2021</button>
-                    <button class="modal-btn-year">2022</button>
+                    {% for year in year_list %}
+                      {% if year == end_year%}
+                      <button class="modal-btn-year active">{{year}}</button>
+                      {% else %}
+                      <button class="modal-btn-year">{{year}}</button>
+                      {% endif %}
+                    {% endfor %}
                   </div>
                   <div>
                     <div class="btn-group" role="group">
@@ -123,7 +126,7 @@
                       </div>
                     </div>
                     <div class="modal-item modal-radar">
-                      <h5 id="modal-radar-title">2021년 기여도 비교</h5>
+                      <h5 id="modal-radar-title">{{end_year}}년 기여도 비교</h5>
                       <div id="radar-canvas">
                         <canvas id="modal-canvas1" class="ctx-item"></canvas>
                       </div>
@@ -165,13 +168,14 @@
                 <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
                   <div class="btn-group" role="group">
                     <button id="btnGroupDropYear" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                      2021
+                      {{end_year}}
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="btnGroupDropYear">
-                      <li><button class="dropdown-item year-item">2022</button></li>
-                      <li><button class="dropdown-item year-item">2021</button></li>
-                      <li><button class="dropdown-item year-item">2020</button></li>
-                      <li><button class="dropdown-item year-item">2019</button></li>
+                      {% for year in year_list %}
+                      <li>
+                        <button class="dropdown-item year-item">{{year}}</button>
+                      </li>
+                      {% endfor %}
                     </ul>
                   </div>
                   <div class="btn-group" role="group">
@@ -223,7 +227,7 @@
                   </div>
                 </div>
                 <div class="tab-pane fade mt-2" id="pills-radar">
-                  <h5 id="radar-title">2021년 기여도 비교</h5>
+                  <h5 id="radar-title">{{end_year}}년 기여도 비교</h5>
                   <canvas id="canvas1" class="ctx-item"></canvas>
                     <div id="target-search">
                       <select name="target" id="target-user">
@@ -249,7 +253,7 @@
         <div class="col-4">
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
-              <h5 class="card-title mb-2">{{this_year}} Score</h5>
+              <h5 class="card-title mb-2">{{end_year}} Score</h5>
               <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score|floatformat:2}}</span>
               <div class="row-complex">
                 <div class="row-contr">
@@ -723,11 +727,11 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/gbti-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
+    const end_year = {{end_year}}
   </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/gbti_test_data.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/gbti_test_main.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
