@@ -5,6 +5,7 @@ from datetime import datetime
 from osp.settings import CRAWLING_LOG_PATH, BASE_DIR
 from user.models import Account
 from home.updateScore import user_score_update
+from home.updateChart import update_chart
 from challenge.models import Challenge
 from challenge.views import achievement_check
 from user.update_act import update_commmit_time, update_individual, update_frequency
@@ -37,4 +38,5 @@ def start():
         update_commmit_time()
         update_individual()
         update_frequency()
+        update_chart(63)
     scheduler.start()
