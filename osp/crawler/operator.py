@@ -7,6 +7,7 @@ from user.models import Account
 from home.updateScore import user_score_update
 from challenge.models import Challenge
 from challenge.views import achievement_check
+from user.update_act import update_commmit_time, update_individual, update_frequency
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import register_events, DjangoJobStore
@@ -33,4 +34,7 @@ def start():
             for chal in challenge_list:
                 achievement_check(user, chal)
             user_score_update(user, year)
+        update_commmit_time()
+        update_individual()
+        update_frequency()
     scheduler.start()
