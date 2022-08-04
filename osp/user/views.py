@@ -33,9 +33,9 @@ class ProfileView(TemplateView):
     # 새로 고침 시 GET 요청으로 처리됨.
     def get(self, request, *args, **kwargs):
 
-        # update_act.update_commmit_time() committer time 업데이트
-        # update_act.update_individual() individual 
-        update_act.update_frequency()
+        # update_act.update_commmit_time() # committer time 업데이트
+        # update_act.update_individual() # individual 업데이트
+        # update_act.update_frequency() # frequency 업데이트
 
         context = self.get_context_data(request, *args, **kwargs)
         std = context['account'].student_data
@@ -280,12 +280,16 @@ class ProfileView(TemplateView):
         committer_time_circmean = pd.read_csv(os.getcwd() + '/static/data/committer_time_circmean.csv')
         committer_time_guide = pd.read_csv(os.getcwd() + '/static/data/time_sector.csv')
         major_act = pd.read_csv(os.getcwd() + '/static/data/major_act.csv')
+        committer_frequency = pd.read_csv(os.getcwd() + '/static/data/commit_intv.csv')
 
 
-        student_time_circmean = committer_time_circmean[committer_time_circmean['author_github'] == context["username"]].iloc[0, 2]
+        student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
-        student_major_act = major_act[major_act['author_github'] == context["username"]].iloc[0, 0]
+        student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
+        committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
+
+
 
         gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
         gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
@@ -310,7 +314,22 @@ class ProfileView(TemplateView):
             gbti_data["typeG1"] = 30
             gbti_data["typeG2"] = 20
 
-        
+        if(student_major_act == 'individual'): # 혼자 작업
+            gbti_data["typeG1"] = 20
+            gbti_data["typeG2"] = 30
+        else: # 함께 작업
+            gbti_data["typeG1"] = 30
+            gbti_data["typeG2"] = 20
+
+        if(committer_frequency == 0): # 자주 작업
+            gbti_data["typeF1"] = 30
+            gbti_data["typeF2"] = 20
+
+        else: # 몰아서 작업
+            gbti_data["typeF1"] = 20
+            gbti_data["typeF2"] = 30
+
+
         context["gbti"] = gbti_data
         context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
