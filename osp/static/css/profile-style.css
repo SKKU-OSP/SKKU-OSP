@@ -187,7 +187,6 @@ a.nav-link {
 #pills-overview.active{
   display: flex;
   flex-direction: column;
-  justify-content: center;
   flex: 1 1 50%;
 }
 .grass{
@@ -197,8 +196,8 @@ a.nav-link {
 }
 .grass-color{
   display: block;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border: 1px solid var(--profile-nav-border);
   margin: 0 2px;
 }
@@ -220,9 +219,23 @@ a.nav-link {
 .grass-group{
   display: flex;
   justify-content: end;
-  font-size: 12px;
+  font-size: 16px;
   align-items: center;
-  margin-top: 5px;
+}
+@media (max-width: 992px) {
+  .grass-color{
+    display: block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--profile-nav-border);
+    margin: 0 2px;
+  }
+  .grass-group{
+    display: flex;
+    justify-content: end;
+    font-size: 12px;
+    align-items: center;
+  }
 }
 .horizontal-menu{
   display: flex;
