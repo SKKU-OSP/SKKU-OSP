@@ -1,11 +1,10 @@
 window.onload = function () {
   const start_year = 2019;
-  const end_year = 2021;
   const grass_size = 60;
   const NS = "http://www.w3.org/2000/svg";
   let chartObjList = [];
   let year_intvl = end_year-start_year;
-  let select_year = 2021;
+  let select_year = end_year;
   let select_month = 0;
   let chartFactor = "score_sum";
   let is_selected_month = 0;
@@ -442,7 +441,7 @@ window.onload = function () {
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
     const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
-    for(let i = 0; i <= year_intvl; i++){
+    for(let i = 0; i < specific_score_label.length; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
       for(let y = 0; y <= year_intvl; y++){
