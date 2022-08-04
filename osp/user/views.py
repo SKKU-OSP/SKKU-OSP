@@ -290,6 +290,10 @@ class ProfileView(TemplateView):
         if not os.path.exists(os.path.join(test_data_path, 'major_act.csv')):
             update_act.update_individual()
         major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
+        
+        if not os.path.exists(os.path.join(test_data_path, 'commit_intv.csv')):
+            update_act.update_frequency()
+        committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
 
 
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
