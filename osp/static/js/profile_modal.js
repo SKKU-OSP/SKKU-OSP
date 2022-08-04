@@ -650,9 +650,58 @@ function setGbtiModal(){
   const main = document.querySelector('#main');
   const qna = document.querySelector('#qna');
   const result = document.querySelector('#result');
-  const selection=[];
-  const endPoint=15;
-  const factor=[0,0,0,0];
+  let selection=[];
+  let endPoint=15;
+  let factor=[0,0,0,0];
+  let P,N,T,E;
+  let descKr, descEng;
+  let resultIdx;
+
+  function setResult(){
+      P= (factor[0]>0 ? 0:1);
+      T= (factor[1]>0 ? 0:1);
+      N= (factor[2]>0 ? 0:1);
+      E= (factor[3]>0 ? 0:1); // factor 0,1 : ENTP 0000
+      
+      descKr = descList[0][P].descKr + descList[1][T].descKr + descList[2][N].descKr + descList[3][E].descKr; //한글 설명 생성
+      descEng = descList[0][P].descEng + descList[1][T].descEng + descList[2][N].descEng + descList[3][E].descEng; //영문 설명 생성
+
+      console.log(descEng);
+      console.log(descKr);
+      
+      let mbti=(E ? 'I':'E') + (N ? 'S':'N') +  (T ? 'F':'T') + (P ? 'J':'P'); //mbti 결과 string
+    
+      console.log(mbti);
+
+      for (let k=0;k<16;k++){
+          if (mbti == resultList[k].mbti) resultIdx=k;
+      }
+      console.log(resultIdx);
+      // var result0= document.querySelector('#descKr'); // 한글 설명 삽입
+      // result0.innerHTML = descKr;
+
+      var result1= document.querySelector('#descEng'); // 영문 설명 삽입
+      console.log("result1", result1);
+      result1.innerHTML = descEng;
+      
+      var result2= document.querySelector('#typeEng'); // 영문 타입명
+      console.log("result2", result2);
+      result2.innerHTML = resultList[resultIdx].typeEng;
+
+      var result3= document.querySelector('#typeKr'); // 한글 타입명
+      result3.innerHTML = resultList[resultIdx].typeKr;
+
+      var resultImg = document.createElement('img'); 
+      const imgDiv = document.querySelector('#resultImg');
+
+      var imgURL= '/static/images/'+mbti+'.png';
+      resultImg.src= imgURL;
+      result.alt=mbti;
+      imgDiv.appendChild(resultImg); //이미지 삽입
+      $("#btn-save-id-card").removeClass("none");
+      $("#gbti-test-restart").removeClass("none");
+  }
+
   function getResult(){
       qna.style.WebkitAnimation = "fadeOut 0.5s";
       qna.style.animation = "fadeOut 0.5s";
@@ -715,11 +764,32 @@ function setGbtiModal(){
               else if(qnaList[k].answer[selection[k]].factor[0]=='J') {
                   factor[0]-=qnaList[k].answer[selection[k]].val[0];
               }
-              
           }
           console.log(factor);
+          let result_progress = $(".test-result-bar");
+          for (let i=0; i<result_progress.length; i++){
+            let bars = $(result_progress[i]).children();
+            let widthList = getProgressLength(factor[i], i%2!=0);
+            for (let j=0; j<bars.length; j++){
+              bars[j].style.width = String(widthList[j]) + "%";
+            }
+          }
+          setResult();
       }, 200);
-      
+      function getProgressLength(factor, reverse=false){
+        let result = []
+        if(reverse) factor = -factor;
+        if(factor < 0){
+          result.push(50+factor/2);
+          result.push(-factor/2);
+          result.push(50);
+        }else{
+          result.push(50);
+          result.push(factor/2);
+          result.push(50-factor/2);
+        }
+        return result;
+      }
   }
   function addA(aTxt,qIdx,idx){
       
@@ -729,7 +799,7 @@ function setGbtiModal(){
       answer.classList.add('my-2');
       answer.classList.add('mx-auto');
       answer.classList.add('answerList');
-      //answer.classList.add('fadeIn');
+      answer.classList.add('fadeIn');
       abox.appendChild(answer);
       answer.innerHTML = aTxt;
 
@@ -738,16 +808,18 @@ function setGbtiModal(){
           var children = document.querySelectorAll('.answerList');
           for (let k =0; k<children.length; k++){
               children[k].disabled = true;
-              //children[k].style.WebkitAnimation = "fadeOut 0.3s";
-              //children[k].style.animation = "fadeOut 0.3s";
+
+              children[k].style.WebkitAnimation = "fadeOut 0.4s";
+              children[k].style.animation = "fadeOut 0.4s";
               
               children[k].style.display = 'none';
           }
-          /*setTimeout(()=>{
+          
+          setTimeout(()=>{
               for (let k =0; k<children.length; k++){
                   children[k].style.display = 'none';
               }
-          },100)*/
+          },200)
           if(qIdx<endPoint-1) nextQ(++qIdx);
           else {
               getResult();
@@ -760,10 +832,10 @@ function setGbtiModal(){
       var qbox = document.querySelector('.qbox');
       qbox.innerHTML = qnaList[qIdx].q;
       for (let k in qnaList[qIdx].answer){
-          addA(qnaList[qIdx].answer[k].a,qIdx,k);
+          addA(qnaList[qIdx].answer[k].a, qIdx, k);
       }
-      var status = document.querySelector('.statusBar');
-      status.style.width= (100/endPoint) * qIdx + '%';
+      var pgBar = document.querySelector('.progress-bar');
+      pgBar.style.width= (100/endPoint) * qIdx + '%';
   }
   $("#gbti-test-start").on("click", ()=>{
     begin();
@@ -772,6 +844,13 @@ function setGbtiModal(){
     begin();
   });
   function begin(){
+      selection=[];
+      endPoint=15;
+      factor=[0,0,0,0];
+      let imgDiv = $('#resultImg');
+      imgDiv.empty(); //이미지 삭제
+
+      result.style.display = "none";
       main.style.WebkitAnimation = "fadeOut 0.5s";
       main.style.animation = "fadeOut 0.5s";
       setTimeout(()=>{

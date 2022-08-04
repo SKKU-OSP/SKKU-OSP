@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container my-4">
   <div class="d-flex justify-content-end mb-1">
-    <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true" >프로필 수정</a>
+    <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true">프로필 수정</a>
   </div>
   <div class="row">
     <div id="profile-info" class="col-md-3 col-12">
@@ -132,7 +132,7 @@
                         <canvas id="modal-canvas1" class="ctx-item"></canvas>
                       </div>
                       <div class="radar-normal">
-                        <button id="modal-btn-toggle" class="btn btn-primary btn-sm" >정규화</button>
+                        <button id="modal-btn-toggle" class="btn btn-primary btn-sm">정규화</button>
                       </div>
                     </div>
                   </div>
@@ -215,7 +215,7 @@
                 </div>
                 <div class="tab-pane fade mt-2 show active" id="pills-overview">
                   <h5 id="grass-title">{{end_year}}년 오픈소스 활동</h5>
-                  <div class="d-flex mt-3">
+                  <div class="d-flex mt-3 justify-content-center">
                     <svg id="activity-monthly" class="grass double" viewBox="0 0 465 190"></svg>
                   </div>
                   <div class="grass-group mt-2">
@@ -398,48 +398,106 @@
             <div class="modal-dialog modal-xl">
               <div class="modal-content gbti-bg">
                 <div class="modal-header">
-                  <h5 id="gbtiModal" class="modal-title">GBTI</h5>
+                  <h5 id="gbtiModal" class="modal-title">개발자 유형</h5>
                   <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
                 {% if gbti %}
                 <div class="container">
-                  <section id ="main" class="mx-auto mt-5" >
-                    <h3>GBTI 개발자 유형 지표 검사</h3>
+                  <section id ="main"> 
+                    <div class="board mx-0 mt-5">
+                      <div class="my-3">
+                        <h3>개발자 유형 검사</h3>
+                      </div>
+                      <div class="d-flex justify-content-center">
+                        <span class="endpoint left"></span>
+                        <span class="line-connect"></span>
+                        <span class="endpoint right"></span>
+                      </div>
+                      <div class="my-2">
+                        위 검사는 개발자 성향 지표를 자가 진단을 통해 분석합니다<br>
+                        과학적인 조사와 통계를 기반으로 하지 않습니다<br>
+                        결과는 추천 시스템과 무관하니 참고용으로 즐겨주시길 바랍니다
+                      </div>
+                      <div class="my-2">
+                        <span id="gbti-test-start" class="btn">시작하기</span>
+                      </div>
+                    </div>
+                  </section>
+                  <section id ="qna" class="m-0">
+                    <div class="qbox my-5 py-3"></div>
+                    <div class="abox"></div>
+                    <div class="progress mt-5" style="height: 10px;">
+                      <div class="progress-bar" role="progressbar" style="width:50%; background: #002743; border-radius: 10px;" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </section>
+                  <section id="result" class="mx-auto mt-5 none">
+                    <h3>개발자 유형 검사 결과</h3>
                     <div class="d-flex justify-content-center">
                       <span class="endpoint left"></span>
                       <span class="line-connect"></span>
                       <span class="endpoint right"></span>
                     </div>
-                    <p>
-                      위 검사는 mbti를 기반으로 개발자의 성향을 분류한 것입니다. <br>
-                      과학적인 조사나 통계를 기반으로 하지 않으므로
-                      검사 결과는 재미로 즐겨 주시길 바랍니다.
-                    </p>
-                    <p>
-                      <span id="gbti-test-start" class="navybtn">시작하기</span>
-                    </p>
-                  </section>
-                  <section id ="qna" class="m-0">
-                    <div class="qbox my-5 py-3"></div>
-                    <div class="abox"></div>
-                    <div class="status mx-auto mt-3">
-                      <div class="statusBar">
+                    <div id="gbti-id-card" class="modal-gbti-card">
+                      <span class="weak-text ms-3 mt-3">OSS ID CARD</span>
+                      <div class="d-flex justify-content-center">
+                        <div class="gbti-content d-flex justify-content-center p-sm">
+                          <div id="resultImg" class="gbti-img">
+                          </div>
+                        </div>
+                        <div class="gbti-content d-flex flex-column p-sm">
+                          <p id="descEng" class="text-center text-label mb-3"></p>
+                          <h4 id="typeEng" class="text-center"></h4>
+                          <h4 id="typeKr" class="text-center"></h4>
+                          <div class="d-flex justify-content-between text-label">
+                            <span>Steady</span>
+                            <span>Fluid</span>
+                          </div>
+                          <div id="type-d-bar" class="progress test-result-bar">
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                          <div class="d-flex justify-content-between text-label">
+                            <span>CoolHead</span>
+                            <span>WarmHeart</span>
+                          </div>
+                          <div id="type-c-bar" class="progress test-result-bar">
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                          <div class="d-flex justify-content-between text-label">
+                            <span>Creative</span>
+                            <span>Efficient</span>
+                          </div>
+                          <div id="type-b-bar" class="progress test-result-bar">
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                          <div class="d-flex justify-content-between text-label">
+                            <span>MultiPlay</span>
+                            <span>SinglePlay</span>
+                          </div>
+                          <div id="type-a-bar" class="progress test-result-bar">
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </section>
-                  <section id="result">
-                    <h3>GBTI 개발자 유형 지표 검사 결과</h3>
-                  </section>
                 </div>
                 {%else %}
-                <h4 class="text-center mt-3">GBTI 개발자 유형 지표 검사 결과</h4>
+                <h4 class="text-center mt-3">개발자 유형 지표 검사 결과</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
                   <span class="line-connect"></span>
                   <span class="endpoint right"></span>
                 </div>
                 <div id="gbti-id-card" class="modal-gbti-card">
-                  <span class="weak-text ms-3 mt-3">GBTI ID CARD</span>
+                  <span class="weak-text ms-3 mt-3">OSS ID CARD</span>
                   <div class="d-flex justify-content-center">
                     <div class="gbti-content d-flex justify-content-center p-sm">
                       <div class="gbti-img">
@@ -448,8 +506,8 @@
                     </div>
                     <div class="gbti-content d-flex flex-column p-sm">
                       <p class="text-center text-label mb-3">{{gbti.desc}}</p>
-                      <h4 class="text-center">{{gbti.nickname}}</h3>
-                      <h4 class="text-center">{{gbti.nicknameKR}}</h3>
+                      <h4 class="text-center">{{gbti.nickname}}</h4>
+                      <h4 class="text-center">{{gbti.nicknameKR}}</h4>
                       <div class="d-flex justify-content-between text-label">
                         <span>Steady</span>
                         <span>Fluid</span>
@@ -489,11 +547,11 @@
                     </div>
                   </div>
                 </div>
-                <div class="d-flex justify-content-end btn-gbti-group">
-                  <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
-                  <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
-                </div>
                 {% endif %}
+                <div class="d-flex justify-content-end btn-gbti-group">
+                  <button id="btn-save-id-card" class="btn-gbti pb-active none">ID CARD 저장</button>
+                  <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3 none">다시 검사하기</button>
+                </div>
                 <h4 class="text-center mt-3">다른 유형과의 조화</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
