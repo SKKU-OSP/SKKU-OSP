@@ -2,3 +2,4 @@ data
 __pycache__
 dev_settings.py
 .venv
+configure.py
