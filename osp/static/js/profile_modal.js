@@ -200,10 +200,11 @@ function setVisualModal(){
     const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
     "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const fs = 15;
+    $("#modal-grass-title").text(select_year + "년 오픈소스 활동");
     for(let col = 1; col <= 6; col++){
       let gr = document.createElementNS(NS, "g");
-      for(let row = 1; row <=2; row++){
-        let mIdx = (col-1)*2+row-1;
+      for(let row = 0; row < 2; row++){
+        let mIdx = (col-1)*2+row;
         let rect = document.createElementNS(NS,"rect");
         let ctb = monthly_contribution[mIdx]
         let level = monthly_contribution_level[mIdx];
@@ -212,7 +213,7 @@ function setVisualModal(){
         rect.setAttributeNS(null,"raw", ctb);
         rect.setAttributeNS(null,"focus", 0);
         rect.setAttributeNS(null,"x", 0);
-        rect.setAttributeNS(null,"y", (grass_size+fs)*row - fs*3);
+        rect.setAttributeNS(null,"y", (grass_size+2.5*fs)*row+1.5*fs);
         rect.setAttributeNS(null,"width", grass_size);
         rect.setAttributeNS(null,"height", grass_size);
         rect.setAttributeNS(null,"rx", "2");
@@ -220,7 +221,7 @@ function setVisualModal(){
         rect.setAttributeNS(null,"class", "modal-ContributionMonth");
         rect.setAttributeNS(null,"data-level", level);
         mLabel.setAttributeNS(null, "x", 0);
-        mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
+        mLabel.setAttributeNS(null, "y", (grass_size+2.5*fs)*row+fs);
         mLabel.setAttributeNS(null, "font-family", "verdana");
         mLabel.setAttributeNS(null, "font-size", "15px");
         mLabel.style.strokeWidth = "0px";

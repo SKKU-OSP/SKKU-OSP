@@ -114,8 +114,9 @@
                 <div class="modal-body justify-content-center" id="modal-visualization">
                   <div class="row justify-content-between">
                     <div class="modal-item modal-grass">
+                      <h5 id="modal-grass-title">{{end_year}}년 오픈소스 활동</h5>
                       <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
-                      <div class="grass-group">
+                      <div class="grass-group mt-2">
                         Less
                         <span class="grass-color" data-level="0"></span>
                         <span class="grass-color" data-level="1"></span>
@@ -159,7 +160,7 @@
                 <i id="icon-modal" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
               </h5>
               <ul class="nav nav-tabs mt-2 text-lg">
-                <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">개요</a></li>
+                <li class="nav-item"><a class="nav-link active" id="pills-overview-tab">활동성</a></li>
                 <li class="nav-item"><a class="nav-link" id="pills-radar-tab">기여 평가</a></li>
                 <li class="nav-item"><a class="nav-link" id="pills-dist-tab">분포</a></li>
                 <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
@@ -212,11 +213,12 @@
                     </ul>
                   </div>
                 </div>
-                <div class="tab-pane fade show active" id="pills-overview">
-                  <div class="d-flex">
+                <div class="tab-pane fade mt-2 show active" id="pills-overview">
+                  <h5 id="grass-title">{{end_year}}년 오픈소스 활동</h5>
+                  <div class="d-flex mt-3">
                     <svg id="activity-monthly" class="grass double" viewBox="0 0 465 190"></svg>
                   </div>
-                  <div class="grass-group">
+                  <div class="grass-group mt-2">
                     Less
                     <span class="grass-color" data-level="0"></span>
                     <span class="grass-color" data-level="1"></span>
