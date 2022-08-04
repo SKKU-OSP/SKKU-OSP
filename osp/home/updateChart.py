@@ -8,7 +8,7 @@ from osp.dev_settings import DATABASES
 # 2. 파이썬 실행의 인자로 annualoverview, annualtotal, distscore, distfactor, student, repository 중에서 선택하여 테이블에 데이터를 insert 할 수 있습니다.
 # 인자로 all을 넣으면 모든 테이블에 insert 할 수 있습니다.
 
-def main(mask):
+def update_chart(mask):
     start = time.time()  # 시작 시간 저장
     startYear = 2019
     startSid = 2011 #소프트웨어학과 설립연도
@@ -736,4 +736,4 @@ if __name__ == '__main__':
                 mask += 8
             elif arg == "student":
                 mask += 16
-    main(mask)
+    update_chart(mask)
