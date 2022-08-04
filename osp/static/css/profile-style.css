@@ -576,7 +576,7 @@ span.row-raw{
   font-weight: 600;
 }
 .gbti-bg{
-  background-color: var(--gbti-bg-color);
+  background-color: var(--developer-bg-color);
 }
 .btn-gbti{
   padding: 10px 20px;
