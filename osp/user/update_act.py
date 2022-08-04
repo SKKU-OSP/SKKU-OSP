@@ -238,7 +238,7 @@ def update_frequency():
                     id_repo_dist[id][repo] = {"id":id, "repo": repo, "dist":commit_dist, "mean": wavg, "sigma":sigma}
                     repo_result.append({"id":id, "repo": repo, "dist":commit_dist, "mean": wavg, "sigma":sigma})
                     
-                    if id in ["SeoJeongYeop", "tsfo1489", "cosmoquester"]:
+                    if id in ["SeoJeongYeop", "tsfo1489"]:
                         print("repo dist", id_repo_dist[id][repo])
         if len(id_repo_dist[id].keys()) > 0 and sum(id_commit_dist)>0:
             id_wavg = id_wavg/len(id_repo_dist[id].keys())
@@ -254,7 +254,7 @@ def update_frequency():
                     "id_mean": id_commit_wavg, "id_sigma": id_commit_sigma,
                     "type1":type_tag1, "type2":type_tag2})
             
-            if id in ["SeoJeongYeop", "tsfo1489", "cosmoquester"]:
+            if id in ["SeoJeongYeop", "tsfo1489"]:
                     print("id dist", {"id":id, "dist":id_commit_dist, 
                     "mean": id_wavg, "sigma":id_sigma, 
                     "id_mean": id_commit_wavg, "id_sigma": id_commit_sigma,
