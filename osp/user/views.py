@@ -2,19 +2,20 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.core.files.images import get_image_dimensions
+
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from tag.models import Tag, DomainLayer
-from django.contrib.auth.decorators import login_required
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
-
-from django.core.files.images import get_image_dimensions
+from osp.settings import BASE_DIR
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
 from user.templatetags.gbti import getGBTI
-from django.db.models import Avg, Sum, Subquery
 
 import time
 import json
@@ -35,7 +36,7 @@ class ProfileView(TemplateView):
 
         # update_act.update_commmit_time() committer time 업데이트
         # update_act.update_individual() individual 
-        update_act.update_frequency()
+        # update_act.update_frequency()
 
         context = self.get_context_data(request, *args, **kwargs)
         std = context['account'].student_data
@@ -277,9 +278,18 @@ class ProfileView(TemplateView):
         context["chart_data"] = json.dumps(chartdata)
         
         #GBTI test
-        committer_time_circmean = pd.read_csv(os.getcwd() + '/static/data/committer_time_circmean.csv')
-        committer_time_guide = pd.read_csv(os.getcwd() + '/static/data/time_sector.csv')
-        major_act = pd.read_csv(os.getcwd() + '/static/data/major_act.csv')
+        test_data_path = os.path.join(BASE_DIR, 'static/data')
+        if not os.path.exists(os.path.join(test_data_path, 'committer_time_circmean.csv')):
+            update_act.update_commmit_time()
+        committer_time_circmean = pd.read_csv(os.path.join(test_data_path, 'committer_time_circmean.csv'))
+        
+        if not os.path.exists(os.path.join(test_data_path, 'time_sector.csv')):
+            update_act.update_commmit_time()
+        committer_time_guide = pd.read_csv(os.path.join(test_data_path, 'time_sector.csv'))
+        
+        if not os.path.exists(os.path.join(test_data_path, 'major_act.csv')):
+            update_act.update_individual()
+        major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
 
 
         student_time_circmean = committer_time_circmean[committer_time_circmean['author_github'] == context["username"]].iloc[0, 2]
