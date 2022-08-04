@@ -34,15 +34,9 @@ class ProfileView(TemplateView):
     # 새로 고침 시 GET 요청으로 처리됨.
     def get(self, request, *args, **kwargs):
 
-<<<<<<< HEAD
-        # update_act.update_commmit_time() committer time 업데이트
-        # update_act.update_individual() individual 
-        # update_act.update_frequency()
-=======
         # update_act.update_commmit_time() # committer time 업데이트
         # update_act.update_individual() # individual 업데이트
         # update_act.update_frequency() # frequency 업데이트
->>>>>>> f7b9ee2c913ee5cdbdd57ca2ba31780b653344f2
 
         context = self.get_context_data(request, *args, **kwargs)
         std = context['account'].student_data
