@@ -126,11 +126,12 @@ window.onload = function () {
   console.log("updateMonthly elapsed time", end-start);
 
   function updateMonthly(select_year){
-    
     monthly_contr = chart_data["monthly_contr"][select_year-start_year];
+    let dirty_month = Array(12).fill(0);
     for(let i=0; i<monthly_contr.length; i++){
       let total = monthly_contr[i]["total"];
       let mid = monthly_contr[i]['month']-1;
+      dirty_month[mid] = 1;
       monthly_contribution[mid] = total;
       if(total<=30){
         monthly_contribution_level[mid] = Math.ceil(total / 10);
@@ -139,6 +140,9 @@ window.onload = function () {
         monthly_contribution_level[mid] = 4;
       }
     }
+    dirty_month.forEach((dirty, idx) =>{
+      if(!dirty) monthly_contribution_level[idx] = 0;
+    });
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
     is_selected_factor = 0;
