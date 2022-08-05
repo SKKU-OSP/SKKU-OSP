@@ -495,6 +495,6 @@ def article_scrap(request):
         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'success', 'result': created})
     except DatabaseError:
         return JsonResponse({'status':'false'})
