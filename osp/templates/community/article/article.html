@@ -80,13 +80,9 @@
         return false;
     }
 
-    {
-        %
-        if article.writer.user == user %
-    }
-
-    function edit() {
-        ajax_form_data = new FormData();
+    {% if article.writer.user == user %}
+    function edit(){
+        ajax_form_data=new FormData();
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
         if (confirm("글을 수정하시겠습니까?")) {
             $.ajax({
@@ -108,10 +104,8 @@
                             }
                         }
                     });
-                    category_select.set(data['tags']); {
-                        %
-                        if board.board_type == 'Recruit' %
-                    }
+                    category_select.set(data['tags']);
+                    {% if board.board_type == 'Recruit' %}
                     const linkedPicker1Element = document.getElementById('PeriodPickerStart');
                     const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element, {
                         localization: {
@@ -153,18 +147,16 @@
                                 maxDate: e.date
                             }
                         });
-                    }); {
-                        % endif %
-                    }
+                    });
+                    {% endif %}
                 },
                 error: function (data) {
                     alert('Error Occured');
                 }
             });
         }
-    } {
-        % endif %
-    }
+    } 
+    {% endif %}
 
     function registerArticle() {
         ajax_form_data = new FormData();
@@ -173,20 +165,12 @@
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         ajax_form_data.append('board_name', '{{ board.name }}');
-        ajax_form_data.append('board_id', '{{ board.id }}'); {
-            %
-            if board.board_type == 'Recruit' %
-        }
-        ajax_form_data.append('team_id', $('#team-option').val()); {
-            % elif board.board_type == 'Team' %
-        }
-        ajax_form_data.append('team_id', {
-            {
-                board.team.id
-            }
-        }); {
-            % endif %
-        }
+        ajax_form_data.append('board_id', '{{ board.id }}'); 
+        {% if board.board_type == 'Recruit' %}
+        ajax_form_data.append('team_id', $('#team-option').val()); 
+        {% elif board.board_type == 'Team' %}
+        ajax_form_data.append('team_id', {{board.team.id}});
+        {% endif %}
 
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
@@ -202,14 +186,10 @@
                 success: function (data) {
                     console.log(data);
                     if (data['status'] == "success") {
-                        alert('등록이 완료되었습니다!') {
-                            %
-                            if board %
-                        }
-                        window.location.href =
-                            "{% url 'community:Board' board_name=board.name board_id=board.id %}"; {
-                            % endif %
-                        }
+                        alert('등록이 완료되었습니다!') 
+                        {% if board %}
+                        window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
+                        {% endif %}
                     } else {
                         alert(data['message']);
                         // alert('Error Occured');
@@ -220,10 +200,8 @@
                 }
             });
         }
-    } {
-        %
-        if article %
     }
+    {% if article %}
 
     function updateArticle() {
         ajax_form_data = new FormData();
@@ -235,16 +213,12 @@
         ajax_form_data.append('board_id', '{{ board.id }}');
         ajax_form_data.append('article_id', '{{ article.id }}');
 
-        {
-            %
-            if board.board_type == 'Recruit' %
-        }
+        {% if board.board_type == 'Recruit' %}
         var period_start_date = new Date($('#PeriodPickerStartInput').val());
         var period_end_date = new Date($('#PeriodPickerEndInput').val());
         ajax_form_data.append('period_start', period_start_date.toISOString());
-        ajax_form_data.append('period_end', period_end_date.toISOString()); {
-            % endif %
-        }
+        ajax_form_data.append('period_end', period_end_date.toISOString());
+        {% endif %}
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
         if (confirm("수정을 완료하시겠습니까?")) {
@@ -258,13 +232,10 @@
 
                 success: function (data) {
                     if (data['status'] == "success") {
-                        alert('수정이 완료되었습니다!') {
-                            %
-                            if article %
-                        }
-                        window.location.href = "{% url 'community:article-view' article_id=article.id %}"; {
-                            % endif %
-                        }
+                        alert('수정이 완료되었습니다!') 
+                        {% if article %}
+                        window.location.href = "{% url 'community:article-view' article_id=article.id %}"; 
+                        {% endif %}
                     } else {
                         alert(data['message']);
                         //alert('Error Occured');
@@ -294,14 +265,11 @@
 
                 success: function (data) {
                     if (data['status'] == "success") {
-                        alert('삭제가 완료되었습니다!') {
-                            %
-                            if board %
-                        }
+                        alert('삭제가 완료되었습니다!') 
+                        {% if board %}
                         window.location.href =
-                            "{% url 'community:Board' board_name=board.name board_id=board.id %}"; {
-                            % endif %
-                        }
+                            "{% url 'community:Board' board_name=board.name board_id=board.id %}"; 
+                        {% endif %}
                     } else {
                         alert(data['message']);
                         //alert('Error Occured');
@@ -312,9 +280,8 @@
                 }
             });
         }
-    } {
-        % endif %
-    }
+    } 
+    {% endif %}
 
     function registerComment() {
 
