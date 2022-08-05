@@ -626,16 +626,6 @@ function setPortfolioModal(){
   });
 }
 function setGbtiModal(){
-  let icon_portfolio_modal = document.getElementById("icon-gbti");
-  icon_portfolio_modal.addEventListener("click", ()=>{
-    $('#modalGbtiBox').modal('show');
-  });
-  document.getElementById("closeGbtiModalIcon").addEventListener("click", ()=>{
-    $('#modalGbtiBox').modal("hide");
-  });
-  document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
-    $('#modalGbtiBox').modal("hide");
-  });
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
     html2canvas(screenshotTarget).then((canvas)=>{
