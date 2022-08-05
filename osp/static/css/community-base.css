@@ -120,7 +120,6 @@
     padding: 0.5rem;
     text-align: center;
     font-style: normal;
-    font-weight: 400;
     font-size: 15px !important;
 
     background: #FFFFFF;
@@ -129,6 +128,7 @@
 
 .boardgroup-item > a{
     color: #000000;
+    font-weight: 600;
 }
 
 .boardgroup-item.selected{
@@ -176,6 +176,7 @@
 
 .accordion-item, .accordion-button{
     border: none;
+    font-weight: 600;
     border-radius: 0 !important;
 }
 

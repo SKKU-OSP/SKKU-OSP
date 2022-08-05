@@ -1,8 +1,6 @@
 import sys, os
 import MySQLdb
-import json
-import math
-import time
+import json, math, time, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from osp.dev_settings import DATABASES
 
@@ -13,7 +11,8 @@ from osp.dev_settings import DATABASES
 def main(mask):
     start = time.time()  # 시작 시간 저장
     startYear = 2019
-    nowYear = 2021
+    startSid = 2011 #소프트웨어학과 설립연도
+    nCase = 4 # 복수전공 포함 여부 & 휴학생 포함 여부
     meta = DATABASES['default']
 
     conn = MySQLdb.connect(
@@ -28,69 +27,66 @@ def main(mask):
     def create2DArray(rows, columns) :
         arr = []
         for i in range(rows):
-            col_arr = []
-            for j in range(columns):
-                col_arr.append(0)
+            col_arr = [ 0 for j in range(columns)]
             arr.append(col_arr)
         return arr
     
     def create2DArray_a(rows, columns):
         arr = []
         for i in range(rows):
-            col_arr=[]
-            for j in range(columns):
-                col_arr.append([])
+            col_arr = [ [] for j in range(columns)]
             arr.append(col_arr)
         return arr
 
     def calculateMeanOfArray(arr) :
         idx = 0
-        newArr = list()
-        for val in arr :
-            newArr.append('{:0.2f}'.format(val / annualCnt[idx]))
+        newArr = ['{:0.4f}'.format(val / annualCnt[idx]) for val in arr]
         return newArr
 
     # MySQLdb
     cursor = conn.cursor(MySQLdb.cursors.DictCursor)
-
-    repo_sql = """select grs.github_id, grs.create_date from github_repo_stats as grs"""
+    # 업데이트 연도
+    repo_sql = """SELECT grs.github_id, grs.create_date FROM github_repo_stats as grs ORDER BY create_date DESC"""
     cursor.execute(repo_sql)
     repo_result = cursor.fetchall()
+    try:
+        endYear = repo_result[0]["create_date"].year
+    except:
+        endYear = datetime.datetime.today().year
+    nYear = endYear - startYear + 1
     repo_total = len(repo_result)
     repo_dist = []
-    for i in range(7):
-        repo_dist.append(0)
-    studentRepo = []
-
-    for i in range(3):
-        studentRepo.append({})
+    studentRepo = [{} for i in range(nYear)]
     for row in repo_result:
         repo_created = row['create_date'].strftime("%Y")
-        idx = nowYear - int(repo_created)
-        if idx < 7 : 
-            repo_dist[idx] += 1
-        if idx < 3:
+        yid = endYear - int(repo_created)
+        if yid >= len(repo_dist):
+            while len(repo_dist)<=yid:
+                repo_dist.append(0)
+        repo_dist[yid] += 1
+        if yid < nYear:
             gid = row['github_id']
-            if gid in studentRepo[idx]:
-                studentRepo[idx][gid] += 1
+            if gid in studentRepo[yid]:
+                studentRepo[yid][gid] += 1
             else:
-                studentRepo[idx][gid]= 1
-    
+                studentRepo[yid][gid]= 1
+
     #MODEL6: insert_repo_sql home_repository
-    if mask & 32: # pow(2,5)
+    if mask & 32:
         print("exec sql repository")
         try:
+            delete_repo_sql = """DELETE FROM home_repository"""
             insert_repo_sql = """insert into home_repository (year, owner, repo_num) VALUES (%s, %s, %s)"""
+            cursor.execute(delete_repo_sql)
             for i in range(len(studentRepo)):
                 for key in studentRepo[i]:
-                    cursor.execute(insert_repo_sql, (nowYear-i, key, studentRepo[i][key]))
+                    cursor.execute(insert_repo_sql, (endYear-i, key, studentRepo[i][key]))
 
             conn.commit()
         except Exception as e:
             print("insert_repo_sql: ", e)
 
-    for case in range(4):
-        
+    for case in range(nCase):
         suffix = ""
         if case == 1:
             suffix = " where st.plural_major = 0"
@@ -99,749 +95,374 @@ def main(mask):
         elif case == 3:
             suffix = " where st.absence = 0 and st.plural_major = 0"
         
-        select_sql = """SELECT gs.github_id, gs.year, gs.excellent_contributor, 
-        round(gs.guideline_score+gs.code_score+gs.other_project_score,1) as owner_score, 
-        gs.contributor_score, round(gs.star_score+gs.contribution_score,1) as additional_score,  
-        gs.best_repo, gs.star_count, gs.commit_count, gs.pr_count, gs.issue_count, gs.star_owner_count, gs.fork_owner_count, 
-        st.id, st.dept, st.absence, st.plural_major,
-        least(round(gs.repo_score_sub+gs.additional_score_sub,3), 5) as total_score_sub, 
-        least(round(gs.repo_score_sum+gs.additional_score_sum,3), 5) as total_score_sum
-        FROM github_score as gs JOIN student_tab as st ON gs.github_id = st.github_id"""
-        cursor.execute(select_sql+suffix)
+        select_dept = """SELECT dept, count(dept) from user_githubscoretable group by dept"""
+        cursor.execute(select_dept)
+        dept_result = cursor.fetchall()
+        deptDict = {}
+        for dept in dept_result:
+            deptDict[dept["dept"]] = len(deptDict.keys())
+        nDept = len(deptDict.keys())
+        select_sql = """SELECT gs.github_id, gs.year, gs.excellent_contributor, gs.best_repo, gs.star_count, 
+        ugs.commit_cnt, ugs.pr_cnt, ugs.issue_cnt, st.id, st.dept, st.absence, st.plural_major, 
+        least(round(gs.repo_score_sum+gs.score_other_repo_sum+score_star+score_fork,3), 5) as total_score_sum
+        FROM github_score as gs JOIN student_tab as st ON gs.github_id = st.github_id 
+        JOIN user_githubscoretable as ugs ON ugs.github_id = st.github_id and ugs.year = gs.year"""
+        order_sql = " ORDER BY id ASC"
+        cursor.execute(select_sql+suffix+order_sql)
         result = cursor.fetchall()
-
-        studentData = [[], [], []]
-        studentRepo = [{}, {}, {}]
+        for row in result:
+            if int(str(row["id"])[:4]) >= startSid:
+                nSid = endYear - int(str(row["id"])[:4]) + 1
+                break
+        select_star_sql = """SELECT A.github_id, YEAR(B.create_date) as year, SUM(B.stargazers_count) as star
+        FROM github_repo_contributor A
+        LEFT JOIN github_repo_stats B ON A.owner_id = B.github_id and A.repo_name = B.repo_name
+        WHERE A.github_id IN (SELECT github_id FROM student_tab as st"""
+        group_by_date =""")GROUP BY A.github_id, YEAR(B.create_date) ORDER BY A.github_id ASC"""
+        cursor.execute(select_star_sql+suffix+group_by_date)
+        star_result = cursor.fetchall()
+        star_github_id_dict = {}
+        for star_data in star_result:
+            if star_data["github_id"] in star_github_id_dict:
+                star_github_id_dict[star_data["github_id"]][star_data["year"]] = int(star_data["star"])
+            else :
+                star_github_id_dict[star_data["github_id"]] = {star_data["year"]:int(star_data["star"])}
         
-        deptDict = { "소프트웨어학과": 0, "글로벌융합학부": 1, "컴퓨터공학과": 2 }
+        studentData = [ [] for i in range(nYear)]
+        studentRepo = [ {} for i in range(nYear)]
+        
         # Year Data: Mean, Var, Std
-        scoreAnnual = [0, 0, 0]
-        scoreSubAnnual = [0, 0, 0]
-        scoreSumAnnual = [0, 0, 0]
-        commitAnnual = [0, 0, 0]
-        starAnnual = [0, 0, 0]
-        prAnnual = [0, 0, 0]
-        issueAnnual = [0, 0, 0]
-        forkAnnual = [0, 0, 0]
+        scoreAnnual = [ 0 for i in range(nYear)]
+        scoreSubAnnual = [ 0 for i in range(nYear)]
+        scoreSumAnnual = [ 0 for i in range(nYear)]
+        commitAnnual = [ 0 for i in range(nYear)]
+        starAnnual = [ 0 for i in range(nYear)]
+        prAnnual = [ 0 for i in range(nYear)]
+        issueAnnual = [ 0 for i in range(nYear)]
+        forkAnnual = [ 0 for i in range(nYear)]
 
         # Overview Data 
-        scoreMore3 = [0, 0, 0]
-        scoreSubMore3 = [0, 0, 0]
-        scoreSumMore3 = [0, 0, 0]
-        totalCommit = [0, 0, 0]
-        totalStar = [0, 0, 0]
-        repoDist = [0, 0, 0, 0, 0, 0, 0]
+        scoreMore3 = [ 0 for i in range(nYear)]
+        scoreSubMore3 = [ 0 for i in range(nYear)]
+        scoreSumMore3 = [ 0 for i in range(nYear)]
+        totalCommit = [ 0 for i in range(nYear)]
+        totalStar = [ 0 for i in range(nYear)]
 
         # Chart Data: Score, Commits, Stars, PRs, Issues 
-        annualCnt = [0, 0, 0]
-        sidSize = create2DArray(3, 7)
-        deptSize = create2DArray(3, 3)
-
+        annualCnt = [ 0 for i in range(nYear)]
+        deptSize = create2DArray(nYear, nDept)
+        sidSize = create2DArray(nYear, nSid)
+        
+        scoreClassCnt, commitClassCnt, starClassCnt, prClassCnt, issueClassCnt = 10, 5, 5, 5, 5
+        scoreClassGap, commitClassGap, starClassGap, prClassGap, issueClassGap = 0.5, 100, 2, 5, 2
+        
+        # 임시로 구간을 fork에 저장
+        forkYearStd = [scoreClassCnt, commitClassCnt, starClassCnt, prClassCnt, issueClassCnt]
+        forkMean = [scoreClassGap, commitClassGap, starClassGap, prClassGap, issueClassGap]
+        
         # About Score
-        scoreDist = create2DArray(3, 10)
-        scoreDept = create2DArray(3, 3)
-        scoreSid = create2DArray(3, 7)
+        scoreDist = create2DArray(nYear, scoreClassCnt)
+        scoreDept = create2DArray(nYear, nDept)
+        scoreSid = create2DArray(nYear, nSid)
         # About Score sub
-        scoreSubDist = create2DArray(3, 10)
-        scoreSubDept = create2DArray(3, 3)
-        scoreSubSid = create2DArray(3, 7)
+        scoreSubDist = create2DArray(nYear, scoreClassCnt)
+        scoreSubDept = create2DArray(nYear, nDept)
+        scoreSubSid = create2DArray(nYear, nSid)
         # About Score sub
-        scoreSumDist = create2DArray(3, 10)
-        scoreSumDept = create2DArray(3, 3)
-        scoreSumSid = create2DArray(3, 7)
+        scoreSumDist = create2DArray(nYear, scoreClassCnt)
+        scoreSumDept = create2DArray(nYear, nDept)
+        scoreSumSid = create2DArray(nYear, nSid)
         # About Commit
-        commitDist = create2DArray(3, 5)
-        commitDept = create2DArray(3, 3)
-        commitSid = create2DArray(3, 7)
+        commitDist = create2DArray(nYear, commitClassCnt)
+        commitDept = create2DArray(nYear, nDept)
+        commitSid = create2DArray(nYear, nSid)
         # About Star
-        starDist = create2DArray(3, 5)
-        starDept = create2DArray(3, 3)
-        starSid = create2DArray(3, 7)
+        starDist = create2DArray(nYear, starClassCnt)
+        starDept = create2DArray(nYear, nDept)
+        starSid = create2DArray(nYear, nSid)
         # About PRs
-        prDist = create2DArray(3, 5)
-        prDept = create2DArray(3, 3)
-        prSid = create2DArray(3, 7)
+        prDist = create2DArray(nYear, prClassCnt)
+        prDept = create2DArray(nYear, nDept)
+        prSid = create2DArray(nYear, nSid)
         # About Issues
-        issueDist = create2DArray(3, 5)
-        issueDept = create2DArray(3, 3)
-        issueSid = create2DArray(3, 7)
+        issueDist = create2DArray(nYear, issueClassCnt)
+        issueDept = create2DArray(nYear, nDept)
+        issueSid = create2DArray(nYear, nSid)
         # About Forks
-        forkDist = create2DArray(3, 5)
-        forkDept = create2DArray(3, 3)
-        forkSid = create2DArray(3, 7)
+        forkDept = create2DArray(nYear, nDept)
+        forkSid = create2DArray(nYear, nSid)
 
-        Row = None
-        idx1 = None
-        idxId = None
-        idxDept = None
-        for ele in result:
-
-            Row = ele
-            idx1 = Row['year'] - startYear
-            idxId = nowYear - math.floor(Row['id'] / 1000000)
-            idxDept = deptDict[Row['dept']]
-            totalCommit[idx1] += Row['commit_count']
-            totalStar[idx1] += Row['star_count']
-            Row['total_score'] = '{:0.1f}'.format(
-                Row['excellent_contributor'] +
-                Row['owner_score'] +
-                Row['contributor_score'] +
-                Row['additional_score']
-            )
-            
-            studentData[idx1].append({
-                "year": idx1+startYear,
-                "github_id": Row["github_id"],
-                "absence": Row["absence"],
-                "plural_major": Row["plural_major"],
-                "score": Row['total_score'],
-                "score_diff": str(Row['total_score_sub']),
-                "score_sum": str(Row['total_score_sum']),
-                "commit": Row["commit_count"],
-                "star": Row["star_count"],
-                "pr": Row["pr_count"],
-                "issue": Row["issue_count"],
-                "fork": Row["fork_owner_count"],
-            })
-            
-            total_score = float(Row['total_score'])
-            total_score_sub = float(Row['total_score_sub'])
-            total_score_sum = float(Row['total_score_sum'])
+        yid, sid, deptid = None, None, None
+        for row in result:
+            if int(str(row['id'])[:4]) < startSid:
+                continue
+            yid = row['year'] - startYear
+            sid = endYear - int(str(row['id'])[:4])
+            deptid = deptDict[row['dept']]
+            totalCommit[yid] += row['commit_cnt']
+            row['total_score_sum'] = row["total_score_sum"]
+            student_dict = {
+                "year": str(row['year']), 
+                "github_id": row["github_id"],
+                "absence": str(row["absence"]), 
+                "plural_major": str(row["plural_major"]),
+                "score": str(row['total_score_sum']), 
+                "score_diff": str(row['total_score_sum']),
+                "score_sum": str(row['total_score_sum']),
+                "commit": str(row["commit_cnt"]), 
+                "pr": str(row["pr_cnt"]), 
+                "issue": str(row["issue_cnt"]),
+                "fork": '0',
+            }
+            row['star_count'] = 0
+            if row["github_id"] in star_github_id_dict:
+                if row['year'] in star_github_id_dict[row["github_id"]]:
+                    row['star_count'] = star_github_id_dict[row["github_id"]][row["year"]]
+            student_dict["star"] = row['star_count']
+            totalStar[yid] += row['star_count']
+            studentData[yid].append(student_dict)
+            total_score = float(row['total_score_sum'])
+            total_score_sub = float(row['total_score_sum'])
+            total_score_sum = float(row['total_score_sum'])
             # student id 
-            scoreSid[idx1][idxId] += total_score
-            scoreSubSid[idx1][idxId] += total_score_sub
-            scoreSumSid[idx1][idxId] += total_score_sum
-            commitSid[idx1][idxId] += Row['commit_count']
-            starSid[idx1][idxId] += Row['star_count']
-            prSid[idx1][idxId] += Row['pr_count']
-            issueSid[idx1][idxId] += Row['issue_count']
-            forkSid[idx1][idxId] += Row['fork_owner_count']
-            sidSize[idx1][idxId] += 1
+            scoreSid[yid][sid] += total_score
+            scoreSubSid[yid][sid] += total_score_sub
+            scoreSumSid[yid][sid] += total_score_sum
+            commitSid[yid][sid] += row['commit_cnt']
+            starSid[yid][sid] += row['star_count']
+            prSid[yid][sid] += row['pr_cnt']
+            issueSid[yid][sid] += row['issue_cnt']
+            sidSize[yid][sid] += 1
             # dept 
-            scoreDept[idx1][idxDept] += total_score
-            scoreSubDept[idx1][idxDept] += total_score_sub
-            scoreSumDept[idx1][idxDept] += total_score_sum
-            commitDept[idx1][idxDept] += Row['commit_count']
-            starDept[idx1][idxDept] += Row['star_count']
-            prDept[idx1][idxDept] += Row['pr_count']
-            issueDept[idx1][idxDept] += Row['issue_count']
-            forkDept[idx1][idxDept] += Row['fork_owner_count']
-            deptSize[idx1][idxDept] += 1
+            scoreDept[yid][deptid] += total_score
+            scoreSubDept[yid][deptid] += total_score_sub
+            scoreSumDept[yid][deptid] += total_score_sum
+            commitDept[yid][deptid] += row['commit_cnt']
+            starDept[yid][deptid] += row['star_count']
+            prDept[yid][deptid] += row['pr_cnt']
+            issueDept[yid][deptid] += row['issue_cnt']
+            deptSize[yid][deptid] += 1
             
-            if total_score < 0.5 :
-                scoreDist[idx1][0] += 1
-            elif total_score < 1 :
-                scoreDist[idx1][1] += 1
-            elif total_score < 1.5 :
-                scoreDist[idx1][2] += 1
-            elif total_score < 2:
-                scoreDist[idx1][3] += 1
-            elif total_score < 2.5 :
-                scoreDist[idx1][4] += 1
-            elif total_score < 3 :
-                scoreDist[idx1][5] += 1
-            elif total_score < 3.5 :
-                scoreDist[idx1][6] += 1
-                scoreMore3[idx1] += 1
-            elif total_score < 4 :
-                scoreDist[idx1][7] += 1
-                scoreMore3[idx1] += 1
-            elif total_score < 4.5 :
-                scoreDist[idx1][8] += 1
-                scoreMore3[idx1] += 1
-            else :
-                scoreDist[idx1][9] += 1
-                scoreMore3[idx1] += 1
+            classIdx = math.floor(total_score*2) if math.floor(total_score*2) <= (scoreClassCnt-1) else scoreClassCnt-1
+            scoreDist[yid][classIdx] += 1
+            scoreMore3[yid] += 1 if total_score >= 3 else 0
+            
+            classIdx = math.floor(total_score_sub*2) if math.floor(total_score_sub*2) <= (scoreClassCnt-1) else scoreClassCnt-1
+            scoreSubDist[yid][classIdx] += 1
+            scoreSubMore3[yid] += 1 if total_score_sub >= 3 else 0
+            
+            classIdx = math.floor(total_score_sum*2) if math.floor(total_score_sum*2) <= scoreClassCnt-1 else scoreClassCnt-1
+            scoreSumDist[yid][classIdx] += 1
+            scoreSumMore3[yid] += 1 if total_score_sum >= 3 else 0
 
-
-            if total_score_sub < 0.5 :
-                scoreSubDist[idx1][0] += 1
-            elif total_score_sub < 1 :
-                scoreSubDist[idx1][1] += 1
-            elif total_score_sub < 1.5 :
-                scoreSubDist[idx1][2] += 1
-            elif total_score_sub < 2 :
-                scoreSubDist[idx1][3] += 1
-            elif total_score_sub < 2.5 :
-                scoreSubDist[idx1][4] += 1
-            elif total_score_sub < 3 :
-                scoreSubDist[idx1][5] += 1
-            elif total_score_sub < 3.5 :
-                scoreSubDist[idx1][6] += 1
-                scoreSubMore3[idx1] += 1
-            elif total_score_sub < 4 :
-                scoreSubDist[idx1][7] += 1
-                scoreSubMore3[idx1] += 1
-            elif total_score_sub < 4.5 :
-                scoreSubDist[idx1][8] += 1
-                scoreSubMore3[idx1] += 1
-            else :
-                scoreSubDist[idx1][9] += 1
-                scoreSubMore3[idx1] += 1
-
-            if total_score_sum < 0.5 :
-                scoreSumDist[idx1][0] += 1
-            elif total_score_sum < 1 :
-                scoreSumDist[idx1][1] += 1
-            elif total_score_sum < 1.5 :
-                scoreSumDist[idx1][2] += 1
-            elif total_score_sum < 2 :
-                scoreSumDist[idx1][3] += 1
-            elif total_score_sum < 2.5 :
-                scoreSumDist[idx1][4] += 1
-            elif total_score_sum < 3 :
-                scoreSumDist[idx1][5] += 1
-            elif total_score_sum < 3.5 :
-                scoreSumDist[idx1][6] += 1
-                scoreSumMore3[idx1] += 1
-            elif total_score_sum < 4 :
-                scoreSumDist[idx1][7] += 1
-                scoreSumMore3[idx1] += 1
-            elif total_score_sum < 4.5 :
-                scoreSumDist[idx1][8] += 1
-                scoreSumMore3[idx1] += 1
-            else :
-                scoreSumDist[idx1][9] += 1
-                scoreSumMore3[idx1] += 1
-
-            if Row['commit_count'] < 100 :
-                commitDist[idx1][0] += 1
-            elif Row['commit_count'] < 200 :
-                commitDist[idx1][1] += 1
-            elif Row['commit_count'] < 300 :
-                commitDist[idx1][2] += 1
-            elif Row['commit_count'] < 400 :
-                commitDist[idx1][3] += 1
-            else :
-                commitDist[idx1][4] += 1
-
-            if Row['star_count'] < 2 :
-                starDist[idx1][0] += 1
-            elif Row['star_count'] < 4 :
-                starDist[idx1][1] += 1
-            elif Row['star_count'] < 6 :
-                starDist[idx1][2] += 1
-            elif Row['star_count'] < 8 :
-                starDist[idx1][3] += 1
-            else :
-                starDist[idx1][4] += 1
-
-            if Row['pr_count'] < 5 :
-                prDist[idx1][0] += 1
-            elif Row['pr_count'] < 10 :
-                prDist[idx1][1] += 1
-            elif Row['pr_count'] < 15 :
-                prDist[idx1][2] += 1
-            elif Row['pr_count'] < 20 :
-                prDist[idx1][3] += 1
-            else :
-                prDist[idx1][4] += 1
-
-            if Row['issue_count'] < 2 :
-                issueDist[idx1][0] += 1
-            elif Row['issue_count'] < 4 :
-                issueDist[idx1][1] += 1
-            elif Row['issue_count'] < 6 :
-                issueDist[idx1][2] += 1
-            elif Row['issue_count'] < 8 :
-                issueDist[idx1][3] += 1
-            else :
-                issueDist[idx1][4] += 1
-
-            if Row['fork_owner_count'] < 1 :
-                forkDist[idx1][0] += 1
-            elif Row['fork_owner_count'] < 2 :
-                forkDist[idx1][1] += 1
-            elif Row['fork_owner_count'] < 3 :
-                forkDist[idx1][2] += 1
-            elif Row['fork_owner_count'] < 4 :
-                forkDist[idx1][3] += 1
-            else :
-                forkDist[idx1][4] += 1
+            classIdx = math.floor(row['commit_cnt']/commitClassGap) if math.floor(row['commit_cnt']/commitClassGap) <= commitClassCnt-1 else commitClassCnt-1
+            commitDist[yid][classIdx] += 1
+            
+            classIdx = math.floor(row['star_count']/starClassGap) if math.floor(row['star_count']/starClassGap) <= starClassCnt-1 else starClassCnt-1
+            starDist[yid][classIdx] += 1
+            
+            classIdx = math.floor(row['pr_cnt']/prClassGap) if math.floor(row['pr_cnt']/prClassGap) <= prClassCnt-1 else prClassCnt-1
+            prDist[yid][classIdx] += 1
+            
+            classIdx = math.floor(row['issue_cnt']/issueClassGap) if math.floor(row['issue_cnt']/issueClassGap) <= issueClassCnt-1 else issueClassCnt-1
+            issueDist[yid][classIdx] += 1
 
             # annual Total sum
-            scoreAnnual[idx1] += total_score
-            scoreSubAnnual[idx1] += total_score_sub
-            scoreSumAnnual[idx1] += total_score_sum
-            commitAnnual[idx1] += Row['commit_count']
-            starAnnual[idx1] += Row['star_count']
-            prAnnual[idx1] += Row['pr_count']
-            issueAnnual[idx1] += Row['issue_count']
-            forkAnnual[idx1] += Row['fork_owner_count']
-            annualCnt[idx1] += 1
+            scoreAnnual[yid] += total_score
+            scoreSubAnnual[yid] += total_score_sub
+            scoreSumAnnual[yid] += total_score_sum
+            commitAnnual[yid] += row['commit_cnt']
+            starAnnual[yid] += row['star_count']
+            prAnnual[yid] += row['pr_cnt']
+            issueAnnual[yid] += row['issue_cnt']
+            annualCnt[yid] += 1
 
         # 상위 5%의 데이터 셋 만들기 
-        scoreSidTop5pct = create2DArray_a(3, 7)
-        scoreDeptTop5pct = create2DArray_a(3, 3)
-        scoreSubSidTop5pct = create2DArray_a(3, 7)
-        scoreSubDeptTop5pct = create2DArray_a(3, 3)
-        scoreSumSidTop5pct = create2DArray_a(3, 7)
-        scoreSumDeptTop5pct = create2DArray_a(3, 3)
-        commitSidTop5pct = create2DArray_a(3, 7)
-        commitDeptTop5pct = create2DArray_a(3, 3)
-        starSidTop5pct = create2DArray_a(3, 7)
-        starDeptTop5pct = create2DArray_a(3, 3)
-        prSidTop5pct = create2DArray_a(3, 7)
-        prDeptTop5pct = create2DArray_a(3, 3)
-        issueSidTop5pct = create2DArray_a(3, 7)
-        issueDeptTop5pct = create2DArray_a(3, 3)
-        forkSidTop5pct = create2DArray_a(3, 7)
-        forkDeptTop5pct = create2DArray_a(3, 3)
-
-        for ele in result:
-            Row = ele
-            idx1 = Row['year'] - startYear
-            idxId = nowYear - math.floor(Row['id'] / 1000000)
-            idxDept = deptDict[Row['dept']]
-            sidmax = int((sidSize[idx1][idxId] * 5) / 100) + 1
-            deptmax = int((deptSize[idx1][idxDept] * 5) / 100) + 1
-            
+        scoreSidTop5pct = create2DArray_a(nYear, nSid)
+        scoreDeptTop5pct = create2DArray_a(nYear, nDept)
+        scoreSubSidTop5pct = create2DArray_a(nYear, nSid)
+        scoreSubDeptTop5pct = create2DArray_a(nYear, nDept)
+        scoreSumSidTop5pct = create2DArray_a(nYear, nSid)
+        scoreSumDeptTop5pct = create2DArray_a(nYear, nDept)
+        commitSidTop5pct = create2DArray_a(nYear, nSid)
+        commitDeptTop5pct = create2DArray_a(nYear, nDept)
+        starSidTop5pct = create2DArray_a(nYear, nSid)
+        starDeptTop5pct = create2DArray_a(nYear, nDept)
+        prSidTop5pct = create2DArray_a(nYear, nSid)
+        prDeptTop5pct = create2DArray_a(nYear, nDept)
+        issueSidTop5pct = create2DArray_a(nYear, nSid)
+        issueDeptTop5pct = create2DArray_a(nYear, nDept)
+        for row in result:
+            if int(str(row['id'])[:4]) < startSid:
+                continue
+            yid = row['year'] - startYear
+            sid = endYear - int(str(row['id'])[:4])
+            deptid = deptDict[row['dept']]
+            nSidTopTier = int((sidSize[yid][sid] * 5) / 100) + 1
+            nDeptTopTier = int((deptSize[yid][deptid] * 5) / 100) + 1
             # score -- student id
-            total_score = float(Row['total_score'])
+            total_score = float(row['total_score_sum'])
             if total_score > 0 :
-                list_len = len(scoreSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    scoreSidTop5pct[idx1][idxId].append(total_score)
-                elif sidmax > list_len:
-                    if total_score < scoreSidTop5pct[idx1][idxId][0] :
-                        scoreSidTop5pct[idx1][idxId].insert(0, total_score)
-                    else :
-                        for p in range(list_len) :
-                            if scoreSidTop5pct[idx1][idxId][p] > total_score :
-                                offset=0
-                                break
-                        scoreSidTop5pct[idx1][idxId].insert(p+offset, total_score)
-                else :
-                    if total_score > scoreSidTop5pct[idx1][idxId][sidmax-1] :
-                        scoreSidTop5pct[idx1][idxId].pop(0)
-                        scoreSidTop5pct[idx1][idxId].append(total_score)
-                    elif total_score > scoreSidTop5pct[idx1][idxId][0] :
-                        scoreSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1):
-                            if scoreSidTop5pct[idx1][idxId][p] > total_score :
-                                offset=0
-                                break
-                        scoreSidTop5pct[idx1][idxId].insert(p+offset, total_score)
-                    
+                list_len = len(scoreSidTop5pct[yid][sid])
+                if nSidTopTier > list_len:
+                    scoreSidTop5pct[yid][sid].append(total_score)
+                    scoreSidTop5pct[yid][sid].sort()
+                elif min(scoreSidTop5pct[yid][sid]) < total_score:
+                    scoreSidTop5pct[yid][sid].append(total_score)
+                    scoreSidTop5pct[yid][sid].sort()
+                    del scoreSidTop5pct[yid][sid][0]
                 # score -- department
-                list_len = len(scoreDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    scoreDeptTop5pct[idx1][idxDept].append(total_score)
-                elif deptmax > list_len :
-                    if total_score < scoreDeptTop5pct[idx1][idxDept][0] :
-                        scoreDeptTop5pct[idx1][idxDept].insert(0, total_score)
-                    else :
-                        for p in range(list_len):
-                            if scoreDeptTop5pct[idx1][idxDept][p] > total_score :
-                                offset=0
-                                break
-                        scoreDeptTop5pct[idx1][idxDept].insert(p+offset, total_score)
-                else :
-                    if total_score > scoreDeptTop5pct[idx1][idxDept][deptmax-1] :
-                        scoreDeptTop5pct[idx1][idxDept].pop(0)
-                        scoreDeptTop5pct[idx1][idxDept].append(total_score)
-                    elif total_score > scoreDeptTop5pct[idx1][idxDept][0] :
-                        scoreDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if scoreDeptTop5pct[idx1][idxDept][p] > total_score :
-                                offset=0
-                                break
-                        scoreDeptTop5pct[idx1][idxDept].insert(p+offset, total_score)
-                    
-            # score sub -- student id
-            total_score_sub = float(Row['total_score_sub'])
+                list_len = len(scoreDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len:
+                    scoreDeptTop5pct[yid][deptid].append(total_score)
+                    scoreDeptTop5pct[yid][deptid].sort()
+                elif min(scoreDeptTop5pct[yid][deptid]) < total_score:
+                    scoreDeptTop5pct[yid][deptid].append(total_score)
+                    scoreDeptTop5pct[yid][deptid].sort()
+                    del scoreDeptTop5pct[yid][deptid][0]
+            total_score_sub = float(row['total_score_sum'])
             if total_score_sub > 0:
-                list_len = len(scoreSubSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    scoreSubSidTop5pct[idx1][idxId].append(total_score_sub)
-                elif sidmax > list_len :
-                    if total_score_sub < scoreSubSidTop5pct[idx1][idxId][0] :
-                        scoreSubSidTop5pct[idx1][idxId].insert(0, total_score_sub)
-                    else :
-                        for p in range(list_len): 
-                            if scoreSubSidTop5pct[idx1][idxId][p] > total_score_sub :
-                                offset=0
-                                break
-                        scoreSubSidTop5pct[idx1][idxId].insert(p+offset, total_score_sub)
-                else :
-                    if total_score_sub > scoreSubSidTop5pct[idx1][idxId][sidmax-1] :
-                        scoreSubSidTop5pct[idx1][idxId].pop(0)
-                        scoreSubSidTop5pct[idx1][idxId].append(total_score_sub)
-                    elif total_score_sub > scoreSubSidTop5pct[idx1][idxId][0] :
-                        scoreSubSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1):
-                            if scoreSubSidTop5pct[idx1][idxId][p] > total_score_sub :
-                                offset=0
-                                break
-                        scoreSubSidTop5pct[idx1][idxId].insert(p+offset, total_score_sub)
+                # score sub -- student id
+                list_len = len(scoreSubSidTop5pct[yid][sid])
+                if nSidTopTier > list_len :
+                    scoreSubSidTop5pct[yid][sid].append(total_score_sub)
+                    scoreSubSidTop5pct[yid][sid].sort()
+                elif min(scoreSubSidTop5pct[yid][sid]) < total_score_sub:
+                    scoreSubSidTop5pct[yid][sid].append(total_score_sub)
+                    scoreSubSidTop5pct[yid][sid].sort()
+                    del scoreSubSidTop5pct[yid][sid][0]
                 # score sub -- department
-                list_len = len(scoreSubDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    scoreSubDeptTop5pct[idx1][idxDept].append(total_score_sub)
-                elif deptmax > list_len :
-                    if total_score_sub < scoreSubDeptTop5pct[idx1][idxDept][0] :
-                        scoreSubDeptTop5pct[idx1][idxDept].insert(0, total_score_sub)
-                    else :
-                        for p in range(list_len):
-                            if scoreSubDeptTop5pct[idx1][idxDept][p] > total_score_sub :
-                                offset=0
-                                break
-                        scoreSubDeptTop5pct[idx1][idxDept].insert(p+offset, total_score_sub)
-                else :
-                    if total_score_sub > scoreSubDeptTop5pct[idx1][idxDept][deptmax-1]:
-                        scoreSubDeptTop5pct[idx1][idxDept].pop(0)
-                        scoreSubDeptTop5pct[idx1][idxDept].append(total_score_sub)
-                    elif total_score_sub > scoreSubDeptTop5pct[idx1][idxDept][0]:
-                        scoreSubDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1):
-                            if scoreSubDeptTop5pct[idx1][idxDept][p] > total_score_sub :
-                                offset=0
-                                break
-                        scoreSubDeptTop5pct[idx1][idxDept].insert(p+offset, total_score_sub)
-
-            # score sum -- student id
-            total_score_sum = float(Row['total_score_sum'])
-            offset = 1
+                list_len = len(scoreSubDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len :
+                    scoreSubDeptTop5pct[yid][deptid].append(total_score_sub)
+                    scoreSubDeptTop5pct[yid][deptid].sort()
+                elif min(scoreSubDeptTop5pct[yid][deptid]) < total_score_sub:
+                    scoreSubDeptTop5pct[yid][deptid].append(total_score_sub)
+                    scoreSubDeptTop5pct[yid][deptid].sort()
+                    del scoreSubDeptTop5pct[yid][deptid][0]
+            total_score_sum = float(row['total_score_sum'])
             if total_score_sum > 0 :
-                list_len = len(scoreSumSidTop5pct[idx1][idxId])
-                if list_len <= 0:
-                    scoreSumSidTop5pct[idx1][idxId].append(total_score_sum)
-                elif sidmax > list_len:
-                    if total_score_sum < scoreSumSidTop5pct[idx1][idxId][0] :
-                        scoreSumSidTop5pct[idx1][idxId].insert(0, total_score_sum)
-                    else :
-                        for p in range(list_len): 
-                            if scoreSumSidTop5pct[idx1][idxId][p] > total_score_sum :
-                                offset=0
-                                break
-                        scoreSumSidTop5pct[idx1][idxId].insert(p+offset, total_score_sum)
-                else :
-                    if total_score_sum > scoreSumSidTop5pct[idx1][idxId][sidmax-1] :
-                        scoreSumSidTop5pct[idx1][idxId].pop(0)
-                        scoreSumSidTop5pct[idx1][idxId].append(total_score_sum)
-                    elif total_score_sum > scoreSumSidTop5pct[idx1][idxId][0] :
-                        scoreSumSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1) :
-                            if scoreSumSidTop5pct[idx1][idxId][p] > total_score_sum :
-                                offset=0
-                                break
-                        scoreSumSidTop5pct[idx1][idxId].insert(p+offset, total_score_sum)
-
+                 # score sum -- student id
+                list_len = len(scoreSumSidTop5pct[yid][sid])
+                if nSidTopTier > list_len:
+                    scoreSumSidTop5pct[yid][sid].append(total_score_sum)
+                    scoreSumSidTop5pct[yid][sid].sort()
+                elif min(scoreSumSidTop5pct[yid][sid]) < total_score_sum:
+                    scoreSumSidTop5pct[yid][sid].append(total_score_sum)
+                    scoreSumSidTop5pct[yid][sid].sort()
+                    del scoreSumSidTop5pct[yid][sid][0]
                 # score sum -- department
-                list_len = len(scoreSumDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    scoreSumDeptTop5pct[idx1][idxDept].append(total_score_sum)
-                elif deptmax > list_len :
-                    if total_score_sum < scoreSumDeptTop5pct[idx1][idxDept][0] :
-                        scoreSumDeptTop5pct[idx1][idxDept].insert(0, total_score_sum)
-                    else :
-                        for p in range(list_len) :
-                            if scoreSumDeptTop5pct[idx1][idxDept][p] > total_score_sum :
-                                offset=0
-                                break
-                        scoreSumDeptTop5pct[idx1][idxDept].insert(p+offset,total_score_sum)
-                else :
-                    if total_score_sum > scoreSumDeptTop5pct[idx1][idxDept][deptmax-1]:
-                        scoreSumDeptTop5pct[idx1][idxDept].pop(0)
-                        scoreSumDeptTop5pct[idx1][idxDept].append(total_score_sum)
-                    elif total_score_sum > scoreSumDeptTop5pct[idx1][idxDept][0] :
-                        scoreSumDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if scoreSumDeptTop5pct[idx1][idxDept][p] > total_score_sum :
-                                offset=0
-                                break
-                        scoreSumDeptTop5pct[idx1][idxDept].insert(p+offset, total_score_sum)
-
-            # commit -- student id
-            if Row['commit_count'] > 0 :
-                list_len = len(commitSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    commitSidTop5pct[idx1][idxId].append(Row['commit_count'])
-                elif sidmax > list_len :
-                    if Row['commit_count'] < commitSidTop5pct[idx1][idxId][0] :
-                        commitSidTop5pct[idx1][idxId].insert(0, Row['commit_count'])
-                    else :
-                        for p in range(list_len):
-                            if commitSidTop5pct[idx1][idxId][p] > Row['commit_count'] :
-                                offset=0
-                                break
-                        commitSidTop5pct[idx1][idxId].insert(p+offset, Row['commit_count'])
-                else :
-                    if Row['commit_count'] > commitSidTop5pct[idx1][idxId][sidmax-1] :
-                        commitSidTop5pct[idx1][idxId].pop(0)
-                        commitSidTop5pct[idx1][idxId].append(Row['commit_count'])
-                    elif Row['commit_count'] > commitSidTop5pct[idx1][idxId][0] :
-                        commitSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1) :
-                            if commitSidTop5pct[idx1][idxId][p] > Row['commit_count'] :
-                                offset=0
-                                break
-                        commitSidTop5pct[idx1][idxId].insert(p+offset, Row['commit_count'])
+                list_len = len(scoreSumDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len :
+                    scoreSumDeptTop5pct[yid][deptid].append(total_score_sum)
+                    scoreSumDeptTop5pct[yid][deptid].sort()
+                elif min(scoreSumDeptTop5pct[yid][deptid]) < total_score_sum:
+                    scoreSumDeptTop5pct[yid][deptid].append(total_score_sum)
+                    scoreSumDeptTop5pct[yid][deptid].sort()
+                    del scoreSumDeptTop5pct[yid][deptid][0]
+            if row['commit_cnt'] > 0 :
+                # commit -- student id
+                list_len = len(commitSidTop5pct[yid][sid])
+                if nSidTopTier > list_len :
+                    commitSidTop5pct[yid][sid].append(row['commit_cnt'])
+                    commitSidTop5pct[yid][sid].sort()
+                elif min(commitSidTop5pct[yid][sid]) < row['commit_cnt']:
+                    commitSidTop5pct[yid][sid].append(row['commit_cnt'])
+                    commitSidTop5pct[yid][sid].sort()
+                    del commitSidTop5pct[yid][sid][0]
                 #commit -- department
-                list_len = len(commitDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    commitDeptTop5pct[idx1][idxDept].append(Row['commit_count'])
-                elif deptmax > list_len :
-                    if Row['commit_count'] < commitDeptTop5pct[idx1][idxDept][0] :
-                        commitDeptTop5pct[idx1][idxDept].insert(0, Row['commit_count'])
-                    else :
-                        for p in range(list_len) :
-                            if commitDeptTop5pct[idx1][idxDept][p] > Row['commit_count'] :
-                                offset=0
-                                break
-                        commitDeptTop5pct[idx1][idxDept].insert(p+offset, Row['commit_count'])
-                else :
-                    if Row['commit_count'] > commitDeptTop5pct[idx1][idxDept][deptmax-1] :
-                        commitDeptTop5pct[idx1][idxDept].pop(0)
-                        commitDeptTop5pct[idx1][idxDept].append(Row['commit_count'])
-                    elif Row['commit_count'] > commitDeptTop5pct[idx1][idxDept][0] :
-                        commitDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if commitDeptTop5pct[idx1][idxDept][p] > Row['commit_count'] :
-                                offset=0
-                                break
-                        commitDeptTop5pct[idx1][idxDept].insert(p+offset, Row['commit_count'])
-
-            # star -- student id
-            if Row['star_count'] > 0 :
-                list_len = len(starSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    starSidTop5pct[idx1][idxId].append(Row['star_count'])
-                elif sidmax > list_len :
-                    if Row['star_count'] < starSidTop5pct[idx1][idxId][0] :
-                        starSidTop5pct[idx1][idxId].insert(0, Row['star_count'])
-                    else :
-                        for p in range(list_len) :
-                            if starSidTop5pct[idx1][idxId][p] > Row['star_count'] :
-                                offset=0
-                                break
-                        starSidTop5pct[idx1][idxId].insert(p+offset, Row['star_count'])
-                else :
-                    if Row['star_count'] > starSidTop5pct[idx1][idxId][sidmax-1] :
-                        starSidTop5pct[idx1][idxId].pop(0)
-                        starSidTop5pct[idx1][idxId].append(Row['star_count'])
-                    elif Row['star_count'] > starSidTop5pct[idx1][idxId][0] :
-                        starSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1) :
-                            if starSidTop5pct[idx1][idxId][p] > Row['star_count'] :
-                                offset=0
-                                break
-                        starSidTop5pct[idx1][idxId].insert(p+offset, Row['star_count'])
+                list_len = len(commitDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len :
+                    commitDeptTop5pct[yid][deptid].append(row['commit_cnt'])
+                    commitDeptTop5pct[yid][deptid].sort()
+                elif min(commitDeptTop5pct[yid][deptid]) < row['commit_cnt']:
+                    commitDeptTop5pct[yid][deptid].append(row['commit_cnt'])
+                    commitDeptTop5pct[yid][deptid].sort()
+                    del commitDeptTop5pct[yid][deptid][0]
+            if row['star_count'] > 0 :
+                # star -- student id
+                list_len = len(starSidTop5pct[yid][sid])
+                if nSidTopTier > list_len :
+                    starSidTop5pct[yid][sid].append(row['star_count'])
+                    starSidTop5pct[yid][sid].sort()
+                elif min(starSidTop5pct[yid][sid]) < row['star_count']:
+                    starSidTop5pct[yid][sid].append(row['star_count'])
+                    starSidTop5pct[yid][sid].sort()
+                    del starSidTop5pct[yid][sid][0]
                 # star -- department
-                list_len = len(starDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    starDeptTop5pct[idx1][idxDept].append(Row['star_count'])
-                elif deptmax > list_len :
-                    if Row['star_count'] < starDeptTop5pct[idx1][idxDept][0] :
-                        starDeptTop5pct[idx1][idxDept].insert(0, Row['star_count'])
-                    else :
-                        for p in range(list_len) :
-                            if starDeptTop5pct[idx1][idxDept][p] > Row['star_count'] :
-                                offset=0
-                                break
-                        starDeptTop5pct[idx1][idxDept].insert(p+offset, Row['star_count'])
-                else :
-                    if Row['star_count'] > starDeptTop5pct[idx1][idxDept][deptmax-1] :
-                        starDeptTop5pct[idx1][idxDept].pop(0)
-                        starDeptTop5pct[idx1][idxDept].append(Row['star_count'])
-                    elif Row['star_count'] > starDeptTop5pct[idx1][idxDept][0] :
-                        starDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if starDeptTop5pct[idx1][idxDept][p] > Row['star_count'] :
-                                offset=0
-                                break
-                        starDeptTop5pct[idx1][idxDept].insert(p+offset, Row['star_count'])
-            # prs -- student id
-            if Row['pr_count'] > 0 :
-                list_len = len(prSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    prSidTop5pct[idx1][idxId].append(Row['pr_count'])
-                elif sidmax > list_len :
-                    if Row['pr_count'] < prSidTop5pct[idx1][idxId][0] :
-                        prSidTop5pct[idx1][idxId].insert(0, Row['pr_count'])
-                    else :
-                        for p in range(list_len) :
-                            if prSidTop5pct[idx1][idxId][p] > Row['pr_count'] :
-                                offset=0
-                                break
-                        prSidTop5pct[idx1][idxId].insert(p+offset, Row['pr_count'])
-                else :
-                    if Row['pr_count'] > prSidTop5pct[idx1][idxId][sidmax-1] :
-                        prSidTop5pct[idx1][idxId].pop(0)
-                        prSidTop5pct[idx1][idxId].append(Row['pr_count'])
-                    elif Row['pr_count'] > prSidTop5pct[idx1][idxId][0] :
-                        prSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1) :
-                            if prSidTop5pct[idx1][idxId][p] > Row['pr_count'] :
-                                offset=0
-                                break
-                        prSidTop5pct[idx1][idxId].insert(p+offset, Row['pr_count'])
+                list_len = len(starDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len :
+                    starDeptTop5pct[yid][deptid].append(row['star_count'])
+                    starDeptTop5pct[yid][deptid].sort()
+                elif min(starDeptTop5pct[yid][deptid]) < row['star_count']:
+                    starDeptTop5pct[yid][deptid].append(row['star_count'])
+                    starDeptTop5pct[yid][deptid].sort()
+                    del starDeptTop5pct[yid][deptid][0]
+            if row['pr_cnt'] > 0 :
+                # prs -- student id
+                list_len = len(prSidTop5pct[yid][sid])
+                if nSidTopTier > list_len :
+                    prSidTop5pct[yid][sid].append(row['pr_cnt'])
+                    prSidTop5pct[yid][sid].sort()
+                elif min(prSidTop5pct[yid][sid]) < row['pr_cnt']:
+                    prSidTop5pct[yid][sid].append(row['pr_cnt'])
+                    prSidTop5pct[yid][sid].sort()
+                    del prSidTop5pct[yid][sid][0]
                 # prs -- department
-                list_len = len(prDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    prDeptTop5pct[idx1][idxDept].append(Row['pr_count'])
-                elif deptmax > list_len :
-                    if Row['pr_count'] < prDeptTop5pct[idx1][idxDept][0] :
-                        prDeptTop5pct[idx1][idxDept].insert(0, Row['pr_count'])
-                    else :
-                        for p in range(list_len) :
-                            if prDeptTop5pct[idx1][idxDept][p] > Row['pr_count'] :
-                                offset=0
-                                break
-                        prDeptTop5pct[idx1][idxDept].insert(p+offset, Row['pr_count'])
-                else :
-                    if Row['pr_count'] > prDeptTop5pct[idx1][idxDept][deptmax-1] :
-                        prDeptTop5pct[idx1][idxDept].pop(0)
-                        prDeptTop5pct[idx1][idxDept].append(Row['pr_count'])
-                    elif Row['pr_count'] > prDeptTop5pct[idx1][idxDept][0] :
-                        prDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if prDeptTop5pct[idx1][idxDept][p] > Row['pr_count'] :
-                                offset=0
-                                break
-                        prDeptTop5pct[idx1][idxDept].insert(p+offset, Row['pr_count'])
-            # issue -- student id
-            if Row['issue_count'] > 0 :
-                list_len = len(issueSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    issueSidTop5pct[idx1][idxId].append(Row['issue_count'])
-                elif sidmax > list_len :
-                    if Row['issue_count'] < issueSidTop5pct[idx1][idxId][0] :
-                        issueSidTop5pct[idx1][idxId].insert(0, Row['issue_count'])
-                    else :
-                        for p in range(list_len) :
-                            if issueSidTop5pct[idx1][idxId][p] > Row['issue_count'] :
-                                offset=0
-                                break
-                        issueSidTop5pct[idx1][idxId].insert(p+offset, Row['issue_count'])
-                else :
-                    if Row['issue_count'] > issueSidTop5pct[idx1][idxId][sidmax-1] :
-                        issueSidTop5pct[idx1][idxId].pop(0)
-                        issueSidTop5pct[idx1][idxId].append(Row['issue_count'])
-                    elif Row['issue_count'] > issueSidTop5pct[idx1][idxId][0] :
-                        issueSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1) :
-                            if issueSidTop5pct[idx1][idxId][p] > Row['issue_count'] :
-                                offset=0
-                                break
-                        issueSidTop5pct[idx1][idxId].insert(p+offset, Row['issue_count'])
+                list_len = len(prDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len :
+                    prDeptTop5pct[yid][deptid].append(row['pr_cnt'])
+                    prDeptTop5pct[yid][deptid].sort()
+                elif min(prDeptTop5pct[yid][deptid]) < row['pr_cnt']:
+                    prDeptTop5pct[yid][deptid].append(row['pr_cnt'])
+                    prDeptTop5pct[yid][deptid].sort()
+                    del prDeptTop5pct[yid][deptid][0]
+            if row['issue_cnt'] > 0 :
+                # issue -- student id
+                list_len = len(issueSidTop5pct[yid][sid])
+                if nSidTopTier > list_len :
+                    issueSidTop5pct[yid][sid].append(row['issue_cnt'])
+                    issueSidTop5pct[yid][sid].sort()
+                elif min(issueSidTop5pct[yid][sid]) < row['issue_cnt']:
+                    issueSidTop5pct[yid][sid].append(row['issue_cnt'])
+                    issueSidTop5pct[yid][sid].sort()
+                    del issueSidTop5pct[yid][sid][0]
                 # issue -- department
-                list_len = len(issueDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    issueDeptTop5pct[idx1][idxDept].append(Row['issue_count'])
-                elif deptmax > list_len :
-                    if Row['issue_count'] < issueDeptTop5pct[idx1][idxDept][0] :
-                        issueDeptTop5pct[idx1][idxDept].insert(0, Row['issue_count'])
-                    else :
-                        for p in range(list_len) :
-                            if issueDeptTop5pct[idx1][idxDept][p] > Row['issue_count'] :
-                                offset=0
-                                break
-                        issueDeptTop5pct[idx1][idxDept].insert(p+offset, Row['issue_count'])
-                else :
-                    if Row['issue_count'] > issueDeptTop5pct[idx1][idxDept][deptmax-1] :
-                        issueDeptTop5pct[idx1][idxDept].pop(0)
-                        issueDeptTop5pct[idx1][idxDept].append(Row['issue_count'])
-                    elif Row['issue_count'] > issueDeptTop5pct[idx1][idxDept][0] :
-                        issueDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if issueDeptTop5pct[idx1][idxDept][p] > Row['issue_count'] :
-                                offset=0
-                                break
-                        issueDeptTop5pct[idx1][idxDept].insert(p+offset, Row['issue_count'])
-            # fork -- student id
-            if Row['fork_owner_count'] > 0:
-                list_len = len(forkSidTop5pct[idx1][idxId])
-                offset = 1
-                if list_len <= 0:
-                    forkSidTop5pct[idx1][idxId].append(Row['fork_owner_count'])
-                elif sidmax > list_len :
-                    if Row['fork_owner_count'] < forkSidTop5pct[idx1][idxId][0] :
-                        forkSidTop5pct[idx1][idxId].insert(0, Row['fork_owner_count'])
-                    else :
-                        for p in range(list_len) :
-                            if forkSidTop5pct[idx1][idxId][p] > Row['fork_owner_count'] :
-                                offset=0
-                                break
-                        forkSidTop5pct[idx1][idxId].insert(p+offset, Row['fork_owner_count'])
-                else :
-                    if Row['fork_owner_count'] > forkSidTop5pct[idx1][idxId][sidmax-1] :
-                        forkSidTop5pct[idx1][idxId].pop(0)
-                        forkSidTop5pct[idx1][idxId].append(Row['fork_owner_count'])
-                    elif Row['fork_owner_count'] > forkSidTop5pct[idx1][idxId][0] :
-                        forkSidTop5pct[idx1][idxId].pop(0)
-                        for p in range(sidmax-1) :
-                            if forkSidTop5pct[idx1][idxId][p] > Row['fork_owner_count'] :
-                                offset=0
-                                break
-                        forkSidTop5pct[idx1][idxId].insert(p+offset, Row['fork_owner_count'])
-                # fork -- department
-                list_len = len(forkDeptTop5pct[idx1][idxDept])
-                offset = 1
-                if list_len <= 0:
-                    forkDeptTop5pct[idx1][idxDept].append(Row['fork_owner_count'])
-                elif deptmax > list_len:
-                    if Row['fork_owner_count'] < forkDeptTop5pct[idx1][idxDept][0] :
-                        forkDeptTop5pct[idx1][idxDept].insert(0, Row['fork_owner_count'])
-                    else :
-                        for p in range(list_len) :
-                            if forkDeptTop5pct[idx1][idxDept][p] > Row['fork_owner_count'] :
-                                offset=0
-                                break
-                        forkDeptTop5pct[idx1][idxDept].insert(p+offset, Row['fork_owner_count'])
-                else :
-                    if Row['fork_owner_count'] > forkDeptTop5pct[idx1][idxDept][deptmax-1] :
-                        forkDeptTop5pct[idx1][idxDept].pop(0)
-                        forkDeptTop5pct[idx1][idxDept].append(Row['fork_owner_count'])
-                    elif Row['fork_owner_count'] > forkDeptTop5pct[idx1][idxDept][0] :
-                        forkDeptTop5pct[idx1][idxDept].pop(0)
-                        for p in range(deptmax-1) :
-                            if forkDeptTop5pct[idx1][idxDept][p] > Row['fork_owner_count'] :
-                                offset=0
-                                break
-                        forkDeptTop5pct[idx1][idxDept].insert(p+offset, Row['fork_owner_count'])
+                list_len = len(issueDeptTop5pct[yid][deptid])
+                if nDeptTopTier > list_len :
+                    issueDeptTop5pct[yid][deptid].append(row['issue_cnt'])
+                    issueDeptTop5pct[yid][deptid].sort()
 
+                elif min(issueDeptTop5pct[yid][deptid]) < row['issue_cnt']:
+                    issueDeptTop5pct[yid][deptid].append(row['issue_cnt'])
+                    issueDeptTop5pct[yid][deptid].sort()
+                    del issueDeptTop5pct[yid][deptid][0]
         # 학번 평균, 학과 평균 구하기 
         # object 타입으로 map함수 사용불가
-        nYear = nowYear - startYear + 1
         for i in range(nYear):
             for j in range(len(scoreSid[i])):
                 if sidSize[i][j] == 0:
                     continue
-                scoreSid[i][j] = '{:0.2f}'.format(scoreSid[i][j] / sidSize[i][j])
-                scoreSubSid[i][j] = '{:0.2f}'.format(scoreSubSid[i][j] / sidSize[i][j])
-                scoreSumSid[i][j] = '{:0.2f}'.format(scoreSumSid[i][j] / sidSize[i][j])
-                commitSid[i][j] = '{:0.2f}'.format(commitSid[i][j] / sidSize[i][j])
-                starSid[i][j] = '{:0.2f}'.format(starSid[i][j] / sidSize[i][j])
-                prSid[i][j] = '{:0.2f}'.format(prSid[i][j] / sidSize[i][j])
-                issueSid[i][j] = '{:0.2f}'.format(issueSid[i][j] / sidSize[i][j])
-                forkSid[i][j] = '{:0.2f}'.format(forkSid[i][j] / sidSize[i][j])
-
+                scoreSid[i][j] = '{:0.4f}'.format(scoreSid[i][j] / sidSize[i][j])
+                scoreSubSid[i][j] = '{:0.4f}'.format(scoreSubSid[i][j] / sidSize[i][j])
+                scoreSumSid[i][j] = '{:0.4f}'.format(scoreSumSid[i][j] / sidSize[i][j])
+                commitSid[i][j] = '{:0.4f}'.format(commitSid[i][j] / sidSize[i][j])
+                starSid[i][j] = '{:0.4f}'.format(starSid[i][j] / sidSize[i][j])
+                prSid[i][j] = '{:0.4f}'.format(prSid[i][j] / sidSize[i][j])
+                issueSid[i][j] = '{:0.4f}'.format(issueSid[i][j] / sidSize[i][j])
+                forkSid[i][j] = '{:0.4f}'.format(forkSid[i][j] / sidSize[i][j])
         for i in range(nYear):
             for j in range(len(scoreDept[i])):
                 if deptSize[i][j] == 0:
                     continue
-                scoreDept[i][j] = '{:0.2f}'.format(scoreDept[i][j] / deptSize[i][j])
-                scoreSubDept[i][j] = '{:0.2f}'.format(scoreSubDept[i][j] / deptSize[i][j])
-                scoreSumDept[i][j] = '{:0.2f}'.format(scoreSumDept[i][j] / deptSize[i][j])
-                commitDept[i][j] = '{:0.2f}'.format(commitDept[i][j] / deptSize[i][j])
-                starDept[i][j] = '{:0.2f}'.format(starDept[i][j] / deptSize[i][j])
-                prDept[i][j] = '{:0.2f}'.format(prDept[i][j] / deptSize[i][j])
-                issueDept[i][j] = '{:0.2f}'.format(issueDept[i][j] / deptSize[i][j])
-                forkDept[i][j] = '{:0.2f}'.format(forkDept[i][j] / deptSize[i][j])
+                scoreDept[i][j] = '{:0.4f}'.format(scoreDept[i][j] / deptSize[i][j])
+                scoreSubDept[i][j] = '{:0.4f}'.format(scoreSubDept[i][j] / deptSize[i][j])
+                scoreSumDept[i][j] = '{:0.4f}'.format(scoreSumDept[i][j] / deptSize[i][j])
+                commitDept[i][j] = '{:0.4f}'.format(commitDept[i][j] / deptSize[i][j])
+                starDept[i][j] = '{:0.4f}'.format(starDept[i][j] / deptSize[i][j])
+                prDept[i][j] = '{:0.4f}'.format(prDept[i][j] / deptSize[i][j])
+                issueDept[i][j] = '{:0.4f}'.format(issueDept[i][j] / deptSize[i][j])
+                forkDept[i][j] = '{:0.4f}'.format(forkDept[i][j] / deptSize[i][j])
 
         # 연도별 점수, 커밋, 스타, pr, issue 평균 계산
         scoreMean = calculateMeanOfArray(scoreAnnual)
@@ -851,140 +472,131 @@ def main(mask):
         starMean = calculateMeanOfArray(starAnnual)
         prMean = calculateMeanOfArray(prAnnual)
         issueMean = calculateMeanOfArray(issueAnnual)
-        forkMean = calculateMeanOfArray(forkAnnual)
+        
 
         # 학번별, 학과별, 연도별에 대해 점수, 커밋, 스타, 풀리, 이슈 등 각각의 분산과 표준편차 계산 
-        scoreSidDevTotal = create2DArray(3, 7)
-        scoreSubSidDevTotal = create2DArray(3, 7)
-        scoreSumSidDevTotal = create2DArray(3, 7)
-        commitSidDevTotal = create2DArray(3, 7)
-        starSidDevTotal = create2DArray(3, 7)
-        prSidDevTotal = create2DArray(3, 7)
-        issueSidDevTotal = create2DArray(3, 7)
-        forkSidDevTotal = create2DArray(3, 7)
-        scoreDeptDevTotal = create2DArray(3, 3)
-        scoreSubDeptDevTotal = create2DArray(3, 3)
-        scoreSumDeptDevTotal = create2DArray(3, 3)
-        commitDeptDevTotal = create2DArray(3, 3)
-        starDeptDevTotal = create2DArray(3, 3)
-        prDeptDevTotal = create2DArray(3, 3)
-        issueDeptDevTotal = create2DArray(3, 3)
-        forkDeptDevTotal = create2DArray(3, 3)
-        scoreYearDevTotal = [0, 0, 0]
-        scoreSubYearDevTotal = [0, 0, 0]
-        scoreSumYearDevTotal = [0, 0, 0]
-        commitYearDevTotal = [0, 0, 0]
-        starYearDevTotal = [0, 0, 0]
-        prYearDevTotal = [0, 0, 0]
-        issueYearDevTotal = [0, 0, 0]
-        forkYearDevTotal = [0, 0, 0]
-
+        scoreSidDevTotal = create2DArray(nYear, nSid)
+        scoreSubSidDevTotal = create2DArray(nYear, nSid)
+        scoreSumSidDevTotal = create2DArray(nYear, nSid)
+        commitSidDevTotal = create2DArray(nYear, nSid)
+        starSidDevTotal = create2DArray(nYear, nSid)
+        prSidDevTotal = create2DArray(nYear, nSid)
+        issueSidDevTotal = create2DArray(nYear, nSid)
+        forkSidDevTotal = create2DArray(nYear, nSid)
+        scoreDeptDevTotal = create2DArray(nYear, nDept)
+        scoreSubDeptDevTotal = create2DArray(nYear, nDept)
+        scoreSumDeptDevTotal = create2DArray(nYear, nDept)
+        commitDeptDevTotal = create2DArray(nYear, nDept)
+        starDeptDevTotal = create2DArray(nYear, nDept)
+        prDeptDevTotal = create2DArray(nYear, nDept)
+        issueDeptDevTotal = create2DArray(nYear, nDept)
+        forkDeptDevTotal = create2DArray(nYear, nDept)
+        scoreYearDevTotal = [ 0 for i in range(nYear)]
+        scoreSubYearDevTotal = [ 0 for i in range(nYear)]
+        scoreSumYearDevTotal = [ 0 for i in range(nYear)]
+        commitYearDevTotal = [ 0 for i in range(nYear)]
+        starYearDevTotal = [ 0 for i in range(nYear)]
+        prYearDevTotal = [ 0 for i in range(nYear)]
+        issueYearDevTotal = [ 0 for i in range(nYear)]
+        forkYearDevTotal = [ 0 for i in range(nYear)]
         for row in result:
-            Row = row
-            idx1 = Row['year'] - startYear
-
+            if int(str(row['id'])[:4]) < startSid:
+                continue
+            yid = row['year'] - startYear
             # student id 
-            idxId = nowYear - math.floor(Row['id'] / 1000000)
-            scoreSidDevTotal[idx1][idxId] += math.pow(float(Row['total_score']) - float(scoreSid[idx1][idxId]), 2)
-            scoreSubSidDevTotal[idx1][idxId] += math.pow(float(Row['total_score_sub']) - float(scoreSubSid[idx1][idxId]), 2)
-            scoreSumSidDevTotal[idx1][idxId] += math.pow(float(Row['total_score_sum']) - float(scoreSumSid[idx1][idxId]), 2)
-            commitSidDevTotal[idx1][idxId] += math.pow(float(Row['commit_count']) - float(commitSid[idx1][idxId]), 2)
-            starSidDevTotal[idx1][idxId] += math.pow(float(Row['star_count']) - float(starSid[idx1][idxId]), 2)
-            prSidDevTotal[idx1][idxId] += math.pow(float(Row['pr_count']) - float(prSid[idx1][idxId]), 2)
-            issueSidDevTotal[idx1][idxId] += math.pow(float(Row['issue_count']) - float(issueSid[idx1][idxId]), 2)
-            forkSidDevTotal[idx1][idxId] += math.pow(float(Row['fork_owner_count']) - float(forkSid[idx1][idxId]), 2)
+            sid = endYear - int(str(row['id'])[:4])
+            scoreSidDevTotal[yid][sid] += math.pow(row['total_score_sum'] - float(scoreSid[yid][sid]),2)
+            scoreSubSidDevTotal[yid][sid] += math.pow(row['total_score_sum'] - float(scoreSubSid[yid][sid]),2)
+            scoreSumSidDevTotal[yid][sid] += math.pow(row['total_score_sum'] - float(scoreSumSid[yid][sid]),2)
+            commitSidDevTotal[yid][sid] += math.pow(row['commit_cnt'] - float(commitSid[yid][sid]),2)
+            starSidDevTotal[yid][sid] += math.pow(row['star_count'] - float(starSid[yid][sid]),2)
+            prSidDevTotal[yid][sid] += math.pow(row['pr_cnt'] - float(prSid[yid][sid]),2)
+            issueSidDevTotal[yid][sid] += math.pow(row['issue_cnt'] - float(issueSid[yid][sid]),2)
 
             # dept 
-            idxDept = deptDict[Row['dept']]
-            scoreDeptDevTotal[idx1][idxDept] += math.pow(float(Row['total_score']) - float(scoreDept[idx1][idxDept]),2)
-            scoreSubDeptDevTotal[idx1][idxDept] += math.pow(float(Row['total_score_sub']) - float(scoreSubDept[idx1][idxDept]),2)
-            scoreSumDeptDevTotal[idx1][idxDept] += math.pow(float(Row['total_score_sum']) - float(scoreSumDept[idx1][idxDept]),2)
-            commitDeptDevTotal[idx1][idxDept] += math.pow(float(Row['commit_count']) - float(commitDept[idx1][idxDept]),2)
-            starDeptDevTotal[idx1][idxDept] += math.pow(float(Row['star_count']) - float(starDept[idx1][idxDept]),2)
-            prDeptDevTotal[idx1][idxDept] += math.pow(float(Row['pr_count']) - float(prDept[idx1][idxDept]),2)
-            issueDeptDevTotal[idx1][idxDept] += math.pow(float(Row['issue_count']) - float(issueDept[idx1][idxDept]),2)
-            forkDeptDevTotal[idx1][idxDept] += math.pow(float(Row['fork_owner_count']) - float(forkDept[idx1][idxDept]),2)
+            deptid = deptDict[row['dept']]
+            scoreDeptDevTotal[yid][deptid] += math.pow(row['total_score_sum'] - float(scoreDept[yid][deptid]),2)
+            scoreSubDeptDevTotal[yid][deptid] += math.pow(row['total_score_sum'] - float(scoreSubDept[yid][deptid]),2)
+            scoreSumDeptDevTotal[yid][deptid] += math.pow(row['total_score_sum'] - float(scoreSumDept[yid][deptid]),2)
+            commitDeptDevTotal[yid][deptid] += math.pow(row['commit_cnt'] - float(commitDept[yid][deptid]),2)
+            starDeptDevTotal[yid][deptid] += math.pow(row['star_count'] - float(starDept[yid][deptid]),2)
+            prDeptDevTotal[yid][deptid] += math.pow(row['pr_cnt'] - float(prDept[yid][deptid]),2)
+            issueDeptDevTotal[yid][deptid] += math.pow(row['issue_cnt'] - float(issueDept[yid][deptid]),2)
             
             # year 
-            scoreYearDevTotal[idx1] += math.pow(float(Row['total_score']) - float(scoreMean[idx1]),2)
-            scoreSubYearDevTotal[idx1] += math.pow(float(Row['total_score_sub']) - float(scoreSubMean[idx1]),2)
-            scoreSumYearDevTotal[idx1] += math.pow(float(Row['total_score_sum']) - float(scoreSumMean[idx1]),2)
-            commitYearDevTotal[idx1] += math.pow(float(Row['commit_count']) - float(commitMean[idx1]), 2)
-            starYearDevTotal[idx1] += math.pow(float(Row['star_count']) - float(starMean[idx1]),2)
-            prYearDevTotal[idx1] += math.pow(float(Row['pr_count']) - float(prMean[idx1]),2)
-            issueYearDevTotal[idx1] += math.pow(float(Row['issue_count']) - float(issueMean[idx1]),2)
-            forkYearDevTotal[idx1] += math.pow(float(Row['fork_owner_count']) - float(forkMean[idx1]),2)
+            scoreYearDevTotal[yid] += math.pow(row['total_score_sum'] - float(scoreMean[yid]),2)
+            scoreSubYearDevTotal[yid] += math.pow(row['total_score_sum'] - float(scoreSubMean[yid]),2)
+            scoreSumYearDevTotal[yid] += math.pow(row['total_score_sum'] - float(scoreSumMean[yid]),2)
+            commitYearDevTotal[yid] += math.pow(row['commit_cnt'] - float(commitMean[yid]), 2)
+            starYearDevTotal[yid] += math.pow(row['star_count'] - float(starMean[yid]),2)
+            prYearDevTotal[yid] += math.pow(row['pr_cnt'] - float(prMean[yid]),2)
+            issueYearDevTotal[yid] += math.pow(row['issue_cnt'] - float(issueMean[yid]),2)
 
-        scoreSidStd = create2DArray(3, 7)
-        scoreSubSidStd = create2DArray(3, 7)
-        scoreSumSidStd = create2DArray(3, 7)
-        commitSidStd = create2DArray(3, 7)
-        starSidStd = create2DArray(3, 7)
-        prSidStd = create2DArray(3, 7)
-        issueSidStd = create2DArray(3, 7)
-        forkSidStd = create2DArray(3, 7)
-        scoreDeptStd = create2DArray(3, 3)
-        scoreSubDeptStd = create2DArray(3, 3)
-        scoreSumDeptStd = create2DArray(3, 3)
-        commitDeptStd = create2DArray(3, 3)
-        starDeptStd = create2DArray(3, 3)
-        prDeptStd = create2DArray(3, 3)
-        issueDeptStd = create2DArray(3, 3)
-        forkDeptStd = create2DArray(3, 3)
-        scoreYearStd = [0, 0, 0]
-        scoreSubYearStd = [0, 0, 0]
-        scoreSumYearStd = [0, 0, 0]
-        commitYearStd = [0, 0, 0]
-        starYearStd = [0, 0, 0]
-        prYearStd = [0, 0, 0]
-        issueYearStd = [0, 0, 0]
-        forkYearStd = [0, 0, 0]
-
-        for i in range(nYear):
-            for j in range(7) :
-                if sidSize[i][j] == 0:
-                    scoreSidStd[i][j] = "NaN"
-                    scoreSubSidStd[i][j] = "NaN"
-                    scoreSumSidStd[i][j] = "NaN"
-                    commitSidStd[i][j] = "NaN"
-                    starSidStd[i][j] = "NaN"
-                    prSidStd[i][j] = "NaN"
-                    issueSidStd[i][j] = "NaN"
-                    forkSidStd[i][j] = "NaN"
-                    scoreSidStd[i][j] = "NaN"
-                else:
-                    scoreSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(scoreSidDevTotal[i][j] / sidSize[i][j])))
-                    scoreSubSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(scoreSubSidDevTotal[i][j] / sidSize[i][j])))
-                    scoreSumSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(scoreSumSidDevTotal[i][j] / sidSize[i][j])))
-                    commitSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(commitSidDevTotal[i][j] / sidSize[i][j])))
-                    starSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(starSidDevTotal[i][j] / sidSize[i][j])))
-                    prSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(prSidDevTotal[i][j] / sidSize[i][j])))
-                    issueSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(issueSidDevTotal[i][j] / sidSize[i][j])))
-                    forkSidStd[i][j] = '{:0.4f}'.format(math.sqrt(float(forkSidDevTotal[i][j] / sidSize[i][j])))
-                
+        scoreSidStd = create2DArray(nYear, nSid)
+        scoreSubSidStd = create2DArray(nYear, nSid)
+        scoreSumSidStd = create2DArray(nYear, nSid)
+        commitSidStd = create2DArray(nYear, nSid)
+        starSidStd = create2DArray(nYear, nSid)
+        prSidStd = create2DArray(nYear, nSid)
+        issueSidStd = create2DArray(nYear, nSid)
+        forkSidStd = create2DArray(nYear, nSid)
+        scoreDeptStd = create2DArray(nYear, nDept)
+        scoreSubDeptStd = create2DArray(nYear, nDept)
+        scoreSumDeptStd = create2DArray(nYear, nDept)
+        commitDeptStd = create2DArray(nYear, nDept)
+        starDeptStd = create2DArray(nYear, nDept)
+        prDeptStd = create2DArray(nYear, nDept)
+        issueDeptStd = create2DArray(nYear, nDept)
+        forkDeptStd = create2DArray(nYear, nDept)
+        scoreYearStd = [ 0 for i in range(nYear)]
+        scoreSubYearStd = [ 0 for i in range(nYear)]
+        scoreSumYearStd = [ 0 for i in range(nYear)]
+        commitYearStd = [ 0 for i in range(nYear)]
+        starYearStd = [ 0 for i in range(nYear)]
+        prYearStd = [ 0 for i in range(nYear)]
+        issueYearStd = [ 0 for i in range(nYear)]
+        
+        for (i, j) in [ (i, j) for i in range(nYear) for j in range(nSid) ]:
+            if sidSize[i][j] == 0:
+                scoreSidStd[i][j] = "NaN"
+                scoreSubSidStd[i][j] = "NaN"
+                scoreSumSidStd[i][j] = "NaN"
+                commitSidStd[i][j] = "NaN"
+                starSidStd[i][j] = "NaN"
+                prSidStd[i][j] = "NaN"
+                issueSidStd[i][j] = "NaN"
+                forkSidStd[i][j] = "NaN"
+                scoreSidStd[i][j] = "NaN"
+            else:
+                scoreSidStd[i][j] = '{:0.4f}'.format(math.sqrt(scoreSidDevTotal[i][j] / sidSize[i][j]))
+                scoreSubSidStd[i][j] = '{:0.4f}'.format(math.sqrt(scoreSubSidDevTotal[i][j] / sidSize[i][j]))
+                scoreSumSidStd[i][j] = '{:0.4f}'.format(math.sqrt(scoreSumSidDevTotal[i][j] / sidSize[i][j]))
+                commitSidStd[i][j] = '{:0.4f}'.format(math.sqrt(commitSidDevTotal[i][j] / sidSize[i][j]))
+                starSidStd[i][j] = '{:0.4f}'.format(math.sqrt(starSidDevTotal[i][j] / sidSize[i][j]))
+                prSidStd[i][j] = '{:0.4f}'.format(math.sqrt(prSidDevTotal[i][j] / sidSize[i][j]))
+                issueSidStd[i][j] = '{:0.4f}'.format(math.sqrt(issueSidDevTotal[i][j] / sidSize[i][j]))
+                forkSidStd[i][j] = '{:0.4f}'.format(math.sqrt(forkSidDevTotal[i][j] / sidSize[i][j]))
+        for (i, j) in [ (i, j) for i in range(nYear) for j in range(nDept) ]:
+            if deptSize[i][j] == 0:
+                scoreDeptStd[i][j] = "NaN"
+                scoreSubDeptStd[i][j] = "NaN"
+                scoreSumDeptStd[i][j] = "NaN"
+                commitDeptStd[i][j] = "NaN"
+                starDeptStd[i][j] = "NaN"
+                prDeptStd[i][j] = "NaN"
+                issueDeptStd[i][j] = "NaN"
+                forkDeptStd[i][j] = "NaN"
+            else:
+                scoreDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(scoreDeptDevTotal[i][j] / deptSize[i][j]))
+                scoreSubDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(scoreSubDeptDevTotal[i][j] / deptSize[i][j]))
+                scoreSumDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(scoreSumDeptDevTotal[i][j] / deptSize[i][j]))
+                commitDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(commitDeptDevTotal[i][j] / deptSize[i][j]))
+                starDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(starDeptDevTotal[i][j] / deptSize[i][j]))
+                prDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(prDeptDevTotal[i][j] / deptSize[i][j]))
+                issueDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(issueDeptDevTotal[i][j] / deptSize[i][j]))
+                forkDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(forkDeptDevTotal[i][j] / deptSize[i][j]))
         for i in range(nYear) :
-            for j in range(3) :
-                if sidSize[i][j] == 0:
-                    scoreDeptStd[i][j] = "NaN"
-                    scoreSubDeptStd[i][j] = "NaN"
-                    scoreSumDeptStd[i][j] = "NaN"
-                    commitDeptStd[i][j] = "NaN"
-                    starDeptStd[i][j] = "NaN"
-                    prDeptStd[i][j] = "NaN"
-                    issueDeptStd[i][j] = "NaN"
-                    forkDeptStd[i][j] = "NaN"
-                else:
-                    scoreDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(scoreDeptDevTotal[i][j] / deptSize[i][j])))
-                    scoreSubDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(scoreSubDeptDevTotal[i][j] / deptSize[i][j])))
-                    scoreSumDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(scoreSumDeptDevTotal[i][j] / deptSize[i][j])))
-                    commitDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(commitDeptDevTotal[i][j] / deptSize[i][j])))
-                    starDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(starDeptDevTotal[i][j] / deptSize[i][j])))
-                    prDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(prDeptDevTotal[i][j] / deptSize[i][j])))
-                    issueDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(issueDeptDevTotal[i][j] / deptSize[i][j])))
-                    forkDeptStd[i][j] = '{:0.4f}'.format(math.sqrt(float(forkDeptDevTotal[i][j] / deptSize[i][j])))
-
-        for i in range(nYear) :
-            if sidSize[i] == 0:
+            if annualCnt[i] == 0:
                 scoreYearStd[i] = "NaN"
                 scoreSubYearStd[i] = "NaN"
                 scoreSumYearStd[i] = "NaN"
@@ -994,24 +606,24 @@ def main(mask):
                 issueYearStd[i] = "NaN"
                 forkYearStd[i] = "NaN"
             else:
-                scoreYearStd[i] = '{:0.4f}'.format(math.sqrt(float(scoreYearDevTotal[i] / annualCnt[i])))
-                scoreSubYearStd[i] = '{:0.4f}'.format(math.sqrt(float(scoreSubYearDevTotal[i] / annualCnt[i])))
-                scoreSumYearStd[i] = '{:0.4f}'.format(math.sqrt(float(scoreSumYearDevTotal[i] / annualCnt[i])))
-                commitYearStd[i] = '{:0.4f}'.format(math.sqrt(float(commitYearDevTotal[i] / annualCnt[i])))
-                starYearStd[i] = '{:0.4f}'.format(math.sqrt(float(starYearDevTotal[i] / annualCnt[i])))
-                prYearStd[i] = '{:0.4f}'.format(math.sqrt(float(prYearDevTotal[i] / annualCnt[i])))
-                issueYearStd[i] = '{:0.4f}'.format(math.sqrt(float(issueYearDevTotal[i] / annualCnt[i])))
-                forkYearStd[i] = '{:0.4f}'.format(math.sqrt(float(forkYearDevTotal[i] / annualCnt[i])))
+                scoreYearStd[i] = '{:0.4f}'.format(math.sqrt(scoreYearDevTotal[i] / annualCnt[i]))
+                scoreSubYearStd[i] = '{:0.4f}'.format(math.sqrt(scoreSubYearDevTotal[i] / annualCnt[i]))
+                scoreSumYearStd[i] = '{:0.4f}'.format(math.sqrt(scoreSumYearDevTotal[i] / annualCnt[i]))
+                commitYearStd[i] = '{:0.4f}'.format(math.sqrt(commitYearDevTotal[i] / annualCnt[i]))
+                starYearStd[i] = '{:0.4f}'.format(math.sqrt(starYearDevTotal[i] / annualCnt[i]))
+                prYearStd[i] = '{:0.4f}'.format(math.sqrt(prYearDevTotal[i] / annualCnt[i]))
+                issueYearStd[i] = '{:0.4f}'.format(math.sqrt(issueYearDevTotal[i] / annualCnt[i]))
         
         # MODEL1: insert_annualoverview_sql
         if mask & 1:
             print("exec sql annualoverview")
             try:
-                insert_annualoverview_sql = """insert into home_annualoverview 
+                delete_annualoverview_sql = """DELETE FROM home_annualoverview WHERE case_num = %d"""%case
+                insert_annualoverview_sql = """INSERT INTO home_annualoverview 
                 (case_num, score, score_diff, score_sum, score_std, score_std_diff, score_std_sum, 
                 commit, commit_std, star, star_std, pr, pr_std, issue, issue_std, fork, fork_std) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-                
+                cursor.execute(delete_annualoverview_sql)
                 cursor.execute(insert_annualoverview_sql, 
                     (case, json.dumps(scoreMean), json.dumps(scoreSubMean), json.dumps(scoreSumMean), json.dumps(scoreYearStd), json.dumps(scoreSubYearStd), json.dumps(scoreSumYearStd), 
                     json.dumps(commitMean), json.dumps(commitYearStd), json.dumps(starMean), json.dumps(starYearStd), json.dumps(prMean), json.dumps(prYearStd), json.dumps(issueMean), json.dumps(issueYearStd), json.dumps(forkMean), json.dumps(forkYearStd)))
@@ -1023,28 +635,30 @@ def main(mask):
         if mask & 2:
             print("exec sql annualtotal")
             try:
-                insert_annualtotal_sql = """insert into home_annualtotal 
+                delete_annualtotal_sql = """DELETE FROM home_annualtotal WHERE case_num = %d"""%case
+                insert_annualtotal_sql = """INSERT INTO home_annualtotal 
                 (case_num, student_KP, student_KP_diff, student_KP_sum, student_total, commit, star, repo, repo_total) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-                
+                cursor.execute(delete_annualtotal_sql)
                 cursor.execute(insert_annualtotal_sql, 
                     (case, json.dumps(scoreMore3), json.dumps(scoreSubMore3), json.dumps(scoreSumMore3), json.dumps(annualCnt),json.dumps(totalCommit), json.dumps(totalStar), json.dumps(repo_dist), repo_total))
                 conn.commit()
             except Exception as e:
                 print("insert_annualtotal_sql ", e)
             
-        
         # MODEL3: insert_distscore_sql
         if mask & 4:
             print("exec sql distscore")
             try:
-                insert_distscore_sql = """insert into home_distscore 
+                delete_distscore_sql = """DELETE FROM home_distscore WHERE case_num = %d"""%case
+                insert_distscore_sql = """INSERT INTO home_distscore 
                 (case_num, year, score, score_diff, score_sum, 
                 score_sid, score_sid_diff, score_sid_sum, score_sid_std, score_sid_std_diff, score_sid_std_sum, score_sid_pct, score_sid_pct_diff, score_sid_pct_sum, 
                 score_dept, score_dept_diff, score_dept_sum, score_dept_std, score_dept_std_diff, score_dept_std_sum, score_dept_pct, score_dept_pct_diff, score_dept_pct_sum) 
                 VALUES (%s, %s, %s, %s, %s, 
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                 %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                cursor.execute(delete_distscore_sql)
                 for yid in range(nYear) :
                     cursor.execute(insert_distscore_sql, 
                     (case, yid+startYear, json.dumps(scoreDist[yid]), json.dumps(scoreSubDist[yid]), json.dumps(scoreSumDist[yid]), 
@@ -1058,12 +672,14 @@ def main(mask):
         if mask & 8:
             print("exec sql distfactor")
             try:
-                insert_distfactor_sql = """insert into home_distfactor 
+                delete_distfactor_sql = """DELETE FROM home_distfactor WHERE case_num = %d"""%case
+                insert_distfactor_sql = """INSERT INTO home_distfactor 
                 (case_num, year, factor, value,
                 value_sid, value_sid_std, value_sid_pct,
                 value_dept, value_dept_std, value_dept_pct) 
                 VALUES (%s, %s, %s, %s, 
                 %s, %s, %s, %s, %s, %s)"""
+                cursor.execute(delete_distfactor_sql)
                 for yid in range(nYear) :
                     cursor.execute(insert_distfactor_sql, 
                     (case, yid+startYear, "commit", json.dumps(commitDist[yid]), 
@@ -1081,10 +697,6 @@ def main(mask):
                     (case, yid+startYear, "issue", json.dumps(issueDist[yid]), 
                     json.dumps(issueSid[yid]), json.dumps(issueSidStd[yid]), json.dumps(issueSidTop5pct[yid]), 
                     json.dumps(issueDept[yid]), json.dumps(issueDeptStd[yid]), json.dumps(issueDeptTop5pct[yid])))
-                    cursor.execute(insert_distfactor_sql, 
-                    (case, yid+startYear, "fork", json.dumps(forkDist[yid]), 
-                    json.dumps(forkSid[yid]), json.dumps(forkSidStd[yid]), json.dumps(forkSidTop5pct[yid]), 
-                    json.dumps(forkDept[yid]), json.dumps(forkDeptStd[yid]), json.dumps(forkDeptTop5pct[yid])))
                 conn.commit()
             except Exception as e:
                 print("insert_distfactor_sql ", e)
@@ -1093,9 +705,11 @@ def main(mask):
         if (mask & 16) and suffix == "":
             print("exec sql student")
             try:
-                insert_student_sql = """insert into home_student 
+                delete_student_sql = """DELETE FROM home_student"""
+                insert_student_sql = """INSERT INTO home_student 
                 (year, github_id, absence, plural_major, score, score_diff, score_sum, commit, star, pr, issue, fork) 
                 VALUES (%(year)s, %(github_id)s, %(absence)s, %(plural_major)s, %(score)s, %(score_diff)s, %(score_sum)s, %(commit)s, %(star)s, %(pr)s, %(issue)s, %(fork)s)"""
+                cursor.execute(delete_student_sql)
                 for yid in range(nYear):
                     cursor.executemany(insert_student_sql, studentData[yid])
                 conn.commit()

@@ -52,6 +52,7 @@ def challenge_acheive_update(request):
     print(acheive_id_list)
     for challenge in challenge_list:
         sql_with_format = challenge.sql.replace('{{github_id}}', my_acc.student_data.github_id)
+        sql_with_format = sql_with_format.replace('{{user_id}}', str(my_acc.user_id))
         try:
             cursor = connection.cursor()
             cursor.execute(sql_with_format)
