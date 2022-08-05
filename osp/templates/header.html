@@ -28,15 +28,20 @@
             {% if user.is_authenticated %}
             <ul class="navbar-nav">
                 <li class="dropdown noti-dropdown-btn">
+                    {% get_notifications request.user as notifications %}
                     <button class="noti-dropdown dropdown-toggle me-2 default-btn" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false" style="color:white;">
-                        <li id="notification" class="nav-item notification material-icons-outlined pointer icon">
+                        <div id="notification" class="nav-item notification material-icons-outlined pointer icon">
                             notifications
-                        </li>
+                        </div>
+                        {% if notifications.new %}
+                        <span id="new-noti">
+                            <span class="visually-hidden">New alerts</span>
+                        </span>
+                        {% endif %}
                     </button>
-                    {% get_notifications request.user as notifications %}
                     <ul class="dropdown-menu noti-dropdown">
-                        {% for noti in notifications %}
+                        {% for noti in notifications.list %}
                         <li class="nav-item d-flex flex-row justify-content-between noti-item">
                             <div class="d-flex">
                                 <div class="material-icons-outlined me-2">
