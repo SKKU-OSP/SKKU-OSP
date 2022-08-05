@@ -1,9 +1,9 @@
 def getGBTI(type1, type2, type3, type4):
     code, desc, descKR = "","",""
-    code += "E" if type1 > 0 else "I"
-    code += "S" if type2 > 0 else "N"
-    code += "T" if type3 > 0 else "F"
-    code += "J" if type4 > 0 else "P"
+    code += "E" if type4 > 0 else "I"
+    code += "N" if type3 > 0 else "S"
+    code += "T" if type2 > 0 else "F"
+    code += "P" if type1 > 0 else "J"
     desc4 = ["Steady", "Fluid"]
     desc3 = ["Cool-head", "Warm-heart"]
     desc2 = ["Efficient", "Creative"]
