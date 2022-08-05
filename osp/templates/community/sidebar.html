@@ -37,19 +37,14 @@
         {% endif %}
     </div>
     <div id="community-tab" class="w-100">
-        <div class="boardgroup-title">
-            게시판
-        </div>
-        {% if board %}
-        <div class="boardgroup-item">
-        {% else %}
-        <div class="boardgroup-item selected">
-        {% endif %}
-            <a href="/community">Community Main</a>
+        <div id="normal-boardgroup" class="boardgroup-title">
+            <a href="/community">
+                게시판
+            </a>
         </div>
         {% board_sidebar_normal_board request %}
         {% if user.is_authenticated %}
-        <div class="boardgroup-title d-flex justify-content-between">
+        <div id="team-boardgroup" class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
         </div>
         {% board_sidebar_team_board request %}
