@@ -700,6 +700,7 @@ function setGbtiModal(){
       imgDiv.appendChild(resultImg); //이미지 삽입
       $("#btn-save-id-card").removeClass("none");
       $("#gbti-test-restart").removeClass("none");
+      saveTestResult({"type":mbti, "factor": factor});
   }
 
   function getResult(){
@@ -769,7 +770,7 @@ function setGbtiModal(){
           let result_progress = $(".test-result-bar");
           for (let i=0; i<result_progress.length; i++){
             let bars = $(result_progress[i]).children();
-            let widthList = getProgressLength(factor[i], i%2!=0);
+            let widthList = getProgressLength(factor[i], !!i);
             for (let j=0; j<bars.length; j++){
               bars[j].style.width = String(widthList[j]) + "%";
             }
@@ -777,6 +778,7 @@ function setGbtiModal(){
           setResult();
       }, 200);
       function getProgressLength(factor, reverse=false){
+        console.log("reverse",reverse)
         let result = []
         if(reverse) factor = -factor;
         if(factor < 0){
@@ -824,7 +826,6 @@ function setGbtiModal(){
           else {
               getResult();
           }
-          
       },false);
 
   }
@@ -837,6 +838,7 @@ function setGbtiModal(){
       var pgBar = document.querySelector('.progress-bar');
       pgBar.style.width= (100/endPoint) * qIdx + '%';
   }
+  
   $("#gbti-test-start").on("click", ()=>{
     begin();
   });
@@ -863,5 +865,21 @@ function setGbtiModal(){
           let qIdx=0;
           nextQ(qIdx);
       }, 200);
+  }
+  function saveTestResult(data={}){
+      $.ajax({
+        type:"POST",
+        url: `testresult`,
+        data:JSON.stringify(data),
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        success:function(res){
+            console.log("data pass success",res);
+        },
+        error : function(data){ 
+          console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+        }
+      });
   }
 }
