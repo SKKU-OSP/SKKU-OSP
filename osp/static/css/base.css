@@ -390,6 +390,10 @@ footer {
   font-weight: 700 !important;
 }
 
+/*.carousel-item{*/
+/*  background:white;*/
+/*}*/
+
 .carousel-inner .carousel-item.active,
 .carousel-inner .carousel-item-next,
 .carousel-inner .carousel-item-prev {
@@ -401,12 +405,12 @@ footer {
 
   .carousel-inner .carousel-item-end.active,
   .carousel-inner .carousel-item-next {
-    transform: translateX(25%);
+    /*transform: translateX(25%);*/
   }
 
   .carousel-inner .carousel-item-start.active,
   .carousel-inner .carousel-item-prev {
-    transform: translateX(-25%);
+    /*transform: translateX(-25%);*/
   }
 }
 

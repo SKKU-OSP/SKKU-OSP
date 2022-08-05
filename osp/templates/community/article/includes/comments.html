@@ -37,8 +37,8 @@
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                        <li><a class="dropdown-item" href="/user/{{comment.writer.user.username}}">프로필</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ comment.writer.user.id }})">메시지</a></li>
                     </ul>
                 </div>
                 {% endif %}

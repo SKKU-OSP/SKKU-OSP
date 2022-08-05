@@ -246,7 +246,7 @@
     background-color: var(--main-point-color) !important;
     color:white;
     margin-bottom:10px;
-    height: 210px;
+    /*height: 210px;*/
 }
 
 #team-update{
@@ -257,8 +257,11 @@
 
 #team-image-container {
     margin:25px;
+    min-height:160px;
     height:160px;
+    min-width:160px;
     width:160px;
+    padding:10px;
     background:white;
     border: 1px solid var(--main-border-color);
     border-radius:10px;
@@ -273,6 +276,10 @@
 #team-data{
     padding-top: 25px;
     padding-bottom: 25px;
+    padding-right:5px;
+}
+#team-desc{
+    padding-bottom:10px;
 }
 
 #team-name{
@@ -297,18 +304,18 @@
     width: 50%;
 }
 
-#team-member{
+.team-member{
     margin-bottom:4px;
     padding-right:4px;
 }
 
-#team-member > *{
+.team-member > *{
     color:white;
     font-weight:400;
     font-size:15px;
 }
 
-#team-member > a{
+.team-member > a{
     text-decoration: underline;
 }
 
@@ -404,7 +411,11 @@
 }
 
 .active-article-item-team-desc{
-    overflow-wrap: break-word;
+    /*overflow-wrap: break-word;*/
+    /*text-overflow:ellipsis;*/
+    /*overflow: hidden;*/
+    /*white-space: nowrap;*/
+
 }
 
 #comment-group{
@@ -474,6 +485,7 @@
 #recruit-team-info-image > img{
     width: 5em;
     height: 5em;
+    margin-right:10px;
 }
 
 #recruit-team-info-period{
