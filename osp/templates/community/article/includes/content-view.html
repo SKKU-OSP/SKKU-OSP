@@ -72,25 +72,15 @@
                         style="line-height:30px;font-size:21px;padding-left:5px;">
                     thumb_up
                 </div>
-                    {% is_article_scrap article request.user as is_scrap %}
-
-                    <div id="bookmark_border"
-                         onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
-                         class="material-icons h-100 pointer opacity-hover
-                        {% if is_scrap %}d-none{% endif %}
-                        "
-                         style="line-height:30px;font-size:23px;padding-right:3px;">
-                        turned_in_not
-                    </div>
-
-                    <div id="bookmark_filled" onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
-                         class="material-icons h-100 pointer opacity-hover
-                        {% if not is_scrap %}d-none{% endif %}
-                        "
-                         style="line-height:30px;font-size:23px;padding-right:3px;">
-                        bookmark
-                    </div>
-
+                {% is_article_scrap article request.user as is_scrap %}
+                <div id="article-bookmark" onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
+                    class="material-icons h-100 pointer opacity-hover" style="line-height:30px;font-size:23px;padding-right:3px;">
+                    {% if is_scrap %} 
+                    bookmark
+                    {% else %}
+                    bookmark_border
+                    {% endif %}
+                </div>
 
 
 

@@ -41,8 +41,12 @@ function ArticleScrap(obj, article_id, user_id) {
 
         success: function (data) {
             if (data['status'] == 'success') {
-                $('#bookmark_border').toggleClass("d-none");
-                $('#bookmark_filled').toggleClass('d-none');
+                if(data['result']){
+                    $('#article-bookmark').html('bookmark');
+                }
+                else{
+                    $('#article-bookmark').html('bookmark_border');
+                }
             }
         },
     });
