@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from tag.models import Tag, DomainLayer
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
@@ -303,29 +303,42 @@ class ProfileView(TemplateView):
         committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
 
 
-        gbti_data = {"typeA":50, "typeB":-50, "typeC":50, "typeD":-50, "typeE":50, "typeF":35, "typeG":55}
+        try:
+            devtype_data = DevType.objects.get(account=account)
+            print("gbti_data", devtype_data.typeA, devtype_data.typeB,devtype_data.typeC, devtype_data.typeD)
+
+            gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
         
-        gbti_data["typeAl"] = int((100 + gbti_data["typeA"])/2) + (100 + gbti_data["typeA"])%2 - 5
-        print(gbti_data["typeAl"])
-        gbti_data["typeAr"] = int((100 - gbti_data["typeA"])/2) - 5
-        print(gbti_data["typeAr"])
+            gbti_data["typeAl"] = int((100 + gbti_data["typeA"])/2) + (100 + gbti_data["typeA"])%2 - 5
+            print(gbti_data["typeAl"])
+            gbti_data["typeAr"] = int((100 - gbti_data["typeA"])/2) - 5
+            print(gbti_data["typeAr"])
+            gbti_data["typeBl"] = int((100 + gbti_data["typeB"])/2) + (100 + gbti_data["typeB"])%2 - 5
+            gbti_data["typeBr"] = int((100 - gbti_data["typeB"])/2) - 5
 
-        gbti_data["typeBl"] = int((100 + gbti_data["typeB"])/2) + (100 + gbti_data["typeB"])%2 - 5
-        gbti_data["typeBr"] = int((100 - gbti_data["typeB"])/2) - 5
+            gbti_data["typeCl"] = int((100 + gbti_data["typeC"])/2) + (100 + gbti_data["typeC"])%2 - 5
+            gbti_data["typeCr"] = int((100 - gbti_data["typeC"])/2) - 5
 
-        gbti_data["typeCl"] = int((100 + gbti_data["typeC"])/2) + (100 + gbti_data["typeC"])%2 - 5
-        gbti_data["typeCr"] = int((100 - gbti_data["typeC"])/2) - 5
-
-        gbti_data["typeDl"] = int((100 + gbti_data["typeD"])/2) + (100 + gbti_data["typeD"])%2 - 5
-        gbti_data["typeDr"] = int((100 - gbti_data["typeD"])/2) - 5
+            gbti_data["typeDl"] = int((100 + gbti_data["typeD"])/2) + (100 + gbti_data["typeD"])%2 - 5
+            gbti_data["typeDr"] = int((100 - gbti_data["typeD"])/2) - 5
 
 
-        gbti_data.update(getGBTI(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
+            gbti_data.update(getGBTI(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
+            
+            print(student_time_circmean)
+            print(time_sector_min)
+
+
+            test_data = getGBTI(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD)
+            print("test_data", test_data)
+        except Exception as e:
+            print("DevType get error", e)
+            test_data = None
         
         print(student_time_circmean)
         print(time_sector_min)
+        gbti_data = {}
 
-        # 모델 바뀌면 DB에 저장되도록 바꿔야하는 부분
         if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
             gbti_data["typeE"] = 1
         else: # 밤에 활동
@@ -342,7 +355,7 @@ class ProfileView(TemplateView):
         else: # 함께 작업
             gbti_data["typeG"] = 1
 
-
+        context["test"] = test_data
         context["gbti"] = gbti_data
         context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
@@ -572,3 +585,38 @@ class ProfileRepoView(TemplateView):
         print("\nProfileRepoView time :", time.time() - start)
         
         return context
+
+
+@csrf_exempt
+def save_test_result(request, username):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            type_factors = data['factor']
+            user = User.objects.get(username=username)
+            try:
+                account = Account.objects.get(user=user)
+            except Exception as e:
+                print("account error", e)
+            devtype_objs = DevType.objects.filter(account=account).all()
+            print("objs len", len(devtype_objs))
+            if len(devtype_objs) == 0:
+                model_instance = DevType(account=account, typeA=type_factors[0], typeB=type_factors[1], typeC=type_factors[2], typeD=type_factors[3], typeE=0, typeF=0, typeG=0)
+                model_instance.save()
+                print("create DevType...DONE")
+            else:
+                for devtype in devtype_objs:
+                    devtype.typeA = type_factors[0]
+                    devtype.typeB = type_factors[1]
+                    devtype.typeC = type_factors[2]
+                    devtype.typeD = type_factors[3]
+                    devtype.save()
+                    print("update DevType...DONE")
+                    
+            
+            context = {"status": 200}
+        except Exception as e:
+            print("error save", e)
+            context = {"status": 400}
+        
+        return JsonResponse(context)
