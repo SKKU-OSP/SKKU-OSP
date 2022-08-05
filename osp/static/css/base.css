@@ -109,6 +109,15 @@ div.vr {
   vertical-align: middle;
 }
 
+#new-noti{
+  background-color: var(--alert-color);
+  border-radius: 50%;
+  padding: 0.25rem;
+  position: absolute;
+  top: 0;
+  left: 5%;
+}
+
 #message-modal .modal-dialog,
 #message-modal .modal-content {
   height: 70%;
