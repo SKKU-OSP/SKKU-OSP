@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from tag.models import Tag, DomainLayer
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
@@ -302,17 +302,19 @@ class ProfileView(TemplateView):
         student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
         committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
 
-
-
-        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
-        gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
-        gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
-        gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
-        gbti_data["typeA0"] = 100 - gbti_data["typeA1"] - gbti_data["typeA2"]
-        gbti_data.update(getGBTI(gbti_data["typeA1"]-gbti_data["typeA2"], gbti_data["typeB1"]-gbti_data["typeB2"], gbti_data["typeC1"]-gbti_data["typeC2"], gbti_data["typeD1"]-gbti_data["typeD2"]))
+        try:
+            devtype_data = DevType.objects.get(account=account)
+            print("gbti_data", devtype_data.typeA, devtype_data.typeB,devtype_data.typeC, devtype_data.typeD)
+        
+            test_data = getGBTI(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD)
+            print("test_data", test_data)
+        except Exception as e:
+            print("DevType get error", e)
+            test_data = None
         
         print(student_time_circmean)
         print(time_sector_min)
+        gbti_data = {}
         if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
             gbti_data["typeE1"] = 30
             gbti_data["typeE2"] = 20
@@ -342,7 +344,7 @@ class ProfileView(TemplateView):
             gbti_data["typeF1"] = 20
             gbti_data["typeF2"] = 30
 
-
+        context["test"] = test_data
         context["gbti"] = gbti_data
         context["star"] = own_star["star"]
         print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
@@ -572,3 +574,38 @@ class ProfileRepoView(TemplateView):
         print("\nProfileRepoView time :", time.time() - start)
         
         return context
+
+
+@csrf_exempt
+def save_test_result(request, username):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            type_factors = data['factor']
+            user = User.objects.get(username=username)
+            try:
+                account = Account.objects.get(user=user)
+            except Exception as e:
+                print("account error", e)
+            devtype_objs = DevType.objects.filter(account=account).all()
+            print("objs len", len(devtype_objs))
+            if len(devtype_objs) == 0:
+                model_instance = DevType(account=account, typeA=type_factors[0], typeB=type_factors[1], typeC=type_factors[2], typeD=type_factors[3], typeE=0, typeF=0, typeG=0)
+                model_instance.save()
+                print("create DevType...DONE")
+            else:
+                for devtype in devtype_objs:
+                    devtype.typeA = type_factors[0]
+                    devtype.typeB = type_factors[1]
+                    devtype.typeC = type_factors[2]
+                    devtype.typeD = type_factors[3]
+                    devtype.save()
+                    print("update DevType...DONE")
+                    
+            
+            context = {"status": 200}
+        except Exception as e:
+            print("error save", e)
+            context = {"status": 400}
+        
+        return JsonResponse(context)
