@@ -780,15 +780,16 @@ function setGbtiModal(){
       function getProgressLength(factor, reverse=false){
         console.log("reverse",reverse)
         let result = []
-        if(reverse) factor = -factor;
-        if(factor < 0){
-          result.push(50+factor/2);
-          result.push(-factor/2);
+        let val = factor
+        if(reverse) val  = -factor;
+        if(val < 0){
+          result.push(50+val/2);
+          result.push(-val/2);
           result.push(50);
         }else{
           result.push(50);
-          result.push(factor/2);
-          result.push(50-factor/2);
+          result.push(val/2);
+          result.push(50-val/2);
         }
         return result;
       }
