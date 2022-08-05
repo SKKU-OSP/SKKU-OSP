@@ -322,6 +322,7 @@
     min-height: 10em;
     background-color: var(--main-point-color);
     margin-bottom: 1rem;
+    color:white;
 }
 
 #no-active-article{
