@@ -173,6 +173,7 @@ div > ::-webkit-scrollbar-thumb:hover {
 
 .modal-content{
   border-radius: 0;
+  border: none;
 }
 
 img.opponent-profile{
@@ -402,3 +403,4 @@ transform: translateX(0);
     border:none;
     background:none;
 }
+
