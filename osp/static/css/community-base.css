@@ -466,6 +466,11 @@
     color: var(--main-border-color);
 }
 
+.comment-like-cnt{
+    font-size: 1rem;
+    color: var(--main-border-color);
+}
+
 #recruit-team-info-image > img{
     width: 5em;
     height: 5em;
