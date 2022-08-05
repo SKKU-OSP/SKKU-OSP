@@ -292,7 +292,7 @@ class ProfileView(TemplateView):
         major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
         
         if not os.path.exists(os.path.join(test_data_path, 'commit_intv.csv')):
-            update_act.update_frequency()
+            update_act.update_frequency()   
         committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
 
 
@@ -303,44 +303,44 @@ class ProfileView(TemplateView):
         committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
 
 
+        gbti_data = {"typeA":50, "typeB":-50, "typeC":50, "typeD":-50, "typeE":50, "typeF":35, "typeG":55}
+        
+        gbti_data["typeAl"] = int((100 + gbti_data["typeA"])/2) + (100 + gbti_data["typeA"])%2 - 5
+        print(gbti_data["typeAl"])
+        gbti_data["typeAr"] = int((100 - gbti_data["typeA"])/2) - 5
+        print(gbti_data["typeAr"])
 
-        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
-        gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
-        gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
-        gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
-        gbti_data["typeA0"] = 100 - gbti_data["typeA1"] - gbti_data["typeA2"]
-        gbti_data.update(getGBTI(gbti_data["typeA1"]-gbti_data["typeA2"], gbti_data["typeB1"]-gbti_data["typeB2"], gbti_data["typeC1"]-gbti_data["typeC2"], gbti_data["typeD1"]-gbti_data["typeD2"]))
+        gbti_data["typeBl"] = int((100 + gbti_data["typeB"])/2) + (100 + gbti_data["typeB"])%2 - 5
+        gbti_data["typeBr"] = int((100 - gbti_data["typeB"])/2) - 5
+
+        gbti_data["typeCl"] = int((100 + gbti_data["typeC"])/2) + (100 + gbti_data["typeC"])%2 - 5
+        gbti_data["typeCr"] = int((100 - gbti_data["typeC"])/2) - 5
+
+        gbti_data["typeDl"] = int((100 + gbti_data["typeD"])/2) + (100 + gbti_data["typeD"])%2 - 5
+        gbti_data["typeDr"] = int((100 - gbti_data["typeD"])/2) - 5
+
+
+        gbti_data.update(getGBTI(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
         
         print(student_time_circmean)
         print(time_sector_min)
+
+        # 모델 바뀌면 DB에 저장되도록 바꿔야하는 부분
         if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
-            gbti_data["typeE1"] = 30
-            gbti_data["typeE2"] = 20
+            gbti_data["typeE"] = 1
         else: # 밤에 활동
-            gbti_data["typeE1"] = 20
-            gbti_data["typeE2"] = 30
-
-        if(student_major_act == 'individual'): # 혼자 작업
-            gbti_data["typeG1"] = 20
-            gbti_data["typeG2"] = 30
-        else: # 함께 작업
-            gbti_data["typeG1"] = 30
-            gbti_data["typeG2"] = 20
-
-        if(student_major_act == 'individual'): # 혼자 작업
-            gbti_data["typeG1"] = 20
-            gbti_data["typeG2"] = 30
-        else: # 함께 작업
-            gbti_data["typeG1"] = 30
-            gbti_data["typeG2"] = 20
+            gbti_data["typeE"] = -1
 
         if(committer_frequency == 0): # 자주 작업
-            gbti_data["typeF1"] = 30
-            gbti_data["typeF2"] = 20
+            gbti_data["typeF"] = 1
 
         else: # 몰아서 작업
-            gbti_data["typeF1"] = 20
-            gbti_data["typeF2"] = 30
+            gbti_data["typeF"] = -1
+
+        if(student_major_act == 'individual'): # 혼자 작업
+            gbti_data["typeG"] = -1
+        else: # 함께 작업
+            gbti_data["typeG"] = 1
 
 
         context["gbti"] = gbti_data
