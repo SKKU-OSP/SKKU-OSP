@@ -514,36 +514,36 @@
                         <span>Fluid</span>
                       </div>
                       <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeD1}}%" aria-valuenow={{gbti.typeD1}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeD0}}%" aria-valuenow={{gbti.typeD0}}  aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeD2}}%" aria-valuenow={{gbti.typeD2}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar"  style="width: {{gbti.typeDl}}%" aria-valuenow="{{gbti.typeDl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar"  style="width: 10%" aria-valuenow=10  aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" style="width: {{gbti.typeDr}}%" aria-valuenow="{{gbti.typeDr}}" aria-valuemin="0" aria-valuemax="100"></div>
                       </div>
                       <div class="d-flex justify-content-between text-label">
                         <span>CoolHead</span>
                         <span>WarmHeart</span>
                       </div>
                       <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeC1}}%" aria-valuenow={{gbti.typeC1}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeC0}}%" aria-valuenow={{gbti.typeC0}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeC2}}%" aria-valuenow={{gbti.typeC2}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeCl}}%" aria-valuenow="{{gbti.typeCl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: 10%" aria-valuenow=10 aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeCr}}%" aria-valuenow="{{gbti.typeCr}}" aria-valuemin="0" aria-valuemax="100"></div>
                       </div>
                       <div class="d-flex justify-content-between text-label">
                         <span>Creative</span>
                         <span>Efficient</span>
                       </div>
                       <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeB1}}%" aria-valuenow={{gbti.typeB1}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeB0}}%" aria-valuenow={{gbti.typeB0}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeB2}}%" aria-valuenow={{gbti.typeB2}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeBl}}%" aria-valuenow="{{gbti.typeBl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: 10%" aria-valuenow=10 aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeBr}}%" aria-valuenow="{{gbti.typeBr}}" aria-valuemin="0" aria-valuemax="100"></div>
                       </div>
                       <div class="d-flex justify-content-between text-label">
                         <span>MultiPlay</span>
                         <span>SinglePlay</span>
                       </div>
                       <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeA1}}%" aria-valuenow={{gbti.typeA1}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: {{gbti.typeA0}}%" aria-valuenow={{gbti.typeA0}} aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeA2}}%" aria-valuenow={{gbti.typeA2}} aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{gbti.typeAl}}%" aria-valuenow="{{gbti.typeAl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: 10%" aria-valuenow=10 aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{gbti.typeAr}}%" aria-valuenow="{{gbti.typeAr}}" aria-valuemin="0" aria-valuemax="100"></div>
                       </div>
                     </div>
                   </div>
@@ -606,7 +606,7 @@
                 </div>
                 <div class="gbti-analysis-container">
                   <div class="gbti-analysis">
-                    {% if gbti.typeE1 >= gbti.typeE2 %}
+                    {% if gbti.typeE >= 0 %}
                     <i class="bi bi-sun-fill icon-lg" style="float: left;"></i>
                     <div class="d-flex flex-column justify-content-center">
                       <span>Sunflower</span>
@@ -621,7 +621,7 @@
                     {% endif %}
                   </div>
                   <div class="gbti-analysis">
-                    {% if gbti.typeF1 >= gbti.typeF2 %}
+                    {% if gbti.typeF >= 0 %}
                     <i class="bi bi-grid-3x3-gap-fill icon-lg" style="float: left;"></i>
                     <div class="d-flex flex-column justify-content-center">
                       <span>Frequent Commit</span>
@@ -636,7 +636,7 @@
                     {% endif %}
                   </div>
                   <div class="gbti-analysis">
-                    {% if gbti.typeG1 >= gbti.typeG2 %}
+                    {% if gbti.typeG >= 0 %}
                     <i class="bi bi-people-fill icon-lg" style="float: left;"></i>
                     <div class="d-flex flex-column justify-content-center">
                       <span>Together</span>
@@ -674,17 +674,17 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-between">
-                  {% if gbti.typeE1 >= gbti.typeE2 %}
+                  {% if gbti.typeE >= 0 %}
                   <i class="bi bi-sun-fill icon-lg"></i>
                   {% else %}
                   <i class="bi bi-moon-fill icon-lg"></i>
                   {% endif %}
-                  {% if gbti.typeF1 >= gbti.typeF2 %}
+                  {% if gbti.typeF >= 0 %}
                   <i class="bi bi-grid-3x3-gap-fill icon-lg"></i>
                   {% else %}
                   <i class="bi bi-square icon-lg"></i>
                   {% endif %}
-                  {% if gbti.typeG1 >= gbti.typeG2 %}
+                  {% if gbti.typeG >= 0 %}
                   <i class="bi bi-people-fill icon-lg"></i>
                   {% else %}
                   <i class="bi bi-person-fill icon-lg"></i>
