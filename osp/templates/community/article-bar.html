@@ -8,10 +8,22 @@
                 {% if article.team %}
                 [{{ article.team.name }}]
                 {% else %}
-                [재]
+                [팀이 더이상 존재하지 않습니다.]
                 {% endif %}
                 {% endif %}
                 {{article.title}}
+            </div>
+            <div>
+                {% if board.board_type == 'Recruit' %}
+                    {% is_period_end article.period_end as is_end %}
+                    {% if not article.team %}
+                        -
+                    {% elif not is_end %}
+                        <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
+                    {% else %}
+                        <span class="badge" style="font-size:13px;background:#fec89a;">모집 마감</span>
+                    {% endif %}
+                {% endif %}
             </div>
             <div style="white-space: nowrap;">
                 {% for tag in article.tags %}
