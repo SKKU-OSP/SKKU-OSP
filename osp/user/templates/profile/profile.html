@@ -489,9 +489,13 @@
                       <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
                     </div>
                   </section>
+                  <div class="d-flex justify-content-end btn-gbti-group">
+                    <button id="btn-save-id-card" class="btn-gbti pb-active none">ID CARD 저장</button>
+                    <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3 none">다시 검사하기</button>
+                  </div>
                 </div>
                 {%else %}
-                <h4 class="text-center mt-3">개발자 유형 지표 검사 결과</h4>
+                <h4 class="text-center mt-3">개발자 유형 검사 결과</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
                   <span class="line-connect"></span>
@@ -501,8 +505,8 @@
                   <p class="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
                   <div class="d-flex justify-content-center">
                     <div class="gbti-content d-flex justify-content-center p-sm">
-                      <div class="gbti-img">
-                        <img src={% static "images/"|add:test.code|add:".png" %} alt="No Image now">
+                      <div id="resultImg" class="gbti-img">
+                        <img src={% static "images/"|add:test.code|add:".png" %}>
                       </div>
                     </div>
                     <div class="gbti-content d-flex flex-column p-sm">
@@ -549,11 +553,11 @@
                   </div>
                   <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
                 </div>
-                {% endif %}
                 <div class="d-flex justify-content-end btn-gbti-group">
-                  <button id="btn-save-id-card" class="btn-gbti pb-active none">ID CARD 저장</button>
-                  <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3 none">다시 검사하기</button>
+                  <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
+                  <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
                 </div>
+                {% endif %}
                 <h4 class="text-center mt-3">다른 유형과의 조화</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
@@ -671,7 +675,6 @@
                     {% else %}
                     <img src={% static "images/back.png" %} alt="No Image now">
                     <span class="weak-text">아직 개발자 유형 검사를 진행하지 않았습니다</span>
-                    
                     {% endif %}
                   </div>
                   <div class="gbti-textbox">
@@ -791,8 +794,8 @@
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/gbti-style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/gbti-animation.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
     const end_year = {{end_year}};
@@ -800,7 +803,7 @@
   </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/gbti_test_data.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/test_type_data.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
