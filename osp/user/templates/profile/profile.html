@@ -789,7 +789,8 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/gbti-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
-    const end_year = {{end_year}}
+    const end_year = {{end_year}};
+    const github_id = '{{username}}';
   </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
