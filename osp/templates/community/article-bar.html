@@ -19,7 +19,7 @@
                     {% if not article.team %}
                         -
                     {% elif not is_end %}
-                        <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중: {{article.period_start|date:'Y-m-d'}}~{{article.period_end|date:'Y-m-d'}}</span>
+                        <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
                     {% else %}
                         <span class="badge" style="font-size:13px;background:#fec89a;">모집 마감</span>
                     {% endif %}

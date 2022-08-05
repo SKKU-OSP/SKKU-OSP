@@ -311,12 +311,17 @@ def article_create(request):
 
     try:
         with transaction.atomic():
+
             account = Account.objects.get(user=request.user)
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
                                              pub_date=datetime.now(), mod_date=datetime.now(),
                                              anonymous_writer=request.POST.get('is_anonymous') == 'true',
                                              board_id_id=board.id,
                                              writer=account)
+            if request.POST.get('period_start', False):
+                article.period_start = request.POST.get('period_start')[:-1]
+                article.period_end = request.POST.get('period_end')[:-1]
+                article.save()
             tag_list = request.POST.get('tags').split(',')
             for tag_name in tag_list:
                 if tag_name:

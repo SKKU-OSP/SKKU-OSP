@@ -58,6 +58,44 @@
                     }
                 }
             });
+        {% if board.board_type == 'Recruit' %}
+            const linkedPicker1Element = document.getElementById('PeriodPickerStart');
+            const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element, {
+            localization: {
+                dayViewHeaderFormat: { month: 'long', year: '2-digit' },
+                locale: 'en',
+            },
+            });
+            linked1.dates.setFromInput("{{article.period_start|date:'Y-m-d'}}T{{article.period_start|date:'H:i:s'}}");
+            const linked2 = new tempusDominus.TempusDominus(document.getElementById('PeriodPickerEnd'), {
+            localization: {
+                dayViewHeaderFormat: { month: 'long', year: '2-digit' },
+                locale: 'en',
+            },
+            useCurrent: false
+            });
+            linked2.dates.setFromInput("{{article.period_end|date:'Y-m-d'}}T{{article.period_end|date:'H:i:s'}}");
+
+            //using event listeners
+            linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+            linked2.updateOptions({
+            restrictions: {
+                minDate: e.detail.date
+            }
+            });
+            });
+            //using subscribe method
+            const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+            linked1.updateOptions({
+            restrictions: {
+                maxDate: e.date
+            }
+            });
+            });
+            {% endif %}
+        function setToDateEnd(){
+            $("#PeriodPickerEndInput").val(new Date());
+        }
         }
     });
 
@@ -153,6 +191,11 @@
         ajax_form_data.append('board_id','{{ board.id }}');
         {% if board.board_type == 'Recruit' %}
             ajax_form_data.append('team_id', $('#team-option').val());
+            const offset = new Date().getTimezoneOffset() * 60000;
+            var period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
+            var period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
+            ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
+            ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         {% elif board.board_type == 'Team' %}
             ajax_form_data.append('team_id', {{ board.team.id }});
         {% endif %}
@@ -188,9 +231,7 @@
         }
     }
     {% if article %}
-    function setToDateEnd(){
-        $("#PeriodPickerEndInput").val(new Date());
-    }
+
     function updateArticle(){
         ajax_form_data=new FormData();
         ajax_form_data.append('title',$('#article-title').val());
