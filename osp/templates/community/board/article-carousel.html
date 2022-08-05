@@ -12,7 +12,7 @@
       {% else %}
       <div class="carousel-item">
       {% endif %}
-        <div class="col-4 p-2">
+        <div class="p-2">
           <div class="active-article-item" onclick="location.href='{% url 'community:article-view' article.id %}'" >
             <div class="team-profile d-flex">
               <img src="{{article.team.image.url}}" alt="profile" class="active-article-item-team-image">
@@ -47,19 +47,11 @@
 </div>
 <script>
   $(function() {
-    let items = document.querySelectorAll('.carousel .carousel-item')
-    items.forEach((el) => {
-        const minPerSlide = 3;
-        let next = el.nextElementSibling
-        for (var i=1; i<minPerSlide; i++) {
-            if (!next) {
-                // wrap carousel by using first child
-              next = items[0]
-            }
-            let cloneChild = next.cloneNode(true)
-            el.appendChild(cloneChild.children[0])
-            next = next.nextElementSibling
-        }
-    })
+      $('.carousel').carousel({
+              {#interval: 100,#}
+            number:3,
+          }
+      );
+
   });
 </script>
