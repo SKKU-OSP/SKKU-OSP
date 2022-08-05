@@ -45,6 +45,7 @@
 </div>
 {% endblock content %}
 {% block script %}
+
 <script>
   $(function(){
   var tag_selector = new SlimSelect({
@@ -55,8 +56,10 @@
       }
       redraw();
     }
-  })});
+  });
 
+
+  });
 
 </script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
