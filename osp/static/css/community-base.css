@@ -356,7 +356,11 @@
 }
 
 .active-article-item-team-desc{
-    overflow-wrap: break-word;
+    /*overflow-wrap: break-word;*/
+    /*text-overflow:ellipsis;*/
+    /*overflow: hidden;*/
+    /*white-space: nowrap;*/
+
 }
 
 #comment-group{
