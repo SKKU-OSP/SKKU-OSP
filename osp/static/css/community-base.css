@@ -157,12 +157,15 @@
 }
 
 .article-head{
+    padding: 0.5rem;
     margin-top : auto;
     margin-bottom: auto;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .article-meta{
+    padding: 0.5rem;
     margin-left: auto;
     text-align: end;
     font-size: 14px;
@@ -317,6 +320,17 @@
     background: var(--main-point-color) !important;
     padding: 20px;
     color:white;
+}
+
+#board-title{
+    font-size: 2rem;
+    margin-right: 1rem;
+}
+
+#board-title > a{
+    font-size: 2rem;
+    margin-right: 1rem;
+    color: #FFFFFF;
 }
 
 .article-bar{
