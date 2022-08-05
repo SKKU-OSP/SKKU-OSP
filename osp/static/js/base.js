@@ -269,15 +269,4 @@ $().ready(function () {
     $('#message').click(function () {
         msgModalOpen();
     });
-      $('.hi').slick({
-        number:3,
-        slide: 'div',
-        slidesToShow: 3,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 2000,
-        arrows : true,
-      }
-  );
-
 });
