@@ -189,6 +189,11 @@
     color: #FFFFFF;
 }
 
+.accordion-button.collapsed{
+    background-color: var(--main-point-color) !important;
+    color: #FFFFFF;
+}
+
 .accordion-button::after{
     font-family: bootstrap-icons;
     background-image: none;
