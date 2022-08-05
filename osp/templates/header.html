@@ -53,7 +53,12 @@
                                 {% endif %}
                             </div>
                         </li>
+                        {% empty %}
+                        <li class="nav-item empty d-flex flex-row justify-content-center noti-item">
+                            알림이 없습니다.
+                        </li>
                         {% endfor %}
+
                     </ul>
                 </li>
                 <li id="message" class="nav-item me-2 pointer">
