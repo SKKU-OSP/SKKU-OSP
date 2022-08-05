@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    var last_year = 0;
+    $('#scoreTable > tbody > tr > td:nth-child(7)').each(function(){
+        last_year = Math.max(Number($(this).html()), last_year);
+    })
+    console.log(last_year)
     var table = $('#scoreTable').DataTable({
         dom: 'Pfrtip',
         searchPanes: {
@@ -9,7 +14,7 @@ $(document).ready(function () {
             initCollapsed: true,
             preSelect:[{
                 column: 6,
-                rows: ['2021']
+                rows: [String(last_year)]
             }]
         },
         columnDefs: [
