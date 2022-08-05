@@ -666,7 +666,13 @@
               <div class="gbti-content p-lg">
                 <div class="gbti-card">
                   <div class="gbti-img">
-                    <img src={% static "images/"|add:test.code|add:".png" %} alt="No Image now">
+                    {% if test %}
+                    <img src={% static "images/"|add:test.code|add:".png" %} alt="test.code">
+                    {% else %}
+                    <img src={% static "images/back.png" %} alt="No Image now">
+                    <span class="weak-text">아직 개발자 유형 검사를 진행하지 않았습니다</span>
+                    
+                    {% endif %}
                   </div>
                   <div class="gbti-textbox">
                     <p id="gbti-name" class="gbti-text bold">{{test.nicknameKR}}</p>
