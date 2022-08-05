@@ -307,7 +307,9 @@ class ProfileView(TemplateView):
             devtype_data = DevType.objects.get(account=account)
             print("gbti_data", devtype_data.typeA, devtype_data.typeB,devtype_data.typeC, devtype_data.typeD)
 
-            gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
+            gbti_data = {
+                        "typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD,
+                        "typeE": 0, "typeF" : 0, "typeG": 0}
         
             gbti_data["typeAl"] = int((100 + gbti_data["typeA"])/2) + (100 + gbti_data["typeA"])%2 - 5
             print(gbti_data["typeAl"])
