@@ -49,15 +49,15 @@
         <div>
             <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body }}</div>
         </div>
-        <div style="margin-top:5px;" class="ss-97888 ss-main d-flex flex-row" >
+        <div style="margin-top:10px;" class="ss-main d-flex flex-row" >
             <div class="ss-multi-selected">
                 <div class="ss-values">
                     {% for tag in tags %}
-                        <div class="ss-value bg-tag-{{tag.tag.type}}">
-                            <span class="ss-value-text"># {{ tag.tag.name }}</span>
-                        </div>
+                    <div class="ss-value bg-tag-{{tag.tag.type}}">
+                        <span class="ss-value-text"># {{ tag.tag.name }}</span>
+                    </div>
                     {% empty %}
-                        <span style="padding-left:5px;">태그 없음</span>
+                    <span style="padding-left:5px;">태그 없음</span>
                     {% endfor %}
                 </div>
             </div>

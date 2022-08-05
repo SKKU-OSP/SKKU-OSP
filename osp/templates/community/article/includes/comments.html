@@ -43,11 +43,16 @@
                 </div>
                 {% endif %}
             </div>
-            {% if request.user == comment.writer.user %}
-            <div class="comment-item-delete">
-                <span onclick="deleteComment({{ comment.id }});">삭제</span>
+            <div class="comment-item-mod">
+                {% if request.user == comment.writer.user %}
+                <div class="comment-item-delete">
+                    <span onclick="deleteComment({{comment.id}});">삭제</span>
+                </div>
+                {% endif %}
+                <div class="comment-item-like material-icons-outlined comment-like-cnt">
+                    thumb_up
+                </div>
             </div>
-            {% endif %}
         </div>
         <div class="comment-item-body">
             {{ comment.body }}

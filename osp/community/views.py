@@ -219,9 +219,13 @@ def article_list(request, board_name, board_id):
                 article.team = None
 
         if board.board_type == 'QnA':
-            comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
-                ArticleComment.objects.filter(article=article).values('id'))\
-                .annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            # comment_by_like = ArticleCommentLike.objects.filter(
+            #     comment__in=ArticleComment.objects.filter(article=article).values_list('id', flat=True)
+            # ).annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            comment_by_like = ArticleComment.objects.filter(
+                article=article
+            ).prefetch_related('articlecommentlike_set')
+            comment_by_like = comment_by_like.annotate(like_cnt=Count('articlecommentlike')).order_by('-like_cnt')
             if len(comment_by_like):
                 article.comment = comment_by_like[0]
     if board.board_type == 'QnA':
@@ -489,5 +493,5 @@ def article_scrap(request):
         if not created:
             obj.delete()
         return JsonResponse({'status': 'success'})
-    except:
+    except DatabaseError:
         return JsonResponse({'status':'false'})
