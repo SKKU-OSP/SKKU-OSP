@@ -335,24 +335,27 @@ footer {
 }
 
 .bg-tag-tool {
-  color: #000000;
+  color: #000000 !important;
   background-color: var(--tag-bg-tool) !important; 
+  font-weight: 700 !important;
 }
 
 .bg-tag-domain {
-  color: #000000;
+  color: #000000 !important;
   background-color: var(--tag-bg-domain) !important; 
+  font-weight: 700 !important;
 }
 
 .bg-tag-language {
-  color: #000000;
+  color: #000000 !important;
   background-color: var(--tag-bg-language) !important; 
+  font-weight: 700 !important;
 }
 
 .bg-tag-etc {
-  color: #000000;
+  color: #000000 !important;
   background-color: var(--tag-bg-ect) !important; 
-  color: black;
+  font-weight: 700 !important;
 }
 
 .carousel-inner .carousel-item.active,
