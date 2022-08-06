@@ -462,7 +462,9 @@
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
+                  {% if user.is_authenticated and user == username%}
                   <button class="btn-gbti pb-inactive ms-3" onclick="location.href='./test'">다시 검사하기</button>
+                  {% endif %}
                 </div>
                 <h4 class="text-center mt-3">다른 유형과의 조화</h4>
                 <div class="d-flex justify-content-center">
@@ -574,7 +576,7 @@
                 개발자 성향
                 {% if test %}
                 <i id="icon-devtype" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
-                {% else %}
+                {% elif user.is_authenticated and user.username == username%}
                 <a href="./test">
                   <i id="icon-devtype" class="bi-box-arrow-up-right evt-icon" title="테스트 페이지로 이동"></i>
                 </a>
