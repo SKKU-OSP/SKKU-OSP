@@ -1,5 +1,6 @@
 {% include 'head.html' %}
 {% load static %}
+{% if user.is_authenticated and user == username %}
 <div class="container">
   <section id ="main"> 
     <div class="board mx-0 mt-5">
@@ -30,7 +31,7 @@
   </section>
   <section id="result" class="mx-auto mt-5">
     <h3>개발자 유형 검사 결과</h3>
-<div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center">
       <span class="endpoint left"></span>
       <span class="line-connect"></span>
       <span class="endpoint right"></span>
@@ -100,6 +101,34 @@
     </div>
   </span>
 </section>
+{% else %}
+<div class="container">
+  <section id ="main"> 
+    <div class="board mx-0 mt-5">
+      <div class="my-3">
+        <h3>개발자 유형 검사</h3>
+      </div>
+      <div class="d-flex justify-content-center">
+        <span class="endpoint left"></span>
+        <span class="line-connect"></span>
+        <span class="endpoint right"></span>
+      </div>
+      <div class="my-2">
+        로그인하거나 본인의 테스트페이지에서 진행해주세요
+      </div>
+      {% if user.is_authenticated %}
+      <div class="my-2">
+        <span id="gbti-test-start" class="btn" onclick="location.href='../{{user.username}}/test'">이동하기</span>
+      </div>
+      {% else %}
+      <div class="my-2">
+        <span id="gbti-test-start" class="btn" onclick="location.href='/accounts/login/'">이동하기</span>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endif %}
 
 {% block script %}
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
