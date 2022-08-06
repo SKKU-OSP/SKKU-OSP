@@ -194,8 +194,9 @@ function ReadNotification(type, noti_id, target_id){
                 window.location = '/community/article/' + target_id;
             }
             if(type == 'team_apply'){
-                
+
             }
+            $('#noti-'+noti_id).addClass('read');
         }
         else{
             alert(data['message']);
