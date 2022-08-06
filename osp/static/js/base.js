@@ -182,3 +182,23 @@ $().ready(function () {
         msgModalOpen();
     })
 });
+
+function ReadNotification(type, noti_id, target_id){
+    console.log(type, noti_id, target_id)
+    $.ajax({
+        url: '/message/noti-read/' + noti_id,
+        dataType: 'JSON',
+    }).done(function(data) {
+        if(data['status'] == 'success'){
+            if(type == 'comment' || type == 'articlelike'){
+                window.location = '/community/article/' + target_id;
+            }
+            if(type == 'team_apply'){
+                
+            }
+        }
+        else{
+            alert(data['message']);
+        }
+    })
+}

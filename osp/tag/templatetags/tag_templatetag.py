@@ -116,6 +116,7 @@ def get_notifications(user):
         return None
 
     msgs = Message.objects.filter(sender__isnull=True, receiver__user=user)
+    new_msg = len(msgs.filter(receiver_read=False)) > 0
     for msg in msgs:
         try:
             tmp = json.loads(msg.body)
@@ -132,7 +133,7 @@ def get_notifications(user):
             tmp = msg.body
             msg.body={"body":tmp}
 
-    return {'new': True, 'list': msgs}
+    return {'new': new_msg, 'list': msgs}
 
 @register.simple_tag
 def is_article_thumb_up(article, user):
