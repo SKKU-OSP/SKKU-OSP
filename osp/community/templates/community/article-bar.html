@@ -53,15 +53,15 @@
             <div class="d-flex justify-content-between">
                 <div class="article-meta-stat color-b d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-                    <div>{{article.like_cnt}}</div>
+                    <div>{{article|article_like}}</div>
                 </div>
                 <div class="article-meta-stat color-b d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
-                    <div>{{article.comment_cnt}}</div>
+                    <div>{{article|article_comment}}</div>
                 </div>
                 <div class="article-meta-stat color-b d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
-                    {{article.scrap_cnt}}
+                    {{article|article_comment}}
                 </div>
                 <div class="article-meta-stat color-b d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">visibility</div>

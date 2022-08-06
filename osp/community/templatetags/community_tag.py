@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 from user.models import Account, User
 from team.models import TeamMember, Team
-from community.models import ArticleComment, Article, ArticleScrap, Board
+from community.models import ArticleComment, Article, ArticleLike, ArticleScrap, Board
 from datetime import datetime, timedelta, timezone
 
 register = template.Library()
@@ -24,25 +24,16 @@ def time_before(date):
     return repr_string
 
 @register.filter
-def user_article(user_model):
-    if not user_model.is_authenticated:
-        return '로그인 필요'
-    account = Account.objects.get(user=user_model)
-    return len(Article.objects.filter(writer=account))
+def article_like(article):
+    return len(ArticleLike.objects.filter(article=article))
 
 @register.filter
-def user_comment(user_model):
-    if not user_model.is_authenticated:
-        return '로그인 필요'
-    account = Account.objects.get(user=user_model)
-    return len(ArticleComment.objects.filter(writer=account))
+def article_comment(article):
+    return len(ArticleComment.objects.filter(article=article))
 
 @register.filter
-def user_scrap(user_model):
-    if not user_model.is_authenticated:
-        return '로그인 필요'
-    account = Account.objects.get(user=user_model)
-    return len(ArticleScrap.objects.filter(account=account))
+def article_scrap(article):
+    return len(ArticleScrap.objects.filter(article=article))
 
 @register.filter
 def anonymous_checked(a_writer):

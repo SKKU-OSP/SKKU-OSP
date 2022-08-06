@@ -498,3 +498,16 @@ def article_scrap(request):
         return JsonResponse({'status': 'success', 'result': created})
     except DatabaseError:
         return JsonResponse({'status':'false'})
+
+@login_required
+def my_activity(request):
+    account = Account.objects.get(user=request.user)
+    article = Article.objects.filter(writer=account)
+    scrap = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True))
+    comment = ArticleComment.objects.filter(writer=account)
+    context = {
+        'write_article': article,
+        'scrap_article': scrap,
+        'comment_list': comment
+    }
+    return render(request, 'community/activity.html', context)

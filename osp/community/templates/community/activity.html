@@ -1,0 +1,102 @@
+{% extends 'main.html' %}
+
+{% load static %}
+{% block content %}
+<div class="container my-4">
+  <div id="community-container" class="row">
+    {% include "community/sidebar.html" with board=board %}
+    <div class="col-md-9 col-12">
+      <div class="row">
+        <div class="col-12">
+          <div class="mb-2 boardgroup">
+            <div class="accordion" id="accordion-article">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <div class="accordion-header-inner">
+                    <div class="">
+                      내가 작성한 글
+                    </div>
+                    <div class="accordion-button" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapse-article" aria-expanded="true" aria-controls="collapse-article">
+                    </div>
+                  </div>
+                </h2>
+                <div id="collapse-article" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                  data-bs-parent="#accordion-article">
+                  <div>
+                    {% include "community/article-bar.html" with article_list=write_article bartype='compact' board=board %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="mb-2 boardgroup">
+            <div class="accordion" id="accordion-scrap">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <div class="accordion-header-inner">
+                    <div class="">
+                      내가 스크랩한 글
+                    </div>
+                    <div class="accordion-button" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapse-scrap" aria-expanded="true" aria-controls="collapse-scrap">
+                    </div>
+                  </div>
+                </h2>
+                <div id="collapse-scrap" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                  data-bs-parent="#accordion-scrap">
+                  <div>
+                    {% include "community/article-bar.html" with article_list=scrap_article bartype='compact' board=board %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="mb-2 boardgroup">
+            <div class="accordion" id="accordion-comment">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <div class="accordion-header-inner">
+                    <div class="">
+                      내가 작성한 댓글
+                    </div>
+                    <div class="accordion-button" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapse-comment" aria-expanded="true" aria-controls="collapse-comment">
+                    </div>
+                  </div>
+                </h2>
+                <div id="collapse-comment" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                  data-bs-parent="#accordion-comment">
+                  <div>
+
+                    {% for comment in comment_list %}
+                    <div class="article-bar">
+                      <div class="d-flex">
+                        <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' comment.article.id %}'">
+                          <div class="article-bar-title my-1">
+                            {{comment.body}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block script %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
+{% endblock script %}
