@@ -4,17 +4,21 @@
 <div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         <div id="profile-image-wrap" class="m-auto">
+            {% if user.is_authenticated %}
             <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
+            {% else %}
+            <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
+            {% endif %}
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
             <div id="profile-username">
                 <a href="/user/{{user.username}}">{{user.username}}</a>
-            </div>
-            <div id="community-stat" class="d-flex">
-                <div class="mx-3"><i class="bi-pencil me-1"></i>{{user|user_article}}</div>
-                <div class="mx-3"><i class="bi-chat-left-dots me-1"></i>{{user|user_comment}}</div>
-                <div class="mx-3"><i class="bi-bookmark me-1"></i>{{user|user_scrap}}</div>
+                <a href="/community/activity">
+                    <span class="material-icons">
+                        collections_bookmark
+                    </span>
+                </a>
             </div>
             {% else %}
             {% endif %}
