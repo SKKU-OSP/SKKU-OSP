@@ -394,6 +394,7 @@
           </div>
         </div>
         <div class="col-5">
+          {% if test %}
           <div id="modalGbtiBox" class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="gbtiModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content gbti-bg">
@@ -401,100 +402,6 @@
                   <h5 id="gbtiModal" class="modal-title">개발자 유형</h5>
                   <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
-                {% if test == None %}
-                <div class="container">
-                  <section id ="main"> 
-                    <div class="board mx-0 mt-5">
-                      <div class="my-3">
-                        <h3>개발자 유형 검사</h3>
-                      </div>
-                      <div class="d-flex justify-content-center">
-                        <span class="endpoint left"></span>
-                        <span class="line-connect"></span>
-                        <span class="endpoint right"></span>
-                      </div>
-                      <div class="my-2">
-                        위 검사는 개발자 성향 지표를 자가 진단을 통해 분석합니다<br>
-                        과학적인 조사와 통계를 기반으로 하지 않습니다<br>
-                        결과는 추천 시스템과 무관하니 참고용으로 즐겨주시길 바랍니다
-                      </div>
-                      <div class="my-2">
-                        <span id="gbti-test-start" class="btn">시작하기</span>
-                      </div>
-                    </div>
-                  </section>
-                  <section id ="qna" class="m-0">
-                    <div class="qbox my-5 py-3"></div>
-                    <div class="abox"></div>
-                    <div class="progress mt-5" style="height: 10px;">
-                      <div class="progress-bar" role="progressbar" style="width:50%; background: #002743; border-radius: 10px;" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                  </section>
-                  <section id="result" class="mx-auto mt-5 none">
-                    <h3>개발자 유형 검사 결과</h3>
-                    <div class="d-flex justify-content-center">
-                      <span class="endpoint left"></span>
-                      <span class="line-connect"></span>
-                      <span class="endpoint right"></span>
-                    </div>
-                    <div id="gbti-id-card" class="modal-gbti-card">
-                      <p class="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
-                      <div class="d-flex justify-content-center">
-                        <div class="gbti-content d-flex justify-content-center p-sm">
-                          <div id="resultImg" class="gbti-img">
-                          </div>
-                        </div>
-                        <div class="gbti-content d-flex flex-column p-sm">
-                          <p id="descEng" class="text-center text-label mb-3"></p>
-                          <h4 id="typeEng" class="text-center"></h4>
-                          <h4 id="typeKr" class="text-center"></h4>
-                          <div class="d-flex justify-content-between text-label">
-                            <span>Steady</span>
-                            <span>Fluid</span>
-                          </div>
-                          <div id="type-d-bar" class="progress test-result-bar">
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                          <div class="d-flex justify-content-between text-label">
-                            <span>CoolHead</span>
-                            <span>WarmHeart</span>
-                          </div>
-                          <div id="type-c-bar" class="progress test-result-bar">
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                          <div class="d-flex justify-content-between text-label">
-                            <span>Creative</span>
-                            <span>Efficient</span>
-                          </div>
-                          <div id="type-b-bar" class="progress test-result-bar">
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                          <div class="d-flex justify-content-between text-label">
-                            <span>MultiPlay</span>
-                            <span>SinglePlay</span>
-                          </div>
-                          <div id="type-a-bar" class="progress test-result-bar">
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
-                    </div>
-                  </section>
-                  <div class="d-flex justify-content-end btn-gbti-group">
-                    <button id="btn-save-id-card" class="btn-gbti pb-active none">ID CARD 저장</button>
-                    <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3 none">다시 검사하기</button>
-                  </div>
-                </div>
-                {%else %}
                 <h4 class="text-center mt-3">개발자 유형 검사 결과</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
@@ -555,9 +462,8 @@
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
-                  <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3">다시 검사하기</button>
+                  <button class="btn-gbti pb-inactive ms-3" onclick="location.href='./test'">다시 검사하기</button>
                 </div>
-                {% endif %}
                 <h4 class="text-center mt-3">다른 유형과의 조화</h4>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
@@ -661,11 +567,18 @@
               </div>
             </div>
           </div>
+          {% endif %}
           <div class="card h-100">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">
                 개발자 성향
-                <i id="icon-gbti" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+                {% if test %}
+                <i id="icon-devtype" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+                {% else %}
+                <a href="./test">
+                  <i id="icon-devtype" class="bi-box-arrow-up-right evt-icon" title="테스트 페이지로 이동"></i>
+                </a>
+                {% endif %}
               </h5>
               <div class="gbti-content p-lg">
                 <div class="gbti-card">

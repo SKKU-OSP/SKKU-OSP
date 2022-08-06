@@ -18,9 +18,9 @@
 
 .fadeIn{
     animation: fadeIn;
-    animation-duration: 0.3s;
+    animation-duration: 0.4s;
 }
 .fadeOut{
     animation: fadeOut;
-    animation-duration: 0.3s;
+    animation-duration: 0.4s;
 }
