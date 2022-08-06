@@ -304,8 +304,6 @@ class ProfileView(TemplateView):
 
         try:
             devtype_data = DevType.objects.get(account=account)
-            print("gbti_data", devtype_data.typeA, devtype_data.typeB,devtype_data.typeC, devtype_data.typeD)
-
             gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
             gbti_data.update(getGBTI(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
@@ -323,7 +321,6 @@ class ProfileView(TemplateView):
             test_data["typeCr"] = get_right_len(test_data["typeC"])
             test_data["typeDl"] = get_left_len(test_data["typeD"])
             test_data["typeDr"] = get_right_len(test_data["typeD"])
-            print("length test_data", test_data)
             test_data.update(getGBTI(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
             print("total test_data", test_data)
         except Exception as e:

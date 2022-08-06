@@ -139,20 +139,9 @@ window.onload = function () {
       }
       setResult();
     }, 1000);
-    function getProgressLength(factor, reverse=false){
-      let result = []
-      let val = factor
-      if(reverse) val = -factor;
-      if(val < 0){
-        result.push(50+val/2);
-        result.push(-val/2);
-        result.push(50);
-      }else{
-        result.push(50);
-        result.push(val/2);
-        result.push(50-val/2);
-      }
-      return result;
+    
+    function getProgressLength(factor){
+      return [(100 - factor)/2 - 5, 10, (100 + factor)/2 + (100 + factor)%2 - 5];
     }
   }
   function addA(aTxt,qIdx,idx){
