@@ -58,23 +58,19 @@ $().ready(function () {
       }).done(function (data) {
         $('#ApplyTeamModal').addClass('ready').html(data)
         $('#ApplyTeamModal').modal('show');
-        $('.bi-caret-down-fill').click(function(){
-          if(this.style.transform==''){
+        $('.bi-caret-down-fill').click(function () {
+          if (this.style.transform == '') {
             this.style.transform = 'rotate(180deg)';
-          }
-          else{
+          } else {
             this.style.transform = '';
           }
-          var tr_id = '#msg-id-'+this.attributes.val.value;
-           if($(tr_id).css('display') === 'none')
-            {
-                $(tr_id).removeClass("d-none");
-            }
-            else
-            {
-              $(tr_id).addClass("d-none");
+          var tr_id = '#msg-id-' + this.attributes.val.value;
+          if ($(tr_id).css('display') === 'none') {
+            $(tr_id).removeClass("d-none");
+          } else {
+            $(tr_id).addClass("d-none");
 
-            }
+          }
         });
       })
     } else {
@@ -82,3 +78,94 @@ $().ready(function () {
     }
   });
 });
+
+function ArticleThumbUp(obj, article_id, user_id) {
+  if (user_id == -1) {
+    alert("로그인 후 이용해주세요.");
+    return;
+  }
+  ajax_form_data = new FormData();
+  ajax_form_data.append('article_id', article_id);
+  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+  $.ajax({
+    type: "POST",
+    url: "/community/api/article/like/",
+    data: ajax_form_data,
+    dataType: 'json',
+    processData: false,
+    contentType: false,
+
+    success: function (data) {
+      if (data['status'] == 'success') {
+        $(obj).toggleClass('material-icons-outlined');
+        $(obj).toggleClass('material-icons');
+      }
+    },
+  });
+}
+
+function ArticleScrap(obj, article_id, user_id) {
+  if (user_id == -1) {
+    alert("로그인 후 이용해주세요.");
+    return;
+  }
+  ajax_form_data = new FormData();
+  ajax_form_data.append('article_id', article_id);
+  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+  $.ajax({
+    type: "POST",
+    url: "/community/api/article/scrap/",
+    data: ajax_form_data,
+    dataType: 'json',
+    processData: false,
+    contentType: false,
+
+    success: function (data) {
+      if (data['status'] == 'success') {
+        if (data['result']) {
+          $('#article-bookmark').html('bookmark');
+        } else {
+          $('#article-bookmark').html('bookmark_border');
+        }
+      }
+    },
+  });
+}
+
+function apply_result(team_id, username, is_okay) {
+
+  var status = is_okay ? "수락" : "거절";
+
+  if (!confirm(username + ": " + status + "하시겠습니까?")) {
+    return;
+  }
+
+  ajax_form_data = new FormData();
+  ajax_form_data.append('team_id', team_id);
+  ajax_form_data.append('username', username);
+  ajax_form_data.append('is_okay', is_okay);
+  ajax_form_data.append('direction', 'TO_TEAM');
+  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+
+  $.ajax({
+    type: "POST",
+    url: "/team/api/team-invite-update/",
+    data: ajax_form_data,
+    dataType: 'json',
+    processData: false,
+    contentType: false,
+
+    success: function (data) {
+      if (data['status'] == "success") {
+        console.log(data)
+        $('#AddTeamModal').html(data['data']);
+      } else {
+        alert(data['message']);
+      }
+    },
+    error: function (data) {
+      alert('Error Occured');
+    }
+  });
+}
