@@ -664,7 +664,7 @@ window.onload = function () {
   setVisualModal();
   setPortfolioModal();
   setGbtiModal();
-  $("#icon-gbti").on("click", ()=>{
+  $("#icon-devtype").on("click", ()=>{
     $('#modalGbtiBox').modal('show');
   });
   $("#closeGbtiModalIcon").on("click", ()=>{

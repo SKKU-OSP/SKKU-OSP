@@ -1,4 +1,3 @@
-from typing import Type
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
@@ -10,20 +9,20 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
-from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
+from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 from osp.settings import BASE_DIR
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
 from user.templatetags.gbti import getGBTI
+from user import update_act
 
-import time
+import time, datetime
 import json
 import os
 import math
 import pandas as pd
-from user import update_act
 
 
 # Create your views here.
@@ -616,3 +615,17 @@ def save_test_result(request, username):
             context = {"status": 400}
         
         return JsonResponse(context)
+    
+class ProfileType(TemplateView):
+    template_name = 'profile/profile-type.html'
+    
+    def get_context_data(self, *args, **kwargs):
+        
+        start = time.time()
+        context = super().get_context_data(**kwargs)
+        user = User.objects.get(username=context["username"])
+        context["username"] = user
+        context["end_year"] = datetime.datetime.now().date().today().year
+        print("\nProfileTypeView time :", time.time() - start)
+        
+        return context
