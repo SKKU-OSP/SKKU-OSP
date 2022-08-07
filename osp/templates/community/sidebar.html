@@ -8,9 +8,11 @@
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
-            <div id="profile-username">{{user.username}}</div>
+            <div id="profile-username">
+                <a href="/user/{{user.username}}">{{user.username}}</a>
+            </div>
             <div id="community-stat" class="d-flex">
-                <div class="mx-3"><i class="bi-card-text me-1"></i>{{user|user_article}}</div>
+                <div class="mx-3"><i class="bi-pencil me-1"></i>{{user|user_article}}</div>
                 <div class="mx-3"><i class="bi-chat-left-dots me-1"></i>{{user|user_comment}}</div>
                 <div class="mx-3"><i class="bi-bookmark me-1"></i>{{user|user_scrap}}</div>
             </div>
@@ -56,6 +58,8 @@
 
     {% if user.is_authenticated %}
     <div class="modal fade" id="AddTeamModal">
+    </div>
+    <div class="modal fade" id="ApplyTeamModal">
     </div>
     <script src="{% static 'js/community_sidebar.js' %}"></script>
     {% endif %}
