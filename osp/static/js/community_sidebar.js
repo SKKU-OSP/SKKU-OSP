@@ -50,14 +50,14 @@ $().ready(function () {
   });
 
   $('#team-apply-list').click(function () {
-    if (!$('#AddTeamModal').hasClass('ready')) {
+    if (!$('#ApplyTeamModal').hasClass('ready')) {
       $.ajax({
         url: "/team/api/team-apply-list",
         type: "GET",
         dataType: 'HTML'
       }).done(function (data) {
-        $('#AddTeamModal').addClass('ready').html(data)
-        $('#AddTeamModal').modal('show');
+        $('#ApplyTeamModal').addClass('ready').html(data)
+        $('#ApplyTeamModal').modal('show');
         $('.bi-caret-down-fill').click(function(){
           if(this.style.transform==''){
             this.style.transform = 'rotate(180deg)';
@@ -78,7 +78,7 @@ $().ready(function () {
         });
       })
     } else {
-      $('#AddTeamModal').modal('show');
+      $('#ApplyTeamModal').modal('show');
     }
   });
 });

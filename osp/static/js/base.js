@@ -268,5 +268,5 @@ function msgModalOpen(selected_oppo = 0) {
 $().ready(function () {
     $('#message').click(function () {
         msgModalOpen();
-    })
+    });
 });

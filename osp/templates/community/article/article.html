@@ -93,12 +93,12 @@
             });
             });
             {% endif %}
-        function setToDateEnd(){
-            $("#PeriodPickerEndInput").val(new Date());
-        }
+
         }
     });
-
+    function setToDateEnd(){
+        $("#PeriodPickerEndInput").val(new Date());
+    }
     function edit_submit(event){
         console.log('TESt');
         event.preventDefault();
