@@ -140,9 +140,13 @@ a.nav-link {
 }
 
 /* Canvas */
-#modalBox{
-  padding: 0 !important;
-  overflow: hidden;
+.modal-light-header{
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--bs-modal-header-border-color);
 }
 #modal-visualization{
   padding: 0 !important;
@@ -151,9 +155,6 @@ a.nav-link {
 .modal-content{
   overflow-x: hidden;
   overflow-y: auto;
-}
-.modal-body{
-  position: static; 
 }
 .modal-body > .row{
   padding: 1rem 3rem;
@@ -335,7 +336,7 @@ a.nav-link {
   cursor: pointer;
   display: inline;
   text-indent: 0;
-  color: white;
+  color: black;
   font-size: 20px;
 }
 .modal-footer{
