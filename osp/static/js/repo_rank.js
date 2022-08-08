@@ -1,13 +1,22 @@
 $(document).ready(function () {
     var table = $('#scoreTable').DataTable({
-        dom: 'Pfrtip',
-        searchPanes: {
-            layout: 'columns-1',
-            viewTotal: true,
-            orderable: false,
-            columns: [7],
-            initCollapsed: true,
+        dom: 'Bfrtp',
+        language: {
+            searchPanes: {
+                clearMessage: '초기화',
+                collapse: {0: '&#61263', _: '&#61263'}
+            }
         },
+        buttons: [{
+            extend: 'searchPanes',
+            config: {
+                layout: 'columns-1',
+                viewTotal: true,
+                orderable: false,
+                columns: [7],
+                initCollapsed: true,
+            },
+        }],
         columnDefs: [
             {
                 orderable: false, 
@@ -57,6 +66,10 @@ $(document).ready(function () {
     });
     $('.dtsp-titleRow').remove();
     $('.dtsp-panesContainer').insertAfter('#scoreTable_filter');
+    $('#scoreTable_filter > label').contents().filter(function(){
+        return this.nodeType === 3;
+    }).remove();
+    $('#scoreTable_filter > label > input').attr('placeholder', 'Search')
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
