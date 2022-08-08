@@ -702,4 +702,37 @@ window.onload = function () {
     }
     if(mt<0 || document.documentElement.scrollTop == 0) sideCol.style.marginTop = '0px';
   });
+  // get repo list
+  load_repo_data({"github_id":github_id});
+  function load_repo_data(data={}){
+    if(data.hasOwnProperty("github_id")){ 
+      $.ajax({
+        type:"POST",
+        url: 'repo-overview',
+        data:JSON.stringify(data),
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        success:function(res){
+            render_repo_list(res["repo"])
+        },
+        error : function(data){ 
+          console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+        }
+      });
+    }
+  }
+  function render_repo_list(repos=[]){
+    repos.forEach((repo)=>{
+      $("#recent-repos").append(
+        `<div class="card w-100 mb-2 recent_repos">
+          <div class="card-body">
+            <h6 class="card-title">${repo["repo_name"]}</h6>
+            <div style="font-size: 13px">
+              ${repo["desc"]}
+            </div>
+          </div>
+        </div>`);
+    });
+  }
 };
