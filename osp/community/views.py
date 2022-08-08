@@ -493,7 +493,8 @@ def article_like(request):
 
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success'})
+        like_cnt = len(ArticleLike.objects.filter(article=article))
+        return JsonResponse({'status': 'success', 'created': created, 'result': like_cnt})
     except:
         return JsonResponse({'status':'false'})
 
@@ -506,7 +507,8 @@ def article_scrap(request):
         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success', 'result': created})
+        scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+        return JsonResponse({'status': 'success', 'created': created, 'result': scrap_cnt})
     except DatabaseError:
         return JsonResponse({'status':'false'})
 
@@ -524,7 +526,7 @@ def my_activity(request):
     return render(request, 'community/activity.html', context)
 
 
-def article_like(request):
+def comment_like(request):
     try:
         comment_id = request.POST.get('comment_id')
         comment = ArticleComment.objects.get(id=comment_id)
