@@ -455,7 +455,7 @@
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
-                  {% if user.is_authenticated and user == username%}
+                  {% if user.is_authenticated and user.username == username%}
                   <button class="btn-gbti pb-inactive ms-3" onclick="location.href='./test'">다시 검사하기</button>
                   {% endif %}
                 </div>
@@ -510,51 +510,15 @@
                   <span class="endpoint right"></span>
                 </div>
                 <div class="gbti-analysis-container">
+                  {% for desc, descKR, icon in gbti.zip %}
                   <div class="gbti-analysis">
-                    {% if gbti.typeE >= 0 %}
-                    <i class="bi bi-sun-fill icon-lg" style="float: left;"></i>
+                    <i class="bi {{icon}} icon-lg" style="float: left;"></i>
                     <div class="d-flex flex-column justify-content-center">
-                      <span>Sunflower</span>
-                      <span>주로 낮에 활동합니다.</span>
+                      <span>{{desc}}</span>
+                      <span>{{descKR}}</span>
                     </div>
-                    {% else %}
-                    <i class="bi bi-moon-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Night Owl</span>
-                      <span>주로 밤에 활동합니다.</span>
-                    </div>
-                    {% endif %}
                   </div>
-                  <div class="gbti-analysis">
-                    {% if gbti.typeF >= 0 %}
-                    <i class="bi bi-grid-3x3-gap-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Frequent Commit</span>
-                      <span>커밋을 자주 합니다</span>
-                    </div>
-                    {% else %}
-                    <i class="bi bi-square icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Infrequent Commit</span>
-                      <span>커밋을 드물게 합니다</span>
-                    </div>
-                    {% endif %}
-                  </div>
-                  <div class="gbti-analysis">
-                    {% if gbti.typeG >= 0 %}
-                    <i class="bi bi-people-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Together</span>
-                      <span>함께 작업하는 편입니다</span>
-                    </div>
-                    {% else %}
-                    <i class="bi bi-person-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Independent</span>
-                      <span>혼자서 작업하는 편입니다</span>
-                    </div>
-                    {% endif %}
-                  </div>
+                  {% endfor%}
                 </div>
                 <div class="modal-footer">
                   <button id="closeGbtiModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -591,21 +555,9 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-between">
-                  {% if gbti.typeE >= 0 %}
-                  <i class="bi bi-sun-fill icon-lg"></i>
-                  {% else %}
-                  <i class="bi bi-moon-fill icon-lg"></i>
-                  {% endif %}
-                  {% if gbti.typeF >= 0 %}
-                  <i class="bi bi-grid-3x3-gap-fill icon-lg"></i>
-                  {% else %}
-                  <i class="bi bi-square icon-lg"></i>
-                  {% endif %}
-                  {% if gbti.typeG >= 0 %}
-                  <i class="bi bi-people-fill icon-lg"></i>
-                  {% else %}
-                  <i class="bi bi-person-fill icon-lg"></i>
-                  {% endif %}
+                  {% for icon in gbti.icon %}
+                  <i class="bi {{icon}} icon-lg"></i>
+                  {% endfor %}
                 </div>
               </div>
             </div>
