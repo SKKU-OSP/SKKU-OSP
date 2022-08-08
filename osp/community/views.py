@@ -77,6 +77,7 @@ def board(request, board_name, board_id):
         return render(request, 'community/board/user-board.html', context)
 
     if board.board_type == 'Recruit':
+
         active_article = Article.objects.filter(board_id=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
@@ -86,6 +87,16 @@ def board(request, board_name, board_id):
                 article.team = teamrecruitarticle.team
             else:
                 article.team = None
+
+
+        # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
+        cnt = active_article.count()
+        from itertools import chain
+        if cnt == 2:
+            active_article = list(chain(active_article, active_article))
+        elif cnt == 1:
+            active_article = list(chain(active_article, active_article)) # 2개
+            active_article = list(chain(active_article, active_article)) # 4개
 
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
@@ -311,12 +322,17 @@ def article_create(request):
 
     try:
         with transaction.atomic():
+
             account = Account.objects.get(user=request.user)
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
                                              pub_date=datetime.now(), mod_date=datetime.now(),
                                              anonymous_writer=request.POST.get('is_anonymous') == 'true',
                                              board_id_id=board.id,
                                              writer=account)
+            if request.POST.get('period_start', False):
+                article.period_start = request.POST.get('period_start')[:-1]
+                article.period_end = request.POST.get('period_end')[:-1]
+                article.save()
             tag_list = request.POST.get('tags').split(',')
             for tag_name in tag_list:
                 if tag_name:
@@ -483,9 +499,7 @@ def article_scrap(request):
         user = request.user
         article = Article.objects.get(id=article_id)
         account = Account.objects.get(user=user)
-
         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
-
         if not created:
             obj.delete()
         return JsonResponse({'status': 'success'})

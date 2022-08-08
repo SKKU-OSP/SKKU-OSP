@@ -53,6 +53,10 @@
     text-align: center;
 }
 
+#profile-username > a{
+    color: #FFFFFF;
+}
+
 #team-manage-tab{
     padding-bottom: 20px;
     gap: 10px;
@@ -117,10 +121,11 @@
 }
 
 .boardgroup-item{
-    padding: 0.5rem;
+    /* padding: 0.5rem; */
     text-align: center;
     font-style: normal;
     font-size: 15px !important;
+    border-top: 1px solid #9D9D9D;
 
     background: #FFFFFF;
     border-top: 1px solid var(--main-border-color);
@@ -128,18 +133,16 @@
 
 .boardgroup-item > a{
     color: #000000;
+    display:inline-block;
+    width: 100%;
+    height: 100%;
     font-weight: 600;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 .boardgroup-item.selected{
-    padding: 0.5rem;
-    text-align: center;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 15px !important;
-
     background: var(--main-bg-color);
-    border-top: 1px solid #9D9D9D;
 }
 
 .boardgroup-item.selected > a{
@@ -189,6 +192,11 @@
     color: #FFFFFF;
 }
 
+.accordion-button.collapsed{
+    background-color: var(--main-point-color) !important;
+    color: #FFFFFF;
+}
+
 .accordion-button::after{
     font-family: bootstrap-icons;
     background-image: none;
@@ -204,7 +212,7 @@
     background-color: var(--main-point-color) !important;
     color:white;
     margin-bottom:10px;
-    height: 210px;
+    /*height: 210px;*/
 }
 
 #team-update{
@@ -215,8 +223,11 @@
 
 #team-image-container {
     margin:25px;
+    min-height:160px;
     height:160px;
+    min-width:160px;
     width:160px;
+    padding:10px;
     background:white;
     border: 1px solid var(--main-border-color);
     border-radius:10px;
@@ -231,6 +242,10 @@
 #team-data{
     padding-top: 25px;
     padding-bottom: 25px;
+    padding-right:5px;
+}
+#team-desc{
+    padding-bottom:10px;
 }
 
 #team-name{
@@ -255,18 +270,18 @@
     width: 50%;
 }
 
-#team-member{
+.team-member{
     margin-bottom:4px;
     padding-right:4px;
 }
 
-#team-member > *{
+.team-member > *{
     color:white;
     font-weight:400;
     font-size:15px;
 }
 
-#team-member > a{
+.team-member > a{
     text-decoration: underline;
 }
 
@@ -315,6 +330,7 @@
     min-height: 10em;
     background-color: var(--main-point-color);
     margin-bottom: 1rem;
+    color:white;
 }
 
 #no-active-article{
@@ -338,6 +354,8 @@
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     border-radius: 0.8rem;
     padding: 0.8rem;
+    height: 100%;
+    margin:2px;
 }
 
 .active-article-item-team-image{
@@ -350,7 +368,11 @@
 }
 
 .active-article-item-team-desc{
-    overflow-wrap: break-word;
+    /*overflow-wrap: break-word;*/
+    /*text-overflow:ellipsis;*/
+    /*overflow: hidden;*/
+    /*white-space: nowrap;*/
+
 }
 
 #comment-group{
@@ -412,12 +434,27 @@
     color: var(--main-border-color);
 }
 
-#recruit-team-info-image > img{
+.recruit-team-info-image > img{
     width: 5em;
     height: 5em;
+    margin-right:10px;
 }
 
-#recruit-team-info-period{
+.recruit-team-info-period{
     width: 5em;
     text-align: center;
+}
+.slick-prev {
+  content: "<";
+  color: red;
+  font-size: 30px;
+    border:none;
+    background:none;
+}
+
+
+.slick-next {
+  content: ">";
+  color: red;
+  font-size: 30px;
 }

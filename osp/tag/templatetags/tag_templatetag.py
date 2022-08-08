@@ -132,7 +132,7 @@ def get_notifications(user):
             tmp = msg.body
             msg.body={"body":tmp}
 
-    return msgs
+    return {'new': True, 'list': msgs}
 
 @register.simple_tag
 def is_article_thumb_up(article, user):

@@ -2,20 +2,21 @@ function setVisualModal(){
   const start_year = 2019;
   const grass_size = 60;
   const NS = "http://www.w3.org/2000/svg";
-  let modalChartObjList = [];
   let year_intvl = end_year-start_year;
   let select_year = end_year;
   let select_month = 0;
   let chartFactor = "score_sum";
   let is_selected_month = 0;
-  let is_selected_factor = 0;
   let is_nomalization = 0;
   const palette = ["#EBEDF0","#a7e6f6","#49c8fd","#00a4ff","#0677ff"];
-  const factorLabels = ["star", "commit", "pr", "issue", "repo_cr", "repo_co"];
+  const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
   let modal_ctx = new Array(4);
   for(let i=0; i<3; i++){
     modal_ctx[i] = document.getElementById(`modal-canvas${String(i+1)}`).getContext("2d");
   }
+  let radar_chart = new Chart(modal_ctx[0]);
+  let dist_chart = new Chart(modal_ctx[1]);
+  let specific_score_chart = new Chart(modal_ctx[2]);
   let btn_year = document.getElementsByClassName("modal-btn-year");
   for (let btn of btn_year) {
     btn.addEventListener("click",function(){
@@ -45,6 +46,7 @@ function setVisualModal(){
     $(".modal-grass-tooltip").remove();
     showTooltip(select_month);
     updateFactor(factorLabels, select_month);
+    makePage(chart_data, 1);
   });
   $(".modal-factor-item").on("click", (e)=>{
     $("#modal-btnGroupDropFactor").text(e.target.innerText);
@@ -53,6 +55,7 @@ function setVisualModal(){
       chartFactor = "score_sum";
     }
     updateFactor(factorLabels, select_month);
+    makePage(chart_data, 2);
   });
   $("#modal-btn-toggle").on("click", (e)=>{
     is_nomalization = 1 - is_nomalization;
@@ -70,6 +73,7 @@ function setVisualModal(){
     if(target_yearly_contr.length>0){
       target_monthly_contr = target_yearly_contr[select_year-start_year];
       updateFactor(factorLabels, select_month);
+      makePage(chart_data, 1);
     }
   });
   const div_activity_monthly = document.getElementById("modal-activity-monthly");
@@ -84,15 +88,17 @@ function setVisualModal(){
   
   let start = new Date();
   updateMonthly(select_year);
+  makeModalSpecificScoreChart();
   let end = new Date();
   console.log("updateMonthly elapsed time", end-start);
 
   function updateMonthly(select_year){
-    
     monthly_contr = chart_data["monthly_contr"][select_year-start_year];
+    let dirty_month = Array(12).fill(0);
     for(let i=0; i<monthly_contr.length; i++){
       let total = monthly_contr[i]["total"];
       let mid = monthly_contr[i]['month']-1;
+      dirty_month[mid] = 1;
       monthly_contribution[mid] = total;
       if(total<=30){
         monthly_contribution_level[mid] = Math.ceil(total / 10);
@@ -101,12 +107,16 @@ function setVisualModal(){
         monthly_contribution_level[mid] = 4;
       }
     }
+    dirty_month.forEach((dirty, idx) =>{
+      if(!dirty) monthly_contribution_level[idx] = 0;
+    });
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
     is_selected_factor = 0;
     makeMonthGrass();
     select_month = 0;
     updateFactor(factorLabels, select_month);
+    makePage(chart_data, 0);
   }
   function clearChildElement(element){
     let child = element.lastElementChild;
@@ -118,7 +128,6 @@ function setVisualModal(){
   function updateFactor(factorLabels, month=0) { 
     if(target_yearly_contr.length > 0)
       target_monthly_contr = target_yearly_contr[select_year-start_year];
-    console.log("updateFactor", target_monthly_contr);
     if(month == 0){
       //initialize
       for(let i=0; i<factorLabels.length; i++) {
@@ -144,36 +153,22 @@ function setVisualModal(){
       let mid = -1;
       let tid = -1;
       for(let i=0; i<monthly_contr.length;i++){
-        if(month == monthly_contr[i]['month']){
-          mid = i;
-        }
+        if(month == monthly_contr[i]['month']) mid = i;
       }
       for(let i=0; i<target_monthly_contr.length;i++){
-        if(month == target_monthly_contr[i]['month']){
-          tid = i;
-        }
+        if(month == target_monthly_contr[i]['month']) tid = i;
       }
       for(let j=0; j<factorLabels.length; j++){
-        if(mid != -1){
-          factor_contribution[j] = monthly_contr[mid][factorLabels[j]];
-        }
-        else{
-          factor_contribution[j] = 0;
-        }
-        if(tid != -1){
-          target_contribution[j] = target_monthly_contr[tid][factorLabels[j]];
-        }else{
-          target_contribution[j] = 0;
-        }
+        if(mid != -1) factor_contribution[j] = monthly_contr[mid][factorLabels[j]];
+        else factor_contribution[j] = 0;
+        if(tid != -1) target_contribution[j] = target_monthly_contr[tid][factorLabels[j]];
+        else target_contribution[j] = 0;
       }
     }
     for(let i=0; i<factorLabels.length; i++){
       factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
       target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
     }
-    modalChartObjList = destroyChart(modalChartObjList, modalChartObjList.length);
-    modalChartObjList = [];
-    makePage(chart_data);
   }
   
   function getDataLevel(value, type, isMonthly=true){
@@ -200,10 +195,11 @@ function setVisualModal(){
     const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
     "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const fs = 15;
+    $("#modal-grass-title").text(select_year + "년 오픈소스 활동");
     for(let col = 1; col <= 6; col++){
       let gr = document.createElementNS(NS, "g");
-      for(let row = 1; row <=2; row++){
-        let mIdx = (col-1)*2+row-1;
+      for(let row = 0; row < 2; row++){
+        let mIdx = (col-1)*2+row;
         let rect = document.createElementNS(NS,"rect");
         let ctb = monthly_contribution[mIdx]
         let level = monthly_contribution_level[mIdx];
@@ -211,17 +207,17 @@ function setVisualModal(){
         rect.setAttributeNS(null,"month", mIdx+1);
         rect.setAttributeNS(null,"raw", ctb);
         rect.setAttributeNS(null,"focus", 0);
-        rect.setAttributeNS(null,"x", 0);
-        rect.setAttributeNS(null,"y", (grass_size+fs)*row - fs*3);
+        rect.setAttributeNS(null,"x", 1);
+        rect.setAttributeNS(null,"y", (grass_size+2.5*fs)*row+1.5*fs);
         rect.setAttributeNS(null,"width", grass_size);
         rect.setAttributeNS(null,"height", grass_size);
         rect.setAttributeNS(null,"rx", "2");
         rect.setAttributeNS(null,"ry", "2");
         rect.setAttributeNS(null,"class", "modal-ContributionMonth");
         rect.setAttributeNS(null,"data-level", level);
-        mLabel.setAttributeNS(null, "x", 0);
-        mLabel.setAttributeNS(null, "y", (grass_size+fs)*row - fs*3);
-        mLabel.setAttributeNS(null, "font-family", "verdana");
+        mLabel.setAttributeNS(null, "x", 1);
+        mLabel.setAttributeNS(null, "y", (grass_size+2.5*fs)*row+fs);
+        mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
         mLabel.setAttributeNS(null, "font-size", "15px");
         mLabel.style.strokeWidth = "0px";
         mLabel.textContent = month_label[mIdx];
@@ -251,6 +247,7 @@ function setVisualModal(){
             }
             e.target.attributes[2].value = focus;
             updateFactor(factorLabels, select_month);
+            makePage(chart_data, 1);
           });
         }
         gr.appendChild(rect);
@@ -267,7 +264,7 @@ function setVisualModal(){
     else if(label == "commit") return 1/10;
     else return 1;
   }
-  function makePage(chart_data){
+  function makePage(chart_data, render_id=0){
     let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
     let user_data = {
       "score_sum": user_data_total["total_score"],
@@ -278,7 +275,6 @@ function setVisualModal(){
     }
     user_data["star"] = chart_data["own_star"]["star"];
     let annual_data = JSON.parse(chart_data["annual_overview"])[0];
-    let score_data = chart_data["score_data"];
     let dist_data = {
       "score_sum" : chart_data["score_dist"][select_year-start_year],
       "star" : chart_data["star_dist"][select_year-start_year],
@@ -289,9 +285,14 @@ function setVisualModal(){
     }
     dist_data["num"] = chart_data["score_dist"][select_year-start_year].length;
     if(dist_data["num"] == 0) dist_data["num"] = 1;
-    
-    makeModalRadarChart(is_nomalization, select_month);
-
+    if(render_id==0){
+      makeModalRadarChart(is_nomalization, select_month);
+      makeModalDistChart(annual_data, dist_data, user_data);
+    }
+    else if(render_id == 1) makeModalRadarChart(is_nomalization, select_month);
+    else if(render_id == 2) makeModalDistChart(annual_data, dist_data, user_data);
+  }
+  function makeModalDistChart(annual_data, dist_data, user_data){
     /* Chart 2: 정규분포 확률밀도함수 */
     let mean = 0;
     let sigma = 1;
@@ -362,7 +363,8 @@ function setVisualModal(){
         drawLine.draw(ctx);
       },
     };
-    var dist_chart = new Chart(modal_ctx[1], {
+    dist_chart.destroy()
+    dist_chart = new Chart(modal_ctx[1], {
       type: 'scatter',
       data: { datasets: [{data:normal_dist_data}] },
       options:{
@@ -387,18 +389,18 @@ function setVisualModal(){
     });
     let histogram_title = String(select_year)+"년 "+chartFactor.split("_")[0].toUpperCase()+" 분포";
     $("#modal-histogram-title").text(histogram_title);
-    function newArrayRange(start, end, step=1, fix_point=0){
-      let arr = [];
-      for(let i=start; i<=end; i = i+step){
-        arr.push(i.toFixed(fix_point));
-      }
-      return arr;
+  }
+  function newArrayRange(start, end, step=1, fix_point=0){
+    let arr = [];
+    for(let i=start; i<=end; i = i+step){
+      arr.push(i.toFixed(fix_point));
     }
-    const yearLabel = newArrayRange(start_year, end_year);
-
-    modalChartObjList.push(dist_chart);
-
+    return arr;
+  }
+  function makeModalSpecificScoreChart(){
     /* Chart 3: 세부 점수 그래프 */
+    let score_data = chart_data["score_data"];
+    const yearLabel = newArrayRange(start_year, end_year);
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
     const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
@@ -419,8 +421,8 @@ function setVisualModal(){
     for(let y = 0; y <= year_intvl; y++){
       total_score_data.push(score_data[y]["total_score"]);
     }
-
-    let specific_score_chart = new Chart(modal_ctx[2], {
+    specific_score_chart.destroy();
+    specific_score_chart = new Chart(modal_ctx[2], {
       type: "bar",
       data: {labels:yearLabel, datasets:score_dataset},
       options: {
@@ -465,9 +467,7 @@ function setVisualModal(){
       },
       plugins: [ChartDataLabels],
     });
-    modalChartObjList.push(specific_score_chart);
   }
-
   function makeModalRadarChart(is_nomalization=0, month=0){
     const radar_labels = ["commits", "stars", "issues", "PRs"];
     const radar_label_keys = ["commit", "star", "issue", "pr"];
@@ -567,28 +567,17 @@ function setVisualModal(){
       });
       return (sum1 - sum2);
     })
-    console.log("radar_datasets", radar_datasets);
-
     /* Chart 1: 레이더 차트 */
-    if(modalChartObjList.length > 0){
-      modalChartObjList = destroyChart(modalChartObjList, 1);
-    }
-    let radar_chart = new Chart(modal_ctx[0], {
+    radar_chart.destroy();
+    radar_chart = new Chart(modal_ctx[0], {
         data: {
           labels: radar_labels,
           datasets: radar_datasets,
         },
         options: radarOption,
       });
-    if (modalChartObjList.length > 0) modalChartObjList[0] = radar_chart;
-    else modalChartObjList.push(radar_chart);
   }
-  function destroyChart(chart=[], size=0) {
-    for (let i = 0; i < size; i++) {
-      chart[i].destroy();
-    }
-    return chart;
-  }
+
   function showTooltip(select_month = 0){
     $(".modal-grass-tooltip").remove();
     if(select_month!=0){
@@ -602,7 +591,7 @@ function setVisualModal(){
       mLabel.setAttributeNS(null, "class", "modal-grass-tooltip");
       mLabel.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
       mLabel.setAttributeNS(null, "y", rect_y + grass_size/2);
-      mLabel.setAttributeNS(null, "font-family", "verdana");
+      mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
       mLabel.setAttributeNS(null, "font-size", "12px");
       mLabel.style.strokeWidth = "0px";
       let mBack = document.createElementNS(NS, "rect");
@@ -661,9 +650,58 @@ function setGbtiModal(){
   const main = document.querySelector('#main');
   const qna = document.querySelector('#qna');
   const result = document.querySelector('#result');
-  const selection=[];
-  const endPoint=15;
-  const factor=[0,0,0,0];
+  let selection=[];
+  let endPoint=15;
+  let factor=[0,0,0,0];
+  let P,N,T,E;
+  let descKr, descEng;
+  let resultIdx;
+
+  function setResult(){
+      P= (factor[0]>0 ? 0:1);
+      T= (factor[1]>0 ? 0:1);
+      N= (factor[2]>0 ? 0:1);
+      E= (factor[3]>0 ? 0:1); // factor 0,1 : ENTP 0000
+      
+      descKr = descList[0][P].descKr + descList[1][T].descKr + descList[2][N].descKr + descList[3][E].descKr; //한글 설명 생성
+      descEng = descList[0][P].descEng + descList[1][T].descEng + descList[2][N].descEng + descList[3][E].descEng; //영문 설명 생성
+
+      console.log(descEng);
+      console.log(descKr);
+      
+      let mbti=(E ? 'I':'E') + (N ? 'S':'N') +  (T ? 'F':'T') + (P ? 'J':'P'); //mbti 결과 string
+    
+      console.log(mbti);
+
+      for (let k=0;k<16;k++){
+          if (mbti == resultList[k].mbti) resultIdx=k;
+      }
+      console.log(resultIdx);
+      // var result0= document.querySelector('#descKr'); // 한글 설명 삽입
+      // result0.innerHTML = descKr;
+
+      var result1= document.querySelector('#descEng'); // 영문 설명 삽입
+      console.log("result1", result1);
+      result1.innerHTML = descEng;
+      
+      var result2= document.querySelector('#typeEng'); // 영문 타입명
+      console.log("result2", result2);
+      result2.innerHTML = resultList[resultIdx].typeEng;
+
+      var result3= document.querySelector('#typeKr'); // 한글 타입명
+      result3.innerHTML = resultList[resultIdx].typeKr;
+
+      var resultImg = document.createElement('img'); 
+      const imgDiv = document.querySelector('#resultImg');
+
+      var imgURL= '/static/images/'+mbti+'.png';
+      resultImg.src= imgURL;
+      result.alt=mbti;
+      imgDiv.appendChild(resultImg); //이미지 삽입
+      $("#btn-save-id-card").removeClass("none");
+      $("#gbti-test-restart").removeClass("none");
+  }
+
   function getResult(){
       qna.style.WebkitAnimation = "fadeOut 0.5s";
       qna.style.animation = "fadeOut 0.5s";
@@ -726,11 +764,32 @@ function setGbtiModal(){
               else if(qnaList[k].answer[selection[k]].factor[0]=='J') {
                   factor[0]-=qnaList[k].answer[selection[k]].val[0];
               }
-              
           }
           console.log(factor);
+          let result_progress = $(".test-result-bar");
+          for (let i=0; i<result_progress.length; i++){
+            let bars = $(result_progress[i]).children();
+            let widthList = getProgressLength(factor[i], i%2!=0);
+            for (let j=0; j<bars.length; j++){
+              bars[j].style.width = String(widthList[j]) + "%";
+            }
+          }
+          setResult();
       }, 200);
-      
+      function getProgressLength(factor, reverse=false){
+        let result = []
+        if(reverse) factor = -factor;
+        if(factor < 0){
+          result.push(50+factor/2);
+          result.push(-factor/2);
+          result.push(50);
+        }else{
+          result.push(50);
+          result.push(factor/2);
+          result.push(50-factor/2);
+        }
+        return result;
+      }
   }
   function addA(aTxt,qIdx,idx){
       
@@ -740,7 +799,7 @@ function setGbtiModal(){
       answer.classList.add('my-2');
       answer.classList.add('mx-auto');
       answer.classList.add('answerList');
-      //answer.classList.add('fadeIn');
+      answer.classList.add('fadeIn');
       abox.appendChild(answer);
       answer.innerHTML = aTxt;
 
@@ -749,16 +808,18 @@ function setGbtiModal(){
           var children = document.querySelectorAll('.answerList');
           for (let k =0; k<children.length; k++){
               children[k].disabled = true;
-              //children[k].style.WebkitAnimation = "fadeOut 0.3s";
-              //children[k].style.animation = "fadeOut 0.3s";
+
+              children[k].style.WebkitAnimation = "fadeOut 0.4s";
+              children[k].style.animation = "fadeOut 0.4s";
               
               children[k].style.display = 'none';
           }
-          /*setTimeout(()=>{
+          
+          setTimeout(()=>{
               for (let k =0; k<children.length; k++){
                   children[k].style.display = 'none';
               }
-          },100)*/
+          },200)
           if(qIdx<endPoint-1) nextQ(++qIdx);
           else {
               getResult();
@@ -771,10 +832,10 @@ function setGbtiModal(){
       var qbox = document.querySelector('.qbox');
       qbox.innerHTML = qnaList[qIdx].q;
       for (let k in qnaList[qIdx].answer){
-          addA(qnaList[qIdx].answer[k].a,qIdx,k);
+          addA(qnaList[qIdx].answer[k].a, qIdx, k);
       }
-      var status = document.querySelector('.statusBar');
-      status.style.width= (100/endPoint) * qIdx + '%';
+      var pgBar = document.querySelector('.progress-bar');
+      pgBar.style.width= (100/endPoint) * qIdx + '%';
   }
   $("#gbti-test-start").on("click", ()=>{
     begin();
@@ -783,6 +844,13 @@ function setGbtiModal(){
     begin();
   });
   function begin(){
+      selection=[];
+      endPoint=15;
+      factor=[0,0,0,0];
+      let imgDiv = $('#resultImg');
+      imgDiv.empty(); //이미지 삭제
+
+      result.style.display = "none";
       main.style.WebkitAnimation = "fadeOut 0.5s";
       main.style.animation = "fadeOut 0.5s";
       setTimeout(()=>{
