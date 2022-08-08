@@ -4,11 +4,9 @@
 <div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         <div id="profile-image-wrap" class="m-auto">
-            {% if user.is_authenticated %}
-            <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
-            {% else %}
-            <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
-            {% endif %}
+            <a href="/user/{{user}}">
+                <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
+            </a>
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
