@@ -377,6 +377,7 @@
     min-height: 10em;
     background-color: var(--main-point-color);
     margin-bottom: 1rem;
+    color:white;
 }
 
 #no-active-article{
@@ -401,6 +402,7 @@
     border-radius: 0.8rem;
     padding: 0.8rem;
     height: 100%;
+    margin:2px;
 }
 
 .active-article-item-team-image{
@@ -484,13 +486,27 @@
     color: var(--main-border-color);
 }
 
-#recruit-team-info-image > img{
+.recruit-team-info-image > img{
     width: 5em;
     height: 5em;
     margin-right:10px;
 }
 
-#recruit-team-info-period{
+.recruit-team-info-period{
     width: 5em;
     text-align: center;
+}
+.slick-prev {
+  content: "<";
+  color: red;
+  font-size: 30px;
+    border:none;
+    background:none;
+}
+
+
+.slick-next {
+  content: ">";
+  color: red;
+  font-size: 30px;
 }

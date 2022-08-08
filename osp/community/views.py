@@ -77,6 +77,7 @@ def board(request, board_name, board_id):
         return render(request, 'community/board/user-board.html', context)
 
     if board.board_type == 'Recruit':
+
         active_article = Article.objects.filter(board_id=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
@@ -86,6 +87,16 @@ def board(request, board_name, board_id):
                 article.team = teamrecruitarticle.team
             else:
                 article.team = None
+
+
+        # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
+        cnt = active_article.count()
+        from itertools import chain
+        if cnt == 2:
+            active_article = list(chain(active_article, active_article))
+        elif cnt == 1:
+            active_article = list(chain(active_article, active_article)) # 2개
+            active_article = list(chain(active_article, active_article)) # 4개
 
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
