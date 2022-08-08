@@ -537,4 +537,4 @@ def comment_like(request):
         like_cnt = len(ArticleCommentLike.objects.filter(comment=comment))
         return JsonResponse({'status': 'success', 'result': like_cnt})
     except DatabaseError as e:
-        return JsonResponse({'status':'faile', 'message': str(e)})
+        return JsonResponse({'status':'fail', 'message': str(e)})
