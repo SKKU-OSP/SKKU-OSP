@@ -1,6 +1,6 @@
 {% extends 'main.html' %}
-
 {% load static %}
+{% load community_tag %}
 {% block content %}
 <div class="container my-4">
   <div id="community-container" class="row">
@@ -74,13 +74,24 @@
                 <div id="collapse-comment" class="accordion-collapse collapse show" aria-labelledby="headingOne"
                   data-bs-parent="#accordion-comment">
                   <div>
-
                     {% for comment in comment_list %}
                     <div class="article-bar">
                       <div class="d-flex">
-                        <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' comment.article.id %}'">
+                        <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' comment.article.id %}#comment-{{comment.id}}'">
                           <div class="article-bar-title my-1">
                             {{comment.body}}
+                          </div>
+                        </div>
+                        <div class="article-meta">
+                          <div>
+                            <a href="{% url 'community:article-view' comment.article.id %}">
+                              {{comment.article.board_id.name}} - {{comment.article.title}}
+                            </a>
+                          </div>
+                          <div>{{comment.pub_date|time_before}}</div>
+                          <div class="article-meta-stat d-flex">
+                            <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+                            <div>{{comment|comment_like}}</div>
                           </div>
                         </div>
                       </div>

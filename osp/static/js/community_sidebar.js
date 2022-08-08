@@ -169,3 +169,29 @@ function apply_result(team_id, username, is_okay) {
     }
   });
 }
+
+function CommentLike(comment_id, user_id) {
+  if (user_id == -1) {
+    alert("로그인 후 이용해주세요.");
+    return;
+  }
+  ajax_form_data = new FormData();
+  ajax_form_data.append('comment_id', comment_id);
+  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+  $.ajax({
+    type: "POST",
+    url: "/community/api/comment/like/",
+    data: ajax_form_data,
+    dataType: 'json',
+    processData: false,
+    contentType: false,
+
+    success: function (data) {
+      if (data['status'] == 'success') {
+        $(`#comment-${comment_id} .comment-item-like > span`).toggleClass('material-icons-outlined');
+        $(`#comment-${comment_id} .comment-item-like > span`).toggleClass('material-icons');
+        $(`#comment-${comment_id} .comment-item-like-cnt`).html(data['result']);
+      }
+    },
+  });
+}

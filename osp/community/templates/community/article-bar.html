@@ -17,7 +17,6 @@
                 {% if board.board_type == 'Recruit' %}
                     {% is_period_end article.period_end as is_end %}
                     {% if not article.team %}
-                        -
                     {% elif not is_end %}
                         <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
                     {% else %}
@@ -49,21 +48,21 @@
                 </div>
                 {% endif %}
             </div>
-            <div class=" color-b">{{article.pub_date|time_before}}</div>
+            <div>{{article.pub_date|time_before}}</div>
             <div class="d-flex justify-content-between">
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
                     <div>{{article|article_like}}</div>
                 </div>
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
                     <div>{{article|article_comment}}</div>
                 </div>
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
                     {{article|article_comment}}
                 </div>
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
                     {{article.view_cnt}}
                 </div>
@@ -74,7 +73,7 @@
     <div class="d-flex" style="background-color: lightgray;">
         {% if article.comment %}
         <div style="width: 2%;"></div>
-        <div class="color-b">
+        <div>
             {{article.comment.body}}
         </div>
         <div class="ms-auto">
