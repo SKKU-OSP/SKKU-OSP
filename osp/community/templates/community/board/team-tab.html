@@ -1,9 +1,9 @@
 {% load static %}
 <div id="team-tab" class="d-flex" team-id="{{team.id}}">
-    <div id="team-image-container" class="col-3">
+    <div id="team-image-container" >
         <img id="team-image" src="{{ team.image.url }}" alt="team-image">
     </div>
-    <div id="team-data" class="col-9" class="d-flex flex-column">
+    <div id="team-data" class="" class="d-flex flex-column">
         <div id="team-name">
             {{ team.name }}
             {% if team_admin %}
@@ -18,16 +18,16 @@
             {% endif %}
 
         </div>
-        <div class="d-flex">
+        <div class="d-flex flex-row flex-wrap" >
             <div id="team-members">
                 <div id="team-members-title">
                     Members
                 </div>
-                <div id="team-member-list" style="overflow-y:auto;height:100px;">
-                    <div class="d-flex flex-row flex-wrap">
+                <div id="team-member-list" style="height:100px;min-width:150px;">
+                    <div class="d-flex flex-row flex-wrap" style="width:100%;min-width:150px;overflow-y:visible;overflow-x:hidden;">
                         {% for member in team_members %}
-                        <div id="team-member" style="width:45%;">
-                            <a href="{% url 'user:profile' member.member.user.username %}">{{member.member.user.username}}</a>
+                        <div class="team-member">
+                            <a href="{% url 'user:profile' member.member.user.username %}" >{{member.member.user.username}}</a>
                             {% if member.is_admin %}
                             <span class="material-icons-outlined team-admin-icon">
                                 military_tech
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div id="team-info" class="d-flex flex-column flex-wrap" style="height:120px;overflow-y:auto;overflow-x:hidden;">
+            <div id="team-info" class="d-flex flex-column flex-wrap" style="height:120px;overflow-y:auto;overflow-x:auto;">
                 <div id="team-desc">
                     {{team.description}}
                 </div>

@@ -77,6 +77,7 @@ def board(request, board_name, board_id):
         return render(request, 'community/board/user-board.html', context)
 
     if board.board_type == 'Recruit':
+
         active_article = Article.objects.filter(board_id=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
@@ -86,6 +87,16 @@ def board(request, board_name, board_id):
                 article.team = teamrecruitarticle.team
             else:
                 article.team = None
+
+
+        # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
+        cnt = active_article.count()
+        from itertools import chain
+        if cnt == 2:
+            active_article = list(chain(active_article, active_article))
+        elif cnt == 1:
+            active_article = list(chain(active_article, active_article)) # 2개
+            active_article = list(chain(active_article, active_article)) # 4개
 
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
@@ -219,9 +230,13 @@ def article_list(request, board_name, board_id):
                 article.team = None
 
         if board.board_type == 'QnA':
-            comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
-                ArticleComment.objects.filter(article=article).values('id'))\
-                .annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            # comment_by_like = ArticleCommentLike.objects.filter(
+            #     comment__in=ArticleComment.objects.filter(article=article).values_list('id', flat=True)
+            # ).annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            comment_by_like = ArticleComment.objects.filter(
+                article=article
+            ).prefetch_related('articlecommentlike_set')
+            comment_by_like = comment_by_like.annotate(like_cnt=Count('articlecommentlike')).order_by('-like_cnt')
             if len(comment_by_like):
                 article.comment = comment_by_like[0]
     if board.board_type == 'QnA':
@@ -311,12 +326,17 @@ def article_create(request):
 
     try:
         with transaction.atomic():
+
             account = Account.objects.get(user=request.user)
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
                                              pub_date=datetime.now(), mod_date=datetime.now(),
                                              anonymous_writer=request.POST.get('is_anonymous') == 'true',
                                              board_id_id=board.id,
                                              writer=account)
+            if request.POST.get('period_start', False):
+                article.period_start = request.POST.get('period_start')[:-1]
+                article.period_end = request.POST.get('period_end')[:-1]
+                article.save()
             tag_list = request.POST.get('tags').split(',')
             for tag_name in tag_list:
                 if tag_name:
@@ -473,7 +493,8 @@ def article_like(request):
 
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success'})
+        like_cnt = len(ArticleLike.objects.filter(article=article))
+        return JsonResponse({'status': 'success', 'created': created, 'result': like_cnt})
     except:
         return JsonResponse({'status':'false'})
 
@@ -483,11 +504,37 @@ def article_scrap(request):
         user = request.user
         article = Article.objects.get(id=article_id)
         account = Account.objects.get(user=user)
-
         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
-
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success'})
-    except:
+        scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+        return JsonResponse({'status': 'success', 'created': created, 'result': scrap_cnt})
+    except DatabaseError:
         return JsonResponse({'status':'false'})
+
+@login_required
+def my_activity(request):
+    account = Account.objects.get(user=request.user)
+    article = Article.objects.filter(writer=account)
+    scrap = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True))
+    comment = ArticleComment.objects.filter(writer=account)
+    context = {
+        'write_article': article,
+        'scrap_article': scrap,
+        'comment_list': comment
+    }
+    return render(request, 'community/activity.html', context)
+
+
+def comment_like(request):
+    try:
+        comment_id = request.POST.get('comment_id')
+        comment = ArticleComment.objects.get(id=comment_id)
+        account = Account.objects.get(user=request.user)
+        obj, created = ArticleCommentLike.objects.get_or_create(comment=comment,account=account)
+        if not created:
+            obj.delete()
+        like_cnt = len(ArticleCommentLike.objects.filter(comment=comment))
+        return JsonResponse({'status': 'success', 'result': like_cnt})
+    except DatabaseError as e:
+        return JsonResponse({'status':'fail', 'message': str(e)})

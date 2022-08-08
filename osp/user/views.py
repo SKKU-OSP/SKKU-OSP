@@ -49,6 +49,7 @@ class ProfileView(TemplateView):
         context['cur_repo_type'] = 'owned'
         ## owned repository
         student_info = std
+
         student_score = GitHubScoreTable.objects.filter(id=std.id).order_by('-year').first()
 
         # 최근 기여 리포지토리 목록
