@@ -79,7 +79,7 @@ $().ready(function () {
   });
 });
 
-function ArticleThumbUp(obj, article_id, user_id) {
+function ArticleThumbUp(article_id, user_id) {
   if (user_id == -1) {
     alert("로그인 후 이용해주세요.");
     return;
@@ -97,14 +97,15 @@ function ArticleThumbUp(obj, article_id, user_id) {
 
     success: function (data) {
       if (data['status'] == 'success') {
-        $(obj).toggleClass('material-icons-outlined');
-        $(obj).toggleClass('material-icons');
+        $('#article-like-btn > span').toggleClass('material-icons-outlined');
+        $('#article-like-btn > span').toggleClass('material-icons');
+        $('#article-like-cnt').html(data['result']);
       }
     },
   });
 }
 
-function ArticleScrap(obj, article_id, user_id) {
+function ArticleScrap(article_id, user_id) {
   if (user_id == -1) {
     alert("로그인 후 이용해주세요.");
     return;
@@ -122,11 +123,12 @@ function ArticleScrap(obj, article_id, user_id) {
 
     success: function (data) {
       if (data['status'] == 'success') {
-        if (data['result']) {
-          $('#article-bookmark').html('bookmark');
+        if (data['created']) {
+          $('#article-scrap-btn').html('bookmark');
         } else {
-          $('#article-bookmark').html('bookmark_border');
+          $('#article-scrap-btn').html('bookmark_border');
         }
+        $('#article-scrap-cnt').html(data['result']);
       }
     },
   });
