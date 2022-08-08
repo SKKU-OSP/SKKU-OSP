@@ -7,7 +7,7 @@ $(document).ready(function () {
         dom: 'Bfrtp',
         language: {
             searchPanes: {
-                clearMessage: 'Obliterate Selections',
+                clearMessage: '초기화',
                 collapse: {0: '&#61263', _: '&#61263'}
             }
         },
