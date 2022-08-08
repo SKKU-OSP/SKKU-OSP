@@ -15,7 +15,7 @@ from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepo
 from osp.settings import BASE_DIR
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
-from user.templatetags.gbti import getGBTI
+from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
 import time, datetime
@@ -91,13 +91,13 @@ class ProfileView(TemplateView):
             'account': context['account']
         }
         context['data'] = data
-        print("ProfileView get time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
+        print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
 
     def get_context_data(self, request, *args, **kwargs):
         
-        start = time.time()  # 시작 시간 저장
+        start = time.time()
         
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
@@ -241,6 +241,7 @@ class ProfileView(TemplateView):
         chartdata["own_star"] = own_star
         chartdata["monthly_avg"] = monthly_avg
         chartdata["username"] = github_id
+        context["star"] = own_star["star"]
         context["chart_data"] = json.dumps(chartdata)
         
         #GBTI test
@@ -261,61 +262,44 @@ class ProfileView(TemplateView):
             update_act.update_frequency()   
         committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
 
-
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
         student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
         committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
+        print(student_time_circmean)
+        print(time_sector_min)
+        gbti_data = {}
+        # 낮에 활동, 밤에 활동
+        gbti_data["typeE"] = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1 
+        # 자주 작업, 몰아서 작업
+        gbti_data["typeF"] = 1 if committer_frequency == 0 else -1 
+         # 혼자 작업, 함께작업 
+        gbti_data["typeG"] = -1 if student_major_act == 'individual' else 1
+        gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(gbti_data.values())
+        gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+        context["gbti"] = gbti_data
 
         try:
             devtype_data = DevType.objects.get(account=account)
             gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            gbti_data.update(getGBTI(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
+            gbti_data.update(get_type_test(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
             
-            def get_left_len(type_val):
-                return int((100 - type_val)/2) - 5
-            def get_right_len(type_val):
-                return int((100 + type_val)/2) + (100 + type_val)%2 - 5
+            def get_type_len(type_val):
+                return (int((100 - type_val)/2) - 5, int((100 + type_val)/2) + (100 + type_val)%2 - 5)
 
-            test_data["typeAl"] = get_left_len(test_data["typeA"])
-            test_data["typeAr"] = get_right_len(test_data["typeA"])
-            test_data["typeBl"] = get_left_len(test_data["typeB"])
-            test_data["typeBr"] = get_right_len(test_data["typeB"])
-            test_data["typeCl"] = get_left_len(test_data["typeC"])
-            test_data["typeCr"] = get_right_len(test_data["typeC"])
-            test_data["typeDl"] = get_left_len(test_data["typeD"])
-            test_data["typeDr"] = get_right_len(test_data["typeD"])
-            test_data.update(getGBTI(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
+            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
+            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
+            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
+            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
         except Exception as e:
             print("DevType get error", e)
             test_data = None
-        
-        print(student_time_circmean)
-        print(time_sector_min)
-        gbti_data = {}
-
-        if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
-            gbti_data["typeE"] = 1
-        else: # 밤에 활동
-            gbti_data["typeE"] = -1
-
-        if(committer_frequency == 0): # 자주 작업
-            gbti_data["typeF"] = 1
-
-        else: # 몰아서 작업
-            gbti_data["typeF"] = -1
-
-        if(student_major_act == 'individual'): # 혼자 작업
-            gbti_data["typeG"] = -1
-        else: # 함께 작업
-            gbti_data["typeG"] = 1
-
         context["test"] = test_data
-        context["gbti"] = gbti_data
-        context["star"] = own_star["star"]
-        print("ProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
+        
+        print("ProfileView time :", time.time() - start)
         
         return context
 
