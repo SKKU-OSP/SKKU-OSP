@@ -28,6 +28,7 @@ urlpatterns = [
 
     path('api/comment/create/', views.comment_create, name='comment-c'),
     path('api/comment/delete/', views.comment_delete, name='comment-d'),
+    path('api/comment/like/', views.article_like, name='comment-like'),
 
     # path('add/', views.TeamView.as_view(), name='Team'),
 ]

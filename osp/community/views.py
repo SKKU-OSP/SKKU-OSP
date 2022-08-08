@@ -522,3 +522,17 @@ def my_activity(request):
         'comment_list': comment
     }
     return render(request, 'community/activity.html', context)
+
+
+def article_like(request):
+    try:
+        comment_id = request.POST.get('comment_id')
+        comment = ArticleComment.objects.get(id=comment_id)
+        account = Account.objects.get(user=request.user)
+        obj, created = ArticleCommentLike.objects.get_or_create(comment=comment,account=account)
+        if not created:
+            obj.delete()
+        like_cnt = len(ArticleCommentLike.objects.filter(comment=comment))
+        return JsonResponse({'status': 'success', 'result': like_cnt})
+    except DatabaseError as e:
+        return JsonResponse({'status':'faile', 'message': str(e)})

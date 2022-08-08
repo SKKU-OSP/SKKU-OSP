@@ -1,7 +1,5 @@
 $(function () {
     $.noConflict();
-
-
     var tag_selector = new SlimSelect({
         select: '#tag-select',
         onChange: (selected_list) => {
@@ -11,9 +9,6 @@ $(function () {
             redraw();
         }
     });
-
-
-
 })
 
 $(document).ready(function(){

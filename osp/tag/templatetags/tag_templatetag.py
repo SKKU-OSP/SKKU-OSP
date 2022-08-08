@@ -3,8 +3,7 @@ from django import template
 register = template.Library()
 from django.utils.safestring import mark_safe
 from tag.models import Tag
-from team.models import TeamMember,TeamInviteMessage, Team
-from user.models import Account, AccountInterest
+from user.models import AccountInterest
 from message.models import Message
 from community.models import *
 import json
@@ -28,26 +27,8 @@ def category_tag(request):
     return mark_safe(result)
 
 @register.simple_tag
-def is_teammember(team, user):
-    if user.is_anonymous: user = None
-    account = Account.objects.filter(user=user).first()
-    if TeamMember.objects.filter(team=team,member=account):
-        return True
-    else:
-        return False
-
-
-
-
-@register.simple_tag
-def teaminvitemessage(team, user):
-    if user.is_anonymous: user = None
-    account = Account.objects.filter(user=user).first()
-    return TeamInviteMessage.objects.filter(team=team,account=account,status=0).first()
-
-@register.simple_tag
-def get_teamappliedmessage_waited(team):
-    return TeamInviteMessage.objects.filter(team=team,status=0)
+def get_account_tags(account):
+    return AccountInterest.objects.filter(account=account)
 
 @register.simple_tag
 def category_tag_domain(request):
@@ -85,31 +66,6 @@ def category_tag_language(request):
 
     return mark_safe(result)
 
-
-@register.simple_tag
-def is_teammember_admin(team, user):
-    if not user.is_anonymous:
-        tm =  TeamMember.objects.filter(team=team, member__user=user).first()
-        if tm and tm.is_admin:
-            return True
-    return False
-
-@register.simple_tag
-def apply_messages(team):
-    apply_messages = TeamInviteMessage.objects.filter(
-        team=team,
-        direction=False,
-        status=0
-    )
-    return apply_messages
-
-@register.simple_tag
-def get_admin_team(user):
-    if not user.is_anonymous:
-        team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
-        return Team.objects.filter(id__in=team_li)
-    return None
-
 @register.simple_tag
 def get_notifications(user):
     if user.is_anonymous:
@@ -134,25 +90,3 @@ def get_notifications(user):
             msg.body={"body":tmp}
 
     return {'new': new_msg, 'list': msgs}
-
-@register.simple_tag
-def is_article_thumb_up(article, user):
-    if user.is_anonymous:
-        return False
-    if ArticleLike.objects.filter(article=article, account__user=user):
-        return True
-    else:
-        return False
-
-@register.simple_tag
-def is_article_scrap(article, user):
-    if user.is_anonymous:
-        return False
-    if ArticleScrap.objects.filter(article=article, account__user=user):
-        return True
-    else:
-        return False
-#
-@register.simple_tag
-def get_account_tags(account):
-    return AccountInterest.objects.filter(account=account)
