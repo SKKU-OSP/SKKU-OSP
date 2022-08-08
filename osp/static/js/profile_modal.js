@@ -618,6 +618,9 @@ function setPortfolioModal(){
   icon_portfolio_modal.addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal('show');
   });
+  document.getElementById("closeChartModalBtn").addEventListener("click", ()=>{
+    $('#modalBox').modal("hide");
+  });
   document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
   });
