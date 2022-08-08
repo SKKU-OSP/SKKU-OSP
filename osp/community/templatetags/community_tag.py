@@ -111,3 +111,11 @@ def team_options(user):
     except:
         result = ''
     return mark_safe(result)
+
+@register.simple_tag()
+def is_period_end(date):
+    if isinstance(date, datetime):
+        return date < datetime.now()
+    else:
+        return True
+

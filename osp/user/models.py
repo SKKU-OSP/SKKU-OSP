@@ -268,22 +268,15 @@ class DevType(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Account, models.CASCADE)
     # GBTI
-    typeA1 = models.IntegerField()
-    typeA2 = models.IntegerField()
-    typeB1 = models.IntegerField()
-    typeB2 = models.IntegerField()
-    typeC1 = models.IntegerField()
-    typeC2 = models.IntegerField()
-    typeD1 = models.IntegerField()
-    typeD2 = models.IntegerField()
+    typeA = models.IntegerField()
+    typeB = models.IntegerField()
+    typeC = models.IntegerField()
+    typeD = models.IntegerField()
     # Analysis Type
-    typeE1 = models.IntegerField()
-    typeE2 = models.IntegerField()
-    typeG1 = models.IntegerField()
-    typeG2 = models.IntegerField()
-    typeF1 = models.IntegerField()
-    typeF2 = models.IntegerField()
-    
+    typeE = models.IntegerField()
+    typeF = models.IntegerField()
+    typeG = models.IntegerField()
+
 class GitHubScoreTable(models.Model):
     a_id = models.AutoField(primary_key=True)
     id = models.IntegerField()

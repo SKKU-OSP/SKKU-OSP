@@ -1,6 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 @import url("/static/css/color.css");
-
 @media (min-width: 768px) {
   .col-my-p20 {
     flex: 0 0 auto;
@@ -54,10 +52,6 @@ body{
   min-height: 100px;
 }
 
-h3, h4, h5{
-  font-family: "Noto Sans KR", sans-serif;
-}
-
 h5.modal-title {
   font: 16px;
   font-weight: 500;
@@ -66,7 +60,6 @@ h5.modal-title {
 
 /* Bootstrap Change */
 .card {
-  font-family: "Roboto", sans-serif;
   box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
   border-radius: 0;
 }
@@ -187,7 +180,6 @@ a.nav-link {
 #pills-overview.active{
   display: flex;
   flex-direction: column;
-  justify-content: center;
   flex: 1 1 50%;
 }
 .grass{
@@ -197,8 +189,8 @@ a.nav-link {
 }
 .grass-color{
   display: block;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border: 1px solid var(--profile-nav-border);
   margin: 0 2px;
 }
@@ -220,9 +212,23 @@ a.nav-link {
 .grass-group{
   display: flex;
   justify-content: end;
-  font-size: 12px;
+  font-size: 16px;
   align-items: center;
-  margin-top: 5px;
+}
+@media (max-width: 992px) {
+  .grass-color{
+    display: block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--profile-nav-border);
+    margin: 0 2px;
+  }
+  .grass-group{
+    display: flex;
+    justify-content: end;
+    font-size: 12px;
+    align-items: center;
+  }
 }
 .horizontal-menu{
   display: flex;
@@ -328,9 +334,6 @@ a.nav-link {
   text-indent: 0;
   color: white;
   font-size: 20px;
-}
-.modal-content{
-  font-family: "Roboto", sans-serif;
 }
 .modal-footer{
   padding: 0 calc(var(--bs-modal-padding) - var(--bs-modal-footer-gap) * .5);;
@@ -439,6 +442,7 @@ span.row-txt, a.row-txt{
   justify-content: space-between;
 }
 .row-contr{
+  font-size: 14px;
   flex-basis: content;
   flex-grow: 1;
   display: flex;
@@ -521,7 +525,6 @@ span.row-raw{
 }
 .gbti-text{
   font-size: 18px;
-  font-family: "Noto Sans KR", sans-serif;
   font-weight: 500;
   margin-bottom: 0.2rem;
 }
@@ -569,12 +572,11 @@ span.row-raw{
 }
 .text-label{
   font-size: 12px;
-  font-family: "Roboto", sans-serif;
   margin: 0;
   font-weight: 600;
 }
 .gbti-bg{
-  background-color: var(--gbti-bg-color);
+  background-color: var(--developer-bg-color);
 }
 .btn-gbti{
   padding: 10px 20px;
@@ -602,7 +604,6 @@ span.row-raw{
 }
 .gbti-analysis span{
   font-size: 18px;
-  font-family: "Noto Sans KR", sans-serif;
   font-weight: 500;
 }
 .gbti-analysis-container{

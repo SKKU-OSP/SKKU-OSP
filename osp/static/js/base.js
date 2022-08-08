@@ -23,7 +23,7 @@ function ArticleThumbUp(obj, article_id, user_id) {
     });
 }
 
-function ArticleScrap(article_id, user_id) {
+function ArticleScrap(obj, article_id, user_id) {
     if (user_id == -1) {
         alert("로그인 후 이용해주세요.");
         return;
@@ -41,8 +41,8 @@ function ArticleScrap(article_id, user_id) {
 
         success: function (data) {
             if (data['status'] == 'success') {
-                $(obj).toggleClass('material-icons-outlined');
-                $(obj).toggleClass('material-icons');
+                $('#bookmark_border').toggleClass("d-none");
+                $('#bookmark_filled').toggleClass('d-none');
             }
         },
     });
@@ -268,5 +268,5 @@ function msgModalOpen(selected_oppo = 0) {
 $().ready(function () {
     $('#message').click(function () {
         msgModalOpen();
-    })
+    });
 });

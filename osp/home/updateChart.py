@@ -75,7 +75,9 @@ def update_chart(mask):
     if mask & 32:
         print("exec sql repository")
         try:
+            delete_repo_sql = """DELETE FROM home_repository"""
             insert_repo_sql = """insert into home_repository (year, owner, repo_num) VALUES (%s, %s, %s)"""
+            cursor.execute(delete_repo_sql)
             for i in range(len(studentRepo)):
                 for key in studentRepo[i]:
                     cursor.execute(insert_repo_sql, (endYear-i, key, studentRepo[i][key]))

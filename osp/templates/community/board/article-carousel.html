@@ -1,65 +1,58 @@
+{% load static %}
+ {% if active_article|length != 0 %}
 <div id="active-article">
-  {% if active_article|length == 0 %}
-  <div id="no-active-article">
-    모집중 게시물이 없습니다.
-  </div>
-  {% else %}
-  <div class="carousel slide" data-bs-ride="carousel" id="active-article-list">
-    <div class="carousel-inner" role="listbox">
-      {% for article in active_article %}
-      {% if forloop.first %}
-      <div class="carousel-item active">
-      {% else %}
-      <div class="carousel-item">
-      {% endif %}
-        <div class="col-4 p-2">
-          <div class="active-article-item" onclick="location.href='{% url 'community:article-view' article.id %}'" >
-            <div class="team-profile d-flex">
-              <img src="{{article.team.image.url}}" alt="profile" class="active-article-item-team-image">
-              <div>
-                <div class="active-article-item-team-name">
-                  {{article.team.name}}
+        <div class="slick-carousel" id="active-article-list" style="display:flex!important;">
+            {% for article in active_article %}
+                <div class="" style="width:30%;">
+                    <div style="height:140px;"  class="d-flex flex-column active-article-item" onclick="location.href='{% url 'community:article-view' article.id %}'" >
+                        <div  class="d-flex flex-row recruit-team-info">
+                            <div class="recruit-team-info-image">
+                                <img src="{{article.team.image.url}}" alt="team-image">
+                            </div>
+                            <div class="d-flex flex-column">
+                                <div class="active-article-item-team-name fw-bold color-b">{{ article.team.name }} </div>
+                                <br>
+                                <div class="active-article-item-team-desc color-b " style="font-size:10px;" >{{ article.team.description }}</div>
+                            </div>
+                        </div>
+                        <div >
+                          {% for tag in article.tags %}
+                          <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
+                          {% endfor %}
+                        </div>
+                    </div>
                 </div>
-                <div class="active-article-item-team-desc">
-                  {{article.team.description}}
-                </div>
-              </div>
-            </div>
-            <div class="fw-bold">{{article.title}}</div>
-            <div>
-              {% for tag in article.tags %}
-              <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
-              {% endfor %}
-            </div>
-          </div>
+            {% endfor %}
+
+
         </div>
-      </div>
-      {% endfor %}
-    </div>
-    <a class="carousel-control-prev bg-transparent w-aut" href="#active-article-list" role="button" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    </a>
-    <a class="carousel-control-next bg-transparent w-aut" href="#active-article-list" role="button" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    </a>
-  </div>
-  {% endif %}
+
+{#      <div id="no-active-article" style="color:white;">#}
+{#        모집중 게시물이 없습니다.#}
+{#      </div>#}
+{#      {% else %}#}
+{#      <div class="slick-carousel" id="active-article-list">#}
+{#          {% for article in active_article %}#}
+{#            <div class="carousel-item" style="width:30%;min-width:300px;">#}
+{#              <div style="height:140px;"  class="d-flex flex-column active-article-item w-100" onclick="location.href='{% url 'community:article-view' article.id %}'" >#}
+{#                    <div id="recruit-team-info" class="d-flex flex-row border w-100">#}
+{#                        <div id="recruit-team-info-image">#}
+{#                            <img src="{{article.team.image.url}}" alt="team-image">#}
+{#                        </div>#}
+{#                        <div class="d-flex flex-column border w-100" style="flex:1;max-width:100%;">#}
+{#                            <div class="active-article-item-team-name fw-bold w-100">{{ article.team.name }} </div>#}
+{#                            <br>#}
+{#                            <div class="active-article-item-team-desc w-100" style="flex:1;maxs-width:100%;" >{{ article.team.description }}</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div >#}
+{#                      {% for tag in article.tags %}#}
+{#                      <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>#}
+{#                      {% endfor %}#}
+{#                    </div>#}
+{#              </div>#}
+{#            </div>#}
+{#          {% endfor %}#}
+{#      </div>#}
+      {% endif %}
 </div>
-<script>
-  $(function() {
-    let items = document.querySelectorAll('.carousel .carousel-item')
-    items.forEach((el) => {
-        const minPerSlide = 3;
-        let next = el.nextElementSibling
-        for (var i=1; i<minPerSlide; i++) {
-            if (!next) {
-                // wrap carousel by using first child
-              next = items[0]
-            }
-            let cloneChild = next.cloneNode(true)
-            el.appendChild(cloneChild.children[0])
-            next = next.nextElementSibling
-        }
-    })
-  });
-</script>
