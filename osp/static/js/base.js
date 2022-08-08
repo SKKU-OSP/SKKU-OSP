@@ -138,6 +138,7 @@ function send_msg(event) {
                 'read': 'False',
             }
             $('#chat-view').append(message_box_builder(msg, false).addClass('pending'));
+            $('#chat-view').scrollTop($('#chat-view').height());
             $('#chat-input').val('')
         }
     }).done(function (data) {
