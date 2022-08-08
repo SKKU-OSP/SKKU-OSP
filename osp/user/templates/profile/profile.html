@@ -379,20 +379,10 @@
       <div class="row mb-3 profile-content">
         <div class="col-7">
           <div class="card h-100">
-            <div class="card-body">
+            <div id="recent-repos" class="card-body">
               <h5 class="card-title d-flex justify-content-between">최근 기여활동
                 <a href="./repo" target="_blank"><i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i></a>
               </h5>
-              {% for recent_repo in data.repos %}
-              <div class="card w-100 mb-2 recent_repos">
-                <div class="card-body">
-                  <h6 class="card-title">{{recent_repo.repo_name}}</h6>
-                  <div style="font-size: 13px">
-                    {{recent_repo.desc}}
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
             </div>
           </div>
         </div>
@@ -685,8 +675,7 @@
       var level_value = 0;
       var contains = $('.span_language');
       for(contain of contains){
-        level_value = $(contain).attr('level')
-        console.log(level_value)
+        level_value = $(contain).attr('level');
         for(var cnt = 1; cnt <= level_value; cnt += 1){
           $(contain).append(`
             <span style='margin-right:10px;'>

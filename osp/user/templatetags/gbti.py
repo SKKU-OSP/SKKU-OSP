@@ -16,7 +16,6 @@ def getGBTI(type1, type2, type3, type4):
     (desc, descKR) = (desc+" Cool-head",descKR+" 냉철한 이성의") if type3 > 0 else (desc+" Warm-heart",descKR+" 따뜻한 마음씨의")
     (desc, descKR) = (desc+" Efficient",descKR+" 효율적인") if type2 > 0 else (desc+" Creative",descKR+" 창의적인")
     (desc, descKR) = (desc+" Multiplayer",descKR+" 협동가") if type1 > 0 else (desc+" Singleplayer",descKR+" 자립가")
-    print(code, desc, descKR)
     gbti_dict = {
         "ENFJ":{"code":"ENFJ", "nickname":"Twilight", "nicknameKR":"해 질 녘", "desc":" ".join([desc4[0], desc3[1], desc2[1], desc1[0]]), "descKR":" ".join([descKR4[0], descKR3[1], descKR2[1], descKR1[0]])},
         "INTJ":{"code":"INTJ", "nickname":"Deep Ocean", "nicknameKR":"심해", "desc":" ".join([desc4[0], desc3[0], desc2[1], desc1[1]]), "descKR":" ".join([descKR4[1], descKR3[1], descKR2[0], descKR1[0]])},
