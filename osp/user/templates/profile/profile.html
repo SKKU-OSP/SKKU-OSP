@@ -52,9 +52,9 @@
     <div class="col-md-9 col-12">
       <div class="row mb-3 profile-content">
         <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
-          <div class="modal-dialog modal-fullscreen">
+          <div class="modal-dialog modal-xl">
             <div class="modal-content">
-              <div class="modal-header">
+              <div class="modal-light-header">
                 <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
                 <i id="closeModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
               </div>
@@ -150,6 +150,9 @@
                     </div>
                   </div>
                 </div>
+              </div>
+              <div class="modal-footer">
+                <button id="closeChartModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -345,7 +348,7 @@
           <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfolioModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-light-header">
                   <h5 id="portfolioModal" class="modal-title">포트폴리오</h5>
                   <i id="closePortfolioModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
@@ -378,20 +381,10 @@
       <div class="row mb-3 profile-content">
         <div class="col-7">
           <div class="card h-100">
-            <div class="card-body">
+            <div id="recent-repos" class="card-body">
               <h5 class="card-title d-flex justify-content-between">최근 기여활동
                 <a href="./repo" target="_blank"><i id="icon-contr" class="bi-box-arrow-up-right evt-icon" title="이동"></i></a>
               </h5>
-              {% for recent_repo in data.repos %}
-              <div class="card w-100 mb-2 recent_repos">
-                <div class="card-body">
-                  <h6 class="card-title">{{recent_repo.repo_name}}</h6>
-                  <div style="font-size: 13px">
-                    {{recent_repo.desc}}
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
             </div>
           </div>
         </div>
@@ -400,7 +393,7 @@
           <div id="modalGbtiBox" class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="gbtiModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content gbti-bg">
-                <div class="modal-header">
+                <div class="modal-light-header">
                   <h5 id="gbtiModal" class="modal-title">개발자 유형</h5>
                   <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
@@ -464,7 +457,7 @@
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
-                  {% if user.is_authenticated and user == username%}
+                  {% if user.is_authenticated and user.username == username%}
                   <button class="btn-gbti pb-inactive ms-3" onclick="location.href='./test'">다시 검사하기</button>
                   {% endif %}
                 </div>
@@ -519,51 +512,15 @@
                   <span class="endpoint right"></span>
                 </div>
                 <div class="gbti-analysis-container">
+                  {% for desc, descKR, icon in gbti.zip %}
                   <div class="gbti-analysis">
-                    {% if gbti.typeE >= 0 %}
-                    <i class="bi bi-sun-fill icon-lg" style="float: left;"></i>
+                    <i class="bi {{icon}} icon-lg" style="float: left;"></i>
                     <div class="d-flex flex-column justify-content-center">
-                      <span>Sunflower</span>
-                      <span>주로 낮에 활동합니다.</span>
+                      <span>{{desc}}</span>
+                      <span>{{descKR}}</span>
                     </div>
-                    {% else %}
-                    <i class="bi bi-moon-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Night Owl</span>
-                      <span>주로 밤에 활동합니다.</span>
-                    </div>
-                    {% endif %}
                   </div>
-                  <div class="gbti-analysis">
-                    {% if gbti.typeF >= 0 %}
-                    <i class="bi bi-grid-3x3-gap-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Frequent Commit</span>
-                      <span>커밋을 자주 합니다</span>
-                    </div>
-                    {% else %}
-                    <i class="bi bi-square icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Infrequent Commit</span>
-                      <span>커밋을 드물게 합니다</span>
-                    </div>
-                    {% endif %}
-                  </div>
-                  <div class="gbti-analysis">
-                    {% if gbti.typeG >= 0 %}
-                    <i class="bi bi-people-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Together</span>
-                      <span>함께 작업하는 편입니다</span>
-                    </div>
-                    {% else %}
-                    <i class="bi bi-person-fill icon-lg" style="float: left;"></i>
-                    <div class="d-flex flex-column justify-content-center">
-                      <span>Independent</span>
-                      <span>혼자서 작업하는 편입니다</span>
-                    </div>
-                    {% endif %}
-                  </div>
+                  {% endfor%}
                 </div>
                 <div class="modal-footer">
                   <button id="closeGbtiModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -600,21 +557,9 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-between">
-                  {% if gbti.typeE >= 0 %}
-                  <i class="bi bi-sun-fill icon-lg"></i>
-                  {% else %}
-                  <i class="bi bi-moon-fill icon-lg"></i>
-                  {% endif %}
-                  {% if gbti.typeF >= 0 %}
-                  <i class="bi bi-grid-3x3-gap-fill icon-lg"></i>
-                  {% else %}
-                  <i class="bi bi-square icon-lg"></i>
-                  {% endif %}
-                  {% if gbti.typeG >= 0 %}
-                  <i class="bi bi-people-fill icon-lg"></i>
-                  {% else %}
-                  <i class="bi bi-person-fill icon-lg"></i>
-                  {% endif %}
+                  {% for icon in gbti.icon %}
+                  <i class="bi {{icon}} icon-lg"></i>
+                  {% endfor %}
                 </div>
               </div>
             </div>
@@ -684,8 +629,7 @@
       var level_value = 0;
       var contains = $('.span_language');
       for(contain of contains){
-        level_value = $(contain).attr('level')
-        console.log(level_value)
+        level_value = $(contain).attr('level');
         for(var cnt = 1; cnt <= level_value; cnt += 1){
           $(contain).append(`
             <span style='margin-right:10px;'>
