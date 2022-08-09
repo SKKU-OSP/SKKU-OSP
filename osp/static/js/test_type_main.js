@@ -132,7 +132,7 @@ window.onload = function () {
       let result_progress = $(".test-result-bar");
       for (let i=0; i<result_progress.length; i++){
         let bars = $(result_progress[i]).children();
-        let widthList = getProgressLength(factor[i], !!i);
+        let widthList = getProgressLength(factor[i]);
         for (let j=0; j<bars.length; j++){
           bars[j].style.width = String(widthList[j]) + "%";
         }
