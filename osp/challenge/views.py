@@ -51,31 +51,15 @@ def challenge_acheive_update(request):
     acheive_id_list = acheive_list.values_list('challenge__id', flat=True)
     print(acheive_id_list)
     for challenge in challenge_list:
-        sql_with_format = challenge.sql.replace('{{github_id}}', my_acc.student_data.github_id)
-        sql_with_format = sql_with_format.replace('{{user_id}}', str(my_acc.user_id))
         try:
-            cursor = connection.cursor()
-            cursor.execute(sql_with_format)
-            result = cursor.fetchall()[0]
-            if challenge.id in acheive_id_list:
-                acheive = acheive_list.get(challenge=challenge)
-                acheive.progress = result[0]
-                acheive.acheive_date = result[1]
-            else:
-                acheive = ChallengeAchieve.objects.create(
-                    account=my_acc,
-                    challenge=challenge,
-                    progress=result[0],
-                    acheive_date=result[1]
-                )
-            acheive.save()
+            achievement_check(my_acc, challenge)
         except:
-            connection.rollback()
             return JsonResponse({'status': 'fail', 'message': 'DB Fail'})
     return JsonResponse({'status': 'success'})
 
 def achievement_check(user: Account, challenge: Challenge):
     sql_with_format = challenge.sql.replace('{{github_id}}', user.student_data.github_id)
+    sql_with_format = sql_with_format.replace('{{user_id}}', str(user.user_id))
     acheive_list = ChallengeAchieve.objects.filter(account=user)
     acheive_id_list = acheive_list.values_list('challenge__id', flat=True)
     try:
