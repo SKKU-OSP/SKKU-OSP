@@ -35,4 +35,4 @@ def user_profile_image_url(user):
         acc = Account.objects.get(user=user)
         return mark_safe(acc.photo.url)
     else:
-        return mark_safe('')
+        return mark_safe(Account._meta.get_field('photo').get_default())

@@ -84,15 +84,20 @@
         }
         function redraw(){
             var tag_list = []
-            for(tag of $('.ss-value-text')){
+            for(tag of $('#tag-filter').find('.ss-value-text')){
                 tag_list.push($(tag).html())
             }
+            console.log(tag_list);
             $.ajax(
                 {
-                    {#url: '/community/article-list/{{board.name}}/{{ board.id }}',#}
-                    {% if board %}
+                    {% if board and board.name != "User" %}
                     url: "{% url 'community:Article_List' board_name=board.name board_id=board.id %}",
+
+                    {% elif board and board.name == "User" %}
+                    url: "{% url 'community:Account_Cards' %}",
+
                     {% endif %}
+
                     data: {
                         'page': now_page,
                         'keyword': $('#search-keyword').val(),
@@ -102,7 +107,11 @@
                     dataType: 'JSON'
                 }
             ).done(function(data){
+                {% if board and board.name == "User" %}
+                $('#article-card-body').html(data['html']);
+                {% else %}
                 $('#article-list-body').html(data['html']);
+                {% endif %}
                 MAX_PAGE = data['max-page']
                 draw_page();
             });
@@ -111,6 +120,9 @@
             now_page=1;
             redraw();
         });
-        redraw();
+
+            redraw();
+
+{#        {% endif %}#}
     </script>
 </div>
