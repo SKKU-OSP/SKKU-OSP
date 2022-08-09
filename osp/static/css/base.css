@@ -87,6 +87,10 @@ div.vr {
   opacity: 100;
 }
 
+.noti-dropdown{
+  padding: 0;
+}
+
 .noti-item {
   width: 20em;
   padding-left: 0.5em;
@@ -96,12 +100,7 @@ div.vr {
   border-bottom: solid 0.5px var(--main-border-color);
 }
 
-.noti-item:first-child {
-  padding-top: 0;
-}
-
 .noti-item:last-child {
-  padding-bottom: 0;
   border-bottom: none;
 }
 
@@ -109,13 +108,18 @@ div.vr {
   vertical-align: middle;
 }
 
+.noti-item.read {
+  background-color: var(--main-bg-color);
+  color: var(--main-border-color);
+}
+
 #new-noti{
   background-color: var(--alert-color);
   border-radius: 50%;
   padding: 0.25rem;
   position: absolute;
-  top: 0;
-  left: 5%;
+  top: -10%;
+  left: -15%;
 }
 
 #message-modal .modal-dialog,

@@ -49,54 +49,53 @@
         <div>
             <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body }}</div>
         </div>
-        <div style="margin-top:5px;" class="ss-97888 ss-main d-flex flex-row" >
+        <div style="margin-top:10px;" class="ss-main d-flex flex-row" >
             <div class="ss-multi-selected">
                 <div class="ss-values">
                     {% for tag in tags %}
-                        <div class="ss-value bg-tag-{{tag.tag.type}}">
-                            <span class="ss-value-text"># {{ tag.tag.name }}</span>
-                        </div>
+                    <div class="ss-value bg-tag-{{tag.tag.type}}">
+                        <span class="ss-value-text"># {{ tag.tag.name }}</span>
+                    </div>
                     {% empty %}
-                        <span style="padding-left:5px;">태그 없음</span>
+                    <span style="padding-left:5px;">태그 없음</span>
                     {% endfor %}
                 </div>
             </div>
-            <div class="d-flex flex-row justify-content-between" style="width:65px;height:30px;">
-                <div onclick="ArticleThumbUp(this, {{ article.id }},{{ request.user.id | default_if_none:-1 }})"
+            <div id="article-like-scrap" class="d-flex flex-row justify-content-between">
+                <div onclick="ArticleThumbUp({{ article.id }},{{ request.user.id | default_if_none:-1 }})"
+                    id="article-like-btn"
+                    class="h-100 pointer opacity-hover">
                     {% is_article_thumb_up article request.user as is_thumb_up %}
                     {% if not is_thumb_up %}
-                        class="material-icons-outlined h-100 pointer opacity-hover"
+                    <span class="material-icons-outlined">
                     {% else %}
-                        class="material-icons h-100 pointer opacity-hover"
+                    <span class="material-icons">
                     {% endif %}
-                        style="line-height:30px;font-size:21px;padding-left:5px;">
-                    thumb_up
+                        thumb_up
+                    </span>
                 </div>
-                    {% is_article_scrap article request.user as is_scrap %}
-
-                    <div id="bookmark_border"
-                         onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
-                         class="material-icons h-100 pointer opacity-hover
-                        {% if is_scrap %}d-none{% endif %}
-                        "
-                         style="line-height:30px;font-size:23px;padding-right:3px;">
-                        turned_in_not
-                    </div>
-
-                    <div id="bookmark_filled" onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
-                         class="material-icons h-100 pointer opacity-hover
-                        {% if not is_scrap %}d-none{% endif %}
-                        "
-                         style="line-height:30px;font-size:23px;padding-right:3px;">
+                <div>
+                    <span id="article-like-cnt">
+                        {{article|article_like}}
+                    </span>
+                </div>
+                {% is_article_scrap article request.user as is_scrap %}
+                <div id="article-scrap-btn" onclick="ArticleScrap({{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
+                    class="h-100 pointer opacity-hover">
+                    <span class="material-icons-outlined">
+                        {% if is_scrap %} 
                         bookmark
-                    </div>
-
-
-
-
+                        {% else %}
+                        bookmark_border
+                        {% endif %}
+                    </span>
+                </div>
+                <div>
+                    <span id="article-scrap-cnt">
+                        {{article|article_scrap}}
+                    </span>
+                </div>
             </div>
-{#            <input name='tags' value='tag1,tag2' placeholder="게시판 관련 태그" style="border-top:none;border-left:none;border-right:none;" readonly >#}
-
         </div>
     </div>
 </form>

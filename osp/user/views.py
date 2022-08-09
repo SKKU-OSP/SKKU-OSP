@@ -8,21 +8,21 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm
-from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
+from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 from osp.settings import BASE_DIR
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
-from user.templatetags.gbti import getGBTI
+from user.templatetags.gbti import get_type_test, get_type_analysis
+from user import update_act
 
-import time
+import time, datetime
 import json
 import os
 import math
 import pandas as pd
-from user import update_act
 
 
 # Create your views here.
@@ -34,42 +34,14 @@ class ProfileView(TemplateView):
     # 새로 고침 시 GET 요청으로 처리됨.
     def get(self, request, *args, **kwargs):
 
-        # update_act.update_commmit_time() # committer time 업데이트
-        # update_act.update_individual() # individual 업데이트
-        # update_act.update_frequency() # frequency 업데이트
-
+        start = time.time()
         context = self.get_context_data(request, *args, **kwargs)
-        std = context['account'].student_data
+        student_info = context['account'].student_data
 
-        # 정보를 가져옴.
-        # student info
-        context['std'] = std
-        github_id = context['std'].github_id
         # student repository info
         context['cur_repo_type'] = 'owned'
         ## owned repository
-        student_info = std
-
-        student_score = GitHubScoreTable.objects.filter(id=std.id).order_by('-year').first()
-
-        # 최근 기여 리포지토리 목록
-        commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
-        recent_repos = {}
-        id_reponame_pair_list = []
-        # 최근 기여 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 셍성함
-        for commit in commit_repos:
-            commit_repo_name = commit['repo_name']
-            if len(recent_repos) == 3:
-                break
-            if commit_repo_name not in recent_repos:
-                recent_repos[commit_repo_name] = {'repo_name': commit_repo_name}
-                recent_repos[commit_repo_name]['github_id'] = commit['github_id']
-                recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
-                id_reponame_pair_list.append((commit['github_id'], commit_repo_name))
-        contr_repo_queryset = GithubRepoStats.objects.extra(where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
-        for contr_repo in contr_repo_queryset:
-            recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
-        recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
+        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
 
         tags_all = Tag.objects # 태그 전체
         tags_domain = tags_all.filter(type='domain') # 분야 태그
@@ -82,14 +54,10 @@ class ProfileView(TemplateView):
         # 유저의 사용언어, 기술스택
         lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
         account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
-        level_list = []
-        for al in account_lang:
-            level_list.append(al.level)
+        level_list = [ al.level for al in account_lang ]
         lang = []
         for tag in lang_tags:
-            lang_tag_dict = {}
-            lang_tag_dict["name"] = tag.name
-            lang_tag_dict["type"] = tag.type
+            lang_tag_dict = {"name":tag.name, "type":tag.type}
             lang_tag_dict["level"] = level_list[len(lang)]
             lang.append(lang_tag_dict)
         domain_layer = DomainLayer.objects
@@ -97,20 +65,16 @@ class ProfileView(TemplateView):
         ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
         ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
         relation_origin = domain_layer.values('parent_tag', 'child_tag')
-
-
         relations = []
         remain_children = list(ints_child_layer)
         print(remain_children)
         for par in ints_parent_layer:
             relation = {
-                'parent' :'',
+                'parent' :par['parent_tag'],
                 'children' : [],
             }
-            relation['parent'] = par['parent_tag']
             for chi in ints_child_layer:
                 if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
-                    print('It is True')
                     relation['children'].append(chi['child_tag'])
                     remain_children.remove({'child_tag' : chi['child_tag']})
             relations.append(relation)
@@ -120,7 +84,6 @@ class ProfileView(TemplateView):
         data = {
             'info': student_info,
             'score': student_score,
-            'repos': recent_repos,
             'ints': ints,
             'lang': lang,
             'relations': relations,
@@ -128,12 +91,13 @@ class ProfileView(TemplateView):
             'account': context['account']
         }
         context['data'] = data
+        print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
 
     def get_context_data(self, request, *args, **kwargs):
         
-        start = time.time()  # 시작 시간 저장
+        start = time.time()
         
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
@@ -147,10 +111,11 @@ class ProfileView(TemplateView):
         
         score_data_list = []
         score_detail_data = GithubScore.objects.filter(github_id=github_id).order_by("year")
-        latest_data = score_detail_data.last()
-        end_year = latest_data.year
         for row in score_detail_data:
             score_data_list.append(row.to_json())
+            
+        end_year = score_data_list[len(score_data_list)-1]["year"]
+        num_year = end_year-self.start_year+1
         context["end_year"] = end_year
         context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
         chartdata["score_data"] = score_data_list
@@ -170,7 +135,7 @@ class ProfileView(TemplateView):
         own_star["avg"] = mean
         sigma = math.sqrt(sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
         own_star["std"] = sigma
-        star_dist = [star_temp_dist for i in range(end_year-self.start_year+1)]
+        star_dist = [star_temp_dist for i in range(num_year)]
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -200,11 +165,11 @@ class ProfileView(TemplateView):
             if row.github_id == github_id:
                 user_data_list.append(row.to_json())
         chartdata["user_data"] = json.dumps(user_data_list)
-        score_dist = [[] for i in range(end_year-self.start_year+1)]
-        commit_dist = [[] for i in range(end_year-self.start_year+1)]
-        pr_dist = [[] for i in range(end_year-self.start_year+1)]
-        issue_dist = [[] for i in range(end_year-self.start_year+1)]
-        repo_dist = [[] for i in range(end_year-self.start_year+1)]
+        score_dist = [[] for i in range(num_year)]
+        commit_dist = [[] for i in range(num_year)]
+        pr_dist = [[] for i in range(num_year)]
+        issue_dist = [[] for i in range(num_year)]
+        repo_dist = [[] for i in range(num_year)]
         for factor_data in total_factor_data_list:
             if factor_data["year"] >= self.start_year :
                 yid = factor_data["year"]-self.start_year
@@ -253,7 +218,7 @@ class ProfileView(TemplateView):
         chartdata["repo_dist"] = repo_dist
         
         # TODO: start_year, end_year에 기반하지 않는 수식 필요
-        monthly_contr = [ [] for i in range(end_year-self.start_year+1)]
+        monthly_contr = [ [] for i in range(num_year)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
             row_json = row.to_json()
@@ -264,7 +229,7 @@ class ProfileView(TemplateView):
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
         # TODO: start_year, end_year에 기반하지 않는 수식 필요
-        monthly_avg = [ [] for i in range(end_year-self.start_year+1)]
+        monthly_avg = [ [] for i in range(num_year)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
             if avg["start_yymm"].year >= self.start_year and avg["start_yymm"].year <= end_year :
@@ -276,6 +241,7 @@ class ProfileView(TemplateView):
         chartdata["own_star"] = own_star
         chartdata["monthly_avg"] = monthly_avg
         chartdata["username"] = github_id
+        context["star"] = own_star["star"]
         context["chart_data"] = json.dumps(chartdata)
         
         #GBTI test
@@ -293,60 +259,47 @@ class ProfileView(TemplateView):
         major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
         
         if not os.path.exists(os.path.join(test_data_path, 'commit_intv.csv')):
-            update_act.update_frequency()
+            update_act.update_frequency()   
         committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
-
 
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
         student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
         committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
-
-
-
-        gbti_data = {"typeD1":40, "typeD2":45, "typeC1":30, "typeC2":55, "typeB1":50, "typeB2":35, "typeA1":55, "typeA2":30, "typeE1":20, "typeE2":10, "typeF1":20, "typeF2":10, "typeG1":20, "typeG2":10}
-        gbti_data["typeD0"] = 100 - gbti_data["typeD1"] - gbti_data["typeD2"]
-        gbti_data["typeC0"] = 100 - gbti_data["typeC1"] - gbti_data["typeC2"]
-        gbti_data["typeB0"] = 100 - gbti_data["typeB1"] - gbti_data["typeB2"]
-        gbti_data["typeA0"] = 100 - gbti_data["typeA1"] - gbti_data["typeA2"]
-        gbti_data.update(getGBTI(gbti_data["typeA1"]-gbti_data["typeA2"], gbti_data["typeB1"]-gbti_data["typeB2"], gbti_data["typeC1"]-gbti_data["typeC2"], gbti_data["typeD1"]-gbti_data["typeD2"]))
-        
         print(student_time_circmean)
         print(time_sector_min)
-        if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
-            gbti_data["typeE1"] = 30
-            gbti_data["typeE2"] = 20
-        else: # 밤에 활동
-            gbti_data["typeE1"] = 20
-            gbti_data["typeE2"] = 30
-
-        if(student_major_act == 'individual'): # 혼자 작업
-            gbti_data["typeG1"] = 20
-            gbti_data["typeG2"] = 30
-        else: # 함께 작업
-            gbti_data["typeG1"] = 30
-            gbti_data["typeG2"] = 20
-
-        if(student_major_act == 'individual'): # 혼자 작업
-            gbti_data["typeG1"] = 20
-            gbti_data["typeG2"] = 30
-        else: # 함께 작업
-            gbti_data["typeG1"] = 30
-            gbti_data["typeG2"] = 20
-
-        if(committer_frequency == 0): # 자주 작업
-            gbti_data["typeF1"] = 30
-            gbti_data["typeF2"] = 20
-
-        else: # 몰아서 작업
-            gbti_data["typeF1"] = 20
-            gbti_data["typeF2"] = 30
-
-
+        gbti_data = {}
+        # 낮에 활동, 밤에 활동
+        gbti_data["typeE"] = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1 
+        # 자주 작업, 몰아서 작업
+        gbti_data["typeF"] = 1 if committer_frequency == 0 else -1 
+         # 혼자 작업, 함께작업 
+        gbti_data["typeG"] = -1 if student_major_act == 'individual' else 1
+        gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(gbti_data.values())
+        gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
         context["gbti"] = gbti_data
-        context["star"] = own_star["star"]
-        print("\nProfileView time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
+
+        try:
+            devtype_data = DevType.objects.get(account=account)
+            gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
+            gbti_data.update(get_type_test(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
+            test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
+            
+            def get_type_len(type_val):
+                return (int((100 - type_val)/2) - 5, int((100 + type_val)/2) + (100 + type_val)%2 - 5)
+
+            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
+            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
+            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
+            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
+            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+        except Exception as e:
+            print("DevType get error", e)
+            test_data = None
+        context["test"] = test_data
+        
+        print("ProfileView time :", time.time() - start)
         
         return context
 
@@ -569,7 +522,86 @@ class ProfileRepoView(TemplateView):
             ctx_repo_stats.append(repo_stat)
         ctx_repo_stats = sorted(ctx_repo_stats, key=lambda x:x['committer_date'], reverse=True)
         context["guideline"] = ctx_repo_stats
+        print("ProfileRepoView time :", time.time() - start)
         
-        print("\nProfileRepoView time :", time.time() - start)
+        return context
+
+
+@csrf_exempt
+def save_test_result(request, username):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            type_factors = data['factor']
+            user = User.objects.get(username=username)
+            try:
+                account = Account.objects.get(user=user)
+            except Exception as e:
+                print("account error", e)
+            devtype_objs = DevType.objects.filter(account=account).all()
+            print("objs len", len(devtype_objs))
+            if len(devtype_objs) == 0:
+                model_instance = DevType(account=account, typeA=type_factors[0], typeB=type_factors[1], typeC=type_factors[2], typeD=type_factors[3], typeE=0, typeF=0, typeG=0)
+                model_instance.save()
+            else:
+                for devtype in devtype_objs:
+                    devtype.typeA = type_factors[0]
+                    devtype.typeB = type_factors[1]
+                    devtype.typeC = type_factors[2]
+                    devtype.typeD = type_factors[3]
+                    devtype.save()
+            context = {"status": 200}
+        except Exception as e:
+            print("error save", e)
+            context = {"status": 400}
+        
+        return JsonResponse(context)
+
+@csrf_exempt
+def load_repo_data(request, username):
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(username=username)
+            try:
+                account = Account.objects.get(user=user)
+            except Exception as e:
+                print("account error", e)
+            # 리포지토리 목록
+            github_id = account.student_data.github_id
+            commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+            recent_repos = {}
+            id_reponame_pair_list = []
+            # 리포지토리 목록 중, 중복하지 않는 가장 최근 3개의 리포지토리 목록을 생성함
+            for commit in commit_repos:
+                commit_repo_name = commit['repo_name']
+                if len(recent_repos) == 3:
+                    break
+                if commit_repo_name not in recent_repos:
+                    recent_repos[commit_repo_name] = {'repo_name': commit_repo_name}
+                    recent_repos[commit_repo_name]['github_id'] = commit['github_id']
+                    recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
+                    id_reponame_pair_list.append((commit['github_id'], commit_repo_name))
+            contr_repo_queryset = GithubRepoStats.objects.extra(where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+            for contr_repo in contr_repo_queryset:
+                recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
+            recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
+            context = {"status": 200, "repo":recent_repos}
+        except Exception as e:
+            print("error save", e)
+            context = {"status": 400}
+        
+        return JsonResponse(context)
+    
+class ProfileType(TemplateView):
+    template_name = 'profile/profile-type.html'
+    
+    def get_context_data(self, *args, **kwargs):
+        
+        start = time.time()
+        context = super().get_context_data(**kwargs)
+        user = User.objects.get(username=context["username"])
+        context["username"] = user
+        context["end_year"] = datetime.datetime.now().date().today().year
+        print("ProfileTypeView time :", time.time() - start)
         
         return context

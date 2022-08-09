@@ -42,7 +42,11 @@
                     </button>
                     <ul class="dropdown-menu noti-dropdown">
                         {% for noti in notifications.list %}
-                        <li class="nav-item d-flex flex-row justify-content-between noti-item">
+                        {% if noti.receiver_read %}
+                        <li class="nav-item d-flex flex-row justify-content-between noti-item read">
+                        {% else %}
+                        <li class="nav-item d-flex flex-row justify-content-between noti-item" id="noti-{{noti.id}}">
+                        {% endif %}
                             <div class="d-flex">
                                 <div class="material-icons-outlined me-2">
                                     {{noti.icon}}
@@ -53,7 +57,10 @@
                             </div>
                             <div>
                                 {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
-                                <i onclick="location.href='{% url 'community:article-view' noti.body.article_id %}'"
+                                <i onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
+                                    class="bi bi-box-arrow-up-right pointer"></i>
+                                {% elif noti.body.type == "team_apply" %}
+                                <i onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
                                     class="bi bi-box-arrow-up-right pointer"></i>
                                 {% endif %}
                             </div>

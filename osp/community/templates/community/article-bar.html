@@ -1,7 +1,7 @@
 {% load community_tag %}
 {% for article in article_list %}
-<div class="article-bar" style="cursor:pointer">
-    <div class="d-flex p-2">
+<div class="article-bar">
+    <div class="d-flex">
         <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' article.id %}'">
             <div class="article-bar-title my-1">
                 {% if board.board_type == 'Recruit' %}
@@ -17,7 +17,6 @@
                 {% if board.board_type == 'Recruit' %}
                     {% is_period_end article.period_end as is_end %}
                     {% if not article.team %}
-                        -
                     {% elif not is_end %}
                         <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
                     {% else %}
@@ -49,21 +48,21 @@
                 </div>
                 {% endif %}
             </div>
-            <div class=" color-b">{{article.pub_date|time_before}}</div>
+            <div>{{article.pub_date|time_before}}</div>
             <div class="d-flex justify-content-between">
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-                    <div>{{article.like_cnt}}</div>
+                    <div>{{article|article_like}}</div>
                 </div>
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
-                    <div>{{article.comment_cnt}}</div>
+                    <div>{{article|article_comment}}</div>
                 </div>
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
-                    {{article.scrap_cnt}}
+                    {{article|article_comment}}
                 </div>
-                <div class="article-meta-stat color-b d-flex">
+                <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
                     {{article.view_cnt}}
                 </div>
@@ -74,8 +73,8 @@
     <div class="d-flex" style="background-color: lightgray;">
         {% if article.comment %}
         <div style="width: 2%;"></div>
-        <div class="color-b">
-            {{article.comment.comment.body}}
+        <div>
+            {{article.comment.body}}
         </div>
         <div class="ms-auto">
         {% if request.user.is_anonymous %}
