@@ -273,63 +273,33 @@ class ProfileView(TemplateView):
         committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
         print(student_time_circmean)
         print(time_sector_min)
-        gbti_data = {}
-        # 낮에 활동, 밤에 활동
-        gbti_data["typeE"] = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1 
-        # 자주 작업, 몰아서 작업
-        gbti_data["typeF"] = 1 if committer_frequency == 0 else -1 
-        # 혼자 작업, 함께작업 
-        gbti_data["typeG"] = -1 if student_major_act == 'individual' else 1
-        gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(gbti_data.values())
-        gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
-        context["gbti"] = gbti_data
 
         try:
             devtype_data = DevType.objects.get(account=account)
+            try:
+                devtype_data.typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
+                devtype_data.typeF = 1 if committer_frequency == 0 else -1
+                devtype_data.typeG = -1 if student_major_act == 'individual' else 1
+                devtype_data.save()
+                gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
+
+                gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(gbti_data.values())
+                gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+                context["gbti"] = gbti_data
+            except:
+                context["gbti"] = None
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            test_data.update(getGBTI(test_data["typeA"], test_data["typeB"], test_data["typeC"], test_data["typeD"]))
+            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+            def get_type_len(type_val):
+                return (int((100 - type_val)/2) - 5, int((100 + type_val)/2) + (100 + type_val)%2 - 5)
 
-            def get_left_len(type_val):
-                return int((100 - type_val)/2) - 5
-            def get_right_len(type_val):
-                return int((100 + type_val)/2) + (100 + type_val)%2 - 5
-
-            test_data["typeAl"] = get_left_len(test_data["typeA"])
-            test_data["typeAr"] = get_right_len(test_data["typeA"])
-            test_data["typeBl"] = get_left_len(test_data["typeB"])
-            test_data["typeBr"] = get_right_len(test_data["typeB"])
-            test_data["typeCl"] = get_left_len(test_data["typeC"])
-            test_data["typeCr"] = get_right_len(test_data["typeC"])
-            test_data["typeDl"] = get_left_len(test_data["typeD"])
-            test_data["typeDr"] = get_right_len(test_data["typeD"])
-            test_data.update(getGBTI(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
-
-            if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
-                devtype_data.typeE = 1
-            else: # 밤에 활동
-                devtype_data.typeE = -1
-            if(committer_frequency == 0): # 자주 작업
-                devtype_data.typeF = 1
-            else: # 몰아서 작업
-                devtype_data.typeF = -1
-            if(student_major_act == 'individual'): # 혼자 작업
-                devtype_data.typeG = -1
-            else: # 함께 작업
-                devtype_data.typeG = 1
-            devtype_data.save()
-            gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
-            gbti_data['typeE'] = devtype_data.typeE
-            gbti_data['typeF'] = devtype_data.typeF
-            gbti_data['typeG'] = devtype_data.typeG
-            print("length test_data", test_data)
-            print("total test_data", test_data)
+            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
+            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
+            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
+            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
         except Exception as e:
             print("DevType get error", e)
             test_data = None
-        
-        print(student_time_circmean)
-        print(time_sector_min)
-        
         context["test"] = test_data
         
         print("ProfileView time :", time.time() - start)
