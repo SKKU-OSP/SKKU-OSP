@@ -4,23 +4,27 @@
 <div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         <div id="profile-image-wrap" class="m-auto">
-            <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
+            <a href="/user/{{user}}">
+                <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
+            </a>
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
-            <div id="profile-username">{{user.username}}</div>
-            <div id="community-stat" class="d-flex">
-                <div class="mx-3"><i class="bi-card-text me-1"></i>{{user|user_article}}</div>
-                <div class="mx-3"><i class="bi-chat-left-dots me-1"></i>{{user|user_comment}}</div>
-                <div class="mx-3"><i class="bi-bookmark me-1"></i>{{user|user_scrap}}</div>
+            <div id="profile-username">
+                <a href="/user/{{user.username}}">{{user.username}}</a>
+                <a href="/community/activity">
+                    <span class="material-icons">
+                        collections_bookmark
+                    </span>
+                </a>
             </div>
             {% else %}
             {% endif %}
         </div>
         {% if user.is_authenticated %}
-        <div id="team-manage-tab" class="d-flex justify-content-center">
-            <div id="team-apply-list">
-                <span class="material-icons">
+        <div id="team-manage-tab" class="d-flex flex-row flex-wrap justify-content-center">
+            <div id="team-apply-list" >
+                <span class="material-icons" >
                 assignment_ind
                 </span>
                 지원서 목록
@@ -35,19 +39,14 @@
         {% endif %}
     </div>
     <div id="community-tab" class="w-100">
-        <div class="boardgroup-title">
-            게시판
-        </div>
-        {% if board %}
-        <div class="boardgroup-item">
-        {% else %}
-        <div class="boardgroup-item selected">
-        {% endif %}
-            <a href="/community">Community Main</a>
+        <div id="normal-boardgroup" class="boardgroup-title">
+            <a href="/community">
+                게시판
+            </a>
         </div>
         {% board_sidebar_normal_board request %}
         {% if user.is_authenticated %}
-        <div class="boardgroup-title d-flex justify-content-between">
+        <div id="team-boardgroup" class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
         </div>
         {% board_sidebar_team_board request %}
@@ -56,6 +55,8 @@
 
     {% if user.is_authenticated %}
     <div class="modal fade" id="AddTeamModal">
+    </div>
+    <div class="modal fade" id="ApplyTeamModal">
     </div>
     <script src="{% static 'js/community_sidebar.js' %}"></script>
     {% endif %}
