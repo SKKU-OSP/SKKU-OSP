@@ -263,7 +263,7 @@ class ProfileView(TemplateView):
         major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
         
         if not os.path.exists(os.path.join(test_data_path, 'commit_intv.csv')):
-            update_act.update_frequency()   
+            update_act.update_frequency()
         committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
 
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
@@ -278,15 +278,16 @@ class ProfileView(TemplateView):
             devtype_data = DevType.objects.get(account=account)
             try:
                 devtype_data.typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
-                devtype_data.typeF = 1 if committer_frequency == 0 else -1
+                devtype_data.typeF = committer_frequency
                 devtype_data.typeG = -1 if student_major_act == 'individual' else 1
                 devtype_data.save()
                 gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
 
-                gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(gbti_data.values())
+                gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
                 gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
                 context["gbti"] = gbti_data
-            except:
+            except Exception as e:
+                print("Calculate dev type error", e)
                 context["gbti"] = None
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
             test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
@@ -298,8 +299,15 @@ class ProfileView(TemplateView):
             test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
             test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
         except Exception as e:
-            print("DevType get error", e)
+            print("Get DevType object error", e)
             test_data = None
+            typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
+            typeF = committer_frequency
+            typeG = -1 if student_major_act == 'individual' else 1
+            gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
+            gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
+            gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+            context["gbti"] = gbti_data
         context["test"] = test_data
         
         print("ProfileView time :", time.time() - start)
