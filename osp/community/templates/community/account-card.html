@@ -1,0 +1,51 @@
+{% load community_tag %}
+{% load tag_templatetag %}
+
+
+<div class="d-flex flex-row flex-wrap justify-content-between" style="padding: 10px 3px;">
+
+    {% for account in article_list %}
+        <div class="article-card card d-flex flex-column"
+             style="cursor:pointer;width:33%;min-width:253px;padding:15px 10px;margin-bottom:10px;"
+        >
+            <div>
+                {% if 0 %}
+                익명
+                {% elif 0 %}
+                <a class="article-bar-writer" href="">사용자</a>
+                {% else %}
+                <div class="dropdown writer-dropdown">
+                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{account.user.username}}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            <div>
+                {{ account.introduction }}
+            </div>
+            <div class="ss-97888 ss-main d-flex flex-row" style="padding-top:10px;overflow-x:auto;">
+            {% get_account_tags account as tags %}
+            <div class="ss-multi-selected">
+                <div class="ss-values" style="flex-wrap:nowrap;overflow-x:auto;">
+                    {% for tag in tags %}
+                        <div class="ss-value bg-tag-{{tag.tag.type}}" style="flex: 0 0 auto;">
+                            <span class="ss-value-text"># {{ tag.tag.name }}</span>
+                        </div>
+                    {% empty %}
+                        <span style="padding-left:5px;">태그 없음</span>
+                    {% endfor %}
+                </div>
+            </div>
+            </div>
+
+        </div>
+    {% empty %}
+
+    {% endfor %}
+
+</div>
