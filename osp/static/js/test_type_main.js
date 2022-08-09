@@ -141,7 +141,7 @@ window.onload = function () {
     }, 1000);
     
     function getProgressLength(factor){
-      return [(100 - factor)/2 - 5, 10, (100 + factor)/2 + (100 + factor)%2 - 5];
+      return [(100 - factor)/2 - 2, 4, (100 + factor)/2 + (100 + factor)%2 - 2];
     }
   }
   function addA(aTxt,qIdx,idx){

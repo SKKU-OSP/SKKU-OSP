@@ -291,7 +291,7 @@ class ProfileView(TemplateView):
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
             test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
             def get_type_len(type_val):
-                return (int((100 - type_val)/2) - 5, int((100 + type_val)/2) + (100 + type_val)%2 - 5)
+                return (int((100 - type_val)/2) - 2, int((100 + type_val)/2) + (100 + type_val)%2 - 2)
 
             test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
             test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
