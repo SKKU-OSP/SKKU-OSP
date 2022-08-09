@@ -23,11 +23,20 @@
         <span style="display:inline-block; width: 120px;">
             <label for="tag_{{row.tag.name}}" class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:5px; ">{{row.tag.name}}</label>
         </span>
-        <input style="width:50%; color:#0094FF;" type="range" class="form-control-range" min="0" max="4" step="1" value ="{{row.level}}" name ="tag_{{row.tag.name}}" id="tag_{{row.tag.name}}">
+        <input style="width:50%; color:#0094FF;" type="range" class="form-control-range" min="0" max="4" step="1" value ="{{row.level}}" name ="tag_{{row.tag.name}}" id="tag_{{row.tag.name}}" list="tickmarks">
+        <output for="range" class="output" id="out_{{row.tag.name}}"></output>
         <button type="submit" class="btn btn btn-outline-dark" name="action" value="delete {{row.tag.name}}">x</button>
     </div>
     <hr>
     {% endfor %}
+    <datalist id="tickmarks">
+        <option value="0" label="asdfafasd"></option>
+        <option value="1"></option>
+        <option value="2"></option>
+        <option value="3"></option>
+        <option value="4"></option>
+        <option value="5" label="50%"></option>
+        </datalist>
     </div>
 </div>
 
@@ -43,4 +52,43 @@
         })
     });
 </script>
+<script>
+    var contains = $('.form-control-range');
+    var outputs = $('.output');
+    
+    function ShowSliderValue(sVal, x){
+        var obValueView = $('.output')[x]
+        var txt = ''
+        if(sVal==0){
+            txt = '단계1'
+        }
+        else if(sVal==1){
+            txt = '단계2'
+        }
+        else if(sVal==2){
+            txt = '단계3'
+        }
+        else if(sVal==3){
+            txt = '단계4'
+        }
+        else{
+            txt = '단계5'
+        }
+        obValueView.innerHTML = txt
+    }
+    var RangeSlider = function(x){
+        $(contains[x]).on('input', function(){
+            ShowSliderValue(this.value, x);
+    });};
+
+    $(document).ready(function(){
+        for(var i = 0;i<contains.length;i++){
+            RangeSlider(i);
+        }
+    });
+    for(var i = 0;i<contains.length;i++){
+        RangeSlider(i);
+    }
+</script>
+
 {% endblock %}

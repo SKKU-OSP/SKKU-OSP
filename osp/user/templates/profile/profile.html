@@ -5,7 +5,9 @@
 {% block content %}
 <div class="container my-4">
   <div class="d-flex justify-content-end mb-1">
+    {% if data.is_own%}
     <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true">프로필 수정</a>
+    {% endif %}
   </div>
   <div class="row">
     <div id="profile-info" class="col-md-3 col-12">
