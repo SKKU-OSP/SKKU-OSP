@@ -54,18 +54,51 @@ def get_type_test(type1, type2, type3, type4):
     return gbti_dict[code]
 
 def get_type_analysis(type_list):
-    icon = ["bi-sun-fill", "bi-moon-fill", "bi-grid-3x3-gap-fill", "bi-square-fill", "bi-people-fill", "bi-person-fill"]
-    msg = ["sunflower","Night Owl", "Steady Commit", "Intensive Commit", "Together", "Independent"]
-    msgKR = ["주로 낮에 활동합니다.", "주로 밤에 활동합니다.", "커밋을 꾸준히 합니다.", "커밋을 몰아서 합니다.", "함께 작업하는 편입니다.", "혼자서 작업하는 편입니다."]
+    icon = {
+        "icon0":["bi-sun-fill", "bi-moon-fill"],
+        "icon1":["bi-lightning-fill", "bi-stars", "bi-fire"],
+        "icon2":["bi-people-fill", "bi-person-fill"]
+    }
+    msg = {
+        "msg0":["sunflower","Night Owl"],
+        "msg1":["Initiator", "Lighthouse", "Burning"],
+        "msg2":["Together", "Independent"]
+    }
+    msgKR = {
+        "msgKR0":["주로 낮에 활동합니다.", "주로 밤에 활동합니다."],
+        "msgKR1":["프로젝트 초반에 주로 활약합니다.", "프로젝트에 전반적으로 활약합니다.", "프로젝트 후반에 주로 활약합니다."],
+        "msgKR2":["함께 작업하는 편입니다.", "혼자서 작업하는 편입니다."]
+    }
     
-    result, resultKR, result_icon = [], [], [] 
-    code, mul, cnt= 0, 1, 0
-    for type in type_list:
-        code += 1*mul if type < 0 else 0
-        idx = 2*cnt + ((code&mul)>>cnt)
-        result.append(msg[idx])
-        resultKR.append(msgKR[idx])
-        result_icon.append(icon[idx])
-        mul, cnt = mul*2, cnt+1
+    result, resultKR, result_icon = [], [], []
+    def split_type(k, n, crtr=[0]):
+        if n == 2:
+            if type_list[int(k)] < crtr[0]:
+                result.append(msg["msg"+k][0])
+                resultKR.append(msgKR["msgKR"+k][0])
+                result_icon.append(icon["icon"+k][0])
+            else:
+                result.append(msg["msg"+k][1])
+                resultKR.append(msgKR["msgKR"+k][1])
+                result_icon.append(icon["icon"+k][1])
+        elif n == 3:
+            if type_list[int(k)] < crtr[0]:
+                result.append(msg["msg"+k][0])
+                resultKR.append(msgKR["msgKR"+k][0])
+                result_icon.append(icon["icon"+k][0])
+            elif type_list[int(k)] < crtr[1]:
+                result.append(msg["msg"+k][1])
+                resultKR.append(msgKR["msgKR"+k][1])
+                result_icon.append(icon["icon"+k][1])
+            else:
+                result.append(msg["msg"+k][2])
+                resultKR.append(msgKR["msgKR"+k][2])
+                result_icon.append(icon["icon"+k][2])
+    
+    split_type("0", 2, [0])
+    split_type("1", 3, [-0.5, 0.5])
+    split_type("2", 2, [0])
+    
+    print(result, resultKR, result_icon)
     
     return result, resultKR, result_icon
