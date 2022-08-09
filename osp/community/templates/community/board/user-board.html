@@ -22,7 +22,7 @@
 
       </div>
       <div id="article-card-body">
-      {% include "community/account-card.html" %}
+        {% include "community/account-card.html" %}
       </div>
       {% include "community/board/board-footer.html" with board=board %}
     </div>
@@ -31,18 +31,17 @@
 {% endblock content %}
 {% block script %}
 <script>
-  $(function(){
-  var tag_selector = new SlimSelect({
-    select: '#tag-select',
-    onChange: (selected_list) => {
-      for(selected of selected_list){
-        $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+  $(function () {
+    var tag_selector = new SlimSelect({
+      select: '#tag-select',
+      onChange: (selected_list) => {
+        for (selected of selected_list) {
+          $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
+        }
+        redraw();
       }
-      redraw();
-    }
-  })});
-
-
+    })
+  });
 </script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
