@@ -20,8 +20,9 @@
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
           <div class="d-flex flex-column justify-content-end text-center user-info">
-              <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
-              <input id="photo" name="photo" type="file" />
+            <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+            <label id="for-photo" for="photo"><i class="bi bi-pen"></i></label>
+            <input id="photo" name="photo" type="file" hidden/>
             <div class="info-body">
               <p class="font-focus">{{data.info.name}}</p>
               <p>{{data.info.github_id}}</p>
@@ -105,9 +106,7 @@
             </div>
           </div>
         </div>
-        
       </div>
-
     {% csrf_token %}
   </form>
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">

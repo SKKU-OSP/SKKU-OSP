@@ -84,15 +84,20 @@ button.btn.btn-outline-dark{
   
 }
 
-#photo {
-  position: relative;
-  top: 0;
-  right: 0;
-  margin: 0;
-  padding: 0;
-  font-size: 20px;
-}
-
 #ints_delete{
   color :black;
+}
+
+#for-photo{
+  display:block;
+  text-align: center;
+  background-color: rgb(79, 173, 224);
+  color: white;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  width: 25px;
+  margin:auto;
+  margin-top: -20px;
+
+  z-index: 6;
 }
