@@ -8,12 +8,14 @@ function setVisualModal(){
   let chartFactor = "score_sum";
   let is_selected_month = 0;
   let is_nomalization = 0;
-  const palette = ["#EBEDF0","#a7e6f6","#49c8fd","#00a4ff","#0677ff"];
+  const cssDecl = getComputedStyle(document.documentElement);
+  const palette = []; // 5 level color
+  for(let i=0; i<5; i++) palette.push(cssDecl.getPropertyValue('--data-level-'+ i));
+  const radar_palette = []; // 3 radar color
+  for(let i=0; i<3; i++) radar_palette.push(cssDecl.getPropertyValue('--data-radar-'+ i));
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
-  let modal_ctx = new Array(4);
-  for(let i=0; i<3; i++){
-    modal_ctx[i] = document.getElementById(`modal-canvas${String(i+1)}`).getContext("2d");
-  }
+  const modal_ctx = []; // 3 ctx
+  for(let i=1; i<=3; i++) modal_ctx.push(document.getElementById('modal-canvas'+i).getContext("2d"));
   let radar_chart = new Chart(modal_ctx[0]);
   let dist_chart = new Chart(modal_ctx[1]);
   let specific_score_chart = new Chart(modal_ctx[2]);
@@ -236,7 +238,7 @@ function setVisualModal(){
                 rect.removeAttribute("stroke-width");
               }
               showTooltip(select_month);
-              e.target.setAttribute("stroke", "#fc2121");
+              e.target.setAttribute("stroke", cssDecl.getPropertyValue('--data-line'));
               e.target.setAttribute("stroke-width", "2px");
             }
             else {
@@ -254,7 +256,7 @@ function setVisualModal(){
         gr.appendChild(mLabel);
       }
       gr.setAttribute("transform", `translate(${(col-1)*(grass_size+fs)}, 0)`);
-      gr.setAttribute("stroke", "#aaaaaa");
+      gr.setAttribute("stroke", cssDecl.getPropertyValue('--main-point-color'));
       div_activity_monthly.appendChild(gr);
     }
   }
@@ -329,6 +331,7 @@ function setVisualModal(){
       x = (x - mean) / sigma;
       return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
     };
+    let dist_line_color = cssDecl.getPropertyValue('--data-line');
     const clickableLines = {
       id: 'clickableLines',
       afterDatasetsDraw(chart, args, pluginOptions){
@@ -349,7 +352,7 @@ function setVisualModal(){
             ctx.restore();
             ctx.beginPath();
             ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+            ctx.strokeStyle = dist_line_color;
             ctx.moveTo(this.width, top+2);
             ctx.lineTo(this.width, bottom);
             ctx.stroke();
@@ -363,13 +366,14 @@ function setVisualModal(){
         drawLine.draw(ctx);
       },
     };
-    dist_chart.destroy()
+    dist_chart.destroy();
+    let dist_point_color = cssDecl.getPropertyValue('--sub-point-color');
     dist_chart = new Chart(modal_ctx[1], {
       type: 'scatter',
       data: { datasets: [{data:normal_dist_data}] },
       options:{
         elements:{
-          point:{radius:2, borderColor: "rgba(0, 148, 255, 1)",backgroundColor:"rgba(0, 148, 255, 1)"}
+          point:{radius:2, borderColor: dist_point_color,backgroundColor:dist_point_color}
         },
         plugins: {
           legend: { display: false },
@@ -403,7 +407,8 @@ function setVisualModal(){
     const yearLabel = newArrayRange(start_year, end_year);
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
-    const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
+    const cc3 = [];
+    for(let i=0;i<3;i++) cc3.push(cssDecl.getPropertyValue('--data-score-'+ i));
     for(let i = 0; i < specific_score_label.length; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
@@ -526,20 +531,20 @@ function setVisualModal(){
               type: "radar",
               label: "average",
               data: average_data,
-              backgroundColor: "rgba(0, 0, 200, 0.3)",
-              hoverBackgroundColor: "rgba(0, 0, 200, 0.9)",
-              borderColor: "rgba(0, 0, 200, 0.5)",
-              hoverBorderColor: "rgba(0, 0, 200, 1)",
+              backgroundColor: radar_palette[0]+'4d',
+              hoverBackgroundColor: radar_palette[0]+'e3',
+              borderColor: radar_palette[0]+'80',
+              hoverBorderColor: radar_palette[0],
               borderWidth: 1,
             });
     radar_datasets.push({ // 유저
               type: "radar",
               label: chart_data['username'],
               data: user_dataset,
-              backgroundColor: "rgba(200, 0, 0, 0.3)",
-              hoverBackgroundColor: "rgba(200, 0, 0, 0.9)",
-              borderColor: "rgba(200, 0, 0, 0.5)",
-              hoverBorderColor: "rgba(200, 0, 0, 1)",
+              backgroundColor: radar_palette[1]+'4d',
+              hoverBackgroundColor: radar_palette[1]+'e3',
+              borderColor: radar_palette[1]+'80',
+              hoverBorderColor: radar_palette[1],
               borderWidth: 1,
             });
     let target = $(".select-compare").find(".placeholder");
@@ -549,10 +554,10 @@ function setVisualModal(){
               type: "radar",
               label: target.text(),
               data: target_dataset,
-              backgroundColor: "rgba(0, 200, 0, 0.3)",
-              hoverBackgroundColor: "rgba(0, 200, 0, 0.9)",
-              borderColor: "rgba(0, 200, 0, 0.5)",
-              hoverBorderColor: "rgba(0, 200, 0, 1)",
+              backgroundColor: radar_palette[2]+'4d',
+              hoverBackgroundColor: radar_palette[2]+'e3',
+              borderColor: radar_palette[2]+'80',
+              hoverBorderColor: radar_palette[2],
               borderWidth: 1,
             });
     }
@@ -582,7 +587,7 @@ function setVisualModal(){
     $(".modal-grass-tooltip").remove();
     if(select_month!=0){
       let rect_target = $(`rect.modal-ContributionMonth[month=${select_month}]`).first();
-      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px", "focus":1});
+      rect_target.attr({"stroke":cssDecl.getPropertyValue('--main-border-color'), "stroke-width":"2px", "focus":1});
       let rect_x = Number(rect_target.attr("x"));
       let rect_y = Number(rect_target.attr("y"));
       let mLabel = document.createElementNS(NS,"text");
@@ -594,6 +599,7 @@ function setVisualModal(){
       mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
       mLabel.setAttributeNS(null, "font-size", "12px");
       mLabel.style.strokeWidth = "0px";
+      mLabel.style.pointerEvents = "none";
       let mBack = document.createElementNS(NS, "rect");
       mBack.setAttributeNS(null, "class", "modal-grass-tooltip");
       mBack.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
@@ -602,11 +608,13 @@ function setVisualModal(){
       mBack.setAttributeNS(null,"height", grass_size/3+4);
       mBack.style.strokeWidth = "0px";
       mBack.style.fill ="white";
+      mBack.style.pointerEvents = "none";
       let mPath = document.createElementNS(NS, "path");
       mPath.setAttributeNS(null, "class", "modal-grass-tooltip");
       mPath.setAttributeNS(null, "d", `M ${label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
       mPath.style.strokeWidth = "0px";
       mPath.style.fill ="white";
+      mPath.style.pointerEvents = "none";
       rect_target.parent().append(mBack);
       rect_target.parent().append(mPath);
       rect_target.parent().append(mLabel);
@@ -618,6 +626,9 @@ function setPortfolioModal(){
   icon_portfolio_modal.addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal('show');
   });
+  document.getElementById("closeChartModalBtn").addEventListener("click", ()=>{
+    $('#modalBox').modal("hide");
+  });
   document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal("hide");
   });
@@ -626,16 +637,6 @@ function setPortfolioModal(){
   });
 }
 function setGbtiModal(){
-  let icon_portfolio_modal = document.getElementById("icon-gbti");
-  icon_portfolio_modal.addEventListener("click", ()=>{
-    $('#modalGbtiBox').modal('show');
-  });
-  document.getElementById("closeGbtiModalIcon").addEventListener("click", ()=>{
-    $('#modalGbtiBox').modal("hide");
-  });
-  document.getElementById("closeGbtiModalBtn").addEventListener("click", ()=>{
-    $('#modalGbtiBox').modal("hide");
-  });
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
     html2canvas(screenshotTarget).then((canvas)=>{
@@ -647,221 +648,4 @@ function setGbtiModal(){
       anchor.remove();
     });
   });
-  const main = document.querySelector('#main');
-  const qna = document.querySelector('#qna');
-  const result = document.querySelector('#result');
-  let selection=[];
-  let endPoint=15;
-  let factor=[0,0,0,0];
-  let P,N,T,E;
-  let descKr, descEng;
-  let resultIdx;
-
-  function setResult(){
-      P= (factor[0]>0 ? 0:1);
-      T= (factor[1]>0 ? 0:1);
-      N= (factor[2]>0 ? 0:1);
-      E= (factor[3]>0 ? 0:1); // factor 0,1 : ENTP 0000
-      
-      descKr = descList[0][P].descKr + descList[1][T].descKr + descList[2][N].descKr + descList[3][E].descKr; //한글 설명 생성
-      descEng = descList[0][P].descEng + descList[1][T].descEng + descList[2][N].descEng + descList[3][E].descEng; //영문 설명 생성
-
-      console.log(descEng);
-      console.log(descKr);
-      
-      let mbti=(E ? 'I':'E') + (N ? 'S':'N') +  (T ? 'F':'T') + (P ? 'J':'P'); //mbti 결과 string
-    
-      console.log(mbti);
-
-      for (let k=0;k<16;k++){
-          if (mbti == resultList[k].mbti) resultIdx=k;
-      }
-      console.log(resultIdx);
-      // var result0= document.querySelector('#descKr'); // 한글 설명 삽입
-      // result0.innerHTML = descKr;
-
-      var result1= document.querySelector('#descEng'); // 영문 설명 삽입
-      console.log("result1", result1);
-      result1.innerHTML = descEng;
-      
-      var result2= document.querySelector('#typeEng'); // 영문 타입명
-      console.log("result2", result2);
-      result2.innerHTML = resultList[resultIdx].typeEng;
-
-      var result3= document.querySelector('#typeKr'); // 한글 타입명
-      result3.innerHTML = resultList[resultIdx].typeKr;
-
-      var resultImg = document.createElement('img'); 
-      const imgDiv = document.querySelector('#resultImg');
-
-      var imgURL= '/static/images/'+mbti+'.png';
-      resultImg.src= imgURL;
-      result.alt=mbti;
-      imgDiv.appendChild(resultImg); //이미지 삽입
-      $("#btn-save-id-card").removeClass("none");
-      $("#gbti-test-restart").removeClass("none");
-  }
-
-  function getResult(){
-      qna.style.WebkitAnimation = "fadeOut 0.5s";
-      qna.style.animation = "fadeOut 0.5s";
-      setTimeout(()=>{
-          result.style.WebkitAnimation = "fadeIn 0.5s";
-          result.style.animation = "fadeIn 0.5s"; 
-          setTimeout(()=>{
-              qna.style.display="none";
-              result.style.display = "block";
-          },200)
-          for (let k = 0; k < endPoint; k++){
-              if(qnaList[k].answer[selection[k]].factor.length>1){
-                  if(qnaList[k].answer[selection[k]].factor[1]=='N') {
-                      factor[2]+=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='S') {
-                      factor[2]-=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='T') {
-                      factor[1]+=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='F') {
-                      factor[1]-=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='E') {
-                      factor[3]+=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='I') {
-                      factor[3]-=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='P') {
-                      factor[0]+=qnaList[k].answer[selection[k]].val[1];
-                  }
-                  else if(qnaList[k].answer[selection[k]].factor[1]=='J') {
-                      factor[0]-=qnaList[k].answer[selection[k]].val[1];
-                  }
-              }
-
-              if(qnaList[k].answer[selection[k]].factor[0]=='N') {
-                  factor[2]+=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='S') {
-                  factor[2]-=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='T') {
-                  factor[1]+=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='F') {
-                  factor[1]-=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='E') {
-                  factor[3]+=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='I') {
-                  factor[3]-=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='P') {
-                  factor[0]+=qnaList[k].answer[selection[k]].val[0];
-              }
-              else if(qnaList[k].answer[selection[k]].factor[0]=='J') {
-                  factor[0]-=qnaList[k].answer[selection[k]].val[0];
-              }
-          }
-          console.log(factor);
-          let result_progress = $(".test-result-bar");
-          for (let i=0; i<result_progress.length; i++){
-            let bars = $(result_progress[i]).children();
-            let widthList = getProgressLength(factor[i], i%2!=0);
-            for (let j=0; j<bars.length; j++){
-              bars[j].style.width = String(widthList[j]) + "%";
-            }
-          }
-          setResult();
-      }, 200);
-      function getProgressLength(factor, reverse=false){
-        let result = []
-        if(reverse) factor = -factor;
-        if(factor < 0){
-          result.push(50+factor/2);
-          result.push(-factor/2);
-          result.push(50);
-        }else{
-          result.push(50);
-          result.push(factor/2);
-          result.push(50-factor/2);
-        }
-        return result;
-      }
-  }
-  function addA(aTxt,qIdx,idx){
-      
-      var abox = document.querySelector('.abox');
-      var answer = document.createElement('div');
-      answer.className = 'answerbtn';
-      answer.classList.add('my-2');
-      answer.classList.add('mx-auto');
-      answer.classList.add('answerList');
-      answer.classList.add('fadeIn');
-      abox.appendChild(answer);
-      answer.innerHTML = aTxt;
-
-      answer.addEventListener("click",function(){
-          selection[qIdx] = idx;
-          var children = document.querySelectorAll('.answerList');
-          for (let k =0; k<children.length; k++){
-              children[k].disabled = true;
-
-              children[k].style.WebkitAnimation = "fadeOut 0.4s";
-              children[k].style.animation = "fadeOut 0.4s";
-              
-              children[k].style.display = 'none';
-          }
-          
-          setTimeout(()=>{
-              for (let k =0; k<children.length; k++){
-                  children[k].style.display = 'none';
-              }
-          },200)
-          if(qIdx<endPoint-1) nextQ(++qIdx);
-          else {
-              getResult();
-          }
-          
-      },false);
-
-  }
-  function nextQ(qIdx){
-      var qbox = document.querySelector('.qbox');
-      qbox.innerHTML = qnaList[qIdx].q;
-      for (let k in qnaList[qIdx].answer){
-          addA(qnaList[qIdx].answer[k].a, qIdx, k);
-      }
-      var pgBar = document.querySelector('.progress-bar');
-      pgBar.style.width= (100/endPoint) * qIdx + '%';
-  }
-  $("#gbti-test-start").on("click", ()=>{
-    begin();
-  });
-  $("#gbti-test-restart").on("click", ()=>{
-    begin();
-  });
-  function begin(){
-      selection=[];
-      endPoint=15;
-      factor=[0,0,0,0];
-      let imgDiv = $('#resultImg');
-      imgDiv.empty(); //이미지 삭제
-
-      result.style.display = "none";
-      main.style.WebkitAnimation = "fadeOut 0.5s";
-      main.style.animation = "fadeOut 0.5s";
-      setTimeout(()=>{
-          qna.style.WebkitAnimation = "fadeIn 0.5s";
-          qna.style.animation = "fadeIn 0.5s"; 
-          setTimeout(()=>{
-              main.style.display="none";
-              qna.style.display = "block";
-          },200)
-          let qIdx=0;
-          nextQ(qIdx);
-      }, 200);
-  }
 }
