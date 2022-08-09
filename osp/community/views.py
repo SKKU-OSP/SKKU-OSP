@@ -230,9 +230,13 @@ def article_list(request, board_name, board_id):
                 article.team = None
 
         if board.board_type == 'QnA':
-            comment_by_like = ArticleCommentLike.objects.filter(comment__in=\
-                ArticleComment.objects.filter(article=article).values('id'))\
-                .annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            # comment_by_like = ArticleCommentLike.objects.filter(
+            #     comment__in=ArticleComment.objects.filter(article=article).values_list('id', flat=True)
+            # ).annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+            comment_by_like = ArticleComment.objects.filter(
+                article=article
+            ).prefetch_related('articlecommentlike_set')
+            comment_by_like = comment_by_like.annotate(like_cnt=Count('articlecommentlike')).order_by('-like_cnt')
             if len(comment_by_like):
                 article.comment = comment_by_like[0]
     if board.board_type == 'QnA':
@@ -489,7 +493,8 @@ def article_like(request):
 
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success'})
+        like_cnt = len(ArticleLike.objects.filter(article=article))
+        return JsonResponse({'status': 'success', 'created': created, 'result': like_cnt})
     except:
         return JsonResponse({'status':'false'})
 
@@ -502,6 +507,34 @@ def article_scrap(request):
         obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
         if not created:
             obj.delete()
-        return JsonResponse({'status': 'success'})
-    except:
+        scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+        return JsonResponse({'status': 'success', 'created': created, 'result': scrap_cnt})
+    except DatabaseError:
         return JsonResponse({'status':'false'})
+
+@login_required
+def my_activity(request):
+    account = Account.objects.get(user=request.user)
+    article = Article.objects.filter(writer=account)
+    scrap = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True))
+    comment = ArticleComment.objects.filter(writer=account)
+    context = {
+        'write_article': article,
+        'scrap_article': scrap,
+        'comment_list': comment
+    }
+    return render(request, 'community/activity.html', context)
+
+
+def comment_like(request):
+    try:
+        comment_id = request.POST.get('comment_id')
+        comment = ArticleComment.objects.get(id=comment_id)
+        account = Account.objects.get(user=request.user)
+        obj, created = ArticleCommentLike.objects.get_or_create(comment=comment,account=account)
+        if not created:
+            obj.delete()
+        like_cnt = len(ArticleCommentLike.objects.filter(comment=comment))
+        return JsonResponse({'status': 'success', 'result': like_cnt})
+    except DatabaseError as e:
+        return JsonResponse({'status':'fail', 'message': str(e)})

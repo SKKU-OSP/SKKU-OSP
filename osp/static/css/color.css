@@ -23,8 +23,15 @@
     --developer-bg-color: #F5F5F5;
     --developer-border-color: #1A1A1A;
     --data-level-0:#EBEDF0;
-    --data-level-1:#a7e6f6;
-    --data-level-2:#49c8fd;
-    --data-level-3:#00a4ff;
-    --data-level-4:#0677ff;
+    --data-level-1:#A7E6F6;
+    --data-level-2:#49C8FD;
+    --data-level-3:#00A4FF;
+    --data-level-4:#0677FF;
+    --data-radar-0:#0000C8;
+    --data-radar-1:#C80000;
+    --data-radar-2:#00C800;
+    --data-score-0:#F7A6AF;
+    --data-score-1:#FFC38B;
+    --data-score-2:#FFF875;
+    --data-line:#FF0000CC;
 }
