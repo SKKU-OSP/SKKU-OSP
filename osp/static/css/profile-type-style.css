@@ -1,6 +1,5 @@
 @import url("/static/css/color.css");
 section#main, section#result, section .qbox{
-    background-color: var(--developer-bg-color);
     text-align: center;
     align-items: center;
 }
@@ -9,6 +8,11 @@ section#main, section#result, section .qbox{
 }
 #result{
     display: none;
+}
+#loading{
+    display: none;
+    margin: auto;
+    height: 100vh;
 }
 .navybtn{
     flex-direction: row;
@@ -42,12 +46,6 @@ section#main, section#result, section .qbox{
 }
 #gbti-test-start:hover{
     background: none;
-}
-.banner{
-    width: 1000px;
-    height: 300px;
-    background-image: url("../images/back.png");
-    background-size: cover;
 }
 .board{
     flex-direction: row;
@@ -101,4 +99,7 @@ section#main, section#result, section .qbox{
     background: white;
     box-shadow: 0px 4px 4px var(--card-box-shadow);
     border-radius: 15px;
+}
+.none{
+    display: none;
 }

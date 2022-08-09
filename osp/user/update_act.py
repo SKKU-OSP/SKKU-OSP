@@ -160,11 +160,42 @@ def update_individual():
 
 
 def update_frequency():
+    users = pd.DataFrame(StudentTab.objects.all().values())
+    usernames = users.loc[:,['github_id']]
+    usernames
 
-    df_commit = pd.DataFrame(GithubRepoCommits.objects.exclude(committer_github__isnull=True).order_by('committer_github', 'committer_date').values())
+    def check_student(unknown_id):
+        checker = int(usernames[usernames['github_id']==unknown_id].count())
+        if checker > 0:
+            return True
+        else:
+            return False
+
+    student_commits = pd.DataFrame(GithubRepoCommits.objects.all().values())
+    commit_lines_limit = 1000
+
+    student_commits = student_commits[student_commits['additions'] < commit_lines_limit] # 한 커밋에 1000개 이상 추가 한 커밋 삭제
+    student_commits = student_commits[student_commits['deletions'] < commit_lines_limit] # 한 커밋에 commit_lines_limit개 이상 삭제 한 커밋 삭제
+
+    student_commits['is_student'] = 0
+    student_commits['is_student'] = student_commits['committer_github'].map(check_student) | student_commits['author_github'].map(check_student)
+    student_commits['committer_is_student'] = student_commits['committer_github'].map(check_student)
+    student_commits['author_is_student'] = student_commits['author_github'].map(check_student)
+    student_commits = student_commits[student_commits['is_student']==True]
+    student_commits['student_github'] = ''
+
+    for row_index in student_commits.index:
+        if student_commits.loc[row_index, 'committer_is_student']:
+            student_commits.loc[row_index, 'student_github'] = student_commits.loc[row_index, 'committer_github']
+        elif student_commits.loc[row_index, 'author_is_student']:
+            student_commits.loc[row_index, 'student_github'] = student_commits.loc[row_index, 'author_github']
+
+    df_commit = student_commits.copy()
+    df_commit.sort_values(by = ['student_github', 'committer_date'] ,inplace=True)
+    # df_commit = pd.DataFrame(GithubRepoCommits.objects.exclude(committer_github__isnull=True).order_by('committer_github', 'committer_date').values())
     # df_commit.dropna(inplace=True)
-    df_commit = df_commit.loc[:,['committer_github', 'repo_name', 'committer_date']].copy()
-    df_commit.rename(columns={'committer_github':'id', 'repo_name': 'rname', 'committer_date':'cdate'}, inplace=True)
+    df_commit = df_commit.loc[:,['student_github', 'repo_name', 'committer_date']].copy()
+    df_commit.rename(columns={'student_github':'id', 'repo_name': 'rname', 'committer_date':'cdate'}, inplace=True)
     
     print(df_commit)
     from datetime import datetime 
@@ -184,7 +215,6 @@ def update_frequency():
         id_repo[row.id][row.rname].append(row.cdate)
     print(len(id_repo.keys()))
     # 현재 날짜와도 비교하는 버전
-    from datetime import datetime 
     date_time_obj = ""
     id_repo_dist = {}
     repo_result = []

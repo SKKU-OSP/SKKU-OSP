@@ -8,12 +8,14 @@ window.onload = function () {
   let chartFactor = "score_sum";
   let is_selected_month = 0;
   let is_nomalization = 0;
-  const palette = ["#EBEDF0","#a7e6f6","#49c8fd","#00a4ff","#0677ff"];
+  const cssDecl = getComputedStyle(document.documentElement);
+  const palette = []; // 5 level color
+  for(let i=0; i<5; i++) palette.push(cssDecl.getPropertyValue('--data-level-'+ i));
+  const radar_palette = []; // 3 radar color
+  for(let i=0; i<3; i++) radar_palette.push(cssDecl.getPropertyValue('--data-radar-'+ i));
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
-  let visual_ctx = new Array(4);
-  for(let i=0; i<3; i++){
-    visual_ctx[i] = document.getElementById(`canvas${String(i+1)}`).getContext("2d");
-  }
+  const visual_ctx = []; // 3 ctx
+  for(let i=1; i<=3; i++) visual_ctx.push(document.getElementById('canvas'+i).getContext("2d"));
   let radar_chart = new Chart(visual_ctx[0]);
   let dist_chart = new Chart(visual_ctx[1]);
   let specific_score_chart = new Chart(visual_ctx[2]);
@@ -105,11 +107,21 @@ window.onload = function () {
     }
   });
   $("#icon-interests").on("click", function(){
+    $("#icon-interests").toggleClass("bi-arrows-angle-contract");
+    $("#icon-interests").toggleClass("bi-arrows-angle-expand");
+    $('#icon-interests').attr('title', function(index, attr){
+      return attr == "확장" ? "축소" : "확장";
+    });
     $(".expandable:nth-child(2)").toggleClass("semi-expanded-0");
     $(".expandable:nth-child(3)").toggleClass("semi-expanded-1");
     $(".expandable:nth-child(1)").toggleClass("expanded");
   })
   $("#icon-lang").on("click", function(){
+    $("#icon-lang").toggleClass("bi-arrows-angle-contract");
+    $("#icon-lang").toggleClass("bi-arrows-angle-expand");
+    $('#icon-lang').attr('title', function(index, attr){
+      return attr == "확장" ? "축소" : "확장";
+    });
     $(".expandable:nth-child(1)").toggleClass("semi-expanded-0");
     $(".expandable:nth-child(3)").toggleClass("semi-expanded-2");
     $(".expandable:nth-child(2)").toggleClass("expanded");
@@ -274,7 +286,7 @@ window.onload = function () {
                 rect.removeAttribute("stroke-width");
               }
               showTooltip(select_month);
-              e.target.setAttribute("stroke", "#fc2121");
+              e.target.setAttribute("stroke", cssDecl.getPropertyValue('--data-line'));
               e.target.setAttribute("stroke-width", "2px");
             }
             else {
@@ -293,7 +305,7 @@ window.onload = function () {
         gr.appendChild(mLabel);
       }
       gr.setAttribute("transform", `translate(${(col-1)*(grass_size+fs)}, 0)`);
-      gr.setAttribute("stroke", "#aaaaaa");
+      gr.setAttribute("stroke", cssDecl.getPropertyValue('--main-point-color'));
       div_activity_monthly.appendChild(gr);
     }
   }
@@ -368,6 +380,7 @@ window.onload = function () {
       x = (x - mean) / sigma;
       return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
     };
+    let dist_line_color = cssDecl.getPropertyValue('--data-line');
     const clickableLines = {
       id: 'clickableLines',
       afterDatasetsDraw(chart, args, pluginOptions){
@@ -388,7 +401,7 @@ window.onload = function () {
             ctx.restore();
             ctx.beginPath();
             ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+            ctx.strokeStyle = dist_line_color;
             ctx.moveTo(this.width, top+2);
             ctx.lineTo(this.width, bottom);
             ctx.stroke();
@@ -402,13 +415,14 @@ window.onload = function () {
         drawLine.draw(ctx);
       },
     };
-    dist_chart.destroy()
+    dist_chart.destroy();
+    let dist_point_color = cssDecl.getPropertyValue('--sub-point-color');
     dist_chart = new Chart(visual_ctx[1], {
       type: 'scatter',
       data: { datasets: [{data:normal_dist_data}] },
       options:{
         elements:{
-          point:{radius:2, borderColor: "rgba(0, 148, 255, 1)",backgroundColor:"rgba(0, 148, 255, 1)"}
+          point:{radius:2, borderColor: dist_point_color, backgroundColor: dist_point_color}
         },
         plugins: {
           legend: { display: false },
@@ -442,7 +456,8 @@ window.onload = function () {
     const yearLabel = newArrayRange(start_year, end_year);
     const score_dataset= [];
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
-    const cc3 = ["#f7a6af", "#ffc38b", "#fff875"];
+    const cc3 = [];
+    for(let i=0;i<3;i++) cc3.push(cssDecl.getPropertyValue('--data-score-'+ i));
     for(let i = 0; i < specific_score_label.length; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
@@ -565,20 +580,20 @@ window.onload = function () {
               type: "radar",
               label: "average",
               data: average_data,
-              backgroundColor: "rgba(0, 0, 200, 0.3)",
-              hoverBackgroundColor: "rgba(0, 0, 200, 0.9)",
-              borderColor: "rgba(0, 0, 200, 0.5)",
-              hoverBorderColor: "rgba(0, 0, 200, 1)",
+              backgroundColor: radar_palette[0]+'4d',
+              hoverBackgroundColor: radar_palette[0]+'e3',
+              borderColor: radar_palette[0]+'80',
+              hoverBorderColor: radar_palette[0],
               borderWidth: 1,
             });
     radar_datasets.push({ // 유저
               type: "radar",
               label: chart_data['username'],
               data: user_dataset,
-              backgroundColor: "rgba(200, 0, 0, 0.3)",
-              hoverBackgroundColor: "rgba(200, 0, 0, 0.9)",
-              borderColor: "rgba(200, 0, 0, 0.5)",
-              hoverBorderColor: "rgba(200, 0, 0, 1)",
+              backgroundColor: radar_palette[1]+'4d',
+              hoverBackgroundColor: radar_palette[1]+'e3',
+              borderColor: radar_palette[1]+'80',
+              hoverBorderColor: radar_palette[1],
               borderWidth: 1,
             });
     let target = $("#target-search").find(".placeholder");
@@ -588,10 +603,10 @@ window.onload = function () {
               type: "radar",
               label: target.text(),
               data: target_dataset,
-              backgroundColor: "rgba(0, 200, 0, 0.3)",
-              hoverBackgroundColor: "rgba(0, 200, 0, 0.9)",
-              borderColor: "rgba(0, 200, 0, 0.5)",
-              hoverBorderColor: "rgba(0, 200, 0, 1)",
+              backgroundColor: radar_palette[2]+'4d',
+              hoverBackgroundColor: radar_palette[2]+'e3',
+              borderColor: radar_palette[2]+'80',
+              hoverBorderColor: radar_palette[2],
               borderWidth: 1,
             });
     }
@@ -621,7 +636,7 @@ window.onload = function () {
     $(".grass-tooltip").remove();
     if(select_month!=0){
       let rect_target = $(`rect.ContributionMonth[month=${select_month}]`).first();
-      rect_target.attr({"stroke":"#fc2121", "stroke-width":"2px", "focus":1});
+      rect_target.attr({"stroke":cssDecl.getPropertyValue('--main-border-color'), "stroke-width":"2px", "focus":1});
       let rect_x = Number(rect_target.attr("x"));
       let rect_y = Number(rect_target.attr("y"));
       let mLabel = document.createElementNS(NS,"text");
@@ -633,6 +648,7 @@ window.onload = function () {
       mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
       mLabel.setAttributeNS(null, "font-size", "12px");
       mLabel.style.strokeWidth = "0px";
+      mLabel.style.pointerEvents = "none";
       let mBack = document.createElementNS(NS, "rect");
       mBack.setAttributeNS(null, "class", "grass-tooltip");
       mBack.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
@@ -641,11 +657,13 @@ window.onload = function () {
       mBack.setAttributeNS(null,"height", grass_size/3+4);
       mBack.style.strokeWidth = "0px";
       mBack.style.fill ="white";
+      mBack.style.pointerEvents = "none";
       let mPath = document.createElementNS(NS, "path");
       mPath.setAttributeNS(null, "class", "grass-tooltip");
       mPath.setAttributeNS(null, "d", `M ${15+label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
       mPath.style.strokeWidth = "0px";
       mPath.style.fill ="white";
+      mPath.style.pointerEvents = "none";
       rect_target.parent().append(mBack);
       rect_target.parent().append(mPath);
       rect_target.parent().append(mLabel);
@@ -654,6 +672,15 @@ window.onload = function () {
   setVisualModal();
   setPortfolioModal();
   setGbtiModal();
+  $("#icon-devtype").on("click", ()=>{
+    $('#modalGbtiBox').modal('show');
+  });
+  $("#closeGbtiModalIcon").on("click", ()=>{
+    $('#modalGbtiBox').modal('hide');
+  });
+  $("#closeGbtiModalBtn").on("click", ()=>{
+    $('#modalGbtiBox').modal('hide');
+  });
   let sideHeight = 0;
   const sideCol = document.getElementById("profile-info");
   for(let i=0; i<sideCol.children.length;i++){
@@ -675,4 +702,37 @@ window.onload = function () {
     }
     if(mt<0 || document.documentElement.scrollTop == 0) sideCol.style.marginTop = '0px';
   });
+  // get repo list
+  load_repo_data({"github_id":github_id});
+  function load_repo_data(data={}){
+    if(data.hasOwnProperty("github_id")){ 
+      $.ajax({
+        type:"POST",
+        url: 'repo-overview',
+        data:JSON.stringify(data),
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        success:function(res){
+            render_repo_list(res["repo"])
+        },
+        error : function(data){ 
+          console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+        }
+      });
+    }
+  }
+  function render_repo_list(repos=[]){
+    repos.forEach((repo)=>{
+      $("#recent-repos").append(
+        `<div class="card w-100 mb-2 recent_repos">
+          <div class="card-body">
+            <h6 class="card-title">${repo["repo_name"]}</h6>
+            <div style="font-size: 13px">
+              ${repo["desc"]}
+            </div>
+          </div>
+        </div>`);
+    });
+  }
 };
