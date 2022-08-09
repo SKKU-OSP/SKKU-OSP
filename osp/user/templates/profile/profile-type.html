@@ -1,0 +1,144 @@
+{% include 'head.html' %}
+{% load static %}
+{% if user.is_authenticated and user == username %}
+<div class="container">
+  <section id ="main"> 
+    <div class="board mx-0 mt-5">
+      <div class="my-3">
+        <h3>개발자 유형 검사</h3>
+      </div>
+      <div class="d-flex justify-content-center">
+        <span class="endpoint left"></span>
+        <span class="line-connect"></span>
+        <span class="endpoint right"></span>
+      </div>
+      <div class="my-2">
+        위 검사는 개발자 성향 지표를 자가 진단을 통해 분석합니다<br>
+        과학적인 조사와 통계를 기반으로 하지 않습니다<br>
+        결과는 추천 시스템과 무관하니 참고용으로 즐겨주시길 바랍니다
+      </div>
+        <div class="my-2">
+          <span id="gbti-test-start" class="btn">시작하기</span>
+        </div>
+    </div>
+  </section>
+  <section id ="qna" class="m-0">
+    <div class="qbox my-5 py-3"></div>
+    <div class="abox"></div>
+    <div class="progress mt-5" style="height: 10px;">
+      <div class="progress-bar" role="progressbar" style="width:50%; background: #002743; border-radius: 10px;" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+  </section>
+  <section id="result" class="mx-auto mt-5">
+    <h3>개발자 유형 검사 결과</h3>
+    <div class="d-flex justify-content-center">
+      <span class="endpoint left"></span>
+      <span class="line-connect"></span>
+      <span class="endpoint right"></span>
+    </div>
+    <div id="gbti-id-card" class="modal-gbti-card">
+      <p class="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
+      <div class="d-flex justify-content-center">
+        <div class="gbti-content d-flex justify-content-center p-sm">
+          <div id="resultImg" class="gbti-img">
+          </div>
+        </div>
+        <div class="gbti-content d-flex flex-column p-sm justify-content-between">
+          <p id="descEng" class="text-center text-label mb-3"></p>
+          <h4 id="typeEng" class="text-center"></h4>
+          <h4 id="typeKr" class="text-center"></h4>
+          <div class="d-flex justify-content-between text-label">
+            <span>Steady</span>
+            <span>Fluid</span>
+          </div>
+          <div id="type-d-bar" class="progress test-result-bar">
+            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <div class="d-flex justify-content-between text-label">
+            <span>CoolHead</span>
+            <span>WarmHeart</span>
+          </div>
+          <div id="type-c-bar" class="progress test-result-bar">
+            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <div class="d-flex justify-content-between text-label">
+            <span>Creative</span>
+            <span>Efficient</span>
+          </div>
+          <div id="type-b-bar" class="progress test-result-bar">
+            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <div class="d-flex justify-content-between text-label">
+            <span>MultiPlay</span>
+            <span>SinglePlay</span>
+          </div>
+          <div id="type-a-bar" class="progress test-result-bar">
+            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+      <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
+    </div>
+  </section>
+  <div class="d-flex justify-content-end btn-gbti-group">
+    <button class="btn-gbti pb-inactive none" style="float:left;margin-right:auto;" onClick="window.history.back();return false;">돌아가기</button>
+    <button id="btn-save-id-card" class="btn-gbti pb-active none">ID CARD 저장</button>
+    <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3 none">다시 검사하기</button>
+  </div>
+</div>
+<section id="loading">
+  <span class="align-middle d-flex flex-column" style="width: 100%; height:100%;">
+    <div class="spinner-border" style="width: 3rem; height: 3rem;margin:auto;" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </span>
+</section>
+{% else %}
+<div class="container">
+  <section id ="main"> 
+    <div class="board mx-0 mt-5">
+      <div class="my-3">
+        <h3>개발자 유형 검사</h3>
+      </div>
+      <div class="d-flex justify-content-center">
+        <span class="endpoint left"></span>
+        <span class="line-connect"></span>
+        <span class="endpoint right"></span>
+      </div>
+      <div class="my-2">
+        로그인하거나 본인의 테스트페이지에서 진행해주세요
+      </div>
+      {% if user.is_authenticated %}
+      <div class="my-2">
+        <span id="gbti-test-start" class="btn" onclick="location.href='../{{user.username}}/test'">이동하기</span>
+      </div>
+      {% else %}
+      <div class="my-2">
+        <span id="gbti-test-start" class="btn" onclick="location.href='/accounts/login/'">이동하기</span>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endif %}
+
+{% block script %}
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
+  <script type="text/javascript">
+    const github_id = '{{username}}';
+  </script>
+  <script type="text/javascript" src="{% static 'js/test_type_main.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/test_type_data.js' %}"></script>
+{% endblock %}
