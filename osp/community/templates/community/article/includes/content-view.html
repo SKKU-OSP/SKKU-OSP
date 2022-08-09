@@ -49,65 +49,89 @@
         <div>
             <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body }}</div>
         </div>
-        <div style="margin-top:5px;" class="ss-97888 ss-main d-flex flex-row" >
+        <div style="margin-top:10px;" class="ss-main d-flex flex-row" >
             <div class="ss-multi-selected">
                 <div class="ss-values">
                     {% for tag in tags %}
-                        <div class="ss-value bg-tag-{{tag.tag.type}}">
-                            <span class="ss-value-text"># {{ tag.tag.name }}</span>
-                        </div>
+                    <div class="ss-value bg-tag-{{tag.tag.type}}">
+                        <span class="ss-value-text"># {{ tag.tag.name }}</span>
+                    </div>
                     {% empty %}
-                        <span style="padding-left:5px;">태그 없음</span>
+                    <span style="padding-left:5px;">태그 없음</span>
                     {% endfor %}
                 </div>
             </div>
-            <div class="d-flex flex-row justify-content-between" style="width:65px;height:30px;">
-                <div onclick="ArticleThumbUp(this, {{ article.id }},{{ request.user.id | default_if_none:-1 }})"
+            <div id="article-like-scrap" class="d-flex flex-row justify-content-between">
+                <div onclick="ArticleThumbUp({{ article.id }},{{ request.user.id | default_if_none:-1 }})"
+                    id="article-like-btn"
+                    class="h-100 pointer opacity-hover">
                     {% is_article_thumb_up article request.user as is_thumb_up %}
                     {% if not is_thumb_up %}
-                        class="material-icons-outlined h-100 pointer opacity-hover"
+                    <span class="material-icons-outlined">
                     {% else %}
-                        class="material-icons h-100 pointer opacity-hover"
+                    <span class="material-icons">
                     {% endif %}
-                        style="line-height:30px;font-size:21px;padding-left:5px;">
-                    thumb_up
+                        thumb_up
+                    </span>
                 </div>
-                <div onclick="ArticleScrap(this, {{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
-                    {% is_article_scrap article request.user as is_scrap %}
-                    {% if not is_scrap %}
-                        class="material-icons-outlined h-100 pointer opacity-hover"
-                    {% else %}
-                        class="material-icons h-100 pointer opacity-hover"
-                    {% endif %}
-                    class="material-icons-outlined h-100 pointer opacity-hover"
-                    style="line-height:30px;font-size:23px;padding-right:3px;">
-                    bookmark_border
+                <div>
+                    <span id="article-like-cnt">
+                        {{article|article_like}}
+                    </span>
+                </div>
+                {% is_article_scrap article request.user as is_scrap %}
+                <div id="article-scrap-btn" onclick="ArticleScrap({{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
+                    class="h-100 pointer opacity-hover">
+                    <span class="material-icons-outlined">
+                        {% if is_scrap %} 
+                        bookmark
+                        {% else %}
+                        bookmark_border
+                        {% endif %}
+                    </span>
+                </div>
+                <div>
+                    <span id="article-scrap-cnt">
+                        {{article|article_scrap}}
+                    </span>
                 </div>
             </div>
-{#            <input name='tags' value='tag1,tag2' placeholder="게시판 관련 태그" style="border-top:none;border-left:none;border-right:none;" readonly >#}
-
         </div>
     </div>
 </form>
 {% if board.board_type == 'Recruit' %}
-<div class="form-control d-flex flex-row justify-content-between" style="margin-top:5px;">
+<div class="form-control d-flex flex-row justify-content-between w-100" style="margin-top:5px;">
     {% if article.team %}
-    <div>
-        <div id="recruit-team-info" class="d-flex flex-row">
-            <div id="recruit-team-info-image">
+    <div class="w-100">
+        <div class="d-flex flex-row recruit-team-info">
+            <div class="recruit-team-info-image">
                 <img src="{{article.team.image.url}}" alt="team-image">
             </div>
             <div>
-                {{ article.team.name }} 
+                <b>{{ article.team.name }} </b>
                 <br> 
                 {{ article.team.description }}
             </div>
         </div>
-        <div class="d-flex">
-            <div id="recruit-team-info-period">
-                모집기간
+        <div class="d-flex flex-row justify-content-between w-100">
+            <div class="d-flex flex-row">
+                <div class="recruit-team-info-period">
+                    모집기간
+                </div>
+                <div>
+                    {{article.period_start|date:'Y-m-d H:i'}} ~ {{article.period_end|date:'Y-m-d H:i'}}
+                </div>
             </div>
-            {{article.period_start|date:'Y-m-d H:i'}} ~ {{article.period_end|date:'Y-m-d H:i'}}
+            <div>
+                {% is_period_end article.period_end as is_end %}
+                {% if not article.team %}
+                    -
+                {% elif not is_end %}
+                    <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중</span>
+                {% else %}
+                    <span class="badge" style="font-size:13px;background:#fec89a;">모집 마감</span>
+                {% endif %}
+            </div>
         </div>
     </div>
         {% is_teammember article.team request.user as is_teammember %}
@@ -121,7 +145,7 @@
                         {% else %}
                         onclick="openTeamApplyModal({{ article.team.id }});" 
                         {% endif %}
-                        data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;">지원하기</button>
+                        data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;margin-left:7px;">지원하기</button>
             </div>
             {% else %}
             <div>

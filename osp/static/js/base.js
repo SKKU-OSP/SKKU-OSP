@@ -1,91 +1,3 @@
-function ArticleThumbUp(obj, article_id, user_id) {
-    if (user_id == -1) {
-        alert("로그인 후 이용해주세요.");
-        return;
-    }
-    ajax_form_data = new FormData();
-    ajax_form_data.append('article_id', article_id);
-    ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-    $.ajax({
-        type: "POST",
-        url: "/community/api/article/like/",
-        data: ajax_form_data,
-        dataType: 'json',
-        processData: false,
-        contentType: false,
-
-        success: function (data) {
-            if (data['status'] == 'success') {
-                $(obj).toggleClass('material-icons-outlined');
-                $(obj).toggleClass('material-icons');
-            }
-        },
-    });
-}
-
-function ArticleScrap(article_id, user_id) {
-    if (user_id == -1) {
-        alert("로그인 후 이용해주세요.");
-        return;
-    }
-    ajax_form_data = new FormData();
-    ajax_form_data.append('article_id', article_id);
-    ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-    $.ajax({
-        type: "POST",
-        url: "/community/api/article/scrap/",
-        data: ajax_form_data,
-        dataType: 'json',
-        processData: false,
-        contentType: false,
-
-        success: function (data) {
-            if (data['status'] == 'success') {
-                $(obj).toggleClass('material-icons-outlined');
-                $(obj).toggleClass('material-icons');
-            }
-        },
-    });
-}
-
-function apply_result(team_id, username, is_okay) {
-
-    var status = is_okay ? "수락" : "거절";
-
-    if (!confirm(username + ": " + status + "하시겠습니까?")) {
-        return;
-    }
-
-    ajax_form_data = new FormData();
-    ajax_form_data.append('team_id', team_id);
-    ajax_form_data.append('username', username);
-    ajax_form_data.append('is_okay', is_okay);
-    ajax_form_data.append('direction', 'TO_TEAM');
-    ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-
-
-    $.ajax({
-        type: "POST",
-        url: "/team/api/team-invite-update/",
-        data: ajax_form_data,
-        dataType: 'json',
-        processData: false,
-        contentType: false,
-
-        success: function (data) {
-            if (data['status'] == "success") {
-                console.log(data)
-                $('#AddTeamModal').html(data['data']);
-            } else {
-                alert(data['message']);
-            }
-        },
-        error: function (data) {
-            alert('Error Occured');
-        }
-    });
-}
-
 function message_box_builder(msg, is_receive) {
     var msg_date = new Date(msg.send_date);
     var msg_box = $('<div></div>').append(
@@ -226,6 +138,7 @@ function send_msg(event) {
                 'read': 'False',
             }
             $('#chat-view').append(message_box_builder(msg, false).addClass('pending'));
+            $('#chat-view').scrollTop($('#chat-view').height());
             $('#chat-input').val('')
         }
     }).done(function (data) {
@@ -270,3 +183,24 @@ $().ready(function () {
         msgModalOpen();
     })
 });
+
+function ReadNotification(type, noti_id, target_id){
+    console.log(type, noti_id, target_id)
+    $.ajax({
+        url: '/message/noti-read/' + noti_id,
+        dataType: 'JSON',
+    }).done(function(data) {
+        if(data['status'] == 'success'){
+            if(type == 'comment' || type == 'articlelike'){
+                window.location = '/community/article/' + target_id;
+            }
+            if(type == 'team_apply'){
+
+            }
+            $('#noti-'+noti_id).addClass('read');
+        }
+        else{
+            alert(data['message']);
+        }
+    })
+}

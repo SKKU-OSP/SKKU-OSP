@@ -120,3 +120,17 @@ def message_chat_view(request, opponent):
         #         'read': str(msg.receiver_read)
         #     })
         return JsonResponse({'status': 'success', 'msg_id': new_msg.id, 'new_msg_list':msg_list})
+
+
+def read_notification(request, noti_id):
+    target = Message.objects.filter(id=noti_id)
+    try:
+        if len(target) > 0:
+            target = target.first()
+            target.receiver_read = True
+            target.save()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'fail', 'message': 'No such notification'})
+    except DatabaseError:
+        return JsonResponse({'status': 'fail', 'message': 'DB Failed'})
