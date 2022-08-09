@@ -116,6 +116,9 @@ class ProfileView(TemplateView):
 
         print(relations)
         print(remain_children)
+
+        is_own = str(request.user) == context['username']
+
         data = {
             'info': student_info,
             'score': student_score,
@@ -124,7 +127,8 @@ class ProfileView(TemplateView):
             'lang': lang,
             'relations': relations,
             'remains': remain_children,
-            'account': context['account']
+            'account': context['account'],
+            'is_own' : is_own
         }
         context['data'] = data
 
@@ -304,10 +308,9 @@ class ProfileView(TemplateView):
 
         try:
             devtype_data = DevType.objects.get(account=account)
-            gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            gbti_data.update(getGBTI(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            
+            test_data.update(getGBTI(test_data["typeA"], test_data["typeB"], test_data["typeC"], test_data["typeD"]))
+
             def get_left_len(type_val):
                 return int((100 - type_val)/2) - 5
             def get_right_len(type_val):
@@ -322,6 +325,25 @@ class ProfileView(TemplateView):
             test_data["typeDl"] = get_left_len(test_data["typeD"])
             test_data["typeDr"] = get_right_len(test_data["typeD"])
             test_data.update(getGBTI(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+
+            if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
+                devtype_data.typeE = 1
+            else: # 밤에 활동
+                devtype_data.typeE = -1
+            if(committer_frequency == 0): # 자주 작업
+                devtype_data.typeF = 1
+            else: # 몰아서 작업
+                devtype_data.typeF = -1
+            if(student_major_act == 'individual'): # 혼자 작업
+                devtype_data.typeG = -1
+            else: # 함께 작업
+                devtype_data.typeG = 1
+            devtype_data.save()
+            gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
+            gbti_data['typeE'] = devtype_data.typeE
+            gbti_data['typeF'] = devtype_data.typeF
+            gbti_data['typeG'] = devtype_data.typeG
+            print("length test_data", test_data)
             print("total test_data", test_data)
         except Exception as e:
             print("DevType get error", e)
@@ -329,24 +351,7 @@ class ProfileView(TemplateView):
         
         print(student_time_circmean)
         print(time_sector_min)
-        gbti_data = {}
-
-        if(student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max): # 낮에 활동
-            gbti_data["typeE"] = 1
-        else: # 밤에 활동
-            gbti_data["typeE"] = -1
-
-        if(committer_frequency == 0): # 자주 작업
-            gbti_data["typeF"] = 1
-
-        else: # 몰아서 작업
-            gbti_data["typeF"] = -1
-
-        if(student_major_act == 'individual'): # 혼자 작업
-            gbti_data["typeG"] = -1
-        else: # 함께 작업
-            gbti_data["typeG"] = 1
-
+        
         context["test"] = test_data
         context["gbti"] = gbti_data
         context["star"] = own_star["star"]
