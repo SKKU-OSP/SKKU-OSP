@@ -1,23 +1,18 @@
 {% load community_tag %}
 <form id="comment-form" method="post" action="." class="row" onsubmit="registerComment();return false;">
     {% csrf_token %}
-    <div class="d-flex flex-row justify-content-between" style="height:40px;margin-top:10px;">
-        <div class="border rounded"
-            style="padding-left:10px;padding-right:5px;height:40px;line-height:40px;margin-right:10px;font-weight:bold;">
+    <div id="comment-input" class="comment-input">
+        <div id="comment-input-desc">
             댓글쓰기
         </div>
-        <input id="comment-body" class="form-control" placeholder="댓글을 입력해주세요."
-            style="flex:1;height:40px;line-height:40px;display:block;margin-right:10px;" required>
-        <div>
-            <input id="comment-is-anonymous" type="checkbox" style="line-height:35px;" checked><span
-                style="padding-left:3px;line-height:40px;">익명</span>
+        <input id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required>
+        <div id="comment-annonymous">
+            <input id="comment-is-anonymous" type="checkbox" checked>
+            <span>익명</span>
         </div>
-        <div>
-            <button type="submit" {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')" {% endif %}
-                class="rounded-circle border-2" style="background:none;font-size:20px;margin-left:5px;"><i
-                    class="bi-chat-left-dots"></i>
-            </button>
-        </div>
+        <button id="comment-submit" type="submit" {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')" {% endif %}>
+            <i class="bi-chat-left-dots"></i>
+        </button>
     </div>
 </form>
 <div id="comment-group" class="list-group">
