@@ -9,6 +9,18 @@
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
+      <div class="d-flex flex-row-reverse">
+        <button class="btn btn-outline-secondary text-white ms-auto mb-1"
+          {% if request.user.is_anonymous %}
+                onclick="alert('로그인 후 이용해주세요')"
+            {% elif board %}
+          onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
+          {% endif %}
+          >
+          글쓰기
+          <i class="bi-pencil text-white"></i>
+        </button>
+      </div>
       {% if board.board_type == 'Recruit' %}
         {% include "community/board/article-carousel.html" %}
       {% endif %}
@@ -16,31 +28,17 @@
         {% include "community/board/team-tab.html" %}
       {% endif %}
       <div class="d-flex justify-content-between" id="board-title-bar">
-        <div class="d-flex col-8 justify-content-start">
-          <div id="board-title">
-            <a href="/community/home/{{board.name}}/{{board.id}}">
-              {{ board.name }} 게시판
-          </a>
-          </div>
-          <div class="my-auto col-6" id="tag-filter">
-            <select class="mx-2" style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
-              {% category_tag request %}
-            </select>
-          </div>
+        <div id="board-title">
+          <a href="/community/home/{{board.name}}/{{board.id}}">
+            {{ board.name }} 게시판
+        </a>
         </div>
-        <div class="my-auto text-white">
-          <button class="btn btn-outline-secondary text-white"
-             {% if request.user.is_anonymous %}
-                  onclick="alert('로그인 후 이용해주세요')"
-              {% elif board %}
-             onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-             {% endif %}
-            >
-            글쓰기
-            <i class="bi-pencil text-white"></i>
-          </button>
+        <div class="my-auto col-3" id="tag-filter">
+          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+            {% category_tag request %}
+          </select>
         </div>
-      </div>
+    </div>
       <div id="article-list-body">
       </div>
       {% include "community/board/board-footer.html" with board=board %}
