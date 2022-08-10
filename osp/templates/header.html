@@ -30,7 +30,7 @@
                 <li class="dropdown noti-dropdown-btn">
                     {% get_notifications request.user as notifications %}
                     <button class="noti-dropdown dropdown-toggle me-2 default-btn" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false" style="color:white;">
+                        aria-expanded="false">
                         <div id="notification" class="nav-item notification material-icons-outlined pointer icon">
                             notifications
                         </div>
@@ -42,11 +42,21 @@
                     </button>
                     <ul class="dropdown-menu noti-dropdown">
                         {% for noti in notifications.list %}
-                        {% if noti.receiver_read %}
-                        <li class="nav-item d-flex flex-row justify-content-between noti-item read">
-                        {% else %}
-                        <li class="nav-item d-flex flex-row justify-content-between noti-item" id="noti-{{noti.id}}">
-                        {% endif %}
+
+                        <li
+                            {% if noti.receiver_read %}
+                            class="nav-item d-flex flex-row justify-content-between noti-item read"
+                            {% else %}
+                            class="nav-item d-flex flex-row justify-content-between noti-item" id="noti-{{noti.id}}"
+                            {% endif %}
+                            {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
+                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
+                                style="cursor:pointer;"
+                            {% elif noti.body.type == "team_apply" %}
+                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
+                                style="cursor:default;"
+                            {% endif %}
+                        >
                             <div class="d-flex">
                                 <div class="material-icons-outlined me-2">
                                     {{noti.icon}}
@@ -57,10 +67,10 @@
                             </div>
                             <div>
                                 {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
-                                <i onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
+                                <i
                                     class="bi bi-box-arrow-up-right pointer"></i>
                                 {% elif noti.body.type == "team_apply" %}
-                                <i onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
+                                <i
                                     class="bi bi-box-arrow-up-right pointer"></i>
                                 {% endif %}
                             </div>
