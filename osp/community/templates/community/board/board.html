@@ -6,6 +6,18 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
+  <div class="d-flex flex-row-reverse">
+    <button class="btn btn-outline-secondary ms-auto mb-1"
+      {% if request.user.is_anonymous %}
+            onclick="alert('로그인 후 이용해주세요')"
+        {% elif board %}
+      onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
+      {% endif %}
+      >
+      글쓰기
+      <i class="bi-pencil"></i>
+    </button>
+  </div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
@@ -16,31 +28,17 @@
         {% include "community/board/team-tab.html" %}
       {% endif %}
       <div class="d-flex justify-content-between" id="board-title-bar">
-        <div class="d-flex col-8 justify-content-start">
-          <div id="board-title">
-            <a href="/community/home/{{board.name}}/{{board.id}}">
-              {{ board.name }} 게시판
-          </a>
-          </div>
-          <div class="my-auto col-6" id="tag-filter">
-            <select class="mx-2" style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
-              {% category_tag request %}
-            </select>
-          </div>
+        <div id="board-title">
+          <a href="/community/home/{{board.name}}/{{board.id}}">
+            {{ board.name }} 게시판
+        </a>
         </div>
-        <div class="my-auto text-white">
-          <button class="btn btn-outline-secondary text-white"
-             {% if request.user.is_anonymous %}
-                  onclick="alert('로그인 후 이용해주세요')"
-              {% elif board %}
-             onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-             {% endif %}
-            >
-            글쓰기
-            <i class="bi-pencil text-white"></i>
-          </button>
+        <div class="my-auto col-3" id="tag-filter">
+          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+            {% category_tag request %}
+          </select>
         </div>
-      </div>
+    </div>
       <div id="article-list-body">
       </div>
       {% include "community/board/board-footer.html" with board=board %}
@@ -50,6 +48,35 @@
 {% endblock content %}
 {% block script %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.js"></script>
+
+<script>
+{#jQuery.noConflict();#}
+
+{#$(document).ready(function($){#}
+{#    $('.slick-carousel').slick({#}
+{#        slidesToShow: 3,#}
+{#        slidesToScroll: 1,#}
+{#        // autoplay: true,#}
+{##}
+{#        autoplay: false,#}
+{#        autoplaySpeed: 2000,#}
+{#        prevArrow: '<div class="a-left prev slick=prev control-c pointer opacity-hover" style="line-height:140px;padding-right:5px;"><</div>',#}
+{#        nextArrow: '<div class="a-left prev slick=prev control-c pointer opacity-hover" style="line-height:140px;padding-left:5px;">></div>',#}
+{#        arrows:true,#}
+{#        responsive:[#}
+{#            {#}
+{#                breakpoint:900,#}
+{#                settings:{#}
+{#                    slidesToShow: 1,#}
+{#                    slidesToScroll: 1,#}
+{#                    autoplaySpeed: 4000,#}
+{#                }#}
+{#            },#}
+{##}
+{#        ]#}
+{#    });#}
+{#});#}
+</script>
 <script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>
 {% endblock script %}

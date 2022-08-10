@@ -2,8 +2,16 @@
 {% load static %}
 
 {% block content %}
-
+<div class="messages">
+  {% for message in messages %}
+    <div {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
+      <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
 <body>
+
   <form method="POST" action=""  enctype="multipart/form-data">
     <div class="container my-4">
       <div class="d-flex justify-content-end mb-1">
@@ -12,8 +20,13 @@
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
           <div class="d-flex flex-column justify-content-end text-center user-info">
+            <div style="position:relative; margin:auto;">
               <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
-              <input id="photo" name="photo" type="file" />
+              <label id="for-photo" for="photo">
+                <i class="bi bi-pen"></i>
+              </label>
+              <input id="photo" name="photo" type="file" hidden/>
+            </div>
             <div class="info-body">
               <p class="font-focus">{{data.info.name}}</p>
               <p>{{data.info.github_id}}</p>
@@ -38,19 +51,19 @@
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">GitHub</span>
-              <input type="text" readonly class="form-control-plaintext" id="github_id" value={{data.info.github_id}}>
+              <span class="row-txt">{{data.info.github_id}}</span>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">개인 Email</span>
-              <input type="email" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+              <input type="text" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">Github Email</span>
-              <input type="email" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+              <input type="text" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">Secondary Email</span>
-              <input type="email" class="form-control" id="primary_email" name="secondary_email" value={{data.info.secondary_email}}>
+              <input type="text" class="form-control" id="primary_email" name="secondary_email" value={{data.info.secondary_email}}>
             </div>
           </div>
         </div>
@@ -71,7 +84,7 @@
               <div class="col edit-container">
                 <div class="card edit-card">
                   <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
-                  <div class="card-body">
+                  <div class="card-body overflow-auto">
                     {% csrf_token %}
                     {% include 'profile/languages.html' %}
                   </div>
@@ -97,9 +110,7 @@
             </div>
           </div>
         </div>
-        
       </div>
-
     {% csrf_token %}
   </form>
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -114,14 +125,7 @@
     </symbol>
   </svg>
   {% if messages %}
-  <div class="messages">
-      {% for message in messages %}
-        <div {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
-          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-          {{ message }}
-        </div>
-      {% endfor %}
-  </div>
+
   {% endif %}
 </body>
 {% endblock %}
@@ -129,4 +133,7 @@
 {% block script %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
   <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
+  <script>
+
+    </script>
 {% endblock %}

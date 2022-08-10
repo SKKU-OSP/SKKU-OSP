@@ -8,7 +8,7 @@
 .accordion-item,
 .accordion-button {
     border: none;
-    border-radius: 0 !important;
+    border-radius: 0.625rem !important;
 }
 
 .accordion-button:focus {
@@ -31,8 +31,16 @@
     background-image: none;
 }
 
-.acheive-item {
+.accordion-collapse{
+    margin-top: -1rem;
+    padding-top: 1rem;
     background-color: #FFFFFF;
+    border-bottom-left-radius: 0.625rem !important;
+    border-bottom-right-radius: 0.625rem !important;
+    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+}
+
+.acheive-item {
     padding: 0.5rem 1rem 0.5rem 1rem;
     border-bottom: 0.5px solid var(--main-border-color);
 }
@@ -60,11 +68,18 @@
     color: #FFFFFF;
     padding: 1rem 1.25rem;
     font-size: 1rem;
+    border-radius: 0.625rem;
 }
 
 #challenge-refresh {
     background-color: transparent;
     border: none;
+}
+
+#total-tab-pane{
+    background-color: #FFFFFF;
+    border-radius: 0.625rem;
+    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
 @keyframes rotate {

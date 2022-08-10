@@ -18,9 +18,9 @@
                     {% is_period_end article.period_end as is_end %}
                     {% if not article.team %}
                     {% elif not is_end %}
-                        <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
+                        <span class="badge tag-recruit">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
                     {% else %}
-                        <span class="badge" style="font-size:13px;background:#fec89a;">모집 마감</span>
+                        <span class="badge tag-recruit-end">모집 마감</span>
                     {% endif %}
                 {% endif %}
             </div>
@@ -70,9 +70,9 @@
         </div>
     </div>
     {% if comment_visible %}
-    <div class="d-flex" style="background-color: lightgray;">
+    <div class="d-flex article-bar-comment">
         {% if article.comment %}
-        <div style="width: 2%;"></div>
+        <i class="bi bi-arrow-return-right me-1"></i>
         <div>
             {{article.comment.body}}
         </div>
@@ -83,9 +83,11 @@
             <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
         {% endif %}
         </div>
-        <div class="mx-2">
-            <i class="bi-star"></i>
-            {{article.comment.like_cnt}}
+        <div class="d-flex">
+            <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+            <div>
+                {{article.comment.like_cnt}}
+            </div>
         </div>
         {% else %}
         <div class="m-auto color-b">댓글이 없습니다</div>
@@ -95,8 +97,6 @@
 </div>
 {% empty %}
 <div class="article-bar empty">
-    <div class="m-auto">
-        등록된 글이 없습니다.
-    </div>
+    등록된 글이 없습니다.
 </div>
 {% endfor %}

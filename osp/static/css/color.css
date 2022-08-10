@@ -3,8 +3,8 @@
     --sub-bg-color: #DAE2E8;
     --main-border-color: #9D9D9D;
     --main-point-color: #002743;
-    --alert-color: #31FFCE;
     --sub-point-color: #0094FF;
+    --alert-color: #31FFCE;
     --main-icon-color: #747474;
     --profile-nav-font:#495057;
     --profile-nav-border:#9D9D9D9D;
@@ -19,6 +19,8 @@
     --tag-bg-language:#9AD5FF;
     --tag-bg-tool: #9AFFE7;
     --tag-bg-ect: #CDCDCD;
+    --tag-bg-recruit: #B8E0D2;
+    --tag-bg-recruit-end: #FEC89A;
     --guideline-inactive: #E2E2E2;
     --developer-bg-color: #F5F5F5;
     --developer-border-color: #1A1A1A;
@@ -27,11 +29,16 @@
     --data-level-2:#49C8FD;
     --data-level-3:#00A4FF;
     --data-level-4:#0677FF;
+    --data-level-5:#EBEDF0;
     --data-radar-0:#0000C8;
     --data-radar-1:#C80000;
     --data-radar-2:#00C800;
     --data-score-0:#F7A6AF;
     --data-score-1:#FFC38B;
     --data-score-2:#FFF875;
+    --type-freq-0:#ffcd56;
+    --type-freq-1:#4bc0c0;
+    --type-freq-2:#36a2eb;
+    --type-freq-3:#9966ff;
     --data-line:#FF0000CC;
 }

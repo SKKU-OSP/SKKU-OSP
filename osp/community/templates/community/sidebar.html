@@ -12,28 +12,23 @@
             {% if user.is_authenticated %}
             <div id="profile-username">
                 <a href="/user/{{user.username}}">{{user.username}}</a>
-                <a href="/community/activity">
-                    <span class="material-icons">
-                        collections_bookmark
-                    </span>
-                </a>
             </div>
             {% else %}
             {% endif %}
         </div>
         {% if user.is_authenticated %}
-        <div id="team-manage-tab" class="d-flex flex-row flex-wrap justify-content-center">
-            <div id="team-apply-list" >
+        <div id="manage-tab" class="d-flex flex-column flex-wrap justify-content-center">
+            <div id="my-activity" onclick="location.href='/community/activity'">
+                <span class="material-icons">
+                    collections_bookmark
+                </span>
+                내 활동 목록
+            </div>
+            <div id="team-apply-list">
                 <span class="material-icons" >
                 assignment_ind
                 </span>
                 지원서 목록
-            </div>
-            <div id="team-create">
-                <span class="material-icons">
-                    group_add
-                </span> 
-                팀 만들기
             </div>
         </div>
         {% endif %}
@@ -48,6 +43,11 @@
         {% if user.is_authenticated %}
         <div id="team-boardgroup" class="boardgroup-title d-flex justify-content-between">
             <div>팀 게시판</div>
+            <div id="team-create">
+                <span class="material-icons">
+                    group_add
+                </span>
+            </div>
         </div>
         {% board_sidebar_team_board request %}
         {% endif %}

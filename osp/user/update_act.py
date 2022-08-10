@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import os
 from scipy.stats import circmean
-import datetime
+from datetime import datetime
+import math, time
 from user.models import GithubRepoCommits, GithubRepoStats, DevType, StudentTab
 
 commit_lines_limit = 1000
@@ -11,7 +12,7 @@ commit_lines_limit = 1000
 
 def update_commmit_time():
     def time_to_seconds(hour_min_sec):
-        time = datetime.datetime.strptime(str(hour_min_sec), '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
+        time = datetime.strptime(str(hour_min_sec), '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
         hour = int(time.split(':')[0])
         minute = int(time.split(':')[1])
         sec = int(time.split(':')[2])
@@ -160,51 +161,31 @@ def update_individual():
 
 
 def update_frequency():
-    users = pd.DataFrame(StudentTab.objects.all().values())
-    usernames = users.loc[:,['github_id']]
-    usernames
-
-    def check_student(unknown_id):
-        checker = int(usernames[usernames['github_id']==unknown_id].count())
-        if checker > 0:
-            return True
-        else:
-            return False
-
-    student_commits = pd.DataFrame(GithubRepoCommits.objects.all().values())
-    commit_lines_limit = 1000
-
-    student_commits = student_commits[student_commits['additions'] < commit_lines_limit] # 한 커밋에 1000개 이상 추가 한 커밋 삭제
-    student_commits = student_commits[student_commits['deletions'] < commit_lines_limit] # 한 커밋에 commit_lines_limit개 이상 삭제 한 커밋 삭제
-
-    student_commits['is_student'] = 0
-    student_commits['is_student'] = student_commits['committer_github'].map(check_student) | student_commits['author_github'].map(check_student)
-    student_commits['committer_is_student'] = student_commits['committer_github'].map(check_student)
-    student_commits['author_is_student'] = student_commits['author_github'].map(check_student)
-    student_commits = student_commits[student_commits['is_student']==True]
-    student_commits['student_github'] = ''
-
-    for row_index in student_commits.index:
-        if student_commits.loc[row_index, 'committer_is_student']:
-            student_commits.loc[row_index, 'student_github'] = student_commits.loc[row_index, 'committer_github']
-        elif student_commits.loc[row_index, 'author_is_student']:
-            student_commits.loc[row_index, 'student_github'] = student_commits.loc[row_index, 'author_github']
-
-    df_commit = student_commits.copy()
-    df_commit.sort_values(by = ['student_github', 'committer_date'] ,inplace=True)
-    # df_commit = pd.DataFrame(GithubRepoCommits.objects.exclude(committer_github__isnull=True).order_by('committer_github', 'committer_date').values())
-    # df_commit.dropna(inplace=True)
-    df_commit = df_commit.loc[:,['student_github', 'repo_name', 'committer_date']].copy()
-    df_commit.rename(columns={'student_github':'id', 'repo_name': 'rname', 'committer_date':'cdate'}, inplace=True)
     
-    print(df_commit)
-    from datetime import datetime 
-    import time, math
-    src='2022-07-26 00:00:00'
-    now_timestamp = time.mktime(datetime.strptime(src, '%Y-%m-%d %H:%M:%S').timetuple())
-    print(now_timestamp)
-
-    before_id=""
+    start = time.time()
+    # StudentTab Query
+    st_queryset = StudentTab.objects.values('github_id')
+    st_set = set(st_query["github_id"] for st_query in st_queryset)
+    # GithubRepoCommits Query
+    github_repo_commits = GithubRepoCommits.objects.filter(additions__lt =commit_lines_limit, deletions__lt=commit_lines_limit)
+    target_committer =github_repo_commits.filter(committer_github__in=st_set).exclude(author_github__in=st_set) | github_repo_commits.filter(committer_github__in=st_set, author_github__isnull = True)
+    target_author =github_repo_commits.filter(author_github__in=st_set).exclude(committer_github__in=st_set) | github_repo_commits.filter(author_github__in=st_set, committer_github__isnull = True)
+    target_bi = github_repo_commits.filter(author_github__in=st_set, committer_github__in=st_set)
+    
+    # Make DataFrame
+    sc_1 = pd.DataFrame(target_committer.values())
+    sc_1['student_github'] = sc_1["committer_github"]
+    sc_2 = pd.DataFrame(target_author.values())
+    sc_2['student_github'] = sc_2["author_github"]
+    sc_3 = pd.DataFrame(target_bi.values())
+    sc_3['student_github'] = sc_3["author_github"]
+    student_commits = pd.concat([sc_1,sc_2, sc_3], ignore_index=True)
+    
+    df_commit = student_commits.loc[:,['student_github', 'repo_name', 'committer_date']].copy()
+    df_commit.rename(columns={'student_github':'id', 'repo_name': 'rname', 'committer_date':'cdate'}, inplace=True)
+    df_commit.sort_values(by=['cdate'], inplace=True, ignore_index=True)
+    
+    # Analysis
     id_repo = {}
     for i in range(len(df_commit.index)):
         row = df_commit.iloc[i]
@@ -213,45 +194,41 @@ def update_frequency():
         if row.rname not in id_repo[row.id]:
             id_repo[row.id][row.rname] = []
         id_repo[row.id][row.rname].append(row.cdate)
-    print(len(id_repo.keys()))
-    # 현재 날짜와도 비교하는 버전
-    date_time_obj = ""
+        
     id_repo_dist = {}
     repo_result = []
     id_result = []
     for id in id_repo.keys():
+        
         id_repo_dist[id] = {}
-        commit_sum = 0
+        commit_sum, id_wavg, id_sigma = 0, 0, 0
         id_commit_dist = [0, 0, 0, 0]
-        id_wavg = 0
-        id_sigma = 0
         for repo in id_repo[id].keys():
             
-            init_commit_timestamp = 0
+            init_ctime = 0
             (criteria_1, criteria_2, criteria_3) = (0, 0, 0)
             commit_dist = [0, 0, 0, 0]
-            
             commit_num = len(id_repo[id][repo])
             commit_sum += commit_num
             if commit_num > 1:
                 for i in range(commit_num):
                     if i == 0 :
-                        init_commit_timestamp = datetime.timestamp(datetime.strptime(str(id_repo[id][repo][i]), '%Y-%m-%d %H:%M:%S'))
-                        last_commit_timestamp = datetime.timestamp(datetime.strptime(str(id_repo[id][repo][-1]), '%Y-%m-%d %H:%M:%S'))
-                        criteria_1 = (last_commit_timestamp - init_commit_timestamp) / 4
-                        criteria_2 = (last_commit_timestamp - init_commit_timestamp) * 2 / 4
-                        criteria_3 = (last_commit_timestamp - init_commit_timestamp) * 3 / 4
+                        init_ctime = datetime.timestamp(datetime.strptime(str(id_repo[id][repo][i]), '%Y-%m-%d %H:%M:%S'))
+                        last_ctime = datetime.timestamp(datetime.strptime(str(id_repo[id][repo][-1]), '%Y-%m-%d %H:%M:%S'))
+                        criteria_1 = (last_ctime - init_ctime) / 4
+                        criteria_2 = criteria_1 * 2
+                        criteria_3 = criteria_1 * 3
                     elif i == (commit_num - 1):
                         pass
                     else :
-                        target_commit_timestamp = datetime.timestamp(datetime.strptime(str(id_repo[id][repo][i]), '%Y-%m-%d %H:%M:%S')) - init_commit_timestamp
-                        if target_commit_timestamp < criteria_1:
+                        target_ctime = datetime.timestamp(datetime.strptime(str(id_repo[id][repo][i]), '%Y-%m-%d %H:%M:%S')) - init_ctime
+                        if target_ctime < criteria_1:
                             commit_dist[0] += 1
                             id_commit_dist[0] += 1
-                        elif target_commit_timestamp < criteria_2:
+                        elif target_ctime < criteria_2:
                             commit_dist[1] += 1
                             id_commit_dist[1] += 1
-                        elif target_commit_timestamp < criteria_3:
+                        elif target_ctime < criteria_3:
                             commit_dist[2] += 1
                             id_commit_dist[2] += 1
                         else :
@@ -268,39 +245,25 @@ def update_frequency():
                     id_repo_dist[id][repo] = {"id":id, "repo": repo, "dist":commit_dist, "mean": wavg, "sigma":sigma}
                     repo_result.append({"id":id, "repo": repo, "dist":commit_dist, "mean": wavg, "sigma":sigma})
                     
-                    if id in ["SeoJeongYeop", "tsfo1489"]:
-                        print("repo dist", id_repo_dist[id][repo])
         if len(id_repo_dist[id].keys()) > 0 and sum(id_commit_dist)>0:
             id_wavg = id_wavg/len(id_repo_dist[id].keys())
             id_sigma = id_sigma/len(id_repo_dist[id].keys())
-            id_commit_wavg = sum( [id_commit_dist[i] * i for i in range(4)] ) / sum(id_commit_dist)
+            weight = [-2,-1,1,2]
+            id_commit_wavg = sum( [id_commit_dist[i] * weight[i] for i in range(4)] ) / sum(id_commit_dist)
             id_commit_mean = sum( [id_commit_dist[i] for i in range(4)])/4
             id_commit_sigma = math.sqrt(sum([ ((id_commit_dist[i] - id_commit_mean)**2) for i in range(4)]) / sum(id_commit_dist))
             type_tag1 = 0 if id_commit_mean <= 1.5 else 1
             type_tag2 = 0 if id_commit_sigma <= 1.5 else 1
+            type_tag3 = round(id_commit_wavg, 2)
+            print(id_commit_dist, id_commit_sigma, type_tag3)
             
             id_result.append({"id":id, "dist":id_commit_dist, 
                     "mean": id_wavg, "sigma":id_sigma, 
                     "id_mean": id_commit_wavg, "id_sigma": id_commit_sigma,
-                    "type1":type_tag1, "type2":type_tag2})
-            
-            if id in ["SeoJeongYeop", "tsfo1489"]:
-                    print("id dist", {"id":id, "dist":id_commit_dist, 
-                    "mean": id_wavg, "sigma":id_sigma, 
-                    "id_mean": id_commit_wavg, "id_sigma": id_commit_sigma,
-                    "type1":type_tag1, "type2":type_tag2})
-    
-    print(len(repo_result))
-        
+                    "type1":type_tag1, "type2":type_tag2, "type3":type_tag3})
         
     df_id_result = pd.DataFrame.from_dict(id_result)
+    df_id_result.loc[:,['id', 'type3', "dist"]].to_csv(os.getcwd() + '/static/data/commit_intv.csv')
 
-    x = np.arange(2)
-    types = ['steady', 'cram']
-    values =[len(df_id_result[df_id_result['type2'] == 0]), # steady는 type2가 0
-            len(df_id_result[df_id_result['type2'] == 1])] # cram은 type2가 1
-
-    df_id_result.loc[:,['id', 'type2']].to_csv(os.getcwd() + '/static/data/commit_intv.csv')
-
-    print(df_id_result)
-    print(values)
+    print("id:", len(id_repo.keys()), "repo:",len(repo_result))
+    print("update_frequency() total time", time.time() - start)
