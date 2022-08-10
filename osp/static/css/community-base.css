@@ -720,3 +720,30 @@
     font-size: 13px;
     background: var(--tag-bg-recruit-end);
 }
+
+#pagination-body{
+    display: flex;
+}
+
+.page-item{
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+}
+
+.page-item > .page-link:nth-child(1){
+    background-color: transparent;
+}
+
+.page-item > .page-link{
+    text-align: center;
+    color: #000000;
+    border: none;
+    padding: 0 !important;
+}
+
+.page-item.active{
+    color: #FFFFFF;
+    background-color: var(--main-border-color);
+}
