@@ -1,7 +1,11 @@
 <div id="article-list-footer" class="d-flex justify-content-between mt-3">
     <div>
         <div class="input-group" id="search-field">
+            {% if board and board.name != "User" %}
             <input type="text" class="form-control" placeholder="제목/본문" id="search-keyword" aria-describedby="search-btn">
+            {% else %}
+            <input type="text" class="form-control" placeholder="Username" id="search-keyword" aria-describedby="search-btn">
+            {% endif %}
             <button class="btn btn-outline-secondary" type="button" id="search-btn">검색</button>
         </div>
     </div>
