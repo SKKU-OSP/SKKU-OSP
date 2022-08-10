@@ -74,7 +74,7 @@ button.btn.btn-secondary{
   
 }
 
-button.btn.btn-outline-dark{
+.delete-domain{
   margin: 2px;
   padding-left: 3px;
   padding-right: 3px;
@@ -102,4 +102,40 @@ button.btn.btn-outline-dark{
   margin-right: 20px;
 
   z-index: 6;
+}
+
+.range-wrap {
+  position: relative;
+  margin: 0 auto 3rem;
+}
+.range {
+  width: 100%;
+}
+.bubble {
+  background: rgb(23, 215, 103);
+  color: white;
+  padding: 4px;
+  position: absolute;
+  border-radius: 4px;
+  margin-top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgb(23, 215, 103);
+  top: -1px;
+  left: 50%;
+}
+
+.delete-lang{
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  margin-left:auto;
 }
