@@ -275,6 +275,7 @@ a.nav-link {
   .nav-link{
     font-size: 14px;
 }
+}
 .horizontal-menu{
   display: flex;
   justify-content: space-between;
