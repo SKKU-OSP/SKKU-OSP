@@ -260,7 +260,7 @@ class ProfileView(TemplateView):
         filepath = os.path.join(test_data_path, 'major_act.csv')
         if not os.path.exists(filepath):
             update_act.update_individual()
-        major_act = pd.read_csv(filepath)
+        major_act = pd.read_csv(filepath, index_col = 0)
         
         filepath = os.path.join(test_data_path, 'commit_intv.csv')
         if not os.path.exists(filepath):
@@ -270,11 +270,12 @@ class ProfileView(TemplateView):
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
-        student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
+        student_major_act = major_act.at[context["username"], "major_act"]
         commit_freq_row = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0]
 
         commit_freq = commit_freq_row["type3"]
-        print("commit_freq", commit_freq)
+        print("student_time_circmean",student_time_circmean, "time_sector_min",time_sector_min, "time_sector_max", time_sector_max)
+        print("major_act", student_major_act, "commit_freq", commit_freq)
         try:
             commit_freq_dist = commit_freq_row["dist"]
             commit_freq_dist = json.loads(commit_freq_dist)
@@ -284,15 +285,13 @@ class ProfileView(TemplateView):
             context["type_data"] = json.dumps(type_data)
         except Exception as e:
             print("Get Type data error", e)
-        print(student_time_circmean)
-        print(time_sector_min)
 
         try:
             devtype_data = DevType.objects.get(account=account)
             try:
                 devtype_data.typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
                 devtype_data.typeF = commit_freq
-                devtype_data.typeG = -1 if student_major_act == 'individual' else 1
+                devtype_data.typeG = 1 if student_major_act == 'individual' else -1
                 devtype_data.save()
                 gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
 
@@ -316,7 +315,7 @@ class ProfileView(TemplateView):
             test_data = None
             typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
             typeF = commit_freq
-            typeG = -1 if student_major_act == 'individual' else 1
+            typeG = 1 if student_major_act == 'individual' else -1
             gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
             gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
             gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
