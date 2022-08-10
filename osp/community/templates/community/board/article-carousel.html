@@ -35,7 +35,7 @@
         <div class="carousel-item {% if article == active_article.0 %}active{% endif %}">
 {#            <div class="d-flex flex-row justify-content-space border w-100">#}
                 <div style="height:140px;width:480px;margin:auto;"  class="d-flex flex-column active-article-item" onclick="location.href='{% url 'community:article-view' article.id %}'" >
-                    <div  class="d-flex flex-row recruit-team-info">
+                    <div style="height:90px;" class="d-flex flex-row recruit-team-info">
                         <div class="recruit-team-info-image">
                             <img src="{{article.team.image.url}}" alt="team-image">
                         </div>
@@ -44,14 +44,14 @@
                                 <div class=" active-article-item-team-name fw-bold color-b">{{ article.team.name }} </div>
                                 <div class=" w-100 active-article-item-team-desc color-b " style="font-size:10px;padding-left:10px;" >{{ article.team.description }}</div>
                             </div>
-                            <div class="color-b w-100  h-100" style="font-size:0.2em;">
+                            <div class="color-b w-100 h-100 border" style="font-size:0.2em;text-overflow: ellipsis;">
                                 {{ article.title }}
                                 <br>
-                                {{ article.body }}
+                                {{ article.body|linebreaksbr }}
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div class="border">
                         {% for tag in article.tags %}
                         <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
                         {% endfor %}
