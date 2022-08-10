@@ -484,7 +484,7 @@
     color: #2F2F2F;
 }
 
-#active-article {
+.active-article {
     min-height: 10em;
     background-color: var(--main-point-color);
     margin-bottom: 1rem;
@@ -495,7 +495,7 @@
     text-align: center;
 }
 
-#active-article-list {
+.active-article-list {
     padding: 1rem;
 }
 
