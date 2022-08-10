@@ -187,7 +187,8 @@
                         for (selected of selected_list) {
                             $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
                         }
-                    }
+                    },
+                    placeholder: '태그',
                 });
                 team_tag_select.set(tag_list);
                 var members_initial = $('#members-list').html();

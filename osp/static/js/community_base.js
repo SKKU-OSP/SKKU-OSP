@@ -7,6 +7,7 @@ $(function () {
                 $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
             }
             redraw();
-        }
+        },
+        placeholder: 'Tag',
     });
 })

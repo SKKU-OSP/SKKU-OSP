@@ -14,7 +14,8 @@ $().ready(function () {
             for (selected of selected_list) {
               $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
             }
-          }
+          },
+          placeholder: 'Tag',
         });
         $('#team-submit').click(function () {
           console.log('Submit');
