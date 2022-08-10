@@ -118,8 +118,8 @@ div.vr {
   border-radius: 50%;
   padding: 0.25rem;
   position: absolute;
-  top: -10%;
-  left: -10px;
+  top: -4px;
+  left: -5px;
 }
 
 #message-modal .modal-dialog,
