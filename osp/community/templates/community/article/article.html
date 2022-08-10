@@ -6,6 +6,7 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
+    <div style="height: 42px;"></div>
     <div id="community-container" class="row">
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
@@ -14,17 +15,6 @@
                     <a href="/community/home/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
                     </a>
-                </div>
-                <div class="my-auto text-white">
-                    <button class="btn btn-outline-secondary text-white" 
-                    {% if request.user.is_anonymous %}
-                    onclick="alert('로그인 후 이용해주세요')" 
-                    {% elif board %}
-                    onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-                    {% endif %}>
-                        글쓰기
-                        <i class="bi-pencil text-white"></i>
-                    </button>
                 </div>
             </div>
             <!-- type은 세가지 값이 가능: view / register / edit -->
