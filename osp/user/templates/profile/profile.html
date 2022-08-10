@@ -520,6 +520,10 @@
                       <span>{{descKR}}</span>
                     </div>
                   </div>
+                  <div>
+                    <canvas id="canvas-type-{{ forloop.counter }}">
+                    </canvas>
+                  </div>
                   {% endfor%}
                 </div>
                 <div class="modal-footer">
@@ -659,6 +663,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
+    let type_data = JSON.parse("{{ type_data | escapejs }}");
     const end_year = {{end_year}};
     const github_id = '{{username}}';
   </script>

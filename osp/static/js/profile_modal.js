@@ -648,4 +648,23 @@ function setGbtiModal(){
       anchor.remove();
     });
   });
+  const type_ctx = []
+  for(let i=1; i<=3; i++) type_ctx.push(document.getElementById('canvas-type-'+i).getContext("2d"));
+
+  const typeF_data = type_data["typeF_data"];
+  const typeF_label = ["초반", "중반", "후반", "마무리"];
+
+  const cssDecl = getComputedStyle(document.documentElement);
+  const freq_palette = [];
+  for(let i=0; i<4; i++) freq_palette.push(cssDecl.getPropertyValue('--type-freq-'+ i));
+  let freq_chart = new Chart(type_ctx[1], {
+      type: 'bar',
+      data: { labels: typeF_label, datasets: [{data:typeF_data,
+         backgroundColor: freq_palette}],},
+      options:{
+        plugins: {
+          legend: { display: false },
+        },
+      },
+    });
 }
