@@ -666,9 +666,9 @@ window.onload = function () {
       mLabel.textContent = String(rect_target.attr("month"))+"월: "+rect_target.attr("raw");
       let label_len = (mLabel.textContent).length;
       mLabel.setAttributeNS(null, "class", "grass-tooltip");
-      let mLabel_x = rect_x+(10-label_len)*1.5;
+      let mLabel_x = rect_x+(10-label_len)*1.5+2;
       let mLabel_y = rect_y + grass_size/2
-      mLabel.setAttributeNS(null, "x", mLabel_x);
+      mLabel.setAttributeNS(null, "x", mLabel_x+2);
       mLabel.setAttributeNS(null, "y", mLabel_y);
       mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
       mLabel.setAttributeNS(null, "font-size", "14px");
@@ -678,14 +678,14 @@ window.onload = function () {
       mBack.setAttributeNS(null, "class", "grass-tooltip");
       mBack.setAttributeNS(null, "x", mLabel_x);
       mBack.setAttributeNS(null, "y", rect_y + grass_size/4);
-      mBack.setAttributeNS(null,"width", label_len*8);
+      mBack.setAttributeNS(null,"width", label_len*8+1);
       mBack.setAttributeNS(null,"height", grass_size/3+4);
       mBack.style.strokeWidth = "0px";
       mBack.style.fill ="white";
       mBack.style.pointerEvents = "none";
       let mPath = document.createElementNS(NS, "path");
       mPath.setAttributeNS(null, "class", "grass-tooltip");
-      mPath.setAttributeNS(null, "d", `M ${rect_x+label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
+      mPath.setAttributeNS(null, "d", `M ${rect_x+label_len*2.5+4} ${40+rect_y} l 10 14 10 -14 z`);
       mPath.style.strokeWidth = "0px";
       mPath.style.fill ="white";
       mPath.style.pointerEvents = "none";
