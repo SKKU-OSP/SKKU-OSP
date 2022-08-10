@@ -3,7 +3,7 @@
     <div id="team-image-container" >
         <img id="team-image" src="{{ team.image.url }}" alt="team-image">
     </div>
-    <div id="team-data" class="" class="d-flex flex-column">
+    <div id="team-data">
         <div id="team-name">
             {{ team.name }}
             {% if team_admin %}
@@ -12,8 +12,10 @@
             </button>
             {% endif %}
             {% if team_members.count == 1 or not team_admin %}
-                <button id="team-out" style="background:none;border:none;padding-left:4px;">
-                    <i onclick="teamOut({{ team.id }},'{{ request.user.username }}')" class="material-icons text-white" style="font-size:16px;" >logout</i>
+                <button id="team-out">
+                    <i onclick="teamOut({{ team.id }},'{{ request.user.username }}')" class="material-icons text-white" style="font-size:16px;">
+                        logout
+                    </i>
                 </button>
             {% endif %}
 
@@ -23,24 +25,22 @@
                 <div id="team-members-title">
                     Members
                 </div>
-                <div id="team-member-list" style="height:100px;min-width:150px;">
-                    <div class="d-flex flex-row flex-wrap" style="width:100%;min-width:150px;overflow-y:visible;overflow-x:hidden;">
-                        {% for member in team_members %}
-                        <div class="team-member">
-                            <a href="{% url 'user:profile' member.member.user.username %}" >{{member.member.user.username}}</a>
-                            {% if member.is_admin %}
-                            <span class="material-icons-outlined team-admin-icon">
-                                military_tech
-                            </span>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
+                <div id="team-member-list">
+                    {% for member in team_members %}
+                    <div class="team-member">
+                        <a href="{% url 'user:profile' member.member.user.username %}" >{{member.member.user.username}}</a>
+                        {% if member.is_admin %}
+                        <span class="material-icons-outlined team-admin-icon">
+                            military_tech
+                        </span>
+                        {% endif %}
                     </div>
+                    {% endfor %}
                 </div>
             </div>
             <div id="team-info" class="d-flex flex-column flex-wrap" style="height:120px;overflow-y:auto;overflow-x:auto;">
                 <div id="team-desc">
-                    {{team.description}}
+                    {{team.description|linebreaksbr}}
                 </div>
                 <div id="team-tag">
                     {% for tag in team_tags %}
@@ -196,9 +196,9 @@
                 });
                 admin_list = [];
                 $('#team-update-submit').click(function(){
-                    var desc_length=$('input[name="team-desc"]').val().length
-                    if((desc_length<30)&&(desc_length>150)){
-                        alert('팀 설명은 30자 이상 150자 이하여야합니다.\n현재 '+desc_length+'자 입니다.');
+                    var desc_length = $('textarea[name="team-desc"]').val().length
+                    if((desc_length<30) && (desc_length>150)){
+                        alert('팀 설명은 30자 이상 150자 이하여야합니다.\n현재 ' + desc_length + '자 입니다.');
                         return;
                     }
                     $("#team-update-form").submit();
