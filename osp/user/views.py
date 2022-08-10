@@ -270,7 +270,17 @@ class ProfileView(TemplateView):
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
         student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
-        committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
+        commit_freq = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
+        print("commit_freq", commit_freq)
+        try:
+            commit_freq_dist = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 3]
+            commit_freq_dist = json.loads(commit_freq_dist)
+            print("commit_freq_dist", commit_freq_dist, type(commit_freq_dist))
+            type_data = {}
+            type_data["typeF_data"] = commit_freq_dist
+            context["type_data"] = json.dumps(type_data)
+        except Exception as e:
+            print("Get Type data error", e)
         print(student_time_circmean)
         print(time_sector_min)
 
@@ -278,7 +288,7 @@ class ProfileView(TemplateView):
             devtype_data = DevType.objects.get(account=account)
             try:
                 devtype_data.typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
-                devtype_data.typeF = committer_frequency
+                devtype_data.typeF = commit_freq
                 devtype_data.typeG = -1 if student_major_act == 'individual' else 1
                 devtype_data.save()
                 gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
@@ -302,7 +312,7 @@ class ProfileView(TemplateView):
             print("Get DevType object error", e)
             test_data = None
             typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
-            typeF = committer_frequency
+            typeF = commit_freq
             typeG = -1 if student_major_act == 'individual' else 1
             gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
             gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
