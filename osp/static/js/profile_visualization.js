@@ -15,7 +15,7 @@ window.onload = function () {
   const radar_palette = []; // 3 radar color
   for(let i=0; i<3; i++) radar_palette.push(cssDecl.getPropertyValue('--data-radar-'+ i));
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
-  const visual_ctx = []; // 3 ctx
+  const visual_ctx = []; // 4 ctx
   for(let i=0; i<=3; i++) visual_ctx.push(document.getElementById('canvas'+i).getContext("2d"));
   let pi_chart = new Chart(visual_ctx[0]);
   let radar_chart = new Chart(visual_ctx[1]);
@@ -241,6 +241,8 @@ window.onload = function () {
     if(level>4) level = 4;
     return level;
   }
+
+  /* Grass for Month */
   function makeMonthGrass(){
     console.log("mMG: y",select_year, "month_contr", monthly_contribution);
     const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
@@ -329,79 +331,7 @@ window.onload = function () {
         responsive: true,
       }});
   }
-  /* Grass for Month */
-  function makeMonthGrass2(){
-    console.log("mMG: y",select_year, "month_contr", monthly_contribution);
-    const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
-    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const fs = 15;
-    $("#grass-title").text(select_year + "년 오픈소스 활동");
-    for(let col = 1; col <= 6; col++){
-      let gr = document.createElementNS(NS, "g");
-      for(let row = 0; row < 2; row++){
-        let mIdx = (col-1)*2+row;
-        let rect = document.createElementNS(NS,"rect");
-        let ctb = monthly_contribution[mIdx]
-        let level = monthly_contribution_level[mIdx];
-        rect.setAttributeNS(null,"month", mIdx+1);
-        rect.setAttributeNS(null,"raw", ctb);
-        rect.setAttributeNS(null,"focus", 0);
-        rect.setAttributeNS(null,"x", 0);
-        rect.setAttributeNS(null,"y", (grass_size)*row+1.5*fs);
-        rect.setAttributeNS(null,"width", grass_size);
-        rect.setAttributeNS(null,"height", grass_size);
-        rect.setAttributeNS(null,"rx", "50");
-        rect.setAttributeNS(null,"ry", "50");
-        rect.setAttributeNS(null,"class", "ContributionMonth");
-        rect.setAttributeNS(null,"data-level", level);
-        rect.setAttributeNS(null,"stroke-width","0px");
-        
-        rect.style.fill = palette[level];
-        if(monthly_contr.length>mIdx){
-          rect.style.cursor = "pointer";
-          rect.addEventListener("click",(e) =>{
-            let focus = 1 - e.target.attributes[2].value;
-            is_selected_month = focus;
-            if(is_selected_month) {
-              select_month = e.target.attributes[0].value;
-              let month_elements = document.getElementsByClassName("ContributionMonth");
-              for(let rect of month_elements){
-                rect.setAttributeNS(null, "focus", 0);
-                rect.removeAttribute("stroke");
-                rect.removeAttribute("stroke-width");
-              }
-              showTooltip(select_month);
-              e.target.setAttribute("stroke", cssDecl.getPropertyValue('--data-line'));
-              e.target.setAttribute("stroke-width", "2px");
-            }
-            else {
-              select_month = 0;
-              $(".grass-tooltip").remove();
-              e.target.removeAttribute("stroke");
-              e.target.removeAttribute("stroke-width");
-            }
-            $("#btnGroupDropMonth").text($(`.month-item[value=${select_month}]`).text());
-            e.target.attributes[2].value = focus;
-            updateFactor(factorLabels, select_month);
-            makePage(chart_data, 1);
-          });
-        }
-        gr.appendChild(rect);
-      }
-      let mIdx = (col-1)*2;
-      let mLabel = document.createElementNS(NS,"text");
-      mLabel.setAttributeNS(null, "x", fs);
-      mLabel.setAttributeNS(null, "y", fs);
-      mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
-      mLabel.setAttributeNS(null, "font-size", "15px");
-      mLabel.style.strokeWidth = "0px";
-      console.log("month_label",month_label[mIdx] + '/' + month_label[mIdx+1]);
-      mLabel.textContent = month_label[mIdx] + '/' + month_label[mIdx+1];
-      gr.appendChild(mLabel);
-      gr.setAttribute("transform", `translate(${(col-1)*(grass_size+fs)}, 0)`);
-      div_activity_monthly.appendChild(gr);
-    }
-  }
+  
   function getNormalCoeff(value, label, is_work=1, goal=10){
     if(value == 0) return 1;
     if(is_work) return goal / value;
@@ -616,7 +546,7 @@ window.onload = function () {
     });
   }
   function makeRadarChart(is_nomalization=0, month=0){
-    const radar_labels = ["commits", "stars", "issues", "PRs"];
+    const radar_labels = ["commits/10", "stars", "issues", "PRs"];
     const radar_label_keys = ["commit", "star", "issue", "pr"];
     const average_data = [];
     const coeffs = {};
@@ -729,7 +659,7 @@ window.onload = function () {
     $(".grass-tooltip").remove();
     if(select_month!=0){
       let rect_target = $(`rect.ContributionMonth[month=${select_month}]`).first();
-      rect_target.attr({"stroke":cssDecl.getPropertyValue('--main-border-color'), "stroke-width":"2px", "focus":1});
+      rect_target.attr({"stroke":cssDecl.getPropertyValue('--data-line'), "stroke-width":"2px", "focus":1});
       let rect_x = Number(rect_target.attr("x"));
       let rect_y = Number(rect_target.attr("y"));
       let mLabel = document.createElementNS(NS,"text");
@@ -830,4 +760,4 @@ window.onload = function () {
         </div>`);
     });
   }
-};
+}
