@@ -92,11 +92,11 @@ def board(request, board_name, board_id):
         # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
         cnt = active_article.count()
         from itertools import chain
-        if cnt == 2:
-            active_article = list(chain(active_article, active_article))
-        elif cnt == 1:
-            active_article = list(chain(active_article, active_article)) # 2개
-            active_article = list(chain(active_article, active_article)) # 4개
+        # if cnt == 2:
+        #     active_article = list(chain(active_article, active_article))
+        # elif cnt == 1:
+        #     active_article = list(chain(active_article, active_article)) # 2개
+        #     active_article = list(chain(active_article, active_article)) # 4개
 
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
