@@ -119,7 +119,7 @@ div.vr {
   padding: 0.25rem;
   position: absolute;
   top: -10%;
-  left: -15%;
+  left: -10px;
 }
 
 #message-modal .modal-dialog,
