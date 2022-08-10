@@ -6,21 +6,21 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
+  <div class="d-flex flex-row-reverse">
+    <button class="btn btn-outline-secondary ms-auto mb-1"
+      {% if request.user.is_anonymous %}
+            onclick="alert('로그인 후 이용해주세요')"
+        {% elif board %}
+      onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
+      {% endif %}
+      >
+      글쓰기
+      <i class="bi-pencil"></i>
+    </button>
+  </div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-      <div class="d-flex flex-row-reverse">
-        <button class="btn btn-outline-secondary text-white ms-auto mb-1"
-          {% if request.user.is_anonymous %}
-                onclick="alert('로그인 후 이용해주세요')"
-            {% elif board %}
-          onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-          {% endif %}
-          >
-          글쓰기
-          <i class="bi-pencil text-white"></i>
-        </button>
-      </div>
       {% if board.board_type == 'Recruit' %}
         {% include "community/board/article-carousel.html" %}
       {% endif %}
