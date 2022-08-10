@@ -64,13 +64,6 @@ $().ready(function () {
           } else {
             this.style.transform = '';
           }
-          var tr_id = '#msg-id-' + this.attributes.val.value;
-          if ($(tr_id).css('display') === 'none') {
-            $(tr_id).removeClass("d-none");
-          } else {
-            $(tr_id).addClass("d-none");
-
-          }
         });
       })
     } else {

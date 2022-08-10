@@ -19,11 +19,7 @@ def teamInfoValidation(team_name, team_desc, team_img):
         is_valid = False
         field_check_list['name'] = '필수 입력값입니다.'
     else:
-        for default_name in Board.DEFAULT_BOARDNAME:
-            if default_name == team_name:
-                is_valid = False
-                field_check_list['name'] = f'{team_name}은 이름으로 사용할 수 없습니다.'
-                break
+        pass
 
     if not team_desc:
         is_valid = False

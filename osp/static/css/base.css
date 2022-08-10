@@ -84,7 +84,7 @@ div.vr {
   opacity: 100;
 }
 
-.noti-dropdown{
+.noti-dropdown {
   padding: 0;
 }
 
@@ -101,7 +101,7 @@ div.vr {
   border-bottom: none;
 }
 
-.noti-item.empty{
+.noti-item.empty {
   vertical-align: middle;
 }
 
@@ -110,7 +110,7 @@ div.vr {
   color: var(--main-border-color);
 }
 
-#new-noti{
+#new-noti {
   background-color: var(--alert-color);
   border-radius: 50%;
   padding: 0.25rem;
@@ -163,10 +163,10 @@ div> ::-webkit-scrollbar-thumb:hover {
 }
 
 .modal-header {
-  background-color: var(--main-point-color);
   border-color: var(--main-border-color);
-  border-radius: 0;
-  color: #FFFFFF;
+  border-top-left-radius: 0.625rem;
+  border-top-right-radius: 0.625rem;
+  color: #000000;
 }
 
 .modal-header button {
@@ -178,6 +178,11 @@ div> ::-webkit-scrollbar-thumb:hover {
 .modal-header button span {
   vertical-align: middle;
   display: inline-block;
+}
+
+.modal-content {
+  border-radius: 0.625rem;
+  border: none;
 }
 
 #oppo-list {
@@ -192,11 +197,6 @@ div> ::-webkit-scrollbar-thumb:hover {
   background-color: var(--main-bg-color);
   display: flex;
   flex-direction: column;
-}
-
-.modal-content {
-  border-radius: 0;
-  border: none;
 }
 
 img.opponent-profile {
@@ -440,4 +440,95 @@ footer {
 .default-btn {
   border: none;
   background: none;
+}
+
+#ApplyTeamModal .modal-body {
+  padding: 0;
+}
+
+#ApplyTeamModal .nav {
+  border-bottom: 1px solid var(---main-border-color);
+}
+
+#ApplyTeamModal .nav-item,
+#ApplyTeamModal .nav-link {
+  border-radius: 0;
+}
+
+#ApplyTeamModal .nav-pills .nav-link,
+#ApplyTeamModal .nav-pills>.nav-link {
+  color: #000000;
+}
+
+#ApplyTeamModal .nav-pills .nav-link.active,
+#ApplyTeamModal .nav-pills .show>.nav-link {
+  background-color: var(--main-bg-color);
+  color: var(--sub-point-color);
+}
+
+.team-apply-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--main-border-color);
+}
+
+.team-apply-item:first-child {
+  border-top: 1px solid var(--main-border-color);
+}
+
+.team-apply-meta {
+  display: flex;
+}
+
+.team-apply-teamname {
+  width: 20%;
+  margin: auto;
+}
+
+.team-apply-user {
+  width: 50%;
+  margin: auto;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.team-apply-action {
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  gap: 0.5rem;
+}
+
+.team-apply-detail {
+  display: flex;
+}
+
+.team-apply-detail-body{
+  text-align: center;
+}
+
+.btn-refuse{
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--main-icon-color);
+  border-radius: 0.625rem;
+  background-color: transparent;
+}
+.btn-refuse:hover{
+  background-color: var(--main-icon-color);
+  opacity: 80%;
+}
+
+.btn-accept{
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--sub-point-color);
+  border-radius: 0.625rem;
+  background-color: transparent;
+}
+.btn-accept:hover{
+  background-color: var(--sub-point-color);
+  opacity: 80%;
 }
