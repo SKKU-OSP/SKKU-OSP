@@ -89,6 +89,7 @@ button.btn.btn-outline-dark{
 }
 
 #for-photo{
+  position:relative;
   display:block;
   text-align: center;
   background-color: rgb(79, 173, 224);
@@ -98,6 +99,7 @@ button.btn.btn-outline-dark{
   width: 25px;
   margin:auto;
   margin-top: -20px;
+  margin-right: 20px;
 
   z-index: 6;
 }
