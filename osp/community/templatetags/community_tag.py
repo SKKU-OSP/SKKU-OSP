@@ -53,8 +53,7 @@ def anonymous_checked(a_writer):
 @register.simple_tag(takes_context=True)
 def board_sidebar_normal_board(context, request):
     result = ''
-    for boardname in Board.DEFAULT_BOARDNAME:
-        board = Board.objects.get(name=boardname)
+    for board in Board.objects.filter(team_id=None):
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
         if board == context['board']:
             result += f'''
@@ -97,46 +96,12 @@ def board_sidebar_team_board(context, request):
                 '''
     return mark_safe(result)
 
-@register.simple_tag
-def team_options(user):
-
-    try:
-        account = Account.objects.get(user=user)
-        result = '<option value="" disabled selected>팀 선택</option>'
-        li = TeamMember.objects.filter(member=account).values_list('team_id')
-        teams = Team.objects.filter(id__in=li)
-        for team in teams:
-            result += f'<option value="{team.id}">{team.name}</option>'
-    except:
-        result = ''
-    return mark_safe(result)
-
 @register.simple_tag()
 def is_period_end(date):
     if isinstance(date, datetime):
         return date < datetime.now()
     else:
         return True
-
-@register.simple_tag
-def is_teammember(team, user):
-    if user.is_anonymous: user = None
-    account = Account.objects.filter(user=user).first()
-    if TeamMember.objects.filter(team=team,member=account):
-        return True
-    else:
-        return False
-
-@register.simple_tag
-def teaminvitemessage(team, user):
-    if user.is_anonymous: user = None
-    account = Account.objects.filter(user=user).first()
-    return TeamInviteMessage.objects.filter(team=team,account=account,status=0).first()
-
-@register.simple_tag
-def get_teamappliedmessage_waited(team):
-    return TeamInviteMessage.objects.filter(team=team,status=0)
-
 
 @register.simple_tag
 def is_teammember_admin(team, user):
