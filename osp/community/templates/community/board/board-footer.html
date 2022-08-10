@@ -10,10 +10,8 @@
         </div>
     </div>
     <div id="article-list-pagination">
-        <nav>
-            <ul class="pagination" id="pagination-body">
-            </ul>
-        </nav>
+        <div id="pagination-body">
+        </div>
     </div>
     <script>
         var MAX_PAGE = 1;
@@ -21,12 +19,12 @@
 
         function page_item(page, href) {
             if(page == now_page){
-                return $('<li></li>').addClass('page-item').addClass('active').append(
-                    $('<a></a>').addClass('page-link').attr('href', '#').attr('value', page).html(page)
+                return $('<div></div>').addClass('page-item').addClass('active').append(
+                    $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
                 )
             }
-            return $('<li></li>').addClass('page-item').append(
-                $('<a></a>').addClass('page-link').attr('href', '#').attr('value', page).html(page)
+            return $('<div></div>').addClass('page-item').append(
+                $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
             )
         }
 
@@ -59,8 +57,8 @@
                 page_body.append(page_item('<i class="bi-chevron-double-right">'));
             }
             else{
-                page_body.append(page_item('<i class="bi-chevron-double-right">').addClass('disabled'));
                 page_body.append(page_item('<i class="bi-chevron-right">').addClass('disabled'));
+                page_body.append(page_item('<i class="bi-chevron-double-right">').addClass('disabled'));
             }
             $('.page-link').click(function(){
                 var val = $(this).attr('value');
@@ -124,9 +122,6 @@
             now_page=1;
             redraw();
         });
-
-            redraw();
-
-{#        {% endif %}#}
+        redraw();
     </script>
 </div>
