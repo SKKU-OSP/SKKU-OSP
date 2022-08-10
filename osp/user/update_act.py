@@ -55,6 +55,10 @@ def update_commmit_time():
             student_commits_time.loc[row_index, 'student_github'] = student_commits_time.loc[row_index, 'author_github']
 
 
+    student_commits_time_hour = student_commits_time.loc[:, ['student_github',  'committer_time']].sort_values(by='student_github')
+    student_commits_time_hour['committer_time'] = student_commits_time_hour['committer_time'].map(lambda x: int(x/3600))
+    student_commits_time_hour.to_csv('student_committer_time_foreachstudent.csv')
+
     student_commits_time = student_commits_time.groupby(['student_github']).apply(cal_circmean)
     student_commits_time = pd.DataFrame(student_commits_time)
     student_commits_time.columns = ['committer_time_circmean']
