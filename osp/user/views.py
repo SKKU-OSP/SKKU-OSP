@@ -250,30 +250,33 @@ class ProfileView(TemplateView):
         
         #GBTI test
         test_data_path = os.path.join(BASE_DIR, 'static/data')
-        if not os.path.exists(os.path.join(test_data_path, 'committer_time_circmean.csv')):
+        filepath1 = os.path.join(test_data_path, 'committer_time_circmean.csv')
+        filepath2 = os.path.join(test_data_path, 'time_sector.csv')
+        if not os.path.exists(filepath1) or not os.path.exists(filepath2):
             update_act.update_commmit_time()
-        committer_time_circmean = pd.read_csv(os.path.join(test_data_path, 'committer_time_circmean.csv'))
+        committer_time_circmean = pd.read_csv(filepath1)
+        committer_time_guide = pd.read_csv(filepath2)
         
-        if not os.path.exists(os.path.join(test_data_path, 'time_sector.csv')):
-            update_act.update_commmit_time()
-        committer_time_guide = pd.read_csv(os.path.join(test_data_path, 'time_sector.csv'))
-        
-        if not os.path.exists(os.path.join(test_data_path, 'major_act.csv')):
+        filepath = os.path.join(test_data_path, 'major_act.csv')
+        if not os.path.exists(filepath):
             update_act.update_individual()
-        major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
+        major_act = pd.read_csv(filepath)
         
-        if not os.path.exists(os.path.join(test_data_path, 'commit_intv.csv')):
+        filepath = os.path.join(test_data_path, 'commit_intv.csv')
+        if not os.path.exists(filepath):
             update_act.update_frequency()
-        committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
+        committer_frequency = pd.read_csv(filepath)
 
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
         student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
-        commit_freq = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
+        commit_freq_row = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0]
+
+        commit_freq = commit_freq_row["type3"]
         print("commit_freq", commit_freq)
         try:
-            commit_freq_dist = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 3]
+            commit_freq_dist = commit_freq_row["dist"]
             commit_freq_dist = json.loads(commit_freq_dist)
             print("commit_freq_dist", commit_freq_dist, type(commit_freq_dist))
             type_data = {}
