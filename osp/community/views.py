@@ -68,8 +68,12 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
-    board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
-    context = {'board': board, 'board_color': board_color}
+    if board.team_id is not None:
+        if not request.user.is_authenticated:
+            return redirect('/community')
+        if len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+            return redirect('/community')
+    context = {'board': board }
 
     if board.board_type == 'User':
         context['accounts'] = Account.objects.all()[:9]
