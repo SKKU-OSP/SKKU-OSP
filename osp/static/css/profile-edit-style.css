@@ -12,7 +12,7 @@
 
 div.edit-container {
   height: 500px;
-  margin-top: 15px;
+  margin-bottom: 1rem;
 }
 
 
@@ -74,7 +74,7 @@ button.btn.btn-secondary{
   
 }
 
-button.btn.btn-outline-dark{
+.delete-domain{
   margin: 2px;
   padding-left: 3px;
   padding-right: 3px;
@@ -82,4 +82,85 @@ button.btn.btn-outline-dark{
   padding-bottom: 1px;
 
   
+}
+
+#ints_delete{
+  color :black;
+}
+
+#for-photo{
+  position:relative;
+  display:block;
+  text-align: center;
+  background-color: rgb(79, 173, 224);
+  color: white;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  width: 25px;
+  margin:auto;
+  margin-top: -20px;
+  margin-right: 20px;
+
+  z-index: 6;
+}
+
+.range-wrap {
+  position: relative;
+  margin: 0 auto 3rem;
+}
+.range {
+  width: 100%;
+}
+.bubble {
+  background: rgb(23, 215, 103);
+  color: white;
+  padding: 4px;
+  position: absolute;
+  border-radius: 4px;
+  margin-top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgb(23, 215, 103);
+  top: -1px;
+  left: 50%;
+}
+
+
+.delete-lang{
+
+  color:black;
+  border:0;
+  outline: 0;
+  padding-left: 30px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  margin-left:auto;
+}
+
+.delete-lang:hover{
+
+  background-color: none;
+  border:0;
+  outline: 0;
+  padding-left: 30px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  margin-left:auto;
+}
+
+.delete-lang svg{
+  fill: black;
+}
+
+.delete-lang:hover svg{
+  fill: gray;
 }

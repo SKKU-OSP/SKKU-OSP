@@ -28,7 +28,7 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    for board in Board.objects.filter(team_board_query | Q(name__in=Board.DEFAULT_BOARDNAME)):
+    for board in Board.objects.filter(team_board_query | Q(team_id=None)):
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
         # week_ago = datetime.now() - timedelta(days=7)
@@ -92,11 +92,11 @@ def board(request, board_name, board_id):
         # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
         cnt = active_article.count()
         from itertools import chain
-        if cnt == 2:
-            active_article = list(chain(active_article, active_article))
-        elif cnt == 1:
-            active_article = list(chain(active_article, active_article)) # 2개
-            active_article = list(chain(active_article, active_article)) # 4개
+        # if cnt == 2:
+        #     active_article = list(chain(active_article, active_article))
+        # elif cnt == 1:
+        #     active_article = list(chain(active_article, active_article)) # 2개
+        #     active_article = list(chain(active_article, active_article)) # 4개
 
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
