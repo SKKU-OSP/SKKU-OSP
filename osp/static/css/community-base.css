@@ -280,6 +280,8 @@
 
 .article-meta {
     padding: 1rem;
+    margin-top: auto;
+    margin-bottom: auto;
     margin-left: auto;
     text-align: end;
     font-size: 14px;
