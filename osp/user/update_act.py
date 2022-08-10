@@ -161,8 +161,7 @@ def update_individual():
     result_df['major_act'] = result_df['individual'] >= result_df['group']
     result_df['major_act'] = result_df['major_act'].map(check)
 
-    result_df.loc[:, ['major_act']].to_csv(os.getcwd() + '/static/data/major_act.csv')
-
+    result_df.loc[:, ['individual', 'group', 'major_act']].to_csv(os.getcwd() + '/static/data/major_act.csv')
 
 def update_frequency():
     
