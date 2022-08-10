@@ -132,10 +132,35 @@ button.btn.btn-secondary{
   left: 50%;
 }
 
+
 .delete-lang{
-  padding-left: 3px;
+
+  color:black;
+  border:0;
+  outline: 0;
+  padding-left: 30px;
   padding-right: 3px;
   padding-top: 1px;
   padding-bottom: 1px;
   margin-left:auto;
+}
+
+.delete-lang:hover{
+
+  background-color: none;
+  border:0;
+  outline: 0;
+  padding-left: 30px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  margin-left:auto;
+}
+
+.delete-lang svg{
+  fill: black;
+}
+
+.delete-lang:hover svg{
+  fill: gray;
 }
