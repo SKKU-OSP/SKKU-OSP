@@ -72,6 +72,7 @@
     {% if comment_visible %}
     <div class="d-flex article-bar-comment">
         {% if article.comment %}
+        <i class="bi bi-arrow-return-right me-1"></i>
         <div>
             {{article.comment.body}}
         </div>
@@ -96,8 +97,6 @@
 </div>
 {% empty %}
 <div class="article-bar empty">
-    <div class="m-auto">
-        등록된 글이 없습니다.
-    </div>
+    등록된 글이 없습니다.
 </div>
 {% endfor %}
