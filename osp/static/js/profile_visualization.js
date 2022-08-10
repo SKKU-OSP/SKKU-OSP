@@ -1,6 +1,7 @@
 window.onload = function () {
   const start_year = 2019;
-  const grass_size = 60;
+  const grass_size = 72;
+  const standard_contr = 30;
   const NS = "http://www.w3.org/2000/svg";
   let year_intvl = end_year-start_year;
   let select_year = end_year;
@@ -10,15 +11,16 @@ window.onload = function () {
   let is_nomalization = 0;
   const cssDecl = getComputedStyle(document.documentElement);
   const palette = []; // 5 level color
-  for(let i=0; i<5; i++) palette.push(cssDecl.getPropertyValue('--data-level-'+ i));
+  for(let i=0; i<6; i++) palette.push(cssDecl.getPropertyValue('--data-level-'+ i));
   const radar_palette = []; // 3 radar color
   for(let i=0; i<3; i++) radar_palette.push(cssDecl.getPropertyValue('--data-radar-'+ i));
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
   const visual_ctx = []; // 3 ctx
-  for(let i=1; i<=3; i++) visual_ctx.push(document.getElementById('canvas'+i).getContext("2d"));
-  let radar_chart = new Chart(visual_ctx[0]);
-  let dist_chart = new Chart(visual_ctx[1]);
-  let specific_score_chart = new Chart(visual_ctx[2]);
+  for(let i=0; i<=3; i++) visual_ctx.push(document.getElementById('canvas'+i).getContext("2d"));
+  let pi_chart = new Chart(visual_ctx[0]);
+  let radar_chart = new Chart(visual_ctx[1]);
+  let dist_chart = new Chart(visual_ctx[2]);
+  let specific_score_chart = new Chart(visual_ctx[3]);
   let btn_year = document.getElementsByClassName("btn-year");
   for (let btn of btn_year) {
     btn.addEventListener("click",function(){
@@ -150,15 +152,16 @@ window.onload = function () {
       let mid = monthly_contr[i]['month']-1;
       dirty_month[mid] = 1;
       monthly_contribution[mid] = total;
-      if(total<=30){
-        monthly_contribution_level[mid] = Math.ceil(total / 10);
+      if(total<=standard_contr){
+        let divisor = standard_contr/3;
+        monthly_contribution_level[mid] = Math.ceil(total / divisor);
       }
       else {
         monthly_contribution_level[mid] = 4;
       }
     }
     dirty_month.forEach((dirty, idx) =>{
-      if(!dirty) monthly_contribution_level[idx] = 0;
+      if(!dirty) monthly_contribution_level[idx] = 5;
     });
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
@@ -238,9 +241,96 @@ window.onload = function () {
     if(level>4) level = 4;
     return level;
   }
-
-  /* Grass for Month */
   function makeMonthGrass(){
+    console.log("mMG: y",select_year, "month_contr", monthly_contribution);
+    const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const fs = 15;
+    $("#grass-title").text(select_year + "년 오픈소스 활동");
+    for(let row=0; row<2; row++){
+      for(let col=0; col<6; col++){
+        let mIdx = row*6+col;
+        let rect = document.createElementNS(NS,"rect");
+        let ctb = monthly_contribution[mIdx]
+        let level = monthly_contribution_level[mIdx];
+        rect.setAttributeNS(null,"month", mIdx+1);
+        rect.setAttributeNS(null,"raw", ctb);
+        rect.setAttributeNS(null,"focus", 0);
+        rect.setAttributeNS(null,"x", (grass_size)*col+1.5*fs);
+        rect.setAttributeNS(null,"y", (grass_size)*row+1.5*fs);
+        rect.setAttributeNS(null,"width", grass_size);
+        rect.setAttributeNS(null,"height", grass_size);
+        rect.setAttributeNS(null,"rx", "50");
+        rect.setAttributeNS(null,"ry", "50");
+        rect.setAttributeNS(null,"class", "ContributionMonth");
+        rect.setAttributeNS(null,"data-level", level);
+        rect.setAttributeNS(null,"stroke-width","0px");
+        rect.style.fill = palette[level];
+        
+        if(monthly_contr.length>mIdx){
+          rect.style.cursor = "pointer";
+          rect.addEventListener("click",(e) =>{
+            let focus = 1 - e.target.attributes[2].value;
+            is_selected_month = focus;
+            if(is_selected_month) {
+              select_month = e.target.attributes[0].value;
+              let month_elements = document.getElementsByClassName("ContributionMonth");
+              for(let rect of month_elements){
+                rect.setAttributeNS(null, "focus", 0);
+                rect.removeAttribute("stroke");
+                rect.removeAttribute("stroke-width");
+              }
+              showTooltip(select_month);
+              e.target.setAttribute("stroke", cssDecl.getPropertyValue('--data-line'));
+              e.target.setAttribute("stroke-width", "2px");
+            }
+            else {
+              select_month = 0;
+              $(".grass-tooltip").remove();
+              e.target.removeAttribute("stroke");
+              e.target.removeAttribute("stroke-width");
+            }
+            $("#btnGroupDropMonth").text($(`.month-item[value=${select_month}]`).text());
+            e.target.attributes[2].value = focus;
+            updateFactor(factorLabels, select_month);
+            makePage(chart_data, 1);
+          });
+        }
+        div_activity_monthly.appendChild(rect);
+      }
+    }
+    pi_chart.destroy();
+    const pi_dataset = Array(5).fill(0);
+    monthly_contribution_level.forEach((val)=>{
+      if(val<=4) pi_dataset[val]++;
+    });
+    const pi_label = [];
+    let divisor = 0
+    for(; divisor<=standard_contr; divisor=Math.floor(divisor+standard_contr/3)){
+      if(divisor == 0) pi_label.push("0");
+      else pi_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
+    }
+    pi_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
+    console.log("pi_label",pi_label);
+    const pi_data = {
+      labels: pi_label,
+      datasets: [{
+        data: pi_dataset,
+        backgroundColor: palette,
+        hoverOffset: 4
+      }]
+    };
+    pi_chart = new Chart(visual_ctx[0], {
+      type: 'pie', data: pi_data, 
+      options:{
+        plugins: {
+          legend: { display: false },
+        },
+        responsive: true,
+      }});
+  }
+  /* Grass for Month */
+  function makeMonthGrass2(){
     console.log("mMG: y",select_year, "month_contr", monthly_contribution);
     const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
     "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -253,24 +343,19 @@ window.onload = function () {
         let rect = document.createElementNS(NS,"rect");
         let ctb = monthly_contribution[mIdx]
         let level = monthly_contribution_level[mIdx];
-        let mLabel = document.createElementNS(NS,"text");
         rect.setAttributeNS(null,"month", mIdx+1);
         rect.setAttributeNS(null,"raw", ctb);
         rect.setAttributeNS(null,"focus", 0);
-        rect.setAttributeNS(null,"x", fs);
-        rect.setAttributeNS(null,"y", (grass_size+2.5*fs)*row+1.5*fs);
+        rect.setAttributeNS(null,"x", 0);
+        rect.setAttributeNS(null,"y", (grass_size)*row+1.5*fs);
         rect.setAttributeNS(null,"width", grass_size);
         rect.setAttributeNS(null,"height", grass_size);
-        rect.setAttributeNS(null,"rx", "2");
-        rect.setAttributeNS(null,"ry", "2");
+        rect.setAttributeNS(null,"rx", "50");
+        rect.setAttributeNS(null,"ry", "50");
         rect.setAttributeNS(null,"class", "ContributionMonth");
         rect.setAttributeNS(null,"data-level", level);
-        mLabel.setAttributeNS(null, "x", fs);
-        mLabel.setAttributeNS(null, "y", (grass_size+2.5*fs)*row+fs);
-        mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
-        mLabel.setAttributeNS(null, "font-size", "15px");
-        mLabel.style.strokeWidth = "0px";
-        mLabel.textContent = month_label[mIdx];
+        rect.setAttributeNS(null,"stroke-width","0px");
+        
         rect.style.fill = palette[level];
         if(monthly_contr.length>mIdx){
           rect.style.cursor = "pointer";
@@ -302,10 +387,18 @@ window.onload = function () {
           });
         }
         gr.appendChild(rect);
-        gr.appendChild(mLabel);
       }
+      let mIdx = (col-1)*2;
+      let mLabel = document.createElementNS(NS,"text");
+      mLabel.setAttributeNS(null, "x", fs);
+      mLabel.setAttributeNS(null, "y", fs);
+      mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
+      mLabel.setAttributeNS(null, "font-size", "15px");
+      mLabel.style.strokeWidth = "0px";
+      console.log("month_label",month_label[mIdx] + '/' + month_label[mIdx+1]);
+      mLabel.textContent = month_label[mIdx] + '/' + month_label[mIdx+1];
+      gr.appendChild(mLabel);
       gr.setAttribute("transform", `translate(${(col-1)*(grass_size+fs)}, 0)`);
-      gr.setAttribute("stroke", cssDecl.getPropertyValue('--main-point-color'));
       div_activity_monthly.appendChild(gr);
     }
   }
@@ -417,7 +510,7 @@ window.onload = function () {
     };
     dist_chart.destroy();
     let dist_point_color = cssDecl.getPropertyValue('--sub-point-color');
-    dist_chart = new Chart(visual_ctx[1], {
+    dist_chart = new Chart(visual_ctx[2], {
       type: 'scatter',
       data: { datasets: [{data:normal_dist_data}] },
       options:{
@@ -476,7 +569,7 @@ window.onload = function () {
       total_score_data.push(score_data[y]["total_score"]);
     }
     specific_score_chart.destroy();
-    specific_score_chart = new Chart(visual_ctx[2], {
+    specific_score_chart = new Chart(visual_ctx[3], {
       type: "bar",
       data: {labels:yearLabel, datasets:score_dataset},
       options: {
@@ -623,7 +716,7 @@ window.onload = function () {
     })
     /* Chart 1: 레이더 차트 */
     radar_chart.destroy();
-    radar_chart = new Chart(visual_ctx[0], {
+    radar_chart = new Chart(visual_ctx[1], {
         data: {
           labels: radar_labels,
           datasets: radar_datasets,
@@ -643,16 +736,18 @@ window.onload = function () {
       mLabel.textContent = String(rect_target.attr("month"))+"월: "+rect_target.attr("raw");
       let label_len = (mLabel.textContent).length;
       mLabel.setAttributeNS(null, "class", "grass-tooltip");
-      mLabel.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
-      mLabel.setAttributeNS(null, "y", rect_y + grass_size/2);
+      let mLabel_x = rect_x+(10-label_len)*1.5;
+      let mLabel_y = rect_y + grass_size/2
+      mLabel.setAttributeNS(null, "x", mLabel_x);
+      mLabel.setAttributeNS(null, "y", mLabel_y);
       mLabel.setAttributeNS(null, "font-family", "IBMPlexSansKR-Regular");
-      mLabel.setAttributeNS(null, "font-size", "12px");
+      mLabel.setAttributeNS(null, "font-size", "14px");
       mLabel.style.strokeWidth = "0px";
       mLabel.style.pointerEvents = "none";
       let mBack = document.createElementNS(NS, "rect");
       mBack.setAttributeNS(null, "class", "grass-tooltip");
-      mBack.setAttributeNS(null, "x", rect_x+(9-label_len)*1.5);
-      mBack.setAttributeNS(null, "y", rect_y-grass_size*3/4 + grass_size);
+      mBack.setAttributeNS(null, "x", mLabel_x);
+      mBack.setAttributeNS(null, "y", rect_y + grass_size/4);
       mBack.setAttributeNS(null,"width", label_len*8);
       mBack.setAttributeNS(null,"height", grass_size/3+4);
       mBack.style.strokeWidth = "0px";
@@ -660,7 +755,7 @@ window.onload = function () {
       mBack.style.pointerEvents = "none";
       let mPath = document.createElementNS(NS, "path");
       mPath.setAttributeNS(null, "class", "grass-tooltip");
-      mPath.setAttributeNS(null, "d", `M ${15+label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
+      mPath.setAttributeNS(null, "d", `M ${rect_x+label_len*2.5} ${32+rect_y} l 10 14 10 -14 z`);
       mPath.style.strokeWidth = "0px";
       mPath.style.fill ="white";
       mPath.style.pointerEvents = "none";
