@@ -64,13 +64,6 @@ $().ready(function () {
           } else {
             this.style.transform = '';
           }
-          var tr_id = '#msg-id-' + this.attributes.val.value;
-          if ($(tr_id).css('display') === 'none') {
-            $(tr_id).removeClass("d-none");
-          } else {
-            $(tr_id).addClass("d-none");
-
-          }
         });
       })
     } else {
@@ -124,9 +117,9 @@ function ArticleScrap(article_id, user_id) {
     success: function (data) {
       if (data['status'] == 'success') {
         if (data['created']) {
-          $('#article-scrap-btn').html('bookmark');
+          $('#article-scrap-btn').html('<span  class="material-icons-outlined" >bookmark </span>');
         } else {
-          $('#article-scrap-btn').html('bookmark_border');
+          $('#article-scrap-btn').html('<span  class="material-icons-outlined" >bookmark_border </span>');
         }
         $('#article-scrap-cnt').html(data['result']);
       }
