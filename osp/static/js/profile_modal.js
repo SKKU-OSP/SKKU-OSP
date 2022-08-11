@@ -693,4 +693,19 @@ function setGbtiModal(){
         },
       },
     });
+    
+  const typeG_data = type_data["typeG_data"];
+  const typeG_label = ["개인", "팀"];
+  const cooperate_palette = []
+  for(let i=0; i<2; i++) cooperate_palette.push(cssDecl.getPropertyValue('--type-coop-'+ i));
+  let cooperate_chart = new Chart(type_ctx[2], {
+      type: 'bar',
+      data: { labels: typeG_label, datasets: [{data:typeG_data,
+         backgroundColor: cooperate_palette}],},
+      options:{
+        plugins: {
+          legend: { display: false },
+        },
+      },
+    });
 }
