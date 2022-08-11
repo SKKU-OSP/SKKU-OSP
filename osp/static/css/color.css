@@ -1,11 +1,18 @@
 :root{
     --main-bg-color: #EBEBEB;
+    --main-bg-color-transparent: #EBEBEB80;
     --sub-bg-color: #DAE2E8;
+    --sub-bg-color-transparent: #DAE2E880;
     --main-border-color: #9D9D9D;
+    --main-border-color-transparent: #9D9D9D80;
     --main-point-color: #002743;
+    --main-point-color-transparent: #00274380;
     --sub-point-color: #0094FF;
-    --alert-color: #31FFCE;
+    --sub-point-color-transparent: #0094FF80;
+    --alert-color: #ffae00;
+    --alert-color-transparent: #ffae0080;
     --main-icon-color: #747474;
+    --main-icon-color-transparent: #74747480;
     --profile-nav-font:#495057;
     --profile-nav-border:#9D9D9D9D;
     --card-box-shadow:#00000040;
@@ -13,6 +20,7 @@
     --profile-btn-inactive:#DDDDDD;
     --chat-send-color: #9AD5FF;
     --chat-receive-color: #FFFFFF;
+    --btn-default-color: #CDCDCD;
     --profile-btn-active:#D9D9D9;
     --profile-btn-border:#2F2F2F;
     --tag-bg-domain:#D3D3D3;
@@ -29,11 +37,18 @@
     --data-level-2:#49C8FD;
     --data-level-3:#00A4FF;
     --data-level-4:#0677FF;
+    --data-level-5:#EBEDF0;
     --data-radar-0:#0000C8;
     --data-radar-1:#C80000;
     --data-radar-2:#00C800;
     --data-score-0:#F7A6AF;
     --data-score-1:#FFC38B;
     --data-score-2:#FFF875;
+    --type-freq-0:#ffcd56;
+    --type-freq-1:#4bc0c0;
+    --type-freq-2:#36a2eb;
+    --type-freq-3:#9966ff;
+    --type-coop-0:#425fea;
+    --type-coop-1:#ff6b4b;
     --data-line:#FF0000CC;
 }

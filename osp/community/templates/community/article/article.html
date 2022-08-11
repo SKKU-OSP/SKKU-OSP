@@ -46,6 +46,7 @@
         if (view_type != 'view') {
             category_select = new SlimSelect({
                 select: '#multiple',
+                placeholder: 'Tag',
                 onChange: (selected_list) => {
                     for (selected of selected_list) {
                         $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
@@ -133,6 +134,7 @@
                     $('#article-content').html(data['html']);
                     category_select = new SlimSelect({
                         select: '#multiple',
+                        placeholder: 'Tag',
                         onChange: (selected_list) => {
                             for (selected of selected_list) {
                                 $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' +

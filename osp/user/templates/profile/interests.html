@@ -22,9 +22,9 @@
 </div>
 <div>
     {% for row in data.ints %}
-        <button type="submit" class="btn btn-outline-dark" name="action" value="delete {{row.tag.name}}">
+        <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete {{row.tag.name}}">
             <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:2px">{{row.tag.name}}</span>
-            <span class="badge badge-light">x</span>
+            <span class="badge badge-light" id="ints_delete">x</span>
         </button>
     {% endfor %}
 </div>

@@ -81,6 +81,9 @@ class ProfileView(TemplateView):
 
         print(relations)
         print(remain_children)
+
+        is_own = str(request.user) == context['username']
+
         data = {
             'info': student_info,
             'score': student_score,
@@ -88,7 +91,8 @@ class ProfileView(TemplateView):
             'lang': lang,
             'relations': relations,
             'remains': remain_children,
-            'account': context['account']
+            'account': context['account'],
+            'is_own' : is_own
         }
         context['data'] = data
         print("ProfileView get time :", time.time() - start)
@@ -246,57 +250,85 @@ class ProfileView(TemplateView):
         
         #GBTI test
         test_data_path = os.path.join(BASE_DIR, 'static/data')
-        if not os.path.exists(os.path.join(test_data_path, 'committer_time_circmean.csv')):
+        filepath1 = os.path.join(test_data_path, 'committer_time_circmean.csv')
+        filepath2 = os.path.join(test_data_path, 'time_sector.csv')
+        if not os.path.exists(filepath1) or not os.path.exists(filepath2):
             update_act.update_commmit_time()
-        committer_time_circmean = pd.read_csv(os.path.join(test_data_path, 'committer_time_circmean.csv'))
+        committer_time_circmean = pd.read_csv(filepath1)
+        committer_time_guide = pd.read_csv(filepath2)
         
-        if not os.path.exists(os.path.join(test_data_path, 'time_sector.csv')):
-            update_act.update_commmit_time()
-        committer_time_guide = pd.read_csv(os.path.join(test_data_path, 'time_sector.csv'))
-        
-        if not os.path.exists(os.path.join(test_data_path, 'major_act.csv')):
+        filepath = os.path.join(test_data_path, 'major_act.csv')
+        if not os.path.exists(filepath):
             update_act.update_individual()
-        major_act = pd.read_csv(os.path.join(test_data_path, 'major_act.csv'))
+        major_act = pd.read_csv(filepath, index_col = 0)
         
-        if not os.path.exists(os.path.join(test_data_path, 'commit_intv.csv')):
-            update_act.update_frequency()   
-        committer_frequency = pd.read_csv(os.path.join(test_data_path, 'commit_intv.csv'))
+        filepath = os.path.join(test_data_path, 'commit_intv.csv')
+        if not os.path.exists(filepath):
+            update_act.update_frequency()
+        committer_frequency = pd.read_csv(filepath)
 
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
-        student_major_act = major_act[major_act['student_github'] == context["username"]].iloc[0, 0]
-        committer_frequency = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0, 2]
-        print(student_time_circmean)
-        print(time_sector_min)
-        gbti_data = {}
-        # 낮에 활동, 밤에 활동
-        gbti_data["typeE"] = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1 
-        # 자주 작업, 몰아서 작업
-        gbti_data["typeF"] = 1 if committer_frequency == 0 else -1 
-         # 혼자 작업, 함께작업 
-        gbti_data["typeG"] = -1 if student_major_act == 'individual' else 1
-        gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(gbti_data.values())
-        gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
-        context["gbti"] = gbti_data
+        try:
+            student_major_act = major_act.at[context["username"], "major_act"]
+            indi_num = int(major_act.at[context["username"], "individual"])
+            group_num = int(major_act.at[context["username"], "group"])
+        except Exception as e:
+            print("Major_act error", e)
+            student_major_act = "individual"
+            indi_num = 0
+            group_num = 0
+        
+        commit_freq_row = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0]
+        commit_freq = commit_freq_row["type3"]
+        print("student_time_circmean",student_time_circmean, "time_sector_min",time_sector_min, "time_sector_max", time_sector_max)
+        print("major_act", student_major_act, indi_num, group_num, ", commit_freq", commit_freq)
+        try:
+            commit_freq_dist = commit_freq_row["dist"]
+            commit_freq_dist = json.loads(commit_freq_dist)
+            print("commit_freq_dist", commit_freq_dist, type(commit_freq_dist))
+            type_data = {}
+            type_data["typeF_data"] = commit_freq_dist
+            type_data["typeG_data"] = [indi_num, group_num]
+            context["type_data"] = json.dumps(type_data)
+        except Exception as e:
+            print("Get Type data error", e)
 
         try:
             devtype_data = DevType.objects.get(account=account)
-            gbti_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            gbti_data.update(get_type_test(gbti_data["typeA"], gbti_data["typeB"], gbti_data["typeC"], gbti_data["typeD"]))
+            try:
+                devtype_data.typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
+                devtype_data.typeF = commit_freq
+                devtype_data.typeG = 1 if student_major_act == 'individual' else -1
+                devtype_data.save()
+                gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
+
+                gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
+                gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+                context["gbti"] = gbti_data
+            except Exception as e:
+                print("Calculate dev type error", e)
+                context["gbti"] = None
             test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            
+            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
             def get_type_len(type_val):
-                return (int((100 - type_val)/2) - 5, int((100 + type_val)/2) + (100 + type_val)%2 - 5)
+                return (int((100 - type_val)/2) - 2, int((100 + type_val)/2) + (100 + type_val)%2 - 2)
 
             test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
             test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
             test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
             test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
-            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
         except Exception as e:
-            print("DevType get error", e)
+            print("Get DevType object error", e)
             test_data = None
+            typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
+            typeF = commit_freq
+            typeG = 1 if student_major_act == 'individual' else -1
+            gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
+            gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
+            gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+            context["gbti"] = gbti_data
         context["test"] = test_data
         
         print("ProfileView time :", time.time() - start)
@@ -498,7 +530,7 @@ class ProfileRepoView(TemplateView):
         
         start = time.time()
         context = super().get_context_data(**kwargs)
-        
+        update_act.update_individual()
         user = User.objects.get(username=context["username"])
         account = Account.objects.get(user=user)
         student_data = account.student_data

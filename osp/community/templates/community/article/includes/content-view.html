@@ -1,6 +1,7 @@
 {% load tag_templatetag %}
 {% load community_tag %}
 {% load team_tag %}
+{% load markdown_filter %}
 {% load static %}
 
 <form method="post" action=".." class="" onSubmit="return false;">
@@ -48,7 +49,7 @@
 
         </div>
         <div>
-            <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body|linebreaksbr }}</div>
+            <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body|mark }}</div>
         </div>
         <div style="margin-top:10px;" class="ss-main d-flex flex-row" >
             <div class="ss-multi-selected">
