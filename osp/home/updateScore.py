@@ -1,5 +1,4 @@
 import math
-
 from django.db import connections, transaction, DatabaseError
 from django.db.models import Q, F, Value, Sum, Count
 from django.db.models.functions import Concat
@@ -74,8 +73,12 @@ def user_score_update(user: Account, year: int):
         repo=Concat(F('github_id'), Value('/'), F('repo_name'))
     ).filter(repo__in=contr_repos)
     
-    star_cnt = contr_repos.aggregate(total_star=Sum('stargazers_count'))['total_star']
-    fork_cnt = contr_repos.aggregate(total_fork=Sum('forks_count'))['total_fork']
+    star_cnt = contr_repos.filter(github_id=github_id).aggregate(total_star=Sum('stargazers_count'))['total_star']
+    if star_cnt is None :
+        star_cnt = 0
+    fork_cnt = contr_repos.filter(github_id=github_id).aggregate(total_fork=Sum('forks_count'))['total_fork']
+    if fork_cnt is None :
+        fork_cnt = 0
     repo_score = {}
     commit_lines = 0
     for repo in contr_repos:
