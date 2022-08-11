@@ -5,6 +5,7 @@ from scipy.stats import circmean
 from datetime import datetime
 import math, time
 from user.models import GithubRepoCommits, GithubRepoStats, DevType, StudentTab
+from django.db.models import Case, When, IntegerField
 
 commit_lines_limit = 1000
 
@@ -90,69 +91,45 @@ def update_commmit_time():
     # ORM으로 DB 업데이트
 
 def update_individual():
-    repo_stat = pd.DataFrame(GithubRepoStats.objects.all().values())
     
-    def check_ind(contributors): # 개인리포면 1 리턴
-        if contributors==1:
-            return 1
-        else:
-            return 0
+    start = time.time()
+    # GithubRepoStats Query
+    repo_stat_queryset = GithubRepoStats.objects.values('github_id', 'repo_name').annotate(
+    individual=Case(When(contributors_count=1, then=1), default=0, output_field=IntegerField()), 
+    group=Case(When(contributors_count__gt=1, then=1), default=0, output_field=IntegerField()))
+    # Make Dataframe
+    repo_stat_ind = pd.DataFrame(repo_stat_queryset)
     
-    def check_gr(contributors): # 그룹리포면 1 리턴
-        if contributors==1:
-            return 0
-        else:
-            return 1
+    # StudentTab Query
+    st_queryset = StudentTab.objects.values('github_id')
+    st_set = set(st_query["github_id"] for st_query in st_queryset)
+    # GithubRepoCommits Query
+    github_repo_commits = GithubRepoCommits.objects.filter(additions__lt =commit_lines_limit, deletions__lt=commit_lines_limit)
     
-    repo_stat['individual'] = repo_stat['contributors_count'].map(check_ind)
-    repo_stat['group'] = repo_stat['contributors_count'].map(check_gr)
-    repo_stat_ind = repo_stat.loc[:, ['github_id', 'repo_name','individual','group']]
+    target_committer =github_repo_commits.filter(committer_github__in=st_set).exclude(author_github__in=st_set) | github_repo_commits.filter(committer_github__in=st_set, author_github__isnull = True)
+    target_author =github_repo_commits.filter(author_github__in=st_set).exclude(committer_github__in=st_set) | github_repo_commits.filter(author_github__in=st_set, committer_github__isnull = True)
+    target_bi = github_repo_commits.filter(author_github__in=st_set, committer_github__in=st_set)
+    
+    # Make Commit DataFrame and concat
+    sc_1 = pd.DataFrame(target_committer.values())
+    sc_1['student_github'] = sc_1["committer_github"]
+    sc_2 = pd.DataFrame(target_author.values())
+    sc_2['student_github'] = sc_2["author_github"]
+    sc_3 = pd.DataFrame(target_bi.values())
+    sc_3['student_github'] = sc_3["author_github"]
+    student_commits_ind = pd.concat([sc_1,sc_2, sc_3], ignore_index=True)
 
-
-    student_commits = pd.DataFrame(GithubRepoCommits.objects.all().values())
-
-    users = pd.DataFrame(StudentTab.objects.all().values())
-    usernames = users.loc[:,['github_id']]
-    usernames
-
-    def check_student(unknown_id):
-        checker = int(usernames[usernames['github_id']==unknown_id].count())
-        if checker > 0:
-            return True
-        else:
-            return False
-
-
-    student_commits_ind = student_commits.loc[:, ['additions', 'deletions', 'author_github' ,'committer_github', 'repo_name']]
-
-    student_commits_ind = student_commits_ind[student_commits_ind['additions'] < commit_lines_limit] # 한 커밋에 1000개 이상 추가 한 커밋 삭제
-    student_commits_ind = student_commits_ind[student_commits_ind['deletions'] < commit_lines_limit] # 한 커밋에 1000개 이상 삭제 한 커밋 삭제
-
-    student_commits_ind['is_student'] = 0
-    student_commits_ind['is_student'] = student_commits_ind['committer_github'].map(check_student) | student_commits_ind['author_github'].map(check_student)
-    student_commits_ind['committer_is_student'] = student_commits_ind['committer_github'].map(check_student)
-    student_commits_ind['author_is_student'] = student_commits_ind['author_github'].map(check_student)
-    student_commits_ind = student_commits_ind[student_commits_ind['is_student']==True]
-    student_commits_ind['student_github'] = ''
-
-    for row_index in student_commits_ind.index:
-        if student_commits_ind.loc[row_index, 'committer_is_student']:
-            student_commits_ind.loc[row_index, 'student_github'] = student_commits_ind.loc[row_index, 'committer_github']
-        elif student_commits_ind.loc[row_index, 'author_is_student']:
-            student_commits_ind.loc[row_index, 'student_github'] = student_commits_ind.loc[row_index, 'author_github']
-            
-    student_commits_ind = student_commits_ind[student_commits_ind['repo_name'] != 'Web-programming-midterm-project']
-    student_commits_ind['individual'] = student_commits_ind['repo_name'].map(lambda x : repo_stat_ind[repo_stat_ind['repo_name'] == x].iloc[0, 2])
-    student_commits_ind['group'] = student_commits_ind['repo_name'].map(lambda x : repo_stat_ind[repo_stat_ind['repo_name'] == x].iloc[0, 3])
-
-
+    # Merge Dataframe Repo stats and Commit
+    student_merge = pd.merge(left=student_commits_ind, right=repo_stat_ind, how="left", on=["github_id","repo_name"])
+    
+    # Calculate Result
     def check(x):
         if x==True:
             return 'individual'
         else:
             return 'group'
 
-    count_df = student_commits_ind.loc[:, ['student_github', 'individual', 'group']].copy()
+    count_df = student_merge.loc[:, ['student_github', 'individual', 'group']].copy()
     count_df.dropna(inplace=True)
     result_df = count_df.groupby('student_github').sum()
     result_df['group/individual'] = result_df['group']/(result_df['individual'] + 1)
@@ -160,8 +137,13 @@ def update_individual():
     result_df['individual-group'] = result_df['individual'] - result_df['group']
     result_df['major_act'] = result_df['individual'] >= result_df['group']
     result_df['major_act'] = result_df['major_act'].map(check)
-
+    result_df.individual = result_df.individual.astype(int)
+    result_df.group = result_df.group.astype(int)
     result_df.loc[:, ['individual', 'group', 'major_act']].to_csv(os.getcwd() + '/static/data/major_act.csv')
+    
+    print("result_df:", len(result_df))
+    print("update_individual() total time", time.time() - start)
+    
 
 def update_frequency():
     
@@ -258,7 +240,6 @@ def update_frequency():
             type_tag1 = 0 if id_commit_mean <= 1.5 else 1
             type_tag2 = 0 if id_commit_sigma <= 1.5 else 1
             type_tag3 = round(id_commit_wavg, 2)
-            print(id_commit_dist, id_commit_sigma, type_tag3)
             
             id_result.append({"id":id, "dist":id_commit_dist, 
                     "mean": id_wavg, "sigma":id_sigma, 
