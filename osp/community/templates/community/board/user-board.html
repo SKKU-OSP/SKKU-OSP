@@ -10,16 +10,17 @@
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
 
-      <div class="d-flex justify-content-between" id="board-title-bar">
-        <div class="d-flex col-8 justify-content-start">
-          <h2 style="padding-right:15px;">{{ board.name }} 게시판</h2>
-          <div class="my-auto col-6" id="tag-filter">
-            <select class="mx-2" style="min-width: 25%;" id="tag-select" multiple>
-              {% category_tag request %}
-            </select>
-          </div>
-        </div>
-
+      <div class="d-flex justify-content-between border" id="board-title-bar" style="position:relative;">
+            <div id="board-title">
+              <a href="/community/home/{{board.name}}/{{board.id}}">
+                {{ board.name }} 게시판
+                </a>
+            </div>
+            <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
+              <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+                {% category_tag request %}
+              </select>
+            </div>
       </div>
       <div id="article-card-body">
         {% include "community/account-card.html" %}
