@@ -11,7 +11,7 @@
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
             <div id="board-title-bar" class="d-flex justify-content-between" id="board-title-bar">
-                <div id="board-title">
+                <div id="board-title" >
                     <a href="/community/home/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
                     </a>
@@ -53,7 +53,52 @@
                 }
             });
         }
+
+        if (view_type == 'register') {
+            console.log('....');
+            const linkedPicker1Element = document.getElementById('PeriodPickerStart');
+            const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element, {
+                localization: {
+                    dayViewHeaderFormat: {
+                        month: 'long',
+                        year: '2-digit'
+                    },
+                    locale: 'en',
+                },
+            });
+            //linked1.dates.setFromInput("{{article.period_start|date:'Y-m-d'}}T{{article.period_start|date:'H:i:s'}}");
+            const linked2 = new tempusDominus.TempusDominus(document.getElementById(
+                'PeriodPickerEnd'), {
+                localization: {
+                    dayViewHeaderFormat: {
+                        month: 'long',
+                        year: '2-digit'
+                    },
+                    locale: 'en',
+                },
+                useCurrent: false
+            });
+            //linked2.dates.setFromInput("{{article.period_end|date:'Y-m-d'}}T{{article.period_end|date:'H:i:s'}}");
+
+            //using event listeners
+            linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+                linked2.updateOptions({
+                    restrictions: {
+                        minDate: e.detail.date
+                    }
+                });
+            });
+            //using subscribe method
+            const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+                linked1.updateOptions({
+                    restrictions: {
+                        maxDate: e.date
+                    }
+                });
+            });
+        }
     });
+
 
     function edit_submit(event) {
         console.log('TEST');
