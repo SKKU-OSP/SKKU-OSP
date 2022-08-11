@@ -137,7 +137,8 @@ def update_individual():
     result_df['individual-group'] = result_df['individual'] - result_df['group']
     result_df['major_act'] = result_df['individual'] >= result_df['group']
     result_df['major_act'] = result_df['major_act'].map(check)
-
+    result_df.individual = result_df.individual.astype(int)
+    result_df.group = result_df.group.astype(int)
     result_df.loc[:, ['individual', 'group', 'major_act']].to_csv(os.getcwd() + '/static/data/major_act.csv')
     
     print("result_df:", len(result_df))

@@ -270,18 +270,27 @@ class ProfileView(TemplateView):
         student_time_circmean = committer_time_circmean[committer_time_circmean['student_github'] == context["username"]].iloc[0, 2]
         time_sector_min = committer_time_guide[committer_time_guide['sector'] == 'major_min'].iloc[0, 2]
         time_sector_max = committer_time_guide[committer_time_guide['sector'] == 'major_max'].iloc[0, 2]
-        student_major_act = major_act.at[context["username"], "major_act"]
+        try:
+            student_major_act = major_act.at[context["username"], "major_act"]
+            indi_num = int(major_act.at[context["username"], "individual"])
+            group_num = int(major_act.at[context["username"], "group"])
+        except Exception as e:
+            print("Major_act error", e)
+            student_major_act = "individual"
+            indi_num = 0
+            group_num = 0
+        
         commit_freq_row = committer_frequency[committer_frequency['id'] == context["username"]].iloc[0]
-
         commit_freq = commit_freq_row["type3"]
         print("student_time_circmean",student_time_circmean, "time_sector_min",time_sector_min, "time_sector_max", time_sector_max)
-        print("major_act", student_major_act, "commit_freq", commit_freq)
+        print("major_act", student_major_act, indi_num, group_num, ", commit_freq", commit_freq)
         try:
             commit_freq_dist = commit_freq_row["dist"]
             commit_freq_dist = json.loads(commit_freq_dist)
             print("commit_freq_dist", commit_freq_dist, type(commit_freq_dist))
             type_data = {}
             type_data["typeF_data"] = commit_freq_dist
+            type_data["typeG_data"] = [indi_num, group_num]
             context["type_data"] = json.dumps(type_data)
         except Exception as e:
             print("Get Type data error", e)
@@ -521,7 +530,7 @@ class ProfileRepoView(TemplateView):
         
         start = time.time()
         context = super().get_context_data(**kwargs)
-        
+        update_act.update_individual()
         user = User.objects.get(username=context["username"])
         account = Account.objects.get(user=user)
         student_data = account.student_data
