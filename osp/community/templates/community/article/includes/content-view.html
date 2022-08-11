@@ -6,21 +6,21 @@
 
 <form method="post" action=".." class="" onSubmit="return false;">
     <!--article content-->
-    <div class="d-flex flex-column border border-2" style="padding:10px;">
-        <div class="d-flex flex-row justify-content-between">
-            <div class="border-2 border-bottom" style="flex:1;width:80%;padding-left:10px;margin-bottom:5px;font-weight:bold;">
+    <div id="article-wrapper">
+        <div id="article-title-wrapper" class="d-flex flex-row justify-content-between">
+            <div id="article-title">
                 {% if board.board_type == 'Recruit' %}
                     [{{ article.team.name |default:"팀이 더이상 존재하지 않습니다." }}]
                 {% endif %}
                 {{ article.title }}
             </div>
-            <div class="d-flex flex-row justify-content-end">
+            <div id="article-metadata">
                 <div style="line-height:40px;padding-left:10px;">
                     {% if user == article.writer.user %}
                     <span style="cursor:pointer" onclick="edit()">수정</span> 
                     <span style="cursor:pointer" onclick="deleteArticle();">삭제</span>
                     {% elif request.user.is_anonymous %}
-                    <a href="">사용자</a>
+                    <a href="#">사용자</a>
                     {% elif not article.anonymous_writer %}
                     <div class="dropdown writer-dropdown">
                         <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -33,37 +33,37 @@
                     </div>
                     {% endif %}
                 </div>
-                <div style="height:40px;line-height:31px;padding-left:10px;" class="d-flex flex-column">
-                <div style="height:10px;font-size:5px;">
-                    {{ article.pub_date|date:"Y-m-d" }}
+                <div id="article-datetime">
+                    <div>
+                        {{ article.pub_date|date:"Y-m-d" }}
+                    </div>
+                    <div>
+                        {{ article.pub_date|time:"h:i a" }}
+                    </div>
                 </div>
-                <div style="height:10px;font-size:5px;">
-                    {{ article.pub_date|time:"h:i a" }}
-                </div>
-                </div>
-                <div class="d-flex flex-row">
-                    <div style="height:40px;line-height:40px;font-size:18px;padding-left:3px;" class="material-icons-outlined">visibility</div>
-                    <div style="height:40px;line-height:40px;font-size:12px;padding-left:3px;padding-right:3px;">{{ article.view_cnt }}</div>
+                <div id="article-viewcnt">
+                    <div class="material-icons">visibility</div>
+                    <div>{{ article.view_cnt }}</div>
                 </div>
             </div>
-
+        </div>
+        <div id="article-title-border"></div>
+        <div id="article-taglist">
+            {% for tag in tags %}
+            <div class="badge bg-tag-{{tag.tag.type}}">
+                #{{ tag.tag.name }}
+            </div>
+            {% empty %}
+            <span style="padding-left:5px;">태그 없음</span>
+            {% endfor %}
         </div>
         <div>
-            <div class="border-2 border-bottom" style="width:100%; padding-top:10px; padding-left:10px; overflow:auto; max-height:350px; min-height:350px;">{{ article.body|mark }}</div>
-        </div>
-        <div style="margin-top:10px;" class="ss-main d-flex flex-row" >
-            <div class="ss-multi-selected">
-                <div class="ss-values">
-                    {% for tag in tags %}
-                    <div class="ss-value bg-tag-{{tag.tag.type}}">
-                        <span class="ss-value-text"># {{ tag.tag.name }}</span>
-                    </div>
-                    {% empty %}
-                    <span style="padding-left:5px;">태그 없음</span>
-                    {% endfor %}
-                </div>
+            <div id="article-body">
+                {{ article.body|mark }}
             </div>
-            <div id="article-like-scrap" class="d-flex flex-row justify-content-between">
+        </div>
+        <div>
+            <div id="article-like-scrap">
                 <div onclick="ArticleThumbUp({{ article.id }},{{ request.user.id | default_if_none:-1 }})"
                     id="article-like-btn"
                     class="h-100 pointer opacity-hover">
@@ -100,71 +100,80 @@
             </div>
         </div>
     </div>
-</form>
-{% if board.board_type == 'Recruit' %}
-<div class="form-control d-flex flex-row justify-content-between w-100" style="margin-top:5px;">
-    {% if article.team %}
-    <div class="w-100">
-        <div class="d-flex flex-row recruit-team-info">
-            <div class="recruit-team-info-image">
+    {% if board.board_type == 'Recruit' %}
+    <div id="article-teamcard">
+        {% if article.team %}
+        <div id="recruit-article-info">
+            <div id="recruit-article-info-image">
                 <img src="{{article.team.image.url}}" alt="team-image">
             </div>
-            <div>
-                <b>{{ article.team.name }} </b>
-                <br> 
-                {{ article.team.description }}
+            <div id="recruit-article-info-text">
+                <div id="recruit-article-info-name">{{ article.team.name }}</div>
+                <div id="recruit-article-info-desc">{{ article.team.description }}</div>
             </div>
         </div>
-        <div class="d-flex flex-row justify-content-between w-100">
-            <div class="d-flex flex-row">
-                <div class="recruit-team-info-period">
-                    모집기간
-                </div>
-                <div>
-                    {{article.period_start|date:'Y-m-d H:i'}} ~ {{article.period_end|date:'Y-m-d H:i'}}
-                </div>
-            </div>
+        {% is_period_end article.period_end as is_end %}
+        {% is_period_end article.period_start as is_start %}
+        <div id="recruit-article-period">
             <div>
-                {% is_period_end article.period_end as is_end %}
-                {% if not article.team %}
-                    -
+                모집기간
+            </div>
+            <div id="recruit-article-period-date">
+                시작: {{article.period_start|date:'Y.m.d H:i'}}
+                <br>
+                마감: {{article.period_end|date:'Y.m.d H:i'}}
+                {% if not is_start %}
+                <div>{{article.period_start|remain_datetime}}</div>
                 {% elif not is_end %}
-                    <span class="badge" style="font-size:13px;background:#b8e0d2;">모집중</span>
-                {% else %}
-                    <span class="badge" style="font-size:13px;background:#fec89a;">모집 마감</span>
+                <div>{{article.period_end|remain_datetime}}</div>
                 {% endif %}
             </div>
         </div>
-    </div>
-        {% is_teammember article.team request.user as is_teammember %}
-        {% if not is_teammember %}
-            {% teaminvitemessage article.team request.user as waited_teaminvitemessage %}
-            {% if not waited_teaminvitemessage %}
-            <div>
-                <button id="team-apply"
-                        {% if request.user.is_anonymous %}
-                        onclick="alert('로그인 후 이용해주세요.')"
-                        {% else %}
-                        onclick="openTeamApplyModal({{ article.team.id }});" 
-                        {% endif %}
-                        data-team-id="{{ article.team.id }}" class="btn btn-secondary h-100" style="font-size:13px;margin-left:7px;">지원하기</button>
-            </div>
+        <div id="recruit-article-status">
+            {% if not is_start %}
+            <div class="recruit-yet">모집 전</div>
+            {% elif not is_end %}
+            <div class="recruit-start">모집 중</div>
             {% else %}
-            <div>
-                <div class="btn btn-secondary" style="font-size:13px; cursor:default;">{{ waited_teaminvitemessage.get_status_display }}</div>
-            </div>
+            <div class="recruit-end">모집 마감</div>
             {% endif %}
+        </div>
+        {% is_teammember article.team request.user as is_teammember %}
+
+        {% if not is_teammember and is_start and not is_end %}
+        
+        {% teaminvitemessage article.team request.user as waited_teaminvitemessage %}
+
+        {% if not waited_teaminvitemessage %}
+        <div id="recruit-article-apply">
+            {% if request.user.is_anonymous %}
+            <div id="team-apply" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
+            {% else %}
+            <div id="team-apply" onclick="openTeamApplyModal({{ article.team.id }});"  data-team-id="{{ article.team.id }}">
+            {% endif %}
+                지원하기
+            </div>
+        </div>
+        {% else %}
+        <div>
+            <div class="btn btn-secondary" style="font-size:13px; cursor:default;">
+                {{ waited_teaminvitemessage.get_status_display }}
+            </div>
+        </div>
         {% endif %}
-    {% else %}
+
+        {% endif %}
+        {% else %}
         <div>
             팀 정보가 없습니다.
         </div>
-    {% endif %}
-</div>
+        {% endif %}
+    </div>
 
     {% if user.is_authenticated %}
-        <div class="modal fade" id="AddTeamApplyModal">
-        </div>
-        <script src="{% static 'js/team_apply_modal.js' %}"></script>
+    <div class="modal fade" id="AddTeamApplyModal">
+    </div>
+    <script src="{% static 'js/team_apply_modal.js' %}"></script>
     {% endif %}
-{% endif %}
+    {% endif %}
+</form>
