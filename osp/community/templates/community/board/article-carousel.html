@@ -21,34 +21,29 @@
 {#    </div>#}
 {#{% endif %}#}
 {#</div>#}
-<div id="active-article">
+<div class="active-article">
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-indicators">
-        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <div class="carousel-indicators" style="bottom:-43px;">
+          {% for article in active_article %}
+              <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.counter0 == 0 %}class="active"{% endif %} aria-current="true" aria-label="Slide 1"></button>
+          {% endfor %}
+{#        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>#}
+{#        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>#}
       </div>
       <div class="carousel-inner">
         {% for article in active_article %}
         <div class="carousel-item {% if article == active_article.0 %}active{% endif %}">
-                <div style="height:140px;width:480px;margin:auto;"  class="d-flex flex-column active-article-item" onclick="location.href='{% url 'community:article-view' article.id %}'" >
-                    <div style="height:90px;" class="d-flex flex-row recruit-team-info">
-                        <div class="recruit-team-info-image">
-                            <img src="{{article.team.image.url}}" alt="team-image">
-                        </div>
-                        <div class="d-flex flex-column w-100" >
-                            <div class="d-flex flex-row w-100" style="height:40px;">
-                                <div class=" active-article-item-team-name fw-bold color-b">{{ article.team.name }} </div>
-                                <div class=" w-100 active-article-item-team-desc color-b " style="font-size:10px;padding-left:10px;" >{{ article.team.description }}</div>
-                            </div>
-                            <div class="color-b w-100 h-100 border" style="font-size:0.2em;text-overflow: ellipsis;">
-                                {{ article.title }}
-                                <br>
-                                {{ article.body|linebreaksbr }}
-                            </div>
-                        </div>
+                <div style="height:160px;min-width:480px;width:92%;margin:auto;margin-top:10px;"  class="d-flex flex-column active-article-item justify-content-between" onclick="location.href='{% url 'community:article-view' article.id %}'" >
+                    <div class="" style="font-size:14px;">
+                        {{ article.title }}
                     </div>
-                    <div class="border">
+                    <div class="" style="font-size:13px;">
+                        {{ article.team.name }}
+                    </div>
+                    <div class="" style="font-size:13px;height:62px;white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                        {{ article.body }}
+                    </div>
+                    <div class="">
                         {% for tag in article.tags %}
                         <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
                         {% endfor %}
@@ -58,11 +53,11 @@
         {% endfor %}
       </div>
       <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span style="" class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
       </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <button  class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <span style="" class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Next</span>
       </button>
     </div>
