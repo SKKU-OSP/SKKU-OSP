@@ -13,6 +13,7 @@ section#main, section#result, section .qbox{
     display: none;
     margin: auto;
     height: 100vh;
+    background-image: url("/static/images/back.png");
 }
 .navybtn{
     flex-direction: row;
