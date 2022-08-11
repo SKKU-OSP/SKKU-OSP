@@ -1,12 +1,16 @@
 @import url("/static/css/color.css");
 .guideline-check{
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: nowrap;
   color:black;
 }
 .weak-text{
   color: var(--main-icon-color);
   font-size: 12px;
+}
+.weak-text-lg{
+  color: var(--main-icon-color);
 }
 .guideline-step{
   background-color: var(--sub-point-color);
@@ -27,7 +31,7 @@
   margin: 0;
 }
 .guideline-step-item{
-  padding: 0 20px;
+  padding: 0 5%;
   flex-basis: 0;
   -webkit-box-flex: 1;
   flex-grow: 1;
@@ -171,4 +175,10 @@
 }
 .repo-info > span{
   margin-right: 1rem;
+}
+.border-right{
+  border-right: 1px solid var(--main-border-color);
+}
+.border-left{
+  border-left: 1px solid var(--main-border-color);
 }
