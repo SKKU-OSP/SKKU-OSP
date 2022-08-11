@@ -166,6 +166,7 @@ div> ::-webkit-scrollbar-thumb:hover {
   border-color: var(--main-border-color);
   border-top-left-radius: 0.625rem;
   border-top-right-radius: 0.625rem;
+  border: none;
   color: #000000;
 }
 
@@ -185,15 +186,30 @@ div> ::-webkit-scrollbar-thumb:hover {
   border: none;
 }
 
+.modal-body .form-control{
+  box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+}
+
+.ss-multi-selected{
+  border: none !important;
+  box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+}
+
+#message-modal .modal-header{
+  border-bottom: 1px solid var(--main-border-color);
+}
+
 #oppo-list {
   width: 40%;
   z-index: 1;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  border-bottom-left-radius: 0.625rem;
+  box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
 }
 
 #chat-view-tab {
   width: 60%;
   padding: 1rem;
+  border-bottom-right-radius: 0.625rem;
   background-color: var(--main-bg-color);
   display: flex;
   flex-direction: column;
@@ -402,7 +418,7 @@ footer {
 /*}*/
 
 /* medium and up screens */
-@media (min-width: 768px) {
+/* @media (min-width: 768px) { */
 
 /*  .carousel-inner .carousel-item-end.active,*/
 /*  .carousel-inner .carousel-item-next {*/
@@ -467,7 +483,7 @@ footer {
 }
 
 .team-apply-item {
-  padding: 0.5rem;
+  padding: 0.75rem;
   border-bottom: 1px solid var(--main-border-color);
 }
 
@@ -507,6 +523,19 @@ footer {
   text-align: center;
 }
 
+.btn-default{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.625rem;
+  border: 1px solid #000000;
+}
+.btn-default:hover{
+  background-color: var(--btn-default-color);
+}
+
 .btn-refuse{
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -516,8 +545,7 @@ footer {
   background-color: transparent;
 }
 .btn-refuse:hover{
-  background-color: var(--main-icon-color);
-  opacity: 80%;
+  background-color: var(--main-icon-color-transparent);
 }
 
 .btn-accept{
@@ -529,6 +557,5 @@ footer {
   background-color: transparent;
 }
 .btn-accept:hover{
-  background-color: var(--sub-point-color);
-  opacity: 80%;
+  background-color: var(--sub-point-color-transparent);
 }

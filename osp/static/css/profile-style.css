@@ -209,7 +209,7 @@ a.nav-link {
 
 .tab-pane {
   text-align: center;
-  padding: 0 8%;
+  padding: 0 4%;
 }
 
 #pills-overview.active {
@@ -228,8 +228,7 @@ a.nav-link {
   display: block;
   width: 20px;
   height: 20px;
-  border: 1px solid var(--profile-nav-border);
-  margin: 0 2px;
+  border-radius: 50%;
 }
 
 .grass-color[data-level="0"] {
@@ -257,6 +256,7 @@ a.nav-link {
   justify-content: end;
   font-size: 16px;
   align-items: center;
+  gap:2px;
 }
 
 @media (max-width: 992px) {
@@ -264,8 +264,6 @@ a.nav-link {
     display: block;
     width: 14px;
     height: 14px;
-    border: 1px solid var(--profile-nav-border);
-    margin: 0 2px;
   }
 
   .grass-group {
@@ -274,9 +272,11 @@ a.nav-link {
     font-size: 12px;
     align-items: center;
   }
+  .nav-link{
+    font-size: 14px;
 }
-
-.horizontal-menu {
+}
+.horizontal-menu{
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -328,10 +328,10 @@ a.nav-link {
 
 .select-compare {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 3rem;
-  gap: 1rem;
+  padding: 0.5rem 1rem;
+  gap: 0.5rem;
   width: 100%;
 }
 
@@ -339,7 +339,6 @@ a.nav-link {
 .select-compare .ss-main {
   font-size: 14px;
   height: fit-content;
-  width: 20%;
 }
 
 #modal-btn-compare {
@@ -355,7 +354,7 @@ a.nav-link {
 
 #modal-btn-toggle {
   text-align: center;
-  width: fit-content;
+  width: 85px;
   height: fit-content;
 }
 
@@ -366,6 +365,7 @@ a.nav-link {
 #target-search {
   width: 100%;
   display: flex;
+  gap: 4px;
 }
 
 #target-search>.ss-main {
