@@ -3,10 +3,12 @@ from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 
+import math
+from datetime import datetime, timedelta, timezone
+
 from user.models import Account, User
 from team.models import TeamMember, Team
 from community.models import ArticleComment, Article, ArticleLike, ArticleScrap, Board, ArticleCommentLike
-from datetime import datetime, timedelta, timezone
 from team.models import TeamMember,TeamInviteMessage, Team
 from user.models import Account, AccountInterest
 
@@ -27,6 +29,17 @@ def time_before(date):
         repr_string = date.strftime('%Y-%m-%d')
     return repr_string
 
+@register.filter
+def remain_datetime(date):
+    delta = date - datetime.now()
+    if delta < timedelta(seconds=3600):
+        repr_string = f'{math.ceil(delta.seconds / 60) % 60}분 전'
+    elif delta < timedelta(days=1):
+        repr_string = f'{math.ceil(delta.seconds / 3600) % 3600}시간 전'
+    else:
+        repr_string = f'{delta.days}일 {math.ceil(delta.seconds / 60) % 24}시간 전'
+    return repr_string
+    
 @register.filter
 def article_like(article):
     return len(ArticleLike.objects.filter(article=article))
@@ -49,6 +62,7 @@ def anonymous_checked(a_writer):
         return mark_safe('checked')
     else:
         return ''
+    
 
 @register.simple_tag(takes_context=True)
 def board_sidebar_normal_board(context, request):
