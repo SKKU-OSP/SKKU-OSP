@@ -117,8 +117,9 @@ def TeamUpdate(request):
 
                 # team update
                 team.name = team_name
-                team.desc = team_desc
-                if team_img: team.image = team_img
+                team.description = team_desc
+                if team_img: 
+                    team.image = team_img
                 team.save()
 
                 # teamMember create and update
@@ -163,6 +164,7 @@ def TeamUpdate(request):
 
                 if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
                     raise DatabaseError('팀 관리자는 0명이 될 수 없습니다.')
+                team.save()
                 return JsonResponse({'status': 'success'})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
