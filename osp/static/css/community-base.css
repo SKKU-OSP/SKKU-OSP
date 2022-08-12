@@ -839,7 +839,7 @@
 
 #article-body {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: flex-start;
 
     min-height: 22rem;
@@ -957,4 +957,11 @@
     padding: 1rem;
     cursor: pointer;
     border: 1px solid var(--main-border-color);
+}
+
+.team-apply-delete{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
 }

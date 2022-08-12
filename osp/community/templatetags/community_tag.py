@@ -135,13 +135,6 @@ def apply_messages(team):
     return apply_messages
 
 @register.simple_tag
-def get_admin_team(user):
-    if not user.is_anonymous:
-        team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
-        return Team.objects.filter(id__in=team_li)
-    return None
-
-@register.simple_tag
 def is_article_thumb_up(article, user):
     if user.is_anonymous:
         return False
