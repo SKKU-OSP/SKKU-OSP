@@ -547,6 +547,10 @@ footer {
 .btn-refuse:hover{
   background-color: var(--main-icon-color-transparent);
 }
+.btn-refuse:disabled{
+  color: #000000;
+  background-color: var(--main-icon-color-transparent);
+}
 
 .btn-accept{
   padding-left: 0.5rem;
@@ -557,5 +561,22 @@ footer {
   background-color: transparent;
 }
 .btn-accept:hover{
+  background-color: var(--sub-point-color-transparent);
+}
+.btn-accept:disabled{
+  color: #000000;
+  background-color: var(--sub-point-color-transparent);
+}
+
+.btn-wait{
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--sub-point-color);
+  border-radius: 0.625rem;
+  background-color: transparent;
+}
+.btn-wait:disabled{
+  color: #000000;
   background-color: var(--sub-point-color-transparent);
 }

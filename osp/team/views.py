@@ -247,4 +247,16 @@ def TeamInviteUpdate(request):
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
 
-
+def TeamInviteDelete(request):
+    if request.method == 'POST':
+        msg_id = request.POST.get('msg_id')
+        apply_msg = TeamInviteMessage.objects.get(id=msg_id)
+        print(request.user.id, apply_msg.account_id)
+        if apply_msg.account_id != request.user.id:
+            return JsonResponse({'status': 'fail', 'message': 'Not Authorized Request'})
+        try:
+            with transaction.atomic():
+                apply_msg.delete()
+                return JsonResponse({'status': 'success'})
+        except DatabaseError as e:
+            return JsonResponse({'status': 'fail', 'message': str(e)})
