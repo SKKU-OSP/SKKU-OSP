@@ -72,13 +72,14 @@ def user_score_update(user: Account, year: int):
     contr_repos = GithubRepoStats.objects.all().annotate(
         repo=Concat(F('github_id'), Value('/'), F('repo_name'))
     ).filter(repo__in=contr_repos)
-    
-    star_cnt = contr_repos.filter(github_id=github_id).aggregate(total_star=Sum('stargazers_count'))['total_star']
+    my_contr_repos = contr_repos.filter(github_id=github_id)
+    star_cnt = my_contr_repos.aggregate(total_star=Sum('stargazers_count'))['total_star']
     if star_cnt is None :
         star_cnt = 0
-    fork_cnt = contr_repos.filter(github_id=github_id).aggregate(total_fork=Sum('forks_count'))['total_fork']
+    fork_cnt = my_contr_repos.aggregate(total_fork=Sum('forks_count'))['total_fork']
     if fork_cnt is None :
         fork_cnt = 0
+    
     repo_score = {}
     commit_lines = 0
     for repo in contr_repos:
@@ -104,6 +105,18 @@ def user_score_update(user: Account, year: int):
         repo_score[repo_string]['guideline'] = 0.3 if (repo.readme and repo.license and repo.proj_short_desc) else 0
         repo_score[repo_string]['score'] = sum([x for _, x in repo_score[repo_string].items()])
     sorted_score = sorted(repo_score.items(), key=(lambda x: x[1]['score']), reverse=True)
+    
+    contr_big_repos = contr_repos.filter(
+        stargazers_count__gt=50,
+        forks_count__gt=50,
+        contributors_count__gt=10
+    )
+    
+    big_pull_n_issue = 0
+    for repo in contr_big_repos:
+        big_pull_n_issue = len(issue_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
+        big_pull_n_issue += len(pull_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
+    
     try:
         with transaction.atomic():
             if len(sorted_score) > 0:
@@ -114,8 +127,9 @@ def user_score_update(user: Account, year: int):
                 if len(sorted_score) > 2:
                     github_score.score_other_repo_sum += sorted_score[2][1]['score']
                 github_score.score_other_repo_sum = min(github_score.score_other_repo_sum, 1.0)
-                github_score.score_star = math.log10(star_cnt + 1)
-                github_score.score_fork = min(fork_cnt * 0.2, 1.0)
+                github_score.score_star = min(math.log10(max((star_cnt + 1.1) / 3, 1)), 2)
+                github_score.score_fork = min(fork_cnt * 0.1, 1.0)
+                github_score.score_pr_issue = min(big_pull_n_issue * 0.1, 1)
             github_score.save()
             score_table = GitHubScoreTable.objects.filter(
                 id=user.student_data.id, 
@@ -132,7 +146,7 @@ def user_score_update(user: Account, year: int):
                     github_id=github_id,
                     total_score=min(
                         github_score.repo_score_sum + github_score.score_other_repo_sum \
-                        + github_score.score_star + github_score.score_fork,
+                        + github_score.score_star + github_score.score_fork + github_score.score_pr_issue,
                         5.0
                     ),
                     commit_cnt=0,
