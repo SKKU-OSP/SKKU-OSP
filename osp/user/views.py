@@ -249,46 +249,18 @@ class ProfileView(TemplateView):
         context["chart_data"] = json.dumps(chartdata)
         
         #GBTI test
-        test_data_path = os.path.join(BASE_DIR, 'static/data')
-        filepath1 = os.path.join(test_data_path, 'committer_time_circmean.csv')
-        filepath2 = os.path.join(test_data_path, 'time_sector.csv')
-        if not os.path.exists(filepath1) or not os.path.exists(filepath2):
-            update_act.update_commmit_time()
-        committer_time_circmean = pd.read_csv(filepath1, index_col = 0)
-        committer_time_guide = pd.read_csv(filepath2, index_col = 0)
+        hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(context['username'])
+        print("commit_time", daytime, night, hour_dist)
         
-        filepath = os.path.join(test_data_path, 'major_act.csv')
-        if not os.path.exists(filepath):
-            update_act.update_individual()
-        major_act = pd.read_csv(filepath, index_col = 0)
+        major_act, indi_num, group_num = update_act.read_major_act(context['username'])
+        print("major_act", major_act, indi_num, group_num)
         
-        filepath = os.path.join(test_data_path, 'commit_intv.csv')
-        if not os.path.exists(filepath):
-            update_act.update_frequency()
-        committer_frequency = pd.read_csv(filepath, index_col = 0)
-
-        student_time_circmean = committer_time_circmean.at[context["username"], "committer_time_circmean"]
-        print("student_time_circmean", student_time_circmean)
-        time_sector_min = committer_time_guide.at["major_min", "second"]
-        time_sector_max = committer_time_guide.at["major_max", "second"]
+        commit_freq, commit_freq_dist = update_act.read_frequency(context['username'])
+        print("commit_freq", commit_freq, commit_freq_dist)
         try:
-            student_major_act = major_act.at[context["username"], "major_act"]
-            indi_num = int(major_act.at[context["username"], "individual"])
-            group_num = int(major_act.at[context["username"], "group"])
-        except Exception as e:
-            print("Major_act error", e)
-            student_major_act = "individual"
-            indi_num = 0
-            group_num = 0
-        
-        commit_freq = committer_frequency.at[context["username"], "type3"]
-        print("student_time_circmean",student_time_circmean, "time_sector_min",time_sector_min, "time_sector_max", time_sector_max)
-        print("major_act", student_major_act, indi_num, group_num, ", commit_freq", commit_freq)
-        try:
-            commit_freq_dist = committer_frequency.at[context["username"], "dist"]
-            commit_freq_dist = json.loads(commit_freq_dist)
-            print("commit_freq_dist", commit_freq_dist, type(commit_freq_dist))
             type_data = {}
+            type_data["typeE_data"] = hour_dist
+            type_data["typeE_sector"] = [int(daytime_min/3600), int(daytime_max/3600)]
             type_data["typeF_data"] = commit_freq_dist
             type_data["typeG_data"] = [indi_num, group_num]
             context["type_data"] = json.dumps(type_data)
@@ -298,9 +270,9 @@ class ProfileView(TemplateView):
         try:
             devtype_data = DevType.objects.get(account=account)
             try:
-                devtype_data.typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
+                devtype_data.typeE = -1 if daytime > night else 1
                 devtype_data.typeF = commit_freq
-                devtype_data.typeG = 1 if student_major_act == 'individual' else -1
+                devtype_data.typeG = 1 if major_act == 'individual' else -1
                 devtype_data.save()
                 gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
 
@@ -322,9 +294,9 @@ class ProfileView(TemplateView):
         except Exception as e:
             print("Get DevType object error", e)
             test_data = None
-            typeE = 1 if student_time_circmean >= time_sector_min and student_time_circmean < time_sector_max else -1
+            typeE = -1 if daytime > night else 1
             typeF = commit_freq
-            typeG = 1 if student_major_act == 'individual' else -1
+            typeG = 1 if major_act == 'individual' else -1
             gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
             gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
             gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
@@ -570,7 +542,6 @@ def save_test_result(request, username):
             except Exception as e:
                 print("account error", e)
             devtype_objs = DevType.objects.filter(account=account).all()
-            print("objs len", len(devtype_objs))
             if len(devtype_objs) == 0:
                 model_instance = DevType(account=account, typeA=type_factors[0], typeB=type_factors[1], typeC=type_factors[2], typeD=type_factors[3], typeE=0, typeF=0, typeG=0)
                 model_instance.save()
@@ -591,6 +562,7 @@ def save_test_result(request, username):
 @csrf_exempt
 def load_repo_data(request, username):
     if request.method == 'POST':
+        start = time.time()
         try:
             user = User.objects.get(username=username)
             try:
@@ -620,7 +592,7 @@ def load_repo_data(request, username):
         except Exception as e:
             print("error save", e)
             context = {"status": 400}
-        
+        print("ajax repo", time.time() - start)
         return JsonResponse(context)
     
 class ProfileType(TemplateView):
