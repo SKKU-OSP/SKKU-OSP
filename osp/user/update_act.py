@@ -45,10 +45,19 @@ def update_commmit_time():
     student_commits_time = pd.concat([sc_1,sc_2, sc_3], ignore_index=True)
     student_commits_time['committer_time'] = student_commits_time['committer_date'].map(time_to_seconds)
 
-    student_commits_time_hour = student_commits_time.loc[:, ['student_github',  'committer_time']].sort_values(by='student_github')
-    student_commits_time_hour['committer_time'] = student_commits_time_hour['committer_time'].map(lambda x: int(x/3600))
+    stdnt_cmt_time = student_commits_time.loc[:, ['student_github',  'committer_time']].sort_values(by='student_github')
+    stdnt_cmt_hour = {}
+    for i in range(len(stdnt_cmt_time.index)):
+        row = stdnt_cmt_time.iloc[i]
+        if row.student_github not in stdnt_cmt_hour:
+            stdnt_cmt_hour[row.student_github] = [0]*24
+        else:
+            cmt_hour = int(row.committer_time/3600)
+            stdnt_cmt_hour[row.student_github][cmt_hour] += 1
+    stdnt_cmt_hour = pd.DataFrame(list(stdnt_cmt_hour.items()),
+                   columns=['student_github', 'hour_dist'])
     
-    student_commits_time_hour.to_csv(os.getcwd() + '/static/data/student_committer_time_foreachstudent.csv')
+    stdnt_cmt_hour.to_csv(os.getcwd() + '/static/data/committer_hour_dist.csv', index=False)
 
     student_commits_time = student_commits_time.groupby(['student_github']).apply(cal_circmean)
     student_commits_time = pd.DataFrame(student_commits_time)
