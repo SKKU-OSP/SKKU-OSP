@@ -578,10 +578,8 @@
 
 #comment-body {
     flex: 1;
-    height: 40px;
-    line-height: 40px;
-    display: block;
-    margin-right: 10px;
+    resize: none;
+    height: 100%;
 }
 
 #comment-cnt{
@@ -591,13 +589,18 @@
     gap: 0.275rem;
 }
 
-#comment-annonymous>input {
-    line-height: 2rem;
+#comment-annonymous{
+    display: flex;
+    gap: 0.5rem;
 }
 
-#comment-annonymous>span {
-    padding-left: 3px;
-    line-height: 40px;
+#comment-writer-display:not(.annonymous){
+    color: var(--sub-point-color);
+    text-decoration: underline;
+}
+
+#comment-annonymous > input {
+    line-height: 2rem;
 }
 
 #comment-submit {
@@ -605,7 +608,7 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 10px 15px;
+    padding: 0.5rem 1rem;
     background-color: transparent;
     border: 1px solid var(--main-border-color);
     border-radius: 0.625rem;
@@ -621,12 +624,32 @@
 }
 
 .comment-item {
+    display: flex;
     background-color: #FFFFFF;
     border-radius: 0.625rem;
-    padding: 0.5rem;
+    padding: 1rem 2rem;
     width: 100%;
     min-height: 2.5rem;
     box-shadow: 0px 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+}
+
+.comment-item-left{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.comment-item-right{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.comment-item-writer-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.25rem;
 }
 
 .comment-item-body {
@@ -645,8 +668,8 @@
     text-align: center;
     margin-top: auto;
     margin-bottom: auto;
-    flex: 1;
     text-align: left;
+    padding: 0;
 }
 
 .comment-item-writer>div>button {
@@ -660,11 +683,14 @@
 
 .comment-item-delete>span {
     cursor: pointer;
+    color: var(--main-border-color);
 }
 
 .comment-item-datetime {
     display: flex;
-    margin-top: auto;
+    flex-direction: column;
+    justify-content: end;
+    align-items: flex-end;
     margin-bottom: auto;
 }
 
@@ -677,6 +703,7 @@
 
 .comment-item-mod {
     display: flex;
+    justify-content: end;
     gap: 0.25em;
 }
 
@@ -719,14 +746,14 @@
 
 .tag-recruit {
     color: #000000;
-    font-size: 13px;
+    font-size: 0.75rem;
     background: var(--tag-bg-recruit);
     color: var(--sub-point-color);
 }
 
 .tag-recruit-end {
     color: #000000;
-    font-size: 13px;
+    font-size: 0.75rem;
     background: var(--main-border-color);
 }
 
