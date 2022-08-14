@@ -15,7 +15,6 @@ window.onload = function () {
   let includeAbsence = true;
   let includePluralMajor = true;
   let switchChecked = true;
-  let scoreIdx = 0;
   let chartFactor = "score";
   let annual = end_year;
   const start_year = 2019;
@@ -25,7 +24,6 @@ window.onload = function () {
   }
 
   switchAbsence.addEventListener("change", function (e) {
-    console.log(e.target.checked);
     $(".switch-toggle-absence").toggleClass("bold");
     $(".switch-toggle-absence").toggleClass("none");
     if (!switchChecked) {
@@ -50,7 +48,6 @@ window.onload = function () {
     fetchData();
   });
   switchMajor.addEventListener("change", function (e) {
-    console.log(e.target.checked);
     $(".switch-toggle-major").toggleClass("bold");
     $(".switch-toggle-major").toggleClass("none");
     if (!switchChecked) {
@@ -111,17 +108,15 @@ window.onload = function () {
 
   function makePage(chartdata) {
     let annual_overview = JSON.parse(chartdata["annual_overview"])[0];
-    console.log("annual_overview",annual_overview);
+    // console.log("annual_overview",annual_overview);
     let annual_total = JSON.parse(chartdata["annual_total"])[0];
     let annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-    console.log("annual_dist",annual_dist);
-    let annual_student = JSON.parse(chartdata[`student${annual}`]);
+    // console.log("annual_dist",annual_dist);
+    let annual_student = JSON.parse(chartdata["student_year"])[annual-start_year];
     const annual_repo = [];
     for(let i = start_year; i <= end_year; i++){
       annual_repo.push(annual_total["repo"][end_year-i]);
     }
-
-    const scoreList = ["", "_diff", "_sum"];
     let scoreAnnual = annual_overview["score"];
     const commitAnnual = annual_overview["commit"];
     const starAnnual = annual_overview["star"];
@@ -151,7 +146,6 @@ window.onload = function () {
         factorDistLabelDict[yearFactorList[i]].push( String(gap*k)+"~"+String(gap*(k+1)));
       }
     });
-    console.log("factorDistLabelDict", factorDistLabelDict);
     const scoreDistLineLabel = [];
     const scoreDistLabel = factorDistLabelDict["score"];
     scoreDistLabel.forEach((label)=>{
@@ -161,7 +155,6 @@ window.onload = function () {
     const starDistLabel = factorDistLabelDict["star"];
     const prDistLabel = factorDistLabelDict["pr"];
     const issueDistLabel = factorDistLabelDict["issue"];
-    console.log("scoreDistLineLabel", scoreDistLineLabel);
     const sidLabel = [];
     for(let i=end_year; i>end_year-sidData.length;i--){
       sidLabel.push(String(i).substring(2));
@@ -204,8 +197,6 @@ window.onload = function () {
         .getContext("2d");
     }
     setOverallStat(annual_total);
-    /* color pallet ref: 
-      https://learnui.design/tools/data-color-picker.html#palette*/
     const bsPrimary = "#0d6efd";
     const cc3 = ["#4245cb", "#ff4470", "#ffe913"];
     const cc8 = [
@@ -366,7 +357,6 @@ window.onload = function () {
       reloadChart(annual, chartFactor);
     });
     switchTotal.addEventListener("change", function (e) {
-      console.log(e.target.checked);
       $(".switch-toggle").toggleClass("bold");
       if (e.target.checked === false) {
         switchChecked = false;
@@ -377,18 +367,16 @@ window.onload = function () {
         destroyChart(overviewChart, 4);
         const data = [];
         for (let year = start_year; year <= end_year; year++) {
-          annual_student = JSON.parse(chartdata[`student${year}`]);
+          annual_student = JSON.parse(chartdata["student_year"])[year-start_year];
           annual_student.map((obj) => {
-            const picked = (({ github_id, score, score_diff, score_sum }) => ({
+            const picked = (({ github_id, score}) => ({
               github_id,
               score,
-              score_diff,
-              score_sum,
             }))(obj);
-            if (Number(picked[`score${scoreList[scoreIdx]}`]) >= 3) {
+            if (Number(picked['score']) >= 3) {
               data.push({
                 x: String(year),
-                y: picked[`score${scoreList[scoreIdx]}`],
+                y: picked['score'],
                 tooltip: picked["github_id"],
                 order: 1,
               });
@@ -435,7 +423,7 @@ window.onload = function () {
 
         const commitDataset = [];
         for (let year = start_year; year <= end_year; year++) {
-          annual_student = JSON.parse(chartdata[`student${year}`]);
+          annual_student = JSON.parse(chartdata["student_year"])[year-start_year];
           annual_student.map((obj) => {
             const picked = (({ github_id, commit }) => ({
               github_id,
@@ -489,7 +477,7 @@ window.onload = function () {
 
         const starDataset = [];
         for (let year = start_year; year <= end_year; year++) {
-          annual_student = JSON.parse(chartdata[`student${year}`]);
+          annual_student = JSON.parse(chartdata["student_year"])[year-start_year];
           annual_student.map((obj) => {
             const picked = (({ github_id, star }) => ({
               github_id,
@@ -543,12 +531,15 @@ window.onload = function () {
 
         const repoDataset = [];
         for (let year = start_year; year <= end_year; year++) {
-          let annual_repo_iter = JSON.parse(chartdata[`repo${year}`])[0];
-          for (let key in annual_repo_iter) {
-            repoDataset.push({
-              x: String(year),
-              y: annual_repo_iter[key],
-              tooltip: key,
+          let annual_repo_list = repodata[year - start_year];
+          for (let idx in annual_repo_list) {
+            let repo = annual_repo_list[idx];
+            Object.keys(repo).forEach((key)=>{
+              repoDataset.push({
+                x: String(year),
+                y: repo[key],
+                tooltip: key,
+              });
             });
           }
         }
@@ -635,10 +626,9 @@ window.onload = function () {
 
       // Overall statistic data: 3점 이상 비율, 총 커밋 수, 총 스타 수, 총 레포 수
       let fix = nStudent === 1 ? 0 : 1;
-      // let annual_total = JSON.parse(chartdata["annual_total"])[0];
       let idx_asc = annual - start_year;
       let idx_desc = end_year - annual;
-      const overGoalcount = annual_total[`student_KP${scoreList[scoreIdx]}`][idx_asc];
+      const overGoalcount = annual_total[`student_KP`][idx_asc];
       $("#overGoalNumerator").text(numberWithCommas(overGoalcount));
       $("#overGoalDenominator").text(
         numberWithCommas(annual_total["student_total"][idx_asc])
@@ -685,26 +675,17 @@ window.onload = function () {
     }
     function setAnnualDistData(annual, factor) {
       document.getElementById("yearDropdown").textContent = annual;
-      if (factor === "score") {
-        annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-        dist = annual_dist[`${factor}${scoreList[scoreIdx]}`];
-        sidData = annual_dist[`${factor}_sid${scoreList[scoreIdx]}`];
-        deptData = annual_dist[`${factor}_dept${scoreList[scoreIdx]}`];
-        sidTopData = annual_dist[`${factor}_sid_pct${scoreList[scoreIdx]}`];
-        deptTopData =annual_dist[`${factor}_dept_pct${scoreList[scoreIdx]}`];
-      } else {
-        dist = annual_dist[`${factor}`];
-        sidData = annual_dist[`${factor}_sid`];
-        deptData = annual_dist[`${factor}_dept`];
-        sidTopData = annual_dist[`${factor}_sid_pct`];
-        deptTopData = annual_dist[`${factor}_dept_pct`];
-      }
+      annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
+      dist = annual_dist[`${factor}`];
+      sidData = annual_dist[`${factor}_sid`];
+      deptData = annual_dist[`${factor}_dept`];
+      sidTopData = annual_dist[`${factor}_sid_pct`];
+      deptTopData =annual_dist[`${factor}_dept_pct`];
     }
     function makeChart(ctx, type, factor,
       labels, data, color, options, topdata = []) {
 
       let chart;
-      console.log("makechart");
       if (type === "barWithErrorBars") {
         const borderWidth = 0.9;
         const barPercentage = 0.9;
@@ -802,23 +783,13 @@ window.onload = function () {
           console.log("reloadChart factor error");
       }
       annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-      if (chartFactor === "score") {
-        dist = annual_dist[`${factor}${scoreList[scoreIdx]}`];
-        sidData = annual_dist[`${factor}_sid${scoreList[scoreIdx]}`];
-        deptData = annual_dist[`${factor}_dept${scoreList[scoreIdx]}`];
-        sidStd = annual_dist[`${factor}_sid_std${scoreList[scoreIdx]}`];
-        deptStd = annual_dist[`${factor}_dept_std${scoreList[scoreIdx]}`];
-        sidTopData = annual_dist[`${factor}_sid_pct${scoreList[scoreIdx]}`];
-        deptTopData = annual_dist[`${factor}_dept_pct${scoreList[scoreIdx]}`];
-      } else {
-        dist = annual_dist[`${factor}`];
-        sidData = annual_dist[`${factor}_sid`];
-        deptData = annual_dist[`${factor}_dept`];
-        sidStd = annual_dist[`${factor}_sid_std`];
-        deptStd = annual_dist[`${factor}_dept_std`];
-        sidTopData = annual_dist[`${factor}_sid_pct`];
-        deptTopData = annual_dist[`${factor}_dept_pct`];
-      }
+      dist = annual_dist[`${factor}`];
+      sidData = annual_dist[`${factor}_sid`];
+      deptData = annual_dist[`${factor}_dept`];
+      sidStd = annual_dist[`${factor}_sid_std`];
+      deptStd = annual_dist[`${factor}_dept_std`];
+      sidTopData = annual_dist[`${factor}_sid_pct`];
+      deptTopData = annual_dist[`${factor}_dept_pct`];
       topdataRule = [
         [],
         makeScatterData(sidTopData, sidLabel),
@@ -903,7 +874,6 @@ window.onload = function () {
           y: dist[j],
         };
       }
-      console.log("NEW DIST", newDist);
       return newDist;
     }
 
