@@ -4,6 +4,7 @@
 
 {% load static %}
 {% load tag_templatetag %}
+{% load community_tag %}
 {% block content %}
 <div class="container my-4">
   <div id="community-container" class="row">
@@ -22,6 +23,12 @@
               </select>
             </div>
       </div>
+        <div class="w-100 border d-flex flex-row flex-wrap">
+            {% get_admin_team request.user as teams %}
+            {% for team in teams %}
+                <button id="filter-{{ team.name }}" onclick="teamFilterBtn('{{ team.name }}')" style="border: 1px solid black;padding:5px 10px 5px 10px;font-size:14px;border-radius:10px;margin-right:7px;" class="opacity-hover">{{ team.name }} 추천<i class="bi bi-check2" style="font-size:15px;padding-left:3px;"></i></button>
+            {% endfor %}
+        </div>
       <div id="article-card-body">
         {% include "community/account-card.html" %}
       </div>
@@ -42,8 +49,15 @@
         redraw();
       },
       placeholder: 'Tag',
-    })
+    });
   });
+  function teamFilterBtn(team_name){
+      var id = "#filter-"+team_name;
+      $(id).css('background','none');
+  }
+
+
+
 </script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}

@@ -127,6 +127,7 @@ def get_admin_team(user):
         return Team.objects.filter(id__in=team_li)
     return None
 
+
 @register.simple_tag
 def is_article_thumb_up(article, user):
     if user.is_anonymous:
