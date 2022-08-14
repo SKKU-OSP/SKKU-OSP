@@ -3,8 +3,6 @@ window.onload = function () {
   // 휴학생, 복수전공 스위치
   const switchAbsence = document.getElementById("absenceSwitch");
   const switchMajor = document.getElementById("majorSwitch");
-  // 점수 산정 방식 버튼 그룹
-  const btnScore = document.getElementsByClassName("btn-score");
   // 개별 합계 스위치
   const switchTotal = document.getElementById("totalSwitch");
   // factor 선택 탭
@@ -42,7 +40,7 @@ window.onload = function () {
     $("#pills-issue-tab").removeClass("active");
     $("#totalSwitch").classList;
     annual = end_year;
-    document.getElementById("dropdownMenuButton1").textContent = annual;
+    document.getElementById("yearDropdown").textContent = annual;
     chartFactor = "score";
     changeCardTitle(chartFactor);
     includeAbsence = !includeAbsence;
@@ -67,7 +65,7 @@ window.onload = function () {
     $("#pills-issue-tab").removeClass("active");
     $("#totalSwitch").classList;
     annual = end_year;
-    document.getElementById("dropdownMenuButton1").textContent = annual;
+    document.getElementById("yearDropdown").textContent = annual;
     chartFactor = "score";
     changeCardTitle(chartFactor);
     includePluralMajor = !includePluralMajor;
@@ -76,16 +74,12 @@ window.onload = function () {
     destroyChart(yearChart, 5);
     fetchData();
   });
+  function createObjArray(size) {
+    return new Array(size).fill(new Object(null));
+  }
   const yearChart = createObjArray(5);
   const overviewChart = createObjArray(4);
   const chart = createObjArray(3);
-  function createObjArray(size) {
-    const arr = new Array(size);
-    for (let i = 0; i < size; i++) {
-      arr[i] = new Object(null);
-    }
-    return arr;
-  }
   function destroyChart(chart, size) {
     for (let i = 0; i < size; i++) {
       chart[i].destroy();
@@ -325,140 +319,16 @@ window.onload = function () {
         topdataRule[i]
       );
     }
-
-    /* Add Event Listener to year button */
-    for (let i = 0; i < btnScore.length; i++) {
-      btnScore.item(i).addEventListener("click", (btn) => {
-        for (let j = 0; j < btnScore.length; j++) {
-          btnScore.item(j).classList.add("btn-outline-primary");
-          btnScore.item(j).classList.remove("btn-primary");
-        }
-        btnScore.item(i).classList.remove("btn-outline-primary");
-        btnScore.item(i).classList.add("btn-primary");
-        scoreIdx = i;
-        //reload score year chart
-        yearChart[0].destroy();
-        yearChart[0] = makeChart(
-          ctxYear[0],
-          "lineWithErrorBars",
-          yearFactorList[0],
-          annual_list,
-          makeErrorJson(
-            annual_overview[`score${scoreList[scoreIdx]}`],
-            annual_overview[`score${scoreList[scoreIdx]}_std`]
-          ),
-          bsPrimary,
-          {
-            plugins: {
-              legend: {
-                display: false,
-              },
-            },
-            scales: {
-              y: { max: 5, beginAtZero: true },
-            },
-          }
-        );
-
-        setAnnualDistData(annual, chartFactor);
-        setOverallStat(
-          annual_total,
-          switchChecked ? 1 : annual_total["student_total"][annual - start_year]
-        );
-        if (switchChecked === true) {
-          //reload score overview chart
-          overviewChart[0].destroy();
-          overviewChart[0] = makeChart(
-            ctxOverview[0],
-            "line",
-            overviewFactorList[0],
-            annual_list,
-            annual_total[`student_KP${scoreList[scoreIdx]}`],
-            bsPrimary,
-            noLegendOption
-          );
-        } else {
-          //reload score overview chart
-          overviewChart[0].destroy();
-          const data = [];
-          for (let year = start_year; year <= end_year; year++) {
-            annual_student = JSON.parse(chartdata[`student${year}`]);
-            annual_student.map((obj) => {
-              const picked = (({ github_id, score, score_diff, score_sum }) => ({
-                github_id,
-                score,
-                score_diff,
-                score_sum,
-              }))(obj);
-
-              if (Number(picked[`score${scoreList[scoreIdx]}`]) >= 3) {
-                data.push({
-                  x: String(year),
-                  y: picked[`score${scoreList[scoreIdx]}`],
-                  tooltip: picked["github_id"],
-                });
-              }
-            });
-          }
-          overviewChart[0] = makeChart(
-            ctxOverview[0],
-            "line",
-            "score",
-            annual_list,
-            data,
-            bsPrimary,
-            {
-              borderColor: "rgba(255, 255, 255, 0)",
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  callbacks: {
-                    title: (items) => {
-                      return items[0].raw.y;
-                    },
-                    label: (item) => {
-                      return item.raw.tooltip;
-                    },
-                  },
-                },
-              },
-              scales: {
-                x: {
-                  ticks: {
-                    stepSize: 1,
-                  },
-                },
-                y: {
-                  max: 5,
-                  beginAtZero: true,
-                },
-              },
-            }
-          );
-        }
-
-        if (chartFactor === "score") {
-          reloadChart(annual, chartFactor);
-        }
-      });
-    }
-      // 연도 선택 드롭다운
-    let btn_year = []
-    annual_list.forEach((year)=>{
-      btn_year.push(document.getElementById(`dropdownBtn${year}`));
-    });
-    btn_year.forEach((btn_obj, i)=>{
-      btn_obj.addEventListener("click", function(){
-        annual = btn_obj.innerText;
-        setAnnualDistData(annual, chartFactor);
-        setOverallStat(
-          annual_total,
-          switchChecked ? 1 : annual_total["student_total"][i]
-        );
-        reloadChart(annual, chartFactor);
-      });
+    // 연도 선택 드롭다운
+    $(".year-item").on("click", (e)=>{
+      $("#yearDropdown").text(e.target.innerText);
+      annual = e.target.innerText;
+      setAnnualDistData(annual, chartFactor);
+      setOverallStat(
+        annual_total,
+        switchChecked ? 1 : annual_total["student_total"][i]
+      );
+      reloadChart(annual, chartFactor);
     });
     scoreTab.addEventListener("click", function () {
       unchosenBtn();
@@ -814,7 +684,7 @@ window.onload = function () {
       controlFontSize();
     }
     function setAnnualDistData(annual, factor) {
-      document.getElementById("dropdownMenuButton1").textContent = annual;
+      document.getElementById("yearDropdown").textContent = annual;
       if (factor === "score") {
         annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
         dist = annual_dist[`${factor}${scoreList[scoreIdx]}`];
