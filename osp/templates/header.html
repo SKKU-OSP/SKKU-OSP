@@ -15,7 +15,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="NavRankDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
-                    <ul class="dropdown-menu" aria-labelledby="NavRankDropdown">
+                    <ul class="dropdown-menu" aria-labelledby="NavRankDropdown"  style="position:absolute;">
                         <li><a class="dropdown-item" href="/rank/user">User</a></li>
                         <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
                     </ul>
@@ -40,7 +40,7 @@
                         </span>
                         {% endif %}
                     </button>
-                    <ul class="dropdown-menu noti-dropdown">
+                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;">
                         {% for noti in notifications.list %}
 
                         <li

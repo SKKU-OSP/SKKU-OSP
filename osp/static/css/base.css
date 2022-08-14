@@ -407,6 +407,11 @@ footer {
   font-weight: 700 !important;
 }
 
+.bg-none{
+  bakcground:none;
+}
+
+
 /*.carousel-item{*/
 /*  background:white;*/
 /*}*/
@@ -451,6 +456,9 @@ footer {
 .noti-dropdown::after,
 .msg-dropdown::after {
   content: none;
+}
+.no-icon-dropdown::after{
+  display:none!important;
 }
 
 .default-btn {

@@ -1,9 +1,9 @@
 {% load static %}
-<div id="team-tab" class="d-flex" team-id="{{team.id}}">
-    <div id="team-image-container" >
+<div id="team-tab" class="col-12" team-id="{{team.id}}">
+    <div id="team-image-container" class="col-3" >
         <img id="team-image" src="{{ team.image.url }}" alt="team-image">
     </div>
-    <div id="team-data">
+    <div id="team-data" class="col-6">
         <div id="team-name">
             {{ team.name }}
             {% if team_admin %}
@@ -20,7 +20,7 @@
             {% endif %}
 
         </div>
-        <div class="d-flex flex-row flex-wrap" >
+        <div class="d-flex flex-row" style="min-height:150px;">
             <div id="team-members">
                 <div id="team-members-title">
                     Members
@@ -28,21 +28,30 @@
                 <div id="team-member-list">
                     {% for member in team_members %}
                     <div class="team-member">
-                        <a href="{% url 'user:profile' member.member.user.username %}" >{{member.member.user.username}}</a>
+                        <div class="dropdown writer-dropdown" style="display:inline-block;">
+                            <a class="dropdown-toggle no-icon-dropdown" style="color:white;text-decoration:underline;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{member.member.user.username}}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/user/{{member.member.user.username}}">프로필</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                            </ul>
+                        </div>
                         {% if member.is_admin %}
-                        <span class="material-icons-outlined team-admin-icon">
-                            military_tech
-                        </span>
+                            <span class="material-icons-outlined team-admin-icon">
+                                military_tech
+                            </span>
                         {% endif %}
+{#                        <a href="{% url 'user:profile' member.member.user.username %}" >{{member.member.user.username}}</a>#}
                     </div>
                     {% endfor %}
                 </div>
             </div>
-            <div id="team-info" class="d-flex flex-column flex-wrap" style="overflow-y:auto;overflow-x:auto;">
+            <div id="team-info" class="d-flex flex-column" style="flex:1;overflow-y:auto;overflow-x:auto;">
                 <div id="team-desc">
                     {{team.description|linebreaksbr}}
                 </div>
-                <div id="team-tag">
+                <div id="team-tag" class="d-flex flex-row">
                     {% for tag in team_tags %}
                     <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
                     {% endfor %}
