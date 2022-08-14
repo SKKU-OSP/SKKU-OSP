@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block content %}
-<div class="container mt-2 mb-2">
+<div class="container mt-2 mb-5">
   <div class="d-flex text-lg">
     <div class="form-check form-switch"> 
       <input class="form-check-input" id="absenceSwitch" type="checkbox" role="switch" checked="checked"/>
@@ -139,6 +139,7 @@
     let chartdata_1 = JSON.parse("{{ chartdata_1 | escapejs }}");
     let chartdata_2 = JSON.parse("{{ chartdata_2 | escapejs }}");
     let chartdata_3 = JSON.parse("{{ chartdata_3 | escapejs }}");
+    let repodata = JSON.parse("{{ repo | escapejs }}");
     const end_year = {{end_year}};
     const classGap = {{ classGap }};
     const classCnt = {{ classCnt }};
