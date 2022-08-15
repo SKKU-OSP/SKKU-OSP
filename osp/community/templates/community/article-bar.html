@@ -15,10 +15,13 @@
             </div>
             <div>
                 {% if board.board_type == 'Recruit' %}
+                    {% is_period_end article.period_start as is_start %}
                     {% is_period_end article.period_end as is_end %}
                     {% if not article.team %}
+                    {% elif not is_start %}
+                    <span class="badge tag-recruit-end">모집 전:  {{article.period_start|date:'Y-m-d'}}~</span>
                     {% elif not is_end %}
-                        <span class="badge tag-recruit">모집중:  ~{{article.period_end|date:'Y-m-d'}}</span>
+                        <span class="badge tag-recruit">모집 중:  ~{{article.period_end|date:'Y-m-d'}}</span>
                     {% else %}
                         <span class="badge tag-recruit-end">모집 마감</span>
                     {% endif %}

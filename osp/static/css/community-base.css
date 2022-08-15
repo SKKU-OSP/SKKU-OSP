@@ -272,12 +272,6 @@
     text-decoration: underline;
 }
 
-.writer-dropdown-btn {
-    border: none;
-    color: var(--sub-point-color);
-    background: none;
-}
-
 .article-meta {
     padding: 1rem;
     margin-top: auto;
@@ -490,12 +484,15 @@
 
 #board-title {
     font-size: 1.5rem;
-    margin-right: 1rem;
 }
 
 #board-title>a {
     font-size: 1.5rem;
     color: #FFFFFF;
+}
+
+#tag-filter{
+    width: 15rem;
 }
 
 .color-b {
@@ -551,6 +548,14 @@
 } */
 
 #comment-input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 0.625rem;
+}
+
+#comment-input {
     height: 40px;
     margin-top: 10px;
     display: flex;
@@ -570,45 +575,79 @@
 
 #comment-body {
     flex: 1;
-    height: 40px;
-    line-height: 40px;
-    display: block;
-    margin-right: 10px;
+    resize: none;
+    height: 100%;
 }
 
-#comment-annonymous>input {
+#comment-cnt{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.275rem;
+}
+
+#comment-annonymous{
+    display: flex;
+    gap: 0.5rem;
+}
+
+#comment-writer-display:not(.annonymous){
+    color: var(--sub-point-color);
+    text-decoration: underline;
+}
+
+#comment-annonymous > input {
     line-height: 2rem;
 }
 
-#comment-annonymous>span {
-    padding-left: 3px;
-    line-height: 40px;
-}
-
 #comment-submit {
-    background: none;
-    width: 2.25rem;
-    height: 2.25rem;
-    font-size: 1.25rem;
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 0.25rem;
-    border: 2px solid var(--main-border-color);
-    border-radius: 50%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    border: 1px solid var(--main-border-color);
+    border-radius: 0.625rem;
 }
 
 #comment-group {
     border-radius: 0px;
     width: 100%;
     margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .comment-item {
-    padding: 0.5rem;
+    display: flex;
+    background-color: #FFFFFF;
+    border-radius: 0.625rem;
+    padding: 1rem 2rem;
     width: 100%;
     min-height: 2.5rem;
+    box-shadow: 0px 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
+.comment-item-left{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.comment-item-right{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.comment-item-writer-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.25rem;
+}
 
 .comment-item-body {
     flex: 1;
@@ -626,8 +665,8 @@
     text-align: center;
     margin-top: auto;
     margin-bottom: auto;
-    flex: 1;
     text-align: left;
+    padding: 0;
 }
 
 .comment-item-writer>div>button {
@@ -641,11 +680,14 @@
 
 .comment-item-delete>span {
     cursor: pointer;
+    color: var(--main-border-color);
 }
 
 .comment-item-datetime {
     display: flex;
-    margin-top: auto;
+    flex-direction: column;
+    justify-content: end;
+    align-items: flex-end;
     margin-bottom: auto;
 }
 
@@ -658,6 +700,7 @@
 
 .comment-item-mod {
     display: flex;
+    justify-content: end;
     gap: 0.25em;
 }
 
@@ -668,17 +711,6 @@
 .comment-item-like>span {
     font-size: 1rem;
     vertical-align: middle;
-}
-
-.recruit-team-info-image>img {
-    width: 5em;
-    height: 5em;
-    margin-right: 10px;
-}
-
-.recruit-team-info-period {
-    width: 5em;
-    text-align: center;
 }
 
 .slick-prev {
@@ -711,39 +743,253 @@
 
 .tag-recruit {
     color: #000000;
-    font-size: 13px;
+    font-size: 0.75rem;
     background: var(--tag-bg-recruit);
+    color: var(--sub-point-color);
 }
 
 .tag-recruit-end {
     color: #000000;
-    font-size: 13px;
-    background: var(--tag-bg-recruit-end);
+    font-size: 0.75rem;
+    background: var(--main-border-color);
 }
 
-#pagination-body{
+#pagination-body {
     display: flex;
 }
 
-.page-item{
+.page-item {
     height: 2.5rem;
     width: 2.5rem;
     border-radius: 50%;
     display: flex;
 }
 
-.page-item > .page-link:nth-child(1){
+.page-item>.page-link:nth-child(1) {
     background-color: transparent;
 }
 
-.page-item > .page-link{
+.page-item>.page-link {
     text-align: center;
     color: #000000;
     border: none;
     padding: 0 !important;
 }
 
-.page-item.active{
+.page-item.active {
     color: #FFFFFF;
     background-color: var(--main-border-color);
+}
+
+#article-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: #FFFFFF;
+    box-shadow: 0px 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+    border-radius: 0.625rem;
+    padding: 2rem 2rem 1rem 2rem;
+    z-index: 1;
+    position: relative;
+    gap: 0.5rem;
+}
+
+#article-title-wrapper {
+    display: flex;
+}
+
+#article-title {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.625rem;
+}
+
+#article-metadata {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.625rem;
+
+}
+
+#article-datetime {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#article-datetime>div {
+    font-size: 0.375rem;
+}
+
+#article-viewcnt {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#article-viewcnt>* {
+    font-size: 1rem;
+}
+
+#article-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    min-height: 22rem;
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+    padding: 0.625rem;
+}
+
+#article-title-border {
+    border: 1px solid var(--main-bg-color);
+}
+
+#article-taglist {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: var(--article-bg-color);
+    border-radius: 0.625rem;
+    gap: 0.5rem;
+}
+
+#article-like-scrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+#article-teamcard {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--main-bg-color);
+    border-radius: 0.625rem;
+    margin-top: -1rem;
+    padding: 2.25rem 3rem 1.25rem 3rem;
+    box-shadow: 0px 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+    gap: 1rem;
+}
+
+#recruit-article-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+#recruit-article-info-image>img {
+    border-radius: 50%;
+}
+
+#recruit-article-info-image>img {
+    height: 5rem;
+    width: 5rem;
+}
+
+#recruit-article-info-name {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+#recruit-article-info-desc {
+    font-size: 1rem;
+}
+
+#recruit-article-period {
+    display: flex;
+    flex-direction: column;
+}
+
+#recruit-article-period>* {
+    font-size: 1rem;
+}
+
+#recruit-article-period-date>div {
+    color: var(--sub-point-color);
+}
+
+#recruit-article-status {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 3rem;
+}
+
+#recruit-article-status>* {
+    border-radius: 0.625rem;
+    padding: 1rem;
+}
+
+.recruit-end,
+.recruit-yet {
+    background-color: var(--main-border-color);
+}
+
+.recruit-start {
+    background-color: var(--tag-bg-recruit);
+    color: var(--sub-point-color);
+}
+
+#recruit-article-apply {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 3rem;
+}
+
+#team-apply {
+    border-radius: 0.625rem;
+    padding: 1rem;
+    cursor: pointer;
+    border: 1px solid var(--main-border-color);
+}
+
+.team-apply-delete{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.account-card{
+    width: calc(33% - 0.5rem);
+    background-color: #FFFFFF;
+    box-shadow: 0px 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    padding: 0.75rem 1rem;
+    margin-top: 0.375rem;
+    margin-bottom: 0.375rem;
+}
+
+.account-data{
+    display: flex;
+    align-items: center;
+}
+
+.account-img{
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+.account-intro{
+    flex: 1;
+}
+
+.account-tag{
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    overflow-x: auto;
+    padding: 0.25rem 0rem;
 }

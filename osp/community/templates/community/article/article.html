@@ -10,7 +10,7 @@
     <div id="community-container" class="row">
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
-            <div id="board-title-bar" class="d-flex justify-content-between" id="board-title-bar">
+            <div id="board-title-bar" class="d-flex justify-content-center" id="board-title-bar">
                 <div id="board-title">
                     <a href="/community/home/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
@@ -54,6 +54,16 @@
                 }
             });
         }
+        $('#comment-is-anonymous').click(function() {
+            if($(this).is(":checked")){
+                $('#comment-writer-display').html('익명');
+                $('#comment-writer-display').addClass('annonymous');
+            }
+            else{
+                $('#comment-writer-display').html($('#comment-writer-display').attr('value'));
+                $('#comment-writer-display').removeClass('annonymous');
+            }
+        });
     });
 
     function edit_submit(event) {

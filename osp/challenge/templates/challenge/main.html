@@ -58,7 +58,7 @@
                   <div class="progress-bar" role="progressbar" aria-label="{{item.challenge.name}}"
                     aria-valuenow="{{item.progress}}" aria-valuemin="0" aria-valuemax="{{item.challenge.max_progress}}"
                     style="width: {{item.width}}%;">
-                    {{item.progress}}/{{item.challenge.max_progress}}
+                    {% widthratio item.progress item.challenge.max_progress 100 %}%
                   </div>
                 </div>
               </div>
@@ -91,7 +91,7 @@
                   <div class="progress-bar" role="progressbar" aria-label="{{item.challenge.name}}"
                     aria-valuenow="{{item.progress}}" aria-valuemin="0" aria-valuemax="{{item.challenge.max_progress}}"
                     style="width: {{item.width}}%;">
-                    {{item.progress}}/{{item.challenge.max_progress}}
+                    {% widthratio item.progress item.challenge.max_progress 100 %}%
                   </div>
                 </div>
               </div>
@@ -122,7 +122,7 @@
           <div class="progress-bar" role="progressbar" aria-label="{{item.name}}"
             aria-valuenow="{{item.total}}" aria-valuemin="0" aria-valuemax="{{account_cnt}}"
             style="width: {{item.total_width}}%;">
-            {{item.total}}/{{account_cnt}}
+            {% widthratio item.total account_cnt 100 %}%
           </div>
         </div>
       </div>
