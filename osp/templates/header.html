@@ -1,4 +1,5 @@
 {% load tag_templatetag %}
+{% load message_tag %}
 <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light">
     <div class="container">
         <a class="navbar-brand" href="/community">SKKU OSP</a>
@@ -26,19 +27,19 @@
                 {% endif %}
             </ul>
             {% if user.is_authenticated %}
-            <ul class="navbar-nav">
+            <ul class="navbar-nav d-flex me-2">
                 <li class="dropdown noti-dropdown-btn">
                     {% get_notifications request.user as notifications %}
-                    <button class="noti-dropdown dropdown-toggle me-2 default-btn" type="button" data-bs-toggle="dropdown"
+                    {% if notifications.new %}
+                    <span id="new-noti" class="badge">
+                        <span class="visually-hidden">New alerts</span>
+                    </span>
+                    {% endif %}
+                    <button class="noti-dropdown dropdown-toggle default-btn" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <div id="notification" class="nav-item notification material-icons-outlined pointer icon">
                             notifications
                         </div>
-                        {% if notifications.new %}
-                        <span id="new-noti">
-                            <span class="visually-hidden">New alerts</span>
-                        </span>
-                        {% endif %}
                     </button>
                     <ul class="dropdown-menu noti-dropdown">
                         {% for noti in notifications.list %}
@@ -58,7 +59,7 @@
                             {% endif %}
                         >
                             <div class="d-flex">
-                                <div class="material-icons-outlined me-2">
+                                <div class="material-icons-outlined">
                                     {{noti.icon}}
                                 </div>
                                 <div>
@@ -83,8 +84,14 @@
 
                     </ul>
                 </li>
-                <li id="message" class="nav-item me-2 pointer">
-                    <button class="default-btn">
+                <li id="message" class="nav-item pointer">
+                    {% get_new_message request.user as is_new_msg %}
+                    {% if is_new_msg %}
+                    <span id="new-msg" class="badge">
+                        <span class="visually-hidden">New Message</span>
+                    </span>
+                    {% endif %}
+                    <button class="default-btn p-0">
                         <span class="material-icons-outlined icon">
                             email
                         </span>
