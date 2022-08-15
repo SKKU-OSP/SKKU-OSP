@@ -28,17 +28,18 @@
         {% include "community/board/team-tab.html" %}
       {% endif %}
       <div class="d-flex justify-content-between" id="board-title-bar">
+        <div style="width: 15rem;"></div>
         <div id="board-title">
           <a href="/community/home/{{board.name}}/{{board.id}}">
             {{ board.name }} 게시판
         </a>
         </div>
-        <div class="my-auto col-3" id="tag-filter">
-          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+        <div class="my-auto" id="tag-filter">
+          <select id="tag-select" name="tag-filter-select" multiple>
             {% category_tag request %}
           </select>
         </div>
-    </div>
+      </div>
       <div id="article-list-body">
       </div>
       {% include "community/board/board-footer.html" with board=board %}
