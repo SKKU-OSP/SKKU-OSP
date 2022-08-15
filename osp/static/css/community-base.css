@@ -272,12 +272,6 @@
     text-decoration: underline;
 }
 
-.writer-dropdown-btn {
-    border: none;
-    color: var(--sub-point-color);
-    background: none;
-}
-
 .article-meta {
     padding: 1rem;
     margin-top: auto;
