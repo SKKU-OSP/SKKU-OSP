@@ -1,59 +1,5 @@
 @import url("/static/css/color.css");
 
-@media (min-width: 768px) {
-  .col-my-p20 {
-    flex: 0 0 auto;
-    width: 20%;
-  }
-}
-
-#visualization {
-  min-height: 514px;
-}
-
-@media (max-width: 1400px) {
-  #visualization {
-    min-height: 480px;
-  }
-}
-
-@media (max-width: 1200px) {
-  #visualization {
-    min-height: 450px;
-  }
-}
-
-@media (max-width: 992px) {
-  #visualization {
-    min-height: 380px;
-  }
-
-  .horizontal-menu>button {
-    padding: 5px;
-    font-size: 12px;
-  }
-
-  .gbti-content div.progress {
-    margin-bottom: 2px !important;
-    height: 10px;
-  }
-
-  .gbti-content p.text-label {
-    margin-bottom: 2px !important;
-    font-size: 10px;
-  }
-
-  .gbti-content>h4 {
-    font-size: 20px;
-    margin-bottom: 4px;
-  }
-}
-
-@media (max-width: 768px) {
-  #profile-info {
-    margin-top: 0 !important;
-  }
-}
 
 body {
   background-color: var(--sub-bg-color);
@@ -198,15 +144,6 @@ a.nav-link {
   text-align: center;
 }
 
-@media (max-width: 768px) {
-  .modal-item {
-    width: 100%;
-    height: 45vw;
-    padding: 0 8%;
-    text-align: center;
-  }
-}
-
 .tab-pane {
   text-align: center;
   padding: 0 4%;
@@ -259,23 +196,6 @@ a.nav-link {
   gap:2px;
 }
 
-@media (max-width: 992px) {
-  .grass-color {
-    display: block;
-    width: 14px;
-    height: 14px;
-  }
-
-  .grass-group {
-    display: flex;
-    justify-content: end;
-    font-size: 12px;
-    align-items: center;
-  }
-  .nav-link{
-    font-size: 14px;
-}
-}
 .horizontal-menu{
   display: flex;
   justify-content: space-between;
@@ -598,7 +518,7 @@ span.row-raw {
 }
 
 .gbti-content>div.progress {
-  margin: 0 0 1rem;
+  margin: 0 0 0.8rem;
 }
 
 .p-lg {
@@ -606,19 +526,13 @@ span.row-raw {
   width: 100%;
 }
 
-.p-sm {
-  padding: 5% 5%;
-  width: 50%;
-}
-
 .gbti-content>.gbti-img {
-  max-width: 300px;
-  max-height: 300px;
+  max-width: 350px;
+  max-height: 350px;
 }
 
 .gbti-img img {
   width: 100%;
-  height: 100%;
   object-fit: cover;
   display: inline-block;
   margin-right: auto;
@@ -633,11 +547,11 @@ span.row-raw {
   box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
   display: flex;
   flex-direction: column;
+  margin-bottom: 1rem;
 }
 
 .gbti-textbox {
-  margin-bottom: 0.2rem;
-  padding: 20px 20px 10px;
+  padding: 6% 6% 3%;
   background-color: white;
 }
 
@@ -677,17 +591,6 @@ span.row-raw {
   display: inline-block;
 }
 
-.modal-gbti-card {
-  margin: 20px 30px 10px;
-  background-color: white;
-  box-shadow: 0px 4px 4px var(--card-box-shadow);
-  border-radius: 15px;
-}
-
-.progress {
-  border-radius: 0;
-}
-
 .pb-inactive {
   background-color: var(--guideline-inactive);
 }
@@ -695,12 +598,6 @@ span.row-raw {
 .pb-active {
   background-color: var(--main-point-color);
   color: white;
-}
-
-.text-label {
-  font-size: 12px;
-  margin: 0;
-  font-weight: 600;
 }
 
 .gbti-bg {
@@ -747,4 +644,163 @@ span.row-raw {
   width: fit-content;
   justify-content: center;
   margin: auto;
+}
+.progress {
+  border-radius: 0;
+}
+#visualization {
+  min-height: 380px;
+}
+.col-my-p20 {
+  flex: 0 0 auto;
+  width: 20%;
+}
+.gbti-content>div.progress {
+  margin-bottom: 2px;
+  height: 10px;
+}
+.gbti-content .text-label {
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+.gbti-content>h4 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.modal-gbti-card {
+  margin: 5% 4% 2%;
+  background-color: white;
+  box-shadow: 0px 4px 4px var(--card-box-shadow);
+  border-radius: 15px;
+}
+.p-sm {
+  padding: 1% 4%;
+  width: 50%;
+}
+@media (max-width: 992px) {
+  .text-label {
+    font-size: 12px;
+    margin: 0;
+    font-weight: 600;
+  }
+  .horizontal-menu>button {
+    padding: 5px;
+    font-size: 12px;
+  }
+  .grass-color {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+  .grass-group {
+    display: flex;
+    justify-content: end;
+    font-size: 12px;
+    align-items: center;
+  }
+  .nav-link{
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  #profile-info {
+    margin-top: 0 !important;
+  }
+  .modal-item {
+    width: 100%;
+    height: 45vw;
+    padding: 0 8%;
+    text-align: center;
+  }
+}
+@media (min-width: 768px) {
+  #visualization {
+    min-height: 380px;
+  }
+  .col-my-p20 {
+    flex: 0 0 auto;
+    width: 20%;
+  }
+  .gbti-content>div.progress {
+    margin-bottom: 2px;
+    height: 10px;
+  }
+  .gbti-content .text-label {
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  .gbti-content>h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .modal-gbti-card {
+    margin: 5% 4% 2%;
+    background-color: white;
+    box-shadow: 0px 4px 4px var(--card-box-shadow);
+    border-radius: 15px;
+  }
+  .p-sm {
+    padding: 1% 4%;
+    width: 50%;
+  }
+}
+@media (min-width: 992px) {
+  #visualization {
+    min-height: 450px;
+  }
+  .modal-gbti-card {
+    margin: 5% 6% 2%;
+    background-color: white;
+    box-shadow: 0px 4px 4px var(--card-box-shadow);
+    border-radius: 15px;
+  }
+  .p-sm {
+    padding: 1.5% 4.5%;
+    width: 50%;
+  }
+  .gbti-content>div.progress {
+    margin-bottom: 4px;
+    height: 14px;
+  }
+  .gbti-content .text-label {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+  .gbti-content>h4 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+}
+@media (min-width: 1200px) {
+  #visualization {
+    min-height: 480px;
+  }
+  .modal-gbti-card {
+    margin: 5% 12% 2%;
+    background-color: white;
+    box-shadow: 0px 4px 4px var(--card-box-shadow);
+    border-radius: 15px;
+  }
+  .p-sm {
+    padding: 2% 5%;
+    width: 50%;
+  }
+  .gbti-content>div.progress {
+    margin-bottom: 6px;
+    height: 16px;
+  }
+  .gbti-content .text-label {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+  .gbti-content>h4 {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+}
+@media (min-width: 1400px) {
+  #visualization {
+    min-height: 514px;
+  }
 }

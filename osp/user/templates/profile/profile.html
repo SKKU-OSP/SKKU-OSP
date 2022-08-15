@@ -403,22 +403,23 @@
           </div>
         </div>
         <div class="col-5">
-          {% if test %}
+          
           <div id="modalGbtiBox" class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="gbtiModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content gbti-bg">
+                {% if test %}
                 <div class="modal-light-header">
                   <h5 id="gbtiModal" class="modal-title">개발자 유형</h5>
                   <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
                 </div>
-                <h4 class="text-center mt-3">개발자 유형 검사 결과</h4>
+                <h3 class="text-center mt-3">개발자 유형 검사 결과</h3>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
                   <span class="line-connect"></span>
                   <span class="endpoint right"></span>
                 </div>
                 <div id="gbti-id-card" class="modal-gbti-card">
-                  <p class="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
+                  <p class="weak-text ms-3 mt-2 mb-0 text-start">OSS ID CARD</p>
                   <div class="d-flex justify-content-center">
                     <div class="gbti-content d-flex justify-content-center p-sm">
                       <div id="resultImg" class="gbti-img">
@@ -426,7 +427,8 @@
                       </div>
                     </div>
                     <div class="gbti-content d-flex flex-column p-sm justify-content-between">
-                      <p class="text-center text-label mb-3">{{test.desc}}</p>
+                      <p class="text-center text-label">{{test.desc}}</p>
+                      <p class="text-center text-label mb-1">{{test.descKR}}</p>
                       <h4 class="text-center">{{test.nickname}}</h4>
                       <h4 class="text-center">{{test.nicknameKR}}</h4>
                       <div class="d-flex justify-content-between text-label">
@@ -467,7 +469,7 @@
                       </div>
                     </div>
                   </div>
-                  <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
+                  <p class="weak-text me-3 mt-0 mb-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
@@ -475,7 +477,7 @@
                   <button class="btn-gbti pb-inactive ms-3" onclick="location.href='./test'">다시 검사하기</button>
                   {% endif %}
                 </div>
-                <h4 class="text-center mt-3">다른 유형과의 조화</h4>
+                <h3 class="text-center mt-3">다른 유형과의 조화</h3>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
                   <span class="line-connect"></span>
@@ -519,13 +521,17 @@
                     {% endfor%}
                   </div>
                 </div>
-                <h4 class="text-center mt-3">개발 성향 분석</h4>
+                {% endif %}
+                <h3 class="text-center mt-3">개발 성향 분석</h3>
                 <div class="d-flex justify-content-center">
                   <span class="endpoint left"></span>
                   <span class="line-connect"></span>
                   <span class="endpoint right"></span>
                 </div>
-                <div class="gbti-analysis-container">
+                <div class="my-2">
+                  <p class="text-center gbti-text bold">본 결과는 Github 데이터를 기반으로 분석한 결과입니다.</p>
+                </div>
+                <div class="gbti-analysis-container mt-3">
                   {% for desc, descKR, icon in gbti.zip %}
                   <div class="gbti-analysis">
                     <i class="bi {{icon}} icon-lg" style="float: left;"></i>
@@ -546,18 +552,13 @@
               </div>
             </div>
           </div>
-          {% endif %}
+          
           <div class="card h-100">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">
                 개발자 성향
-                {% if test %}
                 <i id="icon-devtype" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
-                {% elif user.is_authenticated and user.username == username%}
-                <a href="./test">
-                  <i id="icon-devtype" class="bi-box-arrow-up-right evt-icon" title="테스트 페이지로 이동"></i>
-                </a>
-                {% endif %}
+
               </h5>
               <div class="gbti-content p-lg">
                 <div class="gbti-card">
@@ -574,7 +575,7 @@
                     <p id="gbti-desc" class="gbti-text">{{test.descKR}}</p>
                   </div>
                 </div>
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-around">
                   {% for icon in gbti.icon %}
                   <i class="bi {{icon}} icon-lg"></i>
                   {% endfor %}
