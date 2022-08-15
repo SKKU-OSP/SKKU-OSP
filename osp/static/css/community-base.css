@@ -484,12 +484,15 @@
 
 #board-title {
     font-size: 1.5rem;
-    margin-right: 1rem;
 }
 
 #board-title>a {
     font-size: 1.5rem;
     color: #FFFFFF;
+}
+
+#tag-filter{
+    width: 15rem;
 }
 
 .color-b {

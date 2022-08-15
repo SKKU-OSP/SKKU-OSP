@@ -1,16 +1,15 @@
 from django import template
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
-from user.models import Account, User
-from team.models import TeamMember, Team
-from community.models import ArticleComment, Article, ArticleLike, ArticleScrap, Board, ArticleCommentLike
-from team.models import TeamMember,TeamInviteMessage, Team
-from user.models import Account, AccountInterest
+from community.models import ArticleComment, ArticleLike, ArticleScrap, Board, ArticleCommentLike
+from team.models import TeamMember,TeamInviteMessage
+from user.models import Account
 
 register = template.Library()
 @register.filter
