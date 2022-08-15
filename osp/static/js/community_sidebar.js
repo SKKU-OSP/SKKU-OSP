@@ -49,28 +49,6 @@ $().ready(function () {
       $('#AddTeamModal').modal('show');
     }
   });
-
-  $('#team-apply-list').click(function () {
-    if (!$('#ApplyTeamModal').hasClass('ready')) {
-      $.ajax({
-        url: "/team/api/team-apply-list",
-        type: "GET",
-        dataType: 'HTML'
-      }).done(function (data) {
-        $('#ApplyTeamModal').addClass('ready').html(data)
-        $('#ApplyTeamModal').modal('show');
-        $('.bi-caret-down-fill').click(function () {
-          if (this.style.transform == '') {
-            this.style.transform = 'rotate(180deg)';
-          } else {
-            this.style.transform = '';
-          }
-        });
-      })
-    } else {
-      $('#ApplyTeamModal').modal('show');
-    }
-  });
 });
 
 function ArticleThumbUp(article_id, user_id) {
