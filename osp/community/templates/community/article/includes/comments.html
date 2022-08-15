@@ -1,42 +1,68 @@
 {% load community_tag %}
-<form id="comment-form" method="post" action="." class="row" onsubmit="registerComment();return false;">
+<form id="comment-form" method="post" action="." onsubmit="registerComment();return false;">
     {% csrf_token %}
     <div id="comment-input" class="comment-input">
-        <div id="comment-input-desc">
-            댓글쓰기
+        <div id="comment-cnt">
+            <i class="bi-chat-right-dots"></i>
+            <div id="comment-cnt-number">{{comments|length}}</div>
         </div>
-        <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." style="resize:none;overflow:hidden;line-height:26px;" required></textarea>
         <div id="comment-annonymous">
+            <div id="comment-writer-display" class="annonymous" value="{{user.username}}">익명</div>
             <input id="comment-is-anonymous" type="checkbox" checked>
-            <span>익명</span>
         </div>
+        <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>
         <button id="comment-submit" type="submit" {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')" {% endif %}>
-            <i class="bi-chat-left-dots"></i>
+            댓글 쓰기
         </button>
     </div>
 </form>
-<div id="comment-group" class="list-group">
+<div id="comment-group">
     {% for comment in comments %}
-    <div id="comment-{{comment.id}}" class="list-group-item comment-item">
+    <div id="comment-{{comment.id}}" class="comment-item">
         {% if comment.is_deleted %}
         삭제된 댓글입니다.
         {% else %}
-        <div class="comment-item-meta">
-            <div class="comment-item-writer">
-                <!-- <image></image> -->
+        <div class="comment-item-left">
+            <div class="comment-item-writer-wrapper">
                 {% if comment.anonymous_writer %}
-                <span>익명</span>
+                <div class="comment-item-writer annonymous">익명</div>
                 {% else %}
-                <div class="dropdown writer-dropdown">
+                <div class="comment-item-writer dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/user/{{comment.writer.user.username}}">프로필</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ comment.writer.user.id }})">메시지</a></li>
+                        <li>
+                            <a class="dropdown-item" href="/user/{{comment.writer.user.username}}">
+                                프로필
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="msgModalOpen({{ comment.writer.user.id }})">
+                                메시지
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 {% endif %}
+                {% if request.user == comment.writer.user %}
+                <div class="comment-item-delete">
+                    <span onclick="deleteComment({{comment.id}});">삭제</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="comment-item-body">
+                {{ comment.body|linebreaksbr }}
+            </div>
+        </div>
+        <div class="comment-item-right">
+            <div class="comment-item-datetime">
+                <div>
+                    {{ comment.pub_date|date:"Y-m-d" }}
+                </div>
+                <div>
+                    {{ comment.pub_date|time:"h:i a" }}
+                </div>
             </div>
             <div class="comment-item-mod">
                 {% is_comment_like comment request.user as is_comment_like %}
@@ -52,23 +78,9 @@
                 <div class="comment-item-like-cnt">
                     {{comment|comment_like}}
                 </div>
-                {% if request.user == comment.writer.user %}
-                <div class="comment-item-delete">
-                    <span onclick="deleteComment({{comment.id}});">삭제</span>
-                </div>
-                {% endif %}
             </div>
         </div>
-        <div class="comment-item-body">
-            {{ comment.body|linebreaksbr }}
-        </div>
-        <div class="comment-item-datetime">
-            <div>
-                {{ comment.pub_date|date:"Y-m-d" }}
-            </div>
-            <div>
-                {{ comment.pub_date|time:"h:i a" }}
-            </div>
+        <div class="comment-item-meta">
         </div>
         {% endif %}
     </div>

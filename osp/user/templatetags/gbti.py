@@ -56,12 +56,12 @@ def get_type_test(type1, type2, type3, type4):
 def get_type_analysis(type_list):
     icon = {
         "icon0":["bi-sun-fill", "bi-moon-fill"],
-        "icon1":["bi-lightning-fill", "bi-stars", "bi-fire"],
+        "icon1":["bi-lightning-fill", "bi-tree-fill", "bi-fire"],
         "icon2":["bi-people-fill", "bi-person-fill"]
     }
     msg = {
-        "msg0":["sunflower","Night Owl"],
-        "msg1":["Initiator", "Lighthouse", "Burning"],
+        "msg0":["Sunflower", "Night Owl"],
+        "msg1":["Initiator", "Evergreen", "Burning"],
         "msg2":["Together", "Independent"]
     }
     msgKR = {

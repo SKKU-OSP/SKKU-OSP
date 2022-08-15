@@ -3,14 +3,15 @@
     --main-bg-color-transparent: #EBEBEB80;
     --sub-bg-color: #DAE2E8;
     --sub-bg-color-transparent: #DAE2E880;
+    --article-bg-color: #F5F5F5;
     --main-border-color: #9D9D9D;
     --main-border-color-transparent: #9D9D9D80;
     --main-point-color: #002743;
     --main-point-color-transparent: #00274380;
     --sub-point-color: #0094FF;
     --sub-point-color-transparent: #0094FF80;
-    --alert-color: #ffae00;
-    --alert-color-transparent: #ffae0080;
+    --alert-color: #FF68C3;
+    --alert-color-transparent: #FF68C380;
     --main-icon-color: #747474;
     --main-icon-color-transparent: #74747480;
     --profile-nav-font:#495057;
@@ -27,7 +28,7 @@
     --tag-bg-language:#9AD5FF;
     --tag-bg-tool: #9AFFE7;
     --tag-bg-ect: #CDCDCD;
-    --tag-bg-recruit: #B8E0D2;
+    --tag-bg-recruit: #CCEAFF;
     --tag-bg-recruit-end: #FEC89A;
     --guideline-inactive: #E2E2E2;
     --developer-bg-color: #F5F5F5;
@@ -44,9 +45,13 @@
     --data-score-0:#F7A6AF;
     --data-score-1:#FFC38B;
     --data-score-2:#FFF875;
+    --type-hour-0:#ff6b4b;
+    --type-hour-1:#425fea;
     --type-freq-0:#ffcd56;
     --type-freq-1:#4bc0c0;
     --type-freq-2:#36a2eb;
     --type-freq-3:#9966ff;
+    --type-coop-0:#425fea;
+    --type-coop-1:#ff6b4b;
     --data-line:#FF0000CC;
 }
