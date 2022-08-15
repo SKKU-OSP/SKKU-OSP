@@ -52,11 +52,12 @@
                             {% endif %}
                             {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
                                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
-                                style="cursor:pointer;"
                             {% elif noti.body.type == "team_apply" %}
                                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                                style="cursor:default;"
+                            {% elif noti.body.type == "team_apply_result" %}
+                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
                             {% endif %}
+                            style="cursor:pointer;"
                         >
                             <div class="d-flex">
                                 <div class="material-icons-outlined">
@@ -135,4 +136,6 @@
             </div>
         </div>
     </div>
+</div>
+<div class="modal fade" id="ApplyTeamModal">
 </div>
