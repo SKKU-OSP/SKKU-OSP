@@ -129,16 +129,17 @@ div.vr {
 }
 
 div> ::-webkit-scrollbar {
-  width: 10px;
+  width: 0.25rem;
+  height: 0.25rem;
 }
 
 div> ::-webkit-scrollbar-track {
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 div> ::-webkit-scrollbar-thumb {
   background: var(--profile-btn-inactive);
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 div> ::-webkit-scrollbar-thumb:hover {
@@ -579,4 +580,14 @@ footer {
 .btn-wait:disabled{
   color: #000000;
   background-color: var(--sub-point-color-transparent);
+}
+
+.writer-dropdown-btn {
+  border: none;
+  color: var(--sub-point-color);
+  background: none;
+}
+
+.writer-dropdown-btn::after{
+  display: none;
 }
