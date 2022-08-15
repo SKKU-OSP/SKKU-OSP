@@ -962,3 +962,34 @@
     justify-content: center;
     cursor: pointer;
 }
+
+.account-card{
+    width: calc(33% - 0.5rem);
+    background-color: #FFFFFF;
+    box-shadow: 0px 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    padding: 0.75rem 1rem;
+    margin-top: 0.375rem;
+    margin-bottom: 0.375rem;
+}
+
+.account-data{
+    display: flex;
+    align-items: center;
+}
+
+.account-img{
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+.account-intro{
+    flex: 1;
+}
+
+.account-tag{
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    overflow-x: auto;
+    padding: 0.25rem 0rem;
+}
