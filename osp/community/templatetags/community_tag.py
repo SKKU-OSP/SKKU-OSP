@@ -66,7 +66,10 @@ def anonymous_checked(a_writer):
 @register.simple_tag(takes_context=True)
 def board_sidebar_normal_board(context, request):
     result = ''
-    for board in Board.objects.filter(team_id=None):
+    boards = Board.objects.filter(team_id=None)
+    if request.user.is_anonymous:
+        boards = boards.exclude(board_type='User')
+    for board in boards:
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
         if board == context['board']:
             result += f'''
