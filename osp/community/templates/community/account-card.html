@@ -2,15 +2,17 @@
 {% load tag_templatetag %}
 
 
-<div class="d-flex flex-row flex-wrap justify-content-between" style="padding: 10px 3px;">
+<div class="d-flex flex-row flex-wrap " style="padding: 10px 3px;">
 
     {% for account in article_list %}
         <div class="article-card card d-flex flex-column"
-             style="cursor:pointer;width:33%;min-width:253px;padding:15px 10px;margin-bottom:10px;position:relative;"
+             style="cursor:pointer;width:33%;min-width:253px;padding:15px 10px;margin:5px 1px;position:relative;"
         >
-            <div style="position:absolute;right:16px;top:10px;font-size:13px;background:white; z-index:10;height:22px;border-radius:10px;" class=" d-flex flex-row">
-                <div class="material-icons" style="font-size:20px;">recommend</div><div style="line-height:20px;padding-left:3px;">  OSP 팀원 추천</div>
-            </div>
+            {% if account.recommend_team %}
+                <div style="position:absolute;right:16px;top:10px;font-size:13px;background:white; z-index:10;height:22px;border-radius:10px;" class=" d-flex flex-row">
+                    <div class="material-icons" style="font-size:20px;">recommend</div><div style="line-height:20px;padding-left:3px;">  {{ account.recommend_team.name }} 팀원 추천</div>
+                </div>
+            {% endif %}
             <div>
                 {% if 0 %}
                 익명

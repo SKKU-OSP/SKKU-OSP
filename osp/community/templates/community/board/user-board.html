@@ -7,10 +7,10 @@
 {% load community_tag %}
 {% block content %}
 <div class="container my-4">
+    <div class="w-100" style="height:42px;"></div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-
       <div class="d-flex justify-content-between border" id="board-title-bar" style="position:relative;">
             <div id="board-title">
               <a href="/community/home/{{board.name}}/{{board.id}}">
@@ -23,10 +23,10 @@
               </select>
             </div>
       </div>
-        <div class="w-100 border d-flex flex-row flex-wrap">
+        <div id="team-filter" class="w-100 border d-flex flex-row flex-wrap">
             {% get_admin_team request.user as teams %}
             {% for team in teams %}
-                <button id="filter-{{ team.name }}" onclick="teamFilterBtn('{{ team.name }}')" style="border: 1px solid black;padding:5px 10px 5px 10px;font-size:14px;border-radius:10px;margin-right:7px;" class="opacity-hover">{{ team.name }} 추천<i class="bi bi-check2" style="font-size:15px;padding-left:3px;"></i></button>
+                <div id="filter-{{ team.name }}" onclick="teamFilterBtn('{{ team.name }}')" value="{{ team.id }}"  style="border: 1px solid black;padding:5px 10px 5px 10px;font-size:14px;border-radius:10px;margin-right:7px;" class="opacity-hover pointer bg-gray">{{ team.name }} 추천<i class="bi bi-check2" style="font-size:15px;padding-left:3px;"></i></div>
             {% endfor %}
         </div>
       <div id="article-card-body">
@@ -53,7 +53,12 @@
   });
   function teamFilterBtn(team_name){
       var id = "#filter-"+team_name;
-      $(id).css('background','none');
+      var obj = $(id);
+      {#$(id).css('background','none');#}
+      obj.toggleClass('bg-gray');
+      redraw()
+      {#console.log(team_li);#}
+
   }
 
 

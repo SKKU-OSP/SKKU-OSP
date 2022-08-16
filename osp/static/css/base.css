@@ -408,7 +408,11 @@ footer {
 }
 
 .bg-none{
-  bakcground:none;
+  background:none;
+}
+
+.bg-gray{
+  background:#CDCDCD;
 }
 
 
