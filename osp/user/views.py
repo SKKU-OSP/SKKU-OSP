@@ -91,7 +91,9 @@ class ProfileView(TemplateView):
         print(relations)
         print(remain_children)
 
-        is_own = str(request.user) == context['username']
+
+
+        is_own = request.user.username == context['username']
 
         data = {
             'info': student_info,
@@ -103,6 +105,7 @@ class ProfileView(TemplateView):
             'account': context['account'],
             'is_own' : is_own
         }
+
         context['data'] = data
         print("ProfileView get time :", time.time() - start)
 
@@ -121,7 +124,8 @@ class ProfileView(TemplateView):
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
-        
+        context["student_id"] = student_data.id
+
         score_data_list = []
         score_detail_data = GithubScore.objects.filter(github_id=github_id).order_by("year")
         for row in score_detail_data:
