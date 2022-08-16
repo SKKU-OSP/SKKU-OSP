@@ -37,10 +37,10 @@
         <div class="d-flex row-userdata">
           <span class="row-title text-center">전공</span>
           <span class="row-txt">
-            {% if data.info.plural_major% }
-            원전공
-            {% else %}
+            {% if data.info.plural_major %}
             복수전공
+            {% else %}
+            원전공
             {% endif %}
           </span>
         </div>
