@@ -323,7 +323,7 @@ class ProfileEditView(TemplateView):
 
         pre_img = user_account.photo.path
         field_check_list = {}
-        print(request .FILES)
+        print(request.FILES)
         profile_img = request.FILES.get('photo', False)
         print('img 상태')
         print(profile_img)
@@ -335,12 +335,12 @@ class ProfileEditView(TemplateView):
             #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
             #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
-        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account, prefix="imgform")
+        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
         print(img_form)
         print(pre_img)
         if bool(img_form.is_valid()) and is_valid:
             if 'photo' in request.FILES: # 폼에 이미지가 있으면
-                print('form에 이미지 존재')
+                print('form에 이미지 존재 에딧뷰')
                 try:
                     os.remove(pre_img) # 기존 이미지 삭제
                     
@@ -352,7 +352,7 @@ class ProfileEditView(TemplateView):
 
         else:
             print(field_check_list['photo'])
-        img_form.save()
+
         print('redirectionaasdfasd')
         return redirect(f'/user/{username}/profile-edit')
     @csrf_exempt
@@ -626,7 +626,7 @@ def load_img_data(request, username):
         #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
         #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
-    img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account, prefix="imgform")
+    img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
     print(img_form)
     print(pre_img)
     if bool(img_form.is_valid()) and is_valid:

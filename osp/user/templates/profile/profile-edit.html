@@ -11,23 +11,25 @@
   {% endfor %}
 </div>
 <body>
-    <div class="container my-4">
+    <div class="container my-4" id="wholecontent">
       <div class="d-flex justify-content-end mb-1">
         <!--button type="submit" class="btn btn-primary" method='POST' action="">저장</button-->
-        <input class="btn btn-primary" type="button" value="save" name="action" onclick="saveAll(); return false;">
+        <button class="savebtn" onclick="saveAll(); saveImg();return false;">저장하기</button>
+        <button class="savebtn" onclick="location.href='..'">돌아가기</button >
+
       </div>
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
           <div class="d-flex flex-column justify-content-end text-center user-info">
-            <div style="position:relative; margin:auto;">
+            <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
-                  <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
                 <label id="for-photo" for="photo">
                   <i class="bi bi-pen"></i>
                 </label>
-                <button type="submit" class="btn btn-primary">저장</button>
-                <input id="photo" name="photo" type="file" hidden/>
+                <div><input id="photo" class="form-control" name="photo" type="file" hidden/>
+                <!--button type="submit" class="btn btn-primary" onclick="saveImg(); return false;">저장</button--></div>
               </form>
             </div>
             <div class="info-body">
@@ -140,8 +142,6 @@
 
   {% endif %}
 </body>
-
-<button id="ajaxButton" type="button">Make a request</button>
 {% endblock %}
 
 {% block script %}
@@ -257,12 +257,15 @@
             success : function(data) {
                 var jsonObj = JSON.parse(data);
                 console.log('success');
+                alert("sdf")
             }, // success 
     
             error : function(xhr, status) {
                 alert(xhr + " : " + status);
-                console.log('error');
+                console.log('선택하고 추가해주세요');
+                alert("선택하고 추가해주세요")
             }
+            
         });
         setTimeout(function() {
           console.log('language is appended');
@@ -319,15 +322,18 @@
           }
         }, 1000);
     }
+    
     function saveImg(){
       const imageInput = $("#photo")[0];
       // 파일을 여러개 선택할 수 있으므로 files 라는 객체에 담긴다.
       console.log("imageInput: ", imageInput.files)
-
+      
+      /*
       if(imageInput.files.length === 0){
         alert("파일은 선택해주세요");
         return;
       }
+      */
 
       const formData = new FormData();
       formData.append("photo", imageInput.files[0]);
@@ -340,19 +346,22 @@
         success: function(rtn){
           const message = rtn.data.values[0];
           console.log("message: ", message)
-          $("#resultUploadPath").text(message.uploadFilePath)
         },
         err: function(err){
           console.log("err:", err)
         }
-  })
+      })
+      setTimeout(function() {
+        console.log('이미지 리로드');
+          $('#profileimg').load(window.location.href + ' #profileimg');
+        }, 500);
 
     }
+    
     function saveAll(){
       var formData = $("#portform").serialize();
       formData += '&' + $('#infoform').serialize();
       formData += '&' + $('#introform').serialize();
-      formData += '&' + $('#imgform').serialize();
       formData += '&' + $('.lang-tag').serialize();
       console.log(formData);
       $.ajax({
@@ -366,6 +375,7 @@
           var jsonObj = JSON.parse(data);
           window.location.href = response["redirect"];
           console.log('success');
+
         }, // success 
     
         error : function(xhr, status) {
@@ -379,6 +389,23 @@
       //$('#portform').submit();
       //$('#infoform').submit();
     }
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+    var reader = new FileReader();  
+    reader.onload = function (e) {
+      $('#image_section').attr('src', e.target.result);  
+    }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+ 
+// 이벤트를 바인딩해서 input에 파일이 올라올때 (input에 change를 트리거할때) 위의 함수를 this context로 실행합니다.
+$(document).ready(function() {
+  $("#photo").change(function(){
+    readURL(this);
+  });
+});
+
 
 </script>
 
