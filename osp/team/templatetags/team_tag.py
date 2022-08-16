@@ -5,6 +5,17 @@ from user.models import Account
 from team.models import TeamMember,TeamInviteMessage, Team
 
 register = template.Library()
+@register.simple_tag
+def var_set(var):
+    return var
+
+@register.simple_tag
+def var_add(var1, var2):
+    if not var1:
+        var1 = 0
+    if not var2:
+        var2 = 0
+    return int(var1) + int(var2)
 
 @register.simple_tag
 def team_options(user):
@@ -60,6 +71,13 @@ def apply_messages(team):
 def get_admin_team(user):
     if not user.is_anonymous:
         team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
+        return Team.objects.filter(id__in=team_li)
+    return None
+
+@register.simple_tag
+def get_team(user):
+    if not user.is_anonymous:
+        team_li = list(TeamMember.objects.filter(member__user=user).values_list("team_id", flat=True))
         return Team.objects.filter(id__in=team_li)
     return None
 

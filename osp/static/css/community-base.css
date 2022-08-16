@@ -457,8 +457,9 @@
 }
 
 .team-member {
-    margin-bottom: 4px;
+    margin-bottom: 1px;
     padding-right: 4px;
+    height:25px;
 }
 
 .team-member>* {
