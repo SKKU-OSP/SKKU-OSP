@@ -142,7 +142,7 @@
                           {{target_option}}
                         </select>
                         <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
-                        <button id="modal-btn-toggle" class="btn btn-secondary btn-sm">정규화</button>
+                        <button id="modal-btn-toggle" class="btn btn-primary btn-sm">정규화</button>
                       </div>
                     </div>
                   </div>
@@ -255,9 +255,8 @@
                         {{target_option}}
                       </select>
                       <button id="btn-compare" class="btn btn-primary btn-sm">비교</button>
-                      <button id="btn-toggle" class="btn btn-secondary btn-sm">정규화</button>
+                      <button id="btn-toggle" class="btn btn-primary btn-sm">정규화</button>
                     </div>
-                    
                 </div>
                 <div class="tab-pane fade mt-2" id="pills-dist">
                   <h5 id="histogram-title">분포</h5>
@@ -368,23 +367,17 @@
               <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              <div class="d-flex flex-wrap overflow-auto">
+              <div class="d-flex flex-wrap" style="margin:auto;">
                 {% if data.lang|length == 0%}
                   <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
                 {% endif %}
                 {% for row in data.lang %}
-                <div class="flex-fill" style="min-width: 100px;">
-                  <div class="container">
-                    <div class="row">
-                      <div class="col">
-                        <span class="badge bg-tag-{{row.type}} me-1" style="height:20px; min-width: 80px;">{{row.name}}</span>
-                      </div>
-                      <div class="col">
-                        <span class="span_language" level={{row.level}}></span>
-                      </div>
-                    </div>
-                    <hr>
+                <div>
+                  <div class="d-flex justify-content-between flex-fill">
+                    <span class="badge bg-tag-{{row.type}} mx-2" style="height:20px; min-width: 80px;">{{row.name}}</span>
+                    <span class="span_language d-flex justify-content-between flex-nowrap mx-2" level={{row.level}}></span>
                   </div>
+                  <hr>
                 </div> 
                 {% endfor %}
               </div>
@@ -403,7 +396,6 @@
           </div>
         </div>
         <div class="col-5">
-          
           <div id="modalGbtiBox" class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="gbtiModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content gbti-bg">
@@ -418,58 +410,68 @@
                   <span class="line-connect"></span>
                   <span class="endpoint right"></span>
                 </div>
-                <div id="gbti-id-card" class="modal-gbti-card">
-                  <p class="weak-text ms-3 mt-2 mb-0 text-start">OSS ID CARD</p>
-                  <div class="d-flex justify-content-center">
-                    <div class="gbti-content d-flex justify-content-center p-sm">
-                      <div id="resultImg" class="gbti-img">
-                        <img src={% static "images/"|add:test.code|add:".png" %}>
+                <div id="gbti-id-card">
+                  <div class="modal-gbti-card">
+                    <p class="weak-text ms-3 mt-2 mb-0 text-start">OSS ID CARD</p>
+                    <div class="d-flex justify-content-center">
+                      <div class="gbti-content d-flex justify-content-center p-sm">
+                        <div id="resultImg" class="gbti-img">
+                          <img src={% static "images/"|add:test.code|add:".png" %}>
+                        </div>
+                      </div>
+                      <div class="gbti-content d-flex flex-column p-sm justify-content-between">
+                        <p class="text-center text-label">{{test.desc}}</p>
+                        <p class="text-center text-label mb-1">{{test.descKR}}</p>
+                        <h4 class="text-center">{{test.nickname}}</h4>
+                        <h4 class="text-center">{{test.nicknameKR}}</h4>
+                        <div class="d-flex justify-content-between text-label">
+                          <span>Fluid</span>
+                          <span>Steady</span>
+                        </div>
+                        <div class="progress">
+                          <div class="progress-bar pb-active" role="progressbar"  style="width: {{test.typeAl}}%" aria-valuenow="{{test.typeAl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                          <div class="progress-bar pb-active" role="progressbar"  style="width: 8%" aria-valuenow=8  aria-valuemin="0" aria-valuemax="100">
+                            <div class="pb-marker pb-inactive"></div>
+                          </div>
+                          <div class="progress-bar pb-active" role="progressbar" style="width: {{test.typeAr}}%" aria-valuenow="{{test.typeAr}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-label">
+                          <span>CoolHead</span>
+                          <span>WarmHeart</span>
+                        </div>
+                        <div class="progress">
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{test.typeBl}}%" aria-valuenow="{{test.typeBl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="center" style="width: 8%" aria-valuenow=8 aria-valuemin="0" aria-valuemax="100">
+                            <div class="pb-marker pb-inactive"></div>
+                          </div>
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{test.typeBr}}%" aria-valuenow="{{test.typeBr}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-label">
+                          <span>Creative</span>
+                          <span>Efficient</span>
+                        </div>
+                        <div class="progress">
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{test.typeCl}}%" aria-valuenow="{{test.typeCl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="center" style="width: 8%" aria-valuenow=8 aria-valuemin="0" aria-valuemax="100">
+                            <div class="pb-marker pb-inactive"></div>
+                          </div>
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{test.typeCr}}%" aria-valuenow="{{test.typeCr}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-label">
+                          <span>MultiPlay</span>
+                          <span>SinglePlay</span>
+                        </div>
+                        <div class="progress">
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{test.typeDl}}%" aria-valuenow="{{test.typeDl}}" aria-valuemin="0" aria-valuemax="100"></div>
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="center" style="width: 8%" aria-valuenow=8 aria-valuemin="0" aria-valuemax="100">
+                            <div class="pb-marker pb-inactive"></div>
+                          </div>
+                          <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{test.typeDr}}%" aria-valuenow="{{test.typeDr}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
                       </div>
                     </div>
-                    <div class="gbti-content d-flex flex-column p-sm justify-content-between">
-                      <p class="text-center text-label">{{test.desc}}</p>
-                      <p class="text-center text-label mb-1">{{test.descKR}}</p>
-                      <h4 class="text-center">{{test.nickname}}</h4>
-                      <h4 class="text-center">{{test.nicknameKR}}</h4>
-                      <div class="d-flex justify-content-between text-label">
-                        <span>Fluid</span>
-                        <span>Steady</span>
-                      </div>
-                      <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar"  style="width: {{test.typeAl}}%" aria-valuenow="{{test.typeAl}}" aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar"  style="width: 4%" aria-valuenow=4  aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" style="width: {{test.typeAr}}%" aria-valuenow="{{test.typeAr}}" aria-valuemin="0" aria-valuemax="100"></div>
-                      </div>
-                      <div class="d-flex justify-content-between text-label">
-                        <span>CoolHead</span>
-                        <span>WarmHeart</span>
-                      </div>
-                      <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{test.typeBl}}%" aria-valuenow="{{test.typeBl}}" aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: 4%" aria-valuenow=4 aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{test.typeBr}}%" aria-valuenow="{{test.typeBr}}" aria-valuemin="0" aria-valuemax="100"></div>
-                      </div>
-                      <div class="d-flex justify-content-between text-label">
-                        <span>Creative</span>
-                        <span>Efficient</span>
-                      </div>
-                      <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{test.typeCl}}%" aria-valuenow="{{test.typeCl}}" aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: 4%" aria-valuenow=4 aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{test.typeCr}}%" aria-valuenow="{{test.typeCr}}" aria-valuemin="0" aria-valuemax="100"></div>
-                      </div>
-                      <div class="d-flex justify-content-between text-label">
-                        <span>MultiPlay</span>
-                        <span>SinglePlay</span>
-                      </div>
-                      <div class="progress">
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="left" style="width: {{test.typeDl}}%" aria-valuenow="{{test.typeDl}}" aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" style="width: 4%" aria-valuenow=4 aria-valuemin="0" aria-valuemax="100"></div>
-                        <div class="progress-bar pb-active" role="progressbar" aria-label="right" style="width: {{test.typeDr}}%" aria-valuenow="{{test.typeDr}}" aria-valuemin="0" aria-valuemax="100"></div>
-                      </div>
-                    </div>
+                    <p class="weak-text me-3 mt-0 mb-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
                   </div>
-                  <p class="weak-text me-3 mt-0 mb-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
                 </div>
                 <div class="d-flex justify-content-end btn-gbti-group">
                   <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
@@ -661,14 +663,14 @@
       var contains = $('.span_language');
       for(contain of contains){
         level_value = $(contain).attr('level');
-        for(var cnt = 1; cnt <= level_value; cnt += 1){
+        for(var cnt = 0; cnt <= level_value; cnt += 1){
           $(contain).append(`
             <span style='margin-right:10px;'>
               <svg width='10' height='10' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'>
                 <circle r='9' transform='matrix(1 0 0 -1 9 9)' fill='#0094FF'/>
             </svg></span>`);
         }
-        for(var cnt = 1; cnt <= 5-level_value; cnt += 1){
+        for(var cnt = 1; cnt < 5-level_value; cnt += 1){
           $(contain).append(`
             <span style='margin-right:10px;'>
               <svg width='10' height='10' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'>
