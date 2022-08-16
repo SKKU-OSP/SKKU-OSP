@@ -2,7 +2,10 @@
 {% load message_tag %}
 <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light">
     <div class="container">
-        <a class="navbar-brand" href="/community">SKKU OSP</a>
+        <a class="navbar-brand" href="/community">
+            <img src="/static/images/logo-simple.svg" alt="로고" style="height: 40px; margin-right: 8px;">
+            SKKU SOSD
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon">
@@ -118,8 +121,6 @@
                 </div>
             </div>
             {% else %}
-            <a class="btn btn-outline-primary mx-2" href="/accounts/login">Log In</a>
-            <a class="btn btn-outline-success mx-2" href="/accounts/register">Sign Up</a>
             {% endif %}
         </div>
     </div>
