@@ -327,7 +327,7 @@ def TeamInviteUpdate(request):
                     apply_msg.save()
 
                 data = render_to_string('team/apply-list.html',request=request)
-                return JsonResponse({'status': 'success','data':data})
+                return JsonResponse({'status': 'success','data':data,'username':request.POST.get('username')})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
 
