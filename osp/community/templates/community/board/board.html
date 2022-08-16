@@ -6,45 +6,45 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
-  <div class="d-flex flex-row-reverse">
-    <button class="btn btn-outline-secondary ms-auto mb-1"
-      {% if request.user.is_anonymous %}
-            onclick="alert('로그인 후 이용해주세요')"
-        {% elif board %}
-      onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-      {% endif %}
-      >
-      글쓰기
-      <i class="bi-pencil"></i>
-    </button>
-  </div>
-  <div id="community-container" class="row">
-    {% include "community/sidebar.html" %}
-    <div class="col-md-9">
-      {% if board.board_type == 'Recruit' %}
-        {% include "community/board/article-carousel.html" %}
-      {% endif %}
-      {% if board.board_type == 'Team' %}
-        {% include "community/board/team-tab.html" %}
-      {% endif %}
-      <div class="d-flex justify-content-between border" id="board-title-bar" style="position:relative;">
-            <div id="board-title">
-              <a href="/community/home/{{board.name}}/{{board.id}}">
-                {{ board.name }} 게시판
-                </a>
-            </div>
-            <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
-              <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
-                {% category_tag request %}
-              </select>
-            </div>
+      <div class="d-flex flex-row-reverse">
+        <button class="btn btn-outline-secondary ms-auto mb-1"
+          {% if request.user.is_anonymous %}
+                onclick="alert('로그인 후 이용해주세요')"
+            {% elif board %}
+          onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
+          {% endif %}
+          >
+          글쓰기
+          <i class="bi-pencil"></i>
+        </button>
       </div>
+      <div id="community-container" class="row">
+            {% include "community/sidebar.html" %}
+            <div class="col-md-9">
+                  {% if board.board_type == 'Recruit' %}
+                    {% include "community/board/article-carousel.html" %}
+                  {% endif %}
+                  {% if board.board_type == 'Team' %}
+                    {% include "community/board/team-tab.html" %}
+                  {% endif %}
+                  <div class="d-flex justify-content-between border" id="board-title-bar" style="position:relative;">
+                        <div id="board-title">
+                          <a href="/community/home/{{board.name}}/{{board.id}}">
+                            {{ board.name }} 게시판
+                            </a>
+                        </div>
+                        <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
+                          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+                            {% category_tag request %}
+                          </select>
+                        </div>
+                  </div>
 
-      <div id="article-list-body">
+                  <div id="article-list-body">
+                  </div>
+              {% include "community/board/board-footer.html" with board=board %}
+            </div>
       </div>
-      {% include "community/board/board-footer.html" with board=board %}
-    </div>
-  </div>
 </div>
 {% endblock content %}
 {% block script %}
