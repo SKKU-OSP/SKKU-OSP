@@ -696,6 +696,7 @@ function setPortfolioModal(){
   });
 }
 function setGbtiModal(){
+  const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
     html2canvas(screenshotTarget).then((canvas)=>{
@@ -710,16 +711,35 @@ function setGbtiModal(){
   const type_ctx = []
   for(let i=1; i<=3; i++) type_ctx.push(document.getElementById('canvas-type-'+i).getContext("2d"));
 
+  const typeE_data = type_data["typeE_data"];
+  const typeE_sector = type_data["typeE_sector"];
+  const typeE_label = Array(24).fill(0).map((val, idx)=> idx);
+  const hour_palette = [];
+  for(let i=0; i<24; i++){
+    if(typeE_sector[0]<=i && i<typeE_sector[1]) hour_palette.push(cssDecl.getPropertyValue('--type-hour-0'));
+    else hour_palette.push(cssDecl.getPropertyValue('--type-hour-1'));
+  }
+  let hour_chart = new Chart(type_ctx[0], {
+      type: 'bar',
+      data: { labels: typeE_label, datasets: [{data:typeE_data,
+         backgroundColor: hour_palette}],},
+      options:{
+        plugins: {
+          legend: { display: false },
+        },
+      },
+    });
+
+
   const typeF_data = type_data["typeF_data"];
   const typeF_label = ["초반", "중반", "후반", "마무리"];
-
-  const cssDecl = getComputedStyle(document.documentElement);
   const freq_palette = [];
   for(let i=0; i<4; i++) freq_palette.push(cssDecl.getPropertyValue('--type-freq-'+ i));
   let freq_chart = new Chart(type_ctx[1], {
       type: 'bar',
       data: { labels: typeF_label, datasets: [{data:typeF_data,
-         backgroundColor: freq_palette}],},
+        backgroundColor: freq_palette,
+        barPercentage: 0.8}],},
       options:{
         plugins: {
           legend: { display: false },
@@ -734,8 +754,8 @@ function setGbtiModal(){
   let cooperate_chart = new Chart(type_ctx[2], {
       type: 'bar',
       data: { labels: typeG_label, datasets: [{data:typeG_data,
-         backgroundColor: cooperate_palette,
-        barPercentage: 0.5,}],},
+        backgroundColor: cooperate_palette,
+        barPercentage: 0.4,}],},
       options:{
         plugins: {
           legend: { display: false },

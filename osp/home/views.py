@@ -19,6 +19,42 @@ def statistic(request):
     
     annual_overview = AnnualOverview.objects.order_by("case_num")
     annual_overview_list = [overview.to_json() for overview in annual_overview]
+    
+    # 5. MODEL Student
+    def getStudentYear(end_year):
+        stdnt_case_list = [[[] for i in range(start_year, end_year+1)] for j in range(4)]
+        stdnt_list = Student.objects.all()
+        for stdnt_data in stdnt_list:
+            stdnt_json = stdnt_data.to_json()
+            yid = stdnt_data.year - start_year
+            if(stdnt_data.absence == 0 and stdnt_data.plural_major == 0):
+                stdnt_case_list[0][yid].append(stdnt_json)
+                stdnt_case_list[1][yid].append(stdnt_json)
+                stdnt_case_list[2][yid].append(stdnt_json)
+                stdnt_case_list[3][yid].append(stdnt_json)
+            elif(stdnt_data.absence == 0 and stdnt_data.plural_major == 1):
+                stdnt_case_list[0][yid].append(stdnt_json)
+                stdnt_case_list[2][yid].append(stdnt_json)
+            elif(stdnt_data.absence == 1 and stdnt_data.plural_major == 0):
+                stdnt_case_list[0][yid].append(stdnt_json)
+                stdnt_case_list[1][yid].append(stdnt_json)
+            elif(stdnt_data.absence == 1 and stdnt_data.plural_major == 1):
+                stdnt_case_list[0][yid].append(stdnt_json)
+        return stdnt_case_list
+
+    annual_total_list = AnnualTotal.objects.order_by('case_num')
+    annual_total = [[] for i in range(4)]
+    for annual_data in annual_total_list:
+        annual_total[annual_data.case_num].append(annual_data.to_json())
+    
+    dist_score_total_list = DistScore.objects.order_by('case_num')
+    dist_score_total = [[] for i in range(4)]
+    for dist_score in dist_score_total_list:
+        dist_score_total[dist_score.case_num].append(dist_score.to_json())
+    dist_factor_list = DistFactor.objects.order_by('case_num')
+    dist_factor = [[] for i in range(4)]
+    for dist in dist_factor_list:
+        dist_factor[dist.case_num].append(dist)
     for case in range(4):
         chartdata = {}
         
@@ -27,34 +63,24 @@ def statistic(request):
         chartdata[key_name] = json.dumps([annual_overview_list[case]])
         
         # 2. MODEL AnnualTotal
-        annual_total = AnnualTotal.objects.filter(case_num=case)
-        key_name = "annual_total"
-        chartdata[key_name] = json.dumps([row.to_json() for row in annual_total])
-        dist_score_total = DistScore.objects.filter(case_num=case).order_by('case_num')
-        dist_factor = DistFactor.objects.filter(case_num=case).order_by('case_num')
-        end_year = start_year + len(dist_score_total) - 1
+        chartdata["annual_total"] = json.dumps(annual_total[case])
+        end_year = start_year + len(dist_score_total[case]) - 1
         if case == 0:
-            repo_list = Repository.objects.all()
-            for year in range(start_year, end_year+1):
-                repo_dict = {}
-                for row in repo_list:
-                    if row.year == year:
-                        repo_pair = row.to_json()
-                        repo_dict.update(repo_pair)
-                key_name = "repo"+str(year)
-                chartdata[key_name] = json.dumps([repo_dict])
+            stdnt_case_list = getStudentYear(end_year)
+            repo_total_list = Repository.objects.all()
+            repo_list = [ [] for i in range(end_year-start_year+1)]
+            for repo in repo_total_list:
+                if repo.year >= start_year:
+                    repo_list[repo.year-start_year].append(repo.to_json())
+            context["repo"] = json.dumps(repo_list)
             context["classGap"] = json.loads(annual_overview[case].fork)
             context["classCnt"] = json.loads(annual_overview[case].fork_std)
             
         for year in range(start_year, end_year+1):
             # 3. MODEL DistScore
-            dist_score = dist_score_total[year-start_year]
-
-            # # 딕셔너리를 리스트안에 미리 넣는 방식이라 접근이 힘듦
-            annual_dist = dist_score.to_json()
-            
+            annual_dist = dist_score_total[case][year-start_year]
             # 4. MODEL DistFactor
-            for row in dist_factor:
+            for row in dist_factor[case]:
                 row_json = row.to_json()
                 if row_json["year"] == year :
                     factor = row_json["factor"]
@@ -66,26 +92,13 @@ def statistic(request):
                     row_json[factor+"_dept_std"] = row_json.pop("value_dept_std")
                     row_json[factor+"_dept_pct"] = row_json.pop("value_dept_pct")
                     annual_dist.update(row_json)
-                
-            # print(annual_dist['issue_dept_pct'])
             key_name = "year"+str(year)
             chartdata[key_name] = json.dumps([annual_dist])
-            
-            # 5. MODEL Student
-            student_list = []
-            if case == 0:
-                student_list = Student.objects.filter(year=year)
-            elif case == 1:
-                student_list = Student.objects.filter(year=year, plural_major=0)
-            elif case == 2:
-                student_list = Student.objects.filter(year=year, absence=0, plural_major=case%2)
-            elif case == 3:
-                student_list = Student.objects.filter(year=year, absence=0, plural_major=0)
-            key_name = "student"+str(year)
-            chartdata[key_name] = json.dumps([row.to_json() for row in student_list])
+        chartdata["student_year"] = json.dumps(stdnt_case_list[case])
         context["chartdata_"+str(case)] = json.dumps(chartdata)
-        context["end_year"] = end_year
-        context["year_list"] = [ year for year in range(start_year, end_year+1)]
+    context["end_year"] = end_year
+    context["year_list"] = [ year for year in range(start_year, end_year+1)]
+    context["year_list"].reverse()
     context['user_type'] = 'admin'
     print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
 

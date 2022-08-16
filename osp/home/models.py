@@ -40,11 +40,7 @@ class AnnualOverview(models.Model):
         return {
             "case_num" : self.case_num,
             "score" : json.loads(self.score),
-            "score_diff" : json.loads(self.score_diff),
-            "score_sum" : json.loads(self.score_sum),
             "score_std" : json.loads(self.score_std),
-            "score_diff_std" : json.loads(self.score_std_diff),
-            "score_sum_std" : json.loads(self.score_std_sum),
             "commit" : json.loads(self.commit),
             "commit_std" : json.loads(self.commit_std),
             "star" : json.loads(self.star),
@@ -60,8 +56,6 @@ class AnnualOverview(models.Model):
         return {
             "case_num" : self.case_num,
             "score" : json.loads(self.score),
-            "score_diff" : json.loads(self.score_diff),
-            "score_sum" : json.loads(self.score_sum),
             "commit" : json.loads(self.commit),
             "star" : json.loads(self.star),
             "pr" : json.loads(self.pr),
@@ -91,8 +85,6 @@ class AnnualTotal(models.Model):
         return {
             "case_num" : self.case_num,
             "student_KP" : json.loads(self.student_KP),
-            "student_KP_diff" : json.loads(self.student_KP_diff),
-            "student_KP_sum" : json.loads(self.student_KP_sum),
             "student_total" : json.loads(self.student_total),
             "commit" : json.loads(self.commit),
             "star" : json.loads(self.star),
@@ -141,28 +133,14 @@ class DistScore(models.Model):
             "case_num" : self.case_num,
             "year" : self.year,
             "score" : json.loads(self.score),
-            "score_diff" : json.loads(self.score_diff),
-            "score_sum" : json.loads(self.score_sum),
             
             "score_sid" : json.loads(self.score_sid),
-            "score_sid_diff" : json.loads(self.score_sid_diff),
-            "score_sid_sum" : json.loads(self.score_sid_sum),
             "score_sid_std" : json.loads(self.score_sid_std),
-            "score_sid_std_diff" : json.loads(self.score_sid_std_diff),
-            "score_sid_std_sum" : json.loads(self.score_sid_std_sum),
             "score_sid_pct" : json.loads(self.score_sid_pct),
-            "score_sid_pct_diff" : json.loads(self.score_sid_pct_diff),
-            "score_sid_pct_sum" : json.loads(self.score_sid_pct_sum),
             
             "score_dept" : json.loads(self.score_dept),
-            "score_dept_diff" : json.loads(self.score_dept_diff),
-            "score_dept_sum" : json.loads(self.score_dept_sum),
             "score_dept_std" : json.loads(self.score_dept_std),
-            "score_dept_std_diff" : json.loads(self.score_dept_std_diff),
-            "score_dept_std_sum" : json.loads(self.score_dept_std_sum),
             "score_dept_pct" : json.loads(self.score_dept_pct),
-            "score_dept_pct_diff" : json.loads(self.score_dept_pct_diff),
-            "score_dept_pct_sum" : json.loads(self.score_dept_pct_sum)
         }
     
 # Factor: Commits, Stars, Pull Requests, Issues
@@ -227,13 +205,10 @@ class Student(models.Model):
             "absence" : self.absence,
             "plural_major" : self.plural_major,
             "score" : self.score,
-            "score_diff" : self.score_diff,
-            "score_sum" : self.score_sum,
             "commit" : self.commit,
             "star" : self.star,
             "pr" : self.pr,
             "issue" : self.issue,
-            "fork" : self.fork,
         }
         
     
