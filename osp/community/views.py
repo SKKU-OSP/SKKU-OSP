@@ -28,7 +28,10 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    for board in Board.objects.filter(team_board_query | Q(team_id=None)):
+    boards = Board.objects.filter(team_board_query | Q(team_id=None))
+    if request.user.is_anonymous:
+        boards = boards.exclude(board_type='User')
+    for board in boards:
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
         # week_ago = datetime.now() - timedelta(days=7)
@@ -82,6 +85,8 @@ def board(request, board_name, board_id):
 
 
     if board.board_type == 'User':
+        if request.user.is_anonymous:
+            return redirect('/community')
         context['accounts'] = Account.objects.all()[:9]
         # context['account_all_cnt'] = Account.objects.all()
         return render(request, 'community/board/user-board.html', context)
