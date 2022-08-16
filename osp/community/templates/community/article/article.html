@@ -118,10 +118,10 @@
         event.preventDefault();
         var t = $('#article-form').attr('edit-type');
         if (t == 'register') {
-            console.log('1');
+            {#console.log('1');#}
             registerArticle();
         } else {
-            console.log('2');
+            {#console.log('2');#}
             updateArticle();
         }
         return false;

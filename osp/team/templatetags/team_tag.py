@@ -3,11 +3,18 @@ from django.utils.safestring import mark_safe
 
 from user.models import Account
 from team.models import TeamMember,TeamInviteMessage, Team
+from community.models import Board
 
 register = template.Library()
 @register.simple_tag
 def var_set(var):
     return var
+
+@register.simple_tag
+def make_team_board_url(team_id):
+    from django.shortcuts import resolve_url
+    board = Board.objects.get(team__id=team_id)
+    return resolve_url('community:Board', board_name=board.name, board_id=board.id)
 
 @register.simple_tag
 def var_add(var1, var2):
@@ -40,14 +47,14 @@ def is_teammember(team, user):
         return False
 
 @register.simple_tag
-def teaminvitemessage(team, user):
+def teamapplymessage(team, user):
     if user.is_anonymous: user = None
     account = Account.objects.filter(user=user).first()
-    return TeamInviteMessage.objects.filter(team=team,account=account,status=0).first()
+    return TeamInviteMessage.objects.filter(team=team,account=account,status=0,direction=False).first()
 
 @register.simple_tag
 def get_teamappliedmessage_waited(team):
-    return TeamInviteMessage.objects.filter(team=team,status=0)
+    return TeamInviteMessage.objects.filter(team=team,status=0,direction=False)
 
 
 @register.simple_tag

@@ -1,0 +1,39 @@
+{% load tag_templatetag %}
+{% load community_tag %}
+{% load team_tag %}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">팀원 초대하기</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form class="needs-validation row" id="team-invite-form" enctype="multipart/form-data"
+            onsubmit="invite_submit(event);">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="user-name" class="form-label">팀원</label>
+                    <input type="text" name="username" class="form-control" value="{{ invite_user }}" readonly>
+                </div>
+                <div class="mb-4">
+                    <label for="team-name" class="form-label">팀 선택</label>
+                    <select id="team-option" name="name" style="height: 40px; padding-left:10px;" class="form-control form-check w-100 pointer" required autofocus>
+                        {% team_options request.user %}
+                    </select>
+                    <div class="valid-feedback" for="team-name"></div>
+                    <div class="invalid-feedback" for="team-name"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="team-desc" class="form-label">초대 메세지 추가</label>
+                    <textarea id="team-desc" name="desc" class="form-control" rows="3"></textarea>
+                    <div class="valid-feedback" for="team-desc"></div>
+                    <div class="invalid-feedback" for="team-desc"></div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-default" id="team-invite-submit">초대 메세지 보내기</button>
+        </div>
+    </div>
+</div>

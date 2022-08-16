@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
 from tag.models import Tag
-from team.models import TeamMember, Team, TeamTag
+from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest
 from community.models import TeamRecruitArticle
 
@@ -68,12 +68,18 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
+    context = {'board': board}
     if board.team_id is not None:
         if not request.user.is_authenticated:
             return redirect('/community')
-        if len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+        if TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
+                                            status=0).exists():
+            context['invited_user'] = True
+            context['waitedinvitemessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
+                                            status=0)
+        elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
             return redirect('/community')
-    context = {'board': board }
+
 
     if board.board_type == 'User':
         context['accounts'] = Account.objects.all()[:9]
@@ -111,10 +117,10 @@ def board(request, board_name, board_id):
         if request.user: my_acc = Account.objects.get(user=request.user)
 
         tm = team_members.filter(member=my_acc).first()
-        if not tm:
-            return redirect('/community')
-
-        context['team_admin'] = tm.is_admin
+        # if not tm:
+        #     return redirect('/community')
+        if tm:
+            context['team_admin'] = tm.is_admin
         context['team'] = team
         context['team_tags'] = team_tags
         context['team_members'] = team_members

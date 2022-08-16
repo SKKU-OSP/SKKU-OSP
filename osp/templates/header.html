@@ -1,5 +1,6 @@
 {% load tag_templatetag %}
 {% load message_tag %}
+{% load team_tag %}
 <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light">
     <div class="container">
         <a class="navbar-brand" href="/community">SKKU OSP</a>
@@ -42,7 +43,7 @@
                             notifications
                         </div>
                     </button>
-                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;">
+                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow:auto;">
                         {% for noti in notifications.list %}
 
                         <li
@@ -55,7 +56,11 @@
                                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
                             {% elif noti.body.type == "team_apply" %}
                                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
+                            {% elif noti.body.type == "team_invite" %}
+                                onclick="ReadNotification('{{ noti.body.type }}', '{{ noti.id }}' , '{% make_team_board_url noti.body.team_id %}' )"
                             {% elif noti.body.type == "team_apply_result" %}
+                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
+                            {% else %}
                                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
                             {% endif %}
                             style="cursor:pointer;"
@@ -69,7 +74,8 @@
                                 </div>
                             </div>
                             <div>
-                                {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
+
+                                {% if noti.body.type == "comment" or noti.body.type == "articlelike" or noti.body.type == 'team_invite' %}
                                 <i
                                     class="bi bi-box-arrow-up-right pointer"></i>
                                 {% elif noti.body.type == "team_apply" %}

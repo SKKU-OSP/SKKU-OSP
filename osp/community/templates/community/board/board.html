@@ -27,6 +27,35 @@
                   {% if board.board_type == 'Team' %}
                     {% include "community/board/team-tab.html" %}
                   {% endif %}
+                  {% if board.board_type == 'Team' and invited_user %}
+                    <div class="d-flex justify-content-between" id="board-title-bar" >
+                        <div id="board-title">
+                          <a href="/community/home/{{board.name}}/{{board.id}}">
+                            {{ board.name }} 게시판
+                            </a>
+                        </div>
+                  </div>
+                  <div style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px; border-radius:0.625rem;margin-bottom:10px;">
+                            팀 게시판은 팀원 승인 후에 가능합니다.
+                  </div>
+                  <div class="d-flex flex-column" style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px 15px 20px; border-radius:0.625rem;margin-bottom:10px;">
+                  <div>초대 메세지</div>
+                  {% for msg in waitedinvitemessages %}
+                        <div class=" d-flex flex-row justify-content-between w-100" style="  box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);border-radius:0.625rem;padding:5px 10px;margin-bottom:10px;">
+                            <div style="width:75%;overflow:hidden;white-space:normal;display:inline-block;word-break:normal;overflow-wrap:break-word;">{{ msg.message }}</div>
+                            <div style="width:20%;font-size:10px;">{{ msg.send_date }}</div>
+                        </div>
+                    {% endfor %}
+                      <div class="d-flex flex-row justify-content-end w-100">
+                        <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username  }}',true)"  class="btn-accept">
+                            승인
+                        </button>
+                        <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username  }}',false)"  class="btn-refuse" style="margin-left:5px;">
+                            거절
+                        </button>
+                      </div>
+                  </div>
+                  {% else %}
                   <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
                         <div id="board-title">
                           <a href="/community/home/{{board.name}}/{{board.id}}">
@@ -42,7 +71,8 @@
 
                   <div id="article-list-body">
                   </div>
-              {% include "community/board/board-footer.html" with board=board %}
+                  {% include "community/board/board-footer.html" with board=board %}
+                {% endif %}
             </div>
       </div>
 </div>
