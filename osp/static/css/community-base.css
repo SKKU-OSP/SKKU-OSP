@@ -412,6 +412,12 @@
 
 #team-desc {
     padding-bottom: 10px;
+    width:440px;
+    overflow:hidden;
+    white-space:normal;
+    display:inline-block;
+    word-break:normal;
+    overflow-wrap:break-word;
 }
 
 #team-name {
@@ -427,7 +433,7 @@
 }
 
 #team-members {
-    width: 220px;
+    /*width: 220px;*/
     border-right: 1px solid var(--main-border-color);
 }
 
@@ -442,7 +448,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     overflow-y: auto;
-    min-width: 150px;
+    /*min-width: 150px;*/
 }
 
 #team-info {
