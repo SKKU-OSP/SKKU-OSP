@@ -89,7 +89,15 @@
             for(tag of $('#tag-filter').find('.ss-value-text')){
                 tag_list.push($(tag).html())
             }
-            console.log(tag_list);
+
+            var team_li = [];
+            $('#team-filter').children().each(function(){
+                if($(this).hasClass('bg-gray')){
+                    {#console.log($(this).val())#}
+                    team_li.push($(this).attr('value'));
+                }
+            });
+            console.log(team_li)
             $.ajax(
                 {
                     {% if board and board.name != "User" %}
@@ -103,7 +111,8 @@
                     data: {
                         'page': now_page,
                         'keyword': $('#search-keyword').val(),
-                        'tag': tag_list.join(',')
+                        'tag': tag_list.join(','),
+                        'team_li': JSON.stringify(team_li),
                     },
                     method: 'GET',
                     dataType: 'JSON'

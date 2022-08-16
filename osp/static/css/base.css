@@ -115,8 +115,10 @@ div.vr {
   border-radius: 50%;
   padding: 0.25rem;
   position: relative;
-  top: -1rem;
-  left: 0.5rem;
+  top: -10px;
+  /*top: -1rem;*/
+  left: 8px;
+  /*left: 0.5rem;*/
   height: 0.5rem;
   width: 0.5rem;
 }
@@ -125,8 +127,10 @@ div.vr {
   border-radius: 50%;
   padding: 0.25rem;
   position: relative;
-  top: -1rem;
-  left: 0.5rem;
+  /*top: -1rem;*/
+  top: -12px;
+  /*left: 0.5rem;*/
+  left: 8px;
 }
 
 #message-modal .modal-dialog,
@@ -418,6 +422,15 @@ footer {
   font-weight: 700 !important;
 }
 
+.bg-none{
+  background:none;
+}
+
+.bg-gray{
+  background:#CDCDCD;
+}
+
+
 /*.carousel-item{*/
 /*  background:white;*/
 /*}*/
@@ -462,6 +475,9 @@ footer {
 .noti-dropdown::after,
 .msg-dropdown::after {
   content: none;
+}
+.no-icon-dropdown::after{
+  display:none!important;
 }
 
 .default-btn {

@@ -133,6 +133,8 @@ def apply_messages(team):
     )
     return apply_messages
 
+
+
 @register.simple_tag
 def is_article_thumb_up(article, user):
     if user.is_anonymous:

@@ -16,7 +16,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="NavRankDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
-                    <ul class="dropdown-menu" aria-labelledby="NavRankDropdown">
+                    <ul class="dropdown-menu" aria-labelledby="NavRankDropdown"  style="position:absolute;">
                         <li><a class="dropdown-item" href="/rank/user">User</a></li>
                         <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
                     </ul>
@@ -30,6 +30,7 @@
             <ul class="navbar-nav d-flex me-2">
                 <li class="dropdown noti-dropdown-btn">
                     {% get_notifications request.user as notifications %}
+
                     {% if notifications.new %}
                     <span id="new-noti" class="badge">
                         <span class="visually-hidden">New alerts</span>
@@ -41,7 +42,7 @@
                             notifications
                         </div>
                     </button>
-                    <ul class="dropdown-menu noti-dropdown">
+                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;">
                         {% for noti in notifications.list %}
 
                         <li
@@ -85,6 +86,7 @@
 
                     </ul>
                 </li>
+
                 <li id="message" class="nav-item pointer">
                     {% get_new_message request.user as is_new_msg %}
                     {% if is_new_msg %}
@@ -93,7 +95,7 @@
                     </span>
                     {% endif %}
                     <button class="default-btn p-0">
-                        <span class="material-icons-outlined icon">
+                        <span class="material-icons-outlined icon" style="font-size:22px;">
                             email
                         </span>
                     </button>
@@ -101,7 +103,7 @@
             </ul>
             <div class="d-flex">
                 <div class="dropdown">
-                    <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown"
+                    <div class="dropdown-toggle opacity-hover" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown"
                         style="cursor:pointer;">
                         {{user.username}}
                     </div>
