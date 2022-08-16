@@ -471,7 +471,7 @@ window.onload = function () {
       },
     };
     dist_chart.destroy();
-    let dist_point_color = cssDecl.getPropertyValue('--sub-point-color');
+    let dist_point_color = cssDecl.getPropertyValue('--data-dist-0');
     dist_chart = new Chart(visual_ctx[2], {
       type: 'scatter',
       data: { datasets: [{data:normal_dist_data}] },
@@ -635,9 +635,9 @@ window.onload = function () {
               type: "radar",
               label: "average",
               data: average_data,
-              backgroundColor: radar_palette[0]+'4d',
-              hoverBackgroundColor: radar_palette[0]+'e3',
-              borderColor: radar_palette[0]+'80',
+              backgroundColor: radar_palette[0]+'80',
+              hoverBackgroundColor: radar_palette[0]+'E3',
+              borderColor: radar_palette[0]+'AA',
               hoverBorderColor: radar_palette[0],
               borderWidth: 1,
             });
@@ -645,9 +645,9 @@ window.onload = function () {
               type: "radar",
               label: chart_data['username'],
               data: user_dataset,
-              backgroundColor: radar_palette[1]+'4d',
-              hoverBackgroundColor: radar_palette[1]+'e3',
-              borderColor: radar_palette[1]+'80',
+              backgroundColor: radar_palette[1]+'80',
+              hoverBackgroundColor: radar_palette[1]+'E3',
+              borderColor: radar_palette[1]+'AA',
               hoverBorderColor: radar_palette[1],
               borderWidth: 1,
             });
@@ -658,9 +658,9 @@ window.onload = function () {
               type: "radar",
               label: target.text(),
               data: target_dataset,
-              backgroundColor: radar_palette[2]+'4d',
-              hoverBackgroundColor: radar_palette[2]+'e3',
-              borderColor: radar_palette[2]+'80',
+              backgroundColor: radar_palette[2]+'80',
+              hoverBackgroundColor: radar_palette[2]+'E3',
+              borderColor: radar_palette[2]+'AA',
               hoverBorderColor: radar_palette[2],
               borderWidth: 1,
             });
