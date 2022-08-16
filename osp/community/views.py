@@ -29,8 +29,8 @@ def main(request):
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
     boards = Board.objects.filter(team_board_query | Q(team_id=None))
-    if request.user.is_anonymous:
-        boards = boards.exclude(board_type='User')
+    # if request.user.is_anonymous:
+    boards = boards.exclude(board_type='User')
     for board in boards:
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
