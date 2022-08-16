@@ -854,6 +854,10 @@
     padding: 0.625rem;
 }
 
+#article-body img{
+    max-width: 100%;
+}
+
 #article-title-border {
     border: 1px solid var(--main-bg-color);
 }
