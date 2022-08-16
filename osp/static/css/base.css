@@ -115,8 +115,10 @@ div.vr {
   border-radius: 50%;
   padding: 0.25rem;
   position: relative;
-  top: -1rem;
-  left: 0.5rem;
+  top: -10px;
+  /*top: -1rem;*/
+  left: 8px;
+  /*left: 0.5rem;*/
   height: 0.5rem;
   width: 0.5rem;
 }
@@ -125,8 +127,10 @@ div.vr {
   border-radius: 50%;
   padding: 0.25rem;
   position: relative;
-  top: -1rem;
-  left: 0.5rem;
+  /*top: -1rem;*/
+  top: -12px;
+  /*left: 0.5rem;*/
+  left: 8px;
 }
 
 #message-modal .modal-dialog,

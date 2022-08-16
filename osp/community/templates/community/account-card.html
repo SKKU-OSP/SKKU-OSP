@@ -13,25 +13,25 @@
                     <div class="material-icons" style="font-size:20px;">recommend</div><div style="line-height:20px;padding-left:3px;">  {{ account.recommend_team.name }} 팀원 추천</div>
                 </div>
             {% endif %}
-            <div>
-                {% if 0 %}
-                익명
-                {% elif 0 %}
-                <a class="article-bar-writer" href="">사용자</a>
-                {% else %}
-                <div class="dropdown writer-dropdown">
-                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{account.user.username}}
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
-                    </ul>
+            <div class="account-data">
+                    {% if 0 %}
+                    익명
+                    {% elif 0 %}
+                    <a class="article-bar-writer" href="">사용자</a>
+                    {% else %}
+                    <img class="account-img" src="{{account.photo.url}}" alt="">
+                    <div class="dropdown writer-dropdown">
+                        <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            {{account.user.username}}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
         <div class="account-intro">
             {{ account.introduction }}
         </div>
