@@ -27,7 +27,7 @@
                     {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
                     {% var_add cnt waitedapplymessages.cnt as cnt %}
                     {% for applymsg in waitedapplymessages %}
-                    <div class="team-apply-item">
+                    <div class="team-apply-item" id="apply-user-{{ applymsg.account.user.username }}">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}

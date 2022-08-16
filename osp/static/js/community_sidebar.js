@@ -225,6 +225,8 @@ function apply_result(team_id, username, is_okay) {
     success: function (data) {
       if (data['status'] == "success") {
         console.log(data)
+        $('#apply-user-'+data['username']).css('display','none');
+
         $('#AddTeamModal').html(data['data']);
       } else {
         alert(data['message']);

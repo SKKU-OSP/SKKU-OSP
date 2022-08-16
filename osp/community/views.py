@@ -313,10 +313,11 @@ class ArticleView(TemplateView):
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
                     context['article'].team = teamrecruit.team
+            context['article'].view_cnt += 1
+            context['article'].save()
         except:
-            s = 1
-        context['article'].view_cnt += 1
-        context['article'].save()
+            context['error_occur'] = True
+
 
         return render(request, 'community/article/article.html', context)
 
