@@ -16,15 +16,15 @@
 
     <div class="col">
         <div class="col-md-12 mb-3">
-            <button type="submit" class="btn btn-primary" name="action" value="append_ints">+</button>
+            <input id='intsappend' class="appendbtn" type="button" value="+" name="action" onclick="intsAppend(); return false;">
         </div>
     </div>
 </div>
-<div>
+<div id='interestsdiv'>
     {% for row in data.ints %}
-        <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete {{row.tag.name}}">
+        <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete {{row.tag.name}}" onclick="intsDelete('{{row.tag.name}}'); return false;">
             <span class="badge bg-tag-{{row.tag.type}} me-1" style="height:20px; margin-bottom:2px">{{row.tag.name}}</span>
-            <span class="badge badge-light" id="ints_delete">x</span>
+            <span class="badge badge-light delete-badge" id="ints_delete">x</span>
         </button>
     {% endfor %}
 </div>

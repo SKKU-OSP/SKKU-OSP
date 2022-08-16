@@ -424,7 +424,7 @@ function setVisualModal(){
       },
     };
     dist_chart.destroy();
-    let dist_point_color = cssDecl.getPropertyValue('--sub-point-color');
+    let dist_point_color = cssDecl.getPropertyValue('--data-dist-0');
     dist_chart = new Chart(modal_ctx[2], {
       type: 'scatter',
       data: { datasets: [{data:normal_dist_data}] },
@@ -699,7 +699,7 @@ function setGbtiModal(){
   const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
-    html2canvas(screenshotTarget).then((canvas)=>{
+    html2canvas(screenshotTarget,{scale:2, backgroundColor: cssDecl.getPropertyValue('--developer-bg-color')}).then((canvas)=>{
       const base64image = canvas.toDataURL("image/png");
       var anchor = document.createElement('a');
       anchor.setAttribute("href", base64image);
@@ -722,7 +722,7 @@ function setGbtiModal(){
   let hour_chart = new Chart(type_ctx[0], {
       type: 'bar',
       data: { labels: typeE_label, datasets: [{data:typeE_data,
-         backgroundColor: hour_palette}],},
+         backgroundColor: hour_palette, borderRadius:5}],},
       options:{
         plugins: {
           legend: { display: false },
@@ -739,7 +739,7 @@ function setGbtiModal(){
       type: 'bar',
       data: { labels: typeF_label, datasets: [{data:typeF_data,
         backgroundColor: freq_palette,
-        barPercentage: 0.8}],},
+        barPercentage: 0.8, borderRadius:5}],},
       options:{
         plugins: {
           legend: { display: false },
@@ -755,7 +755,7 @@ function setGbtiModal(){
       type: 'bar',
       data: { labels: typeG_label, datasets: [{data:typeG_data,
         backgroundColor: cooperate_palette,
-        barPercentage: 0.4,}],},
+        barPercentage: 0.4, borderRadius:5}],},
       options:{
         plugins: {
           legend: { display: false },
