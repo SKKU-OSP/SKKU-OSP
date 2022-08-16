@@ -24,7 +24,9 @@
         {% else %}
         <div class="comment-item-left">
             <div class="comment-item-writer-wrapper">
-                {% if comment.anonymous_writer %}
+                {% if request.user.is_anonymous %}
+                <a class="comment-item-writer annonymous" href="">사용자</a>
+                {% elif comment.anonymous_writer %}
                 <div class="comment-item-writer annonymous">익명</div>
                 {% else %}
                 <div class="comment-item-writer dropdown writer-dropdown">
@@ -66,7 +68,7 @@
             </div>
             <div class="comment-item-mod">
                 {% is_comment_like comment request.user as is_comment_like %}
-                <div class="comment-item-like" onclick="CommentLike({{comment.id}}, {{user.id}})">
+                <div class="comment-item-like" onclick="CommentLike({{comment.id}}, {{user.id| default_if_none:-1 }})">
                     {% if is_comment_like %}
                     <span class="material-icons">
                     {% else %}
