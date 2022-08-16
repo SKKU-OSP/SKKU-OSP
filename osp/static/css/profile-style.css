@@ -213,16 +213,14 @@ a.nav-link {
   overflow-y: hidden;
 }
 
-.horizontal-menu>div>button {
-  padding: 0.3rem 1.4rem;
+.horizontal-menu>div>button, .horizontal-menu>div>div>button {
+  padding: 0.25rem 1rem;
   background: white;
-  border: 1.5px solid var(--profile-btn-border);
+  border: 1px solid var(--profile-btn-border) !important;
+  font-size: 14px;
 }
-
-.horizontal-menu>div>div>button {
-  padding: 0.3rem 1.4rem;
-  background: white;
-  border: 1.5px solid var(--profile-btn-border) !important;
+.dropdown-item.modal-factor-item, .dropdown-item.modal-month-item{
+  font-size: 12px;
 }
 
 .horizontal-menu>div>button:hover {
@@ -495,7 +493,7 @@ span.row-raw {
 }
 
 .semi-expanded-1.semi-expanded-2:nth-child(n) {
-  order: 3;
+  order: 1;
 }
 
 .semi-expanded-0:nth-child(n),

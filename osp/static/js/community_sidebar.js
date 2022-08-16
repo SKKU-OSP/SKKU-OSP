@@ -14,7 +14,8 @@ $().ready(function () {
             for (selected of selected_list) {
               $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
             }
-          }
+          },
+          placeholder: 'Tag',
         });
         $('#team-submit').click(function () {
           console.log('Submit');
@@ -46,28 +47,6 @@ $().ready(function () {
       })
     } else {
       $('#AddTeamModal').modal('show');
-    }
-  });
-
-  $('#team-apply-list').click(function () {
-    if (!$('#ApplyTeamModal').hasClass('ready')) {
-      $.ajax({
-        url: "/team/api/team-apply-list",
-        type: "GET",
-        dataType: 'HTML'
-      }).done(function (data) {
-        $('#ApplyTeamModal').addClass('ready').html(data)
-        $('#ApplyTeamModal').modal('show');
-        $('.bi-caret-down-fill').click(function () {
-          if (this.style.transform == '') {
-            this.style.transform = 'rotate(180deg)';
-          } else {
-            this.style.transform = '';
-          }
-        });
-      })
-    } else {
-      $('#ApplyTeamModal').modal('show');
     }
   });
 });
@@ -163,6 +142,29 @@ function apply_result(team_id, username, is_okay) {
       alert('Error Occured');
     }
   });
+}
+
+function ApplyDelete(msg_id){
+
+  ajax_form_data = new FormData();
+  ajax_form_data.append('msg_id', msg_id);
+  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+  $.ajax({
+    type: 'POST',
+    url: '/team/api/team-invite-delete/',
+    data: ajax_form_data,
+    dataType: 'JSON',
+    processData: false,
+    contentType: false,
+    success: function(data){
+      if (data['status'] == "success") {
+        console.log(data)
+        $('#apply-' + msg_id).remove();
+      } else {
+        alert(data['message']);
+      }
+    }
+  })
 }
 
 function CommentLike(comment_id, user_id) {

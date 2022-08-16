@@ -10,7 +10,7 @@
     <div id="community-container" class="row">
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
-            <div id="board-title-bar" class="d-flex justify-content-between" id="board-title-bar">
+            <div id="board-title-bar" class="d-flex justify-content-center" id="board-title-bar">
                 <div id="board-title">
                     <a href="/community/home/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
@@ -46,6 +46,7 @@
         if (view_type != 'view') {
             category_select = new SlimSelect({
                 select: '#multiple',
+                placeholder: 'Tag',
                 onChange: (selected_list) => {
                     for (selected of selected_list) {
                         $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
@@ -53,6 +54,16 @@
                 }
             });
         }
+        $('#comment-is-anonymous').click(function() {
+            if($(this).is(":checked")){
+                $('#comment-writer-display').html('익명');
+                $('#comment-writer-display').addClass('annonymous');
+            }
+            else{
+                $('#comment-writer-display').html($('#comment-writer-display').attr('value'));
+                $('#comment-writer-display').removeClass('annonymous');
+            }
+        });
     });
 
     function edit_submit(event) {
@@ -86,6 +97,7 @@
                     $('#article-content').html(data['html']);
                     category_select = new SlimSelect({
                         select: '#multiple',
+                        placeholder: 'Tag',
                         onChange: (selected_list) => {
                             for (selected of selected_list) {
                                 $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' +

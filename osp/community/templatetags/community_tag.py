@@ -1,14 +1,15 @@
 from django import template
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 
-from user.models import Account, User
-from team.models import TeamMember, Team
-from community.models import ArticleComment, Article, ArticleLike, ArticleScrap, Board, ArticleCommentLike
-from datetime import datetime, timedelta, timezone
-from team.models import TeamMember,TeamInviteMessage, Team
-from user.models import Account, AccountInterest
+import math
+from datetime import datetime, timedelta
+
+from community.models import ArticleComment, ArticleLike, ArticleScrap, Board, ArticleCommentLike
+from team.models import TeamMember,TeamInviteMessage
+from user.models import Account
 
 register = template.Library()
 @register.filter
@@ -27,6 +28,17 @@ def time_before(date):
         repr_string = date.strftime('%Y-%m-%d')
     return repr_string
 
+@register.filter
+def remain_datetime(date):
+    delta = date - datetime.now()
+    if delta < timedelta(seconds=3600):
+        repr_string = f'{math.ceil(delta.seconds / 60) % 60}분 전'
+    elif delta < timedelta(days=1):
+        repr_string = f'{math.ceil(delta.seconds / 3600) % 3600}시간 전'
+    else:
+        repr_string = f'{delta.days}일 {math.ceil(delta.seconds / 60) % 24}시간 전'
+    return repr_string
+    
 @register.filter
 def article_like(article):
     return len(ArticleLike.objects.filter(article=article))
@@ -49,6 +61,7 @@ def anonymous_checked(a_writer):
         return mark_safe('checked')
     else:
         return ''
+    
 
 @register.simple_tag(takes_context=True)
 def board_sidebar_normal_board(context, request):
@@ -119,13 +132,6 @@ def apply_messages(team):
         status=0
     )
     return apply_messages
-
-@register.simple_tag
-def get_admin_team(user):
-    if not user.is_anonymous:
-        team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
-        return Team.objects.filter(id__in=team_li)
-    return None
 
 @register.simple_tag
 def is_article_thumb_up(article, user):

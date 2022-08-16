@@ -277,8 +277,8 @@ class ProfileView(TemplateView):
                 devtype_data.save()
                 gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
 
-                gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
-                gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+                gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
+                gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
                 context["gbti"] = gbti_data
             except Exception as e:
                 print("Calculate dev type error", e)
@@ -299,8 +299,8 @@ class ProfileView(TemplateView):
             typeF = commit_freq
             typeG = 1 if major_act == 'individual' else -1
             gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
-            gbti_desc, gbti_descKR, gbti_data["icon"] = get_type_analysis(list(gbti_data.values()))
-            gbti_data["zip"]=zip(gbti_desc, gbti_descKR, gbti_data["icon"])
+            gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
+            gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
             context["gbti"] = gbti_data
         context["test"] = test_data
         
@@ -480,6 +480,7 @@ def save_test_result(request, username):
         try:
             data = json.loads(request.body)
             type_factors = data['factor']
+            print("type_factors", type_factors)
             user = User.objects.get(username=username)
             try:
                 account = Account.objects.get(user=user)
