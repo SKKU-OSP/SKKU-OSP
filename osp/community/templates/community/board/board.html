@@ -27,17 +27,17 @@
       {% if board.board_type == 'Team' %}
         {% include "community/board/team-tab.html" %}
       {% endif %}
-      <div class="d-flex justify-content-between border" id="board-title-bar" style="position:relative;">
-            <div id="board-title">
-              <a href="/community/home/{{board.name}}/{{board.id}}">
-                {{ board.name }} 게시판
-                </a>
-            </div>
-            <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
-              <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
-                {% category_tag request %}
-              </select>
-            </div>
+      <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
+        <div id="board-title">
+          <a href="/community/home/{{board.name}}/{{board.id}}">
+            {{ board.name }} 게시판
+            </a>
+        </div>
+        <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
+          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+            {% category_tag request %}
+          </select>
+        </div>
       </div>
 
       <div id="article-list-body">
