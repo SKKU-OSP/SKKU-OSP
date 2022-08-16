@@ -77,9 +77,16 @@ a.nav-link {
   padding-right: 3px;
   padding-top: 1px;
   padding-bottom: 1px;
+  border:0;
+  outline: 0;
 
   
 }
+.delete-badge{
+  padding-left: 0px;
+
+}
+
 
 #ints_delete{
   color :black;
@@ -110,23 +117,27 @@ a.nav-link {
 }
 .bubble {
   background: rgb(23, 215, 103);
+  font-size: 10pt;
   color: white;
-  padding: 4px;
   position: absolute;
   border-radius: 4px;
-  margin-top: 12px;
+  margin-top: 15px;
+  padding: 2px 4px 2px 4px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
 }
 .bubble::after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  height: 2px;
   background: rgb(23, 215, 103);
-  top: -1px;
+  font-size: 10pt;
+  color: white;
+  position: absolute;
+  border-radius: 4px;
+  margin-top: 15px;
+  padding: 2px 4px 2px 4px;
   left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 
@@ -164,15 +175,17 @@ a.nav-link {
 
 .appendbtn{
   /* + */
-
+border:0;
+outline: 0;
 width: 28px;
 height: 36px;
-padding-right: 10px;
+padding-right: 6px;
 font-family: 'Inter';
 font-style: normal;
 font-weight: 400;
 font-size: 20px;
 line-height: 36px;
+border-radius: 6px;
 
 color: #000000;
 
@@ -195,7 +208,7 @@ font-weight: 400;
 font-size: 18px;
 line-height: 22px;
 /* identical to box height */
-border-radius: 0.3rem;
+border-radius: 3px;
 margin-left: 5px;
 
 background-color: #E7EDF1;
