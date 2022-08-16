@@ -116,9 +116,9 @@ window.onload = function () {
     $('#icon-interests').attr('title', function(index, attr){
       return attr == "확장" ? "축소" : "확장";
     });
-    $(".expandable:nth-child(2)").toggleClass("semi-expanded-0");
-    $(".expandable:nth-child(3)").toggleClass("semi-expanded-1");
-    $(".expandable:nth-child(1)").toggleClass("expanded");
+    $(".expandable:nth-child(3)").toggleClass("semi-expanded-0");
+    $(".expandable:nth-child(1)").toggleClass("semi-expanded-1");
+    $(".expandable:nth-child(2)").toggleClass("expanded");
   })
   $("#icon-lang").on("click", function(){
     $("#icon-lang").toggleClass("bi-arrows-angle-contract");
@@ -126,9 +126,9 @@ window.onload = function () {
     $('#icon-lang').attr('title', function(index, attr){
       return attr == "확장" ? "축소" : "확장";
     });
-    $(".expandable:nth-child(1)").toggleClass("semi-expanded-0");
-    $(".expandable:nth-child(3)").toggleClass("semi-expanded-2");
-    $(".expandable:nth-child(2)").toggleClass("expanded");
+    $(".expandable:nth-child(2)").toggleClass("semi-expanded-0");
+    $(".expandable:nth-child(1)").toggleClass("semi-expanded-2");
+    $(".expandable:nth-child(3)").toggleClass("expanded");
   })
   const div_activity_monthly = document.getElementById("activity-monthly");
   let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
