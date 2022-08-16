@@ -597,7 +597,3 @@ footer {
   color: var(--sub-point-color);
   background: none;
 }
-
-.writer-dropdown-btn::after{
-  display: none;
-}
