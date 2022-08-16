@@ -62,3 +62,12 @@ def get_admin_team(user):
         team_li = list(TeamMember.objects.filter(member__user=user, is_admin=1).values_list("team_id", flat=True))
         return Team.objects.filter(id__in=team_li)
     return None
+
+
+@register.simple_tag
+def get_sent_teamapply(user):
+    apply_messages = TeamInviteMessage.objects.filter(
+        account__user_id=user.id,
+        direction=False,
+    )
+    return apply_messages

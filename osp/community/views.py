@@ -122,7 +122,6 @@ def board(request, board_name, board_id):
 
 
 def account_cards(request):
-
     PAGE_SIZE = 9
 
     context = {}
@@ -131,7 +130,7 @@ def account_cards(request):
 
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Account.objects.filter()
+    article_list = Account.objects.filter(user__is_superuser=False)
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
 
