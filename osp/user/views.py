@@ -37,6 +37,14 @@ class ProfileView(TemplateView):
 
         start = time.time()
         context = self.get_context_data(request, *args, **kwargs)
+
+        # 비 로그인 시 프로필 열람 불가
+        if request.user.is_anonymous:
+            return redirect('/community')
+        # is_own = str(request.user) == context['username']
+        # print('&*&(&*&(*&*(&*(')
+        # print(is_own)
+
         student_info = context['account'].student_data
 
         # student repository info
