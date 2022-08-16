@@ -1,3 +1,4 @@
+import re
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
@@ -336,11 +337,11 @@ class ProfileView(TemplateView):
         return context
 
 class ProfileEditView(TemplateView):
-
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         username = context['username']
-
+    
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
@@ -348,96 +349,41 @@ class ProfileEditView(TemplateView):
         tags_all = Tag.objects
         tags_domain = tags_all.filter(type='domain')
 
-        print(request.POST.get("action"))
+        pre_img = user_account.photo.path
+        field_check_list = {}
+        print(request .FILES)
+        profile_img = request.FILES.get('photo', False)
+        print('img 상태')
+        print(profile_img)
+        is_valid = True
+        if profile_img:
+            img_width, img_height = get_image_dimensions(profile_img)
+            # if img_width > 500 or img_height > 500:
+            #     is_valid = False
+            #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+            #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
-        if(request.POST.get('action') == 'append_ints'): # 관심분야 추가 버튼 눌렀을 경우
-            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-                already_ints.delete()
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account, prefix="imgform")
+        print(img_form)
+        print(pre_img)
+        if bool(img_form.is_valid()) and is_valid:
+            if 'photo' in request.FILES: # 폼에 이미지가 있으면
+                print('form에 이미지 존재')
+                try:
+                    os.remove(pre_img) # 기존 이미지 삭제
+                    
+                except:                # 기존 이미지가 없을 경우에 pass
+                    pass    
 
-        elif(request.POST.get('action') == 'append_lang'): # 사용언어/기술스택 추가 버튼 눌렀을 경우
-            print(request.POST.get('preferLanguage'))
-            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
-
-        elif(request.POST.get('action') == 'save'): # 저장 버튼 눌렀을 경우
-            # 기본정보 폼
-            info_form = ProfileInfoUploadForm(request.POST, request.FILES, instance=user_tab)
-            if info_form.is_valid():
-                print('Info is valid form')
-                info_form.save()
-
-            # 소개 폼
-            intro_form = IntroductionUploadForm(request.POST, request.FILES, instance=user_account)
-            if intro_form.is_valid():
-                print('Intro is valid form')
-            
-                intro_form.save()
-
-            # 프로필 사진 폼
-            pre_img = user_account.photo.path
-            field_check_list = {}
-            profile_img = request.FILES.get('photo', False)
-            is_valid = True
-            if profile_img:
-                img_width, img_height = get_image_dimensions(profile_img)
-                if img_width > 500 or img_height > 500:
-                    is_valid = False
-                    field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-
-            img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-
-
-            # 사용언어 추가
-            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-            for l in lang:
-                if "tag_" + l.tag.name in request.POST:
-                    added_tag = Tag.objects.get(name=l.tag.name)
-                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-
-            
-            if bool(img_form.is_valid()) and is_valid:
-                if 'photo' in request.FILES: # 폼에 이미지가 있으면
-                    try:
-                        os.remove(pre_img) # 기존 이미지 삭제
-                    except:                # 기존 이미지가 없을 경우에 pass
-                        pass
-
-                print('Image is valid form')
-                img_form.save()
-
-            else:
-                print(field_check_list['photo'])
-
-
-            port_form = PortfolioUploadForm(request.POST, request.FILES, instance=user_account)
-            if port_form.is_valid():
-                print('Portfolio is valid form')
-                port_form.save()
-            
-            if info_form.is_valid() and img_form.is_valid() and port_form.is_valid(): # 저장 성공시 메세지
-                messages.add_message(request, messages.SUCCESS, '프로필이 성공적으로 저장되었습니다!')
-
-
-
+            print('Image is valid form')
+            img_form.save()
 
         else:
-            delete_requested_tagname = request.POST.get('action').split(maxsplit=1)[1]
-            delete_requested_tag = Tag.objects.get(name=delete_requested_tagname)
-            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-            print("Selected tag is successfully deleted")
-
-        return redirect(f'/user/{username}/profile-edit/')
-
+            print(field_check_list['photo'])
+        img_form.save()
+        print('redirectionaasdfasd')
+        return redirect(f'/user/{username}/profile-edit')
+    @csrf_exempt
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         
@@ -455,16 +401,14 @@ class ProfileEditView(TemplateView):
         # developing....
 
 
-        info_form = ProfileInfoUploadForm()
-        img_form = ProfileImgUploadForm()
-        port_form = PortfolioUploadForm()
-        intro_form = IntroductionUploadForm()
+        # info_form = ProfileInfoUploadForm(prefix="infoform")
+        img_form = ProfileImgUploadForm(prefix="imgform")
+        # port_form = PortfolioUploadForm(prefix="portform")
+        # intro_form = IntroductionUploadForm(prefix="introform")
 
         form = {
-            'info_form': info_form,
             'img_form': img_form,
-            'port_form': port_form,
-            'intro_form': intro_form
+
         }
         data = {
             'account': student_account,
@@ -622,7 +566,146 @@ def load_repo_data(request, username):
             context = {"status": 400}
         
         return JsonResponse(context)
-    
+
+@csrf_exempt
+def load_interests_data(request, username):
+    print(request.POST)
+    print(request.POST['act'])
+
+    user = User.objects.get(username=username)
+    user_account = Account.objects.get(user=user.id)
+    student_id = user_account.student_data.id
+    tags_all = Tag.objects
+    if request.POST['act'] == 'append':
+        added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
+        added_tag = Tag.objects.get(name=added_preferLanguage)
+        try:
+            already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+            already_ints.delete()
+            AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+        except:
+            AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+
+    else:
+        delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+        tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+        print("Selected tag is successfully deleted")
+
+
+    return JsonResponse({'data':'asdfas'})
+
+
+
+@csrf_exempt
+def load_language_data(request, username):
+    print(request.POST)
+    print(request.POST['act'])
+    user = User.objects.get(username=username)
+    user_account = Account.objects.get(user=user.id)
+    student_id = user_account.student_data.id
+    tags_all = Tag.objects
+    tags_domain = tags_all.filter(type='domain')
+
+    if request.POST['act'] == 'append':
+        added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
+        added_tag = Tag.objects.get(name=added_preferLanguage)
+        try:
+            already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+        except:
+            AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
+
+
+        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+        for l in lang:
+            if "tag_" + l.tag.name in request.POST:
+                added_tag = Tag.objects.get(name=l.tag.name)
+                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+
+
+        return JsonResponse({'data':'asdfas'})
+    else:
+        delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+        tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+        print("Selected tag is successfully deleted")
+        return JsonResponse({'data':'asdfas'})
+
+
+
+@csrf_exempt
+def load_img_data(request, username):
+    user = User.objects.get(username=username)
+    user_account = Account.objects.get(user=user.id)
+    student_id = user_account.student_data.id
+
+
+
+    pre_img = user_account.photo.path
+    field_check_list = {}
+    print(request .FILES)
+    profile_img = request.FILES.get('photo', False)
+    print('img 상태')
+    print(profile_img)
+    is_valid = True
+    if profile_img:
+        img_width, img_height = get_image_dimensions(profile_img)
+        # if img_width > 500 or img_height > 500:
+        #     is_valid = False
+        #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+        #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
+
+    img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account, prefix="imgform")
+    print(img_form)
+    print(pre_img)
+    if bool(img_form.is_valid()) and is_valid:
+        if 'photo' in request.FILES: # 폼에 이미지가 있으면
+            print('form에 이미지 존재')
+            try:
+                os.remove(pre_img) # 기존 이미지 삭제
+                
+            except:                # 기존 이미지가 없을 경우에 pass
+                pass    
+
+        print('Image is valid form')
+        img_form.save()
+
+    else:
+        print(field_check_list['photo'])
+    img_form.save()
+    return redirect(f'/user/{username}/profile-edit/')
+
+@csrf_exempt
+def save_all(request, username):
+    print(username)
+    user = User.objects.get(username=username)
+    user_account = Account.objects.get(user=user.id)
+    student_id = user_account.student_data.id
+    user_tab = StudentTab.objects.get(id=student_id)
+    tags_all = Tag.objects
+    tags_domain = tags_all.filter(type='domain')
+
+    # print(request.POST.get("action"))
+    print('저장해봐')
+    print(request.POST['portfolio'])
+    lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+
+    for l in lang:
+        if "tag_" + l.tag.name in request.POST:
+            added_tag = Tag.objects.get(name=l.tag.name)
+            AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+
+    user_tab.plural_major = request.POST['plural_major']
+    user_tab.personal_email = request.POST['personal_email']
+    user_tab.primary_email = request.POST['primary_email']
+    user_tab.secondary_email = request.POST['secondary_email']
+    user_tab.save()
+
+    user_account.introduction = request.POST['introduction']
+    user_account.portfolio = request.POST['portfolio']
+    user_account.save()
+
+    return redirect(f'/user/{username}/')
+
+
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
     

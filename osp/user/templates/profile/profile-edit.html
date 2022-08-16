@@ -11,21 +11,24 @@
   {% endfor %}
 </div>
 <body>
-
-  <form method="POST" action=""  enctype="multipart/form-data">
     <div class="container my-4">
       <div class="d-flex justify-content-end mb-1">
-        <button type="submit" class="btn btn-primary" name="action" value="save">저장</button>
+        <!--button type="submit" class="btn btn-primary" method='POST' action="">저장</button-->
+        <input class="btn btn-primary" type="button" value="save" name="action" onclick="saveAll(); return false;">
       </div>
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
           <div class="d-flex flex-column justify-content-end text-center user-info">
             <div style="position:relative; margin:auto;">
-              <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
-              <label id="for-photo" for="photo">
-                <i class="bi bi-pen"></i>
-              </label>
-              <input id="photo" name="photo" type="file" hidden/>
+              <form id="imgform" method='POST' action='' enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+                <label id="for-photo" for="photo">
+                  <i class="bi bi-pen"></i>
+                </label>
+                <button type="submit" class="btn btn-primary">저장</button>
+                <input id="photo" name="photo" type="file" hidden/>
+              </form>
             </div>
             <div class="info-body">
               <p class="font-focus">{{data.info.name}}</p>
@@ -45,26 +48,29 @@
               <span class="row-title text-center">학과</span>
               <span class="row-txt">{{data.info.dept}}</span>
             </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">전공</span>
-              <input type="text" class="form-control" id="personal_email" name="plural_major" value={{data.info.plural_major}}>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">GitHub</span>
-              <span class="row-txt">{{data.info.github_id}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">개인 Email</span>
-              <input type="text" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">Github Email</span>
-              <input type="text" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">Secondary Email</span>
-              <input type="text" class="form-control" id="primary_email" name="secondary_email" value={{data.info.secondary_email}}>
-            </div>
+            <form id="infoform">
+              {% csrf_token %}
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center">전공</span>
+                <input type="text" class="form-control" id="plural_major" name="plural_major" value={{data.info.plural_major}}>
+              </div>
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center">GitHub</span>
+                <span class="row-txt">{{data.info.github_id}}</span>
+              </div>
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center">개인 Email</span>
+                <input type="text" class="form-control" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+              </div>
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center">Github Email</span>
+                <input type="text" class="form-control" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+              </div>
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center">Secondary Email</span>
+                <input type="text" class="form-control" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
+              </div>
+            </form>
           </div>
         </div>
         <div class="col-sm-9">
@@ -74,8 +80,10 @@
                 <div class="card edit-card">
                   <h5 class="card-title"> 관심분야 설정 </h5>
                   <div class="card-body">
-                    {% csrf_token %}
-                    {% include 'profile/interests.html' %}
+                    <form id='intsform' enctype="multipart/form-data">
+                      {% csrf_token %}
+                      {% include 'profile/interests.html' %}
+                    </form>
                   </div>
                 </div>
               </div>
@@ -84,9 +92,11 @@
               <div class="col edit-container">
                 <div class="card edit-card">
                   <h5 class="card-title"> 사용언어, 기술스택 설정 </h5>
-                  <div class="card-body overflow-auto">
-                    {% csrf_token %}
-                    {% include 'profile/languages.html' %}
+                  <div class="card-body overflow-auto" id='langdiv'>
+                    <form id='languageform' name="form2" enctype="multipart/form-data"> 
+                      {% csrf_token %}
+                      {% include 'profile/languages.html' %}
+                    </form>
                   </div>
                 </div>
               </div>
@@ -96,23 +106,25 @@
             <div class="col edit-container">
               <div class="card edit-card">
                 <h5 class="card-title"> 포트폴리오 설정 </h5>
-                <div class="card-body">
-                  <div class="mb-3">
-                    {% csrf_token %}
-                    <label for="id_introduction" class="form-label">Introduction</label>
-                    <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+                  {% csrf_token %}  
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="id_introduction" class="form-label">Introduction</label>
+                      <form id="introform">
+                        <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+                      </form>
+                    </div>
+                    <div class="mb-3">
+                      <form id="portform">
+                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="12">{{data.account.portfolio}}</textarea></p>
+                      </form>
+                    </div>
                   </div>
-                  <div class="mb-3">
-                    <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="12">{{data.account.portfolio}}</textarea></p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    {% csrf_token %}
-  </form>
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
       <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
@@ -128,12 +140,246 @@
 
   {% endif %}
 </body>
+
+<button id="ajaxButton" type="button">Make a request</button>
 {% endblock %}
 
 {% block script %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
   <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
-  <script>
 
-    </script>
+<script>
+    function setBubble(range, bubble) {
+        const val = range.value;
+        const min = range.min ? range.min : 0;
+        const max = range.max ? range.max : 100;
+        const newVal = Number(((val - min) * 100) / (max - min));
+        var txt = ''
+            if(val==0){
+                txt = '초보'
+            }
+            else if(val==1){
+                txt = '주니어'
+            }
+            else if(val==2){
+                txt = '중급자'
+            }
+            else if(val==3){
+                txt = '숙련자'
+            }
+            else{
+                txt = '장인'
+            }
+        bubble.innerHTML = txt;
+      // Sorta magic numbers based on size of the native UI thumb
+      bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+    }
+    var Wrap = function(wrap, range, bubble){
+        $(range).on('input', function(){
+            setBubble(range, bubble)});
+    }
+    
+    $(document).ready(function() {
+      var wraps = $('.range-wrap')
+      var ranges = $('.form-control-range');
+      var bubbles = $('.bubble');
+        for(var i = 0;i<wraps.length;i++){
+            Wrap(wraps[i], ranges[i], bubbles[i])
+            setBubble(ranges[i], bubbles[i])
+        }
+    });
+    function intsAppend(){
+        var formData = $("#intsform").serialize();
+        formData += "&act=" + 'append';
+        formData += "&target=" + '';
+        console.log(formData);
+        $.ajax({
+            cache : false,
+            url : "interestsupdate", // 요기에
+            //processData: false,
+            //contentType: false,
+            type : 'POST', 
+            data : formData,
+            success : function(data) {
+                var jsonObj = JSON.parse(data);
+                console.log('success');
+            }, // success 
+    
+            error : function(xhr, status) {
+                alert(xhr + " : " + status);
+                console.log('error');
+            }
+        });
+        setTimeout(function() {
+          console.log('language is appended');
+          $('#interestsdiv').load(window.location.href + ' #interestsdiv')
+        }, 500);
+    }
+    function intsDelete(target){
+        var formData = $("#intsform").serialize();
+        formData += "&act=" + 'delete';
+        formData += "&target=" + target;
+        console.log(formData);
+        $.ajax({
+            cache : false,
+            url : "interestsupdate", // 요기에
+            //processData: false,
+            //contentType: false,
+            type : 'POST', 
+            data : formData,
+            success : function(data) {
+                var jsonObj = JSON.parse(data);
+                console.log('success');
+            }, // success 
+    
+            error : function(xhr, status) {
+                alert(xhr + " : " + status);
+                console.log('error');
+            }
+        });
+        setTimeout(function() {
+          console.log('language is appended');
+          $('#interestsdiv').load(window.location.href + ' #interestsdiv')
+        }, 500);
+    }
+    function languageAppend(){
+        var formData = $("#languageform").serialize();
+        formData += "&act=" + 'append';
+        formData += "&target=" + '';
+        console.log(formData);
+        $.ajax({
+            cache : false,
+            url : "languageupdate", // 요기에
+            //processData: false,
+            //contentType: false,
+            type : 'POST', 
+            data : formData,
+            success : function(data) {
+                var jsonObj = JSON.parse(data);
+                console.log('success');
+            }, // success 
+    
+            error : function(xhr, status) {
+                alert(xhr + " : " + status);
+                console.log('error');
+            }
+        });
+        setTimeout(function() {
+          console.log('language is appended');
+          $('#languagediv').load(window.location.href + ' #languagediv')
+        }, 500);
+        setTimeout(function() {
+          console.log('start wraping');
+          var wraps = $('.range-wrap')
+          var ranges = $('.form-control-range');
+          var bubbles = $('.bubble');
+          for(var i = 0;i<wraps.length;i++){
+            Wrap(wraps[i], ranges[i], bubbles[i])
+            setBubble(ranges[i], bubbles[i])
+          }
+        }, 1000);
+    }
+    function languageDelete(target){
+      var formData = $("#languageform").serialize();
+      formData += "&act=" + 'delete';
+      formData += "&target=" + target;
+      console.log(target);
+      console.log(formData);
+      
+      $.ajax({
+        cache : false,
+        url : "languageupdate",
+        //processData: false,
+        //contentType: false,
+        type : 'POST', 
+        data : formData,
+        success : function(data) {
+          var jsonObj = JSON.parse(data);
+          console.log('success');
+        }, // success 
+    
+        error : function(xhr, status) {
+          alert(xhr + " : " + status);
+          console.log('error');
+        }
+
+        });
+        setTimeout(function() {
+          console.log('language is appended');
+          $('#languagediv').load(window.location.href + ' #languagediv')
+        }, 500);
+        setTimeout(function() {
+          console.log('start wraping');
+          var wraps = $('.range-wrap')
+          var ranges = $('.form-control-range');
+          var bubbles = $('.bubble');
+          for(var i = 0;i<wraps.length;i++){
+            Wrap(wraps[i], ranges[i], bubbles[i])
+            setBubble(ranges[i], bubbles[i])
+          }
+        }, 1000);
+    }
+    function saveImg(){
+      const imageInput = $("#photo")[0];
+      // 파일을 여러개 선택할 수 있으므로 files 라는 객체에 담긴다.
+      console.log("imageInput: ", imageInput.files)
+
+      if(imageInput.files.length === 0){
+        alert("파일은 선택해주세요");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("photo", imageInput.files[0]);
+      $.ajax({
+        type:"POST",
+        url: "imgupdate",
+        processData: false,
+        contentType: false,
+        data: formData,
+        success: function(rtn){
+          const message = rtn.data.values[0];
+          console.log("message: ", message)
+          $("#resultUploadPath").text(message.uploadFilePath)
+        },
+        err: function(err){
+          console.log("err:", err)
+        }
+  })
+
+    }
+    function saveAll(){
+      var formData = $("#portform").serialize();
+      formData += '&' + $('#infoform').serialize();
+      formData += '&' + $('#introform').serialize();
+      formData += '&' + $('#imgform').serialize();
+      formData += '&' + $('.lang-tag').serialize();
+      console.log(formData);
+      $.ajax({
+        cache : false,
+        url : "save_all",
+        //processData: false,
+        //contentType: false,
+        type : 'POST', 
+        data : formData,
+        success : function(data, response) {
+          var jsonObj = JSON.parse(data);
+          window.location.href = response["redirect"];
+          console.log('success');
+        }, // success 
+    
+        error : function(xhr, status) {
+          alert(xhr + " : " + status);
+          console.log('error');
+        }
+
+        });
+      console.log('do save')
+      //$('#imgform').submit();
+      //$('#portform').submit();
+      //$('#infoform').submit();
+    }
+
+</script>
+
 {% endblock %}
