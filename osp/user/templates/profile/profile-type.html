@@ -36,59 +36,70 @@
       <span class="line-connect"></span>
       <span class="endpoint right"></span>
     </div>
-    <div id="gbti-id-card" class="modal-gbti-card">
-      <p class="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
-      <div class="d-flex justify-content-center">
-        <div class="gbti-content d-flex justify-content-center p-sm">
-          <div id="resultImg" class="gbti-img">
+    <div id="gbti-id-card">
+      <div class="modal-gbti-card">
+        <p class="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
+        <div class="d-flex justify-content-center">
+          <div class="gbti-content d-flex justify-content-center p-sm">
+            <div id="resultImg" class="gbti-img">
+            </div>
+          </div>
+          <div class="gbti-content d-flex flex-column p-sm justify-content-between">
+            <p id="descEng" class="text-center text-label"></p>
+            <p id="descKr" class="text-center text-label mb-1"></p>
+            <h4 id="typeEng" class="text-center"></h4>
+            <h4 id="typeKr" class="text-center"></h4>
+            <div class="d-flex justify-content-between text-label">
+              <span>Fluid</span>
+              <span>Steady</span>
+            </div>
+            <div id="type-d-bar" class="progress test-result-bar">
+              <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100">
+                <div class="pb-marker pb-inactive"></div>
+              </div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between text-label">
+              <span>CoolHead</span>
+              <span>WarmHeart</span>
+            </div>
+            <div id="type-c-bar" class="progress test-result-bar">
+              <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100">
+                <div class="pb-marker pb-inactive"></div>
+              </div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between text-label">
+              <span>Creative</span>
+              <span>Efficient</span>
+            </div>
+            <div id="type-b-bar" class="progress test-result-bar">
+              <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100">
+                <div class="pb-marker pb-inactive"></div>
+              </div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between text-label">
+              <span>MultiPlay</span>
+              <span>SinglePlay</span>
+            </div>
+            <div id="type-a-bar" class="progress test-result-bar">
+              <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100">
+                <div class="pb-marker pb-inactive"></div>
+              </div>
+              <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
           </div>
         </div>
-        <div class="gbti-content d-flex flex-column p-sm justify-content-between">
-          <p id="descEng" class="text-center text-label mb-3"></p>
-          <h4 id="typeEng" class="text-center"></h4>
-          <h4 id="typeKr" class="text-center"></h4>
-          <div class="d-flex justify-content-between text-label">
-            <span>Fluid</span>
-            <span>Steady</span>
-          </div>
-          <div id="type-d-bar" class="progress test-result-bar">
-            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="d-flex justify-content-between text-label">
-            <span>CoolHead</span>
-            <span>WarmHeart</span>
-          </div>
-          <div id="type-c-bar" class="progress test-result-bar">
-            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="d-flex justify-content-between text-label">
-            <span>Creative</span>
-            <span>Efficient</span>
-          </div>
-          <div id="type-b-bar" class="progress test-result-bar">
-            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <div class="d-flex justify-content-between text-label">
-            <span>MultiPlay</span>
-            <span>SinglePlay</span>
-          </div>
-          <div id="type-a-bar" class="progress test-result-bar">
-            <div class="progress-bar pb-active" role="progressbar" aria-label="left" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-inactive" role="progressbar" aria-label="center" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar pb-active" role="progressbar" aria-label="right" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-        </div>
+        <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
       </div>
-      <p class="weak-text me-3 my-2 text-end">{{end_year}} &#9426; SKKU-OSP</p>
     </div>
   </section>
-  <div class="d-flex justify-content-end btn-gbti-group">
+  <div id="gbti-btn-group" class="d-flex justify-content-end btn-gbti-group">
     <button class="btn-gbti pb-inactive none" style="float:left;margin-right:auto;" onclick="location.href='../{{user.username}}'">프로필 페이지</button>
     <button id="btn-save-id-card" class="btn-gbti pb-active none">ID CARD 저장</button>
     <button id="gbti-test-restart" class="btn-gbti pb-inactive ms-3 none">다시 검사하기</button>
