@@ -64,15 +64,6 @@ a.nav-link {
 
 }
 
-button.btn.btn-secondary{
-
-  margin: 3px;
-  padding-left: 3px;
-  padding-right: 1px;
-  padding-top: 2px;
-  padding-bottom: 1px;
-  
-}
 
 .delete-domain{
   margin: 2px;
@@ -163,4 +154,52 @@ button.btn.btn-secondary{
 
 .delete-lang:hover svg{
   fill: gray;
+}
+
+.appendbtn{
+  /* + */
+
+width: 20px;
+height: 36px;
+padding: auto;
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 36px;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+}
+
+.savebtn{
+width: 120px;
+height: 30px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+/* identical to box height */
+border-radius: 0.3rem;
+margin-left: 5px;
+
+color: #000000;
+
+
+/* Inside auto layout */
+
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
 }
