@@ -14,13 +14,13 @@
                 {% endif %}
                 {{ article.title }}
             </div>
-            <div id="article-metadata">
-                <div style="line-height:40px;padding-left:10px;">
+            <div id="article-metadata" >
+                <div style="padding-left:10px;" class="d-flex flex-column justify-content-center">
                     {% if user == article.writer.user %}
                     <span style="cursor:pointer" onclick="edit()">수정</span> 
                     <span style="cursor:pointer" onclick="deleteArticle();">삭제</span>
                     {% elif request.user.is_anonymous %}
-                    <a href="#">사용자</a>
+                    <a href="">사용자</a>
                     {% elif not article.anonymous_writer %}
                     <div class="dropdown writer-dropdown">
                         <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -101,20 +101,21 @@
         </div>
     </div>
     {% if board.board_type == 'Recruit' %}
-    <div id="article-teamcard">
+    <div id="article-teamcard" class="row" style="margin-left:0px;margin-right:0px;" >
         {% if article.team %}
-        <div id="recruit-article-info">
+        <div id="recruit-article-info" class="col" >
             <div id="recruit-article-info-image">
                 <img src="{{article.team.image.url}}" alt="team-image">
             </div>
             <div id="recruit-article-info-text">
                 <div id="recruit-article-info-name">{{ article.team.name }}</div>
-                <div id="recruit-article-info-desc">{{ article.team.description }}</div>
+                <div id="recruit-article-info-desc" style="min-width:360px;">{{ article.team.description }}</div>
             </div>
         </div>
+        <div class="col d-flex flex-row justify-content-between">
         {% is_period_end article.period_end as is_end %}
         {% is_period_end article.period_start as is_start %}
-        <div id="recruit-article-period">
+        <div id="recruit-article-period" class="">
             <div>
                 모집기간
             </div>
@@ -129,7 +130,9 @@
                 {% endif %}
             </div>
         </div>
-        <div id="recruit-article-status">
+        <div class="d-flex flex-column justify-content-center">
+        <div class="d-flex flex-row  justify-content-between">
+        <div id="recruit-article-status" >
             {% if not is_start %}
             <div class="recruit-yet">모집 전</div>
             {% elif not is_end %}
@@ -145,7 +148,7 @@
         {% teamapplymessage article.team request.user as waited_teamapplymessage %}
 
         {% if not waited_teamapplymessage %}
-        <div id="recruit-article-apply">
+        <div id="recruit-article-apply" class="opacity-hover" style="margin-left:5px;">
             {% if request.user.is_anonymous %}
             <div id="team-apply" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
             {% else %}
@@ -161,7 +164,9 @@
             </div>
         </div>
         {% endif %}
-
+        </div>
+        </div>
+        </div>
         {% endif %}
         {% else %}
         <div>

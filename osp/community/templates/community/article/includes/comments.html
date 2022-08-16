@@ -11,7 +11,7 @@
             <input id="comment-is-anonymous" type="checkbox" checked>
         </div>
         <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>
-        <button id="comment-submit" type="submit" {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')" {% endif %}>
+        <button id="comment-submit" class="opacity-hover" type="submit" {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')" {% endif %}>
             댓글 쓰기
         </button>
     </div>

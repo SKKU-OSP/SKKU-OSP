@@ -104,6 +104,7 @@
                 });
             });
         }
+        {% if not request.user.is_anonymous %}
         $('#comment-is-anonymous').click(function() {
             if($(this).is(":checked")){
                 $('#comment-writer-display').html('익명');
@@ -114,6 +115,7 @@
                 $('#comment-writer-display').removeClass('annonymous');
             }
         });
+        {% endif %}
     });
     function setToDateEnd(){
         $('#PeriodPickerEndInput').val(new Date());
