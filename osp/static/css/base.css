@@ -303,8 +303,8 @@ img.opponent-profile {
   margin-top: auto;
   margin-right: 0.25em;
 }
-#team-option{
-  border-radius:10px;
+#team-option::after{
+  content:"▼";
 }
 .chat-text-body {
   max-width: 80%;
