@@ -61,6 +61,7 @@ body::-webkit-scrollbar {
   font-style: normal;
   font-weight: 800;
   font-size: 18px;
+  margin-right: 0;
 }
 
 #main-navbar .nav-link {

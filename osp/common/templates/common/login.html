@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-center container mt-5">
     <div class="col-3">
         <div class="d-flex justify-content-center">
-            <img src="/static/images/logo.png" alt="Logo" class="w-50" />
+            <img src="/static/images/logo.svg" alt="Logo" class="w-100" />
         </div>
         {% for error in form.non_field_errors %}
         <div class="text-center mb-3">
@@ -29,7 +29,10 @@
                     required>
                 <label for="password">Password</label>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="d-flex flex-column">
+                <button type="submit" class="btn btn-outline-secondary mb-3">Log In</button>
+                <a class="btn btn-outline-secondary mb-3" href="/accounts/register">Sign Up</a>
+            </div>
         </form>
     </div>
 </div>
