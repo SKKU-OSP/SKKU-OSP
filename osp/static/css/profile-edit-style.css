@@ -37,6 +37,12 @@ a.nav-link {
   cursor: pointer;
 }
 
+.infoform-element{
+  margin-right: 5px;
+
+
+}
+
 .form-switch {
   padding-top: 9px;
   flex-basis: 150px;
@@ -159,9 +165,9 @@ a.nav-link {
 .appendbtn{
   /* + */
 
-width: 20px;
+width: 28px;
 height: 36px;
-padding: auto;
+padding-right: 10px;
 font-family: 'Inter';
 font-style: normal;
 font-weight: 400;
@@ -192,6 +198,7 @@ line-height: 22px;
 border-radius: 0.3rem;
 margin-left: 5px;
 
+background-color: #E7EDF1;
 color: #000000;
 
 
