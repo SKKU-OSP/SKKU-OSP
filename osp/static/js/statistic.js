@@ -3,8 +3,6 @@ window.onload = function () {
   // 휴학생, 복수전공 스위치
   const switchAbsence = document.getElementById("absenceSwitch");
   const switchMajor = document.getElementById("majorSwitch");
-  // 점수 산정 방식 버튼 그룹
-  const btnScore = document.getElementsByClassName("btn-score");
   // 개별 합계 스위치
   const switchTotal = document.getElementById("totalSwitch");
   // factor 선택 탭
@@ -17,7 +15,6 @@ window.onload = function () {
   let includeAbsence = true;
   let includePluralMajor = true;
   let switchChecked = true;
-  let scoreIdx = 0;
   let chartFactor = "score";
   let annual = end_year;
   const start_year = 2019;
@@ -27,7 +24,6 @@ window.onload = function () {
   }
 
   switchAbsence.addEventListener("change", function (e) {
-    console.log(e.target.checked);
     $(".switch-toggle-absence").toggleClass("bold");
     $(".switch-toggle-absence").toggleClass("none");
     if (!switchChecked) {
@@ -42,7 +38,7 @@ window.onload = function () {
     $("#pills-issue-tab").removeClass("active");
     $("#totalSwitch").classList;
     annual = end_year;
-    document.getElementById("dropdownMenuButton1").textContent = annual;
+    document.getElementById("yearDropdown").textContent = annual;
     chartFactor = "score";
     changeCardTitle(chartFactor);
     includeAbsence = !includeAbsence;
@@ -52,7 +48,6 @@ window.onload = function () {
     fetchData();
   });
   switchMajor.addEventListener("change", function (e) {
-    console.log(e.target.checked);
     $(".switch-toggle-major").toggleClass("bold");
     $(".switch-toggle-major").toggleClass("none");
     if (!switchChecked) {
@@ -67,7 +62,7 @@ window.onload = function () {
     $("#pills-issue-tab").removeClass("active");
     $("#totalSwitch").classList;
     annual = end_year;
-    document.getElementById("dropdownMenuButton1").textContent = annual;
+    document.getElementById("yearDropdown").textContent = annual;
     chartFactor = "score";
     changeCardTitle(chartFactor);
     includePluralMajor = !includePluralMajor;
@@ -76,16 +71,12 @@ window.onload = function () {
     destroyChart(yearChart, 5);
     fetchData();
   });
+  function createObjArray(size) {
+    return new Array(size).fill(new Object(null));
+  }
   const yearChart = createObjArray(5);
   const overviewChart = createObjArray(4);
   const chart = createObjArray(3);
-  function createObjArray(size) {
-    const arr = new Array(size);
-    for (let i = 0; i < size; i++) {
-      arr[i] = new Object(null);
-    }
-    return arr;
-  }
   function destroyChart(chart, size) {
     for (let i = 0; i < size; i++) {
       chart[i].destroy();
@@ -117,17 +108,15 @@ window.onload = function () {
 
   function makePage(chartdata) {
     let annual_overview = JSON.parse(chartdata["annual_overview"])[0];
-    console.log("annual_overview",annual_overview);
+    // console.log("annual_overview",annual_overview);
     let annual_total = JSON.parse(chartdata["annual_total"])[0];
     let annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-    console.log("annual_dist",annual_dist);
-    let annual_student = JSON.parse(chartdata[`student${annual}`]);
+    // console.log("annual_dist",annual_dist);
+    let annual_student = JSON.parse(chartdata["student_year"])[annual-start_year];
     const annual_repo = [];
     for(let i = start_year; i <= end_year; i++){
       annual_repo.push(annual_total["repo"][end_year-i]);
     }
-
-    const scoreList = ["", "_diff", "_sum"];
     let scoreAnnual = annual_overview["score"];
     const commitAnnual = annual_overview["commit"];
     const starAnnual = annual_overview["star"];
@@ -157,7 +146,6 @@ window.onload = function () {
         factorDistLabelDict[yearFactorList[i]].push( String(gap*k)+"~"+String(gap*(k+1)));
       }
     });
-    console.log("factorDistLabelDict", factorDistLabelDict);
     const scoreDistLineLabel = [];
     const scoreDistLabel = factorDistLabelDict["score"];
     scoreDistLabel.forEach((label)=>{
@@ -167,7 +155,6 @@ window.onload = function () {
     const starDistLabel = factorDistLabelDict["star"];
     const prDistLabel = factorDistLabelDict["pr"];
     const issueDistLabel = factorDistLabelDict["issue"];
-    console.log("scoreDistLineLabel", scoreDistLineLabel);
     const sidLabel = [];
     for(let i=end_year; i>end_year-sidData.length;i--){
       sidLabel.push(String(i).substring(2));
@@ -210,8 +197,6 @@ window.onload = function () {
         .getContext("2d");
     }
     setOverallStat(annual_total);
-    /* color pallet ref: 
-      https://learnui.design/tools/data-color-picker.html#palette*/
     const bsPrimary = "#0d6efd";
     const cc3 = ["#4245cb", "#ff4470", "#ffe913"];
     const cc8 = [
@@ -325,140 +310,16 @@ window.onload = function () {
         topdataRule[i]
       );
     }
-
-    /* Add Event Listener to year button */
-    for (let i = 0; i < btnScore.length; i++) {
-      btnScore.item(i).addEventListener("click", (btn) => {
-        for (let j = 0; j < btnScore.length; j++) {
-          btnScore.item(j).classList.add("btn-outline-primary");
-          btnScore.item(j).classList.remove("btn-primary");
-        }
-        btnScore.item(i).classList.remove("btn-outline-primary");
-        btnScore.item(i).classList.add("btn-primary");
-        scoreIdx = i;
-        //reload score year chart
-        yearChart[0].destroy();
-        yearChart[0] = makeChart(
-          ctxYear[0],
-          "lineWithErrorBars",
-          yearFactorList[0],
-          annual_list,
-          makeErrorJson(
-            annual_overview[`score${scoreList[scoreIdx]}`],
-            annual_overview[`score${scoreList[scoreIdx]}_std`]
-          ),
-          bsPrimary,
-          {
-            plugins: {
-              legend: {
-                display: false,
-              },
-            },
-            scales: {
-              y: { max: 5, beginAtZero: true },
-            },
-          }
-        );
-
-        setAnnualDistData(annual, chartFactor);
-        setOverallStat(
-          annual_total,
-          switchChecked ? 1 : annual_total["student_total"][annual - start_year]
-        );
-        if (switchChecked === true) {
-          //reload score overview chart
-          overviewChart[0].destroy();
-          overviewChart[0] = makeChart(
-            ctxOverview[0],
-            "line",
-            overviewFactorList[0],
-            annual_list,
-            annual_total[`student_KP${scoreList[scoreIdx]}`],
-            bsPrimary,
-            noLegendOption
-          );
-        } else {
-          //reload score overview chart
-          overviewChart[0].destroy();
-          const data = [];
-          for (let year = start_year; year <= end_year; year++) {
-            annual_student = JSON.parse(chartdata[`student${year}`]);
-            annual_student.map((obj) => {
-              const picked = (({ github_id, score, score_diff, score_sum }) => ({
-                github_id,
-                score,
-                score_diff,
-                score_sum,
-              }))(obj);
-
-              if (Number(picked[`score${scoreList[scoreIdx]}`]) >= 3) {
-                data.push({
-                  x: String(year),
-                  y: picked[`score${scoreList[scoreIdx]}`],
-                  tooltip: picked["github_id"],
-                });
-              }
-            });
-          }
-          overviewChart[0] = makeChart(
-            ctxOverview[0],
-            "line",
-            "score",
-            annual_list,
-            data,
-            bsPrimary,
-            {
-              borderColor: "rgba(255, 255, 255, 0)",
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  callbacks: {
-                    title: (items) => {
-                      return items[0].raw.y;
-                    },
-                    label: (item) => {
-                      return item.raw.tooltip;
-                    },
-                  },
-                },
-              },
-              scales: {
-                x: {
-                  ticks: {
-                    stepSize: 1,
-                  },
-                },
-                y: {
-                  max: 5,
-                  beginAtZero: true,
-                },
-              },
-            }
-          );
-        }
-
-        if (chartFactor === "score") {
-          reloadChart(annual, chartFactor);
-        }
-      });
-    }
-      // 연도 선택 드롭다운
-    let btn_year = []
-    annual_list.forEach((year)=>{
-      btn_year.push(document.getElementById(`dropdownBtn${year}`));
-    });
-    btn_year.forEach((btn_obj, i)=>{
-      btn_obj.addEventListener("click", function(){
-        annual = btn_obj.innerText;
-        setAnnualDistData(annual, chartFactor);
-        setOverallStat(
-          annual_total,
-          switchChecked ? 1 : annual_total["student_total"][i]
-        );
-        reloadChart(annual, chartFactor);
-      });
+    // 연도 선택 드롭다운
+    $(".year-item").on("click", (e)=>{
+      $("#yearDropdown").text(e.target.innerText);
+      annual = e.target.innerText;
+      setAnnualDistData(annual, chartFactor);
+      setOverallStat(
+        annual_total,
+        switchChecked ? 1 : annual_total["student_total"][i]
+      );
+      reloadChart(annual, chartFactor);
     });
     scoreTab.addEventListener("click", function () {
       unchosenBtn();
@@ -496,7 +357,6 @@ window.onload = function () {
       reloadChart(annual, chartFactor);
     });
     switchTotal.addEventListener("change", function (e) {
-      console.log(e.target.checked);
       $(".switch-toggle").toggleClass("bold");
       if (e.target.checked === false) {
         switchChecked = false;
@@ -507,18 +367,16 @@ window.onload = function () {
         destroyChart(overviewChart, 4);
         const data = [];
         for (let year = start_year; year <= end_year; year++) {
-          annual_student = JSON.parse(chartdata[`student${year}`]);
+          annual_student = JSON.parse(chartdata["student_year"])[year-start_year];
           annual_student.map((obj) => {
-            const picked = (({ github_id, score, score_diff, score_sum }) => ({
+            const picked = (({ github_id, score}) => ({
               github_id,
               score,
-              score_diff,
-              score_sum,
             }))(obj);
-            if (Number(picked[`score${scoreList[scoreIdx]}`]) >= 3) {
+            if (Number(picked['score']) >= 3) {
               data.push({
                 x: String(year),
-                y: picked[`score${scoreList[scoreIdx]}`],
+                y: picked['score'],
                 tooltip: picked["github_id"],
                 order: 1,
               });
@@ -565,7 +423,7 @@ window.onload = function () {
 
         const commitDataset = [];
         for (let year = start_year; year <= end_year; year++) {
-          annual_student = JSON.parse(chartdata[`student${year}`]);
+          annual_student = JSON.parse(chartdata["student_year"])[year-start_year];
           annual_student.map((obj) => {
             const picked = (({ github_id, commit }) => ({
               github_id,
@@ -619,7 +477,7 @@ window.onload = function () {
 
         const starDataset = [];
         for (let year = start_year; year <= end_year; year++) {
-          annual_student = JSON.parse(chartdata[`student${year}`]);
+          annual_student = JSON.parse(chartdata["student_year"])[year-start_year];
           annual_student.map((obj) => {
             const picked = (({ github_id, star }) => ({
               github_id,
@@ -673,12 +531,15 @@ window.onload = function () {
 
         const repoDataset = [];
         for (let year = start_year; year <= end_year; year++) {
-          let annual_repo_iter = JSON.parse(chartdata[`repo${year}`])[0];
-          for (let key in annual_repo_iter) {
-            repoDataset.push({
-              x: String(year),
-              y: annual_repo_iter[key],
-              tooltip: key,
+          let annual_repo_list = repodata[year - start_year];
+          for (let idx in annual_repo_list) {
+            let repo = annual_repo_list[idx];
+            Object.keys(repo).forEach((key)=>{
+              repoDataset.push({
+                x: String(year),
+                y: repo[key],
+                tooltip: key,
+              });
             });
           }
         }
@@ -765,10 +626,9 @@ window.onload = function () {
 
       // Overall statistic data: 3점 이상 비율, 총 커밋 수, 총 스타 수, 총 레포 수
       let fix = nStudent === 1 ? 0 : 1;
-      // let annual_total = JSON.parse(chartdata["annual_total"])[0];
       let idx_asc = annual - start_year;
       let idx_desc = end_year - annual;
-      const overGoalcount = annual_total[`student_KP${scoreList[scoreIdx]}`][idx_asc];
+      const overGoalcount = annual_total[`student_KP`][idx_asc];
       $("#overGoalNumerator").text(numberWithCommas(overGoalcount));
       $("#overGoalDenominator").text(
         numberWithCommas(annual_total["student_total"][idx_asc])
@@ -814,27 +674,18 @@ window.onload = function () {
       controlFontSize();
     }
     function setAnnualDistData(annual, factor) {
-      document.getElementById("dropdownMenuButton1").textContent = annual;
-      if (factor === "score") {
-        annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-        dist = annual_dist[`${factor}${scoreList[scoreIdx]}`];
-        sidData = annual_dist[`${factor}_sid${scoreList[scoreIdx]}`];
-        deptData = annual_dist[`${factor}_dept${scoreList[scoreIdx]}`];
-        sidTopData = annual_dist[`${factor}_sid_pct${scoreList[scoreIdx]}`];
-        deptTopData =annual_dist[`${factor}_dept_pct${scoreList[scoreIdx]}`];
-      } else {
-        dist = annual_dist[`${factor}`];
-        sidData = annual_dist[`${factor}_sid`];
-        deptData = annual_dist[`${factor}_dept`];
-        sidTopData = annual_dist[`${factor}_sid_pct`];
-        deptTopData = annual_dist[`${factor}_dept_pct`];
-      }
+      document.getElementById("yearDropdown").textContent = annual;
+      annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
+      dist = annual_dist[`${factor}`];
+      sidData = annual_dist[`${factor}_sid`];
+      deptData = annual_dist[`${factor}_dept`];
+      sidTopData = annual_dist[`${factor}_sid_pct`];
+      deptTopData =annual_dist[`${factor}_dept_pct`];
     }
     function makeChart(ctx, type, factor,
       labels, data, color, options, topdata = []) {
 
       let chart;
-      console.log("makechart");
       if (type === "barWithErrorBars") {
         const borderWidth = 0.9;
         const barPercentage = 0.9;
@@ -932,23 +783,13 @@ window.onload = function () {
           console.log("reloadChart factor error");
       }
       annual_dist = JSON.parse(chartdata[`year${annual}`])[0];
-      if (chartFactor === "score") {
-        dist = annual_dist[`${factor}${scoreList[scoreIdx]}`];
-        sidData = annual_dist[`${factor}_sid${scoreList[scoreIdx]}`];
-        deptData = annual_dist[`${factor}_dept${scoreList[scoreIdx]}`];
-        sidStd = annual_dist[`${factor}_sid_std${scoreList[scoreIdx]}`];
-        deptStd = annual_dist[`${factor}_dept_std${scoreList[scoreIdx]}`];
-        sidTopData = annual_dist[`${factor}_sid_pct${scoreList[scoreIdx]}`];
-        deptTopData = annual_dist[`${factor}_dept_pct${scoreList[scoreIdx]}`];
-      } else {
-        dist = annual_dist[`${factor}`];
-        sidData = annual_dist[`${factor}_sid`];
-        deptData = annual_dist[`${factor}_dept`];
-        sidStd = annual_dist[`${factor}_sid_std`];
-        deptStd = annual_dist[`${factor}_dept_std`];
-        sidTopData = annual_dist[`${factor}_sid_pct`];
-        deptTopData = annual_dist[`${factor}_dept_pct`];
-      }
+      dist = annual_dist[`${factor}`];
+      sidData = annual_dist[`${factor}_sid`];
+      deptData = annual_dist[`${factor}_dept`];
+      sidStd = annual_dist[`${factor}_sid_std`];
+      deptStd = annual_dist[`${factor}_dept_std`];
+      sidTopData = annual_dist[`${factor}_sid_pct`];
+      deptTopData = annual_dist[`${factor}_dept_pct`];
       topdataRule = [
         [],
         makeScatterData(sidTopData, sidLabel),
@@ -1033,7 +874,6 @@ window.onload = function () {
           y: dist[j],
         };
       }
-      console.log("NEW DIST", newDist);
       return newDist;
     }
 
