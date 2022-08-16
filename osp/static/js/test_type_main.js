@@ -12,7 +12,8 @@ window.onload = function () {
 
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
-    html2canvas(screenshotTarget).then((canvas)=>{
+    const cssDecl = getComputedStyle(document.documentElement);
+    html2canvas(screenshotTarget, {scale:2, backgroundColor: cssDecl.getPropertyValue('--developer-bg-color')}).then((canvas)=>{
       const base64image = canvas.toDataURL("image/png");
       var anchor = document.createElement('a');
       anchor.setAttribute("href", base64image);
@@ -37,8 +38,8 @@ window.onload = function () {
     for (let k=0;k<16;k++){
       if (devtype == resultList[k].mbti) resultIdx=k;
     }
-    // var result0= document.querySelector('#descKr'); // 한글 설명 삽입
-    // result0.innerHTML = descKr;
+    var result0= document.querySelector('#descKr'); // 한글 설명 삽입
+    result0.innerHTML = descKr;
 
     var result1= document.querySelector('#descEng'); // 영문 설명 삽입
     result1.innerHTML = descEng;
@@ -141,7 +142,7 @@ window.onload = function () {
     }, 1000);
     
     function getProgressLength(factor){
-      return [(100 - factor)/2 - 2, 4, (100 + factor)/2 + (100 + factor)%2 - 2];
+      return [(100 - factor)/2 - 3, 6, (100 + factor)/2 + (100 + factor)%2 - 3];
     }
   }
   function addA(aTxt,qIdx,idx){
