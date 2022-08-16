@@ -25,6 +25,21 @@ def var_add(var1, var2):
     return int(var1) + int(var2)
 
 @register.simple_tag
+def team_options_exclude_user(user, invite_user):
+    try:
+        account = Account.objects.get(user=user)
+        result = '<option value="" disabled selected>팀 선택</option>'
+        li1 = list(TeamMember.objects.filter(member=account).values_list('team_id',flat=True))
+        li2 = list(TeamMember.objects.filter(member__user=invite_user).values_list('team_id',flat=True))
+        teams = Team.objects.filter(id__in=list(set(li1)-set(li2)))
+        for team in teams:
+            result += f'<option value="{team.id}">{team.name}</option>'
+    except:
+        result = ''
+    return mark_safe(result)
+
+
+@register.simple_tag
 def team_options(user):
     try:
         account = Account.objects.get(user=user)

@@ -18,7 +18,7 @@
                 <div class="mb-4">
                     <label for="team-name" class="form-label">팀 선택</label>
                     <select id="team-option" name="name" style="height: 40px; padding-left:10px;" class="form-control form-check w-100 pointer" required autofocus>
-                        {% team_options request.user %}
+                        {% team_options_exclude_user request.user invite_user %}
                     </select>
                     <div class="valid-feedback" for="team-name"></div>
                     <div class="invalid-feedback" for="team-name"></div>
