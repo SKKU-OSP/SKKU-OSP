@@ -14,6 +14,8 @@ function setVisualModal(){
   for(let i=0; i<6; i++) palette.push(cssDecl.getPropertyValue('--data-level-'+ i));
   const radar_palette = []; // 3 radar color
   for(let i=0; i<3; i++) radar_palette.push(cssDecl.getPropertyValue('--data-radar-'+ i));
+  const inactive_color = cssDecl.getPropertyValue('--main-icon-color');
+  const active_color = cssDecl.getPropertyValue('--bootstrap-primary');
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
   const modal_ctx = []; // 4 ctx
   for(let i=0; i<=3; i++) modal_ctx.push(document.getElementById('modal-canvas'+i).getContext("2d"));
@@ -220,7 +222,24 @@ function setVisualModal(){
         rect.setAttributeNS(null,"data-level", level);
         rect.setAttributeNS(null,"stroke-width","0px");
         rect.style.fill = palette[level];
-        
+
+        let mLabel = document.createElementNS(NS,"g");
+        mLabel.setAttributeNS(null, "transform", `translate(${(grass_size)*col+1.5*fs}, ${(grass_size)*row+1.5*fs})`);
+        mLabel_text = month_label[mIdx].split("");
+        for(let i = 0; i<mLabel_text.length; i++){
+          let mText = document.createElementNS(NS,"text");
+          mText.textContent = mLabel_text[i];
+          mText.setAttributeNS(null,"x", i*13 - 20);
+          mText.setAttributeNS(null,"y", 12);
+          mText.setAttributeNS(null,"transform", `rotate(${-60+12*i})`);
+          mText.style.fontSize = "12px";
+          if(level == 5) mText.style.fill = inactive_color;
+          else {
+            mText.style.fill = active_color;
+            mText.style.fontWeight = "bold";
+          }
+          mLabel.appendChild(mText);
+        }
         if(monthly_contr.length>mIdx){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
@@ -234,12 +253,14 @@ function setVisualModal(){
                 rect.removeAttribute("stroke");
                 rect.removeAttribute("stroke-width");
               }
+              $("#modal-btnGroupDropMonth").text(month_label[select_month-1]);
               showTooltip(select_month);
               e.target.setAttribute("stroke", cssDecl.getPropertyValue('--data-line'));
               e.target.setAttribute("stroke-width", "2px");
             }
             else {
               select_month = 0;
+              $("#modal-btnGroupDropMonth").text("ALL");
               $(".modal-grass-tooltip").remove();
               e.target.removeAttribute("stroke");
               e.target.removeAttribute("stroke-width");
@@ -251,13 +272,11 @@ function setVisualModal(){
           });
         }
         div_activity_monthly.appendChild(rect);
+        div_activity_monthly.appendChild(mLabel);
       }
     }
     pi_chart.destroy();
-    const pi_dataset = Array(5).fill(0);
-    monthly_contribution_level.forEach((val)=>{
-      if(val<=4) pi_dataset[val]++;
-    });
+    
     const pi_label = [];
     let divisor = 0
     for(; divisor<=standard_contr; divisor=Math.floor(divisor+standard_contr/3)){
@@ -265,7 +284,14 @@ function setVisualModal(){
       else pi_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
     }
     pi_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
-    console.log("pi_label",pi_label);
+    const pi_dataset = Array(5).fill(0);
+    let active_grass = 0;
+    monthly_contribution_level.forEach((val)=>{
+      if(val<=4){
+        pi_dataset[val]++;
+        active_grass++;
+      }
+    });
     const pi_data = {
       labels: pi_label,
       datasets: [{
@@ -279,6 +305,13 @@ function setVisualModal(){
       options:{
         plugins: {
           legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (item) => {
+                return `${item.label}: ${item.raw} (${(item.raw*100/active_grass).toFixed(1)}%)`;
+              },
+            },
+          },
         },
         responsive: true,
       }});
@@ -663,6 +696,7 @@ function setPortfolioModal(){
   });
 }
 function setGbtiModal(){
+  const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
     html2canvas(screenshotTarget).then((canvas)=>{
@@ -677,16 +711,35 @@ function setGbtiModal(){
   const type_ctx = []
   for(let i=1; i<=3; i++) type_ctx.push(document.getElementById('canvas-type-'+i).getContext("2d"));
 
+  const typeE_data = type_data["typeE_data"];
+  const typeE_sector = type_data["typeE_sector"];
+  const typeE_label = Array(24).fill(0).map((val, idx)=> idx);
+  const hour_palette = [];
+  for(let i=0; i<24; i++){
+    if(typeE_sector[0]<=i && i<typeE_sector[1]) hour_palette.push(cssDecl.getPropertyValue('--type-hour-0'));
+    else hour_palette.push(cssDecl.getPropertyValue('--type-hour-1'));
+  }
+  let hour_chart = new Chart(type_ctx[0], {
+      type: 'bar',
+      data: { labels: typeE_label, datasets: [{data:typeE_data,
+         backgroundColor: hour_palette}],},
+      options:{
+        plugins: {
+          legend: { display: false },
+        },
+      },
+    });
+
+
   const typeF_data = type_data["typeF_data"];
   const typeF_label = ["초반", "중반", "후반", "마무리"];
-
-  const cssDecl = getComputedStyle(document.documentElement);
   const freq_palette = [];
   for(let i=0; i<4; i++) freq_palette.push(cssDecl.getPropertyValue('--type-freq-'+ i));
   let freq_chart = new Chart(type_ctx[1], {
       type: 'bar',
       data: { labels: typeF_label, datasets: [{data:typeF_data,
-         backgroundColor: freq_palette}],},
+        backgroundColor: freq_palette,
+        barPercentage: 0.8}],},
       options:{
         plugins: {
           legend: { display: false },
@@ -701,7 +754,8 @@ function setGbtiModal(){
   let cooperate_chart = new Chart(type_ctx[2], {
       type: 'bar',
       data: { labels: typeG_label, datasets: [{data:typeG_data,
-         backgroundColor: cooperate_palette}],},
+        backgroundColor: cooperate_palette,
+        barPercentage: 0.4,}],},
       options:{
         plugins: {
           legend: { display: false },

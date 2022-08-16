@@ -178,28 +178,56 @@ function msgModalOpen(selected_oppo = 0) {
     })
 }
 
+function ApplyTeamModalOpen() {
+    if (!$('#ApplyTeamModal').hasClass('ready')) {
+        $.ajax({
+            url: "/team/api/team-apply-list",
+            type: "GET",
+            dataType: 'HTML'
+        }).done(function (data) {
+            $('#ApplyTeamModal').addClass('ready').html(data)
+            $('#ApplyTeamModal').modal('show');
+            $('.bi-caret-down-fill').click(function () {
+                if (this.style.transform == '') {
+                    this.style.transform = 'rotate(180deg)';
+                } else {
+                    this.style.transform = '';
+                }
+            });
+        })
+    } else {
+        $('#ApplyTeamModal').modal('show');
+    }
+}
+
+
 $().ready(function () {
     $('#message').click(function () {
         msgModalOpen();
     })
+    $('#team-apply-list').click(function (){
+        ApplyTeamModalOpen();
+    });
 });
 
-function ReadNotification(type, noti_id, target_id){
+function ReadNotification(type, noti_id, target_id) {
     console.log(type, noti_id, target_id)
     $.ajax({
         url: '/message/noti-read/' + noti_id,
         dataType: 'JSON',
-    }).done(function(data) {
-        if(data['status'] == 'success'){
-            if(type == 'comment' || type == 'articlelike'){
+    }).done(function (data) {
+        if (data['status'] == 'success') {
+            if (type == 'comment' || type == 'articlelike') {
                 window.location = '/community/article/' + target_id;
             }
-            if(type == 'team_apply'){
-
+            if (type == 'team_apply') {
+                ApplyTeamModalOpen();
             }
-            $('#noti-'+noti_id).addClass('read');
-        }
-        else{
+            if (type == 'team_apply_result') {
+                ApplyTeamModalOpen();
+            }
+            $('#noti-' + noti_id).addClass('read');
+        } else {
             alert(data['message']);
         }
     })

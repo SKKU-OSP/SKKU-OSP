@@ -114,9 +114,19 @@ div.vr {
   background-color: var(--alert-color);
   border-radius: 50%;
   padding: 0.25rem;
-  position: absolute;
-  top: -4px;
-  left: -5px;
+  position: relative;
+  top: -1rem;
+  left: 0.5rem;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+#new-msg {
+  background-color: var(--alert-color);
+  border-radius: 50%;
+  padding: 0.25rem;
+  position: relative;
+  top: -1rem;
+  left: 0.5rem;
 }
 
 #message-modal .modal-dialog,
@@ -129,16 +139,17 @@ div.vr {
 }
 
 div> ::-webkit-scrollbar {
-  width: 10px;
+  width: 0.25rem;
+  height: 0.25rem;
 }
 
 div> ::-webkit-scrollbar-track {
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 div> ::-webkit-scrollbar-thumb {
   background: var(--profile-btn-inactive);
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 div> ::-webkit-scrollbar-thumb:hover {
@@ -559,6 +570,10 @@ footer {
 .btn-refuse:hover{
   background-color: var(--main-icon-color-transparent);
 }
+.btn-refuse:disabled{
+  color: #000000;
+  background-color: var(--main-icon-color-transparent);
+}
 
 .btn-accept{
   padding-left: 0.5rem;
@@ -570,4 +585,27 @@ footer {
 }
 .btn-accept:hover{
   background-color: var(--sub-point-color-transparent);
+}
+.btn-accept:disabled{
+  color: #000000;
+  background-color: var(--sub-point-color-transparent);
+}
+
+.btn-wait{
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--sub-point-color);
+  border-radius: 0.625rem;
+  background-color: transparent;
+}
+.btn-wait:disabled{
+  color: #000000;
+  background-color: var(--sub-point-color-transparent);
+}
+
+.writer-dropdown-btn {
+  border: none;
+  color: var(--sub-point-color);
+  background: none;
 }

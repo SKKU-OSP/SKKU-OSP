@@ -14,6 +14,8 @@ window.onload = function () {
   for(let i=0; i<6; i++) palette.push(cssDecl.getPropertyValue('--data-level-'+ i));
   const radar_palette = []; // 3 radar color
   for(let i=0; i<3; i++) radar_palette.push(cssDecl.getPropertyValue('--data-radar-'+ i));
+  const inactive_color = cssDecl.getPropertyValue('--main-icon-color');
+  const active_color = cssDecl.getPropertyValue('--bootstrap-primary');
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
   const visual_ctx = []; // 4 ctx
   for(let i=0; i<=3; i++) visual_ctx.push(document.getElementById('canvas'+i).getContext("2d"));
@@ -268,7 +270,24 @@ window.onload = function () {
         rect.setAttributeNS(null,"data-level", level);
         rect.setAttributeNS(null,"stroke-width","0px");
         rect.style.fill = palette[level];
-        
+
+        let mLabel = document.createElementNS(NS,"g");
+        mLabel.setAttributeNS(null, "transform", `translate(${(grass_size)*col+1.5*fs}, ${(grass_size)*row+1.5*fs})`);
+        mLabel_text = month_label[mIdx].split("");
+        for(let i = 0; i<mLabel_text.length; i++){
+          let mText = document.createElementNS(NS,"text");
+          mText.textContent = mLabel_text[i];
+          mText.setAttributeNS(null,"x", i*13 - 20);
+          mText.setAttributeNS(null,"y", 12);
+          mText.setAttributeNS(null,"transform", `rotate(${-60+12*i})`);
+          mText.style.fontSize = "12px";
+          if(level == 5) mText.style.fill = inactive_color;
+          else {
+            mText.style.fill = active_color;
+            mText.style.fontWeight = "bold";
+          }
+          mLabel.appendChild(mText);
+        }
         if(monthly_contr.length>mIdx){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
@@ -282,12 +301,14 @@ window.onload = function () {
                 rect.removeAttribute("stroke");
                 rect.removeAttribute("stroke-width");
               }
+              $("#btnGroupDropMonth").text(month_label[select_month-1]);
               showTooltip(select_month);
               e.target.setAttribute("stroke", cssDecl.getPropertyValue('--data-line'));
               e.target.setAttribute("stroke-width", "2px");
             }
             else {
               select_month = 0;
+              $("#btnGroupDropMonth").text("ALL");
               $(".grass-tooltip").remove();
               e.target.removeAttribute("stroke");
               e.target.removeAttribute("stroke-width");
@@ -299,13 +320,10 @@ window.onload = function () {
           });
         }
         div_activity_monthly.appendChild(rect);
+        div_activity_monthly.appendChild(mLabel);
       }
     }
     pi_chart.destroy();
-    const pi_dataset = Array(5).fill(0);
-    monthly_contribution_level.forEach((val)=>{
-      if(val<=4) pi_dataset[val]++;
-    });
     const pi_label = [];
     let divisor = 0
     for(; divisor<=standard_contr; divisor=Math.floor(divisor+standard_contr/3)){
@@ -313,7 +331,14 @@ window.onload = function () {
       else pi_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
     }
     pi_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
-    console.log("pi_label",pi_label);
+    const pi_dataset = Array(5).fill(0);
+    let active_grass = 0;
+    monthly_contribution_level.forEach((val)=>{
+      if(val<=4) {
+        pi_dataset[val]++;
+        active_grass++;
+      }
+    });
     const pi_data = {
       labels: pi_label,
       datasets: [{
@@ -327,6 +352,13 @@ window.onload = function () {
       options:{
         plugins: {
           legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (item) => {
+                return `${item.label}: ${item.raw} (${(item.raw*100/active_grass).toFixed(1)}%)`;
+              },
+            },
+          },
         },
         responsive: true,
       }});
