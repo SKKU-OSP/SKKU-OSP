@@ -139,7 +139,7 @@ def account_cards(request):
     if request.user.is_anonymous:
         team_li = []
     elif team_li==['first']:
-        team_li = list(TeamMember.objects.filter(member__user=request.user, is_admin=1).values_list("team_id", flat=True))
+        team_li = list(TeamMember.objects.filter(member__user=request.user).values_list("team_id", flat=True))
 
 
     if keyword != '':
@@ -159,6 +159,7 @@ def account_cards(request):
     member_id = []
     from itertools import chain
     from team.recommend import get_team_recommendation
+    print(team_li)
     if team_li:
         for team_id in team_li:
             team = Team.objects.get(id=team_id)
