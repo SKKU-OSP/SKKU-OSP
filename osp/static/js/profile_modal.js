@@ -588,9 +588,9 @@ function setVisualModal(){
               type: "radar",
               label: "average",
               data: average_data,
-              backgroundColor: radar_palette[0]+'4d',
-              hoverBackgroundColor: radar_palette[0]+'e3',
-              borderColor: radar_palette[0]+'80',
+              backgroundColor: radar_palette[0]+'80',
+              hoverBackgroundColor: radar_palette[0]+'E3',
+              borderColor: radar_palette[0]+'AA',
               hoverBorderColor: radar_palette[0],
               borderWidth: 1,
             });
@@ -598,9 +598,9 @@ function setVisualModal(){
               type: "radar",
               label: chart_data['username'],
               data: user_dataset,
-              backgroundColor: radar_palette[1]+'4d',
-              hoverBackgroundColor: radar_palette[1]+'e3',
-              borderColor: radar_palette[1]+'80',
+              backgroundColor: radar_palette[1]+'80',
+              hoverBackgroundColor: radar_palette[1]+'E3',
+              borderColor: radar_palette[1]+'AA',
               hoverBorderColor: radar_palette[1],
               borderWidth: 1,
             });
@@ -611,9 +611,9 @@ function setVisualModal(){
               type: "radar",
               label: target.text(),
               data: target_dataset,
-              backgroundColor: radar_palette[2]+'4d',
-              hoverBackgroundColor: radar_palette[2]+'e3',
-              borderColor: radar_palette[2]+'80',
+              backgroundColor: radar_palette[2]+'80',
+              hoverBackgroundColor: radar_palette[2]+'E3',
+              borderColor: radar_palette[2]+'AA',
               hoverBorderColor: radar_palette[2],
               borderWidth: 1,
             });
@@ -699,13 +699,38 @@ function setGbtiModal(){
   const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", ()=>{
     const screenshotTarget = document.getElementById("gbti-id-card");
+    const idCard = document.getElementById("gbti-id-card-content");
+    idCard.style.position = "relative";
+    idCard.style.zIndex = 1057;
+    shadow_ele = Array(6);
+    for(let i=0; i<6; i++){
+      shadow_ele[i] = document.createElement("div");
+      shadow_ele[i].style.display = "block";
+      shadow_ele[i].style.width = idCard.getBoundingClientRect().width+2-i + "px";
+      shadow_ele[i].style.height = idCard.getBoundingClientRect().height-i + "px";
+      shadow_ele[i].style.backgroundColor = '#0000000d';
+      shadow_ele[i].style.position = "absolute";
+      shadow_ele[i].style.borderRadius = "15px";
+      shadow_ele[i].style.top = "16px";
+      shadow_ele[i].style.left = 4+0.5*i + "px";
+      shadow_ele[i].style.zIndex = 1056;
+      screenshotTarget.appendChild(shadow_ele[i]);
+    }
+    
     html2canvas(screenshotTarget,{scale:2, backgroundColor: cssDecl.getPropertyValue('--developer-bg-color')}).then((canvas)=>{
+      console.log("canvas", canvas);
+      console.log("canvas2d", canvas.getContext('2d'));
+      canvas.getContext('2d').filter = 'blur(4px)';
       const base64image = canvas.toDataURL("image/png");
       var anchor = document.createElement('a');
       anchor.setAttribute("href", base64image);
       anchor.setAttribute("download", "my-image.png");
       anchor.click();
       anchor.remove();
+    });
+    idCard.removeAttribute("style");
+    shadow_ele.forEach((shadow)=>{
+      shadow.remove();
     });
   });
   const type_ctx = []
