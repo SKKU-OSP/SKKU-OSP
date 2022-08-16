@@ -521,6 +521,19 @@
                     {% endfor%}
                   </div>
                 </div>
+                {% else %}
+                <h3 class="text-center mt-3">개발자 유형 검사 결과</h3>
+                <div class="d-flex justify-content-center">
+                  <span class="endpoint left"></span>
+                  <span class="line-connect"></span>
+                  <span class="endpoint right"></span>
+                </div>
+                <p class="text-center gbti-text bold">검사결과가 없습니다.</p>
+                <div class="d-flex justify-content-center btn-gbti-group">
+                  {% if user.is_authenticated and user.username == username%}
+                  <button class="btn-gbti pb-active" onclick="location.href='./test'">검사하기</button>
+                  {% endif %}
+                </div>
                 {% endif %}
                 <h3 class="text-center mt-3">개발 성향 분석</h3>
                 <div class="d-flex justify-content-center">
@@ -558,7 +571,6 @@
               <h5 class="card-title d-flex justify-content-between">
                 개발자 성향
                 <i id="icon-devtype" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
-
               </h5>
               <div class="gbti-content p-lg">
                 <div class="gbti-card">
@@ -576,8 +588,8 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-around">
-                  {% for icon in gbti.icon %}
-                  <i class="bi {{icon}} icon-lg"></i>
+                  {% for desc, descKR, icon in gbti.zip %}
+                  <i class="bi {{icon}} icon-lg" title="{{descKR}}"></i>
                   {% endfor %}
                 </div>
               </div>
