@@ -220,12 +220,16 @@ function ReadNotification(type, noti_id, target_id) {
             if (type == 'comment' || type == 'articlelike') {
                 window.location = '/community/article/' + target_id;
             }
+            if(type=='team_invite'){
+                window.location = target_id;
+            }
             if (type == 'team_apply') {
                 ApplyTeamModalOpen();
             }
             if (type == 'team_apply_result') {
                 ApplyTeamModalOpen();
             }
+
             $('#noti-' + noti_id).addClass('read');
         } else {
             alert(data['message']);

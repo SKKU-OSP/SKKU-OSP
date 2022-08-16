@@ -142,9 +142,9 @@
 
         {% if not is_teammember and is_start and not is_end %}
         
-        {% teaminvitemessage article.team request.user as waited_teaminvitemessage %}
+        {% teamapplymessage article.team request.user as waited_teamapplymessage %}
 
-        {% if not waited_teaminvitemessage %}
+        {% if not waited_teamapplymessage %}
         <div id="recruit-article-apply">
             {% if request.user.is_anonymous %}
             <div id="team-apply" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
@@ -157,7 +157,7 @@
         {% else %}
         <div>
             <div class="btn btn-secondary" style="font-size:13px; cursor:default;">
-                {{ waited_teaminvitemessage.get_status_display }}
+                {{ waited_teamapplymessage.get_status_display }}
             </div>
         </div>
         {% endif %}

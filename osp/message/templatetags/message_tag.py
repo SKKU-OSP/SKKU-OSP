@@ -33,5 +33,5 @@ def get_notifications(user):
 def get_new_message(user):
     if user.is_anonymous:
         return None
-    msgs = Message.objects.filter(receiver__user=user, receiver_read=False)
+    msgs = Message.objects.filter(receiver__user=user, receiver_read=False,sender__isnull=False)
     return len(msgs) > 0
