@@ -213,16 +213,15 @@ a.nav-link {
   overflow-y: hidden;
 }
 
-.horizontal-menu>div>button {
-  padding: 0.3rem 1.4rem;
+.horizontal-menu>div>button, .horizontal-menu>div>div>button {
+  padding: 0.25rem 1.25rem;
   background: white;
-  border: 1.5px solid var(--profile-btn-border);
+  border: 1px solid var(--profile-btn-border) !important;
+  border-radius: 0.5rem;
+  font-size: 14px;
 }
-
-.horizontal-menu>div>div>button {
-  padding: 0.3rem 1.4rem;
-  background: white;
-  border: 1.5px solid var(--profile-btn-border) !important;
+.dropdown-item.modal-factor-item, .dropdown-item.modal-month-item{
+  font-size: 12px;
 }
 
 .horizontal-menu>div>button:hover {
@@ -495,7 +494,7 @@ span.row-raw {
 }
 
 .semi-expanded-1.semi-expanded-2:nth-child(n) {
-  order: 3;
+  order: 1;
 }
 
 .semi-expanded-0:nth-child(n),
@@ -519,8 +518,8 @@ span.row-raw {
 
 .gbti-content>div.progress {
   margin: 0 0 0.8rem;
+  border-radius: 5px;
 }
-
 .p-lg {
   padding: 20px 15%;
   width: 100%;
@@ -554,9 +553,11 @@ span.row-raw {
   padding: 6% 6% 3%;
   background-color: white;
 }
-
-.gbti-text {
+.gbti-text.bold {
   font-size: 18px;
+}
+.gbti-text {
+  font-size: 16px;
   font-weight: 500;
   margin-bottom: 0.2rem;
 }
@@ -599,7 +600,12 @@ span.row-raw {
   background-color: var(--main-point-color);
   color: white;
 }
-
+.pb-marker{
+  width: 100%;
+  height: 100%;
+  border: 1px solid transparent;
+  border-radius: 5px;
+}
 .gbti-bg {
   background-color: var(--developer-bg-color);
 }
@@ -619,12 +625,12 @@ span.row-raw {
 .gbti-harmony {
   display: flex;
   justify-content: center;
-  margin: 20px 5.5rem 10px;
+  margin: 20px 20% 10px;
 }
 
 .harmony {
   flex: 1 1 auto;
-  padding: 2rem 1rem 1rem;
+  padding: 2rem 5% 1rem;
 }
 
 .gbti-analysis {
@@ -667,8 +673,15 @@ span.row-raw {
   font-size: 16px;
   margin-bottom: 4px;
 }
+#gbti-id-card{
+  margin: 4% 4% 2%;
+  padding: 1px;
+}
+#gbti-btn-group{
+  margin: 0 4%;
+  padding: 1px;
+}
 .modal-gbti-card {
-  margin: 5% 4% 2%;
   background-color: white;
   box-shadow: 0px 4px 4px var(--card-box-shadow);
   border-radius: 15px;
@@ -734,8 +747,15 @@ span.row-raw {
     font-size: 16px;
     margin-bottom: 4px;
   }
+  #gbti-id-card{
+    margin: 4% 4% 2%;
+    padding: 1px;
+  }
+  #gbti-btn-group{
+    margin: 0 4%;
+    padding: 1px;
+  }
   .modal-gbti-card {
-    margin: 5% 4% 2%;
     background-color: white;
     box-shadow: 0px 4px 4px var(--card-box-shadow);
     border-radius: 15px;
@@ -749,8 +769,15 @@ span.row-raw {
   #visualization {
     min-height: 450px;
   }
+  #gbti-id-card{
+    margin: 4% 6% 2%;
+    padding: 1px;
+  }
+  #gbti-btn-group{
+    margin: 0 6%;
+    padding: 1px;
+  }
   .modal-gbti-card {
-    margin: 5% 6% 2%;
     background-color: white;
     box-shadow: 0px 4px 4px var(--card-box-shadow);
     border-radius: 15px;
@@ -764,7 +791,7 @@ span.row-raw {
     height: 14px;
   }
   .gbti-content .text-label {
-    font-size: 14px;
+    font-size: 12px;
     margin-bottom: 2px;
   }
   .gbti-content>h4 {
@@ -776,8 +803,15 @@ span.row-raw {
   #visualization {
     min-height: 480px;
   }
+  #gbti-id-card{
+    margin: 4% 12% 2%;
+    padding: 1px;
+  }
+  #gbti-btn-group{
+    margin: 0 12%;
+    padding: 1px;
+  }
   .modal-gbti-card {
-    margin: 5% 12% 2%;
     background-color: white;
     box-shadow: 0px 4px 4px var(--card-box-shadow);
     border-radius: 15px;
@@ -791,7 +825,7 @@ span.row-raw {
     height: 16px;
   }
   .gbti-content .text-label {
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 2px;
   }
   .gbti-content>h4 {
