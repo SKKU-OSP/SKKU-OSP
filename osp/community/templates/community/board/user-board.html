@@ -6,20 +6,22 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
+  <div style="height: 42px;"></div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-
       <div class="d-flex justify-content-between" id="board-title-bar">
-        <div class="d-flex col-8 justify-content-start">
-          <h2 style="padding-right:15px;">{{ board.name }} 게시판</h2>
-          <div class="my-auto col-6" id="tag-filter">
-            <select class="mx-2" style="min-width: 25%;" id="tag-select" multiple>
-              {% category_tag request %}
-            </select>
-          </div>
+        <div style="width: 15rem;"></div>
+        <div id="board-title">
+          <a href="/community/home/{{board.name}}/{{board.id}}">
+            {{ board.name }} 게시판
+        </a>
         </div>
-
+        <div class="my-auto" id="tag-filter">
+          <select id="tag-select" name="tag-filter-select" multiple>
+            {% category_tag request %}
+          </select>
+        </div>
       </div>
       <div id="article-card-body">
         {% include "community/account-card.html" %}
@@ -39,7 +41,8 @@
           $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
         }
         redraw();
-      }
+      },
+      placeholder: 'Tag',
     })
   });
 </script>

@@ -68,8 +68,12 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
-    board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
-    context = {'board': board, 'board_color': board_color}
+    if board.team_id is not None:
+        if not request.user.is_authenticated:
+            return redirect('/community')
+        if len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+            return redirect('/community')
+    context = {'board': board }
 
     if board.board_type == 'User':
         context['accounts'] = Account.objects.all()[:9]
@@ -118,7 +122,6 @@ def board(request, board_name, board_id):
 
 
 def account_cards(request):
-
     PAGE_SIZE = 9
 
     context = {}
@@ -127,7 +130,7 @@ def account_cards(request):
 
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Account.objects.filter()
+    article_list = Account.objects.filter(user__is_superuser=False)
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
     if keyword != '':
