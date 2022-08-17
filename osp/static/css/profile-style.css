@@ -676,11 +676,11 @@ span.row-raw {
 }
 #gbti-id-card{
   margin: 4% 4% 2%;
-  padding: 1px;
+  padding: 1px 5px;
 }
 #gbti-btn-group{
   margin: 0 4%;
-  padding: 1px;
+  padding: 1px 5px;
 }
 .modal-gbti-card {
   background-color: white;
@@ -750,11 +750,11 @@ span.row-raw {
   }
   #gbti-id-card{
     margin: 4% 4% 2%;
-    padding: 1px;
+    padding: 1px 5px;
   }
   #gbti-btn-group{
     margin: 0 4%;
-    padding: 1px;
+    padding: 1px 5px;
   }
   .modal-gbti-card {
     background-color: white;
@@ -772,11 +772,11 @@ span.row-raw {
   }
   #gbti-id-card{
     margin: 4% 6% 2%;
-    padding: 1px;
+    padding: 1px 5px;
   }
   #gbti-btn-group{
     margin: 0 6%;
-    padding: 1px;
+    padding: 1px 5px;
   }
   .modal-gbti-card {
     background-color: white;
@@ -806,11 +806,11 @@ span.row-raw {
   }
   #gbti-id-card{
     margin: 4% 12% 2%;
-    padding: 1px;
+    padding: 1px 5px;
   }
   #gbti-btn-group{
     margin: 0 12%;
-    padding: 1px;
+    padding: 1px 5px;
   }
   .modal-gbti-card {
     background-color: white;

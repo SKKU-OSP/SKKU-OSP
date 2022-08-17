@@ -534,7 +534,7 @@ def load_repo_data(request, username):
             # 리포지토리 목록 중, 중복하지 않는 가장 최근 3개의 리포지토리 목록을 생성함
             for commit in commit_repos:
                 commit_repo_name = commit['repo_name']
-                if len(recent_repos) == 3:
+                if len(recent_repos) == 4:
                     break
                 if commit_repo_name not in recent_repos:
                     recent_repos[commit_repo_name] = {'repo_name': commit_repo_name}
