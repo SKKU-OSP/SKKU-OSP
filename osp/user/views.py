@@ -37,6 +37,14 @@ class ProfileView(TemplateView):
 
         start = time.time()
         context = self.get_context_data(request, *args, **kwargs)
+
+        # 비 로그인 시 프로필 열람 불가
+        if request.user.is_anonymous:
+            return redirect('/community')
+        # is_own = str(request.user) == context['username']
+        # print('&*&(&*&(*&*(&*(')
+        # print(is_own)
+
         student_info = context['account'].student_data
 
         # student repository info
@@ -83,7 +91,9 @@ class ProfileView(TemplateView):
         print(relations)
         print(remain_children)
 
-        is_own = str(request.user) == context['username']
+
+
+        is_own = request.user.username == context['username']
 
         data = {
             'info': student_info,
@@ -95,6 +105,7 @@ class ProfileView(TemplateView):
             'account': context['account'],
             'is_own' : is_own
         }
+
         context['data'] = data
         print("ProfileView get time :", time.time() - start)
 
@@ -113,7 +124,8 @@ class ProfileView(TemplateView):
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
-        
+        context["student_id"] = student_data.id
+
         score_data_list = []
         score_detail_data = GithubScore.objects.filter(github_id=github_id).order_by("year")
         for row in score_detail_data:
@@ -522,7 +534,7 @@ def load_repo_data(request, username):
             # 리포지토리 목록 중, 중복하지 않는 가장 최근 3개의 리포지토리 목록을 생성함
             for commit in commit_repos:
                 commit_repo_name = commit['repo_name']
-                if len(recent_repos) == 3:
+                if len(recent_repos) == 4:
                     break
                 if commit_repo_name not in recent_repos:
                     recent_repos[commit_repo_name] = {'repo_name': commit_repo_name}

@@ -8,8 +8,41 @@ from .models import Team, TeamMember, TeamTag, TeamInviteMessage
 from tag.models import Tag
 from user.models import Account
 from community.models import Board
+from message.models import Message
 
 from datetime import datetime
+
+def teamInviteValidation(user, username, team_id, invite_msg):
+    is_valid = True
+    field_check_list = {}
+
+    if user.is_anonymous:
+        is_valid = False
+    if username=='null':
+        is_valid = False
+        field_check_list['name'] = '필수 입력값입니다.'
+    else:
+        try:
+            Account.objects.get(user__username=username)
+        except:
+            is_valid = False
+
+    # Team Name Check
+    if team_id=='null':
+        is_valid = False
+        field_check_list['name'] = '필수 입력값입니다.'
+    else:
+        try:
+            Team.objects.get(id=team_id)
+        except:
+            is_valid = False
+            pass
+
+    if len(invite_msg) > 150:
+        is_valid = False
+        field_check_list['desc'] = f'초대 메세지은 이상 50자 이하입니다. 현재 {len(invite_msg)}자'
+
+    return field_check_list, is_valid
 
 def teamInfoValidation(team_name, team_desc, team_img):
     is_valid = True
@@ -37,6 +70,68 @@ def teamInfoValidation(team_name, team_desc, team_img):
             field_check_list['image'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}'
 
     return field_check_list, is_valid
+
+
+
+# Create your views here.
+def TeamInvite(request):
+    if request.method == 'GET':
+        # print(request.GET.get('user_id'))
+        context = {
+            'invite_user': Account.objects.filter(user__id=request.GET.get('user_id')).first(),
+            'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first()
+                   }
+        return render(request, 'team/invite-form.html',context)
+    if request.method == 'POST':
+        username = request.POST.get('username', False)
+        team_id = request.POST.get('team_id', False)
+        # print(username)
+        # print('*******')
+        # print(team_id)
+        invite_msg = request.POST.get('invite_msg', False)
+        # print(invite_msg)
+        field_check_list, is_valid = teamInviteValidation(request.user, username,team_id,invite_msg)
+
+        if is_valid and TeamMember.objects.filter(member__user__username=username, team__id=team_id):
+            is_valid = False
+
+        if is_valid:
+            # print('hi')
+            try:
+                with transaction.atomic():
+                    team = Team.objects.get(id=team_id)
+                    account = Account.objects.get(user__username=username)
+                    TeamInviteMessage.objects.create(
+                        team = team,
+                        account = account,
+                        message = invite_msg,
+                        direction = True,
+                        send_date = datetime.now(),
+                    )
+                    # noti - 자동생성 (signals)
+                    # msg
+                    from django.shortcuts import resolve_url
+                    board = Board.objects.get(team=team)
+                    url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
+                    sender = Account.objects.get(user=request.user)
+                    Message.objects.create(
+                        sender=sender,
+                        receiver=account,
+                        body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
+                        send_date = datetime.now(),
+                        receiver_read = False,
+                        sender_delete = False,
+                        receiver_delete = False
+                    )
+
+                    return JsonResponse({'status': 'success'})
+            except DatabaseError:
+                field_check_list['DB'] = 'DB Error'
+                return JsonResponse({'status': 'fail', 'errors': field_check_list})
+        else:
+            # print(field_check_list)
+            return JsonResponse({'status': 'fail', 'errors': field_check_list})
+
 
 # Create your views here.
 def TeamCreate(request):
@@ -216,7 +311,7 @@ def TeamOut(request):
             with transaction.atomic():
                 teammember.delete()
                 teammembers = TeamMember.objects.filter(team=team)
-                if teammembers.count()==1:
+                if teammembers.count()==0:
                     team.delete()
             return JsonResponse({'status': 'success'})
 
@@ -229,21 +324,20 @@ def TeamInviteUpdate(request):
         team = Team.objects.get(id=request.POST.get('team_id'))
         account = Account.objects.get(user__username=request.POST.get('username'))
         direction = request.POST.get('direction') == 'TO_ACCOUNT'
-        apply_msg = TeamInviteMessage.objects.filter(team=team,account=account,direction=direction, status=0).first()
+        apply_msgs = TeamInviteMessage.objects.filter(team=team,account=account,direction=direction, status=0)
         try:
             with transaction.atomic():
                 if request.POST.get('is_okay')=="true":
-                    print(request.POST.get('is_okay'))
                     status = 1  # 승인
                     TeamMember.objects.create(team=team,member=account)
                 else:
                     status = 2  # 거절
-
-                apply_msg.status = status
-                apply_msg.save()
+                for apply_msg in apply_msgs:
+                    apply_msg.status = status
+                    apply_msg.save()
 
                 data = render_to_string('team/apply-list.html',request=request)
-                return JsonResponse({'status': 'success','data':data})
+                return JsonResponse({'status': 'success','data':data,'username':request.POST.get('username')})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
 

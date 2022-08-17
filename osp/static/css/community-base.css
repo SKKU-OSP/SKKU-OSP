@@ -181,6 +181,7 @@
     background: white;
     box-shadow: 0rem 0.125rem 0.125rem rgba(0, 0, 0, 0.25);
     border-radius: 0.625rem;
+    padding: 1rem;
 }
 
 #article-list-body>.article-bar>*:last-child {
@@ -209,11 +210,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-top: -1rem;
-    padding-top: 1rem;
     border-top-left-radius: 0rem;
     border-top-right-radius: 0rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
 }
 
 .article-bar.empty {
@@ -244,6 +242,7 @@
     justify-content: center;
     background-color: #FFFFFF;
     border-bottom: 1px solid var(--main-border-color);
+    padding: 1rem;
 }
 
 .accordion-collapse .article-bar:last-child {
@@ -253,7 +252,6 @@
 }
 
 .article-head {
-    padding: 1rem;
     overflow: hidden;
     cursor: pointer;
     display: flex;
@@ -262,9 +260,8 @@
 }
 
 .article-bar-title {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
 }
 
 .article-bar-writer {
@@ -273,7 +270,6 @@
 }
 
 .article-meta {
-    padding: 1rem;
     margin-top: auto;
     margin-bottom: auto;
     margin-left: auto;
@@ -412,6 +408,12 @@
 
 #team-desc {
     padding-bottom: 10px;
+    width:100%;
+    overflow:hidden;
+    white-space:normal;
+    display:inline-block;
+    word-break:normal;
+    overflow-wrap:break-word;
 }
 
 #team-name {
@@ -427,7 +429,7 @@
 }
 
 #team-members {
-    width: 220px;
+    /*width: 220px;*/
     border-right: 1px solid var(--main-border-color);
 }
 
@@ -442,7 +444,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     overflow-y: auto;
-    min-width: 150px;
+    /*min-width: 150px;*/
 }
 
 #team-info {
@@ -451,8 +453,9 @@
 }
 
 .team-member {
-    margin-bottom: 4px;
+    margin-bottom: 1px;
     padding-right: 4px;
+    height:25px;
 }
 
 .team-member>* {
@@ -742,16 +745,24 @@
 }
 
 .tag-recruit {
-    color: #000000;
     font-size: 0.75rem;
+    height: 1.5rem;
+    /* width: 4rem; */
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tag-recruit-ing{
     background: var(--tag-bg-recruit);
     color: var(--sub-point-color);
+
 }
 
 .tag-recruit-end {
-    color: #000000;
-    font-size: 0.75rem;
     background: var(--main-border-color);
+    color: #000000;
 }
 
 #pagination-body {

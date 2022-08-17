@@ -61,6 +61,7 @@ body::-webkit-scrollbar {
   font-style: normal;
   font-weight: 800;
   font-size: 18px;
+  margin-right: 0;
 }
 
 #main-navbar .nav-link {
@@ -136,6 +137,7 @@ div.vr {
 #message-modal .modal-dialog,
 #message-modal .modal-content {
   height: 70%;
+  min-width:700px;
 }
 
 #message-modal .modal-body {
@@ -303,11 +305,25 @@ img.opponent-profile {
   margin-right: 0.25em;
 }
 
+.ss-single-selected > .placeholder{
+  background:none;
+}
+#team-option::after{
+  content:"▼";
+}
 .chat-text-body {
   max-width: 80%;
   padding: 0.5rem;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
   border-radius: 10px;
+
+  /*padding-bottom: 10px;*/
+  /*  width:440px;*/
+    overflow:hidden;
+    white-space:normal;
+    display:inline-block;
+    word-break:normal;
+    overflow-wrap:break-word;
 }
 
 .send .chat-text-body {

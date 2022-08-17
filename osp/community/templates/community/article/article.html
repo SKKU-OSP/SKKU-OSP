@@ -5,6 +5,11 @@
 {% load static %}
 {% load tag_templatetag %}
 {% block content %}
+{% if error_occur %}
+   <div class="container my-4">
+   잘못된 페이지 입니다.
+   </div>
+{% else %}
 <div class="container my-4">
     <div style="height: 42px;"></div>
     <div id="community-container" class="row">
@@ -36,6 +41,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock content %}
 {% block script %}
 <script>
@@ -98,6 +104,7 @@
                 });
             });
         }
+        {% if not request.user.is_anonymous %}
         $('#comment-is-anonymous').click(function() {
             if($(this).is(":checked")){
                 $('#comment-writer-display').html('익명');
@@ -108,6 +115,7 @@
                 $('#comment-writer-display').removeClass('annonymous');
             }
         });
+        {% endif %}
     });
     function setToDateEnd(){
         $('#PeriodPickerEndInput').val(new Date());
@@ -118,10 +126,10 @@
         event.preventDefault();
         var t = $('#article-form').attr('edit-type');
         if (t == 'register') {
-            console.log('1');
+            {#console.log('1');#}
             registerArticle();
         } else {
-            console.log('2');
+            {#console.log('2');#}
             updateArticle();
         }
         return false;

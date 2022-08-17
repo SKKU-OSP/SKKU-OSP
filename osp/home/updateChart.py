@@ -4,8 +4,7 @@ import json, math, time, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from osp.dev_settings import DATABASES
 
-# 1. 업데이트 기능을 구현하지 않아 테이블 데이터를 delete 하고 실행해야합니다.
-# 2. 파이썬 실행의 인자로 annualoverview, annualtotal, distscore, distfactor, student, repository 중에서 선택하여 테이블에 데이터를 insert 할 수 있습니다.
+# 파이썬 실행의 인자로 annualoverview, annualtotal, distscore, distfactor, student, repository 중에서 입력하여 해당 테이블에 데이터를 insert 할 수 있습니다.
 # 인자로 all을 넣으면 모든 테이블에 insert 할 수 있습니다.
 
 def update_chart(mask):
@@ -116,8 +115,8 @@ def update_chart(mask):
                 break
         select_star_sql = """SELECT A.github_id, YEAR(B.create_date) as year, SUM(B.stargazers_count) as star
         FROM github_repo_contributor A
-        LEFT JOIN github_repo_stats B ON A.owner_id = B.github_id and A.repo_name = B.repo_name
-        WHERE A.github_id IN (SELECT github_id FROM student_tab as st"""
+        LEFT JOIN github_repo_stats B ON A.owner_id = B.github_id and A.github_id = B.github_id and A.repo_name = B.repo_name
+        WHERE B.github_id IN (SELECT github_id FROM student_tab as st"""
         group_by_date =""")GROUP BY A.github_id, YEAR(B.create_date) ORDER BY A.github_id ASC"""
         cursor.execute(select_star_sql+suffix+group_by_date)
         star_result = cursor.fetchall()
