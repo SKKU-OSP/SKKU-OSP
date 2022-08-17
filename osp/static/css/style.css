@@ -1,5 +1,8 @@
 .row {
-  --bs-gutter-x: 0.8rem !important;
+  --bs-gutter-x: 1rem !important;
+}
+.d-flex.text-lg{
+  gap: 0.5% !important;
 }
 @media (min-width: 768px) {
   .col-my-p20 {
@@ -54,12 +57,6 @@ a.nav-link {
   padding-top: 9px;
   flex-basis: 150px;
 }
-.d-flex.text-lg > .btn-toolbar {
-  margin-right: 20px;
-}
-.d-flex.text-lg > .dropdown {
-  margin-right: 30px;
-}
 .form-check-label {
   color: gray;
 }
@@ -74,7 +71,20 @@ a.nav-link {
 .border-round{
   border-radius: 0.375rem;
 }
+.nav-link.border-round{
+  background: white;
+  border: 1px solid var(--profile-btn-border) !important;
+  min-width: 100px;
+  text-align: center;
+  color:black;
+}
+.nav-link.border-round:hover{
+  background: var(--profile-btn-active);
+}
 .nav-link.border-round.active{
-  background-color: var(--bootstrap-primary);
-  color: white;
+  background-color: var(--profile-btn-active);
+  color: var(--bootstrap-primary);
+}
+.form-check-input:hover{
+  background-color: var(--bootstrap-active-primary);
 }
