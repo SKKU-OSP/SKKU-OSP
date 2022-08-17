@@ -26,7 +26,7 @@
 
       </div>
         <div id="team-filter" class="w-100 border d-flex flex-row flex-wrap">
-            {% get_admin_team request.user as teams %}
+            {% get_team request.user as teams %}
             {% for team in teams %}
                 <div id="filter-{{ team.name }}" onclick="teamFilterBtn('{{ team.name }}')" value="{{ team.id }}"  style="border: 1px solid black;padding:5px 10px 5px 10px;font-size:14px;border-radius:10px;margin-right:7px;" class="opacity-hover pointer bg-gray">{{ team.name }} 추천<i class="bi bi-check2" style="font-size:15px;padding-left:3px;"></i></div>
             {% endfor %}
@@ -58,7 +58,7 @@
       var obj = $(id);
       {#$(id).css('background','none');#}
       obj.toggleClass('bg-gray');
-      redraw()
+      redraw(to_page_1=1)
       {#console.log(team_li);#}
 
   }

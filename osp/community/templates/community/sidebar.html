@@ -50,12 +50,14 @@
             </div>
         </div>
         {% board_sidebar_team_board request %}
+{#        {% board_sidebar_invite_team_board request %}#}
         {% endif %}
     </div>
 
     {% if user.is_authenticated %}
     <div class="modal fade" id="AddTeamModal">
     </div>
-    <script src="{% static 'js/community_sidebar.js' %}"></script>
     {% endif %}
+    <script src="{% static 'js/community_sidebar.js' %}"></script>
+
 </div>

@@ -1,0 +1,53 @@
+{% load tag_templatetag %}
+{% load community_tag %}
+{% load team_tag %}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">팀원 초대하기</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form class="needs-validation row" id="team-invite-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if invite_user %}
+                    <div class="mb-4">
+                        <label for="user-name" class="form-label">팀원</label>
+                        <input id="invite-team-username" type="text" name="username" class="form-control" value="{{ invite_user.user.username }}" readonly>
+                    </div>
+                    <div class="mb-4">
+                        <label for="team-name" class="form-label">초대할 팀 선택</label>
+                        <select id="invite-team-id" name="name" class=" pointer" required autofocus>
+                            {% team_options_exclude_user request.user invite_user %}
+                        </select>
+                        <div class="valid-feedback" for="team-name"></div>
+                        <div class="invalid-feedback" for="team-name"></div>
+                    </div>
+                {% else %}
+                    <div class="mb-4">
+                        <label for="user-name" class="form-label">팀</label>
+                        <input type="text" class="form-control" id="invite-team-id" team_id="{{ invite_team.id }}"  value="{{ invite_team.name }}" readonly>
+                    </div>
+                    <div class="mb-4">
+                        <label for="team-name" class="form-label">초대할 팀원 선택</label>
+                        <select id="invite-team-username" name="name"  class="pointer" required autofocus>
+                            {% teammember_options_exclude_members request.user invite_team %}
+                        </select>
+                        <div class="valid-feedback" for="team-name"></div>
+                        <div class="invalid-feedback" for="team-name"></div>
+                    </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <label for="team-desc" class="form-label">초대 메세지</label>
+                    <textarea id="team-invite-msg" name="desc" class="form-control" rows="3" placeholder="초대 인사를 입력하세요."></textarea>
+                    <div class="valid-feedback" for="team-desc"></div>
+                    <div class="invalid-feedback" for="team-desc"></div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-default" id="team-invite-submit">초대 메세지 보내기</button>
+        </div>
+    </div>
+</div>

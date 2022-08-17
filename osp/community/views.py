@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
 from tag.models import Tag
-from team.models import TeamMember, Team, TeamTag
+from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest
 from community.models import TeamRecruitArticle
 
@@ -28,7 +28,10 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    for board in Board.objects.filter(team_board_query | Q(team_id=None)):
+    boards = Board.objects.filter(team_board_query | Q(team_id=None))
+    # if request.user.is_anonymous:
+    boards = boards.exclude(board_type='User')
+    for board in boards:
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
         # week_ago = datetime.now() - timedelta(days=7)
@@ -68,14 +71,22 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
+    context = {'board': board}
     if board.team_id is not None:
         if not request.user.is_authenticated:
             return redirect('/community')
-        if len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+        if TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
+                                            status=0).exists():
+            context['invited_user'] = True
+            context['waitedinvitemessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
+                                            status=0)
+        elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
             return redirect('/community')
-    context = {'board': board }
+
 
     if board.board_type == 'User':
+        if request.user.is_anonymous:
+            return redirect('/community')
         context['accounts'] = Account.objects.all()[:9]
         # context['account_all_cnt'] = Account.objects.all()
         return render(request, 'community/board/user-board.html', context)
@@ -111,10 +122,10 @@ def board(request, board_name, board_id):
         if request.user: my_acc = Account.objects.get(user=request.user)
 
         tm = team_members.filter(member=my_acc).first()
-        if not tm:
-            return redirect('/community')
-
-        context['team_admin'] = tm.is_admin
+        # if not tm:
+        #     return redirect('/community')
+        if tm:
+            context['team_admin'] = tm.is_admin
         context['team'] = team
         context['team_tags'] = team_tags
         context['team_members'] = team_members
@@ -139,7 +150,7 @@ def account_cards(request):
     if request.user.is_anonymous:
         team_li = []
     elif team_li==['first']:
-        team_li = list(TeamMember.objects.filter(member__user=request.user, is_admin=1).values_list("team_id", flat=True))
+        team_li = list(TeamMember.objects.filter(member__user=request.user).values_list("team_id", flat=True))
 
 
     if keyword != '':
@@ -159,6 +170,7 @@ def account_cards(request):
     member_id = []
     from itertools import chain
     from team.recommend import get_team_recommendation
+    print(team_li)
     if team_li:
         for team_id in team_li:
             team = Team.objects.get(id=team_id)
@@ -306,10 +318,11 @@ class ArticleView(TemplateView):
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
                     context['article'].team = teamrecruit.team
+            context['article'].view_cnt += 1
+            context['article'].save()
         except:
-            s = 1
-        context['article'].view_cnt += 1
-        context['article'].save()
+            context['error_occur'] = True
+
 
         return render(request, 'community/article/article.html', context)
 

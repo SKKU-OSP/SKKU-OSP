@@ -22,7 +22,12 @@ window.onload = function () {
   for (let year=start_year; year<=end_year; year++){
     annual_list.push(String(year));
   }
-
+  const cssDecl = getComputedStyle(document.documentElement);
+  const palette = []; // 13 level color
+  const bsPrimary = cssDecl.getPropertyValue('--data-level-4');
+  const bsBorder = "rgba(255, 255, 255, 0)"
+  const cc3 = [];
+  for(let i=0; i<3; i++) cc3.push(cssDecl.getPropertyValue('--data-score-'+ i));
   switchAbsence.addEventListener("change", function (e) {
     $(".switch-toggle-absence").toggleClass("bold");
     $(".switch-toggle-absence").toggleClass("none");
@@ -132,6 +137,8 @@ window.onload = function () {
 
     let dist = annual_dist["score"];
     let sidData = annual_dist["score_sid"];
+    console.log("sidData", sidData)
+    for(let i=0; i<13; i=i+1+sidData.length/12) palette.push(cssDecl.getPropertyValue('--type-sid-'+i.toFixed()));
     let deptData = annual_dist["score_dept"];
     let sidTopData = annual_dist["score_sid_pct"];
     let deptTopData = annual_dist["score_dept_pct"];
@@ -197,23 +204,10 @@ window.onload = function () {
         .getContext("2d");
     }
     setOverallStat(annual_total);
-    const bsPrimary = "#0d6efd";
-    const cc3 = ["#4245cb", "#ff4470", "#ffe913"];
-    const cc8 = [
-      "#4245cb",
-      "#aa33bf",
-      "#e91ca5",
-      "#ff2e83",
-      "#ff5c5e",
-      "#ff8e39",
-      "#ffbd0e",
-      "#ffe913",
-    ];
+    
     const noLegendOption = {
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: {display: false},
       },
       scales: {
         y: { beginAtZero: true },
@@ -221,9 +215,7 @@ window.onload = function () {
     };
     const scoreOption = {
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: {display: false},
       },
       scales: {
         y: { max: 5, beginAtZero: true },
@@ -232,9 +224,7 @@ window.onload = function () {
     function histogramOption(offset) {
       return {
         plugins: {
-          legend: {
-            display: false,
-          },
+          legend: {display: false},
           tooltip: {
             callbacks: {
               title: (items) => {
@@ -259,12 +249,8 @@ window.onload = function () {
           x: {
             type: "linear",
             offset: false,
-            grid: {
-              offset: false,
-            },
-            ticks: {
-              stepSize: offset * 2,
-            },
+            grid: {offset: false},
+            ticks: {stepSize: offset * 2},
           },
           y: { beginAtZero: true },
         },
@@ -291,7 +277,7 @@ window.onload = function () {
       );
     }
     const chartTypeRule = ["bar", "barWithErrorBars", "barWithErrorBars"];
-    let chartColorRule = [bsPrimary, cc8, cc3];
+    let chartColorRule = [bsPrimary, palette, cc3];
     let chartOptions = [histogramOption(0.25), scoreOption, scoreOption];
     let topdataRule = [
       [],
@@ -391,11 +377,9 @@ window.onload = function () {
           data,
           bsPrimary,
           {
-            borderColor: "rgba(255, 255, 255, 0)",
+            borderColor: bsBorder,
             plugins: {
-              legend: {
-                display: false,
-              },
+              legend: {display: false},
               tooltip: {
                 callbacks: {
                   title: (items) => {
@@ -446,11 +430,9 @@ window.onload = function () {
           commitDataset,
           bsPrimary,
           {
-            borderColor: "rgba(255, 255, 255, 0)",
+            borderColor: bsBorder,
             plugins: {
-              legend: {
-                display: false,
-              },
+              legend: {display: false},
               tooltip: {
                 callbacks: {
                   title: (items) => {
@@ -500,11 +482,9 @@ window.onload = function () {
           starDataset,
           bsPrimary,
           {
-            borderColor: "rgba(255, 255, 255, 0)",
+            borderColor: bsBorder,
             plugins: {
-              legend: {
-                display: false,
-              },
+              legend: {display: false},
               tooltip: {
                 callbacks: {
                   title: (items) => {
@@ -517,14 +497,8 @@ window.onload = function () {
               },
             },
             scales: {
-              x: {
-                ticks: {
-                  stepSize: 1,
-                },
-              },
-              y: {
-                beginAtZero: true,
-              },
+              x: {ticks: {stepSize: 1}},
+              y: {beginAtZero: true},
             },
           }
         );
@@ -551,11 +525,9 @@ window.onload = function () {
           repoDataset,
           bsPrimary,
           {
-            borderColor: "rgba(255, 255, 255, 0)",
+            borderColor: bsBorder,
             plugins: {
-              legend: {
-                display: false,
-              },
+              legend: { display: false },
               tooltip: {
                 callbacks: {
                   title: (items) => {
@@ -568,14 +540,8 @@ window.onload = function () {
               },
             },
             scales: {
-              x: {
-                ticks: {
-                  stepSize: 1,
-                },
-              },
-              y: {
-                beginAtZero: true,
-              },
+              x: {ticks: { stepSize: 1}},
+              y: {beginAtZero: true},
             },
           }
         );
@@ -757,7 +723,7 @@ window.onload = function () {
 
     function reloadChart(annual, factor) {
       destroyChart(chart, 3);
-      chartColorRule = [bsPrimary, cc8, cc3];
+      chartColorRule = [bsPrimary, palette, cc3];
       switch (factor) {
         case "score":
           labelList[0] = scoreDistLabel;
@@ -819,13 +785,7 @@ window.onload = function () {
             labelList[i],
             datasetList[i],
             chartColorRule[i],
-            {
-              plugins: {
-                legend: {
-                  display: false,
-                },
-              },
-            },
+            {plugins: {legend: {display: false}}},
             topdataRule[i]
           );
         }
@@ -887,11 +847,7 @@ window.onload = function () {
         bsPrimary,
         i === 0
           ? {
-              plugins: {
-                legend: {
-                  display: false,
-                },
-              },
+              plugins: {legend: {display: false}},
               scales: {
                 y: { max: 5, beginAtZero: true },
               },
@@ -902,6 +858,9 @@ window.onload = function () {
 
     // too long text
     function controlFontSize() {
+      const overviewCard = document.getElementById("overviewChart");
+      let cw = overviewCard.getBoundingClientRect().width / 2;
+      console.log(overviewCard);
       const numerator = document.getElementsByClassName("text-primary");
       const denominator = document.getElementsByClassName("total");
       const percent = document.getElementsByClassName("percent");
@@ -910,9 +869,10 @@ window.onload = function () {
         let lenNumer = numerator.item(i).textContent.length;
         let lenDenom = denominator.item(i).textContent.length;
         let lenPercent = percent.item(i).textContent.length;
-        let lenText = (lenNumer + lenDenom + lenPercent);
+        let lenText = (2*lenNumer + lenDenom + 2*lenPercent);
+        console.log(lenNumer, lenDenom, lenPercent, lenText);
         if (lenText >= 13) {
-          kpi.item(i).style.fontSize = (25 / lenText).toFixed(2) +"rem";
+          kpi.item(i).style.fontSize = (cw / lenText).toFixed(2) +"px";
         }
       }
     }

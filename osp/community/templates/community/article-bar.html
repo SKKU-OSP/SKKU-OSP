@@ -5,27 +5,30 @@
         <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' article.id %}'">
             <div class="article-bar-title my-1">
                 {% if board.board_type == 'Recruit' %}
-                {% if article.team %}
-                [{{ article.team.name }}]
+                {% is_period_end article.period_start as is_start %}
+                {% is_period_end article.period_end as is_end %}
+                {% if not article.team %}
+                {% elif not is_start %}
+                <div class="badge tag-recruit tag-recruit-end">모집 전</div>
+                {% elif not is_end %}
+                <div class="badge tag-recruit tag-recruit-ing">모집 중</div>
                 {% else %}
-                [팀이 더이상 존재하지 않습니다.]
+                <div class="badge tag-recruit tag-recruit-end">모집 마감</div>
                 {% endif %}
                 {% endif %}
-                {{article.title}}
-            </div>
-            <div>
-                {% if board.board_type == 'Recruit' %}
-                    {% is_period_end article.period_start as is_start %}
-                    {% is_period_end article.period_end as is_end %}
-                    {% if not article.team %}
-                    {% elif not is_start %}
-                    <span class="badge tag-recruit-end">모집 전:  {{article.period_start|date:'Y-m-d'}}~</span>
-                    {% elif not is_end %}
-                        <span class="badge tag-recruit">모집 중:  ~{{article.period_end|date:'Y-m-d'}}</span>
+                <div class="flex-grow" style="
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;">
+                    {% if board.board_type == 'Recruit' %}
+                    {% if article.team %}
+                    [{{ article.team.name }}]
                     {% else %}
-                        <span class="badge tag-recruit-end">모집 마감</span>
+                    [팀이 더이상 존재하지 않습니다.]
                     {% endif %}
-                {% endif %}
+                    {% endif %}
+                    {{article.title}}
+                </div>
             </div>
             <div style="white-space: nowrap;">
                 {% for tag in article.tags %}
@@ -41,12 +44,14 @@
                 <a class="article-bar-writer" href="">사용자</a>
                 {% else %}
                 <div class="dropdown writer-dropdown">
-                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                        <li><a class="dropdown-item" href="#"
+                                onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
                 </div>
                 {% endif %}
@@ -80,11 +85,12 @@
             {{article.comment.body}}
         </div>
         <div class="ms-auto">
-        {% if request.user.is_anonymous %}
-          <a href="">사용자</a>
-        {% else %}
-            <a href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
-        {% endif %}
+            {% if request.user.is_anonymous %}
+            <a href="">사용자</a>
+            {% else %}
+            <a
+                href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
+            {% endif %}
         </div>
         <div class="d-flex">
             <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
