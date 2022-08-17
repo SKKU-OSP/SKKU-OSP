@@ -288,7 +288,7 @@ window.onload = function () {
           }
           mLabel.appendChild(mText);
         }
-        if(monthly_contr.length>mIdx){
+        if(level != 5){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
