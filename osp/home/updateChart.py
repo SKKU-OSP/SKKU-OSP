@@ -115,7 +115,7 @@ def main(mask):
                 break
         select_star_sql = """SELECT A.github_id, YEAR(B.create_date) as year, SUM(B.stargazers_count) as star
         FROM github_repo_contributor A
-        LEFT JOIN github_repo_stats B ON A.owner_id = B.github_id and A.repo_name = B.repo_name
+        LEFT JOIN github_repo_stats B ON A.owner_id = B.github_id and A.github_id = B.github_id and A.repo_name = B.repo_name
         WHERE B.github_id IN (SELECT github_id FROM student_tab as st"""
         group_by_date =""")GROUP BY A.github_id, YEAR(B.create_date) ORDER BY A.github_id ASC"""
         cursor.execute(select_star_sql+suffix+group_by_date)

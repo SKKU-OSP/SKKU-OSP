@@ -858,6 +858,9 @@ window.onload = function () {
 
     // too long text
     function controlFontSize() {
+      const overviewCard = document.getElementById("overviewChart");
+      let cw = overviewCard.getBoundingClientRect().width / 2;
+      console.log(overviewCard);
       const numerator = document.getElementsByClassName("text-primary");
       const denominator = document.getElementsByClassName("total");
       const percent = document.getElementsByClassName("percent");
@@ -866,9 +869,10 @@ window.onload = function () {
         let lenNumer = numerator.item(i).textContent.length;
         let lenDenom = denominator.item(i).textContent.length;
         let lenPercent = percent.item(i).textContent.length;
-        let lenText = (lenNumer + lenDenom + lenPercent);
+        let lenText = (2*lenNumer + lenDenom + 2*lenPercent);
+        console.log(lenNumer, lenDenom, lenPercent, lenText);
         if (lenText >= 13) {
-          kpi.item(i).style.fontSize = (25 / lenText).toFixed(2) +"rem";
+          kpi.item(i).style.fontSize = (cw / lenText).toFixed(2) +"px";
         }
       }
     }
