@@ -304,6 +304,10 @@ img.opponent-profile {
   margin-top: auto;
   margin-right: 0.25em;
 }
+
+.ss-single-selected > .placeholder{
+  background:none;
+}
 #team-option::after{
   content:"▼";
 }

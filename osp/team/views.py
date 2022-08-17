@@ -18,11 +18,14 @@ def teamInviteValidation(user, username, team_id, invite_msg):
 
     if user.is_anonymous:
         is_valid = False
-
-    try:
-        Account.objects.get(user__username=username)
-    except:
+    if username=='null':
         is_valid = False
+        field_check_list['name'] = '필수 입력값입니다.'
+    else:
+        try:
+            Account.objects.get(user__username=username)
+        except:
+            is_valid = False
 
     # Team Name Check
     if team_id=='null':
@@ -73,20 +76,27 @@ def teamInfoValidation(team_name, team_desc, team_img):
 # Create your views here.
 def TeamInvite(request):
     if request.method == 'GET':
-        print(request.GET.get('user_id'))
-        return render(request, 'team/invite-form.html',{'invite_user':Account.objects.get(user__id=request.GET.get('user_id'))})
+        # print(request.GET.get('user_id'))
+        context = {
+            'invite_user': Account.objects.filter(user__id=request.GET.get('user_id')).first(),
+            'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first()
+                   }
+        return render(request, 'team/invite-form.html',context)
     if request.method == 'POST':
         username = request.POST.get('username', False)
         team_id = request.POST.get('team_id', False)
-        print(username)
-        print('*******')
-        print(team_id)
+        # print(username)
+        # print('*******')
+        # print(team_id)
         invite_msg = request.POST.get('invite_msg', False)
-        print(invite_msg)
+        # print(invite_msg)
         field_check_list, is_valid = teamInviteValidation(request.user, username,team_id,invite_msg)
 
+        if is_valid and TeamMember.objects.filter(member__user__username=username, team__id=team_id):
+            is_valid = False
+
         if is_valid:
-            print('hi')
+            # print('hi')
             try:
                 with transaction.atomic():
                     team = Team.objects.get(id=team_id)
@@ -107,7 +117,7 @@ def TeamInvite(request):
                     Message.objects.create(
                         sender=sender,
                         receiver=account,
-                        body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br>"+invite_msg,
+                        body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
                         send_date = datetime.now(),
                         receiver_read = False,
                         sender_delete = False,
@@ -301,7 +311,7 @@ def TeamOut(request):
             with transaction.atomic():
                 teammember.delete()
                 teammembers = TeamMember.objects.filter(team=team)
-                if teammembers.count()==1:
+                if teammembers.count()==0:
                     team.delete()
             return JsonResponse({'status': 'success'})
 
