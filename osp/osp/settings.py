@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'challenge',
     'django_apscheduler',
     'crawler',
-    'debug_toolbar'
+    'debug_toolbar',
+    'fontawesomefree'
 ]
 
 MIDDLEWARE = [

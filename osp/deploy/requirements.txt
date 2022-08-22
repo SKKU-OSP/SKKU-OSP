@@ -11,6 +11,7 @@ django-apscheduler==0.6.2
 django-debug-toolbar==3.5.0
 filelock==3.6.0
 Flask==2.1.2
+fontawesomefree==6.1.2
 idna==3.3
 importlib-metadata==4.11.3
 itsdangerous==2.1.2
