@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.db import connection
 from django.contrib.auth.decorators import login_required
 
-from user.models import Account
+from user.models import Account, StudentTab
 from .models import Challenge, ChallengeAchieve
 
 # Create your views here.
@@ -32,15 +32,13 @@ def challenge_list_view(request):
     context['account_cnt'] = account_cnt
     for achievement in achieve_list:
         achievement.width = achievement.progress / achievement.challenge.max_progress * 100
+        achievement.total = achieve_cnt[achievement.challenge.id] if achievement.challenge.id in achieve_cnt else 0
         if achievement.challenge.max_progress > achievement.progress:
             context['not_achieved_list'].append(achievement)
         else:
             context['achieved_list'].append(achievement)
-    challenge_list = Challenge.objects.all()
-    for challenge in challenge_list:
-        challenge.total = achieve_cnt[challenge.id] if challenge.id in achieve_cnt else 0
-        challenge.total_width = challenge.total / account_cnt * 100
-    context['total'] = challenge_list
+    context['total'] = len(context['not_achieved_list']) + len(context['achieved_list'])
+    context['total_cnt'] = len(StudentTab.objects.all())
     return render(request, 'challenge/main.html', context)
 
 @login_required

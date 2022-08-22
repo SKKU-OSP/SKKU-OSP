@@ -124,6 +124,7 @@ div.vr {
   height: 0.5rem;
   width: 0.5rem;
 }
+
 #new-msg {
   background-color: var(--alert-color);
   border-radius: 50%;
@@ -138,7 +139,7 @@ div.vr {
 #message-modal .modal-dialog,
 #message-modal .modal-content {
   height: 70%;
-  min-width:700px;
+  min-width: 700px;
 }
 
 #message-modal .modal-body {
@@ -204,16 +205,16 @@ div> ::-webkit-scrollbar-thumb:hover {
   border: none;
 }
 
-.modal-body .form-control{
+.modal-body .form-control {
   box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
-.ss-multi-selected{
+.ss-multi-selected {
   border: none !important;
   box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
-#message-modal .modal-header{
+#message-modal .modal-header {
   border-bottom: 1px solid var(--main-border-color);
 }
 
@@ -306,12 +307,14 @@ img.opponent-profile {
   margin-right: 0.25em;
 }
 
-.ss-single-selected > .placeholder{
-  background:none;
+.ss-single-selected>.placeholder {
+  background: none;
 }
-#team-option::after{
-  content:"▼";
+
+#team-option::after {
+  content: "▼";
 }
+
 .chat-text-body {
   max-width: 80%;
   padding: 0.5rem;
@@ -320,11 +323,11 @@ img.opponent-profile {
 
   /*padding-bottom: 10px;*/
   /*  width:440px;*/
-    overflow:hidden;
-    white-space:normal;
-    display:inline-block;
-    word-break:normal;
-    overflow-wrap:break-word;
+  overflow: hidden;
+  white-space: normal;
+  display: inline-block;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .send .chat-text-body {
@@ -439,12 +442,12 @@ footer {
   font-weight: 700 !important;
 }
 
-.bg-none{
-  background:none;
+.bg-none {
+  background: none;
 }
 
-.bg-gray{
-  background:#CDCDCD;
+.bg-gray {
+  background: #CDCDCD;
 }
 
 
@@ -493,8 +496,9 @@ footer {
 .msg-dropdown::after {
   content: none;
 }
-.no-icon-dropdown::after{
-  display:none!important;
+
+.no-icon-dropdown::after {
+  display: none !important;
 }
 
 .default-btn {
@@ -563,11 +567,11 @@ footer {
   display: flex;
 }
 
-.team-apply-detail-body{
+.team-apply-detail-body {
   text-align: center;
 }
 
-.btn-default{
+.btn-default {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -576,11 +580,12 @@ footer {
   border-radius: 0.625rem;
   border: 1px solid #000000;
 }
-.btn-default:hover{
+
+.btn-default:hover {
   background-color: var(--btn-default-color);
 }
 
-.btn-refuse{
+.btn-refuse {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   font-size: 1rem;
@@ -588,15 +593,17 @@ footer {
   border-radius: 0.625rem;
   background-color: transparent;
 }
-.btn-refuse:hover{
+
+.btn-refuse:hover {
   background-color: var(--main-icon-color-transparent);
 }
-.btn-refuse:disabled{
+
+.btn-refuse:disabled {
   color: #000000;
   background-color: var(--main-icon-color-transparent);
 }
 
-.btn-accept{
+.btn-accept {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   font-size: 1rem;
@@ -604,15 +611,17 @@ footer {
   border-radius: 0.625rem;
   background-color: transparent;
 }
-.btn-accept:hover{
+
+.btn-accept:hover {
   background-color: var(--sub-point-color-transparent);
 }
-.btn-accept:disabled{
+
+.btn-accept:disabled {
   color: #000000;
   background-color: var(--sub-point-color-transparent);
 }
 
-.btn-wait{
+.btn-wait {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   font-size: 1rem;
@@ -620,7 +629,8 @@ footer {
   border-radius: 0.625rem;
   background-color: transparent;
 }
-.btn-wait:disabled{
+
+.btn-wait:disabled {
   color: #000000;
   background-color: var(--sub-point-color-transparent);
 }
@@ -629,4 +639,36 @@ footer {
   border: none;
   color: var(--sub-point-color);
   background: none;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-5 {
+  gap: 1.25rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-7 {
+  gap: 1.75rem;
+}
+
+.gap-8 {
+  gap: 2rem;
 }
