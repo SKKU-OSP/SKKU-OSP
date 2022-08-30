@@ -9,14 +9,14 @@
             <form class="needs-validation row" id="team-create-form" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-4">
-                    <label for="team-name" class="form-label">팀 이름</label>
-                    <input type="text" id="team-name" name="name" class="form-control" required>
+                    <label for="team-name"  class="form-label">팀 이름</label>
+                    <input type="text" id="team-name" name="name" style="font-size:14px;" class="form-control" required>
                     <div class="valid-feedback" for="team-name"></div>
                     <div class="invalid-feedback" for="team-name"></div>
                 </div>
                 <div class="mb-4">
                     <label for="team-desc" class="form-label">팀 설명</label>
-                    <textarea id="team-desc" name="desc" class="form-control" rows="3"></textarea>
+                    <textarea id="team-desc"  style="font-size:14px;" name="desc" class="form-control" rows="3"></textarea>
                     <div class="valid-feedback" for="team-desc"></div>
                     <div class="invalid-feedback" for="team-desc"></div>
                 </div>

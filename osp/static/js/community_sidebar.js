@@ -49,7 +49,77 @@ $().ready(function () {
       $('#AddTeamModal').modal('show');
     }
   });
+
+  // $('.team-invite').click();
 });
+
+function inviteMsgModalOpen (user_id=-1, team_id=-1) {
+    // console.log('hi!')
+    // if (!$('#AddTeamModal').hasClass('ready')) {
+      // console.log('hi')
+      $.ajax({
+        url: "/team/api/team-invite",
+        type: "GET",
+        data:{'user_id':user_id, 'team_id':team_id},
+        dataType: 'HTML'
+      }).done(function (data) {
+        $('#AddTeamModal').addClass('ready').html(data)
+        $('#AddTeamModal').modal('show');
+        if(user_id==-1){
+          option_select = new SlimSelect({
+            select: '#invite-team-username',
+            // placeholder: 'Tag',
+        })
+        }else{
+          option_select = new SlimSelect({
+            select: '#invite-team-id',
+            // placeholder: 'Tag',
+        })
+        }
+
+        $('#team-invite-submit').click(function () {
+          ajax_form_data=new FormData();
+          ajax_form_data.append('username',$('#invite-team-username').val());
+          if ($('#invite-team-id').attr('team_id')==undefined){
+          ajax_form_data.append('team_id',$('#invite-team-id').val());
+          }else{
+          ajax_form_data.append('team_id',$('#invite-team-id').attr('team_id'));
+          }
+          ajax_form_data.append('invite_msg',$('#team-invite-msg').val());
+          ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+          if(confirm('초대 메세지를 보내시겠습니까?')){
+                      $.ajax({
+            url: "/team/api/team-invite",
+            type: "POST",
+            data: ajax_form_data,
+            dataType: 'JSON',
+            cache: false,
+            contentType: false,
+            processData: false
+          }).done(function (data) {
+            console.log(data);
+            if (data.status == 'fail') {
+              for (const [field, errors] of Object.entries(data.errors)) {
+                console.log(field, errors)
+                $(`[name=${field}`).addClass('is-invalid')
+                $(`.invalid-feedback[for=team-${field}`).html(errors)
+              }
+            } else {
+              alert('초대 메세지를 전송하였습니다!');
+              window.location.reload();
+            }
+          }).fail(function (data) {
+            alert('Server Error!');
+          });
+          }
+        });
+      })
+    // } else {
+    //   $('#AddTeamModal').modal('show');
+    // }
+  }
+
+
 
 function ArticleThumbUp(article_id, user_id) {
   if (user_id == -1) {
@@ -106,6 +176,44 @@ function ArticleScrap(article_id, user_id) {
   });
 }
 
+
+function invite_result(team_id, username, is_okay) {
+
+  var status = is_okay ? "수락" : "거절";
+
+  if (!confirm("팀 초대를" + status + "하시겠습니까?")) {
+    return;
+  }
+
+  ajax_form_data = new FormData();
+  ajax_form_data.append('team_id', team_id);
+  ajax_form_data.append('username', username);
+  ajax_form_data.append('is_okay', is_okay);
+  ajax_form_data.append('direction', 'TO_ACCOUNT');
+  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+
+  $.ajax({
+    type: "POST",
+    url: "/team/api/team-invite-update/",
+    data: ajax_form_data,
+    dataType: 'json',
+    processData: false,
+    contentType: false,
+
+    success: function (data) {
+      if (data['status'] == "success") {
+        window.location.reload();
+      } else {
+        alert(data['message']);
+      }
+    },
+    error: function (data) {
+      alert('Error Occured');
+    }
+  });
+}
+
 function apply_result(team_id, username, is_okay) {
 
   var status = is_okay ? "수락" : "거절";
@@ -133,6 +241,8 @@ function apply_result(team_id, username, is_okay) {
     success: function (data) {
       if (data['status'] == "success") {
         console.log(data)
+        $('#apply-user-'+data['username']).css('display','none');
+
         $('#AddTeamModal').html(data['data']);
       } else {
         alert(data['message']);

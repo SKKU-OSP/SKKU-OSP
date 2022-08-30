@@ -366,6 +366,7 @@ a.nav-link {
 
 .dropdown-menu {
   --bs-dropdown-min-width: 7rem;
+  position:absolute!important;
 }
 
 /* User Profile */

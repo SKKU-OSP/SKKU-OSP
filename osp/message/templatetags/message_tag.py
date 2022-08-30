@@ -9,7 +9,7 @@ def get_notifications(user):
     if user.is_anonymous:
         return None
 
-    msgs = Message.objects.filter(sender__isnull=True, receiver__user=user)
+    msgs = Message.objects.filter(sender__isnull=True, receiver__user=user).order_by('-send_date')
     new_msg = len(msgs.filter(receiver_read=False)) > 0
     for msg in msgs:
         try:
@@ -33,5 +33,5 @@ def get_notifications(user):
 def get_new_message(user):
     if user.is_anonymous:
         return None
-    msgs = Message.objects.filter(receiver__user=user, receiver_read=False)
+    msgs = Message.objects.filter(receiver__user=user, receiver_read=False,sender__isnull=False)
     return len(msgs) > 0

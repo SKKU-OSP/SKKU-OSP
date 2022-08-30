@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'team',
     'message',
     'challenge',
-    'debug_toolbar'
+    'debug_toolbar',
+    'fontawesomefree'
 ]
 
 MIDDLEWARE = [

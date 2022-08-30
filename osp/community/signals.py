@@ -74,62 +74,64 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
         direction = "팀원 초대"
     else:
         direction = "팀 지원"
-        tm_admin_li = list(TeamMember.objects.filter(is_admin=True, team=instance.team).values_list('member', flat=True))
-        body_subject = instance.team.name
-        if direction=="팀 지원" and status=="대기중":
-            # 지원한 팀의 admin권한을 가진 유저들에게 모두 메세지를 보낸다.
-            body_dict = {"type": "team_apply", "body": f"[{body_subject}] 팀 지원 요청이 있습니다."}
-            body = json.dumps(body_dict)
-            for tm_admin in tm_admin_li:
-                print(tm_admin)
-                account = Account.objects.get(user__id=tm_admin)
-                Message.objects.create(
-                    receiver=account, 
-                    body=body, 
-                    send_date=datetime.now(),
-                    receiver_read=False, 
-                    sender_delete=False, 
-                    receiver_delete=False
-                )
-        elif direction=="팀 지원": # 팀 지원 수락 또는 거절
-            body_dict = {"type": "team_apply_result",
-                         "body": f"[{body_subject}] 팀 지원이 {status} 되었습니다."}
-            body = json.dumps(body_dict)
+    tm_admin_li = list(TeamMember.objects.filter(is_admin=True, team=instance.team).values_list('member', flat=True))
+    body_subject = instance.team.name
+    if direction=="팀 지원" and status=="대기중":
+        # 지원한 팀의 admin권한을 가진 유저들에게 모두 메세지를 보낸다.
+        body_dict = {"type": "team_apply", "body": f"[{body_subject}] 팀 지원 요청이 있습니다."}
+        body = json.dumps(body_dict)
+        for tm_admin in tm_admin_li:
+            print(tm_admin)
+            account = Account.objects.get(user__id=tm_admin)
             Message.objects.create(
-                receiver=instance.account, 
-                body=body, 
+                receiver=account,
+                body=body,
                 send_date=datetime.now(),
-                receiver_read=False, 
-                sender_delete=False, 
+                receiver_read=False,
+                sender_delete=False,
                 receiver_delete=False
             )
-        elif direction=="팀원 초대" and status=="대기중":
-            # 초대하는 유저에게 메세지를 보낸다.
-            body_dict = {"type": "team_invite", "body": "[" + body_subject + "]" + "팀 초대가 있습니다."}
-            body = json.dumps(body_dict)
+    elif direction=="팀 지원": # 팀 지원 수락 또는 거절
+        body_dict = {"type": "team_apply_result",
+                     "body": f"[{body_subject}] 팀 지원이 {status} 되었습니다."}
+        body = json.dumps(body_dict)
+        Message.objects.create(
+            receiver=instance.account,
+            body=body,
+            send_date=datetime.now(),
+            receiver_read=False,
+            sender_delete=False,
+            receiver_delete=False
+        )
+    elif direction=="팀원 초대" and status=="대기중":
+        # 초대하는 유저에게 메세지를 보낸다.
+        body_dict = {"type": "team_invite", "body": "[" + body_subject + "]" + "팀 초대가 있습니다.", "team_id":str(instance.team.id)+""}
+        body = json.dumps(body_dict)
+        Message.objects.create(
+            receiver=instance.account,
+            body=body,
+            send_date=datetime.now(),
+            receiver_read=False,
+            sender_delete=False,
+            receiver_delete=False
+        )
+    else: # 팀원 초대 수락 또는 거절
+        tmp = "[" + body_subject + "]"
+        tmp += " " + instance.account.user.username + "님이 "
+        tmp += "팀 초대를 " + status + "하셨습니다."
+        body_dict = {"type": "team_invite_result", "body": tmp}
+        body = json.dumps(body_dict)
+        for tm_admin in tm_admin_li:
+            account = Account.objects.get(user__id=tm_admin)
+
             Message.objects.create(
-                receiver=instance.account, 
-                body=body, 
+                receiver=account,
+                body=body,
                 send_date=datetime.now(),
-                receiver_read=False, 
-                sender_delete=False, 
+                receiver_read=False,
+                sender_delete=False,
                 receiver_delete=False
             )
-        else: # 팀원 초대 수락 또는 거절
-            tmp = "[" + body_subject + "]"
-            tmp += " " + instance.account.user.username + "님이 "
-            tmp += "팀 초대를 " + status + "하셨습니다."
-            body_dict = {"type": "team_invite_result", "body": tmp}
-            body = json.dumps(body_dict)
-            for tm_admin in tm_admin_li:
-                Message.objects.create(
-                    receiver__id=tm_admin, 
-                    body=body, 
-                    send_date=datetime.now(),
-                    receiver_read=False, 
-                    sender_delete=False, 
-                    receiver_delete=False
-                )
 
 # @receiver(post_save, sender=TeamInviteMessage)
 # def create_teaminvite_result_alert(sender, instance, created, **kwargs):

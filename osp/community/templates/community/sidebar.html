@@ -4,9 +4,15 @@
 <div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         <div id="profile-image-wrap" class="m-auto">
+            {% if user.is_authenticated %}
             <a href="/user/{{user}}">
                 <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
             </a>
+            {% else %}
+            <a href="/accounts/login">
+                <img src="/static/images/empty-profile.png" id="profile-image" alt="Log-In" style="background-color: #FFFFFF;">
+            </a>
+            {% endif %}
         </div>
         <div id="profile-sum">
             {% if user.is_authenticated %}
@@ -14,6 +20,9 @@
                 <a href="/user/{{user.username}}">{{user.username}}</a>
             </div>
             {% else %}
+            <div id="profile-username">
+                <a href="/accounts/login">Log In</a>
+            </div>
             {% endif %}
         </div>
         {% if user.is_authenticated %}
@@ -50,12 +59,14 @@
             </div>
         </div>
         {% board_sidebar_team_board request %}
+{#        {% board_sidebar_invite_team_board request %}#}
         {% endif %}
     </div>
 
     {% if user.is_authenticated %}
     <div class="modal fade" id="AddTeamModal">
     </div>
-    <script src="{% static 'js/community_sidebar.js' %}"></script>
     {% endif %}
+    <script src="{% static 'js/community_sidebar.js' %}"></script>
+
 </div>

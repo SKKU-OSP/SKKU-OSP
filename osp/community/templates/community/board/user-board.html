@@ -4,25 +4,33 @@
 
 {% load static %}
 {% load tag_templatetag %}
+{% load community_tag %}
+{% load team_tag %}
 {% block content %}
 <div class="container my-4">
-  <div style="height: 42px;"></div>
+    <div class="w-100" style="height:42px;"></div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-      <div class="d-flex justify-content-between" id="board-title-bar">
-        <div style="width: 15rem;"></div>
-        <div id="board-title">
-          <a href="/community/home/{{board.name}}/{{board.id}}">
-            {{ board.name }} 게시판
-        </a>
-        </div>
-        <div class="my-auto" id="tag-filter">
-          <select id="tag-select" name="tag-filter-select" multiple>
-            {% category_tag request %}
-          </select>
-        </div>
+      <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
+            <div id="board-title">
+              <a href="/community/home/{{board.name}}/{{board.id}}">
+                {{ board.name }} 게시판
+                </a>
+            </div>
+            <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
+              <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
+                {% category_tag request %}
+              </select>
+            </div>
+
       </div>
+        <div id="team-filter" class="w-100 border d-flex flex-row flex-wrap">
+            {% get_team request.user as teams %}
+            {% for team in teams %}
+                <div id="filter-{{ team.name }}" onclick="teamFilterBtn('{{ team.name }}')" value="{{ team.id }}"  style="border: 1px solid black;padding:5px 10px 5px 10px;font-size:14px;border-radius:10px;margin-right:7px;" class="opacity-hover pointer bg-gray">{{ team.name }} 추천<i class="bi bi-check2" style="font-size:15px;padding-left:3px;"></i></div>
+            {% endfor %}
+        </div>
       <div id="article-card-body">
         {% include "community/account-card.html" %}
       </div>
@@ -43,8 +51,20 @@
         redraw();
       },
       placeholder: 'Tag',
-    })
+    });
   });
+  function teamFilterBtn(team_name){
+      var id = "#filter-"+team_name;
+      var obj = $(id);
+      {#$(id).css('background','none');#}
+      obj.toggleClass('bg-gray');
+      redraw(to_page_1=1)
+      {#console.log(team_li);#}
+
+  }
+
+
+
 </script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
