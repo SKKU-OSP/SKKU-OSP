@@ -749,6 +749,12 @@ function setGbtiModal(){
       data: { labels: typeE_label, datasets: [{data:typeE_data,
          backgroundColor: hour_palette, borderRadius:5}],},
       options:{
+        scales:{y:{
+          beginAtZero: true,
+          title:{
+          display:true, 
+          text:"Commits"
+        }}},
         plugins: {
           legend: { display: false },
         },
@@ -766,6 +772,12 @@ function setGbtiModal(){
         backgroundColor: freq_palette,
         barPercentage: 0.8, borderRadius:5}],},
       options:{
+        scales:{y:{
+          beginAtZero: true,
+          title:{
+          display:true, 
+          text:"Commits"
+        }}},
         plugins: {
           legend: { display: false },
         },
@@ -782,6 +794,12 @@ function setGbtiModal(){
         backgroundColor: cooperate_palette,
         barPercentage: 0.4, borderRadius:5}],},
       options:{
+        scales:{y:{
+          beginAtZero: true,
+          title:{
+          display:true, 
+          text:"Commits"
+        }}},
         plugins: {
           legend: { display: false },
         },
