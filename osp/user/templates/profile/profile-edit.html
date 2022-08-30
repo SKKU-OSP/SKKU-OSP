@@ -146,8 +146,8 @@
 {% endblock %}
 
 {% block script %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
-  <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
+<link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
 
 <script>
     function setBubble(range, bubble) {
@@ -155,21 +155,21 @@
         const min = range.min ? range.min : 0;
         const max = range.max ? range.max : 100;
         const newVal = Number(((val - min) * 100) / (max - min));
-        var txt = ''
+        var txt = '';
         if(val==0){
-            txt = '초보'
+            txt = '초보';
         }
         else if(val==1){
-            txt = '주니어'
+            txt = '주니어';
         }
         else if(val==2){
-            txt = '중급자'
+            txt = '중급자';
           }
         else if(val==3){
-            txt = '숙련자'
+            txt = '숙련자';
         }
         else{
-            txt = '장인'
+            txt = '장인';
         }
         bubble.innerHTML = txt;
       // Sorta magic numbers based on size of the native UI thumb
@@ -252,16 +252,14 @@
         console.log(formData);
         $.ajax({
             cache : false,
-            url : "languageupdate", // 요기에
-            //processData: false,
-            //contentType: false,
+            url : "languageupdate",
             type : 'POST', 
             data : formData,
             success : function(data) {
                 var jsonObj = JSON.parse(data);
                 console.log('success');
                 alert("sdf")
-            }, // success 
+            }, 
     
             error : function(xhr, status) {
                 alert(xhr + " : " + status);
@@ -295,14 +293,13 @@
       $.ajax({
         cache : false,
         url : "languageupdate",
-        //processData: false,
-        //contentType: false,
+
         type : 'POST', 
         data : formData,
         success : function(data) {
           var jsonObj = JSON.parse(data);
           console.log('success');
-        }, // success 
+        },
     
         error : function(xhr, status) {
           alert(xhr + " : " + status);
@@ -328,7 +325,6 @@
     
     function saveImg(){
       const imageInput = $("#photo")[0];
-      // 파일을 여러개 선택할 수 있으므로 files 라는 객체에 담긴다.
       console.log("imageInput: ", imageInput.files)
       
       /*
@@ -371,8 +367,6 @@
       $.ajax({
         cache : false,
         url : "save_all",
-        //processData: false,
-        //contentType: false,
         type : 'POST', 
         data : formData,
         success : function(data, response) {
@@ -389,9 +383,24 @@
 
         });
         setTimeout(function() {
-          console.log('이미지 리로드');
           $('#profileimg').load(window.location.href + ' #profileimg');
         }, 500);
+        setTimeout(function() {
+          $('#languagediv').load(window.location.href + ' #languagediv')
+        }, 500);
+        setTimeout(function() {
+          $('#interestsdiv').load(window.location.href + ' #interestsdiv')
+        }, 500);
+        setTimeout(function() {
+          console.log('start wraping');
+          var wraps = $('.range-wrap')
+          var ranges = $('.form-control-range');
+          var bubbles = $('.bubble');
+          for(var i = 0;i<wraps.length;i++){
+            Wrap(wraps[i], ranges[i], bubbles[i])
+            setBubble(ranges[i], bubbles[i])
+          }
+        }, 3000)
     }
   function readURL(input) {
     if (input.files && input.files[0]) {
@@ -408,6 +417,9 @@ $(document).ready(function() {
     readURL(this);
   });
 });
+
+
+f();
 
 
 </script>
