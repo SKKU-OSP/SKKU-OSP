@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
 from tag.models import Tag
-from team.models import TeamMember, Team, TeamTag
+from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest
 from community.models import TeamRecruitArticle
 
@@ -28,7 +28,10 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    for board in Board.objects.filter(team_board_query | Q(team_id=None)):
+    boards = Board.objects.filter(team_board_query | Q(team_id=None))
+    # if request.user.is_anonymous:
+    boards = boards.exclude(board_type='User')
+    for board in boards:
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
         # week_ago = datetime.now() - timedelta(days=7)
@@ -68,14 +71,22 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
+    context = {'board': board}
     if board.team_id is not None:
         if not request.user.is_authenticated:
             return redirect('/community')
-        if len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+        if TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
+                                            status=0).exists():
+            context['invited_user'] = True
+            context['waitedinvitemessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
+                                            status=0)
+        elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
             return redirect('/community')
-    context = {'board': board }
+
 
     if board.board_type == 'User':
+        if request.user.is_anonymous:
+            return redirect('/community')
         context['accounts'] = Account.objects.all()[:9]
         # context['account_all_cnt'] = Account.objects.all()
         return render(request, 'community/board/user-board.html', context)
@@ -111,10 +122,10 @@ def board(request, board_name, board_id):
         if request.user: my_acc = Account.objects.get(user=request.user)
 
         tm = team_members.filter(member=my_acc).first()
-        if not tm:
-            return redirect('/community')
-
-        context['team_admin'] = tm.is_admin
+        # if not tm:
+        #     return redirect('/community')
+        if tm:
+            context['team_admin'] = tm.is_admin
         context['team'] = team
         context['team_tags'] = team_tags
         context['team_members'] = team_members
@@ -133,6 +144,15 @@ def account_cards(request):
     article_list = Account.objects.filter(user__is_superuser=False)
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
+
+    import json
+    team_li = json.loads(request.GET.get('team_li'))
+    if request.user.is_anonymous:
+        team_li = []
+    elif team_li==['first']:
+        team_li = list(TeamMember.objects.filter(member__user=request.user).values_list("team_id", flat=True))
+
+
     if keyword != '':
         article_list = article_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
         print(keyword, type(keyword), article_list)
@@ -146,22 +166,32 @@ def account_cards(request):
         article_with_tag = AccountInterest.objects.filter(tag_query).values('account__user')
         article_list = article_list.filter(user__in=article_with_tag)
 
+    user_list = []
+    member_id = []
+    from itertools import chain
+    from team.recommend import get_team_recommendation
+    print(team_li)
+    if team_li:
+        for team_id in team_li:
+            team = Team.objects.get(id=team_id)
+            member_li = get_team_recommendation(team)
+            member_id += member_li
+            tmps = article_list.filter(user__in=member_li)
+            for tmp in tmps:
+                tmp.recommend_team = team
+            user_list += list(tmps)
+
+    user_list += list(article_list.exclude(user__in=member_id))
+
+    article_list = user_list
+
     total_len = len(article_list)
     # Order
     # article_list = article_list.order_by(*sort_field)
     # Slice to Page
     article_list = article_list[PAGE_SIZE * (page - 1):]
     article_list = article_list[:PAGE_SIZE]
-    # Get Article Metadata
-    # for article in article_list:
-        # comment_cnt = len(ArticleComment.objects.filter(article=article))
-        # like_cnt = len(ArticleLike.objects.filter(article=article))
-        # tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-        # article.comment_cnt = comment_cnt
-        # article.like_cnt = like_cnt
-        # article.tags = tags
-        # if board.name == 'Team':
-        #     article.team = TeamRecruitArticle.objects.get(article=article).team
+
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/account-card.html', context, request=request)
@@ -288,10 +318,11 @@ class ArticleView(TemplateView):
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
                 if teamrecruit:
                     context['article'].team = teamrecruit.team
+            context['article'].view_cnt += 1
+            context['article'].save()
         except:
-            s = 1
-        context['article'].view_cnt += 1
-        context['article'].save()
+            context['error_occur'] = True
+
 
         return render(request, 'community/article/article.html', context)
 

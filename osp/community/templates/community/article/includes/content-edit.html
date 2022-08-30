@@ -11,13 +11,13 @@
                 class="form-control" style="width:100%; height: 40px; padding-left:10px;" required autofocus>
             {% if board.board_type == 'Recruit' %}
             {% if type == 'register' %}
-            <select id="team-option" style="width:150px;height: 40px; padding-left:10px;border: 1px solid #ced4da;"
-                name="" id="" class="form-check" required>
+            <select id="team-option" style="width:150px;padding-left:10px;border: 1px solid #ced4da;"
+                name="" id="" class="form-control pointer" required>
                 {% team_options request.user %}
             </select>
             {% elif type == 'edit' %}
-            <select id="team-option" style="width:150px;height: 40px; padding-left:10px;border: 1px solid #ced4da;"
-                name="" id="" class="form-check" required>
+            <select id="team-option" style="border-radius:9px;width:150px;padding-right:2px;padding-left:10px;border: 1px solid #ced4da;"
+                name="" id="" class="form-control pointer" required>
                 <option value="{{ article.team.id }}" disabled selected>{{ article.team.name }}</option>
             </select>
             {% endif %}
@@ -45,7 +45,7 @@
                     <div class='input-group log-event' id='PeriodPickerStart' data-td-target-input='nearest'
                         data-td-target-toggle='nearest'>
                         <input id='PeriodPickerStartInput' type='text' class='form-control'
-                            data-td-target='#PeriodPickerStart' />
+                            data-td-target='#PeriodPickerStart' required/>
                         <span class='input-group-text' data-td-target='#PeriodPickerStart' data-td-toggle='datetimepicker'>
                             <span class="material-icons-outlined">
                                 today
@@ -58,7 +58,7 @@
                     <div class='input-group log-event' id='PeriodPickerEnd' data-td-target-input='nearest'
                         data-td-target-toggle='nearest'>
                         <input id='PeriodPickerEndInput' type='text' class='form-control'
-                            data-td-target='#PeriodPickerEnd' />
+                            data-td-target='#PeriodPickerEnd'  required />
                         <span class='input-group-text' data-td-target='#PeriodPickerEnd' data-td-toggle='datetimepicker'>
                             <span class="material-icons-outlined">
                                 event

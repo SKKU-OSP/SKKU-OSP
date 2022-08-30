@@ -5,6 +5,11 @@
 {% load static %}
 {% load tag_templatetag %}
 {% block content %}
+{% if error_occur %}
+   <div class="container my-4">
+   잘못된 페이지 입니다.
+   </div>
+{% else %}
 <div class="container my-4">
     <div style="height: 42px;"></div>
     <div id="community-container" class="row">
@@ -36,6 +41,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock content %}
 {% block script %}
 <script>
@@ -54,6 +60,51 @@
                 }
             });
         }
+
+        if (view_type == 'register') {
+            console.log('....');
+            const linkedPicker1Element = document.getElementById('PeriodPickerStart');
+            const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element, {
+                localization: {
+                    dayViewHeaderFormat: {
+                        month: 'long',
+                        year: '2-digit'
+                    },
+                    locale: 'en',
+                },
+            });
+            //linked1.dates.setFromInput("{{article.period_start|date:'Y-m-d'}}T{{article.period_start|date:'H:i:s'}}");
+            const linked2 = new tempusDominus.TempusDominus(document.getElementById(
+                'PeriodPickerEnd'), {
+                localization: {
+                    dayViewHeaderFormat: {
+                        month: 'long',
+                        year: '2-digit'
+                    },
+                    locale: 'en',
+                },
+                useCurrent: false
+            });
+            //linked2.dates.setFromInput("{{article.period_end|date:'Y-m-d'}}T{{article.period_end|date:'H:i:s'}}");
+
+            //using event listeners
+            linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+                linked2.updateOptions({
+                    restrictions: {
+                        minDate: e.detail.date
+                    }
+                });
+            });
+            //using subscribe method
+            const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+                linked1.updateOptions({
+                    restrictions: {
+                        maxDate: e.date
+                    }
+                });
+            });
+        }
+        {% if not request.user.is_anonymous %}
         $('#comment-is-anonymous').click(function() {
             if($(this).is(":checked")){
                 $('#comment-writer-display').html('익명');
@@ -64,17 +115,21 @@
                 $('#comment-writer-display').removeClass('annonymous');
             }
         });
+        {% endif %}
     });
+    function setToDateEnd(){
+        $('#PeriodPickerEndInput').val(new Date());
+    }
 
     function edit_submit(event) {
         console.log('TEST');
         event.preventDefault();
         var t = $('#article-form').attr('edit-type');
         if (t == 'register') {
-            console.log('1');
+            {#console.log('1');#}
             registerArticle();
         } else {
-            console.log('2');
+            {#console.log('2');#}
             updateArticle();
         }
         return false;

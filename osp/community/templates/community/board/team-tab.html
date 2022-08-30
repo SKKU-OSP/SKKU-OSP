@@ -1,58 +1,70 @@
 {% load static %}
-<div id="team-tab" class="d-flex" team-id="{{team.id}}">
-    <div id="team-image-container" >
-        <img id="team-image" src="{{ team.image.url }}" alt="team-image">
-    </div>
-    <div id="team-data">
-        <div id="team-name">
-            {{ team.name }}
-            {% if team_admin %}
-            <button id="team-update">
-                <i class="bi-pencil text-white"></i>
-            </button>
-            {% endif %}
-            {% if team_members.count == 1 or not team_admin %}
-                <button id="team-out">
-                    <i onclick="teamOut({{ team.id }},'{{ request.user.username }}')" class="material-icons text-white" style="font-size:16px;">
-                        logout
-                    </i>
-                </button>
-            {% endif %}
-
-        </div>
-        <div class="d-flex flex-row flex-wrap" >
-            <div id="team-members">
-                <div id="team-members-title">
-                    Members
+<div id="team-tab" class="row" style="margin-left:0px;margin-right:0px;" team-id="{{team.id}}">
+        <div class="col " >
+            <div class="d-flex flex-row ">
+                <div id="team-image-container" class=" " >
+                    <img id="team-image" src="{{ team.image.url }}" alt="team-image">
                 </div>
-                <div id="team-member-list">
-                    {% for member in team_members %}
-                    <div class="team-member">
-                        <a href="{% url 'user:profile' member.member.user.username %}" >{{member.member.user.username}}</a>
-                        {% if member.is_admin %}
-                        <span class="material-icons-outlined team-admin-icon">
-                            military_tech
-                        </span>
+                <div class=" " style="flex:1">
+                    <div id="team-name">
+                        {{ team.name }}
+                        {% if team_admin %}
+                        <button id="team-update">
+                            <i class="bi-pencil text-white"></i>
+                        </button>
+                        {% endif %}
+                        {% if team_members.count == 1 or not team_admin %}
+                            <button id="team-out">
+                                <i onclick="teamOut({{ team.id }},'{{ request.user.username }}')" class="material-icons text-white" style="font-size:16px;">
+                                    logout
+                                </i>
+                            </button>
                         {% endif %}
                     </div>
-                    {% endfor %}
+                    <div id="team-members">
+                        <div id="team-members-title">
+                            Members <i class="bi bi-person-plus-fill opacity-hover pointer" style="font-size:15px;padding-left:3px;" onclick="inviteMsgModalOpen(-1, {{ team.id }})"></i>
+                        </div>
+                        <div id="team-member-list" style="height:80px; margin-right:5px;">
+                            {% for member in team_members %}
+
+                            <div class="dropdown writer-dropdown dropdown-toggle no-icon-dropdown team-member" style="height:25px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class=""  style="display:inline-block;">
+                                    <a class="" style="color:white;text-decoration:underline;" >
+                                        {{member.member.user.username}}
+                                    </a>
+                                </div>
+                                {% if member.is_admin %}
+                                    <span class="material-icons-outlined team-admin-icon">
+                                        military_tech
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <ul class="dropdown-menu" style="position:absolute;">
+                                <li><a class="dropdown-item" href="/user/{{member.member.user.username}}">프로필</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                            </ul>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div id="team-info" class="d-flex flex-column flex-wrap" style="overflow-y:auto;overflow-x:auto;">
-                <div id="team-desc">
+        </div>
+        <div class="col " style="padding-top:10px; overflow-y:auto; min-width:50%;" >
+            <div id="team-info" class="d-flex flex-column w-100" style="overflow-y:auto;">
+                <div id="team-desc" >
                     {{team.description|linebreaksbr}}
                 </div>
-                <div id="team-tag">
+                <div id="team-tag" class="d-flex flex-row flex-wrap" style="width:440px;">
                     {% for tag in team_tags %}
-                    <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
+                    <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" style="margin-bottom:3px;" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="team-update-modal">
-</div>
+
+    <div class="modal fade" id="team-update-modal"></div>
 <script>
     var admin_list = [];
     var tag_list = [];

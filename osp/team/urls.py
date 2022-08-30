@@ -4,6 +4,7 @@ from team import views
 app_name = 'team'
 
 urlpatterns = [
+    path('api/team-invite', views.TeamInvite, name='team-invite'),
     path('api/team-create', views.TeamCreate, name='team-create'),
     path('api/team-update', views.TeamUpdate, name='team-update'),
     path('api/team-apply-list', views.TeamApplyList, name='team-apply-list'),
