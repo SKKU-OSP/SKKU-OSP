@@ -202,12 +202,12 @@
             type : 'POST', 
             data : formData,
             success : function(data) {
-                var jsonObj = JSON.parse(data);
+                //var jsonObj = JSON.parse(data);
                 console.log('success');
             }, // success 
     
             error : function(xhr, status) {
-                alert(xhr + " : " + status);
+                // alert(xhr + " : " + status);
                 console.log('error');
                 alert("선택하고 추가해주세요")
 
@@ -231,12 +231,12 @@
             type : 'POST', 
             data : formData,
             success : function(data) {
-                var jsonObj = JSON.parse(data);
+                //var jsonObj = JSON.parse(data);
                 console.log('success');
             }, // success 
     
             error : function(xhr, status) {
-                alert(xhr + " : " + status);
+                // alert(xhr + " : " + status);
                 console.log('error');
             }
         });
@@ -245,82 +245,85 @@
           $('#interestsdiv').load(window.location.href + ' #interestsdiv')
         }, 500);
     }
-    function languageAppend(){
-        var formData = $("#languageform").serialize();
-        formData += "&act=" + 'append';
-        formData += "&target=" + '';
-        console.log(formData);
-        $.ajax({
-            cache : false,
-            url : "languageupdate",
-            type : 'POST', 
-            data : formData,
-            success : function(data) {
-                var jsonObj = JSON.parse(data);
-                console.log('success');
-                alert("sdf")
-            }, 
-    
-            error : function(xhr, status) {
-                alert(xhr + " : " + status);
-                console.log('선택하고 추가해주세요');
-                alert("선택하고 추가해주세요")
-            }
-            
+    function reload_window(){
+        return new Promise(function(resolve){
+          console.log('language is deleted, reload window');
+          $('#languagediv').load(window.location.href + ' #languagediv');
+          resolve('hello');
         });
-        setTimeout(function() {
-          console.log('language is appended');
-          $('#languagediv').load(window.location.href + ' #languagediv')
-        }, 500);
+      }
+    function reload_bubble(){
+      return new Promise(function(resolve){
         setTimeout(function() {
           console.log('start wraping');
           var wraps = $('.range-wrap')
           var ranges = $('.form-control-range');
           var bubbles = $('.bubble');
+          console.log(ranges);
           for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i])
-            setBubble(ranges[i], bubbles[i])
+            Wrap(wraps[i], ranges[i], bubbles[i]);
+            setBubble(ranges[i], bubbles[i]);
           }
         }, 1000);
+
+        console.log("finish wraping");
+          resolve('hello');
+      });
+
+    }
+    async function reload(){
+      let a = await reload_window();
+      console.log('middle of async');
+      let b = await reload_bubble();
+      return('hello');
+    }
+    function languageAppend(){
+      var formData = $("#languageform").serialize();
+      formData += "&act=" + 'append';
+      formData += "&target=" + '';
+      console.log(formData);
+      $.ajax({
+        cache : false,
+          url : "languageupdate",
+          type : 'POST', 
+          data : formData,
+          success : function(data) {
+            console.log('success');
+          }, 
+          error : function(xhr, status) {
+              // alert(xhr + " : " + status);
+              console.log('선택하고 추가해주세요');
+              alert("선택하고 추가해주세요")
+          }  
+        });
+      reload();
     }
     function languageDelete(target){
       var formData = $("#languageform").serialize();
       formData += "&act=" + 'delete';
+      target = encodeURIComponent(target);
       formData += "&target=" + target;
+
       console.log(target);
       console.log(formData);
+
       
       $.ajax({
         cache : false,
         url : "languageupdate",
-
         type : 'POST', 
         data : formData,
         success : function(data) {
-          var jsonObj = JSON.parse(data);
+          //var jsonObj = JSON.parse(data);
           console.log('success');
         },
     
         error : function(xhr, status) {
-          alert(xhr + " : " + status);
           console.log('error');
         }
 
-        });
-        setTimeout(function() {
-          console.log('language is appended');
-          $('#languagediv').load(window.location.href + ' #languagediv')
-        }, 500);
-        setTimeout(function() {
-          console.log('start wraping');
-          var wraps = $('.range-wrap')
-          var ranges = $('.form-control-range');
-          var bubbles = $('.bubble');
-          for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i])
-            setBubble(ranges[i], bubbles[i])
-          }
-        }, 1000);
+      });
+      reload();
     }
     
     function saveImg(){
@@ -377,7 +380,7 @@
         }, // success 
     
         error : function(xhr, status) {
-          alert(xhr + " : " + status);
+          // alert(xhr + " : " + status);
           console.log('error');
         }
 
@@ -417,9 +420,6 @@ $(document).ready(function() {
     readURL(this);
   });
 });
-
-
-f();
 
 
 </script>
