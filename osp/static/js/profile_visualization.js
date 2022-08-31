@@ -19,7 +19,7 @@ window.onload = function () {
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
   const visual_ctx = []; // 4 ctx
   for(let i=0; i<=3; i++) visual_ctx.push(document.getElementById('canvas'+i).getContext("2d"));
-  let pi_chart = new Chart(visual_ctx[0]);
+  let pie_chart = new Chart(visual_ctx[0]);
   let radar_chart = new Chart(visual_ctx[1]);
   let dist_chart = new Chart(visual_ctx[2]);
   let specific_score_chart = new Chart(visual_ctx[3]);
@@ -323,32 +323,33 @@ window.onload = function () {
         div_activity_monthly.appendChild(mLabel);
       }
     }
-    pi_chart.destroy();
-    const pi_label = [];
+    pie_chart.destroy();
+    const pie_label = [];
     let divisor = 0
     for(; divisor<=standard_contr; divisor=Math.floor(divisor+standard_contr/3)){
-      if(divisor == 0) pi_label.push("0");
-      else pi_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
+      if(divisor == 0) pie_label.push("0");
+      else pie_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
     }
-    pi_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
-    const pi_dataset = Array(5).fill(0);
+    pie_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
+    const pie_dataset = Array(5).fill(0);
     let active_grass = 0;
     monthly_contribution_level.forEach((val)=>{
       if(val<=4) {
-        pi_dataset[val]++;
+        pie_dataset[val]++;
         active_grass++;
       }
     });
-    const pi_data = {
-      labels: pi_label,
+    const pie_data = {
+      labels: pie_label,
       datasets: [{
-        data: pi_dataset,
+        data: pie_dataset,
         backgroundColor: palette,
         hoverOffset: 4
       }]
     };
-    pi_chart = new Chart(visual_ctx[0], {
-      type: 'pie', data: pi_data, 
+    
+    pie_chart = new Chart(visual_ctx[0], {
+      type: 'pie', data: pie_data, 
       options:{
         plugins: {
           legend: { display: false },
@@ -359,9 +360,26 @@ window.onload = function () {
               },
             },
           },
+          datalabels:{
+            anchor: (context)=>{
+              return 'center';
+            },
+            color: "black",
+            font:{
+              family: 'IBMPlexSansKR-Regular',
+            },
+            formatter: (value, context) => {
+              const datasetArray = context.dataset.data;
+              if(datasetArray[context.dataIndex] > 0) 
+                return (datasetArray[context.dataIndex]*100/active_grass).toFixed(1) + "%";
+              else return '';
+            }
+          },
         },
         responsive: true,
-      }});
+      },
+      plugins: [ChartDataLabels],
+    });
   }
   
   function getNormalCoeff(value, label, is_work=1, goal=10){
