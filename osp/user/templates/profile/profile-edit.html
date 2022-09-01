@@ -346,11 +346,11 @@
         contentType: false,
         data: formData,
         success: function(rtn){
-          const message = rtn.data.values[0];
-          console.log("message: ", message)
+          //const message = rtn.data.values[0];
+          //console.log("message: ", message)
         },
         err: function(err){
-          console.log("err:", err)
+          //console.log("err:", err)
         }
       })
       setTimeout(function() {
@@ -373,7 +373,7 @@
         type : 'POST', 
         data : formData,
         success : function(data, response) {
-          var jsonObj = JSON.parse(data);
+          //var jsonObj = JSON.parse(data);
           
           console.log('success');
 
@@ -405,6 +405,7 @@
           }
         }, 3000)
     }
+  
   function readURL(input) {
     if (input.files && input.files[0]) {
     var reader = new FileReader();  
@@ -413,13 +414,32 @@
     }
       reader.readAsDataURL(input.files[0]);
     }
+    console.log('이미지 확인');
   }
  
-$(document).ready(function() {
-  $("#photo").change(function(){
-    readURL(this);
+  $(document).ready(function() {
+    $("#photo").change(function(){
+      
+      readURL(this);
+    });
   });
-});
+  /*
+  $(function() {
+    $("#photo").on('change', function(){
+    readURL(this);
+    });
+  });
+
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+        $('#img_section').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+  }
+  */
 
 
 </script>
