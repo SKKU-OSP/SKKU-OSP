@@ -20,7 +20,7 @@
       </div>
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
-          <div class="d-flex flex-column justify-content-end text-center user-info">
+          <div class="d-flex flex-column justify-content-end text-center user-info" id="profileimg_pa">
             <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
@@ -69,7 +69,7 @@
                 <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
               </div>
               <div class="d-flex row-userdata">
-                <span class="row-title text-center">Secondary Email</span>
+                <span class="row-title text-center" style="font-size: 13px;">Secondary Email</span>
                 <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
               </div>
             </form>
@@ -354,8 +354,8 @@
         }
       })
       setTimeout(function() {
-        console.log('이미지 리로드');
-          $('#profileimg').load(window.location.href + ' #profileimg');
+
+          location.reload();
         }, 500);
 
     }
@@ -385,25 +385,8 @@
         }
 
         });
-        setTimeout(function() {
-          $('#profileimg').load(window.location.href + ' #profileimg');
-        }, 500);
-        setTimeout(function() {
-          $('#languagediv').load(window.location.href + ' #languagediv')
-        }, 500);
-        setTimeout(function() {
-          $('#interestsdiv').load(window.location.href + ' #interestsdiv')
-        }, 500);
-        setTimeout(function() {
-          console.log('start wraping');
-          var wraps = $('.range-wrap')
-          var ranges = $('.form-control-range');
-          var bubbles = $('.bubble');
-          for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i])
-            setBubble(ranges[i], bubbles[i])
-          }
-        }, 3000)
+      reload();
+
     }
   
   function readURL(input) {
@@ -414,15 +397,44 @@
     }
       reader.readAsDataURL(input.files[0]);
     }
-    console.log('이미지 확인');
+    console.log('이미지 확인2');
   }
  
-  $(document).ready(function() {
+  $("#profileimg").ready(function() {
+    console.log('change detected');
     $("#photo").change(function(){
-      
+      console.log('이미지 확인1-로드');
+      let input = this;
+      console.log(input);
+      if (input.files && input.files[0]) {
+        console.log('preview avaliable');
+        var reader = new FileReader();  
+        reader.onload = function (e) {
+          console.log($('#image_section'));
+          $('#image_section').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+      console.log('이미지 확인2');
+    });
+  });
+
+  /*
+  $(document).ready(function() {
+    $("#profileimg").change(function(){
+      console.log('이미지 확인1');
+      readURL(this);  
+    });
+  });
+*/
+  /*
+  $('#profileimg').ready('load',function() {
+    $("#photo").change(function(){
+      console.log('이미지 확인1');
       readURL(this);
     });
   });
+  */
   /*
   $(function() {
     $("#photo").on('change', function(){
