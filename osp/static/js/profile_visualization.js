@@ -6,7 +6,7 @@ window.onload = function () {
   let year_intvl = end_year-start_year;
   let select_year = end_year;
   let select_month = 0;
-  let chartFactor = "score_sum";
+  let chartFactor = "score";
   let is_selected_month = 0;
   let is_nomalization = 0;
   const cssDecl = getComputedStyle(document.documentElement);
@@ -29,10 +29,7 @@ window.onload = function () {
       select_year = btn.innerText;
       $('.btn-year.active').removeClass("active");
       this.className += " active";
-      let start = new Date();
       updateMonthly(select_year);
-      let end = new Date();
-      console.log("updateMonthly elapsed time", end-start);
     });
   }
   let chart_navs = document.getElementsByClassName("nav-link");
@@ -85,9 +82,6 @@ window.onload = function () {
   $(".factor-item").on("click", (e)=>{
     $("#btnGroupDropFactor").text(e.target.innerText);
     chartFactor = (e.target.innerText).toLowerCase();
-    if(chartFactor == "score"){
-      chartFactor = "score_sum";
-    }
     updateFactor(factorLabels, select_month);
     makePage(chart_data, 2);
   });
@@ -136,15 +130,10 @@ window.onload = function () {
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
-  let factor_contribution_level = Array(6).fill(0);
   let target_contribution = Array(6).fill(0);
-  let target_contribution_level = Array(6).fill(0);
   
-  let start = new Date();
   updateMonthly(select_year);
   makeSpecificScoreChart();
-  let end = new Date();
-  console.log("updateMonthly elapsed time", end-start);
 
   function updateMonthly(select_year){
     monthly_contr = chart_data["monthly_contr"][select_year-start_year];
@@ -220,33 +209,10 @@ window.onload = function () {
         else target_contribution[j] = 0;
       }
     }
-    for(let i=0; i<factorLabels.length; i++){
-      factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
-      target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
-    }
-  }
-  
-  function getDataLevel(value, type, isMonthly=true){
-    let level = 0;
-    if (isMonthly) {
-      if (type === 1) level = Math.ceil(value / 25);
-      else if (type === 0)  level = Math.ceil(value / 2);
-      else if (type === 2)  level = Math.ceil(value / 3);
-      else level = Math.ceil(value / 2);
-    }
-    else {
-      if (type === 1) level = Math.ceil(value / 100);
-      else if (type === 0)  level = Math.ceil(value / 2);
-      else if (type === 2)  level = Math.ceil(value / 5);
-      else level = Math.ceil(value / 4);
-    }
-    if(level>4) level = 4;
-    return level;
   }
 
   /* Grass for Month */
   function makeMonthGrass(){
-    console.log("mMG: y",select_year, "month_contr", monthly_contribution);
     const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
     "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const fs = 15;
@@ -391,7 +357,7 @@ window.onload = function () {
   function makePage(chart_data, render_id=0){
     let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
     let user_data = {
-      "score_sum": user_data_total["total_score"],
+      "score": user_data_total["total_score"],
       "commit": user_data_total["commit_cnt"],
       "pr": user_data_total["pr_cnt"],
       "issue": user_data_total["issue_cnt"],
@@ -400,7 +366,7 @@ window.onload = function () {
     user_data["star"] = chart_data["own_star"]["star"];
     let annual_data = JSON.parse(chart_data["annual_overview"])[0];
     let dist_data = {
-      "score_sum" : chart_data["score_dist"][select_year-start_year],
+      "score" : chart_data["score_dist"][select_year-start_year],
       "star" : chart_data["star_dist"][select_year-start_year],
       "commit" : chart_data["commit_dist"][select_year-start_year],
       "pr" : chart_data["pr_dist"][select_year-start_year],
