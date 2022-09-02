@@ -53,14 +53,15 @@ $().ready(function () {
   // $('.team-invite').click();
 });
 
-function inviteMsgModalOpen (user_id=-1, team_id=-1) {
+function inviteMsgModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
+  console.log(rec_team_id);
     // console.log('hi!')
     // if (!$('#AddTeamModal').hasClass('ready')) {
       // console.log('hi')
       $.ajax({
         url: "/team/api/team-invite",
         type: "GET",
-        data:{'user_id':user_id, 'team_id':team_id},
+        data:{'user_id':user_id, 'team_id':team_id, 'recommend_team': rec_team_id},
         dataType: 'HTML'
       }).done(function (data) {
         $('#AddTeamModal').addClass('ready').html(data)
@@ -74,7 +75,8 @@ function inviteMsgModalOpen (user_id=-1, team_id=-1) {
           option_select = new SlimSelect({
             select: '#invite-team-id',
             // placeholder: 'Tag',
-        })
+        });
+
         }
 
         $('#team-invite-submit').click(function () {
