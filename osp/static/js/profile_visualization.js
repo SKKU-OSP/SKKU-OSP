@@ -497,10 +497,16 @@ window.onload = function () {
     const specific_score_label = ["main_repo_score", "other_repo_score", "reputation_score"];
     const cc3 = [];
     for(let i=0;i<3;i++) cc3.push(cssDecl.getPropertyValue('--data-score-'+ i));
+    let detail_score_sum = Array(year_intvl+1).fill(0);
     for(let i = 0; i < specific_score_label.length; i++){
       let score_dataset_data = [];
       let score_label = specific_score_label[i];
       for(let y = 0; y <= year_intvl; y++){
+        detail_score_sum[y] += score_data[y][score_label];
+        if(detail_score_sum[y] > 5.00){
+          score_data[y][score_label] -= (detail_score_sum[y] - 5);
+          detail_score_sum[y] = 5;
+        }
         score_dataset_data.push(score_data[y][score_label]);
       }
       score_dataset.push({
