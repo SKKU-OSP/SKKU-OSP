@@ -43,10 +43,7 @@ a.nav-link {
 
 }
 
-.form-switch {
-  padding-top: 9px;
-  flex-basis: 150px;
-}
+
 .d-flex.text-lg > .btn-toolbar {
   margin-right: 20px;
 }
@@ -72,21 +69,36 @@ a.nav-link {
 
 
 .delete-domain{
-  margin: 2px;
-  padding-left: 3px;
-  padding-right: 3px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  background-color: rgb(211,211,211);
+  width:20px;
+  height: 20px;
   border:0;
   outline: 0;
+  margin-top: 1px;
+  text-align: center;
+  line-height:8px;
+  padding-left: 6px;
+  margin-left:-14px;
+  border-radius: 0px 5px 5px 0px;
+  
+}
+.delete-domain:hover{
+  background-color: #121314;
 
   
 }
 .delete-badge{
-  padding-left: 0px;
+  width:30px;
+  margin-left: -10px;
+  margin-right: -3px;
 
 }
-
+.bg-tag-domain {
+  color: #000000 !important;
+  background-color: var(--tag-bg-domain) !important;
+  font-weight: 700 !important;
+  top:-10px;
+}
 
 #ints_delete{
   color :black;
@@ -116,9 +128,12 @@ a.nav-link {
   width: 100%;
 }
 .bubble {
-  background: rgb(23, 215, 103);
+  border-style: solid;
+  border-width: 1px;
+  outline: 3px black;
+  background: white;
   font-size: 10pt;
-  color: white;
+  color: black;
   position: absolute;
   border-radius: 4px;
   margin-top: 15px;
@@ -128,9 +143,9 @@ a.nav-link {
   white-space: nowrap;
 }
 .bubble::after {
-  background: rgb(23, 215, 103);
+  background: #D9D9D9;
   font-size: 10pt;
-  color: white;
+  color: black;
   position: absolute;
   border-radius: 4px;
   margin-top: 15px;
@@ -199,16 +214,15 @@ flex-grow: 0;
 }
 
 .savebtn{
-width: 120px;
+width: 100px;
 height: 30px;
-
 font-family: 'Inter';
 font-style: normal;
 font-weight: 400;
 font-size: 18px;
 line-height: 22px;
 /* identical to box height */
-border-radius: 3px;
+border-radius: 10px;
 margin-left: 5px;
 
 background-color: #E7EDF1;

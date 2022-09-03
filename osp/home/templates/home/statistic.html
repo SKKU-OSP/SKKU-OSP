@@ -140,9 +140,9 @@
     let chartdata_2 = JSON.parse("{{ chartdata_2 | escapejs }}");
     let chartdata_3 = JSON.parse("{{ chartdata_3 | escapejs }}");
     let repodata = JSON.parse("{{ repo | escapejs }}");
-    const end_year = {{end_year}};
-    const classGap = {{ classGap }};
-    const classCnt = {{ classCnt }};
+    const end_year = {{ end_year }};
+    const levelStep = {{ levelStep }};
+    const classNum = {{ classNum }};
     const deptLabel = JSON.parse("{{dept_list | escapejs }}");
   </script>
   <script type="text/javascript" src="{% static 'js/statistic.js' %}"></script>

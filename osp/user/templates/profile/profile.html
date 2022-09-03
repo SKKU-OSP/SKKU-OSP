@@ -18,60 +18,62 @@
       <div class="d-flex flex-column justify-content-end text-center user-info"
       {% if not data.is_own %}
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
-    {% endif %}
+      {% endif %}
       >
-          <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+        <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
         <div class="info-body">
         {% if data.is_own %}
           <p class="font-focus">{{data.info.name}}</p>
           <p>{{data.info.github_id}}</p>
         {% else %}
-            <div class="d-flex flex-row justify-content-between w-100" style="padding: 5px 0px;">
+          <div class="d-flex flex-row justify-content-between w-100" style="padding: 5px 0px;">
             <div style="margin:auto;">
                 Github:
-              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}} <i class="bi bi-box-arrow-up-right pointer"></i></a>
-
+              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">
+                {{data.info.github_id}}
+                <i class="bi bi-box-arrow-up-right pointer"></i>
+              </a>
             </div>
-            </div>
+          </div>
         {% endif %}
         </div>
       </div>
     {% if data.is_own %}
       <div class="d-flex flex-column user-detail">
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">학번</span>
-              <span class="row-txt">{{data.info.id}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">대학</span>
-              <span class="row-txt">{{data.info.college}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">학과</span>
-              <span class="row-txt">{{data.info.dept}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">전공</span>
-              <span class="row-txt">
-                {% if data.info.plural_major %}
-                복수전공
-                {% else %}
-                원전공
-                {% endif %}
-              </span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">GitHub</span>
-              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">개인 Email</span>
-              <span class="row-txt">{{data.info.personal_email}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">Github Email</span>
-              <span class="row-txt">{{data.info.primary_email}}</span>
-            </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">학번</span>
+          <span class="row-txt">{{data.info.id}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">대학</span>
+          <span class="row-txt">{{data.info.college}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">학과</span>
+          <span class="row-txt">{{data.info.dept}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">전공</span>
+          <span class="row-txt">
+            {% if data.info.plural_major %}
+            복수전공
+            {% else %}
+            원전공
+            {% endif %}
+          </span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">GitHub</span>
+          <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">개인 Email</span>
+          <span class="row-txt">{{data.info.personal_email}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">Github Email</span>
+          <span class="row-txt">{{data.info.primary_email}}</span>
+        </div>
       </div>
     {% endif %}
     </div>

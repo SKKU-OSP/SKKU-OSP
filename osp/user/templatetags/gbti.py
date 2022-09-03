@@ -98,6 +98,5 @@ def get_type_analysis(type_list):
     split_type("0", 2, [0])
     split_type("1", 3, [-0.4, 0.4])
     split_type("2", 2, [0])
-    print(result, resultKR, result_icon)
     
     return result, resultKR, result_icon

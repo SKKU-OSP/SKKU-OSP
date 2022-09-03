@@ -182,8 +182,6 @@ class GithubScore(models.Model):
             "main_repo_score": self.repo_score_sum,
             "other_repo_score": self.score_other_repo_sum,
             "reputation_score": self.score_star+self.score_fork,
-            "guideline_score": self.guideline_score,
-            "additional_score": self.additional_score_sum,
             "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork
         }
 
