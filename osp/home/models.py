@@ -16,11 +16,7 @@ class AnnualOverview(models.Model):
     # 각 데이터 평균과 표준편차
     case_num = models.IntegerField(null=False)
     score = models.TextField(null=False)
-    score_diff = models.TextField(null=False)
-    score_sum = models.TextField(null=False)
     score_std = models.TextField(null=False)
-    score_std_diff = models.TextField(null=False)
-    score_std_sum = models.TextField(null=False)
     
     commit = models.TextField(null=False)
     commit_std = models.TextField(null=False)
@@ -30,10 +26,8 @@ class AnnualOverview(models.Model):
     pr_std = models.TextField(null=False)
     issue = models.TextField(null=False)
     issue_std = models.TextField(null=False)
-    
-    #fork는 그래프에 사용하지는 않음
-    fork = models.TextField(null=False)
-    fork_std = models.TextField(null=False)
+    class_num = models.TextField(null=False, default="[10, 5, 5, 5, 5]")
+    level_step = models.TextField(null=False, default="[0.5, 100, 2, 5, 2]")
     
     # dictionary 형태로 반환하여 js에서 사용할 수 있도록
     def to_json(self):
@@ -49,8 +43,8 @@ class AnnualOverview(models.Model):
             "pr_std" : json.loads(self.pr_std),
             "issue" : json.loads(self.issue),
             "issue_std" : json.loads(self.issue_std),
-            "fork" : json.loads(self.fork),
-            "fork_std" : json.loads(self.fork_std)
+            "class_num" : json.loads(self.class_num),
+            "level_step" : json.loads(self.level_step)
         }
     def to_avg_json(self):
         return {
@@ -60,7 +54,6 @@ class AnnualOverview(models.Model):
             "star" : json.loads(self.star),
             "pr" : json.loads(self.pr),
             "issue" : json.loads(self.issue),
-            "fork" : json.loads(self.fork),
         }
     
 
@@ -71,8 +64,6 @@ class AnnualTotal(models.Model):
     case_num = models.IntegerField(null=False)
     # 기존 3점 이상 인원
     student_KP = models.TextField(null=False)
-    student_KP_diff = models.TextField(null=False, default="[0, 0, 0]")
-    student_KP_sum = models.TextField(null=False, default="[0, 0, 0]")
     student_total = models.TextField(null=False, default="[1, 1, 1]")
     
     commit = models.TextField(null=False)
@@ -101,32 +92,18 @@ class DistScore(models.Model):
     
     # 전체 Score 분포,  list size = 10
     score = models.TextField(null=False)
-    score_diff = models.TextField(null=False)
-    score_sum = models.TextField(null=False)
     
     # 학번별 Score 분포, 표준편차
     score_sid = models.TextField(null=False)
-    score_sid_diff = models.TextField(null=False)
-    score_sid_sum = models.TextField(null=False)
     score_sid_std = models.TextField(null=False)
-    score_sid_std_diff = models.TextField(null=False)
-    score_sid_std_sum = models.TextField(null=False)
     # 학번별 아웃라이어(Top5)
     score_sid_pct = models.TextField(null=False, default="[[],[],[],[],[],[],[]]")
-    score_sid_pct_diff = models.TextField(null=False, default="[[],[],[],[],[],[],[]]")
-    score_sid_pct_sum = models.TextField(null=False, default="[[],[],[],[],[],[],[]]")
     
     # 학과별 Score 분포, 표준편차
     score_dept = models.TextField(null=False)
-    score_dept_diff = models.TextField(null=False)
-    score_dept_sum = models.TextField(null=False)
     score_dept_std = models.TextField(null=False)
-    score_dept_std_diff = models.TextField(null=False)
-    score_dept_std_sum = models.TextField(null=False)
     # 학과별 아웃라이어(Top5)
     score_dept_pct = models.TextField(null=False, default="[[],[],[]]")
-    score_dept_pct_diff = models.TextField(null=False, default="[[],[],[]]")
-    score_dept_pct_sum = models.TextField(null=False, default="[[],[],[]]")
     
     def to_json(self):
         return {
@@ -190,8 +167,6 @@ class Student(models.Model):
     absence = models.IntegerField(null=False)
     plural_major = models.IntegerField(null=False)
     score = models.CharField(max_length=10, null=False)
-    score_diff = models.CharField(max_length=10, null=False, default="0.0")
-    score_sum = models.CharField(max_length=10, null=False, default="0.0")
     commit = models.IntegerField(null=False, default=0)
     star = models.IntegerField(null=False, default=0)
     pr = models.IntegerField(null=False, default=0)

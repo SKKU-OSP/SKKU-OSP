@@ -137,7 +137,6 @@ window.onload = function () {
 
     let dist = annual_dist["score"];
     let sidData = annual_dist["score_sid"];
-    console.log("sidData", sidData)
     for(let i=0; i<13; i=i+1+sidData.length/12) palette.push(cssDecl.getPropertyValue('--type-sid-'+i.toFixed()));
     let deptData = annual_dist["score_dept"];
     let sidTopData = annual_dist["score_sid_pct"];
@@ -146,11 +145,11 @@ window.onload = function () {
 
     const yearFactorList = ["score", "commit", "star", "pr", "issue"];
     let factorDistLabelDict = {};
-    classCnt.forEach((list_len, i)=>{
+    classNum.forEach((list_len, i)=>{
       factorDistLabelDict[yearFactorList[i]] = []
-      let gap = classGap[i];
+      let step = levelStep[i];
       for(let k=0; k<list_len; k++){
-        factorDistLabelDict[yearFactorList[i]].push( String(gap*k)+"~"+String(gap*(k+1)));
+        factorDistLabelDict[yearFactorList[i]].push( String(step*k)+"~"+String(step*(k+1)));
       }
     });
     const scoreDistLineLabel = [];
@@ -860,7 +859,6 @@ window.onload = function () {
     function controlFontSize() {
       const overviewCard = document.getElementById("overviewChart");
       let cw = overviewCard.getBoundingClientRect().width / 2;
-      console.log(overviewCard);
       const numerator = document.getElementsByClassName("text-primary");
       const denominator = document.getElementsByClassName("total");
       const percent = document.getElementsByClassName("percent");
@@ -870,7 +868,6 @@ window.onload = function () {
         let lenDenom = denominator.item(i).textContent.length;
         let lenPercent = percent.item(i).textContent.length;
         let lenText = (2*lenNumer + lenDenom + 2*lenPercent);
-        console.log(lenNumer, lenDenom, lenPercent, lenText);
         if (lenText >= 13) {
           kpi.item(i).style.fontSize = (cw / lenText).toFixed(2) +"px";
         }
