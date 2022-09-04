@@ -46,15 +46,6 @@ class AnnualOverview(models.Model):
             "class_num" : json.loads(self.class_num),
             "level_step" : json.loads(self.level_step)
         }
-    def to_avg_json(self):
-        return {
-            "case_num" : self.case_num,
-            "score" : json.loads(self.score),
-            "commit" : json.loads(self.commit),
-            "star" : json.loads(self.star),
-            "pr" : json.loads(self.pr),
-            "issue" : json.loads(self.issue),
-        }
     
 
 # 합계 3점 이상 인원, 총 Commit, Star, Repo 수

@@ -66,44 +66,7 @@ class GithubStatsYymm(models.Model):
             "issue" : self.num_of_issues,
             "total" : self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
         }
-        
-    
-class ScoreTable(models.Model):
-    a_id = models.AutoField(primary_key=True)
-    id = models.IntegerField()
-    year = models.IntegerField()
-    name = models.CharField(max_length=20)
-    github_id = models.CharField(max_length=40)
-    total_score = models.FloatField()
-    commit_cnt = models.IntegerField()
-    commit_line = models.IntegerField()
-    issue_cnt = models.IntegerField()
-    pr_cnt = models.IntegerField()
-    repo_cnt = models.IntegerField()
-    dept = models.CharField(max_length=45)
-    absence = models.IntegerField()
-    plural_major = models.IntegerField()
 
-    class Meta:
-        managed=False
-        db_table = 'score_table_sum'
-    
-    def to_json(self):
-        return {
-            "id":self.id,
-            "year":self.year,
-            "name":self.github_id,
-            "github_id":self.name,
-            "total_score":self.total_score,
-            "commit_cnt":self.commit_cnt,
-            "commit_line":self.commit_line,
-            "issue_cnt":self.issue_cnt,
-            "pr_cnt":self.pr_cnt,
-            "repo_cnt":self.repo_cnt,
-            "dept":self.dept,
-            "absence":self.absence,
-            "plural_major":self.plural_major,
-        }
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -184,50 +147,6 @@ class GithubScore(models.Model):
             "reputation_score": self.score_star+self.score_fork,
             "total_score": self.repo_score_sum + self.score_other_repo_sum + self.score_star+self.score_fork
         }
-
-class GithubRepoCommits(models.Model):
-    github_id = models.CharField(primary_key=True, max_length=40)
-    repo_name = models.CharField(max_length=100)
-    sha = models.CharField(max_length=40)
-    additions = models.IntegerField()
-    deletions = models.IntegerField()
-    author_date = models.DateTimeField()
-    committer_date = models.DateTimeField()
-    author = models.CharField(max_length=100, blank=True, null=True)
-    committer = models.CharField(max_length=100, blank=True, null=True)
-    author_github = models.CharField(max_length=50, blank=True, null=True)
-    committer_github = models.CharField(max_length=50, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'github_repo_commits'
-        unique_together = (('github_id', 'repo_name', 'sha'),)
-
-class GithubRepoStats(models.Model):
-    github_id = models.CharField(primary_key=True, max_length=40)
-    repo_name = models.CharField(max_length=100)
-    stargazers_count = models.IntegerField(blank=True, null=True)
-    forks_count = models.IntegerField(blank=True, null=True)
-    commits_count = models.IntegerField(blank=True, null=True)
-    prs_count = models.IntegerField(blank=True, null=True)
-    open_issue_count = models.IntegerField(blank=True, null=True)
-    close_issue_count = models.IntegerField(blank=True, null=True)
-    watchers_count = models.IntegerField(blank=True, null=True)
-    dependencies = models.IntegerField(blank=True, null=True)
-    language = models.CharField(max_length=45, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
-    contributors_count = models.IntegerField(blank=True, null=True)
-    release_ver = models.CharField(max_length=45, blank=True, null=True)
-    release_count = models.IntegerField(blank=True, null=True)
-    readme = models.IntegerField(blank=True, null=True)
-    license = models.CharField(max_length=45, blank=True, null=True)
-    proj_short_desc = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'github_repo_stats'
-        unique_together = (('github_id', 'repo_name'),)
 
 
 class GithubUserFollowing(models.Model):
