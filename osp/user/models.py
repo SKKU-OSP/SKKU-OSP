@@ -170,17 +170,6 @@ class GithubUserStarred(models.Model):
         unique_together = (('github_id', 'starred_repo_owner', 'starred_repo_name'),)
 
 
-class GithubRepoContributor(models.Model):
-    github_id = models.CharField(primary_key=True, max_length=40)
-    owner_id = models.CharField(max_length=40)
-    repo_name = models.CharField(max_length=100)
-
-    class Meta:
-        managed = False
-        db_table = 'github_repo_contributor'
-        unique_together = (('github_id', 'repo_name', 'owner_id'),)
-
-
 class DevType(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Account, models.CASCADE)
