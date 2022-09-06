@@ -518,7 +518,7 @@ def load_repo_data(request, username):
             commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
             recent_repos = {}
             id_reponame_pair_list = []
-            # 리포지토리 목록 중, 중복하지 않는 가장 최근 3개의 리포지토리 목록을 생성함
+            # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
             for commit in commit_repos:
                 commit_repo_name = commit['repo_name']
                 if len(recent_repos) == 4:
@@ -683,11 +683,9 @@ class ProfileType(TemplateView):
     
     def get_context_data(self, *args, **kwargs):
         
-        start = time.time()
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
         context["username"] = user
         context["end_year"] = datetime.datetime.now().date().today().year
-        print("ProfileTypeView time :", time.time() - start)
         
         return context
