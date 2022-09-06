@@ -28,7 +28,7 @@ def get_type_test(type1, type2, type3, type4):
         "ENTJ":{"code":"ENTJ", "nickname":"Dawn Breathe", "nicknameKR":"새벽 숨", "desc":" ".join([desc4[0], desc3[0], desc2[1], desc1[0]]), "descKR":" ".join([descKR4[0], descKR3[0], descKR2[1], descKR1[0]])},
         "INTP":{"code":"INTP", "nickname":"Blue Hour", "nicknameKR":"여명 빛", "desc":" ".join([desc4[1], desc3[0], desc2[1], desc1[1]]), "descKR":" ".join([descKR4[1], descKR3[0], descKR2[1], descKR1[1]])},
         "ESTJ":{"code":"ESTJ", "nickname":"Dune Line", "nicknameKR":"사구선", "desc":" ".join([desc4[0], desc3[0], desc2[0], desc1[0]]), "descKR":" ".join([descKR4[0], descKR3[0], descKR2[0], descKR1[0]])},
-        "ESTP":{"code":"ESTP", "nickname":"Lightning Flash", "nicknameKR":"번개 섬광", "desc":" ".join([desc4[1], desc3[0], desc2[0], desc1[0]]), "descKR":" ".join([descKR4[1], descKR3[0], descKR2[0], descKR1[1]])},
+        "ESTP":{"code":"ESTP", "nickname":"Lightning Flash", "nicknameKR":"번개 섬광", "desc":" ".join([desc4[1], desc3[0], desc2[0], desc1[0]]), "descKR":" ".join([descKR4[1], descKR3[0], descKR2[0], descKR1[0]])},
         "ENTP":{"code":"ENTP", "nickname":"Blinking Star", "nicknameKR":"깜박이별", "desc":" ".join([desc4[1], desc3[0], desc2[1], desc1[0]]), "descKR":" ".join([descKR4[1], descKR3[0], descKR2[1], descKR1[0]])},
     }
     gbti_combi_dict = {
