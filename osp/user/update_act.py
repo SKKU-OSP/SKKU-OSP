@@ -4,7 +4,8 @@ import os
 from scipy.stats import circmean
 from datetime import datetime
 import math, time, json
-from user.models import GithubRepoCommits, GithubRepoStats, DevType, StudentTab
+from user.models import StudentTab
+from repository.models import GithubRepoCommits, GithubRepoStats;
 from django.db.models import Case, When, IntegerField
 from osp.settings import BASE_DIR
 

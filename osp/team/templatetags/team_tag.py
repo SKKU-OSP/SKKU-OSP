@@ -12,8 +12,6 @@ def var_set(var):
 
 @register.simple_tag
 def make_team_board_url(team_id):
-    print('&*&*&**&*&*&*&*')
-    print(team_id)
     from django.shortcuts import resolve_url
     try:
         board = Board.objects.get(team__id=team_id)
@@ -48,7 +46,7 @@ def teammember_options_exclude_members(user, team):
     return mark_safe(result)
 
 @register.simple_tag
-def team_options_exclude_user(user, invite_user):
+def team_options_exclude_user(user, invite_user, recommend_team=-1):
     try:
         account = Account.objects.get(user=user)
         result = '<option value="" disabled selected>팀 선택</option>'
@@ -56,7 +54,17 @@ def team_options_exclude_user(user, invite_user):
         li2 = list(TeamMember.objects.filter(member__user=invite_user).values_list('team_id',flat=True))
         teams = Team.objects.filter(id__in=list(set(li1)-set(li2)))
         for team in teams:
-            result += f'<option team_id="{team.id}" value="{team.id}">{team.name}</option>'
+            # print('ggggggg')
+            # print(recommend_team)
+            if recommend_team!=-1 and team.id == int(recommend_team):
+                # print('this')
+                result += f'<option team_id="{team.id}" value="{team.id}" selected>{team.name}</option>'
+            else:
+                # print('team')
+                # print(team.id)
+                # print(recommend_team)
+                result += f'<option team_id="{team.id}" value="{team.id}">{team.name}</option>'
+
     except:
         result = ''
     return mark_safe(result)

@@ -79,8 +79,9 @@ def TeamInvite(request):
         # print(request.GET.get('user_id'))
         context = {
             'invite_user': Account.objects.filter(user__id=request.GET.get('user_id')).first(),
-            'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first()
-                   }
+            'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first(),
+            'recommend_team' : request.GET.get('recommend_team'),
+            }
         return render(request, 'team/invite-form.html',context)
     if request.method == 'POST':
         username = request.POST.get('username', False)

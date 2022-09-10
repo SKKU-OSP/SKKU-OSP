@@ -20,7 +20,7 @@
       </div>
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
-          <div class="d-flex flex-column justify-content-end text-center user-info">
+          <div class="d-flex flex-column justify-content-end text-center user-info" id="profileimg_pa">
             <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
@@ -54,7 +54,20 @@
               {% csrf_token %}
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">전공</span>
-                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value={{data.info.plural_major}}>
+                <div class="form-check" value="{{data.info.plural_major}}">
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    원전공
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="1">
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    복수전공
+                  </label>
+                </div>
+                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value={{data.info.plural_major}} hidden>
+
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">GitHub</span>
@@ -69,7 +82,7 @@
                 <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
               </div>
               <div class="d-flex row-userdata">
-                <span class="row-title text-center">Secondary Email</span>
+                <span class="row-title text-center" style="font-size: 13px;">Secondary Email</span>
                 <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
               </div>
             </form>
@@ -146,8 +159,8 @@
 {% endblock %}
 
 {% block script %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
-  <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
+<link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
 
 <script>
     function setBubble(range, bubble) {
@@ -155,21 +168,21 @@
         const min = range.min ? range.min : 0;
         const max = range.max ? range.max : 100;
         const newVal = Number(((val - min) * 100) / (max - min));
-        var txt = ''
+        var txt = '';
         if(val==0){
-            txt = '초보'
+            txt = '초보';
         }
         else if(val==1){
-            txt = '주니어'
+            txt = '주니어';
         }
         else if(val==2){
-            txt = '중급자'
+            txt = '중급자';
           }
         else if(val==3){
-            txt = '숙련자'
+            txt = '숙련자';
         }
         else{
-            txt = '장인'
+            txt = '장인';
         }
         bubble.innerHTML = txt;
       // Sorta magic numbers based on size of the native UI thumb
@@ -202,12 +215,12 @@
             type : 'POST', 
             data : formData,
             success : function(data) {
-                var jsonObj = JSON.parse(data);
+                //var jsonObj = JSON.parse(data);
                 console.log('success');
             }, // success 
     
             error : function(xhr, status) {
-                alert(xhr + " : " + status);
+                // alert(xhr + " : " + status);
                 console.log('error');
                 alert("선택하고 추가해주세요")
 
@@ -231,12 +244,12 @@
             type : 'POST', 
             data : formData,
             success : function(data) {
-                var jsonObj = JSON.parse(data);
+                //var jsonObj = JSON.parse(data);
                 console.log('success');
             }, // success 
     
             error : function(xhr, status) {
-                alert(xhr + " : " + status);
+                // alert(xhr + " : " + status);
                 console.log('error');
             }
         });
@@ -245,90 +258,89 @@
           $('#interestsdiv').load(window.location.href + ' #interestsdiv')
         }, 500);
     }
-    function languageAppend(){
-        var formData = $("#languageform").serialize();
-        formData += "&act=" + 'append';
-        formData += "&target=" + '';
-        console.log(formData);
-        $.ajax({
-            cache : false,
-            url : "languageupdate", // 요기에
-            //processData: false,
-            //contentType: false,
-            type : 'POST', 
-            data : formData,
-            success : function(data) {
-                var jsonObj = JSON.parse(data);
-                console.log('success');
-                alert("sdf")
-            }, // success 
-    
-            error : function(xhr, status) {
-                alert(xhr + " : " + status);
-                console.log('선택하고 추가해주세요');
-                alert("선택하고 추가해주세요")
-            }
-            
+    function reload_window(){
+        return new Promise(function(resolve){
+          console.log('language is deleted, reload window');
+          $('#languagediv').load(window.location.href + ' #languagediv');
+          resolve('hello');
         });
-        setTimeout(function() {
-          console.log('language is appended');
-          $('#languagediv').load(window.location.href + ' #languagediv')
-        }, 500);
+      }
+    function reload_bubble(){
+      return new Promise(function(resolve){
         setTimeout(function() {
           console.log('start wraping');
           var wraps = $('.range-wrap')
           var ranges = $('.form-control-range');
           var bubbles = $('.bubble');
+          console.log(ranges);
           for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i])
-            setBubble(ranges[i], bubbles[i])
+            Wrap(wraps[i], ranges[i], bubbles[i]);
+            setBubble(ranges[i], bubbles[i]);
           }
         }, 1000);
+
+        console.log("finish wraping");
+          resolve('hello');
+      });
+
+    }
+    async function reload(){
+      let a = await reload_window();
+      console.log('middle of async');
+      let b = await reload_bubble();
+      return('hello');
+    }
+    function languageAppend(){
+      var formData = $("#languageform").serialize();
+      formData += "&act=" + 'append';
+      formData += "&target=" + '';
+      console.log(formData);
+      $.ajax({
+        cache : false,
+          url : "languageupdate",
+          type : 'POST', 
+          data : formData,
+          success : function(data) {
+            console.log('success');
+          }, 
+          error : function(xhr, status) {
+              // alert(xhr + " : " + status);
+              console.log('선택하고 추가해주세요');
+              alert("선택하고 추가해주세요")
+          }  
+        });
+      reload();
     }
     function languageDelete(target){
       var formData = $("#languageform").serialize();
       formData += "&act=" + 'delete';
+      target = encodeURIComponent(target);
       formData += "&target=" + target;
+
       console.log(target);
       console.log(formData);
+
       
       $.ajax({
         cache : false,
         url : "languageupdate",
-        //processData: false,
-        //contentType: false,
         type : 'POST', 
         data : formData,
         success : function(data) {
-          var jsonObj = JSON.parse(data);
+          //var jsonObj = JSON.parse(data);
           console.log('success');
-        }, // success 
+        },
     
         error : function(xhr, status) {
-          alert(xhr + " : " + status);
           console.log('error');
         }
 
-        });
-        setTimeout(function() {
-          console.log('language is appended');
-          $('#languagediv').load(window.location.href + ' #languagediv')
-        }, 500);
-        setTimeout(function() {
-          console.log('start wraping');
-          var wraps = $('.range-wrap')
-          var ranges = $('.form-control-range');
-          var bubbles = $('.bubble');
-          for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i])
-            setBubble(ranges[i], bubbles[i])
-          }
-        }, 1000);
+      });
+      reload();
     }
     
     function saveImg(){
       const imageInput = $("#photo")[0];
-      // 파일을 여러개 선택할 수 있으므로 files 라는 객체에 담긴다.
       console.log("imageInput: ", imageInput.files)
       
       /*
@@ -347,17 +359,17 @@
         contentType: false,
         data: formData,
         success: function(rtn){
-          const message = rtn.data.values[0];
-          console.log("message: ", message)
+          //const message = rtn.data.values[0];
+          //console.log("message: ", message)
         },
         err: function(err){
-          console.log("err:", err)
+          //console.log("err:", err)
         }
       })
       setTimeout(function() {
-        console.log('이미지 리로드');
-          $('#profileimg').load(window.location.href + ' #profileimg');
-        }, 500);
+
+          location.reload();
+        }, 1000);
 
     }
     
@@ -366,33 +378,31 @@
       formData += '&' + $('#infoform').serialize();
       formData += '&' + $('#introform').serialize();
       formData += '&' + $('.lang-tag').serialize();
+      formData += ''
       alert("저장되었습니다.");
       console.log(formData);
       $.ajax({
         cache : false,
         url : "save_all",
-        //processData: false,
-        //contentType: false,
         type : 'POST', 
         data : formData,
         success : function(data, response) {
-          var jsonObj = JSON.parse(data);
+          //var jsonObj = JSON.parse(data);
           
           console.log('success');
 
         }, // success 
     
         error : function(xhr, status) {
-          alert(xhr + " : " + status);
+          // alert(xhr + " : " + status);
           console.log('error');
         }
 
         });
-        setTimeout(function() {
-          console.log('이미지 리로드');
-          $('#profileimg').load(window.location.href + ' #profileimg');
-        }, 500);
+      reload();
+
     }
+  
   function readURL(input) {
     if (input.files && input.files[0]) {
     var reader = new FileReader();  
@@ -401,13 +411,79 @@
     }
       reader.readAsDataURL(input.files[0]);
     }
+    console.log('이미지 확인2');
   }
  
-$(document).ready(function() {
-  $("#photo").change(function(){
-    readURL(this);
+  $("#profileimg").ready(function() {
+    console.log('change detected');
+    $("#photo").change(function(){
+      console.log('이미지 확인1-로드');
+      let input = this;
+      console.log(input);
+      if (input.files && input.files[0]) {
+        console.log('preview avaliable');
+        var reader = new FileReader();  
+        reader.onload = function (e) {
+          console.log($('#image_section'));
+          $('#image_section').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+      console.log('이미지 확인2');
+    });
   });
-});
+
+  
+  $(document).ready(function() {
+    console.log($('.form-check').attr('value'));
+    plural = $('.form-check').attr('value');
+    if(plural==0){
+      $(":radio[id=flexRadioDefault1]").prop('checked', true);
+    }
+    else{
+      $(":radio[id=flexRadioDefault2]").prop('checked', true);
+    }
+    $("#flexRadioDefault1").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="flexRadioDefault"]:checked').val();
+      $('#plural_major').val('0');
+      console.log(radio);
+      
+    });
+    $("#flexRadioDefault2").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="flexRadioDefault"]:checked').val();
+      $('#plural_major').val('1');
+      console.log(radio);
+      
+    });
+  });
+
+  /*
+  $('#profileimg').ready('load',function() {
+    $("#photo").change(function(){
+      console.log('이미지 확인1');
+      readURL(this);
+    });
+  });
+  */
+  /*
+  $(function() {
+    $("#photo").on('change', function(){
+    readURL(this);
+    });
+  });
+
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+        $('#img_section').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+  }
+  */
 
 
 </script>
