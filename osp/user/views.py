@@ -1,4 +1,3 @@
-import re
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
@@ -12,8 +11,7 @@ from django.core.files.images import get_image_dimensions
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
 from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
-from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
-from osp.settings import BASE_DIR
+from repository.models import GithubRepoStats, GithubRepoCommits
 
 from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
@@ -23,13 +21,11 @@ import time, datetime
 import json
 import os
 import math
-import pandas as pd
 
 
 # Create your views here.
 class ProfileView(TemplateView):
 
-    # TODO: start_year, end_year에 기반하지 않는 수식 필요
     template_name = 'profile/profile.html'
     start_year = 2019
     # 새로 고침 시 GET 요청으로 처리됨.
@@ -113,8 +109,6 @@ class ProfileView(TemplateView):
 
     def get_context_data(self, request, *args, **kwargs):
         
-        start = time.time()
-        
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
         account = Account.objects.get(user=user)
@@ -195,13 +189,13 @@ class ProfileView(TemplateView):
                 pr_dist[yid].append(factor_data["pr_cnt"])
                 issue_dist[yid].append(factor_data["issue_cnt"])
                 repo_dist[yid].append(factor_data["repo_cnt"])
-        annual_dist_data = {"score_sum":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_sum_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
+        annual_dist_data = {"score":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
         for sub_dist in score_dist:
             sub_dist.sort()
             mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["score_sum"].append(mean)
+            annual_dist_data["score"].append(mean)
             sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["score_sum_std"].append(sigma)
+            annual_dist_data["score_std"].append(sigma)
         for sub_dist in commit_dist:
             sub_dist.sort()
             mean = sum(sub_dist)/len(sub_dist)
@@ -234,7 +228,6 @@ class ProfileView(TemplateView):
         chartdata["issue_dist"] = issue_dist
         chartdata["repo_dist"] = repo_dist
         
-        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_contr = [ [] for i in range(num_year)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
@@ -245,7 +238,6 @@ class ProfileView(TemplateView):
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
-        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_avg = [ [] for i in range(num_year)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
@@ -263,13 +255,10 @@ class ProfileView(TemplateView):
         
         #GBTI test
         hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(context['username'])
-        print("commit_time", daytime, night, hour_dist)
         
         major_act, indi_num, group_num = update_act.read_major_act(context['username'])
-        print("major_act", major_act, indi_num, group_num)
         
         commit_freq, commit_freq_dist = update_act.read_frequency(context['username'])
-        print("commit_freq", commit_freq, commit_freq_dist)
         try:
             type_data = {}
             type_data["typeE_data"] = hour_dist
@@ -315,8 +304,6 @@ class ProfileView(TemplateView):
             gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
             context["gbti"] = gbti_data
         context["test"] = test_data
-        
-        print("ProfileView time :", time.time() - start)
         
         return context
 
@@ -531,7 +518,7 @@ def load_repo_data(request, username):
             commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
             recent_repos = {}
             id_reponame_pair_list = []
-            # 리포지토리 목록 중, 중복하지 않는 가장 최근 3개의 리포지토리 목록을 생성함
+            # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
             for commit in commit_repos:
                 commit_repo_name = commit['repo_name']
                 if len(recent_repos) == 4:
@@ -696,11 +683,9 @@ class ProfileType(TemplateView):
     
     def get_context_data(self, *args, **kwargs):
         
-        start = time.time()
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
         context["username"] = user
         context["end_year"] = datetime.datetime.now().date().today().year
-        print("ProfileTypeView time :", time.time() - start)
         
         return context

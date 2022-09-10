@@ -28,7 +28,11 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
                             <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
+                            {% if account.recommend_team %}
+                            <li><a class="dropdown-item" href="#" onclick="inviteMsgModalOpen({{ account.user.id }},-1, {{ account.recommend_team.id }} )">팀 초대하기</a></li>
+                            {% else %}
                             <li><a class="dropdown-item" href="#" onclick="inviteMsgModalOpen({{ account.user.id }})">팀 초대하기</a></li>
+                            {% endif %}
                         </ul>
                     </div>
                     {% endif %}

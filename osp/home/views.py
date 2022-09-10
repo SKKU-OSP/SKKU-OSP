@@ -73,8 +73,8 @@ def statistic(request):
                 if repo.year >= start_year:
                     repo_list[repo.year-start_year].append(repo.to_json())
             context["repo"] = json.dumps(repo_list)
-            context["classGap"] = json.loads(annual_overview[case].fork)
-            context["classCnt"] = json.loads(annual_overview[case].fork_std)
+            context["classNum"] = json.loads(annual_overview[case].class_num)
+            context["levelStep"] = json.loads(annual_overview[case].level_step)
             
         for year in range(start_year, end_year+1):
             # 3. MODEL DistScore
