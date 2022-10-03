@@ -49,11 +49,49 @@ def main(request):
         # 최신 게시물
         article_list = Article.objects.filter(board_id=board).order_by('-pub_date')
         board.article_list = article_list[:min(3, len(article_list))]
+        article_tags = ArticleTag.objects.filter(article__in=board.article_list).values('article', 'tag__name', 'tag__type')
+        article_tags_dict = {}
+        try:
+            for atg in article_tags:
+                if atg["article"] not in article_tags_dict:
+                    article_tags_dict[atg["article"]] = []
+                article_tags_dict[atg["article"]].append({'name':atg["tag__name"], 'type':atg["tag__type"]})
+        except Exception as e:
+            print("error tag", e)
+            
+        article_likes = ArticleLike.objects.filter(article__in=board.article_list).values('article').annotate(like_num=Count('article'))
+        article_likes_dict = {}
+        try:
+            for obj in article_likes:
+                article_likes_dict[obj["article"]] = obj["like_num"]
+        except Exception as e:
+            print("like error: ", e)
+            
+        article_comments = ArticleComment.objects.filter(article__in=board.article_list).values('article').annotate(comment_num=Count('article'))
+        article_comments_dict = {}
+        try:
+            for obj in article_comments:
+                article_comments_dict[obj["article"]] = obj["comment_num"]
+        except Exception as e:
+            print("comment error: ", e)
+            
+        article_scraps = ArticleScrap.objects.filter(article__in=board.article_list).values('article').annotate(scrap_num=Count('article'))
+        article_scraps_dict = {}
+        try:
+            for obj in article_scraps:
+                article_scraps_dict[obj["article"]] = obj["scrap_num"]
+        except Exception as e:
+            print("scrap error: ", e)
+            
         for article in board.article_list:
-            article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-            article.like_cnt = len(ArticleLike.objects.filter(article=article))
-            article.comment_cnt = len(ArticleComment.objects.filter(article=article))
-            article.scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+            #article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+            article.tags = article_tags_dict[article.id]
+            # article.like_cnt = len(ArticleLike.objects.filter(article=article))
+            article.like_cnt = article_likes_dict.get(article.id, 0)
+            # article.comment_cnt = len(ArticleComment.objects.filter(article=article))
+            article.comment_cnt = article_comments_dict.get(article.id, 0)
+            # article.scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+            article.scrap_cnt = article_scraps_dict.get(article.id, 0)
             if board.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
