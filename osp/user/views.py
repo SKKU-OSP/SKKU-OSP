@@ -598,9 +598,6 @@ def load_language_data(request, username):
 def load_img_data(request, username):
     user = User.objects.get(username=username)
     user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-
-
 
     pre_img = user_account.photo.path
     field_check_list = {}
@@ -611,10 +608,10 @@ def load_img_data(request, username):
     is_valid = True
     if profile_img:
         img_width, img_height = get_image_dimensions(profile_img)
-        # if img_width > 500 or img_height > 500:
-        #     is_valid = False
-        #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-        #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
+        if img_width > 500 or img_height > 500:
+            is_valid = False
+            field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+            print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
     img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
     print(img_form)
@@ -633,12 +630,11 @@ def load_img_data(request, username):
 
     else:
         print(field_check_list['photo'])
-    img_form.save()
+
     return redirect(f'/user/{username}/profile-edit/')
 
 @csrf_exempt
 def save_all(request, username):
-    print(username)
     user = User.objects.get(username=username)
     user_account = Account.objects.get(user=user.id)
     student_id = user_account.student_data.id
@@ -646,9 +642,6 @@ def save_all(request, username):
     tags_all = Tag.objects
     tags_domain = tags_all.filter(type='domain')
 
-    # print(request.POST.get("action"))
-    print('저장해봐')
-    print(request.POST['portfolio'])
     lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
 
     for l in lang:
