@@ -14,7 +14,7 @@
     <div class="container my-4" id="wholecontent">
       <div class="d-flex justify-content-end mb-1">
         <!--button type="submit" class="btn btn-primary" method='POST' action="">저장</button-->
-        <button class="savebtn" onclick="saveAll(); saveImg();return false;">저장하기</button>
+        <button class="savebtn" onclick="saveImg(); saveAll(); return false;">저장하기</button>
         <button class="savebtn" onclick="location.href='..'">돌아가기</button >
 
       </div>
@@ -54,13 +54,13 @@
               {% csrf_token %}
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">전공</span>
-                <div class="form-check" value="{{data.info.plural_major}}">
+                <div class="form-check plural-major-radio" value="{{data.info.plural_major}}">
                   <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
                   <label class="form-check-label" for="flexRadioDefault1">
                     원전공
                   </label>
                 </div>
-                <div class="form-check">
+                <div class="form-check plural-major-radio">
                   <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="1">
                   <label class="form-check-label" for="flexRadioDefault2">
                     복수전공
@@ -277,7 +277,7 @@
             Wrap(wraps[i], ranges[i], bubbles[i]);
             setBubble(ranges[i], bubbles[i]);
           }
-        }, 1000);
+        }, 2000);
 
         console.log("finish wraping");
           resolve('hello');
@@ -343,33 +343,31 @@
       const imageInput = $("#photo")[0];
       console.log("imageInput: ", imageInput.files)
       
-      /*
-      if(imageInput.files.length === 0){
-        alert("파일은 선택해주세요");
-        return;
-      }
-      */
-
-      const formData = new FormData();
-      formData.append("photo", imageInput.files[0]);
-      $.ajax({
-        type:"POST",
-        url: "imgupdate",
-        processData: false,
-        contentType: false,
-        data: formData,
-        success: function(rtn){
-          //const message = rtn.data.values[0];
-          //console.log("message: ", message)
-        },
-        err: function(err){
-          //console.log("err:", err)
-        }
-      })
+      if(imageInput.files.length > 0){
+        const formData = new FormData();
+        formData.append("photo", imageInput.files[0]);
+        $.ajax({
+          type:"POST",
+          url: "imgupdate",
+          processData: false,
+          contentType: false,
+          data: formData,
+          success: function(rtn){
+            //const message = rtn.data.values[0];
+            //console.log("message: ", message)
+          },
+          err: function(err){
+            //console.log("err:", err)
+          }
+        })
       setTimeout(function() {
 
           location.reload();
         }, 1000);
+
+
+      }
+
 
     }
     
@@ -435,8 +433,8 @@
 
   
   $(document).ready(function() {
-    console.log($('.form-check').attr('value'));
-    plural = $('.form-check').attr('value');
+    console.log($('.plural-major-radio').attr('value'));
+    plural = $('.plural-major-radio').attr('value');
     if(plural==0){
       $(":radio[id=flexRadioDefault1]").prop('checked', true);
     }
@@ -458,33 +456,6 @@
       
     });
   });
-
-  /*
-  $('#profileimg').ready('load',function() {
-    $("#photo").change(function(){
-      console.log('이미지 확인1');
-      readURL(this);
-    });
-  });
-  */
-  /*
-  $(function() {
-    $("#photo").on('change', function(){
-    readURL(this);
-    });
-  });
-
-  function readURL(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-        $('#img_section').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
-  }
-  */
-
 
 </script>
 
