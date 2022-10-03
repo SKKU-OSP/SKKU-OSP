@@ -601,7 +601,6 @@ def load_img_data(request, username):
 
     pre_img = user_account.photo.path
     field_check_list = {}
-    print(request.FILES)
     profile_img = request.FILES.get('photo', False)
     print('img 상태')
     print(profile_img)
