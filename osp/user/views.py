@@ -13,7 +13,7 @@ from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
 from repository.models import GithubRepoStats, GithubRepoCommits
 
-from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
+from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
@@ -37,9 +37,6 @@ class ProfileView(TemplateView):
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
             return redirect('/community')
-        # is_own = str(request.user) == context['username']
-        # print('&*&(&*&(*&*(&*(')
-        # print(is_own)
 
         student_info = context['account'].student_data
 
@@ -316,9 +313,7 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
-        user_tab = StudentTab.objects.get(id=student_id)
         tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
 
         pre_img = user_account.photo.path
         field_check_list = {}
@@ -329,10 +324,10 @@ class ProfileEditView(TemplateView):
         is_valid = True
         if profile_img:
             img_width, img_height = get_image_dimensions(profile_img)
-            # if img_width > 500 or img_height > 500:
-            #     is_valid = False
-            #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-            #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
         print(img_form)
@@ -371,11 +366,7 @@ class ProfileEditView(TemplateView):
         lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
         # developing....
 
-
-        # info_form = ProfileInfoUploadForm(prefix="infoform")
         img_form = ProfileImgUploadForm(prefix="imgform")
-        # port_form = PortfolioUploadForm(prefix="portform")
-        # intro_form = IntroductionUploadForm(prefix="introform")
 
         form = {
             'img_form': img_form,
@@ -613,7 +604,7 @@ def load_img_data(request, username):
 
     pre_img = user_account.photo.path
     field_check_list = {}
-    print(request .FILES)
+    print(request.FILES)
     profile_img = request.FILES.get('photo', False)
     print('img 상태')
     print(profile_img)
