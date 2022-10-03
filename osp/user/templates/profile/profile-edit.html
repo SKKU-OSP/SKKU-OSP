@@ -14,7 +14,7 @@
     <div class="container my-4" id="wholecontent">
       <div class="d-flex justify-content-end mb-1">
         <!--button type="submit" class="btn btn-primary" method='POST' action="">저장</button-->
-        <button class="savebtn" onclick="saveAll(); saveImg();return false;">저장하기</button>
+        <button class="savebtn" onclick="saveImg(); saveAll(); return false;">저장하기</button>
         <button class="savebtn" onclick="location.href='..'">돌아가기</button >
 
       </div>
@@ -343,33 +343,31 @@
       const imageInput = $("#photo")[0];
       console.log("imageInput: ", imageInput.files)
       
-      /*
-      if(imageInput.files.length === 0){
-        alert("파일은 선택해주세요");
-        return;
-      }
-      */
-
-      const formData = new FormData();
-      formData.append("photo", imageInput.files[0]);
-      $.ajax({
-        type:"POST",
-        url: "imgupdate",
-        processData: false,
-        contentType: false,
-        data: formData,
-        success: function(rtn){
-          //const message = rtn.data.values[0];
-          //console.log("message: ", message)
-        },
-        err: function(err){
-          //console.log("err:", err)
-        }
-      })
+      if(imageInput.files.length > 0){
+        const formData = new FormData();
+        formData.append("photo", imageInput.files[0]);
+        $.ajax({
+          type:"POST",
+          url: "imgupdate",
+          processData: false,
+          contentType: false,
+          data: formData,
+          success: function(rtn){
+            //const message = rtn.data.values[0];
+            //console.log("message: ", message)
+          },
+          err: function(err){
+            //console.log("err:", err)
+          }
+        })
       setTimeout(function() {
 
           location.reload();
         }, 1000);
+
+
+      }
+
 
     }
     
@@ -458,33 +456,6 @@
       
     });
   });
-
-  /*
-  $('#profileimg').ready('load',function() {
-    $("#photo").change(function(){
-      console.log('이미지 확인1');
-      readURL(this);
-    });
-  });
-  */
-  /*
-  $(function() {
-    $("#photo").on('change', function(){
-    readURL(this);
-    });
-  });
-
-  function readURL(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-        $('#img_section').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
-  }
-  */
-
 
 </script>
 
