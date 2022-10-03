@@ -76,7 +76,6 @@ def teamInfoValidation(team_name, team_desc, team_img):
 # Create your views here.
 def TeamInvite(request):
     if request.method == 'GET':
-        # print(request.GET.get('user_id'))
         context = {
             'invite_user': Account.objects.filter(user__id=request.GET.get('user_id')).first(),
             'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first(),
@@ -86,18 +85,13 @@ def TeamInvite(request):
     if request.method == 'POST':
         username = request.POST.get('username', False)
         team_id = request.POST.get('team_id', False)
-        # print(username)
-        # print('*******')
-        # print(team_id)
         invite_msg = request.POST.get('invite_msg', False)
-        # print(invite_msg)
         field_check_list, is_valid = teamInviteValidation(request.user, username,team_id,invite_msg)
 
         if is_valid and TeamMember.objects.filter(member__user__username=username, team__id=team_id):
             is_valid = False
 
         if is_valid:
-            # print('hi')
             try:
                 with transaction.atomic():
                     team = Team.objects.get(id=team_id)
@@ -130,7 +124,6 @@ def TeamInvite(request):
                 field_check_list['DB'] = 'DB Error'
                 return JsonResponse({'status': 'fail', 'errors': field_check_list})
         else:
-            # print(field_check_list)
             return JsonResponse({'status': 'fail', 'errors': field_check_list})
 
 
@@ -180,7 +173,6 @@ def TeamCreate(request):
                 field_check_list['DB'] = 'DB Error'
                 return JsonResponse({'status': 'fail', 'errors': field_check_list})
         else:
-            # print(field_check_list)
             return JsonResponse({'status': 'fail', 'errors': field_check_list})
 
 def TeamUpdate(request):
