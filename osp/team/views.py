@@ -11,10 +11,18 @@ from message.models import Message
 
 from datetime import datetime
 
-# 팀 초대 시 가져온 사용자의 입력 값에 대하여 validation을 수행
-# validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
-# Caller : TeamInvite
+
 def teamInviteValidation(user, username, team_id, invite_msg):
+    '''
+    팀 초대 시 가져온 사용자의 입력 값에 대하여 validation을 수행
+    validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
+
+    Returns:
+        field_check_list, is_valid
+
+    Caller :
+        TeamInvite
+    '''
 
     is_valid = True
     field_check_list = {}
@@ -49,10 +57,17 @@ def teamInviteValidation(user, username, team_id, invite_msg):
     return field_check_list, is_valid
 
 
-# 팀 정보 생성/수정 시 가져온 사용자의 입력 값에 대하여 validation을 수행
-# validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
-# Caller : TeamCreate, TeamUpdate
 def teamInfoValidation(team_name, team_desc, team_img):
+    '''
+    팀 정보 생성/수정 시 가져온 사용자의 입력 값에 대하여 validation을 수행
+    validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
+
+    Returns:
+        field_check_list, is_valid
+
+    Caller :
+        TeamCreate, TeamUpdate
+    '''
     is_valid = True
     field_check_list = {}
 
@@ -81,11 +96,20 @@ def teamInfoValidation(team_name, team_desc, team_img):
 
 
 
-# 팀원 초대 창
-# url       : /team/api/team-invite
-# template  : team/invite-form.html
+
 def TeamInvite(request):
+    '''
+    팀원 초대 창
+    url       : /team/api/team-invite
+    template  : team/invite-form.html
+
+    Returns :
+        GET  : render
+        POST : JsonResponse
+
+    '''
     if request.method == 'GET':
+
 
         # 팀원 초대장 팝업창 렌더링
         # context 정보
@@ -175,11 +199,18 @@ def TeamInvite(request):
             return JsonResponse({'status': 'fail', 'errors': field_check_list})
 
 
-# 팀 생성
-# url       : /team/api/team-create
-# template  : team/create-form.html
-def TeamCreate(request):
 
+def TeamCreate(request):
+    '''
+    팀 생성
+    url       : /team/api/team-create
+    template  : team/create-form.html
+
+    Returns :
+        GET  : render
+        POST : JsonResponse
+
+    '''
     if request.method == 'GET':
         # 팀 생성 팝업창 랜더링
         return render(request, 'team/create-form.html')
@@ -256,10 +287,18 @@ def TeamCreate(request):
 
 
 
-# 팀 정보 업데이트
-# url       : /team/api/team-update
-# template  : team/update-form.html
+
 def TeamUpdate(request):
+    '''
+    팀 정보 업데이트
+    url       : /team/api/team-update
+    template  : team/update-form.html
+
+    Returns:
+        GET     : render
+        POST    : JsonResponse
+        others  : JsonResponse
+    '''
     if request.method == 'GET':
 
         # team_id   : 업데이트할 팀의 team_id
@@ -270,7 +309,7 @@ def TeamUpdate(request):
         team = Team.objects.get(id=team_id)
         context['team'] = team
         context['team_members'] = TeamMember.objects.filter(team=team).select_related('member')
-        
+
         return render(request, 'team/update-form.html', context)
 
     if request.method == 'POST':
@@ -347,7 +386,19 @@ def TeamUpdate(request):
             return JsonResponse({'status': 'fail', 'message': str(e)})
 
 
+
+
 def TeamApply(request, team_id):
+    '''
+    팀 가입 팝업창
+    url       : /team/api/team-apply/<int:team_id>
+    template  : team/apply-form.html
+    
+    Returns :
+        GET     : render
+        POST    : JsonResponse
+        others  : JsonResponse
+    '''
     if request.method == 'GET':
         context = {}
         team = Team.objects.get(id=team_id)
@@ -376,10 +427,25 @@ def TeamApply(request, team_id):
             return JsonResponse({'status': 'fail', 'message': "기존 팀원은 지원할 수 없습니다."})
 
 def TeamApplyList(request):
+    '''
+    팀 초대장/가입 신청서 목록렌더링
+    url : /team/api/team-apply-list
+    template : team/apply-list.html
+
+    Returns :
+        render
+    '''
     if request.method == 'GET':
         return render(request, 'team/apply-list.html')
 
 def TeamOut(request):
+    '''
+    팀 탈퇴 요청 처리
+    url : /team/api/team-out
+
+    Returns :
+        JsonResponse
+    '''
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
         account = Account.objects.get(user__username=request.POST.get('username'))
@@ -402,6 +468,13 @@ def TeamOut(request):
 
 
 def TeamInviteUpdate(request):
+    '''
+    팀 지원 및 팀원 초대시 생성되는 TeamInviteMessage의 변경 요청을 처리
+    url : /team/api/team-invite-update
+
+    Returns :
+        JsonResponse
+    '''
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
         account = Account.objects.get(user__username=request.POST.get('username'))
@@ -424,6 +497,13 @@ def TeamInviteUpdate(request):
             return JsonResponse({'status': 'fail', 'message': str(e)})
 
 def TeamInviteDelete(request):
+    '''
+    팀 지원서 및 팀원 초대장 삭제 요청을 처리
+    url : /team/api/team-invite-delete
+
+    Retruns:
+        JsonResponse
+    '''
     if request.method == 'POST':
         msg_id = request.POST.get('msg_id')
         apply_msg = TeamInviteMessage.objects.get(id=msg_id)
