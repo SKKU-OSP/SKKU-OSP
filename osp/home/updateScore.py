@@ -114,7 +114,7 @@ def user_score_update(user: Account, year: int):
     
     big_pull_n_issue = 0
     for repo in contr_big_repos:
-        big_pull_n_issue = len(issue_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
+        big_pull_n_issue += len(issue_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
         big_pull_n_issue += len(pull_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
     
     try:

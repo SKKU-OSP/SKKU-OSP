@@ -608,7 +608,7 @@ if __name__ == '__main__':
         for arg in sys.argv:
             if arg == "all":
                 mask = 63
-                break;
+                break
             elif arg == "repository":
                 mask += 32
             elif arg == "annualoverview":
