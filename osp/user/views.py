@@ -380,7 +380,7 @@ class ProfileEditView(TemplateView):
             'tags_lang' : lang
         }
 
-        if(str(request.user) != username): # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
+        if str(request.user) != username : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
             print("허용되지 않는 접근 입니다.")
             return redirect(f'/user/{username}/')
 
