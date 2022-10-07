@@ -88,6 +88,9 @@ class AccountInterest(models.Model):
     account = models.ForeignKey(Account, models.CASCADE)
     tag = models.ForeignKey(Tag, models.CASCADE)
     level = models.IntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['account', 'tag'], name="accountbytag")]
     
 class GithubScore(models.Model):
     yid =models.CharField(max_length=45, null=False, primary_key=True)
