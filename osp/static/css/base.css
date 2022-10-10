@@ -522,12 +522,30 @@ footer {
 #ApplyTeamModal .nav-pills .nav-link,
 #ApplyTeamModal .nav-pills>.nav-link {
   color: #000000;
+  border-top-color: transparent;
+  border-bottom-color: #000000;
+  border-radius: 0px
 }
 
 #ApplyTeamModal .nav-pills .nav-link.active,
 #ApplyTeamModal .nav-pills .show>.nav-link {
   background-color: var(--main-bg-color);
   color: var(--sub-point-color);
+  border-color: #000000;
+  border-bottom-color: transparent;
+  border-radius: 10px 10px 0px 0px;
+}
+
+#apply-recv-tab{
+  border-right: 0.5px solid transparent;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+#apply-send-tab{
+  border-left: 0.5px solid transparent;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
 }
 
 .team-apply-item {
@@ -541,22 +559,23 @@ footer {
 
 .team-apply-meta {
   display: flex;
+  gap: 0.5rem;
 }
 
 .team-apply-teamname {
-  width: 20%;
+  flex: 1 1 1;
   margin: auto;
 }
 
 .team-apply-user {
-  width: 50%;
+  flex: 1 1 1;
   margin: auto;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .team-apply-action {
-  width: 30%;
+  flex: 1 1 0;
   display: flex;
   flex-direction: row;
   justify-content: end;
