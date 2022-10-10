@@ -178,7 +178,7 @@ function msgModalOpen(selected_oppo = 0) {
     })
 }
 
-function ApplyTeamModalOpen() {
+function ApplyTeamModalOpen(isResult=false) {
     if (!$('#ApplyTeamModal').hasClass('ready')) {
         $.ajax({
             url: "/team/api/team-apply-list",
@@ -194,6 +194,13 @@ function ApplyTeamModalOpen() {
                     this.style.transform = '';
                 }
             });
+            if(isResult){
+                console.log("applyteammodal");
+                $("#apply-recv-tab").toggleClass("active");
+                $("#apply-send-tab").toggleClass("active");
+                $("#apply-recv").toggleClass("show active");
+                $("#apply-send").toggleClass("show active");
+            }
         })
     } else {
         $('#ApplyTeamModal').modal('show');
@@ -227,7 +234,7 @@ function ReadNotification(type, noti_id, target_id) {
                 ApplyTeamModalOpen();
             }
             if (type == 'team_apply_result') {
-                ApplyTeamModalOpen();
+                ApplyTeamModalOpen(isResult=true);
             }
 
             $('#noti-' + noti_id).addClass('read');
