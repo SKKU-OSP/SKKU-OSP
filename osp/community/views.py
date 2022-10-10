@@ -53,13 +53,10 @@ def main(request):
         article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(board.article_list)
             
         for article in board.article_list:
-            #article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-            article.tags = article_tags_dict[article.id]
-            # article.like_cnt = len(ArticleLike.objects.filter(article=article))
+            article.tags = article_tags_dict.get(article.id, [])
+
             article.like_cnt = article_likes_dict.get(article.id, 0)
-            # article.comment_cnt = len(ArticleComment.objects.filter(article=article))
             article.comment_cnt = article_comments_dict.get(article.id, 0)
-            # article.scrap_cnt = len(ArticleScrap.objects.filter(article=article))
             article.scrap_cnt = article_scraps_dict.get(article.id, 0)
             if board.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
@@ -124,7 +121,14 @@ def board(request, board_name, board_id):
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
         team = board.team
-        team_tags = TeamTag.objects.filter(team=team)
+        team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
+        team_tags_list= []
+        try:
+            for atg in team_tags:
+                team_tags_list.append({'name':atg["tag__name"], 'type':atg["tag__type"]})
+        except Exception as e:
+            print("error tag", e)
+        
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
         if request.user: my_acc = Account.objects.get(user=request.user)
 
@@ -134,7 +138,7 @@ def board(request, board_name, board_id):
         if tm:
             context['team_admin'] = tm.is_admin
         context['team'] = team
-        context['team_tags'] = team_tags
+        context['team_tags'] = team_tags_list
         context['team_members'] = team_members
     return render(request, 'community/board/board.html', context)
 
@@ -207,7 +211,6 @@ def account_cards(request):
 
 
 def article_list(request, board_name, board_id):
-    
     try:
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
@@ -256,8 +259,7 @@ def article_list(request, board_name, board_id):
         article.comment_cnt = article_comments_dict.get(article.id, 0)
         article.like_cnt = article_likes_dict.get(article.id, 0)
         article.scrap_cnt = article_scraps_dict.get(article.id, 0)
-        article.tags = article_tags_dict[article.id]
-
+        article.tags = article_tags_dict.get(article.id, [])
         if board.board_type == 'Recruit':
             tr = TeamRecruitArticle.objects.filter(article=article).first()
             if tr:
@@ -366,10 +368,10 @@ def article_create(request):
 
             account = Account.objects.get(user=request.user)
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
-                                             pub_date=datetime.now(), mod_date=datetime.now(),
-                                             anonymous_writer=request.POST.get('is_anonymous') == 'true',
-                                             board_id_id=board.id,
-                                             writer=account)
+                pub_date=datetime.now(), mod_date=datetime.now(),
+                anonymous_writer=request.POST.get('is_anonymous') == 'true',
+                board_id_id=board.id,
+                writer=account)
             if request.POST.get('period_start', False):
                 article.period_start = request.POST.get('period_start')[:-1]
                 article.period_end = request.POST.get('period_end')[:-1]
