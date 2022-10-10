@@ -8,7 +8,7 @@
         <div class="modal-body">
                 <div class="mb-3">
                     <div class="form-label">지원하는 팀: {{ team.name }}</div>
-                    <div class="">"{{ team.description }}"</div>
+                    <div class="desc-break">{{ team.description }}</div>
                 </div>
                 <div class="mb-3">
                     <div class="form-label">지원자 정보: {{ request.user.username }}</div>
@@ -17,8 +17,8 @@
                 {% csrf_token %}
                 <input type="text" style="display:none;" name="team_id" val="{{ team.id }}">
                 <div class="mb-3">
-                    <label for="team-desc" class="form-label">지원 이유</label>
-                    <textarea id="team-desc" placeholder="지원 이유를 작성해주세요." name="desc" class="form-control" rows="3" required></textarea>
+                    <label for="team-desc" class="form-label">지원 동기</label>
+                    <textarea id="team-desc" placeholder="지원 동기를 작성해주세요." name="desc" class="form-control" rows="3" required></textarea>
                     <div class="valid-feedback" for="team-desc"></div>
                     <div class="invalid-feedback" for="team-desc"></div>
                 </div>
@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-default" id="team-apply-submit">저장</button>
+                    <button type="submit" class="btn btn-default" id="team-apply-submit">지원하기</button>
                 </div>
             </form>
         </div>
