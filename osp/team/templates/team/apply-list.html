@@ -22,12 +22,10 @@
                 <div class="tab-pane fade show active" id="apply-recv" role="tabpanel" aria-labelledby="apply-recv-tab"
                     tabindex="0">
                     {% get_admin_team request.user as admin_teams %}
-                    {% var_set 0 as cnt %}
                     {% for admin_team in admin_teams %}
                     {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
-                    {% var_add cnt waitedapplymessages.cnt as cnt %}
                     {% for applymsg in waitedapplymessages %}
-                    <div class="team-apply-item" id="apply-user-{{ applymsg.account.user.username }}">
+                    <div class="team-apply-item received " id="apply-user-{{ applymsg.account.user.username }}">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
@@ -56,18 +54,15 @@
                             </div>
                         </div>
                     </div>
-                    {% empty %}
                     {% endfor %}
                     {% endfor %}
-                    {% if cnt == 0 %}
-                        <div style="text-align:center; padding-top:40px;">받은 지원서가 없습니다. </div>
-                    {% endif %}
+   
                 </div>
                 <div class="tab-pane fade" id="apply-send" role="tabpanel" aria-labelledby="apply-send-tab"
                     tabindex="0">
                     {% get_sent_teamapply request.user as sent_teamapply %}
                     {% for applymsg in sent_teamapply %}
-                    <div id="apply-{{applymsg.id}}" class="team-apply-item">
+                    <div id="apply-{{applymsg.id}}" class="team-apply-item sended">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
@@ -105,8 +100,6 @@
                             </div>
                         </div>
                     </div>
-                    {% empty %}
-                        <div style="text-align:center; padding-top:40px;">보낸 지원서가 없습니다. </div>
                     {% endfor %}
                 </div>
             </div>
@@ -116,3 +109,21 @@
         </div>
     </div>
 </div>
+<script>
+    function showEmptyApply(){
+        msg_received = $(".team-apply-item.received");
+        console.log(msg_received);
+        if (msg_received.length == 0){
+            $("#apply-recv").empty();
+            $("#apply-recv").append(`<div style="text-align:center; padding-top:40px;">받은 지원서가 없습니다. </div>`);
+        }
+        msg_sended = $(".team-apply-item.sended");
+        console.log("msg_sended",msg_sended);
+        if (msg_sended.length == 0){
+            $("#apply-send").empty();
+            $("#apply-send").append(`<div style="text-align:center; padding-top:40px;">보낸 지원서가 없습니다. </div>`);
+        }
+    }
+    showEmptyApply();
+    
+</script>
