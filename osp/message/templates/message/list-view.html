@@ -17,7 +17,7 @@
         </li>
         {% endwith %}
     {% endif %}
-    {% for oppo, data in msg_opponent.items %}
+    {% for oppo, data in msg_opponent %}
     <li id="opo-id-{{ oppo.user.id }}" class="opponent-item pointer opacity-hover" value="{{oppo.user.id}}">
       <div class="d-flex">
         <div class="opponent-account me-2">
