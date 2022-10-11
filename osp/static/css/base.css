@@ -171,6 +171,8 @@ div> ::-webkit-scrollbar-thumb:hover {
 #opponent-list {
   padding-inline-start: 0;
   list-style-type: none;
+  height: 100%;
+  overflow: scroll;
 }
 
 .opponent-item {
