@@ -115,18 +115,28 @@ class ProfileView(TemplateView):
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
-        context["student_id"] = student_data.id
 
         score_data_list = []
         score_detail_data = GithubScore.objects.filter(github_id=github_id).order_by("year")
         for row in score_detail_data:
             score_data_list.append(row.to_json())
-            
-        end_year = score_data_list[len(score_data_list)-1]["year"]
-        num_year = end_year-self.start_year+1
-        context["end_year"] = end_year
-        context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
-        chartdata["score_data"] = score_data_list
+        
+        # GitHub data가 존재하지 않는 경우 더미데이터 리턴하고 
+        # 데이터 관련 부분 프로필페이지에서 제거
+        try:
+            end_year = score_data_list[len(score_data_list)-1]["year"]
+            num_year = end_year-self.start_year+1
+            context["end_year"] = end_year
+            context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
+            chartdata["score_data"] = score_data_list
+        except Exception as e:
+            print("[profile view] There are no score_data", e)
+            context["end_year"] = datetime.datetime.now().year
+            context["score_data"] = None
+            context["chart_data"] = []
+            context["type_data"] = []
+            context["success"] = False
+            return context
         
         student = StudentTab.objects.all()
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
@@ -301,6 +311,7 @@ class ProfileView(TemplateView):
             gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
             context["gbti"] = gbti_data
         context["test"] = test_data
+        context["success"] = True
         
         return context
 
