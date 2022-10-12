@@ -1,4 +1,4 @@
-window.onload = function () {
+window.addEventListener('load', function () {
   const start_year = 2019;
   const grass_size = 72;
   const standard_contr = 30;
@@ -104,26 +104,6 @@ window.onload = function () {
       makePage(chart_data, 1);
     }
   });
-  $("#icon-interests").on("click", function(){
-    $("#icon-interests").toggleClass("bi-arrows-angle-contract");
-    $("#icon-interests").toggleClass("bi-arrows-angle-expand");
-    $('#icon-interests').attr('title', function(index, attr){
-      return attr == "확장" ? "축소" : "확장";
-    });
-    $(".expandable:nth-child(3)").toggleClass("semi-expanded-0");
-    $(".expandable:nth-child(1)").toggleClass("semi-expanded-1");
-    $(".expandable:nth-child(2)").toggleClass("expanded");
-  })
-  $("#icon-lang").on("click", function(){
-    $("#icon-lang").toggleClass("bi-arrows-angle-contract");
-    $("#icon-lang").toggleClass("bi-arrows-angle-expand");
-    $('#icon-lang').attr('title', function(index, attr){
-      return attr == "확장" ? "축소" : "확장";
-    });
-    $(".expandable:nth-child(2)").toggleClass("semi-expanded-0");
-    $(".expandable:nth-child(1)").toggleClass("semi-expanded-2");
-    $(".expandable:nth-child(3)").toggleClass("expanded");
-  })
   const div_activity_monthly = document.getElementById("activity-monthly");
   let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
 
@@ -717,7 +697,6 @@ window.onload = function () {
     }
   }
   setVisualModal();
-  setPortfolioModal();
   setGbtiModal();
   $("#icon-devtype").on("click", ()=>{
     $('#modalGbtiBox').modal('show');
@@ -776,4 +755,4 @@ window.onload = function () {
         </div>`);
     });
   }
-}
+});

@@ -78,6 +78,7 @@
     {% endif %}
     </div>
     <div class="col-md-9 col-12">
+      {% if success %}
       <div class="row mb-3 profile-content">
         <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
           <div class="modal-dialog modal-xl">
@@ -327,6 +328,7 @@
           </div>
         </div>
       </div>
+      {% endif %}
       <div class="row profile-content">
         <div class="col-4 expandable">
           <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfolioModal" aria-hidden="true">
@@ -404,6 +406,7 @@
           </div>
         </div>
       </div>
+      {% if success %}
       <div class="row mb-3 profile-content">
         <div class="col-7">
           <div class="card h-100">
@@ -615,6 +618,14 @@
           </div>
         </div>
       </div>
+      {% else %}
+      <div>
+        아직 데이터가 수집되지 않았습니다. 데이터 수집은 하루에 한 번 이루어 집니다. 내일 다시 방문해주세요.
+      </div>
+      <div>
+        GitHub ID가 올바르지 않은면 데이터 수집이 불가능합니다. GitHub ID를 확인해주세요
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -622,6 +633,11 @@
 {% endblock %}
 
 {% block script %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
+  <script type="text/javascript" src="{% static 'js/profile_basic.js' %}"></script>
+  {% if success %}
   <script>
     var category_select;
     var modal_category_select;
@@ -703,9 +719,6 @@
     });
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
     let type_data = JSON.parse("{{ type_data | escapejs }}");
@@ -717,4 +730,5 @@
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  {% endif %}
 {% endblock %}

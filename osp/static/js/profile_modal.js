@@ -660,12 +660,6 @@ function setVisualModal(){
     }
   }
 }
-function setPortfolioModal(){
-  let icon_portfolio_modal = document.getElementById("icon-portfolio");
-  icon_portfolio_modal.addEventListener("click", ()=>{
-    $('#modalPortfolioBox').modal('show');
-  });
-}
 function setGbtiModal(){
   const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", ()=>{
