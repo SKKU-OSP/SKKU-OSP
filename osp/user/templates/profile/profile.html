@@ -84,7 +84,7 @@
             <div class="modal-content">
               <div class="modal-light-header">
                 <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
-                <i id="closeModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="container">
                 <div class="horizontal-menu">
@@ -183,9 +183,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="modal-footer">
-                <button id="closeChartModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -337,16 +334,13 @@
               <div class="modal-content">
                 <div class="modal-light-header">
                   <h5 id="portfolioModal" class="modal-title">포트폴리오</h5>
-                  <i id="closePortfolioModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body-markdown">
                   {% if data.account.portfolio == '' %}
                     <span class="weak-text">포트폴리오를 설정해주세요</span>
                   {% endif %}
                   {{ data.account.portfolio|mark }}
-                </div>
-                <div class="modal-footer">
-                  <button id="closePortfolioModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>
@@ -427,7 +421,7 @@
                 {% if test %}
                 <div class="modal-light-header">
                   <h5 id="gbtiModal" class="modal-title">개발자 유형</h5>
-                  <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <h3 class="text-center mt-3">개발자 유형 검사 결과</h3>
                 <div class="d-flex justify-content-center">
@@ -585,9 +579,6 @@
                     </canvas>
                   </div>
                   {% endfor%}
-                </div>
-                <div class="modal-footer">
-                  <button id="closeGbtiModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>

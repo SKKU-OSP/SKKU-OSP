@@ -36,10 +36,6 @@ function setVisualModal(){
   icon_modal.addEventListener("click", (e)=>{
     $('#modalBox').modal('show');
   });
-  // close modal
-  document.getElementById("closeModalIcon").addEventListener("click", ()=>{
-    $('#modalBox').modal("hide");
-  })
   $(".modal-month-item").on("click", (e)=>{
     $("#modal-btnGroupDropMonth").text(e.target.innerText);
     select_month = Number(e.target.value);
@@ -668,15 +664,6 @@ function setPortfolioModal(){
   let icon_portfolio_modal = document.getElementById("icon-portfolio");
   icon_portfolio_modal.addEventListener("click", ()=>{
     $('#modalPortfolioBox').modal('show');
-  });
-  document.getElementById("closeChartModalBtn").addEventListener("click", ()=>{
-    $('#modalBox').modal("hide");
-  });
-  document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
-    $('#modalPortfolioBox').modal("hide");
-  });
-  document.getElementById("closePortfolioModalBtn").addEventListener("click", ()=>{
-    $('#modalPortfolioBox').modal("hide");
   });
 }
 function setGbtiModal(){

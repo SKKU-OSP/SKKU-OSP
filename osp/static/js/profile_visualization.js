@@ -722,12 +722,6 @@ window.onload = function () {
   $("#icon-devtype").on("click", ()=>{
     $('#modalGbtiBox').modal('show');
   });
-  $("#closeGbtiModalIcon").on("click", ()=>{
-    $('#modalGbtiBox').modal('hide');
-  });
-  $("#closeGbtiModalBtn").on("click", ()=>{
-    $('#modalGbtiBox').modal('hide');
-  });
   let sideHeight = 0;
   const sideCol = document.getElementById("profile-info");
   for(let i=0; i<sideCol.children.length;i++){
