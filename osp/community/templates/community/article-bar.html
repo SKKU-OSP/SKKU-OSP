@@ -49,7 +49,9 @@
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
+                        {% if not article.writer.user.is_superuser %}
                         <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href="#"
                                 onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
