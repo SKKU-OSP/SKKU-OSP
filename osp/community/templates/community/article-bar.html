@@ -64,7 +64,7 @@
                     <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
                     <div>{{article.like_cnt}}</div>
                 </div>
-                <div class="article-meta-stat d-flex">
+                <div class="article-meta-stat d-flex" onclick="location.href='{% url 'community:article-view' article.id %}#comment-content'" style="cursor:pointer;">
                     <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
                     <div>{{article.comment_cnt}}</div>
                 </div>
