@@ -12,6 +12,9 @@ def user_score_update(user: Account, year: int):
     github_id = user.student_data.github_id
     pri_email = user.student_data.primary_email
     sec_email = user.student_data.secondary_email
+    plural_major = user.student_data.plural_major
+    absence = user.student_data.absence
+    dept = user.student_data.dept
     github_score = GithubScore.objects.filter(
         yid=f'{year}{github_id}'
     )
@@ -137,7 +140,6 @@ def user_score_update(user: Account, year: int):
             )
             if len(score_table) > 0:
                 score_table = score_table[0]
-                score_table
             else:
                 score_table = GitHubScoreTable.objects.create(
                     id=user.student_data.id,
@@ -154,15 +156,18 @@ def user_score_update(user: Account, year: int):
                     issue_cnt=0,
                     pr_cnt=0,
                     repo_cnt=0,
-                    dept=user.student_data.dept,
-                    absence=user.student_data.absence,
-                    plural_major=user.student_data.plural_major
+                    dept=dept,
+                    absence=absence,
+                    plural_major=plural_major
                 )
             score_table.total_score=min(
                 github_score.repo_score_sum + github_score.score_other_repo_sum \
                 + github_score.score_star + github_score.score_fork,
                 5.0
             )
+            score_table.dept = dept
+            score_table.absence = absence
+            score_table.plural_major = plural_major
             score_table.commit_cnt=len(commit_data)
             score_table.commit_line=commit_lines
             score_table.issue_cnt=len(issue_data)
