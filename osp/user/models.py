@@ -71,7 +71,7 @@ class GithubStatsYymm(models.Model):
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE, null=True)
-    photo = models.ImageField(upload_to='img/profile_img', default='default.jpg')
+    photo = models.ImageField(upload_to='img/profile_img', default='img/profile_img/default.jpg')
     introduction = models.TextField(default='')
     portfolio = models.TextField(default='')
     profile_open = models.BooleanField(default=False)
