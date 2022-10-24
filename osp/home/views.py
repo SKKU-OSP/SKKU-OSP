@@ -35,10 +35,10 @@ def statistic(request):
             elif stdnt_data.absence == 0 and stdnt_data.plural_major == 1 :
                 stdnt_case_list[0][yid].append(stdnt_json)
                 stdnt_case_list[2][yid].append(stdnt_json)
-            elif stdnt_data.absence == 1 and stdnt_data.plural_major == 0 :
+            elif stdnt_data.absence >= 1 and stdnt_data.plural_major == 0 :
                 stdnt_case_list[0][yid].append(stdnt_json)
                 stdnt_case_list[1][yid].append(stdnt_json)
-            elif stdnt_data.absence == 1 and stdnt_data.plural_major == 1 :
+            elif stdnt_data.absence >= 1 and stdnt_data.plural_major == 1 :
                 stdnt_case_list[0][yid].append(stdnt_json)
         return stdnt_case_list
 
