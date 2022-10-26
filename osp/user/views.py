@@ -25,7 +25,15 @@ import math
 
 # Create your views here.
 class ProfileView(TemplateView):
+    '''
+    유저 프로필
+    url        : /user/<username>
+    template   : profile/profile.html 
 
+    Returns :
+        GET     : redirect, render
+    '''
+    
     template_name = 'profile/profile.html'
     start_year = 2019
     # 새로 고침 시 GET 요청으로 처리됨.
@@ -58,6 +66,7 @@ class ProfileView(TemplateView):
         account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
         level_list = [ al.level for al in account_lang ]
         lang = []
+
         for tag in lang_tags:
             lang_tag_dict = {"name":tag.name, "type":tag.type}
             lang_tag_dict["level"] = level_list[len(lang)]
@@ -69,7 +78,7 @@ class ProfileView(TemplateView):
         relation_origin = domain_layer.values('parent_tag', 'child_tag')
         relations = []
         remain_children = list(ints_child_layer)
-        print(remain_children)
+
         for par in ints_parent_layer:
             relation = {
                 'parent' :par['parent_tag'],
@@ -80,11 +89,6 @@ class ProfileView(TemplateView):
                     relation['children'].append(chi['child_tag'])
                     remain_children.remove({'child_tag' : chi['child_tag']})
             relations.append(relation)
-
-        print(relations)
-        print(remain_children)
-
-
 
         is_own = request.user.username == context['username']
 
@@ -574,6 +578,7 @@ def load_interests_data(request, username):
 def load_language_data(request, username):
     print(request.POST)
     print(request.POST['act'])
+    print(request.POST['target'])
     user = User.objects.get(username=username)
     user_account = Account.objects.get(user=user.id)
     student_id = user_account.student_data.id
@@ -618,6 +623,7 @@ def load_img_data(request, username):
     is_valid = True
     if profile_img:
         img_width, img_height = get_image_dimensions(profile_img)
+        print(img_width, img_height)
         if img_width > 500 or img_height > 500:
             is_valid = False
             field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
