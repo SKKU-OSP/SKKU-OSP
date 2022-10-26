@@ -163,51 +163,32 @@
 <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
 
 <script>
-    function setBubble(range, bubble) {
-        const val = range.value;
-        const min = range.min ? range.min : 0;
-        const max = range.max ? range.max : 100;
-        const newVal = Number(((val - min) * 100) / (max - min));
-        var txt = '';
-        if(val==0){
-            txt = '초보';
-        }
-        else if(val==1){
-            txt = '주니어';
-        }
-        else if(val==2){
-            txt = '중급자';
-          }
-        else if(val==3){
-            txt = '숙련자';
-        }
-        else{
-            txt = '장인';
-        }
-        bubble.innerHTML = txt;
-      // Sorta magic numbers based on size of the native UI thumb
-      bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
-    }
-    var Wrap = function(wrap, range, bubble){
-        $(range).on('input', function(){
-            setBubble(range, bubble)});
-    }
-    
-    $(document).ready(function() {
-      var wraps = $('.range-wrap')
-      var ranges = $('.form-control-range');
-      var bubbles = $('.bubble');
-        for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i])
-            setBubble(ranges[i], bubbles[i])
-        }
-    });
     function intsAppend(){
         var formData = $("#intsform").serialize();
         formData += "&act=" + 'append';
         formData += "&target=" + '';
         console.log(formData);
-        $.ajax({
+
+        var selected = $("#intsform").find(".placeholder").text();
+        console.log(selected);
+        var ints = $('.bg-tag-domain');
+        var intsarr = [];
+        console.log(ints);
+
+        for(int of ints){
+          console.log($(int).text());
+          intsarr.push($(int).text());
+        }
+
+        if(!(intsarr.includes(selected))){
+          $("#interestsdiv").append(`<span id='intspan_`+ selected +`'>
+
+            <span class="badge bg-tag-domain me-1">`+ selected +`</span>
+            <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">x
+            </button>
+
+            </span>`);
+            $.ajax({
             cache : false,
             url : "interestsupdate", // 요기에
             //processData: false,
@@ -218,24 +199,26 @@
                 //var jsonObj = JSON.parse(data);
                 console.log('success');
             }, // success 
-    
+
             error : function(xhr, status) {
                 // alert(xhr + " : " + status);
                 console.log('error');
-                alert("선택하고 추가해주세요")
+                // alert("선택하고 추가해주세요")
 
             }
-        });
-        setTimeout(function() {
-          console.log('language is appended');
-          $('#interestsdiv').load(window.location.href + ' #interestsdiv')
-        }, 500);
+            });
+
+        }
     }
     function intsDelete(target){
         var formData = $("#intsform").serialize();
         formData += "&act=" + 'delete';
         formData += "&target=" + target;
         console.log(formData);
+
+        console.log("span[id='intspan_" +  target + "']");
+        $("span[id='intspan_" +  target + "']").remove();
+
         $.ajax({
             cache : false,
             url : "interestsupdate", // 요기에
@@ -253,11 +236,11 @@
                 console.log('error');
             }
         });
-        setTimeout(function() {
-          console.log('language is appended');
-          $('#interestsdiv').load(window.location.href + ' #interestsdiv')
-        }, 500);
+ 
     }
+
+
+    
     function reload_window(){
         return new Promise(function(resolve){
           console.log('language is deleted, reload window');
@@ -265,37 +248,43 @@
           resolve('hello');
         });
       }
-    function reload_bubble(){
-      return new Promise(function(resolve){
-        setTimeout(function() {
-          console.log('start wraping');
-          var wraps = $('.range-wrap')
-          var ranges = $('.form-control-range');
-          var bubbles = $('.bubble');
-          console.log(ranges);
-          for(var i = 0;i<wraps.length;i++){
-            Wrap(wraps[i], ranges[i], bubbles[i]);
-            setBubble(ranges[i], bubbles[i]);
-          }
-        }, 2000);
-
-        console.log("finish wraping");
-          resolve('hello');
-      });
-
-    }
     async function reload(){
       let a = await reload_window();
       console.log('middle of async');
       let b = await reload_bubble();
       return('hello');
     }
+    $(document).ready(function() {
+        var langlists = $('.langlabel');
+        console.log(langlists);
+
+
+    });
     function languageAppend(){
       var formData = $("#languageform").serialize();
       formData += "&act=" + 'append';
       formData += "&target=" + '';
       console.log(formData);
-      $.ajax({
+      var langs = $('.langlabel');
+      var langsarr = [];
+      console.log(langs);
+      for(lang of langs){
+          console.log($(lang).attr('for').slice(4));
+          langsarr.push($(lang).attr('for').slice(4));
+      }
+      var selected = $("#langdiv").find(".placeholder").text();
+      //selected = selected.slice(3);
+      
+      var selected_nospace;
+
+      selected_nospace = selected.replace(/ /g, "");
+      console.log(langsarr);
+      console.log(selected);
+
+      console.log(!(langsarr.includes(selected)));
+      if(!(langsarr.includes(selected))){
+      
+        $.ajax({
         cache : false,
           url : "languageupdate",
           type : 'POST', 
@@ -306,10 +295,29 @@
           error : function(xhr, status) {
               // alert(xhr + " : " + status);
               console.log('선택하고 추가해주세요');
-              alert("선택하고 추가해주세요")
+              // alert("선택하고 추가해주세요")
           }  
         });
-      reload();
+        $("#languagediv").append(`
+        <div id="langdiv_`+ selected_nospace + `"class="langdiv">
+        <span style="display:inline-block; width: 120px;">
+            <label for="tag_`+ selected_nospace + `" class="badge bg-tag-language me-1 langlabel" style="height:20px; margin-bottom:5px; ">` + selected + `</label>
+        </span>
+        <span class="range-wrap" style="margin-right:30px;">
+            <input style="width:50%; color:#0094FF;" type="range" class="form-control-range lang-tag" min="0" max="4" step="1" value ="0" name ="tag_`+ selected +`" id="tag_`+ selected +`" list="tickmarks">
+            <!--output for="range" class="bubble" id="out_` + selected_nospace + `"></output-->
+        </span>  
+        <button class="btn delete-lang" name="action" onclick="languageDelete('`+ selected +`', '`+ selected_nospace + `'); return false;">
+            <svg width="14" height="19" viewBox="0 0 14 19" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 16.5C1 17.6 1.9 18.5 3 18.5H11C12.1 18.5 13 17.6 13 16.5V4.5H1V16.5ZM3 6.5H11V16.5H3V6.5ZM10.5 1.5L9.5 0.5H4.5L3.5 1.5H0V3.5H14V1.5H10.5Z"/>
+            </svg>
+        </button>
+        <hr>
+        </div>
+      `);
+      }
+
+      // reload();
     }
     function languageDelete(target){
       var formData = $("#languageform").serialize();
@@ -317,10 +325,16 @@
       target = encodeURIComponent(target);
       formData += "&target=" + target;
 
-      console.log(target);
-      console.log(formData);
-
+      // console.log(target);
+      // console.log(formData);
       
+      target = decodeURI(target);
+      
+      divtarget = target.replace(/ /g, "");
+      divtarget = decodeURIComponent(divtarget);
+      console.log(divtarget);
+      console.log("div[id='langdiv_" +  divtarget + "']");
+      $("div[id='langdiv_" +  divtarget + "']").remove();
       $.ajax({
         cache : false,
         url : "languageupdate",
@@ -336,7 +350,9 @@
         }
 
       });
+      /*
       reload();
+      */
     }
     
     function saveImg(){
