@@ -636,7 +636,11 @@ def load_img_data(request, username):
         if 'photo' in request.FILES: # 폼에 이미지가 있으면
             print('form에 이미지 존재')
             try:
-                os.remove(pre_img) # 기존 이미지 삭제
+                print(" path of pre_image is "+ pre_img)
+                if(pre_img.split("/")[-1] == "default.jpg"):
+                    pass
+                else:
+                    os.remove(pre_img) # 기존 이미지 삭제
                 
             except:                # 기존 이미지가 없을 경우에 pass
                 pass    
