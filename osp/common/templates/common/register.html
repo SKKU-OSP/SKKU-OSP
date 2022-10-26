@@ -75,7 +75,11 @@
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="absence" id="absenceTrue" value="1">
-                        <label class="form-check-label" for="absenceTrue">휴학/졸업</label>
+                        <label class="form-check-label" for="absenceTrue">휴학</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="absence" id="absenceReal" value="2">
+                        <label class="form-check-label" for="absenceReal">졸업</label>
                     </div>
                 </div>
             </div>
@@ -141,8 +145,42 @@
                 }
             },
         })
+        $("#duplicate_check").on("click", ()=>{
+            ajaxCheckDup();
+        })
     });
+    
+    function ajaxCheckDup(){
+        console.log("ajaxCheckDup")
+        ajax_form_data=new FormData();
+        ajax_form_data.append('username',$('#username').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'common:check_user' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
 
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    alert('사용가능한 유저이름입니다.')
+                    $('#duplicate_check').css('backgroundColor', '#0D6EFD');
+                    $('#duplicate_check').css('color', '#FFFFFF');
+                }
+                else{
+                    alert( data['message'] );
+                    $('#duplicate_check').css('backgroundColor', '#DC3545');
+                    $('#duplicate_check').css('color', '#FFFFFF');
+                }
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
+    }
     function ajaxSignIn(){
         ajax_form_data=new FormData();
         ajax_form_data.append('username',$('#username').val());
@@ -162,30 +200,28 @@
 
         ajax_form_data.append('category_tag_list', category_select.selected().toString());
 
-
-
         $.ajax({
-                type: "POST",
-                url: "{% url 'common:signup' %}",
-                data: ajax_form_data,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
+            type: "POST",
+            url: "{% url 'common:signup' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
 
-                success: function(data) {
-                    console.log(data);
-                    if(data['status']=="success"){
-                        alert('회원가입이 완료되었습니다! 로그인 해주세요.')
-                        window.location.href = "{% url 'common:login' %}";
-                    }
-                    else{
-                      alert( data['message'] );
-                    }
-                },
-                error: function(data){
-                    alert('Error Occured');
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    alert('회원가입이 완료되었습니다! 로그인 해주세요.')
+                    window.location.href = "{% url 'common:login' %}";
                 }
-         });
+                else{
+                    alert( data['message'] );
+                }
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
     }
     </script>
 {% endblock script %}
