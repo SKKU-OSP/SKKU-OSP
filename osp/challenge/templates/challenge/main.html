@@ -3,130 +3,96 @@
 {% load static %}
 {% block content %}
 <div class="container my-4">
-  <div class="d-flex justify-content-between">
-    <h5>도전과제</h5>
-    <button id="challenge-refresh">
-      <span class="material-icons-outlined">
-        refresh
-      </span>
-    </button>
-  </div>
-  <ul class="nav nav-tabs" id="ChallengeTab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="individual-tab" data-bs-toggle="tab" data-bs-target="#individual-tab-pane"
-        type="button" role="tab" aria-controls="individual-tab-pane" aria-selected="true">
-        개인 도전 과제
-      </button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="total-tab" data-bs-toggle="tab" data-bs-target="#total-tab-pane" type="button"
-        role="tab" aria-controls="total-tab-pane" aria-selected="false">
-        전체 도전 과제
-      </button>
-    </li>
-    </li>
-  </ul>
-  <div class="tab-content" id="ChallengeTabContent">
-    <div class="tab-pane fade show active" id="individual-tab-pane" role="tabpanel" aria-labelledby="individual-tab"
-      tabindex="0">
-      <div class="accordion my-2" id="acheived-challange">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="acheived-challange-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-              data-bs-target="#acheived-challange-collapse" aria-expanded="true"
-              aria-controls="acheived-challange-collapse">
-              달성한 도전 과제
-            </button>
-          </h2>
-          <div id="acheived-challange-collapse" class="accordion-collapse collapse show"
-            aria-labelledby="acheived-challange-header" data-bs-parent="#acheived-challange">
-            <div class="accordion-body">
-              {% for item in achieved_list %}
-              <div class="acheive-item">
-                <div class="challenge-name">
-                  {{item.challenge.name}}
-                </div>
-                <div class="d-flex justify-content-between">
-                  <div class="challenge-description">
-                    {{item.challenge.description}}
-                  </div>
-                  <div class="challenge-date">
-                    {{item.acheive_date|date:"Y-m-d h:i a"}}
-                  </div>
-                </div>
-                <div class="challenge-progress progress">
-                  <div class="progress-bar" role="progressbar" aria-label="{{item.challenge.name}}"
-                    aria-valuenow="{{item.progress}}" aria-valuemin="0" aria-valuemax="{{item.challenge.max_progress}}"
-                    style="width: {{item.width}}%;">
-                    {% widthratio item.progress item.challenge.max_progress 100 %}%
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="accordion" id="acheived-challange">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="not-acheived-challange-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-              data-bs-target="#not-acheived-challange-collapse" aria-expanded="true"
-              aria-controls="not-acheived-challange-collapse">
-              미달성한 도전 과제
-            </button>
-          </h2>
-          <div id="not-acheived-challange-collapse" class="accordion-collapse collapse show"
-            aria-labelledby="not-acheived-challange-header" data-bs-parent="#not-acheived-challange">
-            <div class="accordion-body">
-              {% for item in not_achieved_list %}
-              <div class="acheive-item not-acheived">
-                <div class="challenge-name">
-                  {{item.challenge.name}}
-                </div>
-                <div class="challenge-description">
-                  {{item.challenge.description}}
-                </div>
-                <div class="challenge-progress progress">
-                  <div class="progress-bar" role="progressbar" aria-label="{{item.challenge.name}}"
-                    aria-valuenow="{{item.progress}}" aria-valuemin="0" aria-valuemax="{{item.challenge.max_progress}}"
-                    style="width: {{item.width}}%;">
-                    {% widthratio item.progress item.challenge.max_progress 100 %}%
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
+  <div id="challenge-title" class="d-flex justify-content-between">
+    <div class="mb-1">
+      <h4>도전과제</h4>
+    </div>
+    <div class="d-flex gap-5 mb-2">
+      <div>전체 도전과제: {{total}}</div>
+      <div>도전과제 진행률: {{achieved_list|length}} / {{total}}</div>
+    </div>
+    <div class="challenge-progress progress w-100">
+      <div class="progress-bar" role="progressbar" aria-label="total-progress" aria-valuenow="{{achieved_list|length}}"
+        aria-valuemin="0" aria-valuemax="{{total}}"
+        style="width: {% widthratio achieved_list|length total 100 %}%;">
+        {% widthratio achieved_list|length total 100 %}%
       </div>
     </div>
-    <div class="tab-pane fade" id="total-tab-pane" role="tabpanel" aria-labelledby="total-tab" tabindex="0">
-      <div id="total-challenge-head" class="my-2" >
-        <div>
-          총 도전과제: {{total|length}}
-        </div>
-        <div>
-          도전과제 진행률: {{achieved_list|length}} / {{total|length}}
-        </div>
+  </div>
+  <div id="challenge-wrapper">
+    <div id="challenge-achieved">
+      <div class="challenge-group-title">
+        달성한 도전과제
       </div>
-      {% for item in total %}
-      <div class="acheive-item">
-        <div class="challenge-name">
-          {{item.name}}
-        </div>
-        <div class="challenge-description">
-          {{item.description}}
-        </div>
-        <div class="challenge-progress progress">
-          <div class="progress-bar" role="progressbar" aria-label="{{item.name}}"
-            aria-valuenow="{{item.total}}" aria-valuemin="0" aria-valuemax="{{account_cnt}}"
-            style="width: {{item.total_width}}%;">
-            {% widthratio item.total account_cnt 100 %}%
+      <div class="challenge-itemlist">
+        {% for item in achieved_list %}
+        <div class="acheive-item">
+          <div class="challenge-head">
+            <i class="fa-solid fa-trophy challenge-icon challenge-tier-{{item.challenge.tier}}"></i>
+            <div>
+              <div class="challenge-name">
+                {{item.challenge.name}}
+              </div>
+              <div class="challenge-rate">
+                {% widthratio item.total total_cnt 100 %}% 의 사용자가 이 도전과제를 달성했습니다.
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="challenge-description">
+              {{item.challenge.description}}
+            </div>
+            <div class="challenge-date">
+              {{item.acheive_date|date:"Y-m-d h:i a"}}
+            </div>
+          </div>
+          <div class="challenge-progress progress">
+            <div class="progress-bar" role="progressbar" aria-label="{{item.challenge.name}}"
+              aria-valuenow="{{item.progress}}" aria-valuemin="0" aria-valuemax="{{item.challenge.max_progress}}"
+              style="width: {{item.width}}%;">
+              {% widthratio item.progress item.challenge.max_progress 100 %}%
+            </div>
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
+    </div>
+    <div id="challenge-unachieved">
+      <div class="challenge-group-title">
+        진행중인 도전과제
+      </div>
+      <div class="challenge-itemlist">
+        {% for item in not_achieved_list %}
+        <div class="acheive-item">
+          <div class="challenge-head">
+            <i class="fa-solid fa-trophy challenge-icon challenge-tier-{{item.challenge.tier}}"></i>
+            <div>
+              <div class="challenge-name">
+                {{item.challenge.name}}
+              </div>
+              <div class="challenge-rate">
+                {% widthratio item.total total_cnt 100 %}% 의 사용자가 이 도전과제를 달성했습니다.
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="challenge-description">
+              {{item.challenge.description}}
+            </div>
+            <div class="challenge-date">
+              {{item.acheive_date|date:"Y-m-d h:i a"}}
+            </div>
+          </div>
+          <div class="challenge-progress progress">
+            <div class="progress-bar" role="progressbar" aria-label="{{item.challenge.name}}"
+              aria-valuenow="{{item.progress}}" aria-valuemin="0" aria-valuemax="{{item.challenge.max_progress}}"
+              style="width: {{item.width}}%;">
+              {% widthratio item.progress item.challenge.max_progress 100 %}%
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 </div>
@@ -134,17 +100,4 @@
 
 {% block script %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/challenge-base.css' %}">
-<script>
-  $(function () {
-    $('#challenge-refresh').click(function () {
-      $('#challenge-refresh span').addClass('rotation');
-      $.ajax({
-        url: 'check',
-        method: 'GET',
-      }).done(function(){
-        window.location.reload();
-      })
-    });
-  });
-</script>
 {% endblock script %}

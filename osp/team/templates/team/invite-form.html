@@ -18,7 +18,7 @@
                     <div class="mb-4">
                         <label for="team-name" class="form-label">초대할 팀 선택</label>
                         <select id="invite-team-id" name="name" class=" pointer" required autofocus>
-                            {% team_options_exclude_user request.user invite_user %}
+                            {% team_options_exclude_user request.user invite_user recommend_team %}
                         </select>
                         <div class="valid-feedback" for="team-name"></div>
                         <div class="invalid-feedback" for="team-name"></div>

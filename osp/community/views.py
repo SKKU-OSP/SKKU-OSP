@@ -49,11 +49,15 @@ def main(request):
         # 최신 게시물
         article_list = Article.objects.filter(board_id=board).order_by('-pub_date')
         board.article_list = article_list[:min(3, len(article_list))]
+        
+        article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(board.article_list)
+            
         for article in board.article_list:
-            article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-            article.like_cnt = len(ArticleLike.objects.filter(article=article))
-            article.comment_cnt = len(ArticleComment.objects.filter(article=article))
-            article.scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+            article.tags = article_tags_dict.get(article.id, [])
+
+            article.like_cnt = article_likes_dict.get(article.id, 0)
+            article.comment_cnt = article_comments_dict.get(article.id, 0)
+            article.scrap_cnt = article_scraps_dict.get(article.id, 0)
             if board.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
@@ -117,7 +121,14 @@ def board(request, board_name, board_id):
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
         team = board.team
-        team_tags = TeamTag.objects.filter(team=team)
+        team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
+        team_tags_list= []
+        try:
+            for atg in team_tags:
+                team_tags_list.append({'name':atg["tag__name"], 'type':atg["tag__type"]})
+        except Exception as e:
+            print("error tag", e)
+        
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
         if request.user: my_acc = Account.objects.get(user=request.user)
 
@@ -127,7 +138,7 @@ def board(request, board_name, board_id):
         if tm:
             context['team_admin'] = tm.is_admin
         context['team'] = team
-        context['team_tags'] = team_tags
+        context['team_tags'] = team_tags_list
         context['team_members'] = team_members
     return render(request, 'community/board/board.html', context)
 
@@ -201,9 +212,7 @@ def account_cards(request):
 
 def article_list(request, board_name, board_id):
     try:
-        # board = Board.objects.get(name=board_name)
         board = Board.objects.get(id=board_id)
-        # print(board)
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
@@ -242,19 +251,15 @@ def article_list(request, board_name, board_id):
     # Order
     article_list = article_list.order_by(*sort_field)
     # Slice to Page
-    article_list = article_list[PAGE_SIZE * (page - 1):]
-    article_list = article_list[:PAGE_SIZE]
+    article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE])
+    
     # Get Article Metadata
+    article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(article_list)
     for article in article_list:
-        comment_cnt = len(ArticleComment.objects.filter(article=article))
-        like_cnt = len(ArticleLike.objects.filter(article=article))
-        tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-        article.comment_cnt = comment_cnt
-        article.like_cnt = like_cnt
-        article.tags = tags
-        # if board.name == 'Team':
-        #     article.team = TeamRecruitArticle.objects.get(article=article).team
-
+        article.comment_cnt = article_comments_dict.get(article.id, 0)
+        article.like_cnt = article_likes_dict.get(article.id, 0)
+        article.scrap_cnt = article_scraps_dict.get(article.id, 0)
+        article.tags = article_tags_dict.get(article.id, [])
         if board.board_type == 'Recruit':
             tr = TeamRecruitArticle.objects.filter(article=article).first()
             if tr:
@@ -363,10 +368,10 @@ def article_create(request):
 
             account = Account.objects.get(user=request.user)
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
-                                             pub_date=datetime.now(), mod_date=datetime.now(),
-                                             anonymous_writer=request.POST.get('is_anonymous') == 'true',
-                                             board_id_id=board.id,
-                                             writer=account)
+                pub_date=datetime.now(), mod_date=datetime.now(),
+                anonymous_writer=request.POST.get('is_anonymous') == 'true',
+                board_id_id=board.id,
+                writer=account)
             if request.POST.get('period_start', False):
                 article.period_start = request.POST.get('period_start')[:-1]
                 article.period_end = request.POST.get('period_end')[:-1]
@@ -572,3 +577,45 @@ def comment_like(request):
         return JsonResponse({'status': 'success', 'result': like_cnt})
     except DatabaseError as e:
         return JsonResponse({'status':'fail', 'message': str(e)})
+    
+
+def get_article_metas(article_list):
+    
+    if type(article_list) == list:
+        article_list = list(article_list)
+    
+    article_tags = ArticleTag.objects.filter(article__in=article_list).values('article', 'tag__name', 'tag__type')
+    article_tags_dict = {}
+    try:
+        for atg in article_tags:
+            if atg["article"] not in article_tags_dict:
+                article_tags_dict[atg["article"]] = []
+            article_tags_dict[atg["article"]].append({'name':atg["tag__name"], 'type':atg["tag__type"]})
+    except Exception as e:
+        print("error tag", e)
+
+    article_likes = ArticleLike.objects.filter(article__in=article_list).values('article').annotate(like_num=Count('article'))
+    article_likes_dict = {}
+    try:
+        for obj in article_likes:
+            article_likes_dict[obj["article"]] = obj["like_num"]
+    except Exception as e:
+        print("like error: ", e)
+        
+    article_comments = ArticleComment.objects.filter(article__in=article_list).values('article').annotate(comment_num=Count('article'))
+    article_comments_dict = {}
+    try:
+        for obj in article_comments:
+            article_comments_dict[obj["article"]] = obj["comment_num"]
+    except Exception as e:
+        print("comment error: ", e)
+        
+    article_scraps = ArticleScrap.objects.filter(article__in=article_list).values('article').annotate(scrap_num=Count('article'))
+    article_scraps_dict = {}
+    try:
+        for obj in article_scraps:
+            article_scraps_dict[obj["article"]] = obj["scrap_num"]
+    except Exception as e:
+        print("scrap error: ", e)
+        
+    return article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict

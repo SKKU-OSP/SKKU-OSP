@@ -91,8 +91,7 @@ def board_sidebar_team_board(context, request):
     team_board_query = Q()
     result = ''
     if request.user and request.user.is_authenticated:
-        user = User.objects.get(username=request.user)
-        account = Account.objects.get(user=user)
+        account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
 
@@ -118,9 +117,6 @@ def board_sidebar_invite_team_board(context, request):
     team_board_query = Q()
     result = ''
     if request.user and request.user.is_authenticated:
-        user = User.objects.get(username=request.user)
-        account = Account.objects.get(user=user)
-
         team_list = list(TeamInviteMessage.objects.filter(account__user=request.user, status=0, direction=True).values_list('team__name',flat=True))
 
         team_board_query = Q(name__in=team_list)

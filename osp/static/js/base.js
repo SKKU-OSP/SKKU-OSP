@@ -120,6 +120,7 @@ function select_oppo() {
 
 function send_msg(event) {
     event.preventDefault();
+    if(!$('#chat-input').val()) return;
     var form_data = new FormData($('#chat-input-form')[0]);
     var oppo_id = $($('.opponent-item.selected')[0]).attr('value');
     var random_id = Math.random().toString(36).substring(2, 11);
@@ -178,7 +179,7 @@ function msgModalOpen(selected_oppo = 0) {
     })
 }
 
-function ApplyTeamModalOpen() {
+function ApplyTeamModalOpen(isResult=false) {
     if (!$('#ApplyTeamModal').hasClass('ready')) {
         $.ajax({
             url: "/team/api/team-apply-list",
@@ -194,6 +195,13 @@ function ApplyTeamModalOpen() {
                     this.style.transform = '';
                 }
             });
+            if(isResult){
+                console.log("applyteammodal");
+                $("#apply-recv-tab").toggleClass("active");
+                $("#apply-send-tab").toggleClass("active");
+                $("#apply-recv").toggleClass("show active");
+                $("#apply-send").toggleClass("show active");
+            }
         })
     } else {
         $('#ApplyTeamModal').modal('show');
@@ -227,7 +235,7 @@ function ReadNotification(type, noti_id, target_id) {
                 ApplyTeamModalOpen();
             }
             if (type == 'team_apply_result') {
-                ApplyTeamModalOpen();
+                ApplyTeamModalOpen(isResult=true);
             }
 
             $('#noti-' + noti_id).addClass('read');

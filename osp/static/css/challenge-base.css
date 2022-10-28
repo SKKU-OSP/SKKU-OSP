@@ -1,52 +1,90 @@
 @import url("/static/css/color.css");
 
+#challenge-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 3rem;
 
-.accordion-body {
-    padding: 0;
+    background: #FFFFFF;
+    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    border-radius: 0.625rem;
+    margin-bottom: 1.5rem;
 }
 
-.accordion-item,
-.accordion-button {
-    border: none;
-    border-radius: 0.625rem !important;
+#challenge-wrapper{
+    display: flex;
+    gap: 1rem;
 }
 
-.accordion-button:focus {
-    box-shadow: none;
+#challenge-achieved{
+    width: calc(50% - 0.5rem);
+}
+#challenge-unachieved{
+    width: calc(50% - 0.5rem);
 }
 
-.accordion-button:not(.collapsed) {
-    background-color: var(--main-point-color) !important;
+.challenge-group-title{
+    text-align: center;
+
+    background-color: var(--main-point-color);
     color: #FFFFFF;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 0.625rem;
+
+    z-index: 1;
+    position: relative;
 }
 
-.accordion-button::after {
-    font-family: bootstrap-icons;
-    background-image: none;
-    width: fit-content;
-    content: "\F229";
-}
-
-.accordion-button:not(.collapsed):after {
-    background-image: none;
-}
-
-.accordion-collapse{
+.challenge-itemlist{
     margin-top: -1rem;
     padding-top: 1rem;
+    padding-bottom: 0.5rem;
     background-color: #FFFFFF;
-    border-bottom-left-radius: 0.625rem !important;
-    border-bottom-right-radius: 0.625rem !important;
+    border-bottom-left-radius: 0.625rem;
+    border-bottom-right-radius: 0.625rem;
     box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
 .acheive-item {
     padding: 0.5rem 1rem 0.5rem 1rem;
     border-bottom: 0.5px solid var(--main-border-color);
+    background-color: #FFFFFF;
 }
 
 .acheive-item:last-child {
     border-bottom: none;
+}
+
+.challenge-head{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.challenge-icon{
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    font-size: 1rem;
+}
+.challenge-icon.challenge-tier-0{
+    border: 3px solid #FFFFFF;
+}
+.challenge-icon.challenge-tier-1{
+    border: 3px solid var(--color-bronze);
+    color: var(--color-bronze);
+}
+.challenge-icon.challenge-tier-2{
+    border: 3px solid var(--color-silver);
+    color: var(--color-silver);
+}
+.challenge-icon.challenge-tier-3{
+    border: 3px solid var(--color-gold);
+    color: var(--color-gold);
 }
 
 .challenge-name {
@@ -59,7 +97,7 @@
     color: var(--main-icon-color);
 }
 
-.progress-bar{
+.progress-bar {
     background-color: var(--sub-point-color);
 }
 
@@ -76,7 +114,7 @@
     border: none;
 }
 
-#total-tab-pane{
+#total-tab-pane {
     background-color: #FFFFFF;
     border-radius: 0.625rem;
     box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
@@ -96,6 +134,15 @@
     }
 }
 
-.rotation{
+.rotation {
     animation: rotate 3s;
+}
+
+.progress{
+    border-radius: 1rem;
+}
+
+.progress-bar{
+    color: #000000;
+    border-radius: 1rem;
 }

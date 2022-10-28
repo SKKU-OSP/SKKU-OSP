@@ -49,7 +49,9 @@
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
+                        {% if not article.writer.user.is_superuser %}
                         <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href="#"
                                 onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
@@ -60,15 +62,15 @@
             <div class="d-flex justify-content-between">
                 <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-                    <div>{{article|article_like}}</div>
+                    <div>{{article.like_cnt}}</div>
                 </div>
-                <div class="article-meta-stat d-flex">
+                <div class="article-meta-stat d-flex" onclick="location.href='{% url 'community:article-view' article.id %}#comment-content'" style="cursor:pointer;">
                     <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
-                    <div>{{article|article_comment}}</div>
+                    <div>{{article.comment_cnt}}</div>
                 </div>
                 <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
-                    {{article|article_comment}}
+                    {{article.scrap_cnt}}
                 </div>
                 <div class="article-meta-stat d-flex">
                     <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
