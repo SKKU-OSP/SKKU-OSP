@@ -57,7 +57,7 @@
                 </div>
                 <div id="team-tag" class="d-flex flex-row flex-wrap" style="width:440px;">
                     {% for tag in team_tags %}
-                    <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" style="margin-bottom:3px;" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
+                    <span class="badge bg-tag-{{tag.type}} me-1 team-tag" style="margin-bottom:3px;" name="{{tag.name}}">{{tag.name}}</span>
                     {% endfor %}
                 </div>
             </div>

@@ -18,71 +18,74 @@
       <div class="d-flex flex-column justify-content-end text-center user-info"
       {% if not data.is_own %}
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
-    {% endif %}
+      {% endif %}
       >
-          <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+        <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
         <div class="info-body">
         {% if data.is_own %}
           <p class="font-focus">{{data.info.name}}</p>
           <p>{{data.info.github_id}}</p>
         {% else %}
-            <div class="d-flex flex-row justify-content-between w-100" style="padding: 5px 0px;">
+          <div class="d-flex flex-row justify-content-between w-100" style="padding: 5px 0px;">
             <div style="margin:auto;">
                 Github:
-              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}} <i class="bi bi-box-arrow-up-right pointer"></i></a>
-
+              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">
+                {{data.info.github_id}}
+                <i class="bi bi-box-arrow-up-right pointer"></i>
+              </a>
             </div>
-            </div>
+          </div>
         {% endif %}
         </div>
       </div>
     {% if data.is_own %}
       <div class="d-flex flex-column user-detail">
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">학번</span>
-              <span class="row-txt">{{data.info.id}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">대학</span>
-              <span class="row-txt">{{data.info.college}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">학과</span>
-              <span class="row-txt">{{data.info.dept}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">전공</span>
-              <span class="row-txt">
-                {% if data.info.plural_major %}
-                복수전공
-                {% else %}
-                원전공
-                {% endif %}
-              </span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">GitHub</span>
-              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">개인 Email</span>
-              <span class="row-txt">{{data.info.personal_email}}</span>
-            </div>
-            <div class="d-flex row-userdata">
-              <span class="row-title text-center">Github Email</span>
-              <span class="row-txt">{{data.info.primary_email}}</span>
-            </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">학번</span>
+          <span class="row-txt">{{data.info.id}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">대학</span>
+          <span class="row-txt">{{data.info.college}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">학과</span>
+          <span class="row-txt">{{data.info.dept}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">전공</span>
+          <span class="row-txt">
+            {% if data.info.plural_major %}
+            복수전공
+            {% else %}
+            원전공
+            {% endif %}
+          </span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">GitHub</span>
+          <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">개인 Email</span>
+          <span class="row-txt">{{data.info.personal_email}}</span>
+        </div>
+        <div class="d-flex row-userdata">
+          <span class="row-title text-center">Github Email</span>
+          <span class="row-txt">{{data.info.primary_email}}</span>
+        </div>
       </div>
     {% endif %}
     </div>
     <div class="col-md-9 col-12">
+      {% if success %}
       <div class="row mb-3 profile-content">
         <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
           <div class="modal-dialog modal-xl">
             <div class="modal-content">
               <div class="modal-light-header">
                 <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
-                <i id="closeModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="container">
                 <div class="horizontal-menu">
@@ -181,9 +184,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="modal-footer">
-                <button id="closeChartModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -328,6 +328,7 @@
           </div>
         </div>
       </div>
+      {% endif %}
       <div class="row profile-content">
         <div class="col-4 expandable">
           <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfolioModal" aria-hidden="true">
@@ -335,16 +336,13 @@
               <div class="modal-content">
                 <div class="modal-light-header">
                   <h5 id="portfolioModal" class="modal-title">포트폴리오</h5>
-                  <i id="closePortfolioModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body-markdown">
                   {% if data.account.portfolio == '' %}
                     <span class="weak-text">포트폴리오를 설정해주세요</span>
                   {% endif %}
                   {{ data.account.portfolio|mark }}
-                </div>
-                <div class="modal-footer">
-                  <button id="closePortfolioModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>
@@ -408,6 +406,7 @@
           </div>
         </div>
       </div>
+      {% if success %}
       <div class="row mb-3 profile-content">
         <div class="col-7">
           <div class="card h-100">
@@ -425,7 +424,7 @@
                 {% if test %}
                 <div class="modal-light-header">
                   <h5 id="gbtiModal" class="modal-title">개발자 유형</h5>
-                  <i id="closeGbtiModalIcon" class="bi bi-x-lg" data-bs-dismiss="modal" aria-label="Close"></i>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <h3 class="text-center mt-3">개발자 유형 검사 결과</h3>
                 <div class="d-flex justify-content-center">
@@ -584,9 +583,6 @@
                   </div>
                   {% endfor%}
                 </div>
-                <div class="modal-footer">
-                  <button id="closeGbtiModalBtn" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
               </div>
             </div>
           </div>
@@ -622,6 +618,14 @@
           </div>
         </div>
       </div>
+      {% else %}
+      <div>
+        아직 데이터가 수집되지 않았습니다. 데이터 수집은 하루에 한 번 이루어 집니다. 내일 다시 방문해주세요.
+      </div>
+      <div>
+        GitHub ID가 올바르지 않은면 데이터 수집이 불가능합니다. GitHub ID를 확인해주세요
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -629,6 +633,11 @@
 {% endblock %}
 
 {% block script %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
+  <script type="text/javascript" src="{% static 'js/profile_basic.js' %}"></script>
+  {% if success %}
   <script>
     var category_select;
     var modal_category_select;
@@ -710,9 +719,6 @@
     });
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/profile-type-animation.css' %}">
   <script type="text/javascript">
     let chart_data = JSON.parse("{{ chart_data | escapejs }}");
     let type_data = JSON.parse("{{ type_data | escapejs }}");
@@ -721,8 +727,8 @@
   </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/test_type_data.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  {% endif %}
 {% endblock %}

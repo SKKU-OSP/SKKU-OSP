@@ -46,7 +46,7 @@
                             notifications
                         </div>
                     </button>
-                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow:auto;">
+                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto; overflow-x:hidden">
                         {% for noti in notifications.list %}
 
                         <li
@@ -127,8 +127,6 @@
                 </div>
             </div>
             {% else %}
-            <a class="btn btn-outline-primary mx-2" href="/accounts/login">Log In</a>
-            <a class="btn btn-outline-success mx-2" href="/accounts/register">Sign Up</a>
             {% endif %}
         </div>
     </div>
@@ -138,7 +136,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">메시지</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="message-modal-body" class="modal-body d-flex">
                 <div class="spinner-border m-auto" role="status">

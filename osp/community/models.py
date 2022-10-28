@@ -74,7 +74,7 @@ class ArticleComment(models.Model):
     writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
     
     def __str__(self) -> str:
-        return f'{self.id:03d}:{self.body})'
+        return f'{self.id:03d}:{self.body}'
 
 class ArticleCommentLike(models.Model):
     comment = models.ForeignKey(ArticleComment, models.CASCADE)

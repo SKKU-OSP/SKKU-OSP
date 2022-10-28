@@ -126,6 +126,7 @@ a.nav-link {
 .modal-content {
   overflow-x: hidden;
   overflow-y: auto;
+  padding-bottom: 3rem;
 }
 
 .modal-body>.row {
@@ -146,7 +147,7 @@ a.nav-link {
 
 .tab-pane {
   text-align: center;
-  padding: 0 4%;
+  padding: 1% 4%;
 }
 
 #pills-overview.active {
@@ -312,16 +313,6 @@ a.nav-link {
   display: inline;
   text-indent: 0;
   color: var(--main-icon-color);
-}
-
-#closeModalIcon,
-#closePortfolioModalIcon,
-#closeGbtiModalIcon {
-  cursor: pointer;
-  display: inline;
-  text-indent: 0;
-  color: black;
-  font-size: 20px;
 }
 
 .modal-footer {

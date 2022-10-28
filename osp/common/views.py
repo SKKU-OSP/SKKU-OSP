@@ -26,7 +26,8 @@ def register_page(request):
             fail_reason.append('이메일 주소는 100자를 넘을 수 없습니다.')
         if len(request.POST['secondary_email']) > 100:
             fail_reason.append('이메일 주소는 100자를 넘을 수 없습니다.')
-        
+        if check_duplicate(request.POST.get('username')):
+            fail_reason.append('중복된 이름이 있습니다.')
         if len(fail_reason) > 0:
             return JsonResponse({'status': 'fail', 'message': fail_reason})
         user = User.objects.create_user(username=request.POST.get('username'), password=request.POST['password'])
@@ -52,3 +53,22 @@ def register_page(request):
             if len(tag) == 1:
                 AccountInterest.objects.create(account=new_account, tag=tag[0])
         return JsonResponse({'status': 'success'})
+    
+def check_user(request):
+    if request.method == 'POST':
+        fail_reason = []
+        username = request.POST.get('username')
+        if len(username) < 5:
+            fail_reason.append('username은 5자 이상이여야 합니다.')
+        
+        if check_duplicate(username):
+            fail_reason.append('중복된 이름이 있습니다.')
+        if len(fail_reason) > 0:
+            return JsonResponse({'status': 'fail', 'message': fail_reason})
+        
+        return JsonResponse({'status': 'success'})
+    
+def check_duplicate(username):
+    user = User.objects.filter(username=username)
+    return True if len(user) else False
+    
