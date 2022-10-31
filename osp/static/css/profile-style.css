@@ -558,7 +558,9 @@ span.row-raw {
   color: var(--main-icon-color);
   font-size: 12px;
 }
-
+.weak-text-lg{
+  color: var(--main-icon-color);
+}
 .endpoint {
   height: 6px !important;
   width: 6px !important;

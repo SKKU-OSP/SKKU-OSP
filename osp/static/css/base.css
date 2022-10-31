@@ -698,3 +698,7 @@ footer {
 .gap-8 {
   gap: 2rem;
 }
+.weak-text{
+  color: var(--main-icon-color);
+  font-size: 12px;
+}
