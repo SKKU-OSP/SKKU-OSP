@@ -14,25 +14,28 @@
             {% csrf_token %}
             <div class="col-md-6 mb-3">
                 <label for="github_id" class="form-label">GitHub ID</label>
-                <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
+                <div class="input-group">
+                    <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
                     required>
+                    <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
+                </div>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="username" class="form-label">Username</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                    <button class="btn btn-outline-secondary" type="button" id="duplicate_check">Check</button>
+                    <button class="btn btn-outline-secondary" type="button" id="duplicate-check">Check</button>
                 </div>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
-                    required>
+                <label for="password">Password</label>
+                <div class="weak-text form-label">비밀번호는 4자 이상이어야 합니다.</div>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
-                <label for="password_check" class="form-label">Password Check</label>
-                <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password"
-                    required>
+                <label for="password_check">Password Check</label>
+                <div id="password-check-sign" class="weak-text form-label">비밀번호를 다시 입력해주세요.</div>
+                <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
                 <label for="student_id" class="form-label">학번</label>
@@ -166,8 +169,11 @@
                 }
             },
         })
-        $("#duplicate_check").on("click", ()=>{
+        $("#duplicate-check").on("click", ()=>{
             ajaxCheckDup();
+        })
+        $("#github-id-check").on("click", ()=>{
+            ajaxCheckIdValid();
         })
     });
     function setEmailDomain(id, email_domain){
@@ -176,11 +182,32 @@
         let target_id = id.split("-select")[0]
         $(`#${target_id}`).val(email_domain)
     }
+    function checkPassword(){
+        let pswd = $("#password").val();
+        let checkpswd = $("#password_check").val();
+        if (checkpswd.length > 0){
+            if(pswd == checkpswd){
+                $("#password-check-sign").text("비밀번호가 일치합니다.")
+                $("#password-check-sign").attr("class", "text-primary weak-text form-label");
+            }else{
+                $("#password-check-sign").text("비밀번호가 일치하지 않습니다.")
+                $("#password-check-sign").attr("class", "text-danger weak-text form-label");
+            }
+        }
+        else{
+            $("#password-check-sign").text("비밀번호를 다시 입력해주세요.")
+            $("#password-check-sign").attr("class", "weak-text form-label");
+        }
+    }
+        
     function ajaxCheckDup(){
         console.log("ajaxCheckDup")
         ajax_form_data=new FormData();
         ajax_form_data.append('username',$('#username').val());
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        $('#duplicate-check').html(`<div class="spinner-border spinner-border-sm text-dark" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>`);
         $.ajax({
             type: "POST",
             url: "{% url 'common:check_user' %}",
@@ -193,14 +220,50 @@
                 console.log(data);
                 if(data['status']=="success"){
                     alert('사용가능한 유저이름입니다.')
-                    $('#duplicate_check').css('backgroundColor', '#0D6EFD');
-                    $('#duplicate_check').css('color', '#FFFFFF');
+                    $('#duplicate-check').css('backgroundColor', '#0D6EFD');
+                    $('#duplicate-check').css('color', '#FFFFFF');
                 }
                 else{
                     alert( data['message'] );
-                    $('#duplicate_check').css('backgroundColor', '#DC3545');
-                    $('#duplicate_check').css('color', '#FFFFFF');
+                    $('#duplicate-check').css('backgroundColor', '#DC3545');
+                    $('#duplicate-check').css('color', '#FFFFFF');
                 }
+                $('#duplicate-check').html("Check")
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
+    }
+    function ajaxCheckIdValid(){
+        console.log("ajaxCheckIdValid")
+        ajax_form_data=new FormData();
+        ajax_form_data.append('github_id',$('#github_id').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        $('#github-id-check').html(`<div class="spinner-border text-dark spinner-border-sm" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>`);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'common:check_github_id' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    alert('사용가능한 GitHub ID입니다.')
+                    $('#github-id-check').css('backgroundColor', '#0D6EFD');
+                    $('#github-id-check').css('color', '#FFFFFF');
+                }
+                else{
+                    alert( data['message'] );
+                    $('#github-id-check').css('backgroundColor', '#DC3545');
+                    $('#github-id-check').css('color', '#FFFFFF');
+                }
+                $('#github-id-check').html("Check")
             },
             error: function(data){
                 alert('Error Occured');
