@@ -12,19 +12,24 @@
         </div>
         <form method="post" action="." class="row" onsubmit="ajaxSignIn(); return false;">
             {% csrf_token %}
-            <div class="col-md-4 mb-3">
+            <div class="col-md-6 mb-3">
+                <label for="github_id" class="form-label">GitHub ID</label>
+                <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
+                    required>
+            </div>
+            <div class="col-md-6 mb-3">
                 <label for="username" class="form-label">Username</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                     <button class="btn btn-outline-secondary" type="button" id="duplicate_check">Check</button>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password"
                     required>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="password_check" class="form-label">Password Check</label>
                 <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password"
                     required>
@@ -99,25 +104,41 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="github_id" class="form-label">GitHub ID</label>
-                <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
-                    required>
-            </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <label for="personal_email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="personal_email" name="personal_email" placeholder="연락용 Email"
+                <div class="d-flex">
+                    <input type="text" class="form-control email-input" id="personal_email" name="personal_email" placeholder="연락용 Email"
                     required>
+                    <span style="line-height: 38px;">@</span>
+                    <input type="text" id="email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);" aria-label="email-select">
+                        {% email_domain_tag request %}
+                    </select>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <label for="primary_email" class="form-label">GitHub Email</label>
-                <input type="email" class="form-control" id="primary_email" name="primary_email"
-                    placeholder="GitHub 계정과 연결된 Email" required>
+                <div class="d-flex">
+                    <input type="text" class="form-control email-input" id="primary_email" name="primary_email"
+                    placeholder="GitHub 계정 연동 Email" required>
+                    <span style="line-height: 38px;">@</span>
+                    <input type="text" id="primary-email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="primary-email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);">
+                        {% email_domain_tag request %}
+                    </select>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="secondary_email" class="form-label">Secondary Email</label>
-                <input type="email" class="form-control" id="secondary_email" name="secondary_email"
-                    placeholder="Git과 연결된 예비 Email">
+            <div class="col-md-12 mb-3">
+                <label for="secondary_email" class="form-label">기타 연동 Email (선택)</label>
+                <div class="d-flex">
+                    <input type="text" class="form-control email-input" id="secondary_email" name="secondary_email"
+                    placeholder="기타 연동 Email">
+                    <span style="line-height: 38px;">@</span>
+                    <input type="text" id="secondary-email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="secondary-email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);">
+                        {% email_domain_tag request %}
+                    </select>
+                </div>
             </div>
             <div class="col-md-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
@@ -149,7 +170,12 @@
             ajaxCheckDup();
         })
     });
-    
+    function setEmailDomain(id, email_domain){
+        if(email_domain == "직접입력") return;
+        console.log("setEmailDomain", id, email_domain)
+        let target_id = id.split("-select")[0]
+        $(`#${target_id}`).val(email_domain)
+    }
     function ajaxCheckDup(){
         console.log("ajaxCheckDup")
         ajax_form_data=new FormData();
@@ -193,9 +219,12 @@
         ajax_form_data.append('github_id', $('#github_id').val());
         ajax_form_data.append('absence', $("input[name='absence']:checked").val());
         ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val());
-        ajax_form_data.append('personal_email', $('#personal_email').val());
-        ajax_form_data.append('primary_email', $('#primary_email').val());
-        ajax_form_data.append('secondary_email',$('#secondary_email').val());
+        let personal_email = ($('#personal_email').val()).trim() + "@" + ($('#email-domain').val()).trim()
+        ajax_form_data.append('personal_email', personal_email);
+        let primary_email = ($('#primary_email').val()).trim() + "@" + ($('#primary-email-domain').val()).trim()
+        ajax_form_data.append('primary_email', primary_email);
+        let secondary_email = ($('#secondary_email').val()).trim() + "@" + ($('#secondary-email-domain').val()).trim()
+        ajax_form_data.append('secondary_email', secondary_email);
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
         ajax_form_data.append('category_tag_list', category_select.selected().toString());
