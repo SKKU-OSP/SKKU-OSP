@@ -46,7 +46,7 @@
                             notifications
                         </div>
                     </button>
-                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto; overflow-x:hidden">
+                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto;overflow-x:hidden;">
                         {% for noti in notifications.list %}
 
                         <li
@@ -96,7 +96,7 @@
                     </ul>
                 </li>
 
-                <li id="message" class="nav-item pointer">
+                <li id="message" class="nav-item pointer" style="position:relative;">
                     {% get_new_message request.user as is_new_msg %}
                     {% if is_new_msg %}
                     <span id="new-msg" class="badge">
