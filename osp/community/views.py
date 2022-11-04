@@ -129,7 +129,7 @@ def board(request, board_name, board_id):
         except Exception as e:
             print("error tag", e)
         
-        team_members = TeamMember.objects.filter(team=team).order_by('-is_admin')
+        team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
         if request.user: my_acc = Account.objects.get(user=request.user)
 
         tm = team_members.filter(member=my_acc).first()
