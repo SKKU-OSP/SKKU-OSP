@@ -55,6 +55,7 @@ def article_scrap(article):
 def comment_like(comment):
     return len(ArticleCommentLike.objects.filter(comment=comment))
 
+#todo: 사용안되는 함수, 명세서에 작성안함.
 @register.filter
 def anonymous_checked(a_writer):
     if a_writer:
@@ -112,7 +113,7 @@ def board_sidebar_team_board(context, request):
                 '''
     return mark_safe(result)
 
-
+#todo: 사용 x
 @register.simple_tag(takes_context=True)
 def board_sidebar_invite_team_board(context, request):
     team_board_query = Q()
