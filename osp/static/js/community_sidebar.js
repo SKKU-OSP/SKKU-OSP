@@ -1,6 +1,7 @@
 $().ready(function () {
   $('#team-create').click(function () {
     if (!$('#AddTeamModal').hasClass('ready')) {
+      $.LoadingOverlay("show");
       $.ajax({
         url: "/team/api/team-create",
         type: "GET",
@@ -17,6 +18,7 @@ $().ready(function () {
           },
           placeholder: 'Tag',
         });
+        $.LoadingOverlay("hide");
         $('#team-submit').click(function () {
           console.log('Submit');
           var form = $('#team-create-form')[0];
