@@ -118,7 +118,7 @@
         {% endif %}
     });
     function setToDateEnd(){
-        $('#PeriodPickerEndInput').val(new Date());
+        $('#PeriodPickerEndInput').val(new Date().toLocaleString("en-US"));
     }
 
     function edit_submit(event) {
