@@ -28,23 +28,25 @@
                         <div id="team-member-list" style="height:80px; margin-right:5px;">
                             {% for member in team_members %}
 
+                            <div class="btn-group" style="position:static;">
+                                <div class="dropdown writer-dropdown dropdown-toggle no-icon-dropdown team-member" style="height:25px;" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <div class=""  style="display:inline-block;">
+                                        <a class="" style="color:white;text-decoration:underline;" >
+                                            {{member.member.user.username}}
+                                        </a>
+                                    </div>
+                                    {% if member.is_admin %}
+                                        <span class="material-icons-outlined team-admin-icon">
+                                            military_tech
+                                        </span>
+                                    {% endif %}
 
-                            <div class="dropdown writer-dropdown dropdown-toggle no-icon-dropdown team-member" style="height:25px;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class=""  style="display:inline-block;">
-                                    <a class="" style="color:white;text-decoration:underline;" >
-                                        {{member.member.user.username}}
-                                    </a>
                                 </div>
-                                {% if member.is_admin %}
-                                    <span class="material-icons-outlined team-admin-icon">
-                                        military_tech
-                                    </span>
-                                {% endif %}
+                                <ul class="dropdown-menu" style="position:absolute;" >
+                                    <li><a class="dropdown-item" href="/user/{{member.member.user.username}}">프로필</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                                </ul>
                             </div>
-                            <ul class="dropdown-menu" style="position:absolute;">
-                                <li><a class="dropdown-item" href="/user/{{member.member.user.username}}">프로필</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
-                            </ul>
                             {% endfor %}
                         </div>
                     </div>
@@ -58,14 +60,14 @@
                 </div>
                 <div id="team-tag" class="d-flex flex-row flex-wrap" style="width:440px;">
                     {% for tag in team_tags %}
-                    <span class="badge bg-tag-{{tag.tag.type}} me-1 team-tag" style="margin-bottom:3px;" name="{{tag.tag.name}}">{{tag.tag.name}}</span>
+                    <span class="badge bg-tag-{{tag.type}} me-1 team-tag" style="margin-bottom:3px;" name="{{tag.name}}">{{tag.name}}</span>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="team-update-modal"></div>
+    <div class="modal modal-lg fade" id="team-update-modal"></div>
 <script>
     var admin_list = [];
     var tag_list = [];

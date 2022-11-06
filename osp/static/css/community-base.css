@@ -493,9 +493,6 @@
     color: #FFFFFF;
 }
 
-#tag-filter{
-    /*width: 15rem;*/
-}
 
 .color-b {
     color: #2F2F2F;
@@ -1007,4 +1004,10 @@
     overflow: hidden;
     overflow-x: auto;
     padding: 0.25rem 0rem;
+}
+
+.desc-break{
+    display: block;
+    word-break: break-all;
+    overflow: hidden;
 }

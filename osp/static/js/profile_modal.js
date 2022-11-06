@@ -6,7 +6,7 @@ function setVisualModal(){
   let year_intvl = end_year-start_year;
   let select_year = end_year;
   let select_month = 0;
-  let chartFactor = "score_sum";
+  let chartFactor = "score";
   let is_selected_month = 0;
   let is_nomalization = 0;
   const cssDecl = getComputedStyle(document.documentElement);
@@ -19,7 +19,7 @@ function setVisualModal(){
   const factorLabels = ["score", "star", "commit", "pr", "issue", "repo"];
   const modal_ctx = []; // 4 ctx
   for(let i=0; i<=3; i++) modal_ctx.push(document.getElementById('modal-canvas'+i).getContext("2d"));
-  let pi_chart = new Chart(modal_ctx[0]);
+  let pie_chart = new Chart(modal_ctx[0]);
   let radar_chart = new Chart(modal_ctx[1]);
   let dist_chart = new Chart(modal_ctx[2]);
   let specific_score_chart = new Chart(modal_ctx[3]);
@@ -29,20 +29,13 @@ function setVisualModal(){
       select_year = btn.innerText;
       $('.modal-btn-year.active').removeClass("active");
       this.className += " active";
-      let start = new Date();
       updateMonthly(select_year);
-      let end = new Date();
-      console.log("updateMonthly elapsed time", end-start);
     });
   }
   let icon_modal = document.getElementById("icon-modal");
   icon_modal.addEventListener("click", (e)=>{
     $('#modalBox').modal('show');
   });
-  // close modal
-  document.getElementById("closeModalIcon").addEventListener("click", ()=>{
-    $('#modalBox').modal("hide");
-  })
   $(".modal-month-item").on("click", (e)=>{
     $("#modal-btnGroupDropMonth").text(e.target.innerText);
     select_month = Number(e.target.value);
@@ -57,9 +50,6 @@ function setVisualModal(){
   $(".modal-factor-item").on("click", (e)=>{
     $("#modal-btnGroupDropFactor").text(e.target.innerText);
     chartFactor = (e.target.innerText).toLowerCase();
-    if(chartFactor == "score"){
-      chartFactor = "score_sum";
-    }
     updateFactor(factorLabels, select_month);
     makePage(chart_data, 2);
   });
@@ -88,15 +78,10 @@ function setVisualModal(){
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
-  let factor_contribution_level = Array(6).fill(0);
   let target_contribution = Array(6).fill(0);
-  let target_contribution_level = Array(6).fill(0);
   
-  let start = new Date();
   updateMonthly(select_year);
   makeModalSpecificScoreChart();
-  let end = new Date();
-  console.log("updateMonthly elapsed time", end-start);
 
   function updateMonthly(select_year){
     monthly_contr = chart_data["monthly_contr"][select_year-start_year];
@@ -172,33 +157,10 @@ function setVisualModal(){
         else target_contribution[j] = 0;
       }
     }
-    for(let i=0; i<factorLabels.length; i++){
-      factor_contribution_level[i] = getDataLevel(factor_contribution[i], i, is_selected_month);
-      target_contribution_level[i] = getDataLevel(target_contribution[i], i, is_selected_month);
-    }
-  }
-  
-  function getDataLevel(value, type, isMonthly=true){
-    let level = 0;
-    if (isMonthly) {
-      if (type === 1) level = Math.ceil(value / 25);
-      else if (type === 0)  level = Math.ceil(value / 2);
-      else if (type === 2)  level = Math.ceil(value / 3);
-      else level = Math.ceil(value / 2);
-    }
-    else {
-      if (type === 1) level = Math.ceil(value / 100);
-      else if (type === 0)  level = Math.ceil(value / 2);
-      else if (type === 2)  level = Math.ceil(value / 5);
-      else level = Math.ceil(value / 4);
-    }
-    if(level>4) level = 4;
-    return level;
   }
 
-  /* Grass for Month */
+  /** 연도에 따라 월별 잔디 차트를 렌더링하는 함수 */
   function makeMonthGrass(){
-    console.log("mMG: y",select_year, "month_contr", monthly_contribution);
     const month_label = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
     "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const fs = 15;
@@ -275,33 +237,33 @@ function setVisualModal(){
         div_activity_monthly.appendChild(mLabel);
       }
     }
-    pi_chart.destroy();
+    pie_chart.destroy();
     
-    const pi_label = [];
+    const pie_label = [];
     let divisor = 0
     for(; divisor<=standard_contr; divisor=Math.floor(divisor+standard_contr/3)){
-      if(divisor == 0) pi_label.push("0");
-      else pi_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
+      if(divisor == 0) pie_label.push("0");
+      else pie_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
     }
-    pi_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
-    const pi_dataset = Array(5).fill(0);
+    pie_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
+    const pie_dataset = Array(5).fill(0);
     let active_grass = 0;
     monthly_contribution_level.forEach((val)=>{
       if(val<=4){
-        pi_dataset[val]++;
+        pie_dataset[val]++;
         active_grass++;
       }
     });
-    const pi_data = {
-      labels: pi_label,
+    const pie_data = {
+      labels: pie_label,
       datasets: [{
-        data: pi_dataset,
+        data: pie_dataset,
         backgroundColor: palette,
         hoverOffset: 4
       }]
     };
-    pi_chart = new Chart(modal_ctx[0], {
-      type: 'pie', data: pi_data, 
+    pie_chart = new Chart(modal_ctx[0], {
+      type: 'pie', data: pie_data, 
       options:{
         plugins: {
           legend: { display: false },
@@ -312,9 +274,26 @@ function setVisualModal(){
               },
             },
           },
+          datalabels:{
+            anchor: (context)=>{
+              return 'center';
+            },
+            color: "black",
+            font:{
+              family: 'IBMPlexSansKR-Regular',
+            },
+            formatter: (value, context) => {
+              const datasetArray = context.dataset.data;
+              if(datasetArray[context.dataIndex] > 0) 
+                return (datasetArray[context.dataIndex]*100/active_grass).toFixed(1) + "%";
+              else return '';
+            }
+          },
         },
         responsive: true,
-      }});
+      },
+      plugins: [ChartDataLabels],
+    });
   }
   
   function getNormalCoeff(value, label, is_work=1, goal=10){
@@ -326,7 +305,7 @@ function setVisualModal(){
   function makePage(chart_data, render_id=0){
     let user_data_total = JSON.parse(chart_data["user_data"])[select_year-start_year];
     let user_data = {
-      "score_sum": user_data_total["total_score"],
+      "score": user_data_total["total_score"],
       "commit": user_data_total["commit_cnt"],
       "pr": user_data_total["pr_cnt"],
       "issue": user_data_total["issue_cnt"],
@@ -335,7 +314,7 @@ function setVisualModal(){
     user_data["star"] = chart_data["own_star"]["star"];
     let annual_data = JSON.parse(chart_data["annual_overview"])[0];
     let dist_data = {
-      "score_sum" : chart_data["score_dist"][select_year-start_year],
+      "score" : chart_data["score_dist"][select_year-start_year],
       "star" : chart_data["star_dist"][select_year-start_year],
       "commit" : chart_data["commit_dist"][select_year-start_year],
       "pr" : chart_data["pr_dist"][select_year-start_year],
@@ -351,8 +330,9 @@ function setVisualModal(){
     else if(render_id == 1) makeModalRadarChart(is_nomalization, select_month);
     else if(render_id == 2) makeModalDistChart(annual_data, dist_data, user_data);
   }
+
+  /** 차트 모달의 정규분포 Scatter 차트 렌더링 함수 */
   function makeModalDistChart(annual_data, dist_data, user_data){
-    /* Chart 2: 정규분포 확률밀도함수 */
     let mean = 0;
     let sigma = 1;
     const normal_dist_data = [];
@@ -382,8 +362,8 @@ function setVisualModal(){
       }
     });
     dist_data[chartFactor].reverse();
+    /** 확률밀도함수 */
     function gaussian(x) {
-      // 확률밀도함수
       let gaussianConstant = 1 / Math.sqrt(2 * Math.PI);
       x = (x - mean) / sigma;
       return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
@@ -680,21 +660,6 @@ function setVisualModal(){
     }
   }
 }
-function setPortfolioModal(){
-  let icon_portfolio_modal = document.getElementById("icon-portfolio");
-  icon_portfolio_modal.addEventListener("click", ()=>{
-    $('#modalPortfolioBox').modal('show');
-  });
-  document.getElementById("closeChartModalBtn").addEventListener("click", ()=>{
-    $('#modalBox').modal("hide");
-  });
-  document.getElementById("closePortfolioModalIcon").addEventListener("click", ()=>{
-    $('#modalPortfolioBox').modal("hide");
-  });
-  document.getElementById("closePortfolioModalBtn").addEventListener("click", ()=>{
-    $('#modalPortfolioBox').modal("hide");
-  });
-}
 function setGbtiModal(){
   const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", ()=>{
@@ -718,8 +683,6 @@ function setGbtiModal(){
     }
     
     html2canvas(screenshotTarget,{scale:2, backgroundColor: cssDecl.getPropertyValue('--developer-bg-color')}).then((canvas)=>{
-      console.log("canvas", canvas);
-      console.log("canvas2d", canvas.getContext('2d'));
       canvas.getContext('2d').filter = 'blur(4px)';
       const base64image = canvas.toDataURL("image/png");
       var anchor = document.createElement('a');
@@ -749,6 +712,12 @@ function setGbtiModal(){
       data: { labels: typeE_label, datasets: [{data:typeE_data,
          backgroundColor: hour_palette, borderRadius:5}],},
       options:{
+        scales:{y:{
+          beginAtZero: true,
+          title:{
+          display:true, 
+          text:"Commits"
+        }}},
         plugins: {
           legend: { display: false },
         },
@@ -766,6 +735,12 @@ function setGbtiModal(){
         backgroundColor: freq_palette,
         barPercentage: 0.8, borderRadius:5}],},
       options:{
+        scales:{y:{
+          beginAtZero: true,
+          title:{
+          display:true, 
+          text:"Commits"
+        }}},
         plugins: {
           legend: { display: false },
         },
@@ -782,6 +757,12 @@ function setGbtiModal(){
         backgroundColor: cooperate_palette,
         barPercentage: 0.4, borderRadius:5}],},
       options:{
+        scales:{y:{
+          beginAtZero: true,
+          title:{
+          display:true, 
+          text:"Commits"
+        }}},
         plugins: {
           legend: { display: false },
         },

@@ -34,7 +34,7 @@
                 {{item.challenge.name}}
               </div>
               <div class="challenge-rate">
-                {% widthratio item.total total_cnt 100 %}%
+                {% widthratio item.total total_cnt 100 %}% 의 사용자가 이 도전과제를 달성했습니다.
               </div>
             </div>
           </div>
@@ -59,7 +59,7 @@
     </div>
     <div id="challenge-unachieved">
       <div class="challenge-group-title">
-        미달성한 도전과제
+        진행중인 도전과제
       </div>
       <div class="challenge-itemlist">
         {% for item in not_achieved_list %}
@@ -71,7 +71,7 @@
                 {{item.challenge.name}}
               </div>
               <div class="challenge-rate">
-                {% widthratio item.total total_cnt 100 %}%
+                {% widthratio item.total total_cnt 100 %}% 의 사용자가 이 도전과제를 달성했습니다.
               </div>
             </div>
           </div>

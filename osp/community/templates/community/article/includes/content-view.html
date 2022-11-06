@@ -111,7 +111,7 @@
                     </div>
                     <div id="recruit-article-info-text">
                         <div id="recruit-article-info-name">{{ article.team.name }}</div>
-                        <div id="recruit-article-info-desc" style="min-width:360px;">{{ article.team.description }}</div>
+                        <div id="recruit-article-info-desc" class="desc-break" style="min-width:360px;">{{ article.team.description }}</div>
                     </div>
                 </div>
                 <div class="col ">
@@ -175,7 +175,7 @@
             {% endif %}
     </div>
     {% if user.is_authenticated %}
-        <div class="modal fade" id="AddTeamApplyModal"></div>
+        <div class="modal modal-lg fade" id="AddTeamApplyModal"></div>
         <script src="{% static 'js/team_apply_modal.js' %}"></script>
     {% endif %}
     {% endif %}

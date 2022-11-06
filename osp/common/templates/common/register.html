@@ -12,22 +12,30 @@
         </div>
         <form method="post" action="." class="row" onsubmit="ajaxSignIn(); return false;">
             {% csrf_token %}
-            <div class="col-md-4 mb-3">
+            <div class="col-md-6 mb-3">
+                <label for="github_id" class="form-label">GitHub ID</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
+                    required>
+                    <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
                 <label for="username" class="form-label">Username</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                    <button class="btn btn-outline-secondary" type="button" id="duplicate_check">Check</button>
+                    <button class="btn btn-outline-secondary" type="button" id="duplicate-check">Check</button>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
-                    required>
+            <div class="col-md-6 mb-3">
+                <label for="password">Password</label>
+                <div class="weak-text form-label">비밀번호는 4자 이상이어야 합니다.</div>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
-            <div class="col-md-4 mb-3">
-                <label for="password_check" class="form-label">Password Check</label>
-                <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password"
-                    required>
+            <div class="col-md-6 mb-3">
+                <label for="password_check">Password Check</label>
+                <div id="password-check-sign" class="weak-text form-label">비밀번호를 다시 입력해주세요.</div>
+                <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
                 <label for="student_id" class="form-label">학번</label>
@@ -75,7 +83,11 @@
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="absence" id="absenceTrue" value="1">
-                        <label class="form-check-label" for="absenceTrue">휴학/졸업</label>
+                        <label class="form-check-label" for="absenceTrue">휴학</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="absence" id="absenceReal" value="2">
+                        <label class="form-check-label" for="absenceReal">졸업</label>
                     </div>
                 </div>
             </div>
@@ -95,25 +107,41 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="github_id" class="form-label">GitHub ID</label>
-                <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
-                    required>
-            </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <label for="personal_email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="personal_email" name="personal_email" placeholder="연락용 Email"
+                <div class="d-flex">
+                    <input type="text" class="form-control email-input" id="personal_email" name="personal_email" placeholder="연락용 Email"
                     required>
+                    <span style="line-height: 38px;">@</span>
+                    <input type="text" id="email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);" aria-label="email-select">
+                        {% email_domain_tag request %}
+                    </select>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <label for="primary_email" class="form-label">GitHub Email</label>
-                <input type="email" class="form-control" id="primary_email" name="primary_email"
-                    placeholder="GitHub 계정과 연결된 Email" required>
+                <div class="d-flex">
+                    <input type="text" class="form-control email-input" id="primary_email" name="primary_email"
+                    placeholder="GitHub 계정 연동 Email" required>
+                    <span style="line-height: 38px;">@</span>
+                    <input type="text" id="primary-email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="primary-email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);">
+                        {% email_domain_tag request %}
+                    </select>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="secondary_email" class="form-label">Secondary Email</label>
-                <input type="email" class="form-control" id="secondary_email" name="secondary_email"
-                    placeholder="Git과 연결된 예비 Email">
+            <div class="col-md-12 mb-3">
+                <label for="secondary_email" class="form-label">기타 연동 Email (선택)</label>
+                <div class="d-flex">
+                    <input type="text" class="form-control email-input" id="secondary_email" name="secondary_email"
+                    placeholder="기타 연동 Email">
+                    <span style="line-height: 38px;">@</span>
+                    <input type="text" id="secondary-email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="secondary-email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);">
+                        {% email_domain_tag request %}
+                    </select>
+                </div>
             </div>
             <div class="col-md-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
@@ -141,8 +169,107 @@
                 }
             },
         })
+        $("#duplicate-check").on("click", ()=>{
+            ajaxCheckDup();
+        })
+        $("#github-id-check").on("click", ()=>{
+            ajaxCheckIdValid();
+        })
     });
+    function setEmailDomain(id, email_domain){
+        if(email_domain == "직접입력") return;
+        console.log("setEmailDomain", id, email_domain)
+        let target_id = id.split("-select")[0]
+        $(`#${target_id}`).val(email_domain)
+    }
+    function checkPassword(){
+        let pswd = $("#password").val();
+        let checkpswd = $("#password_check").val();
+        if (checkpswd.length > 0){
+            if(pswd == checkpswd){
+                $("#password-check-sign").text("비밀번호가 일치합니다.")
+                $("#password-check-sign").attr("class", "text-primary weak-text form-label");
+            }else{
+                $("#password-check-sign").text("비밀번호가 일치하지 않습니다.")
+                $("#password-check-sign").attr("class", "text-danger weak-text form-label");
+            }
+        }
+        else{
+            $("#password-check-sign").text("비밀번호를 다시 입력해주세요.")
+            $("#password-check-sign").attr("class", "weak-text form-label");
+        }
+    }
+        
+    function ajaxCheckDup(){
+        console.log("ajaxCheckDup")
+        ajax_form_data=new FormData();
+        ajax_form_data.append('username',$('#username').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        $('#duplicate-check').html(`<div class="spinner-border spinner-border-sm text-dark" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>`);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'common:check_user' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
 
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    alert('사용가능한 유저이름입니다.')
+                    $('#duplicate-check').css('backgroundColor', '#0D6EFD');
+                    $('#duplicate-check').css('color', '#FFFFFF');
+                }
+                else{
+                    alert( data['message'] );
+                    $('#duplicate-check').css('backgroundColor', '#DC3545');
+                    $('#duplicate-check').css('color', '#FFFFFF');
+                }
+                $('#duplicate-check').html("Check")
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
+    }
+    function ajaxCheckIdValid(){
+        console.log("ajaxCheckIdValid")
+        ajax_form_data=new FormData();
+        ajax_form_data.append('github_id',$('#github_id').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        $('#github-id-check').html(`<div class="spinner-border text-dark spinner-border-sm" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>`);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'common:check_github_id' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    alert('사용가능한 GitHub ID입니다.')
+                    $('#github-id-check').css('backgroundColor', '#0D6EFD');
+                    $('#github-id-check').css('color', '#FFFFFF');
+                }
+                else{
+                    alert( data['message'] );
+                    $('#github-id-check').css('backgroundColor', '#DC3545');
+                    $('#github-id-check').css('color', '#FFFFFF');
+                }
+                $('#github-id-check').html("Check")
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
+    }
     function ajaxSignIn(){
         ajax_form_data=new FormData();
         ajax_form_data.append('username',$('#username').val());
@@ -155,37 +282,38 @@
         ajax_form_data.append('github_id', $('#github_id').val());
         ajax_form_data.append('absence', $("input[name='absence']:checked").val());
         ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val());
-        ajax_form_data.append('personal_email', $('#personal_email').val());
-        ajax_form_data.append('primary_email', $('#primary_email').val());
-        ajax_form_data.append('secondary_email',$('#secondary_email').val());
+        let personal_email = ($('#personal_email').val()).trim() + "@" + ($('#email-domain').val()).trim()
+        ajax_form_data.append('personal_email', personal_email);
+        let primary_email = ($('#primary_email').val()).trim() + "@" + ($('#primary-email-domain').val()).trim()
+        ajax_form_data.append('primary_email', primary_email);
+        let secondary_email = ($('#secondary_email').val()).trim() + "@" + ($('#secondary-email-domain').val()).trim()
+        ajax_form_data.append('secondary_email', secondary_email);
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
 
         ajax_form_data.append('category_tag_list', category_select.selected().toString());
 
-
-
         $.ajax({
-                type: "POST",
-                url: "{% url 'common:signup' %}",
-                data: ajax_form_data,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
+            type: "POST",
+            url: "{% url 'common:signup' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
 
-                success: function(data) {
-                    console.log(data);
-                    if(data['status']=="success"){
-                        alert('회원가입이 완료되었습니다! 로그인 해주세요.')
-                        window.location.href = "{% url 'common:login' %}";
-                    }
-                    else{
-                      alert( data['message'] );
-                    }
-                },
-                error: function(data){
-                    alert('Error Occured');
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    alert('회원가입이 완료되었습니다! 로그인 해주세요.')
+                    window.location.href = "{% url 'common:login' %}";
                 }
-         });
+                else{
+                    alert( data['message'] );
+                }
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
     }
     </script>
 {% endblock script %}

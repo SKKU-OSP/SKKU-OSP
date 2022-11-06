@@ -2,7 +2,8 @@ import os
 import pandas as pd
 
 from osp.settings import STATICFILES_DIRS
-from user.models import Account, GithubUserFollowing, GithubUserStarred, GithubRepoContributor
+from user.models import Account, GithubUserFollowing, GithubUserStarred
+from repository.models import GithubRepoContributor
 from .models import Team, TeamMember
 
 from datetime import datetime, timedelta

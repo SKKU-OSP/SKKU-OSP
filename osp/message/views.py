@@ -5,6 +5,7 @@ from django.db.models import Q, Max
 from django.contrib.auth.decorators import login_required
 
 from datetime import datetime
+import time
 
 from .models import Message
 from user.models import Account
@@ -20,7 +21,6 @@ def message_list_view(request, selected_oppo):
     selected_opponent = None
     if selected_oppo!=0:
         selected_opponent = Account.objects.get(user__id=selected_oppo)
-    
     msg_opponent = {}
     # 내가 가장 마지막에 보낸 메시지의 시간
     my_last_send_date = { msg.receiver: msg \
@@ -30,26 +30,52 @@ def message_list_view(request, selected_oppo):
     for opponent, msg in my_last_send_date.items():
         msg_opponent[msg.receiver] = {
             'unread': 0,
+            'recent_date':time.mktime((msg.last_date).timetuple()),
             'last_msg': msg
         }
-    for last_msg in Message.objects.filter(receiver=my_acc).exclude(sender=None).distinct():
-        opponent = last_msg.sender
+
+    # 다른 사용자에게서 받은 메시지를 가져와서 사용자 리스트를 만듦
+    received_msg_list = Message.objects.filter(receiver=my_acc).exclude(sender=None).values_list('sender', flat=True).distinct()
+    conn_acc = Account.objects.filter(user__in = received_msg_list)
+
+    unread_cnt = 0
+    for opponent in conn_acc :
+
         if opponent in my_last_send_date:
             last_date = my_last_send_date[opponent].send_date
+            # 받은 메시지 모두 가져오고 안 읽은 메시지는 따로 필터링하여 가져옴 
             msg_list = Message.objects.filter(
                 sender=opponent, 
                 receiver=my_acc, 
-                receiver_read=False,
-                send_date__gt=last_date
             ).order_by('-send_date')
+            unread_msg_list = msg_list.filter(receiver_read=False, send_date__gt=last_date)
+            unread_cnt = len(unread_msg_list)
         else:
             msg_list = Message.objects.filter(
                 sender=opponent, 
                 receiver=my_acc, 
                 receiver_read=False,
-            )
-        msg_opponent[opponent] = {'unread': len(msg_list) }
-    data['msg_opponent'] = msg_opponent
+            ).order_by('-send_date')
+            unread_cnt = len(msg_list)
+        
+        # 최신순으로 정렬하기 위해 시각 비교 후 업데이트
+        target_timestamp = time.mktime((msg_list[0].send_date).timetuple())
+        if opponent not in msg_opponent:
+            msg_opponent[opponent] = {'unread': unread_cnt, 'recent_date': target_timestamp}
+        elif msg_opponent[opponent]['recent_date'] <  target_timestamp :
+            msg_opponent[opponent] = {'unread': unread_cnt, 'recent_date': target_timestamp}
+    
+    def get_recent_date(item):
+        recent_date = item[1]['recent_date']
+        return recent_date
+    
+    try:
+        sorted_dict = sorted(msg_opponent.items(), key=get_recent_date, reverse=True)
+    except Exception as e:
+        sorted_dict = msg_opponent.items()
+        print("fail sort msg_opponent", e)
+    
+    data['msg_opponent'] = sorted_dict
     if selected_opponent in msg_opponent or not selected_opponent:
         data['selected_new_opponent'] = None
     else:

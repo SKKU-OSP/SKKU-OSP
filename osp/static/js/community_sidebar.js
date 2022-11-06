@@ -243,9 +243,8 @@ function apply_result(team_id, username, is_okay) {
     success: function (data) {
       if (data['status'] == "success") {
         console.log(data)
-        $('#apply-user-'+data['username']).css('display','none');
-
-        $('#AddTeamModal').html(data['data']);
+        $('#apply-user-'+data['username']).remove()
+        showEmptyApply();
       } else {
         alert(data['message']);
       }
@@ -272,6 +271,7 @@ function ApplyDelete(msg_id){
       if (data['status'] == "success") {
         console.log(data)
         $('#apply-' + msg_id).remove();
+        showEmptyApply();
       } else {
         alert(data['message']);
       }
