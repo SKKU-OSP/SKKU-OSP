@@ -147,6 +147,7 @@
                                     {% is_teammember article.team request.user as is_teammember %}
                                     {% if not is_teammember and is_start and not is_end %}
                                     {% teamapplymessage article.team request.user as waited_teamapplymessage %}
+
                                         {% if not waited_teamapplymessage %}
                                         <div id="recruit-article-apply" class="opacity-hover" style="margin-left:5px;">
                                             {% if request.user.is_anonymous %}
@@ -158,12 +159,15 @@
                                                 </div>
                                         </div>
                                         {% else %}
-                                        <div class="btn btn-secondary" style="font-size:13px; cursor:default;">
-                                            {{ waited_teamapplymessage.get_status_display }}
-                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="btn btn-secondary" style="margin-left:5px;font-size:13px; cursor:default;">
+                                                {{ waited_teamapplymessage.get_status_display }}
+                                            </div>
+                                         </div>
                                         {% endif %}
+
                                     {% endif %}
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </div>
