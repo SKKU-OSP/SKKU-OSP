@@ -5,13 +5,6 @@
   flex-wrap: nowrap;
   color:black;
 }
-.weak-text{
-  color: var(--main-icon-color);
-  font-size: 12px;
-}
-.weak-text-lg{
-  color: var(--main-icon-color);
-}
 .guideline-step{
   background-color: var(--sub-point-color);
   display: flex;

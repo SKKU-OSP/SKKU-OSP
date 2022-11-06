@@ -1,4 +1,3 @@
-import re
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
@@ -12,10 +11,9 @@ from django.core.files.images import get_image_dimensions
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
 from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
-from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
-from osp.settings import BASE_DIR
+from repository.models import GithubRepoStats, GithubRepoCommits
 
-from user.forms import ProfileInfoUploadForm, ProfileImgUploadForm, PortfolioUploadForm, IntroductionUploadForm
+from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
@@ -23,13 +21,19 @@ import time, datetime
 import json
 import os
 import math
-import pandas as pd
 
 
 # Create your views here.
 class ProfileView(TemplateView):
+    '''
+    유저 프로필
+    url        : /user/<username>
+    template   : profile/profile.html 
 
-    # TODO: start_year, end_year에 기반하지 않는 수식 필요
+    Returns :
+        GET     : redirect, render
+    '''
+    
     template_name = 'profile/profile.html'
     start_year = 2019
     # 새로 고침 시 GET 요청으로 처리됨.
@@ -41,9 +45,6 @@ class ProfileView(TemplateView):
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
             return redirect('/community')
-        # is_own = str(request.user) == context['username']
-        # print('&*&(&*&(*&*(&*(')
-        # print(is_own)
 
         student_info = context['account'].student_data
 
@@ -65,6 +66,7 @@ class ProfileView(TemplateView):
         account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
         level_list = [ al.level for al in account_lang ]
         lang = []
+
         for tag in lang_tags:
             lang_tag_dict = {"name":tag.name, "type":tag.type}
             lang_tag_dict["level"] = level_list[len(lang)]
@@ -76,7 +78,7 @@ class ProfileView(TemplateView):
         relation_origin = domain_layer.values('parent_tag', 'child_tag')
         relations = []
         remain_children = list(ints_child_layer)
-        print(remain_children)
+
         for par in ints_parent_layer:
             relation = {
                 'parent' :par['parent_tag'],
@@ -87,11 +89,6 @@ class ProfileView(TemplateView):
                     relation['children'].append(chi['child_tag'])
                     remain_children.remove({'child_tag' : chi['child_tag']})
             relations.append(relation)
-
-        print(relations)
-        print(remain_children)
-
-
 
         is_own = request.user.username == context['username']
 
@@ -113,8 +110,6 @@ class ProfileView(TemplateView):
 
     def get_context_data(self, request, *args, **kwargs):
         
-        start = time.time()
-        
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
         account = Account.objects.get(user=user)
@@ -124,18 +119,28 @@ class ProfileView(TemplateView):
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
-        context["student_id"] = student_data.id
 
         score_data_list = []
         score_detail_data = GithubScore.objects.filter(github_id=github_id).order_by("year")
         for row in score_detail_data:
             score_data_list.append(row.to_json())
-            
-        end_year = score_data_list[len(score_data_list)-1]["year"]
-        num_year = end_year-self.start_year+1
-        context["end_year"] = end_year
-        context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
-        chartdata["score_data"] = score_data_list
+        
+        # GitHub data가 존재하지 않는 경우 더미데이터 리턴하고 
+        # 데이터 관련 부분 프로필페이지에서 제거
+        try:
+            end_year = score_data_list[len(score_data_list)-1]["year"]
+            num_year = end_year-self.start_year+1
+            context["end_year"] = end_year
+            context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
+            chartdata["score_data"] = score_data_list
+        except Exception as e:
+            print("[profile view] There are no score_data", e)
+            context["end_year"] = datetime.datetime.now().year
+            context["score_data"] = None
+            context["chart_data"] = []
+            context["type_data"] = []
+            context["success"] = False
+            return context
         
         student = StudentTab.objects.all()
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
@@ -195,13 +200,13 @@ class ProfileView(TemplateView):
                 pr_dist[yid].append(factor_data["pr_cnt"])
                 issue_dist[yid].append(factor_data["issue_cnt"])
                 repo_dist[yid].append(factor_data["repo_cnt"])
-        annual_dist_data = {"score_sum":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_sum_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
+        annual_dist_data = {"score":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
         for sub_dist in score_dist:
             sub_dist.sort()
             mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["score_sum"].append(mean)
+            annual_dist_data["score"].append(mean)
             sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["score_sum_std"].append(sigma)
+            annual_dist_data["score_std"].append(sigma)
         for sub_dist in commit_dist:
             sub_dist.sort()
             mean = sum(sub_dist)/len(sub_dist)
@@ -234,7 +239,6 @@ class ProfileView(TemplateView):
         chartdata["issue_dist"] = issue_dist
         chartdata["repo_dist"] = repo_dist
         
-        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_contr = [ [] for i in range(num_year)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
@@ -245,7 +249,6 @@ class ProfileView(TemplateView):
         
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
-        # TODO: start_year, end_year에 기반하지 않는 수식 필요
         monthly_avg = [ [] for i in range(num_year)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
@@ -263,13 +266,10 @@ class ProfileView(TemplateView):
         
         #GBTI test
         hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(context['username'])
-        print("commit_time", daytime, night, hour_dist)
         
         major_act, indi_num, group_num = update_act.read_major_act(context['username'])
-        print("major_act", major_act, indi_num, group_num)
         
         commit_freq, commit_freq_dist = update_act.read_frequency(context['username'])
-        print("commit_freq", commit_freq, commit_freq_dist)
         try:
             type_data = {}
             type_data["typeE_data"] = hour_dist
@@ -315,8 +315,7 @@ class ProfileView(TemplateView):
             gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
             context["gbti"] = gbti_data
         context["test"] = test_data
-        
-        print("ProfileView time :", time.time() - start)
+        context["success"] = True
         
         return context
 
@@ -329,9 +328,7 @@ class ProfileEditView(TemplateView):
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
-        user_tab = StudentTab.objects.get(id=student_id)
         tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
 
         pre_img = user_account.photo.path
         field_check_list = {}
@@ -342,10 +339,10 @@ class ProfileEditView(TemplateView):
         is_valid = True
         if profile_img:
             img_width, img_height = get_image_dimensions(profile_img)
-            # if img_width > 500 or img_height > 500:
-            #     is_valid = False
-            #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-            #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
         print(img_form)
@@ -384,11 +381,7 @@ class ProfileEditView(TemplateView):
         lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
         # developing....
 
-
-        # info_form = ProfileInfoUploadForm(prefix="infoform")
         img_form = ProfileImgUploadForm(prefix="imgform")
-        # port_form = PortfolioUploadForm(prefix="portform")
-        # intro_form = IntroductionUploadForm(prefix="introform")
 
         form = {
             'img_form': img_form,
@@ -402,7 +395,7 @@ class ProfileEditView(TemplateView):
             'tags_lang' : lang
         }
 
-        if(str(request.user) != username): # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
+        if str(request.user) != username : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
             print("허용되지 않는 접근 입니다.")
             return redirect(f'/user/{username}/')
 
@@ -531,7 +524,7 @@ def load_repo_data(request, username):
             commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
             recent_repos = {}
             id_reponame_pair_list = []
-            # 리포지토리 목록 중, 중복하지 않는 가장 최근 3개의 리포지토리 목록을 생성함
+            # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
             for commit in commit_repos:
                 commit_repo_name = commit['repo_name']
                 if len(recent_repos) == 4:
@@ -585,6 +578,7 @@ def load_interests_data(request, username):
 def load_language_data(request, username):
     print(request.POST)
     print(request.POST['act'])
+    print(request.POST['target'])
     user = User.objects.get(username=username)
     user_account = Account.objects.get(user=user.id)
     student_id = user_account.student_data.id
@@ -620,23 +614,20 @@ def load_language_data(request, username):
 def load_img_data(request, username):
     user = User.objects.get(username=username)
     user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-
-
 
     pre_img = user_account.photo.path
     field_check_list = {}
-    print(request .FILES)
     profile_img = request.FILES.get('photo', False)
     print('img 상태')
     print(profile_img)
     is_valid = True
     if profile_img:
         img_width, img_height = get_image_dimensions(profile_img)
-        # if img_width > 500 or img_height > 500:
-        #     is_valid = False
-        #     field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-        #    print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
+        print(img_width, img_height)
+        if img_width > 500 or img_height > 500:
+            is_valid = False
+            field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+            print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
     img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
     print(img_form)
@@ -645,7 +636,11 @@ def load_img_data(request, username):
         if 'photo' in request.FILES: # 폼에 이미지가 있으면
             print('form에 이미지 존재')
             try:
-                os.remove(pre_img) # 기존 이미지 삭제
+                print(" path of pre_image is "+ pre_img)
+                if(pre_img.split("/")[-1] == "default.jpg"):
+                    pass
+                else:
+                    os.remove(pre_img) # 기존 이미지 삭제
                 
             except:                # 기존 이미지가 없을 경우에 pass
                 pass    
@@ -655,12 +650,11 @@ def load_img_data(request, username):
 
     else:
         print(field_check_list['photo'])
-    img_form.save()
+
     return redirect(f'/user/{username}/profile-edit/')
 
 @csrf_exempt
 def save_all(request, username):
-    print(username)
     user = User.objects.get(username=username)
     user_account = Account.objects.get(user=user.id)
     student_id = user_account.student_data.id
@@ -668,9 +662,6 @@ def save_all(request, username):
     tags_all = Tag.objects
     tags_domain = tags_all.filter(type='domain')
 
-    # print(request.POST.get("action"))
-    print('저장해봐')
-    print(request.POST['portfolio'])
     lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
 
     for l in lang:
@@ -696,11 +687,9 @@ class ProfileType(TemplateView):
     
     def get_context_data(self, *args, **kwargs):
         
-        start = time.time()
         context = super().get_context_data(**kwargs)
         user = User.objects.get(username=context["username"])
         context["username"] = user
         context["end_year"] = datetime.datetime.now().date().today().year
-        print("ProfileTypeView time :", time.time() - start)
         
         return context

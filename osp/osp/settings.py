@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'team',
     'message',
     'challenge',
+    'django_apscheduler',
+    'crawler',
     'debug_toolbar',
     'fontawesomefree'
 ]
@@ -149,3 +151,9 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/data/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data/media')
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
+
+SCHEDULER_DEFAULT = True
+
+CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
