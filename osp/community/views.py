@@ -290,6 +290,27 @@ def article_list(request, board_name, board_id):
     return JsonResponse(result)
 
 
+
+class ArticleRegisterwithTeamIdView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+
+        context['type'] = 'register'
+        team_id = kwargs.get('team_id')
+        try:
+            context['board'] = Board.objects.get(id=2)
+            context['team'] = Team.objects.get(id=team_id)
+
+        except:
+            return redirect('community:Community-Main')
+
+        return render(request, 'community/article/article.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
 class ArticleRegisterView(TemplateView):
 
     def get(self, request, *args, **kwargs):
