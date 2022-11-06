@@ -319,7 +319,7 @@ def TeamOut(request):
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
 
-
+#todo: inviteandapply Ehsms InvtieMessageUpdate로 바꿀것(이경우 document도 수정해야함.)
 def TeamInviteUpdate(request):
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
@@ -341,7 +341,7 @@ def TeamInviteUpdate(request):
                 return JsonResponse({'status': 'success','data':data,'username':request.POST.get('username')})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
-
+#todo: inviteandapply Ehsms InvtieMessageDelete로 바꿀것(이경우 document도 수정해야함.)
 def TeamInviteDelete(request):
     if request.method == 'POST':
         msg_id = request.POST.get('msg_id')

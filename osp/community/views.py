@@ -83,10 +83,11 @@ def board(request, board_name, board_id):
         elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
             return redirect('/community')
 
-
+    #todo: account 지워도됨.
     if board.board_type == 'User':
         if request.user.is_anonymous:
             return redirect('/community')
+        #todo: admin 제외시키
         context['accounts'] = Account.objects.all()[:9]
         # context['account_all_cnt'] = Account.objects.all()
         return render(request, 'community/board/user-board.html', context)
