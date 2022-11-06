@@ -252,7 +252,9 @@ def article_list(request, board_name, board_id):
     # Order
     article_list = article_list.order_by(*sort_field)
     # Slice to Page
-    article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE])
+    article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+
+    # print(article_list)
     
     # Get Article Metadata
     article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(article_list)
@@ -284,6 +286,7 @@ def article_list(request, board_name, board_id):
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context,request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+
     return JsonResponse(result)
 
 
