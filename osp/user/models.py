@@ -91,6 +91,13 @@ class AccountInterest(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=['account', 'tag'], name="accountbytag")]
+
+class AccountPrivacy(models.Model):
+    id = models.AutoField(primary_key=True)
+    account = models.ForeignKey(Account, models.CASCADE)
+    open_lvl = models.IntegerField(default=0)
+    is_write = models.BooleanField(default=False)
+    is_open = models.BooleanField(default=False)
     
 class GithubScore(models.Model):
     yid =models.CharField(max_length=45, null=False, primary_key=True)
