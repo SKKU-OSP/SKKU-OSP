@@ -1,18 +1,17 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
-from django.contrib import messages
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
 from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
 from repository.models import GithubRepoStats, GithubRepoCommits
 
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
 from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
@@ -56,9 +55,11 @@ class ProfileView(TemplateView):
         tags_all = Tag.objects # 태그 전체
         tags_domain = tags_all.filter(type='domain') # 분야 태그
 
+        student_account = context['account']
+        acc_pp = AccountPrivacy.objects.get(account=student_account)
+        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+        
         # 유저의 관심분야
-        student_account = context['account'] 
-
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
 
         # 유저의 사용언어, 기술스택
@@ -100,7 +101,10 @@ class ProfileView(TemplateView):
             'relations': relations,
             'remains': remain_children,
             'account': context['account'],
-            'is_own' : is_own
+            'is_own' : is_own,
+            'open_lvl': acc_pp.open_lvl,
+            'is_write': acc_pp.is_write, 
+            'is_open': acc_pp.is_open,
         }
 
         context['data'] = data
@@ -187,11 +191,11 @@ class ProfileView(TemplateView):
             if row.github_id == github_id:
                 user_data_list.append(row.to_json())
         chartdata["user_data"] = json.dumps(user_data_list)
-        score_dist = [[] for i in range(num_year)]
-        commit_dist = [[] for i in range(num_year)]
-        pr_dist = [[] for i in range(num_year)]
-        issue_dist = [[] for i in range(num_year)]
-        repo_dist = [[] for i in range(num_year)]
+        score_dist = [[]] * num_year
+        commit_dist = [[]] * num_year
+        pr_dist = [[]] * num_year
+        issue_dist = [[]] * num_year
+        repo_dist = [[]] * num_year
         for factor_data in total_factor_data_list:
             if factor_data["year"] >= self.start_year :
                 yid = factor_data["year"]-self.start_year
