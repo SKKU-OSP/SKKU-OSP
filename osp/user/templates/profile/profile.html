@@ -38,7 +38,7 @@
         {% endif %}
         </div>
       </div>
-    {% if data.is_own %}
+    {% if data.is_own or data.open_lvl == 2%}
       <div class="d-flex flex-column user-detail">
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학번</span>
