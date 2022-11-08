@@ -9,6 +9,7 @@ from django.core.files.images import get_image_dimensions
 
 from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
+from team.models import TeamMember
 from repository.models import GithubRepoStats, GithubRepoCommits
 
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
@@ -92,6 +93,24 @@ class ProfileView(TemplateView):
             relations.append(relation)
 
         is_own = request.user.username == context['username']
+        if not is_own and acc_pp.open_lvl == 0:
+            # 정보 비공개 상태인 경우 팀원확인
+            print("정보 비공개 상태인 경우 팀원확인")
+            is_redirect = True
+            target_team = TeamMember.objects.filter(member=context['account']).values('team')
+            if target_team:
+                # team check
+                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                if cowork:
+                    is_redirect = False
+                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
+                    request.session['alert'] = True
+            if is_redirect:
+                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
+                request.session['alert'] = True
+                return redirect('../'+request.user.username+'/')
+            else:
+                acc_pp.open_lvl = 1
 
         data = {
             'info': student_info,
@@ -107,7 +126,12 @@ class ProfileView(TemplateView):
             'is_open': acc_pp.is_open,
         }
 
+        if 'alert' in request.session and request.session['alert']:
+            print(request.session['privacy'])
+            data['privacy'] = request.session['privacy']
         context['data'] = data
+        if request.session['alert'] :
+            request.session['alert'] = False
         print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
