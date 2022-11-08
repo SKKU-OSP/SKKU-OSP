@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
-from user.models import Account, AccountInterest
+from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
 
 import hashlib
@@ -141,6 +141,11 @@ def board(request, board_name, board_id):
         context['team'] = team
         context['team_tags'] = team_tags_list
         context['team_members'] = team_members
+    account = Account.objects.get(user=request.user)
+    acc_pp = AccountPrivacy.objects.get(account=account)
+    context['is_write'] = acc_pp.is_write
+    context['is_open'] = acc_pp.is_open
+
     return render(request, 'community/board/board.html', context)
 
 
