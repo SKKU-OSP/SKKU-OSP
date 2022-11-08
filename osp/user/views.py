@@ -129,9 +129,8 @@ class ProfileView(TemplateView):
         if 'alert' in request.session and request.session['alert']:
             print(request.session['privacy'])
             data['privacy'] = request.session['privacy']
-        context['data'] = data
-        if request.session['alert'] :
             request.session['alert'] = False
+        context['data'] = data
         print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
