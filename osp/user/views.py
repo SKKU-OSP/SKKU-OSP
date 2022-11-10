@@ -40,10 +40,13 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         start = time.time()
-        context = self.get_context_data(request, *args, **kwargs)
 
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
+            return redirect('/community')
+
+        context = self.get_context_data(request, *args, **kwargs)
+        if not context:
             return redirect('/community')
 
         student_info = context['account'].student_data
@@ -136,13 +139,17 @@ class ProfileView(TemplateView):
         return render(request=request, template_name=self.template_name, context=context)
 
     def get_context_data(self, request, *args, **kwargs):
-        
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=context["username"])
-        account = Account.objects.get(user=user)
-        context['account'] = account
-        student_data = account.student_data
-        github_id = student_data.github_id
+        try:
+            context = super().get_context_data(**kwargs)
+            user = User.objects.get(username=context["username"])
+            account = Account.objects.get(user=user)
+            context['account'] = account
+            student_data = account.student_data
+            github_id = student_data.github_id
+        except Exception as e:
+            print(e)
+            return None
+            
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
