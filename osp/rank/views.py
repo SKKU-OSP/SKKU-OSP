@@ -38,7 +38,9 @@ def repo_rank(request):
         repo_link = repo.github_id + '/' + repo.repo_name
         if repo_link in student_contributor:
             repo.student_contributor = student_contributor[repo_link]
-            repo_list.append(repo)
+            if (repo.stargazers_count is not None and repo.forks_count is not None 
+                and repo.commits_count is not None and repo.prs_count is not None):
+                repo_list.append(repo)
     return render(request, 'rank/repo_rank.html', {'data': repo_list})
 
 def repo_api(request):
