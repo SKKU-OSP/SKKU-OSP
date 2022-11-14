@@ -96,10 +96,13 @@ class ProfileView(TemplateView):
             relations.append(relation)
 
         is_own = request.user.username == context['username']
+        # initialize
+        is_redirect = True
+        if 'privacy' in request.session:
+            del request.session['privacy']
+        if 'alert' in request.session:
+            del request.session['alert']
         if not is_own and acc_pp.open_lvl == 0:
-            # 정보 비공개 상태인 경우 팀원확인
-            print("정보 비공개 상태인 경우 팀원확인")
-            is_redirect = True
             target_team = TeamMember.objects.filter(member=context['account']).values('team')
             if target_team:
                 # team check
@@ -108,12 +111,11 @@ class ProfileView(TemplateView):
                     is_redirect = False
                     request.session['privacy'] = "팀원의 프로필페이지 입니다."
                     request.session['alert'] = True
+                    acc_pp.open_lvl = 1
             if is_redirect:
                 request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
                 request.session['alert'] = True
                 return redirect('../'+request.user.username+'/')
-            else:
-                acc_pp.open_lvl = 1
 
         data = {
             'info': student_info,
@@ -131,8 +133,8 @@ class ProfileView(TemplateView):
 
         if 'alert' in request.session and request.session['alert']:
             print(request.session['privacy'])
-            data['privacy'] = request.session['privacy']
-            request.session['alert'] = False
+            if 'privacy' in request.session and request.session['privacy']:
+                data['privacy'] = request.session['privacy']
         context['data'] = data
         print("ProfileView get time :", time.time() - start)
 
