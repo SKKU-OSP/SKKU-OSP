@@ -739,3 +739,43 @@ class ProfileType(TemplateView):
         context["end_year"] = datetime.datetime.now().date().today().year
         
         return context
+
+def consent_write(request, username):
+
+    '''
+    글쓰기/댓글쓰기 시 본인의 프로필 공개 동의서
+    url     : /user/api/consent-write
+    template: consent/consent_write.html
+    '''
+    print("get consent_write")
+
+    if request.method == 'GET':
+        account = Account.objects.get(user=request.user.id)
+        acc_pp = AccountPrivacy.objects.get(account=account)
+
+        context = {
+            'is_write': acc_pp.is_write,
+            'open_lvl': acc_pp.open_lvl,
+        }
+
+        return render(request, 'consent/consent_write.html',context)
+
+
+def consent_open(request):
+
+    '''
+    유저 추천시스템 사용에 대한 동의서
+    url     : /user/api/consent-open
+    template: consent/consent_open.html
+    '''
+
+    if request.method == 'GET':
+        account = Account.objects.get(user=request.user.id)
+        acc_pp = AccountPrivacy.objects.get(account=account)
+
+        context = {
+            'is_open': acc_pp.is_open,
+            'open_lvl': acc_pp.open_lvl,
+        }
+
+        return render(request, 'consent/consent_open.html',context)

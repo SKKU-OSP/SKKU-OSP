@@ -244,3 +244,17 @@ function ReadNotification(type, noti_id, target_id) {
         }
     })
 }
+
+
+function consentWriteOpen(user){
+    console.log("open_consent_write");
+    $.ajax({
+        url: `/user/${user}/api/consent-write`,
+        type: "GET",
+        data: null,
+        dataType: 'HTML'
+    }).done(function (data) {
+        $('#consent-wirte').addClass('ready').html(data)
+        $('#consent-wirte').modal('show');
+    })
+}
