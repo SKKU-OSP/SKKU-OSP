@@ -1,0 +1,40 @@
+{% load static %}
+{% load user_templatetag %}
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">글쓰기 권한</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body w-100" style="min-height:400px;overflow-y:auto;">
+            <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="apply-recv-tab" data-bs-toggle="pill"
+                        data-bs-target="#apply-recv" type="button" role="tab" aria-controls="apply-recv"
+                        aria-selected="true">개인정보 공개 범위</button>
+                    <span class="progress-uncheck-sm"></span>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="apply-send-tab" data-bs-toggle="pill" data-bs-target="#apply-send"
+                        type="button" role="tab" aria-controls="apply-send" aria-selected="false">동의서</button>
+                        <span class="progress-uncheck-sm"></span>
+                </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="apply-recv" role="tabpanel" aria-labelledby="apply-recv-tab"
+                    tabindex="0">
+                    <p>현재 개인정보 공개에 동의하지 않아 글쓰기 작업이 제한됩니다.</p>
+                    <p>현재 이 기능은 준비중입니다.</p>
+                </div>
+                <div class="tab-pane fade" id="apply-send" role="tabpanel" aria-labelledby="apply-send-tab"
+                    tabindex="0">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    
+</script>

@@ -10,6 +10,8 @@
         <button class="btn btn-outline-secondary ms-auto mb-1"
         {% if request.user.is_anonymous %}
         onclick="alert('로그인 후 이용해주세요')"
+        {% elif not is_write %}
+        onclick="consentWriteOpen('{{request.user.username}}');"
         {% elif board %}
         onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
         {% endif %}

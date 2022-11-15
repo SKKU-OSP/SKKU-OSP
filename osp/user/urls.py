@@ -16,4 +16,6 @@ urlpatterns = [
     path('<username>/repo-overview', views.load_repo_data, name='repo-overview'),
     path('<username>/test', views.ProfileType.as_view(), name='test'),
     path('<username>/testresult', views.save_test_result, name='testresult'),
+    path('<username>/api/consent-write', views.consent_write, name='consent_write'),
+    path('<username>/api/consent-open', views.consent_open, name='consent_open'),
 ]
