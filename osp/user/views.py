@@ -413,6 +413,7 @@ class ProfileEditView(TemplateView):
         tags_domain = tags_all.filter(type='domain')
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
         lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
+        pri = AccountPrivacy.objects.get(account=student_account)
         # developing....
 
         img_form = ProfileImgUploadForm(prefix="imgform")
@@ -426,7 +427,8 @@ class ProfileEditView(TemplateView):
             'form': form,
             'info': student_info,
             'ints': ints,
-            'tags_lang' : lang
+            'tags_lang' : lang,
+            'privacy' : pri
         }
 
         if str(request.user) != username : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
@@ -697,7 +699,8 @@ def save_all(request, username):
     tags_domain = tags_all.filter(type='domain')
 
     lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-
+    user_privacy = AccountPrivacy.objects.get(account=user_account)
+    print(user_privacy)
     for l in lang:
         if "tag_" + l.tag.name in request.POST:
             added_tag = Tag.objects.get(name=l.tag.name)
@@ -712,6 +715,13 @@ def save_all(request, username):
     user_account.introduction = request.POST['introduction']
     user_account.portfolio = request.POST['portfolio']
     user_account.save()
+
+
+    user_privacy.open_lvl = request.POST['profileprivacy']
+    user_privacy.is_write = request.POST['articleprivacy']
+    user_privacy.is_open = request.POST['teamprivacy']
+    user_privacy.save()
+
 
     return redirect(f'/user/{username}/')
 
