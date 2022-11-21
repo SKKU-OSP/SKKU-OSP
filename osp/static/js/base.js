@@ -258,3 +258,31 @@ function consentWriteOpen(user){
         $('#consent-wirte').modal('show');
     })
 }
+
+function submitWriteConsent(e, user){
+    e.preventDefault();
+    formHTML = $("#write-consent-form")[0]
+    
+    let form_data = new FormData(formHTML);
+    let opt1 = form_data.get('radio-1')
+    let opt2 = form_data.get('radio-2')
+
+    if(Number(opt1[0])&Number(opt2[0])){
+        $.ajax({
+            url: `/user/${user}/api/consent-write`,
+            method: 'POST',
+            data: form_data,
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+        }).done(function (data) {
+            console.log(data);
+            alert(data.msg);
+            window.location.reload();
+        });
+    }else{
+        alert("정보 공개에 동의하지 않아 글쓰기 작업이 제한됩니다.");
+    }
+
+    return false;
+}
