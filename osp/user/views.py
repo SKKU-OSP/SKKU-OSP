@@ -727,6 +727,20 @@ def save_all(request, username):
 
     return redirect(f'/user/{username}/')
 
+@csrf_exempt
+def change_passwd(request, username):
+    user = User.objects.get(username=username)
+
+    if(user.check_password(request.POST['inputOldPassword']) == False):
+        return JsonResponse({"status" : "error"})
+
+    if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
+        return JsonResponse({"status" : "error"})
+
+    user.set_password(request.POST['inputNewPassword'])
+    user.save()
+    print("비밀번호가 변경되었습니다. ")
+    return redirect(f'/user/{username}/')
 
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
