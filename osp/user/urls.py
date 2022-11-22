@@ -11,6 +11,7 @@ urlpatterns = [
     path('<username>/profile-edit/languageupdate', views.load_language_data, name='languageupdate'),
     path('<username>/profile-edit/imgupdate', views.load_img_data, name='imgupdate'),
     path('<username>/profile-edit/save_all', views.save_all, name='save_all'),
+    path('<username>/profile-edit/passwd', views.change_passwd, name='change_passwd'),
     path('<username>/comparestat', views.compare_stat, name='comparestat'),
     path('<username>/repo', views.ProfileRepoView.as_view(), name='repo'),
     path('<username>/repo-overview', views.load_repo_data, name='repo-overview'),
