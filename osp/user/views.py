@@ -754,14 +754,13 @@ class ProfileType(TemplateView):
         
         return context
 
-def consent_write(request, username):
+def consent_write(request, username=""):
 
     '''
     글쓰기/댓글쓰기 시 본인의 프로필 공개 동의서
     url     : /user/api/consent-write
     template: consent/consent_write.html
     '''
-    print("get consent_write")
 
     if request.method == 'GET':
         account = Account.objects.get(user=request.user.id)
@@ -770,10 +769,23 @@ def consent_write(request, username):
         context = {
             'is_write': acc_pp.is_write,
             'open_lvl': acc_pp.open_lvl,
+            'user': username
         }
 
         return render(request, 'consent/consent_write.html',context)
 
+    if request.method == 'POST':
+        try:
+            account = Account.objects.get(user=request.user.id)
+            acc_pp = AccountPrivacy.objects.get(account=account)
+            acc_pp.is_write = True
+            acc_pp.open_lvl = 1
+            acc_pp.save()
+            return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status': 'fail', 'msg':'저장에 싪패하였습니다. 잠시후 다시 시도해주세요.'})
+            
 
 def consent_open(request):
 
