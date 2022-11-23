@@ -286,3 +286,44 @@ function submitWriteConsent(e, user){
 
     return false;
 }
+
+function consentUserOpen(user){
+    console.log("open_consent_user");
+    $.ajax({
+        url: `/user/${user}/api/consent-open`,
+        type: "GET",
+        data: null,
+        dataType: 'HTML'
+    }).done(function (data) {
+        $('#consent-open').addClass('ready').html(data)
+        $('#consent-open').modal('show');
+    })
+}
+
+function submitUserConsent(e, user){
+    e.preventDefault();
+    formHTML = $("#open-consent-form")[0]
+    
+    let form_data = new FormData(formHTML);
+    let opt1 = form_data.get('radio-1')
+    let opt2 = form_data.get('radio-2')
+
+    if(Number(opt1[0])&Number(opt2[0])){
+        $.ajax({
+            url: `/user/${user}/api/consent-open`,
+            method: 'POST',
+            data: form_data,
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+        }).done(function (data) {
+            console.log(data);
+            alert(data.msg);
+            window.location.reload();
+        });
+    }else{
+        alert("정보 공개에 동의하지 않아 유저 추천시스템에 대한 접근이 제한됩니다.");
+    }
+
+    return false;
+}

@@ -4,15 +4,15 @@
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">글쓰기 권한 설정</h5>
+            <h5 class="modal-title">유저 추천시스템 권한 설정</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form id="write-consent-form" onsubmit="submitWriteConsent(event, '{{user}}');">
+        <form id="open-consent-form" onsubmit="submitUserConsent(event, '{{user}}');">
             {% csrf_token %}
             <div class="modal-body w-100" style="min-height:400px;overflow-y:auto;">
-                <p>현재 개인정보 공개에 동의하지 않아 글쓰기 작업이 제한됩니다.</p>
+                <p>현재 개인정보 공개에 동의하지 않아 유저 추천시스템에 대한 접근이 제한됩니다.</p>
                 <div class="tab-content">
-                    {% consent_text request "write" as consents %}
+                    {% consent_text request "open" as consents %}
                     {% for obj in consents %}
                     <div class="team-apply-item received " id="apply-user">
                         <p>
@@ -48,11 +48,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-default" id="write-consent-submit" >저장</button>
+                <button type="submit" class="btn btn-default" id="open-consent-submit" >저장</button>
             </div>
         </form>
     </div>
 </div>
-<script>
-    
-</script>
