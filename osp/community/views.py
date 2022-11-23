@@ -156,12 +156,18 @@ def account_cards(request):
 
     start = time.time()
     PAGE_SIZE = 9
-
+    
+    result = {}
+    result['max-page'] = 1
     context = {}
     context['board'] = Board.objects.get(board_type="User")
+    context['account_list'] = []
+    context['is_open'] = 0
+
     is_show = True
     try:
         acc_pp = AccountPrivacy.objects.get(account=request.user.id)
+        context['is_open'] = acc_pp.is_open
         if not acc_pp.is_open:
             is_show = False
     except Exception as e:
@@ -169,17 +175,17 @@ def account_cards(request):
         is_show = False
     
     if not is_show:
-        context['account_list'] = []
-        result = {}
         result['html'] = render_to_string('community/account-card.html', context, request=request)
-        result['max-page'] = 1
         return JsonResponse(result)
 
     # sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
 
     page = int(request.GET.get('page', 1))
     # Filter Board
-    account_list = Account.objects.filter(user__is_superuser=False)
+    open_acc = AccountPrivacy.objects.filter(is_open=True).exclude(account=request.user.id).values('account_id')
+    print("open_acc", len(open_acc))
+
+    account_list = Account.objects.filter(user__is_superuser=False, user__id__in=open_acc)
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
 
@@ -206,16 +212,17 @@ def account_cards(request):
     user_list = []
     member_id = []
     print(team_li)
-    if team_li:
-        for team_id in team_li:
-            # TODO: 쿼리 최적화
-            team = Team.objects.get(id=team_id)
-            member_li = get_team_recommendation(team)
-            member_id += member_li
-            tmps = account_list.filter(user__in=member_li)
-            for tmp in tmps:
-                tmp.recommend_team = team
-            user_list += list(tmps)
+
+    team_list = Team.objects.filter(id__in=team_li)
+    print(team_list)
+    for team_obj in team_list:
+        # TODO: 추천함수 최적화
+        member_li = get_team_recommendation(team_obj)
+        member_id += member_li
+        tmps = account_list.filter(user__in=member_li)
+        for tmp in tmps:
+            tmp.recommend_team = team_obj
+        user_list += list(tmps)
 
     user_list += list(account_list.exclude(user__in=member_id))
 
