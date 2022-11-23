@@ -41,9 +41,9 @@ def user_profile_image_url(user):
         return mark_safe(Account._meta.get_field('photo').get_default())
 
 @register.simple_tag
-def consent_text(request):
+def consent_text(request, type):
     try:
-        with open(os.path.join(DATA_DIR, "consent.json"), 'r') as consent:
+        with open(os.path.join(DATA_DIR, "consent_{}.json".format(type)), 'r') as consent:
             data = json.load(consent)
     except:
         data = None

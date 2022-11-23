@@ -784,10 +784,10 @@ def consent_write(request, username=""):
             return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
         except Exception as e:
             print(e)
-            return JsonResponse({'status': 'fail', 'msg':'저장에 싪패하였습니다. 잠시후 다시 시도해주세요.'})
+            return JsonResponse({'status': 'fail', 'msg':'저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
             
 
-def consent_open(request):
+def consent_open(request, username=""):
 
     '''
     유저 추천시스템 사용에 대한 동의서
@@ -802,6 +802,19 @@ def consent_open(request):
         context = {
             'is_open': acc_pp.is_open,
             'open_lvl': acc_pp.open_lvl,
+            'user': username
         }
 
         return render(request, 'consent/consent_open.html',context)
+    
+    if request.method == 'POST':
+        try:
+            account = Account.objects.get(user=request.user.id)
+            acc_pp = AccountPrivacy.objects.get(account=account)
+            acc_pp.is_open = True
+            acc_pp.open_lvl = 1
+            acc_pp.save()
+            return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status': 'fail', 'msg':'저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})

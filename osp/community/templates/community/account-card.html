@@ -3,7 +3,15 @@
 
 
 <div class="d-flex flex-row flex-wrap " style="padding: 10px 3px;">
-
+{% if not is_open %}
+    
+    <div>
+        <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
+        <button class="btn btn-primary" onclick="consentUserOpen('{{request.user.username}}');">
+            정보공개하기
+        </button>
+    </div>
+{% else %}
     {% for account in account_list %}
     <div class="article-card card d-flex flex-column user-card">
         {% if account.recommend_team %}
@@ -50,5 +58,5 @@
     {% empty %}
     사용자를 표시하는 중 입니다.
     {% endfor %}
-
+{% endif %}
 </div>
