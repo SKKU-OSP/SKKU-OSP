@@ -29,7 +29,7 @@
         </div>      
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary " onclick="passwdChange(); return false;">비밀번호변경</button>
+          <button type="submit" class="btn btn-primary " onclick="passwdChange(); return false;">비밀번호변경</button>
         </div>
       </div>
     </div>
@@ -74,7 +74,7 @@
           }
         });
         alert("비밀번호가 변경되었습니다. 다시로그인해 주세요.");
-
+        window.location.reload();
 
     }
   </script>

@@ -740,7 +740,7 @@ def change_passwd(request, username):
     user.set_password(request.POST['inputNewPassword'])
     user.save()
     print("비밀번호가 변경되었습니다. ")
-    return redirect(f'/user/{username}/')
+    return 1
 
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
