@@ -74,12 +74,14 @@ a.nav-link {
   height: 20px;
   border:0;
   outline: 0;
-  margin-top: 1px;
+
   text-align: center;
   line-height:8px;
   padding-left: 6px;
-  margin-left:-14px;
-  border-radius: 0px 5px 5px 0px;
+  margin-left: -5px;
+  margin-top:10px;
+  margin-bottom: 10px;
+  border-radius: 8px 8px 8px 8px;
   
 }
 .delete-domain:hover{
@@ -97,6 +99,7 @@ a.nav-link {
   color: #000000 !important;
   background-color: var(--tag-bg-domain) !important;
   font-weight: 700 !important;
+  height: 20px;
   top:-10px;
 }
 
