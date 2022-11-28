@@ -245,6 +245,9 @@ function ReadNotification(type, noti_id, target_id) {
     })
 }
 
+function consentSignInOpen(){
+    $('#consent-signin').modal('show');
+}
 
 function consentWriteOpen(user){
     console.log("open_consent_write");
