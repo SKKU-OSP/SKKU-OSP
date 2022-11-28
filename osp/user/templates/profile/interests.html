@@ -22,10 +22,9 @@
 </div>
 <div id='interestsdiv'>
     {% for row in data.ints %}
-    <span id="intspan_{{row.tag.name}}">
-        <span class="badge bg-tag-{{row.tag.type}} me-1">{{row.tag.name}}</span>
-        <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete {{row.tag.name}}" onclick="intsDelete('{{row.tag.name}}'); return false;">x
-        </button>
+    <span id="intspan_{{row.tag.name}}" style="white-space: nowrap;">
+        <span class="badge bg-tag-{{row.tag.type}} me-1">{{row.tag.name}}  </span>
+        <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete {{row.tag.name}}" onclick="intsDelete('{{row.tag.name}}'); return false;">x</button>
     </span>
     {% endfor %}
 </div>
