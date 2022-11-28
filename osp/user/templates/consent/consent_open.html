@@ -14,7 +14,7 @@
                 <div class="tab-content">
                     {% consent_text request "open" as consents %}
                     {% for obj in consents %}
-                    <div class="team-apply-item received " id="apply-user">
+                    <div class="team-apply-item received">
                         <p>
                             <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{obj.id}}" aria-expanded="true" aria-controls="collapse-{{obj.id}}">
                                 {{obj.title}}
