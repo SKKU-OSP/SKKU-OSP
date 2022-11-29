@@ -11,7 +11,7 @@
         <div class="d-flex justify-content-center">
             <img src="/static/images/logo.svg" alt="Logo" class="w-25" />
         </div>
-        <form method="post" action="." class="row" onsubmit="ajaxSignIn(); return false;">
+        <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
             <div class="col-md-6 mb-3">
                 <label for="github_id" class="form-label">GitHub ID</label>
@@ -151,7 +151,7 @@
                 </select>
             </div>
             <div>
-                <button type="button" class="btn btn-outline-secondary ms-auto mb-1" onclick="consentSignInOpen();">
+                <button type="button" class="btn btn-secondary ms-auto mb-1" onclick="consentSignInOpen();">
                     개인정보 이용내역 동의
                 </button>
             </div>
@@ -201,7 +201,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-bs-dismiss="modal" aria-label="Close">저장</button>
+                            <button type="button" class="btn btn-default" data-bs-dismiss="modal" aria-label="Close">닫기</button>
                         </div>
                     </div>
                 </div>
@@ -232,6 +232,34 @@
         $("#github-id-check").on("click", ()=>{
             ajaxCheckIdValid();
         })
+        // sign form
+        const signinForm = document.getElementById("signin-form");
+        signinForm.addEventListener("submit", (event) => {
+            const ajax_form_data = new FormData(signinForm);
+            event.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'common:signup' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                
+                success: function(data) {
+                    console.log(data);
+                    if(data['status']=="success"){
+                        alert('회원가입이 완료되었습니다! 로그인 해주세요.')
+                        window.location.href = "{% url 'common:login' %}";
+                    }
+                    else{
+                        alert( data['message'] );
+                    }
+                },
+                error: function(data){
+                    alert('Error Occured');
+                }
+            });
+        }, false);
     });
     function setEmailDomain(id, email_domain){
         if(email_domain == "직접입력") return;
@@ -321,51 +349,6 @@
                     $('#github-id-check').css('color', '#FFFFFF');
                 }
                 $('#github-id-check').html("Check")
-            },
-            error: function(data){
-                alert('Error Occured');
-            }
-        });
-    }
-    function ajaxSignIn(){
-        ajax_form_data=new FormData();
-        ajax_form_data.append('username',$('#username').val());
-        ajax_form_data.append('password',$('#password').val());
-        ajax_form_data.append('password_check',$('#password_check').val());
-        ajax_form_data.append('student_id', $('#student_id').val());
-        ajax_form_data.append('name', $('#name').val());
-        ajax_form_data.append('college', $('#college').val());
-        ajax_form_data.append('dept', $('#dept').val());
-        ajax_form_data.append('github_id', $('#github_id').val());
-        ajax_form_data.append('absence', $("input[name='absence']:checked").val());
-        ajax_form_data.append('plural_major', $("input[name='plural_major']:checked").val());
-        let personal_email = ($('#personal_email').val()).trim() + "@" + ($('#email-domain').val()).trim()
-        ajax_form_data.append('personal_email', personal_email);
-        let primary_email = ($('#primary_email').val()).trim() + "@" + ($('#primary-email-domain').val()).trim()
-        ajax_form_data.append('primary_email', primary_email);
-        let secondary_email = ($('#secondary_email').val()).trim() + "@" + ($('#secondary-email-domain').val()).trim()
-        ajax_form_data.append('secondary_email', secondary_email);
-        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-
-        ajax_form_data.append('category_tag_list', category_select.selected().toString());
-
-        $.ajax({
-            type: "POST",
-            url: "{% url 'common:signup' %}",
-            data: ajax_form_data,
-            dataType: 'json',
-            processData: false,
-            contentType: false,
-
-            success: function(data) {
-                console.log(data);
-                if(data['status']=="success"){
-                    alert('회원가입이 완료되었습니다! 로그인 해주세요.')
-                    window.location.href = "{% url 'common:login' %}";
-                }
-                else{
-                    alert( data['message'] );
-                }
             },
             error: function(data){
                 alert('Error Occured');
