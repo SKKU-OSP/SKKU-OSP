@@ -141,13 +141,17 @@ def board(request, board_name, board_id):
         context['team'] = team
         context['team_tags'] = team_tags_list
         context['team_members'] = team_members
-    account = Account.objects.get(user=request.user)
-    try:
-        acc_pp = AccountPrivacy.objects.get(account=account)
-    except:
-        acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
-    context['is_write'] = acc_pp.is_write
-    context['is_open'] = acc_pp.is_open
+    if not request.user.is_anonymous:
+        account = Account.objects.get(user=request.user)
+        try:
+            acc_pp = AccountPrivacy.objects.get(account=account)
+        except:
+            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+        context['is_write'] = acc_pp.is_write
+        context['is_open'] = acc_pp.is_open
+    else:
+        context['is_write'] = 0
+        context['is_open'] = 0
 
     return render(request, 'community/board/board.html', context)
 

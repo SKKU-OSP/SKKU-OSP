@@ -205,7 +205,7 @@
 .article-bar-comment {
     background-color: var(--tag-bg-ect) !important;
     z-index: -1;
-    max-height: 2.5rem;
+    max-height: 3.5rem;
     word-wrap: break-word;
     overflow: hidden;
     text-overflow: ellipsis;

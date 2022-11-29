@@ -38,10 +38,10 @@
         </div>
         <div class="article-meta">
             <div class="color-b">
-                {% if article.anonymous_writer %}
-                익명
-                {% elif request.user.is_anonymous %}
-                <a class="article-bar-writer" href="">사용자</a>
+                {% if request.user.is_anonymous %}
+                <span>사용자</span>
+                {% elif article.anonymous_writer %}
+                <span>익명</span>
                 {% else %}
                 <div class="dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
@@ -80,7 +80,7 @@
         </div>
     </div>
     {% if comment_visible %}
-    <div class="d-flex article-bar-comment">
+    <div class="d-flex article-bar-comment" style="padding-bottom: 0.2rem;">
         {% if article.comment %}
         <i class="bi bi-arrow-return-right me-1"></i>
         <div>
@@ -88,10 +88,11 @@
         </div>
         <div class="ms-auto">
             {% if request.user.is_anonymous %}
-            <a href="">사용자</a>
+            <span>사용자</span>
+            {% elif article.comment.anonymous_writer %}
+            <span>익명</span>
             {% else %}
-            <a
-                href="/user/{{article.comment.comment.writer.user.username}}">{{article.comment.comment.writer.user.username}}</a>
+            <a href="/user/{{article.comment.writer.user.username}}">{{article.comment.writer.user.username}}</a>
             {% endif %}
         </div>
         <div class="d-flex">
