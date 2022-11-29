@@ -7,11 +7,11 @@ function openTeamApplyModal(team_id){
         type: "GET",
         dataType: 'HTML'
       }).done(function (data) {
-        $('#AddTeamModal').addClass('ready').html(data);
-        $('#AddTeamModal').modal('show');
+        $('#AddTeamApplyModal').addClass('ready').html(data);
+        $('#AddTeamApplyModal').modal('show');
       })
     } else {
-      $('#AddTeamModal').modal('show');
+      $('#AddTeamApplyModal').modal('show');
     }
 }
 
