@@ -1,4 +1,7 @@
 {% load community_tag %}
+{% if request.user.is_anonymous %}
+댓글 쓰기 기능은 로그인 후 이용 가능합니다.
+{% else %}
 <form id="comment-form" method="post" action="." onsubmit="registerComment();return false;">
     {% csrf_token %}
     <div id="comment-input" class="comment-input">
@@ -11,11 +14,12 @@
             <input id="comment-is-anonymous" type="checkbox" checked>
         </div>
         <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>
-        <button id="comment-submit" class="opacity-hover" type="submit" {% if request.user.is_anonymous %}onclick="alert('로그인 후 이용해주세요.')" {% endif %}>
+        <button id="comment-submit" class="opacity-hover" type="submit">
             댓글 쓰기
         </button>
     </div>
 </form>
+{% endif %}
 <div id="comment-group">
     {% for comment in comments %}
     <div id="comment-{{comment.id}}" class="comment-item">
@@ -25,7 +29,7 @@
         <div class="comment-item-left">
             <div class="comment-item-writer-wrapper">
                 {% if request.user.is_anonymous %}
-                <a class="comment-item-writer annonymous" href="">사용자</a>
+                <a class="comment-item-writer annonymous">사용자</a>
                 {% elif comment.anonymous_writer %}
                 <div class="comment-item-writer annonymous">익명</div>
                 {% else %}
