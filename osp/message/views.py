@@ -59,7 +59,7 @@ def message_list_view(request, selected_oppo):
             unread_cnt = len(msg_list)
         
         # 최신순으로 정렬하기 위해 시각 비교 후 업데이트
-        target_timestamp = time.mktime((msg_list[0].send_date).timetuple())
+        target_timestamp = time.mktime((msg_list[0].send_date).timetuple()) if len(msg_list) != 0 else 1.0
         if opponent not in msg_opponent:
             msg_opponent[opponent] = {'unread': unread_cnt, 'recent_date': target_timestamp}
         elif msg_opponent[opponent]['recent_date'] <  target_timestamp :
