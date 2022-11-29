@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from user.models import StudentTab, Account, AccountInterest
+from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
 from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
@@ -54,6 +54,15 @@ def register_page(request):
             tag = Tag.objects.filter(name=tag)
             if len(tag) == 1:
                 AccountInterest.objects.create(account=new_account, tag=tag[0])
+
+        new_privacy = AccountPrivacy.objects.create(
+            account=new_account, 
+            open_lvl=request.POST['radio-3'], 
+            is_write=request.POST['radio-1'], 
+            is_open=request.POST['radio-2']
+        )
+        new_privacy.save()
+
         return JsonResponse({'status': 'success'})
     
 def check_user(request):
