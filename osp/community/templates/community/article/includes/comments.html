@@ -91,6 +91,8 @@
         {% endif %}
     </div>
     {% empty %}
+    {% if not request.user.is_anonymous %}
     <div>댓글을 등록해주세요.</div>
+    {% endif %}
     {% endfor %}
 </div>
