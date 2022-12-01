@@ -12,7 +12,7 @@
     <div class="modal-body">
       <form id="team-update-form" onsubmit="submit_update_form(event);">
         {% csrf_token %}
-        <input style="display:none" name="team-id" val="{{ team.id }}">
+        <input style="display:none" name="team-id" value="{{ team.id }}">
         <div style="margin-bottom:5px;">
           <label for="team-name">팀 이름:</label>
           <input type="text" name="team-name" class="form-control" value="{{ team.name }}" required>
@@ -32,7 +32,7 @@
         </div>
         <div id="members-list" class="w-100 text-left"
           style="height:200px;max-height:200px;overflow-y:auto;margin-bottom:5px;">
-          <table class="w-100" id="username" val="{{ request.user.username }}">
+          <table class="w-100" id="username" value="{{ request.user.username }}">
             <colgroup>
               <col width="10%">
               <col width="80%">
