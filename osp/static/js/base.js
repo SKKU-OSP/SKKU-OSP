@@ -247,6 +247,12 @@ function ReadNotification(type, noti_id, target_id) {
 
 function consentSignInOpen(){
     $('#consent-signin').modal('show');
+    // set is_modal_open in register.html
+    is_modal_open = 1;
+    if($("#consentSignUp").hasClass("btn-secondary")){
+        $("#consentSignUp").removeClass("btn-secondary");
+        $("#consentSignUp").addClass("btn-primary");
+    }
 }
 
 function consentWriteOpen(user){
