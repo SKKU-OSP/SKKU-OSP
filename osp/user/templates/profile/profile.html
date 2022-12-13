@@ -6,7 +6,7 @@
 
 <div class="container my-4">
   {% if data.is_own %}
-  <div class="d-flex justify-content-end mb-1">
+  <div class="d-flex justify-content-end" style="margin-bottom:11px;">
     <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true">프로필 수정</a>
   </div>
   {% else %}
@@ -20,7 +20,7 @@
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
       {% endif %}
       >
-        <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+        <img src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
         <div class="info-body">
         {% if data.is_own %}
           <p class="font-focus">{{data.info.name}}</p>

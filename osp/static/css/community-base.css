@@ -18,24 +18,6 @@
     border-top-right-radius: 0.625rem;
 }
 
-#profile-image-wrap {
-    width: fit-content;
-}
-
-#profile-image {
-    box-sizing: border-box;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: -40px;
-    padding: 0;
-
-    z-index: 5;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    border: 2px solid var(--main-point-color);
-}
-
 #profile-sum {
     display: flex;
     flex-direction: column;
