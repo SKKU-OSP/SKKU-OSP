@@ -44,6 +44,9 @@
                 <span>익명</span>
                 {% else %}
                 <div class="dropdown writer-dropdown">
+                    {% if article.writer.user.username is null %}
+                        탈퇴한 이용자
+                    {% else %}
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         {{article.writer.user.username}}
@@ -55,6 +58,7 @@
                         <li><a class="dropdown-item" href="#"
                                 onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
