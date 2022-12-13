@@ -15,6 +15,18 @@
                 {{ article.title }}
             </div>
             <div id="article-metadata" >
+                <div id="article-datetime">
+                    <div>
+                        {{ article.pub_date|date:"Y-m-d" }}
+                    </div>
+                    <div>
+                        {{ article.pub_date|time:"h:i a" }}
+                    </div>
+                </div>
+                <div id="article-viewcnt">
+                    <div class="material-icons">visibility</div>
+                    <div>{{ article.view_cnt }}</div>
+                </div>
                 <div style="padding-left:10px;" class="d-flex flex-column justify-content-center">
                     {% if user == article.writer.user %}
                     <span style="cursor:pointer" onclick="edit()">수정</span> 
@@ -32,18 +44,6 @@
                         </ul>
                     </div>
                     {% endif %}
-                </div>
-                <div id="article-datetime">
-                    <div>
-                        {{ article.pub_date|date:"Y-m-d" }}
-                    </div>
-                    <div>
-                        {{ article.pub_date|time:"h:i a" }}
-                    </div>
-                </div>
-                <div id="article-viewcnt">
-                    <div class="material-icons">visibility</div>
-                    <div>{{ article.view_cnt }}</div>
                 </div>
             </div>
         </div>
