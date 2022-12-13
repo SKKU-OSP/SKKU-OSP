@@ -27,13 +27,13 @@
         </div>
         {% if user.is_authenticated %}
         <div id="manage-tab" class="d-flex flex-column flex-wrap justify-content-center">
-            <div id="my-activity" onclick="location.href='/community/activity'">
+            <div id="my-activity" class="hover-opacity" onclick="location.href='/community/activity'">
                 <span class="material-icons">
                     collections_bookmark
                 </span>
                 내 활동 목록
             </div>
-            <div id="team-apply-list">
+            <div id="team-apply-list" class="hover-opacity">
                 <span class="material-icons" >
                 assignment_ind
                 </span>

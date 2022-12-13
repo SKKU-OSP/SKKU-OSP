@@ -27,13 +27,13 @@
                     <div class="material-icons">visibility</div>
                     <div>{{ article.view_cnt }}</div>
                 </div>
-                <div style="padding-left:10px;" class="d-flex flex-column justify-content-center">
+                <div class="d-flex flex-column justify-content-center">
                     {% if user == article.writer.user %}
-                    <span style="cursor:pointer" onclick="edit()">수정</span> 
-                    <span style="cursor:pointer" onclick="deleteArticle();">삭제</span>
+                    <span class="hover-opacity" onclick="edit()">수정</span> 
+                    <span class="hover-opacity" onclick="deleteArticle();">삭제</span>
                     {% elif request.user.is_anonymous %}
                     <a href="">사용자</a>
-                    {% elif not article.anonymous_writer %}
+                    {% elif not article.anonymous_writer and article.writer.user.username is not null%}
                     <div class="dropdown writer-dropdown">
                         <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{article.writer.user.username}}
@@ -43,6 +43,8 @@
                             <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                         </ul>
                     </div>
+                    {% else %}
+                        탈퇴한 이용자
                     {% endif %}
                 </div>
             </div>
