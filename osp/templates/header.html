@@ -48,54 +48,46 @@
                             notifications
                         </div>
                     </button>
-                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto;overflow-x:hidden;">
-                        {% for noti in notifications.list %}
+                    <div>
+                        <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto;overflow-x:hidden;">
+                            {% for noti in notifications.list %}
 
-                        <li
-                            {% if noti.receiver_read %}
-                            class="nav-item d-flex flex-row justify-content-between noti-item read"
-                            {% else %}
-                            class="nav-item d-flex flex-row justify-content-between noti-item" id="noti-{{noti.id}}"
-                            {% endif %}
-                            {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
-                            {% elif noti.body.type == "team_apply" %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                            {% elif noti.body.type == "team_invite" %}
-                                onclick="ReadNotification('{{ noti.body.type }}', '{{ noti.id }}' , '{% make_team_board_url noti.body.team_id %}' )"
-                            {% elif noti.body.type == "team_apply_result" %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                            {% else %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                            {% endif %}
-                            style="cursor:pointer;"
-                        >
-                            <div class="d-flex">
-                                <div class="material-icons-outlined">
-                                    {{noti.icon}}
+                            <li
+                                {% if noti.receiver_read %}
+                                class="nav-item d-flex flex-row justify-content-between noti-item hover-opacity read"
+                                {% else %}
+                                class="nav-item d-flex flex-row justify-content-between noti-item hover-opacity" id="noti-{{noti.id}}"
+                                {% endif %}
+                                {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
+                                    onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
+                                {% elif noti.body.type == "team_invite" %}
+                                    onclick="ReadNotification('{{ noti.body.type }}', '{{ noti.id }}' , '{% make_team_board_url noti.body.team_id %}' )"
+                                {% else %}
+                                    onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
+                                {% endif %}
+                            >
+                                <div class="d-flex">
+                                    <div class="material-icons-outlined">
+                                        {{noti.icon}}
+                                    </div>
+                                    <div>
+                                        {{ noti.body.body }}
+                                    </div>
                                 </div>
                                 <div>
-                                    {{ noti.body.body }}
+                                    {% if noti.body.type in notifications.open_types %}
+                                    <i class="bi bi-box-arrow-up-right pointer"></i>
+                                    {% endif %}
                                 </div>
-                            </div>
-                            <div>
+                            </li>
+                            {% empty %}
+                            <li class="nav-item empty d-flex flex-row justify-content-center noti-item">
+                                알림이 없습니다.
+                            </li>
+                            {% endfor %}
 
-                                {% if noti.body.type == "comment" or noti.body.type == "articlelike" or noti.body.type == 'team_invite' %}
-                                <i
-                                    class="bi bi-box-arrow-up-right pointer"></i>
-                                {% elif noti.body.type == "team_apply" %}
-                                <i
-                                    class="bi bi-box-arrow-up-right pointer"></i>
-                                {% endif %}
-                            </div>
-                        </li>
-                        {% empty %}
-                        <li class="nav-item empty d-flex flex-row justify-content-center noti-item">
-                            알림이 없습니다.
-                        </li>
-                        {% endfor %}
-
-                    </ul>
+                        </ul>
+                    </div>
                 </li>
 
                 <li id="message" class="nav-item pointer" style="position:relative;">
