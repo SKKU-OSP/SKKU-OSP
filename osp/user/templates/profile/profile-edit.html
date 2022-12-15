@@ -27,7 +27,7 @@
             <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
-                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
                 <label id="for-photo" for="photo">
                   <i class="bi bi-pen"></i>
                 </label>

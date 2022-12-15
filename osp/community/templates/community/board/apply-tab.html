@@ -9,8 +9,8 @@
   {% for apply_message in apply_messages  %}
       <div class="h-100 d-flex flex-column border rounded" style="width:150px;min-width:150px;padding:5px 10px;margin-right:10px;">
           <div class="w-100"
-               style="text-decoration:underline; color:dodgerblue;font-size: 14px;"
-               onclick="location.href='/user/{{apply_message.account.user.username}}'">
+              style="text-decoration:underline; color:dodgerblue;font-size: 14px;"
+              onclick="location.href='/user/{{apply_message.account.user.username}}'">
               {{ apply_message.account.user.username }}
           </div>
           <div class="w-100 h-100" style="font-size:5px;overflow:scroll;">
@@ -21,10 +21,6 @@
               <button onclick="apply_result({{ team.id }},'{{ apply_message.account.user.username  }}',false)" class="btn btn-danger" style="width:49%; font-size:12px;">거절</button>
           </div>
       </div>
-  {% empty %}
-{#  <div class="w-100 d-flex flex-row" style="overflow-x:scroll;height:100px;margin-bottom:10px;">#}
-{#    지원자가 없습니다.#}
-{#  </div>#}
   {% endfor %}
   </div>
 {% endif %}

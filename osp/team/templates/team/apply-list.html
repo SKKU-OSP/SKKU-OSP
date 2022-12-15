@@ -89,9 +89,15 @@
                                 </button>
                                 {% endif %}
                             </div>
-                            <div class="team-apply-delete material-icons-outlined" onclick="ApplyDelete({{applymsg.id}})">
-                                delete
-                            </div>
+                            {% if applymsg.status == 0 %}
+                            <button class="team-apply-delete btn btn-outline-danger" onclick="ApplyDelete({{applymsg.id}})">
+                                취소
+                            </button>
+                            {% else %}
+                            <button class="team-apply-delete btn btn-outline-danger" onclick="ApplyDelete({{applymsg.id}})">
+                                삭제
+                            </button>
+                            {% endif %}
                         </div>
                         <div id="msg-id-{{ applymsg.id }}" class="collapse team-apply-detail">
                             <div style="width: 20%;">지원동기</div>
@@ -120,6 +126,44 @@
             $("#apply-send").empty();
             $("#apply-send").append(`<div style="text-align:center; padding-top:40px;">보낸 지원서가 없습니다. </div>`);
         }
+    }
+    function apply_result(team_id, username, is_okay) {
+
+        var status = is_okay ? "수락" : "거절";
+        
+        if (!confirm(username + ": " + status + "하시겠습니까?")) {
+            return;
+        }
+        
+        ajax_form_data = new FormData();
+        ajax_form_data.append('team_id', team_id);
+        ajax_form_data.append('username', username);
+        ajax_form_data.append('is_okay', is_okay);
+        ajax_form_data.append('direction', 'TO_TEAM');
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        
+        
+        $.ajax({
+            type: "POST",
+            url: "/team/api/team-invite-update/",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            
+            success: function (data) {
+                if (data['status'] == "success") {
+                    console.log(data)
+                    $('#apply-user-'+data['username']).remove()
+                    showEmptyApply();
+                } else {
+                    alert(data['message']);
+                }
+            },
+            error: function (data) {
+                alert('Error Occured');
+            }
+        });
     }
     showEmptyApply();
     
