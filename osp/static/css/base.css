@@ -144,6 +144,7 @@ div> ::-webkit-scrollbar {
 }
 
 div> ::-webkit-scrollbar-track {
+  background: var(--main-border-color);
   border-radius: 0.625rem;
 }
 
@@ -154,6 +155,15 @@ div> ::-webkit-scrollbar-thumb {
 
 div> ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
+}
+
+
+.hover-opacity{
+  cursor: pointer;
+}
+
+.hover-opacity:hover{
+  opacity: 0.5;
 }
 
 #message-modal-body {
