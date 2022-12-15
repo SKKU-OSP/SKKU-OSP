@@ -181,7 +181,7 @@ class ProfileView(TemplateView):
         student = StudentTab.objects.all()
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
-        own_star = {}
+        own_star = {"star" : 0}
         star_temp_dist = []
         for row in star_data:
             star_temp_dist.append(row["star"])
@@ -282,7 +282,7 @@ class ProfileView(TemplateView):
             row_json['star'] = own_star["star"]
             if row_json["year"] >= self.start_year and row_json["year"] <= end_year:
                 monthly_contr[row_json["year"] - self.start_year].append(row_json)
-        
+        print("monthly_contr", monthly_contr);
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
         monthly_avg = [ [] for i in range(num_year)]

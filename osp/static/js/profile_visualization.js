@@ -106,7 +106,7 @@ window.addEventListener('load', function () {
   });
   const div_activity_monthly = document.getElementById("activity-monthly");
   let monthly_contr = chart_data["monthly_contr"][select_year-start_year];
-
+  console.log("monthly_contr", monthly_contr);
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
@@ -131,8 +131,13 @@ window.addEventListener('load', function () {
         monthly_contribution_level[mid] = 4;
       }
     }
+    let cur_date = new Date();
+    let month = cur_date.getMonth(); // month - 1
     dirty_month.forEach((dirty, idx) =>{
-      if(!dirty) monthly_contribution_level[idx] = 5;
+      if(!dirty) {
+        if (idx<=month) monthly_contribution_level[idx] = 0;
+        else monthly_contribution_level[idx] = 5;
+      }
     });
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
@@ -152,6 +157,7 @@ window.addEventListener('load', function () {
   function updateFactor(factorLabels, month=0) { 
     if(target_yearly_contr.length > 0)
       target_monthly_contr = target_yearly_contr[select_year-start_year];
+      console.log("target_monthly_contr", target_monthly_contr);
     if(month == 0){
       //initialize
       for(let i=0; i<factorLabels.length; i++) {
@@ -279,12 +285,14 @@ window.addEventListener('load', function () {
     pie_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
     const pie_dataset = Array(5).fill(0);
     let active_grass = 0;
+    console.log("monthly_contribution_level", monthly_contribution_level);
     monthly_contribution_level.forEach((val)=>{
       if(val<=4) {
         pie_dataset[val]++;
         active_grass++;
       }
     });
+    console.log("pie_dataset", pie_dataset);
     const pie_data = {
       labels: pie_label,
       datasets: [{

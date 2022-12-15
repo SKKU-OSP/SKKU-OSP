@@ -99,8 +99,13 @@ function setVisualModal(){
         monthly_contribution_level[mid] = 4;
       }
     }
+    let cur_date = new Date();
+    let month = cur_date.getMonth(); // month - 1
     dirty_month.forEach((dirty, idx) =>{
-      if(!dirty) monthly_contribution_level[idx] = 5;
+      if(!dirty) {
+        if (idx<=month) monthly_contribution_level[idx] = 0;
+        else monthly_contribution_level[idx] = 5;
+      }
     });
     clearChildElement(div_activity_monthly);
     is_selected_month = 0;
@@ -202,7 +207,7 @@ function setVisualModal(){
           }
           mLabel.appendChild(mText);
         }
-        if(monthly_contr.length>mIdx){
+        if(level != 5){
           rect.style.cursor = "pointer";
           rect.addEventListener("click",(e) =>{
             let focus = 1 - e.target.attributes[2].value;
