@@ -117,14 +117,11 @@
     }
 
     function edit_submit(event) {
-        console.log('TEST');
         event.preventDefault();
         var t = $('#article-form').attr('edit-type');
         if (t == 'register') {
-            {#console.log('1');#}
             registerArticle();
         } else {
-            {#console.log('2');#}
             updateArticle();
         }
         return false;
@@ -144,6 +141,10 @@
             const offset = new Date().getTimezoneOffset() * 60000;
             var period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
             var period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
+            if(period_start_date > period_end_date){
+                alert('날짜입력에 오류가 있습니다.');
+                return 0;
+            }
             ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
             ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         }
@@ -165,7 +166,7 @@
                 success: function (data) {
                     console.log(data);
                     if (data['status'] == "success") {
-                        alert('등록이 완료되었습니다!') 
+                        alert('등록이 완료되었습니다!');
                         {% if board %}
                         window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
                         {% endif %}

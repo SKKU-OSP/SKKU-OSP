@@ -10,6 +10,8 @@
         onclick="alert('로그인 후 이용해주세요')"
         {% elif not is_write %}
         onclick="consentWriteOpen('{{request.user.username}}');"
+        {% elif team_cnt == 0 %}
+        onclick="alert('모집할 팀이 없습니다.')"
         {% elif board %}
         onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
         {% endif %}
