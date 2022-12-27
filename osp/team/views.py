@@ -416,7 +416,7 @@ def TeamApply(request, team_id):
                         team=team,
                         account=account,
                         message=message,
-                        status=0, # 대기중
+                        status=0, # 대기 중
                         direction=False, # FROM ACCOUNT TO_TEAM
                         send_date=datetime.now(),
                     )

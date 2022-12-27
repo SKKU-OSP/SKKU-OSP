@@ -34,9 +34,9 @@ def remain_datetime(date):
     if delta < timedelta(seconds=3600):
         repr_string = f'{math.ceil(delta.seconds / 60) % 60}분 전'
     elif delta < timedelta(days=1):
-        repr_string = f'{math.ceil(delta.seconds / 3600) % 3600}시간 전'
+        repr_string = f'{math.ceil(delta.seconds / 3600) % 24}시간 전'
     else:
-        repr_string = f'{delta.days}일 {math.ceil(delta.seconds / 60) % 24}시간 전'
+        repr_string = f'{delta.days}일 {math.ceil(delta.seconds / 3600) % 24}시간 전'
     return repr_string
     
 @register.filter
