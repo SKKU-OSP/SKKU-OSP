@@ -76,6 +76,10 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
+
+    if request.user: 
+        account = Account.objects.get(user=request.user)
+
     context = {'board': board}
     if board.team_id is not None:
         if not request.user.is_authenticated:
@@ -118,6 +122,9 @@ def board(request, board_name, board_id):
         #     active_article = list(chain(active_article, active_article)) # 2개
         #     active_article = list(chain(active_article, active_article)) # 4개
 
+        team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
+
+        context['team_cnt'] = team_cnt
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
@@ -131,9 +138,8 @@ def board(request, board_name, board_id):
             print("error tag", e)
         
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
-        if request.user: my_acc = Account.objects.get(user=request.user)
 
-        tm = team_members.filter(member=my_acc).first()
+        tm = team_members.filter(member=account).first()
         # if not tm:
         #     return redirect('/community')
         if tm:
@@ -142,7 +148,6 @@ def board(request, board_name, board_id):
         context['team_tags'] = team_tags_list
         context['team_members'] = team_members
     if not request.user.is_anonymous:
-        account = Account.objects.get(user=request.user)
         try:
             acc_pp = AccountPrivacy.objects.get(account=account)
         except:
