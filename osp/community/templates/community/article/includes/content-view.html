@@ -104,70 +104,62 @@
     </div>
 
     {% if board.board_type == 'Recruit' %}
-    <div id="article-teamcard" style="margin-left:0px;margin-right:0px;" >
+    <div id="article-teamcard">
         {% if article.team %}
-        <div class="row  w-100" >
-            <div id="recruit-article-info" class="col">
-                <div id="recruit-article-info-image" style="height:5rem;width:5rem;">
-                    <img src="{{article.team.image.url}}" alt="team-image">
+        <div class="d-flex col">
+            <div class="small-radius-image m-2">
+                <img src="{{article.team.image.url}}" alt="team-image">
+            </div>
+            <div class="m-2">
+                <div class="article-info-name">{{ article.team.name }}</div>
+                <div class="article-info-desc desc-break">{{ article.team.description }}</div>
+            </div>
+        </div>
+        <div class="d-flex col justify-content-between m-2">
+            <div>
+                {% is_period_end article.period_end as is_end %}
+                {% is_period_end article.period_start as is_start %}
+                <div class="article-info-name">
+                    모집기간
                 </div>
-                <div id="recruit-article-info-text">
-                    <div id="recruit-article-info-name">{{ article.team.name }}</div>
-                    <div id="recruit-article-info-desc" class="desc-break" style="min-width:360px;">{{ article.team.description }}</div>
+                <div>
+                    시작: {{article.period_start|date:'Y.m.d H:i'}}
+                    <br>
+                    마감: {{article.period_end|date:'Y.m.d H:i'}}
+                    {% if not is_start %}
+                    <div class="sub-point-text">{{article.period_start|remain_datetime}}</div>
+                    {% elif not is_end %}
+                    <div class="sub-point-text">{{article.period_end|remain_datetime}}</div>
+                    {% endif %}
                 </div>
             </div>
-            <div class="col ">
-                <div class=" w-100 d-flex flex-row justify-content-between">
-                    {% is_period_end article.period_end as is_end %}
-                    {% is_period_end article.period_start as is_start %}
-                    <div id="recruit-article-period" style="margin-right:20px;">
-                        <div>
-                            모집기간
-                        </div>
-                        <div id="recruit-article-period-date">
-                            시작: {{article.period_start|date:'Y.m.d H:i'}}
-                            <br>
-                            마감: {{article.period_end|date:'Y.m.d H:i'}}
-                            {% if not is_start %}
-                            <div>{{article.period_start|remain_datetime}}</div>
-                            {% elif not is_end %}
-                            <div>{{article.period_end|remain_datetime}}</div>
-                            {% endif %}
-                        </div>
+            
+            <div class="d-flex align-items-center">
+                {% if not is_start %}
+                <div class="recruit-badge recruit-inactive mx-1">모집 전</div>
+                {% elif not is_end %}
+                <div class="recruit-badge recruit-active mx-1">모집 중</div>
+                {% else %}
+                <div class="recruit-badge recruit-inactive mx-1">모집 마감</div>
+                {% endif %}
+
+                {% is_teammember article.team request.user as is_teammember %}
+                {% if not is_teammember and is_start and not is_end %}
+                {% teamapplymessage article.team request.user as waited_teamapplymessage %}
+                    {% if not waited_teamapplymessage %}
+                        {% if request.user.is_anonymous %}
+                        <button class="recruit-btn opacity-hover mx-1" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
+                        {% else %}
+                        <button class="recruit-btn opacity-hover mx-1" onclick="openTeamApplyModal({{ article.team.id }});" data-team-id="{{ article.team.id }}">
+                        {% endif %}
+                            지원하기
+                        </button>
+                    {% else %}
+                    <div class="recruit-badge recruit-inactive">
+                        {{ waited_teamapplymessage.get_status_display }}
                     </div>
-                    <div class="d-flex flex-column justify-content-center">
-                        <div class="d-flex flex-row  justify-content-between">
-                            <div id="recruit-article-status" >
-                                {% if not is_start %}
-                                <div class="recruit-yet">모집 전</div>
-                                {% elif not is_end %}
-                                <div class="recruit-start">모집 중</div>
-                                {% else %}
-                                <div class="recruit-end">모집 마감</div>
-                                {% endif %}
-                            </div>
-                            {% is_teammember article.team request.user as is_teammember %}
-                            {% if not is_teammember and is_start and not is_end %}
-                            {% teamapplymessage article.team request.user as waited_teamapplymessage %}
-                                {% if not waited_teamapplymessage %}
-                                <div id="recruit-article-apply" class="opacity-hover" style="margin-left:5px;">
-                                    {% if request.user.is_anonymous %}
-                                    <button id="team-apply" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
-                                    {% else %}
-                                    <button id="team-apply" onclick="openTeamApplyModal({{ article.team.id }});" data-team-id="{{ article.team.id }}">
-                                    {% endif %}
-                                        지원하기
-                                    </button>
-                                </div>
-                                {% else %}
-                                <div class="btn btn-secondary" style="font-size:13px; cursor:default;">
-                                    {{ waited_teamapplymessage.get_status_display }}
-                                </div>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
         {% else %}
