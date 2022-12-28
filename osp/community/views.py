@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db import DatabaseError, transaction
-from django.db.models import Q, Count
+from django.db.models import F, Q, Count
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
@@ -48,18 +48,13 @@ def main(request):
         # else:
         #     board.article_list = []
         # 최신 게시물
-        article_list = Article.objects.filter(board_id=board).order_by('-pub_date')
+        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
         board.article_list = article_list[:min(3, len(article_list))]
         
-        article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(board.article_list)
-            
-        for article in board.article_list:
-            article.tags = article_tags_dict.get(article.id, [])
-
-            article.like_cnt = article_likes_dict.get(article.id, 0)
-            article.comment_cnt = article_comments_dict.get(article.id, 0)
-            article.scrap_cnt = article_scraps_dict.get(article.id, 0)
-            if board.board_type == 'Recruit':
+        board.article_list = get_article_metas(board.article_list)
+        
+        if board.board_type == 'Recruit':
+            for article in board.article_list:
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
                     article.team = tr.team
@@ -273,7 +268,7 @@ def article_list(request, board_name, board_id):
     
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Article.objects.filter(board_id=board)
+    article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
     if keyword != '':
@@ -298,31 +293,25 @@ def article_list(request, board_name, board_id):
     # print(article_list)
     
     # Get Article Metadata
-    article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(article_list)
-    for article in article_list:
-        article.comment_cnt = article_comments_dict.get(article.id, 0)
-        article.like_cnt = article_likes_dict.get(article.id, 0)
-        article.scrap_cnt = article_scraps_dict.get(article.id, 0)
-        article.tags = article_tags_dict.get(article.id, [])
-        if board.board_type == 'Recruit':
+    article_list = get_article_metas(article_list)
+    
+    if board.board_type == 'Recruit':
+        for article in article_list:
             tr = TeamRecruitArticle.objects.filter(article=article).first()
             if tr:
                 article.team = tr.team
             else:
                 article.team = None
 
-        if board.board_type == 'QnA':
-            # comment_by_like = ArticleCommentLike.objects.filter(
-            #     comment__in=ArticleComment.objects.filter(article=article).values_list('id', flat=True)
-            # ).annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+    if board.board_type == 'QnA':
+        context['comment_visible'] = True
+        for article in article_list:
             comment_by_like = ArticleComment.objects.filter(
                 article=article
             ).prefetch_related('articlecommentlike_set')
             comment_by_like = comment_by_like.annotate(like_cnt=Count('articlecommentlike')).order_by('-like_cnt')
             if len(comment_by_like):
                 article.comment = comment_by_like[0]
-    if board.board_type == 'QnA':
-        context['comment_visible'] = True
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context,request=request)
@@ -599,12 +588,16 @@ def article_scrap(request):
 @login_required
 def my_activity(request):
     account = Account.objects.get(user=request.user)
-    article = Article.objects.filter(writer=account)
-    scrap = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True))
-    comment = ArticleComment.objects.filter(writer=account)
+    article_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    scrap_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    comment = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
+
+    article_list = get_article_metas(article_list)
+    scrap_list = get_article_metas(scrap_list)
+
     context = {
-        'write_article': article,
-        'scrap_article': scrap,
+        'write_article': article_list,
+        'scrap_article': scrap_list,
         'comment_list': comment
     }
     return render(request, 'community/activity.html', context)
@@ -626,7 +619,7 @@ def comment_like(request):
 
 def get_article_metas(article_list):
     
-    if type(article_list) == list:
+    if type(article_list) != list:
         article_list = list(article_list)
     
     article_tags = ArticleTag.objects.filter(article__in=article_list).values('article', 'tag__name', 'tag__type')
@@ -662,5 +655,11 @@ def get_article_metas(article_list):
             article_scraps_dict[obj["article"]] = obj["scrap_num"]
     except Exception as e:
         print("scrap error: ", e)
+
+    for article in article_list:
+        article.tags = article_tags_dict.get(article.id, [])
+        article.like_cnt = article_likes_dict.get(article.id, 0)
+        article.comment_cnt = article_comments_dict.get(article.id, 0)
+        article.scrap_cnt = article_scraps_dict.get(article.id, 0)
         
-    return article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict
+    return article_list

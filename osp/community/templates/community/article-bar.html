@@ -44,19 +44,19 @@
                 <span>익명</span>
                 {% else %}
                 <div class="dropdown writer-dropdown">
-                    {% if article.writer.user.username is null %}
+                    {% if article.writer_name is null %}
                         탈퇴한 이용자
                     {% else %}
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        {{article.writer.user.username}}
+                        {{article.writer_name}}
                     </button>
                     <ul class="dropdown-menu">
-                        {% if not article.writer.user.is_superuser %}
-                        <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
+                        {% if not article.is_superuser %}
+                        <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
                         {% endif %}
                         <li><a class="dropdown-item" href="#"
-                                onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
+                                onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
                     </ul>
                     {% endif %}
                 </div>
