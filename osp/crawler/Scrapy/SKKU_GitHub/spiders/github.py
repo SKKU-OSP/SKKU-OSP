@@ -364,22 +364,30 @@ class GithubSpider(scrapy.Spider):
         repo_path = f'{github_id}/{repo_name}'
         repo_data['path'] = repo_path
         release_tag = soup.select_one(f'a[href="/{repo_path}/releases"]')
-        if release_tag is None :
-            repo_data['release_ver'] = None
-            repo_data['release_count'] = 0
-        else:
+        if not release_tag is None :
             release_tag = release_tag.parent.parent
-            if release_tag.select_one('span.Counter') is None:
+            release_counter = release_tag.select_one('span.Counter')
+            if not release_counter is None:
+                try:
+                    repo_data['release_count'] = int(release_counter.text.replace(',', '').replace('+', ''))
+                except ValueError:
+                    repo_data['release_count'] = 0
+                repo_data['release_ver'] = release_tag.select_one('a > div span').text[:45]
+            else :
                 repo_data['release_ver'] = None
                 repo_data['release_count'] = 0
-            else :
-                repo_data['release_count'] = int(release_tag.select_one('span.Counter').text.replace(',', ''))
-                repo_data['release_ver'] = release_tag.select_one('a > div span').text[:45]
+        else:
+            repo_data['release_ver'] = None
+            repo_data['release_count'] = 0
 
         contributor_tag = soup.select_one(f'a[href="/{github_id}/{repo_name}/graphs/contributors"]')
         if not contributor_tag is None:
-            contributor_tag = contributor_tag.parent.parent
-            repo_data['contributors_count'] = int(contributor_tag.select_one('span.Counter').text.replace(',',''))
+            try:
+                contributor_tag = contributor_tag.parent.parent
+                contributor_counter = contributor_tag.select_one('span.Counter')
+                repo_data['contributors_count'] = int(contributor_counter.text.replace(',','').replace('+',''))
+            except ValueError:
+                repo_data['contributors_count'] = 1
         else:
             repo_data['contributors_count'] = 1
         
