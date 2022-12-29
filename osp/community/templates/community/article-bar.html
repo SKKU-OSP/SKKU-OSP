@@ -1,12 +1,16 @@
 {% load community_tag %}
+
 {% for article in article_list %}
+{% if comment_visible or bartype == 'compact' %}
 <div class="article-bar">
-    <div class="d-flex">
-        <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' article.id %}'">
-            <div class="article-bar-title my-1">
-                {% if board.board_type == 'Recruit' %}
-                {% is_period_end article.period_start as is_start %}
-                {% is_period_end article.period_end as is_end %}
+{% else %}
+<div class="article-bar background-shadow">
+{% endif %}
+    <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' article.id %}'">
+        <div class="article-bar-title my-1">
+            {% if board.board_type == 'Recruit' %}
+            {% is_period_end article.period_start as is_start %}
+            {% is_period_end article.period_end as is_end %}
                 {% if not article.team %}
                 {% elif not is_start %}
                 <div class="badge tag-recruit tag-recruit-end">모집 전</div>
@@ -15,102 +19,96 @@
                 {% else %}
                 <div class="badge tag-recruit tag-recruit-end">모집 마감</div>
                 {% endif %}
-                {% endif %}
-                <div class="flex-grow" style="
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;">
-                    {% if board.board_type == 'Recruit' %}
+            {% endif %}
+            <div class="flex-grow" style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                {% if board.board_type == 'Recruit' %}
                     {% if article.team %}
                     [{{ article.team.name }}]
                     {% else %}
-                    [팀이 더이상 존재하지 않습니다.]
+                    [삭제된 팀]
                     {% endif %}
-                    {% endif %}
-                    {{article.title}}
-                </div>
-            </div>
-            <div style="white-space: nowrap;">
-                {% for tag in article.tags %}
-                <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
-                {% endfor %}
+                {% endif %}
+                {{article.title}}
             </div>
         </div>
-        <div class="article-meta">
-            <div class="color-b">
-                {% if request.user.is_anonymous %}
-                <span>사용자</span>
-                {% elif article.anonymous_writer %}
-                <span>익명</span>
-                {% else %}
-                <div class="dropdown writer-dropdown">
-                    {% if article.writer_name is null %}
-                        탈퇴한 이용자
-                    {% else %}
-                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        {{article.writer_name}}
-                    </button>
-                    <ul class="dropdown-menu">
-                        {% if not article.is_superuser %}
-                        <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
-                        {% endif %}
-                        <li><a class="dropdown-item" href="#"
-                                onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
-                    </ul>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-            <div>{{article.pub_date|time_before}}</div>
-            <div class="d-flex justify-content-between">
-                <div class="article-meta-stat d-flex">
-                    <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-                    <div>{{article.like_cnt}}</div>
-                </div>
-                <div class="article-meta-stat d-flex" onclick="location.href='{% url 'community:article-view' article.id %}#comment-content'" style="cursor:pointer;">
-                    <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
-                    <div>{{article.comment_cnt}}</div>
-                </div>
-                <div class="article-meta-stat d-flex">
-                    <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
-                    {{article.scrap_cnt}}
-                </div>
-                <div class="article-meta-stat d-flex">
-                    <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
-                    {{article.view_cnt}}
-                </div>
-            </div>
+        <div style="white-space: nowrap;">
+            {% for tag in article.tags %}
+            <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
+            {% endfor %}
         </div>
     </div>
-    {% if comment_visible %}
-    <div class="d-flex article-bar-comment" style="padding-bottom: 0.2rem;">
-        {% if article.comment %}
-        <i class="bi bi-arrow-return-right me-1"></i>
-        <div>
-            {{article.comment.body}}
-        </div>
-        <div class="ms-auto">
+    <div class="article-meta">
+        <div class="color-b">
             {% if request.user.is_anonymous %}
             <span>사용자</span>
-            {% elif article.comment.anonymous_writer %}
+            {% elif article.anonymous_writer %}
             <span>익명</span>
             {% else %}
-            <a href="/user/{{article.comment.writer.user.username}}">{{article.comment.writer.user.username}}</a>
+            <div class="dropdown writer-dropdown">
+                {% if article.writer_name is null %}
+                    탈퇴한 이용자
+                {% else %}
+                <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{article.writer_name}}
+                </button>
+                <ul class="dropdown-menu">
+                    {% if not article.is_superuser %}
+                    <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
+                    {% endif %}
+                    <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
+                </ul>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
-        <div class="d-flex">
-            <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-            <div>
-                {{article.comment.like_cnt}}
+        <div>{{article.pub_date|time_before}}</div>
+        <div class="d-flex justify-content-between">
+            <div class="article-meta-stat d-flex">
+                <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+                <div>{{article.like_cnt}}</div>
+            </div>
+            <div class="article-meta-stat d-flex" role="button" onclick="location.href='{% url 'community:article-view' article.id %}#comment-content'">
+                <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
+                <div>{{article.comment_cnt}}</div>
+            </div>
+            <div class="article-meta-stat d-flex">
+                <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
+                {{article.scrap_cnt}}
+            </div>
+            <div class="article-meta-stat d-flex">
+                <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
+                {{article.view_cnt}}
             </div>
         </div>
+    </div>
+</div>
+{% if comment_visible %}
+<div class="d-flex article-bar-comment" style="padding-bottom: 0.2rem;">
+    {% if article.comment %}
+    <i class="bi bi-arrow-return-right me-1"></i>
+    <div>
+        {{article.comment.body}}
+    </div>
+    <div class="ms-auto">
+        {% if request.user.is_anonymous %}
+        <span>사용자</span>
+        {% elif article.comment.anonymous_writer %}
+        <span>익명</span>
         {% else %}
-        <div class="m-auto color-b">댓글이 없습니다</div>
+        <a href="/user/{{article.comment.writer.user.username}}">{{article.comment.writer.user.username}}</a>
         {% endif %}
     </div>
+    <div class="d-flex">
+        <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+        <div>
+            {{article.comment.like_cnt}}
+        </div>
+    </div>
+    {% else %}
+    <div class="m-auto color-b">댓글이 없습니다</div>
     {% endif %}
 </div>
+{% endif %}
 {% empty %}
 <div class="article-bar empty">
     등록된 글이 없습니다.
