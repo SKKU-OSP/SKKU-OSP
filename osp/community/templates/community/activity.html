@@ -3,104 +3,55 @@
 {% load community_tag %}
 {% block content %}
 <div class="container my-4">
+  <div style="height: 42px;"></div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" with board=board %}
     <div class="col-md-9 col-12">
-      <div class="row">
-        <div class="col-12">
-          <div class="mb-2 boardgroup">
-            <div class="accordion" id="accordion-article">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <div class="accordion-header-inner">
-                    <div class="">
-                      내가 작성한 글
-                    </div>
-                    <div class="accordion-button" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapse-article" aria-expanded="true" aria-controls="collapse-article">
-                    </div>
-                  </div>
-                </h2>
-                <div id="collapse-article" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                  data-bs-parent="#accordion-article">
-                  <div>
-                    {% include "community/article-bar.html" with article_list=write_article bartype='compact' board=board %}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div>
+        <ul class="nav nav-pills nav-fill mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="title-bar nav-link active" id="pills-article-tab" data-bs-toggle="pill" data-bs-target="#pills-article" type="button" role="tab" aria-controls="pills-article">내가 작성한 글</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="title-bar nav-link" id="pills-scrap-tab" data-bs-toggle="pill" data-bs-target="#pills-scrap" type="button" role="tab" aria-controls="pills-scrap">내가 스크랩한 글</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="title-bar nav-link" id="pills-comment-tab" data-bs-toggle="pill" data-bs-target="#pills-comment" type="button" role="tab" aria-controls="pills-comment">내가 작성한 댓글</button>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade background-shadow fw-semibold active show" id="pills-article" role="tabpanel" aria-labelledby="pills-article-tab" tabindex="0">
+          {% include "community/article-bar.html" with article_list=write_article bartype='compact' board=board %}
         </div>
-
-        <div class="col-6">
-          <div class="mb-2 boardgroup">
-            <div class="accordion" id="accordion-scrap">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <div class="accordion-header-inner">
-                    <div class="">
-                      내가 스크랩한 글
-                    </div>
-                    <div class="accordion-button" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapse-scrap" aria-expanded="true" aria-controls="collapse-scrap">
-                    </div>
-                  </div>
-                </h2>
-                <div id="collapse-scrap" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                  data-bs-parent="#accordion-scrap">
-                  <div>
-                    {% include "community/article-bar.html" with article_list=scrap_article bartype='compact' board=board %}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="tab-pane fade background-shadow fw-semibold" id="pills-scrap" role="tabpanel" aria-labelledby="pills-scrap-tab" tabindex="0">
+          {% include "community/article-bar.html" with article_list=scrap_article bartype='compact' board=board %}
         </div>
-
-        <div class="col-6">
-          <div class="mb-2 boardgroup">
-            <div class="accordion" id="accordion-comment">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <div class="accordion-header-inner">
-                    <div class="">
-                      내가 작성한 댓글
-                    </div>
-                    <div class="accordion-button" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapse-comment" aria-expanded="true" aria-controls="collapse-comment">
-                    </div>
+        <div class="tab-pane fade background-shadow fw-semibold" id="pills-comment" role="tabpanel" aria-labelledby="pills-comment-tab" tabindex="0">
+          <div>
+            {% for comment in comment_list %}
+            <div class="article-bar">
+              <div class="d-flex">
+                <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' comment.article.id %}#comment-{{comment.id}}'">
+                  <div class="article-bar-title my-1">
+                    {{comment.body}}
                   </div>
-                </h2>
-                <div id="collapse-comment" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                  data-bs-parent="#accordion-comment">
+                </div>
+                <div class="article-meta">
                   <div>
-                    {% for comment in comment_list %}
-                    <div class="article-bar">
-                      <div class="d-flex">
-                        <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' comment.article.id %}#comment-{{comment.id}}'">
-                          <div class="article-bar-title my-1">
-                            {{comment.body}}
-                          </div>
-                        </div>
-                        <div class="article-meta">
-                          <div>
-                            <a href="{% url 'community:article-view' comment.article.id %}">
-                              {{comment.article.board_id.name}} - {{comment.article.title}}
-                            </a>
-                          </div>
-                          <div>{{comment.pub_date|time_before}}</div>
-                          <div class="article-meta-stat d-flex">
-                            <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-                            <div>{{comment|comment_like}}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {% endfor %}
+                    <a href="{% url 'community:article-view' comment.article.id %}">
+                      {{comment.article.board_id.name}} - {{comment.article.title}}
+                    </a>
+                  </div>
+                  <div>{{comment.pub_date|time_before}}</div>
+                  <div class="article-meta-stat d-flex">
+                    <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
+                    <div>{{comment|comment_like}}</div>
                   </div>
                 </div>
               </div>
             </div>
+            {% endfor %}
           </div>
         </div>
       </div>
