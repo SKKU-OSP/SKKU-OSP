@@ -66,9 +66,7 @@
         </div>
         <div>
             <div id="article-like-scrap">
-                <div onclick="ArticleThumbUp({{ article.id }},{{ request.user.id | default_if_none:-1 }})"
-                    id="article-like-btn"
-                    class="h-100 pointer opacity-hover">
+                <div id="article-like-btn" onclick="ArticleThumbUp({{ article.id }},{{ request.user.id | default_if_none:-1 }})" class="h-100 hover-opacity">
                     {% is_article_thumb_up article request.user as is_thumb_up %}
                     {% if not is_thumb_up %}
                     <span class="material-icons-outlined">
@@ -84,8 +82,7 @@
                     </span>
                 </div>
                 {% is_article_scrap article request.user as is_scrap %}
-                <div id="article-scrap-btn" onclick="ArticleScrap({{ article.id }}, {{ request.user.id | default_if_none:-1 }})"
-                    class="h-100 pointer opacity-hover">
+                <div id="article-scrap-btn" onclick="ArticleScrap({{ article.id }}, {{ request.user.id | default_if_none:-1 }})" class="h-100 hover-opacity">
                     <span class="material-icons-outlined">
                         {% if is_scrap %} 
                         bookmark
@@ -148,9 +145,9 @@
                 {% teamapplymessage article.team request.user as waited_teamapplymessage %}
                     {% if not waited_teamapplymessage %}
                         {% if request.user.is_anonymous %}
-                        <button class="recruit-btn opacity-hover mx-1" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
+                        <button class="recruit-btn hover-opacity mx-1" onclick="alert('로그인 후 이용해주세요.')" data-team-id="{{ article.team.id }}">
                         {% else %}
-                        <button class="recruit-btn opacity-hover mx-1" onclick="openTeamApplyModal({{ article.team.id }});" data-team-id="{{ article.team.id }}">
+                        <button class="recruit-btn hover-opacity mx-1" onclick="openTeamApplyModal({{ article.team.id }});" data-team-id="{{ article.team.id }}">
                         {% endif %}
                             지원하기
                         </button>

@@ -158,13 +158,6 @@ div> ::-webkit-scrollbar-thumb:hover {
 }
 
 
-.hover-opacity{
-  cursor: pointer;
-}
-
-.hover-opacity:hover{
-  opacity: 0.5;
-}
 
 #message-modal-body {
   padding: 0;
@@ -497,8 +490,12 @@ footer {
   cursor: pointer;
 }
 
-.opacity-hover:hover {
-  opacity: 60%;
+.hover-opacity{
+  cursor: pointer;
+}
+
+.hover-opacity:hover{
+  opacity: 0.5;
 }
 
 .noti-dropdown::after,

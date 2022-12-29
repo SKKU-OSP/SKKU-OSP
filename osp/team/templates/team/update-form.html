@@ -27,7 +27,7 @@
         </div>
         <div class="w-100 d-flex flex-row justify-content-between">
           <div><label for="">팀 멤버</label></div>
-          <div><i id="refresh-members" class="material-icons pointer opacity-hover"
+          <div><i id="refresh-members" class="material-icons hover-opacity"
               style="padding-top:5px;">autorenew</i></div>
         </div>
         <div id="members-list" class="w-100 text-left"
@@ -43,7 +43,7 @@
               <td class="text-center">
                 <i id="admin-{{ member.member.user.username }}"
                   onclick="toggleIsAdmin('{{ member.member.user.username }}')"
-                  class="material-icons opacity-hover pointer" {% if member.is_admin %} style="color:black" {% else %}
+                  class="material-icons hover-opacity" {% if member.is_admin %} style="color:black" {% else %}
                   style="color:#CDCDCD" {% endif %}>military_tech
                 </i>
               </td>
@@ -56,7 +56,7 @@
               <td class="text-center">
                 {% if member.member.user != request.user %}
                 <i onclick="removeMember('{{ member.member.user.username }}')"
-                  class="material-icons opacity-hover pointer" style="color:#CDCDCD;">delete</i>
+                  class="material-icons hover-opacity" style="color:#CDCDCD;">delete</i>
                 {% endif %}
               </td>
             </tr>
