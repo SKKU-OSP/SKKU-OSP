@@ -233,6 +233,33 @@
     border-bottom-right-radius: 0.625rem !important;
 }
 
+.article-bar {
+    min-height: 82px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--main-border-color);
+    padding: 1rem;
+}
+
+.article-bar:first-child {
+    border-top: none;
+    border-top-left-radius: 0.625rem !important;
+    border-top-right-radius: 0.625rem !important;
+}
+
+.article-bar:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 0.625rem !important;
+    border-bottom-right-radius: 0.625rem !important;
+}
+
+.background-shadow{
+    border-bottom-left-radius: 0.625rem !important;
+    border-bottom-right-radius: 0.625rem !important;
+    box-shadow: 0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);
+}
 .article-head {
     overflow: hidden;
     cursor: pointer;
@@ -452,6 +479,13 @@
 
 .team-admin-icon {
     vertical-align: middle;
+}
+
+.nav-pills .title-bar.nav-link.active, .nav-pills .show>.nav-link {
+    color: var(--bs-nav-pills-link-active-color);
+    background-color: var(--main-point-color);
+    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    border-radius: 0.75rem;
 }
 
 #board-title-bar {
