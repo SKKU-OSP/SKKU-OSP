@@ -611,45 +611,37 @@ class ProfileInterestsView(UpdateView):
 
         return JsonResponse({'data':'asdfas'})
 
-class ProfileLanguageView(UpdateView):
-    def post(self, request, *args, **kwargs):
+class ProfileLanguagesView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        print(request.POST)
+        print(request.POST['act'])
+        print(request.POST['target'])
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        student_id = user_account.student_data.id
+        tags_all = Tag.objects
+        tags_domain = tags_all.filter(type='domain')
+
+        if request.POST['act'] == 'append':
+            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
+            added_tag = Tag.objects.get(name=added_preferLanguage)
+            try:
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
 
 
-        return
-
-@csrf_exempt
-def load_language_data(request, username):
-    print(request.POST)
-    print(request.POST['act'])
-    print(request.POST['target'])
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-    tags_all = Tag.objects
-    tags_domain = tags_all.filter(type='domain')
-
-    if request.POST['act'] == 'append':
-        added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-        added_tag = Tag.objects.get(name=added_preferLanguage)
-        try:
-            already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-        except:
-            AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
-
-
-        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-        for l in lang:
-            if "tag_" + l.tag.name in request.POST:
-                added_tag = Tag.objects.get(name=l.tag.name)
-                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-
-
-        return JsonResponse({'data':'asdfas'})
-    else:
-        delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-        tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-        print("Selected tag is successfully deleted")
-        return JsonResponse({'data':'asdfas'})
+            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+            for l in lang:
+                if "tag_" + l.tag.name in request.POST:
+                    added_tag = Tag.objects.get(name=l.tag.name)
+                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+            return JsonResponse({'data':'asdfas'})
+        else:
+            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+            print("Selected tag is successfully deleted")
+            return JsonResponse({'data':'asdfas'})
 
 
 
