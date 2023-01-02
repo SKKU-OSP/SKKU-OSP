@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
+from django.views.generic.edit import UpdateView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
@@ -582,34 +583,39 @@ def load_repo_data(request, username):
         print("ajax repo", time.time() - start)
         return JsonResponse(context)
 
-@csrf_exempt
-def load_interests_data(request, username):
-    print(request.POST)
-    print(request.POST['act'])
-
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-    tags_all = Tag.objects
-    if request.POST['act'] == 'append':
-        added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
-        added_tag = Tag.objects.get(name=added_preferLanguage)
-        try:
-            already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-            already_ints.delete()
-            AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-        except:
-            AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-
-    else:
-        delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-        tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-        print("Selected tag is successfully deleted")
 
 
-    return JsonResponse({'data':'asdfas'})
+
+class ProfileInterestsView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        print(request.POST)
+        print(request.POST['act'])
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        student_id = user_account.student_data.id
+        tags_all = Tag.objects
+        if request.POST['act'] == 'append':
+            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
+            added_tag = Tag.objects.get(name=added_preferLanguage)
+            try:
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+                already_ints.delete()
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+
+        else:
+            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+            print("Selected tag is successfully deleted")
+
+        return JsonResponse({'data':'asdfas'})
+
+class ProfileLanguageView(UpdateView):
+    def post(self, request, *args, **kwargs):
 
 
+        return
 
 @csrf_exempt
 def load_language_data(request, username):
