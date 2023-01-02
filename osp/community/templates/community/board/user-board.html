@@ -16,10 +16,13 @@
             {{ board.name }} 게시판
           </a>
         </div>
-        <div class="my-auto col-3" id="article-filter" style="position:absolute; right:15px;">
-          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
-            {% category_tag request %}
-          </select>
+        <div id="article-filter">
+          {% include "community/board/searcher.html" with board=board %}
+          <div id="tag-filter">
+            <select id="tag-select" name="tag-filter-select" multiple>
+              {% category_tag request %}
+            </select>
+          </div>
         </div>
       </div>
       <div id="team-filter" class="w-100 border d-flex flex-row flex-wrap">
@@ -39,7 +42,7 @@
 {% endblock content %}
 {% block script %}
 <script>
-  $(function () {
+  {% comment %} $(function () {
     var tag_selector = new SlimSelect({
       select: '#tag-select',
       onChange: (selected_list) => {
@@ -50,7 +53,7 @@
       },
       placeholder: 'Tag',
     });
-  });
+  }); {% endcomment %}
   function teamFilterBtn(team_name){
       var id = "#filter-"+team_name;
       var obj = $(id);
@@ -61,5 +64,7 @@
 
   }
 </script>
+<script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>
+
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}

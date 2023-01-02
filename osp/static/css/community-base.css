@@ -482,9 +482,12 @@
     flex: 0 0 auto;
     width: 33.33333333%;
 }
+#tag-filter{
+    transition-duration: 0.15s;
+}
 #tag-filter:not(.show){
     opacity: 0;
-    display: none;
+    visibility: hidden;
 }
 @media (max-width: 992px) {
     #board-title {
@@ -780,7 +783,9 @@
     border-radius: 50%;
     display: flex;
 }
-
+.page-item.disabled {
+    opacity: 50%;
+}
 .page-item>.page-link:nth-child(1) {
     background-color: transparent;
 }
