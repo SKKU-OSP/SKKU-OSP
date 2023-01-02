@@ -345,7 +345,7 @@
       
         $.ajax({
         cache : false,
-          url : "languageupdate",
+          url : "languages",
           type : 'POST', 
           data : formData,
           success : function(data) {
@@ -396,7 +396,7 @@
       $("div[id='langdiv_" +  divtarget + "']").remove();
       $.ajax({
         cache : false,
-        url : "languageupdate",
+        url : "languages",
         type : 'POST', 
         data : formData,
         success : function(data) {
