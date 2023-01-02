@@ -48,10 +48,7 @@ def update_chart(mask):
     repo_sql = """SELECT grs.github_id, grs.create_date FROM github_repo_stats as grs ORDER BY create_date DESC"""
     cursor.execute(repo_sql)
     repo_result = cursor.fetchall()
-    try:
-        endYear = repo_result[0]["create_date"].year
-    except:
-        endYear = datetime.datetime.today().year
+    endYear = datetime.datetime.today().year
     nYear = endYear - startYear + 1
     repo_total = len(repo_result)
     repo_dist = []
