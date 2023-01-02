@@ -473,10 +473,28 @@
 
 #board-title {
     font-size: 18px;
-    /*margin-right: 1rem;*/
     margin:auto;
-
 }
+#article-filter{
+    position:absolute;
+    right:5px;
+    top:5px;
+    flex: 0 0 auto;
+    width: 33.33333333%;
+}
+#tag-filter:not(.show){
+    opacity: 0;
+    display: none;
+}
+@media (max-width: 992px) {
+    #board-title {
+        margin-left: 1rem;
+    }
+    #article-filter{
+        width: 41.6%;
+    }
+}
+
 
 #board-title > a {
     font-size: 20px;

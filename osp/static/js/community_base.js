@@ -11,3 +11,7 @@ $(function () {
         placeholder: 'Tag',
     });
 })
+function toggleTag(){
+    console.log("toggleTag");
+    $("#tag-filter").toggleClass("show");
+}
