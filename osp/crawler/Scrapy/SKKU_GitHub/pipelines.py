@@ -5,9 +5,13 @@
 
 
 # useful for handling different item types with a single interface
+import sys
+import re
+import logging
+import pymysql
 from itemadapter import ItemAdapter
-import sys, pymysql
-import regex as re
+from scrapy import signals
+from pydispatch import dispatcher
 from .items import *
 from .configure import *
 
@@ -18,6 +22,23 @@ class SkkuGithubPipeline:
                 data[key] = self.emoji_pattern.sub(r'', data[key])
 
     def __init__(self) -> None:
+        
+        self.crawlDB = None
+        self.cursor = None
+        try :
+            dispatcher.connect(self.spider_opened, signals.spider_opened)
+            dispatcher.connect(self.spider_closed, signals.spider_closed)
+        except :
+            print('ERROR: dispatcher connection failed')
+            sys.exit(1)
+        
+        self.wait = {}
+        self.lost = {}
+        self.emoji_pattern = re.compile("["u"\U00010000-\U0010FFFF""]+", flags=re.UNICODE)
+        
+    def spider_opened(self, spider):
+        
+        logging.info("spider_opened")
         try :
             self.crawlDB = pymysql.connect(
                 user=SQL_USER,
@@ -30,9 +51,38 @@ class SkkuGithubPipeline:
         except :
             print('ERROR: DB connection failed')
             sys.exit(1)
-        self.wait = {}
-        self.lost = {}
-        self.emoji_pattern = re.compile("["u"\U00010000-\U0010FFFF""]+", flags=re.UNICODE)
+    
+    def spider_closed(self, spider):
+        
+        logging.info("spider_closed")
+        try :
+            self.cursor.close()
+            self.crawlDB.close()
+        except :
+            print('ERROR: DB close failed')
+            sys.exit(1)
+    
+    def reconn(self):
+        
+        logging.info("DB reconnect")
+        try :
+            self.cursor.close()
+            self.crawlDB.close()
+        except :
+            print('ERROR: DB close failed')
+            sys.exit(1)
+        try :
+            self.crawlDB = pymysql.connect(
+                user=SQL_USER,
+                passwd=SQL_PW,
+                host=SQL_HOST,
+                port=SQL_PORT,
+                db=SQL_DB
+            )
+            self.cursor = self.crawlDB.cursor()
+        except :
+            print('ERROR: DB reconnection failed')
+            sys.exit(1)
 
     def process_item(self, item, spider):
         insert = False
@@ -119,6 +169,7 @@ class SkkuGithubPipeline:
             insert_sql+= f'VALUES({", ".join(["%s"]*len(data))})'
             insert_data = [data[x] for x in key_col + data_col]
             try:
+                self.crawlDB.ping(reconnect=True)
                 if self.cursor.execute(select_sql, select_data) == 0:
                     self.cursor.execute(insert_sql, insert_data)
                 elif len(update_data) != len(key_col):
@@ -130,5 +181,5 @@ class SkkuGithubPipeline:
                 if len(update_data) != 0:
                     print(self.cursor.mogrify(update_sql, update_data))
                 print('\n')
-                sys.exit(1)
+                self.reconn()
         return item
