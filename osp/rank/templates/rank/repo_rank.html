@@ -35,7 +35,22 @@
                 <td>{{row.watchers_count}}</td>
                 <td>{{row.language}}</td>
                 <td>{{row.contributors_count}}</td>
-                <td class="contributor_list" data-id="{{row.github_id}}" data-repo="{{row.repo_name}}">{{row.student_contributor|length}}</td>
+                <td class="contributor_list" data-id="{{row.github_id}}" data-repo="{{row.repo_name}}">
+                    <span>{{row.student_contributor|length}}</span>
+                    <button class="btn btn-sm btn-outline-dark btn-show" data-id="{{row.github_id}}" data-repo="{{row.repo_name}}" onclick="showContr(event);">+</button>
+                    <div id="{{row.github_id}}/{{row.repo_name}}" class="dropdown-menu noti-dropdown col-dropdown text-center d-flex">
+                        <li class="col-item d-flex flex-column" data-id="Name">
+                        </li>
+                        <li class="col-item d-flex flex-column" data-id="GitHub Id">
+                        </li>
+                        <li class="col-item d-flex flex-column" data-id="Commits">
+                        </li>
+                        <li class="col-item d-flex flex-column" data-id="Issues">
+                        </li>
+                        <li class="col-item d-flex flex-column" data-id="Pulls">
+                        </li>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
