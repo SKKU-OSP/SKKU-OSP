@@ -242,11 +242,8 @@
 
         if(!(intsarr.includes(selected))){
           $("#interestsdiv").append(`<span id='intspan_`+ selected +`'>
-
-            <span class="badge bg-tag-domain me-1">`+ selected +`</span>
-            <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">x
+            <button type="submit" class="btn btn-outline-dark badge delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">` + selected +`
             </button>
-
             </span>`);
             $.ajax({
             cache : false,
