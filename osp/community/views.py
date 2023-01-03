@@ -326,6 +326,8 @@ class ArticleRegisterView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
 
         context['type'] = 'register'
+        context['type_kr'] = '등록'
+        context['anonymous_check'] = 'checked'
         board_name = kwargs.get('board_name')
         board_id = kwargs.get('board_id')
         try:
@@ -368,6 +370,8 @@ class ArticleView(TemplateView):
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         context['type'] = 'edit'
+        context['type_kr'] = '수정'
+        
         article_id = kwargs.get('article_id')
         context['article'] = Article.objects.get(id=article_id)
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
@@ -377,6 +381,7 @@ class ArticleView(TemplateView):
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
                 context['article'].team = teamrecruit.team
+        context['anonymous_check'] = "checked" if context['article'].anonymous_writer else ""
 
         result = {}
         result['html'] = render_to_string('community/article/includes/content-edit.html', context, request=request)
