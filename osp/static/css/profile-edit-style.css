@@ -70,15 +70,14 @@ a.nav-link {
 
 .delete-domain{
   background-color: rgb(211,211,211);
-  width:20px;
   height: 20px;
   border:0;
   outline: 0;
-
+  color: #000000;
   text-align: center;
   line-height:8px;
   padding-left: 6px;
-  margin-left: -5px;
+  margin-left: 10px;
   margin-top:10px;
   margin-bottom: 10px;
   border-radius: 8px 8px 8px 8px;

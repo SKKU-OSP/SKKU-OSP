@@ -20,11 +20,12 @@
         </div>
     </div>
 </div>
+<h5 style="font-size: 9pt; color:darkgrey">클릭하면 삭제됩니다.</h5>
 <div id='interestsdiv'>
     {% for row in data.ints %}
     <span id="intspan_{{row.tag.name}}" style="white-space: nowrap;">
-        <span class="badge bg-tag-{{row.tag.type}} me-1">{{row.tag.name}}  </span>
-        <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete {{row.tag.name}}" onclick="intsDelete('{{row.tag.name}}'); return false;">x</button>
+        <!--span class="badge bg-tag-{{row.tag.type}} me-1"> {{row.tag.name}}  </span-->
+        <button type="submit" class="btn btn-outline-dark badge delete-domain" name="action" value="delete {{row.tag.name}}" onclick="intsDelete('{{row.tag.name}}'); return false;">{{row.tag.name}}</button>
     </span>
     {% endfor %}
 </div>
