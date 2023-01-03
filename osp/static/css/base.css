@@ -89,6 +89,10 @@ div.vr {
 .noti-dropdown {
   padding: 0;
 }
+.col-dropdown:not(.show){
+  visibility: hidden;
+  opacity: 0;
+}
 @media (min-width: 991px) {
   .noti-dropdown {
     padding: 0;
@@ -311,10 +315,6 @@ img.opponent-profile {
 
 .ss-single-selected>.placeholder {
   background: none;
-}
-
-#team-option::after {
-  content: "▼";
 }
 
 .chat-text-body {
