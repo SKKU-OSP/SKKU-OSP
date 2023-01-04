@@ -112,8 +112,7 @@
         });
     });
     function setToDateEnd(){
-        let today = new Date();
-        $('#PeriodPickerEndInput').val(today.toLocaleString('en-US'));
+        $('#PeriodPickerEndInput').val(new Date().toLocaleString("en-US"));
     }
 
     function edit_submit(event) {
