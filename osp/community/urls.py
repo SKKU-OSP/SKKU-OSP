@@ -15,6 +15,7 @@ urlpatterns = [
 
 
     path('<board_name>/<board_id>/register_article/', views.ArticleRegisterView.as_view(), name='article-register'),
+    path('register_article_with_team_id/<team_id>', views.ArticleRegisterwithTeamIdView.as_view(), name='article-register-team'),
     path('article/<article_id>', views.ArticleView.as_view(), name='article-view'),
 
 

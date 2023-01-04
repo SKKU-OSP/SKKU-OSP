@@ -1,6 +1,7 @@
 $().ready(function () {
   $('#team-create').click(function () {
     if (!$('#AddTeamModal').hasClass('ready')) {
+      $.LoadingOverlay("show");
       $.ajax({
         url: "/team/api/team-create",
         type: "GET",
@@ -17,6 +18,7 @@ $().ready(function () {
           },
           placeholder: 'Tag',
         });
+        $.LoadingOverlay("hide");
         $('#team-submit').click(function () {
           console.log('Submit');
           var form = $('#team-create-form')[0];
@@ -50,6 +52,11 @@ $().ready(function () {
     }
   });
 });
+
+function writeTeamArticle(team_id){
+    var url = "/community/register_article_with_team_id/" + team_id
+    window.location.href = url
+}
 
 function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
   console.log(rec_team_id);

@@ -8,7 +8,11 @@
         <div class="d-flex justify-content-between mb-1">
             <input type="text" id="article-title" class="form-control" value="{{ article.title }}" placeholder="제목"  required autofocus>
             {% if board.board_type == 'Recruit' %}
-            {% if type == 'register' %}
+            {% if team %}
+            <select id="team-option" name="team-option" class="form-control pointer" required>
+                <option value="{{ team.id }}" disabled selected>{{ team.name }}</option>
+            </select>
+            {% elif type == 'register' %}
             <select id="team-option" name="team-option" class="form-control pointer" required>
                 {% team_options request.user %}
             </select>
