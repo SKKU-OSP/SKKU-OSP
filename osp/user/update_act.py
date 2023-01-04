@@ -34,7 +34,7 @@ def update_commmit_time():
         circular_mean = circmean(df['committer_time'], high=86399, low=0, axis=None, nan_policy='propagate')
         return(circular_mean)
 
-     # StudentTab Query
+    # StudentTab Query
     st_queryset = StudentTab.objects.values('github_id')
     st_set = set(st_query["github_id"] for st_query in st_queryset)
     # GithubRepoCommits Query
@@ -273,6 +273,12 @@ def update_frequency():
 
 def read_commit_time(username):
     
+    if not os.path.isdir(DATA_DIR):
+        try:
+            os.makedirs(DATA_DIR)
+        except OSError as e:
+            print("Error in making a directory", DATA_DIR)
+            print(e)
     filepath1 = DATA_DIR + commmit_time_path1
     filepath2 = DATA_DIR + commmit_time_path2
     filepath3 = DATA_DIR + commmit_time_path3

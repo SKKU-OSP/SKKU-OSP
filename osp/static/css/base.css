@@ -89,6 +89,10 @@ div.vr {
 .noti-dropdown {
   padding: 0;
 }
+.col-dropdown:not(.show){
+  visibility: hidden;
+  opacity: 0;
+}
 @media (min-width: 991px) {
   .noti-dropdown {
     padding: 0;
@@ -144,6 +148,7 @@ div> ::-webkit-scrollbar {
 }
 
 div> ::-webkit-scrollbar-track {
+  background: var(--main-border-color);
   border-radius: 0.625rem;
 }
 
@@ -155,6 +160,8 @@ div> ::-webkit-scrollbar-thumb {
 div> ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
 }
+
+
 
 #message-modal-body {
   padding: 0;
@@ -308,10 +315,6 @@ img.opponent-profile {
 
 .ss-single-selected>.placeholder {
   background: none;
-}
-
-#team-option::after {
-  content: "▼";
 }
 
 .chat-text-body {
@@ -487,8 +490,12 @@ footer {
   cursor: pointer;
 }
 
-.opacity-hover:hover {
-  opacity: 60%;
+.hover-opacity{
+  cursor: pointer;
+}
+
+.hover-opacity:hover{
+  opacity: 0.5;
 }
 
 .noti-dropdown::after,
@@ -693,4 +700,31 @@ footer {
 .weak-text{
   color: var(--main-icon-color);
   font-size: 12px;
+}
+
+.user-info {
+  margin: auto;
+  background-color: var(--main-point-color);
+  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  border-top-left-radius: 0.625rem;
+  border-top-right-radius: 0.625rem;
+  width: 100%;
+  text-align: center;
+}
+
+.user-info .profile-img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--profile-btn-inactive);
+  border: 2px solid var(--main-point-color);
+  z-index: 5;
+  position: relative;
+  margin-top: -40px;
+  display: inline-block;
+  margin-right: auto;
+  margin-left: auto;
+  box-sizing: border-box;
+  padding: 0;
 }

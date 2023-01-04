@@ -46,7 +46,7 @@ class TeamMember(models.Model):
 
 class TeamInviteMessage(models.Model):
     STATUS_CHOICES = (
-        (0, '대기중'),
+        (0, '대기 중'),
         (1, '승인'),
         (2, '거절'),
     )

@@ -1,18 +1,19 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
-from django.contrib import messages
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
+from django.views.generic.edit import UpdateView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType
 from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
+from team.models import TeamMember
 from repository.models import GithubRepoStats, GithubRepoCommits
 
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
 from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
@@ -40,10 +41,13 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         start = time.time()
-        context = self.get_context_data(request, *args, **kwargs)
 
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
+            return redirect('/community')
+
+        context = self.get_context_data(request, *args, **kwargs)
+        if not context:
             return redirect('/community')
 
         student_info = context['account'].student_data
@@ -56,9 +60,11 @@ class ProfileView(TemplateView):
         tags_all = Tag.objects # 태그 전체
         tags_domain = tags_all.filter(type='domain') # 분야 태그
 
+        student_account = context['account']
+        acc_pp = AccountPrivacy.objects.get(account=student_account)
+        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+        
         # 유저의 관심분야
-        student_account = context['account'] 
-
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
 
         # 유저의 사용언어, 기술스택
@@ -91,6 +97,26 @@ class ProfileView(TemplateView):
             relations.append(relation)
 
         is_own = request.user.username == context['username']
+        # initialize
+        is_redirect = True
+        if 'privacy' in request.session:
+            del request.session['privacy']
+        if 'alert' in request.session:
+            del request.session['alert']
+        if not is_own and acc_pp.open_lvl == 0:
+            target_team = TeamMember.objects.filter(member=context['account']).values('team')
+            if target_team:
+                # team check
+                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                if cowork:
+                    is_redirect = False
+                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
+                    request.session['alert'] = True
+                    acc_pp.open_lvl = 1
+            if is_redirect:
+                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
+                request.session['alert'] = True
+                return redirect('../'+request.user.username+'/')
 
         data = {
             'info': student_info,
@@ -100,22 +126,33 @@ class ProfileView(TemplateView):
             'relations': relations,
             'remains': remain_children,
             'account': context['account'],
-            'is_own' : is_own
+            'is_own' : is_own,
+            'open_lvl': acc_pp.open_lvl,
+            'is_write': acc_pp.is_write, 
+            'is_open': acc_pp.is_open,
         }
 
+        if 'alert' in request.session and request.session['alert']:
+            print(request.session['privacy'])
+            if 'privacy' in request.session and request.session['privacy']:
+                data['privacy'] = request.session['privacy']
         context['data'] = data
         print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
 
     def get_context_data(self, request, *args, **kwargs):
-        
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=context["username"])
-        account = Account.objects.get(user=user)
-        context['account'] = account
-        student_data = account.student_data
-        github_id = student_data.github_id
+        try:
+            context = super().get_context_data(**kwargs)
+            user = User.objects.get(username=context["username"])
+            account = Account.objects.get(user=user)
+            context['account'] = account
+            student_data = account.student_data
+            github_id = student_data.github_id
+        except Exception as e:
+            print(e)
+            return None
+            
         chartdata = {}
         context["user_type"] = 'user'
         context["student_id"] = student_data.id
@@ -145,7 +182,7 @@ class ProfileView(TemplateView):
         student = StudentTab.objects.all()
         star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
         
-        own_star = {}
+        own_star = {"star" : 0}
         star_temp_dist = []
         for row in star_data:
             star_temp_dist.append(row["star"])
@@ -187,11 +224,11 @@ class ProfileView(TemplateView):
             if row.github_id == github_id:
                 user_data_list.append(row.to_json())
         chartdata["user_data"] = json.dumps(user_data_list)
-        score_dist = [[] for i in range(num_year)]
-        commit_dist = [[] for i in range(num_year)]
-        pr_dist = [[] for i in range(num_year)]
-        issue_dist = [[] for i in range(num_year)]
-        repo_dist = [[] for i in range(num_year)]
+        score_dist = [[]] * num_year
+        commit_dist = [[]] * num_year
+        pr_dist = [[]] * num_year
+        issue_dist = [[]] * num_year
+        repo_dist = [[]] * num_year
         for factor_data in total_factor_data_list:
             if factor_data["year"] >= self.start_year :
                 yid = factor_data["year"]-self.start_year
@@ -246,7 +283,6 @@ class ProfileView(TemplateView):
             row_json['star'] = own_star["star"]
             if row_json["year"] >= self.start_year and row_json["year"] <= end_year:
                 monthly_contr[row_json["year"] - self.start_year].append(row_json)
-        
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
         monthly_avg = [ [] for i in range(num_year)]
@@ -379,6 +415,7 @@ class ProfileEditView(TemplateView):
         tags_domain = tags_all.filter(type='domain')
         ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
         lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
+        pri = AccountPrivacy.objects.get(account=student_account)
         # developing....
 
         img_form = ProfileImgUploadForm(prefix="imgform")
@@ -392,7 +429,8 @@ class ProfileEditView(TemplateView):
             'form': form,
             'info': student_info,
             'ints': ints,
-            'tags_lang' : lang
+            'tags_lang' : lang,
+            'privacy' : pri
         }
 
         if str(request.user) != username : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
@@ -545,68 +583,65 @@ def load_repo_data(request, username):
         print("ajax repo", time.time() - start)
         return JsonResponse(context)
 
-@csrf_exempt
-def load_interests_data(request, username):
-    print(request.POST)
-    print(request.POST['act'])
-
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-    tags_all = Tag.objects
-    if request.POST['act'] == 'append':
-        added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
-        added_tag = Tag.objects.get(name=added_preferLanguage)
-        try:
-            already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-            already_ints.delete()
-            AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-        except:
-            AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-
-    else:
-        delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-        tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-        print("Selected tag is successfully deleted")
-
-
-    return JsonResponse({'data':'asdfas'})
 
 
 
-@csrf_exempt
-def load_language_data(request, username):
-    print(request.POST)
-    print(request.POST['act'])
-    print(request.POST['target'])
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-    tags_all = Tag.objects
-    tags_domain = tags_all.filter(type='domain')
+class ProfileInterestsView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        print(request.POST)
+        print(request.POST['act'])
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        student_id = user_account.student_data.id
+        tags_all = Tag.objects
+        if request.POST['act'] == 'append':
+            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
+            added_tag = Tag.objects.get(name=added_preferLanguage)
+            try:
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+                already_ints.delete()
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
 
-    if request.POST['act'] == 'append':
-        added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-        added_tag = Tag.objects.get(name=added_preferLanguage)
-        try:
-            already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-        except:
-            AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
-
-
-        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-        for l in lang:
-            if "tag_" + l.tag.name in request.POST:
-                added_tag = Tag.objects.get(name=l.tag.name)
-                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-
+        else:
+            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+            print("Selected tag is successfully deleted")
 
         return JsonResponse({'data':'asdfas'})
-    else:
-        delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-        tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-        print("Selected tag is successfully deleted")
-        return JsonResponse({'data':'asdfas'})
+
+class ProfileLanguagesView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        print(request.POST)
+        print(request.POST['act'])
+        print(request.POST['target'])
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        student_id = user_account.student_data.id
+        tags_all = Tag.objects
+        tags_domain = tags_all.filter(type='domain')
+
+        if request.POST['act'] == 'append':
+            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
+            added_tag = Tag.objects.get(name=added_preferLanguage)
+            try:
+                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
+            except:
+                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
+
+
+            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+            for l in lang:
+                if "tag_" + l.tag.name in request.POST:
+                    added_tag = Tag.objects.get(name=l.tag.name)
+                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+            return JsonResponse({'data':'asdfas'})
+        else:
+            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
+            print("Selected tag is successfully deleted")
+            return JsonResponse({'data':'asdfas'})
 
 
 
@@ -663,7 +698,8 @@ def save_all(request, username):
     tags_domain = tags_all.filter(type='domain')
 
     lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-
+    user_privacy = AccountPrivacy.objects.get(account=user_account)
+    print(user_privacy)
     for l in lang:
         if "tag_" + l.tag.name in request.POST:
             added_tag = Tag.objects.get(name=l.tag.name)
@@ -679,8 +715,29 @@ def save_all(request, username):
     user_account.portfolio = request.POST['portfolio']
     user_account.save()
 
+
+    user_privacy.open_lvl = request.POST['profileprivacy']
+    user_privacy.is_write = request.POST['articleprivacy']
+    user_privacy.is_open = request.POST['teamprivacy']
+    user_privacy.save()
+
+
     return redirect(f'/user/{username}/')
 
+@csrf_exempt
+def change_passwd(request, username):
+    user = User.objects.get(username=username)
+
+    if(user.check_password(request.POST['inputOldPassword']) == False):
+        return JsonResponse({"status" : "error"})
+
+    if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
+        return JsonResponse({"status" : "error"})
+
+    user.set_password(request.POST['inputNewPassword'])
+    user.save()
+    print("비밀번호가 변경되었습니다. ")
+    return 1
 
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
@@ -693,3 +750,68 @@ class ProfileType(TemplateView):
         context["end_year"] = datetime.datetime.now().date().today().year
         
         return context
+
+def consent_write(request, username=""):
+
+    '''
+    글쓰기/댓글쓰기 시 본인의 프로필 공개 동의서
+    url     : /user/api/consent-write
+    template: consent/consent_write.html
+    '''
+
+    if request.method == 'GET':
+        account = Account.objects.get(user=request.user.id)
+        acc_pp = AccountPrivacy.objects.get(account=account)
+
+        context = {
+            'is_write': acc_pp.is_write,
+            'open_lvl': acc_pp.open_lvl,
+            'user': username
+        }
+
+        return render(request, 'consent/consent_write.html',context)
+
+    if request.method == 'POST':
+        try:
+            account = Account.objects.get(user=request.user.id)
+            acc_pp = AccountPrivacy.objects.get(account=account)
+            acc_pp.is_write = True
+            acc_pp.open_lvl = 1
+            acc_pp.save()
+            return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status': 'fail', 'msg':'저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
+            
+
+def consent_open(request, username=""):
+
+    '''
+    유저 추천시스템 사용에 대한 동의서
+    url     : /user/api/consent-open
+    template: consent/consent_open.html
+    '''
+
+    if request.method == 'GET':
+        account = Account.objects.get(user=request.user.id)
+        acc_pp = AccountPrivacy.objects.get(account=account)
+
+        context = {
+            'is_open': acc_pp.is_open,
+            'open_lvl': acc_pp.open_lvl,
+            'user': username
+        }
+
+        return render(request, 'consent/consent_open.html',context)
+    
+    if request.method == 'POST':
+        try:
+            account = Account.objects.get(user=request.user.id)
+            acc_pp = AccountPrivacy.objects.get(account=account)
+            acc_pp.is_open = True
+            acc_pp.open_lvl = 1
+            acc_pp.save()
+            return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status': 'fail', 'msg':'저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})

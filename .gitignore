@@ -2,5 +2,6 @@ data
 __pycache__
 dev_settings.py
 .venv
+.static*
 configure.py
 *.log

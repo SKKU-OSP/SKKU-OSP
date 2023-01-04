@@ -5,17 +5,18 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db import DatabaseError, transaction
-from django.db.models import Q, Count
+from django.db.models import F, Q, Count
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
 from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
-from user.models import Account, AccountInterest
+from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
+from team.recommend import get_team_recommendation
 
 import hashlib
-import math
+import math, json, time
 from django.views.generic import TemplateView
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
@@ -47,18 +48,13 @@ def main(request):
         # else:
         #     board.article_list = []
         # 최신 게시물
-        article_list = Article.objects.filter(board_id=board).order_by('-pub_date')
+        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
         board.article_list = article_list[:min(3, len(article_list))]
         
-        article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(board.article_list)
-            
-        for article in board.article_list:
-            article.tags = article_tags_dict.get(article.id, [])
-
-            article.like_cnt = article_likes_dict.get(article.id, 0)
-            article.comment_cnt = article_comments_dict.get(article.id, 0)
-            article.scrap_cnt = article_scraps_dict.get(article.id, 0)
-            if board.board_type == 'Recruit':
+        board.article_list = get_article_metas(board.article_list)
+        
+        if board.board_type == 'Recruit':
+            for article in board.article_list:
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
                     article.team = tr.team
@@ -75,6 +71,10 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
+
+    if request.user: 
+        account = Account.objects.get(user=request.user)
+
     context = {'board': board}
     if board.team_id is not None:
         if not request.user.is_authenticated:
@@ -111,13 +111,15 @@ def board(request, board_name, board_id):
 
         # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
         cnt = active_article.count()
-        from itertools import chain
         # if cnt == 2:
         #     active_article = list(chain(active_article, active_article))
         # elif cnt == 1:
         #     active_article = list(chain(active_article, active_article)) # 2개
         #     active_article = list(chain(active_article, active_article)) # 4개
 
+        team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
+
+        context['team_cnt'] = team_cnt
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
     if board.board_type == 'Team':
@@ -131,9 +133,8 @@ def board(request, board_name, board_id):
             print("error tag", e)
         
         team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
-        if request.user: my_acc = Account.objects.get(user=request.user)
 
-        tm = team_members.filter(member=my_acc).first()
+        tm = team_members.filter(member=account).first()
         # if not tm:
         #     return redirect('/community')
         if tm:
@@ -141,23 +142,57 @@ def board(request, board_name, board_id):
         context['team'] = team
         context['team_tags'] = team_tags_list
         context['team_members'] = team_members
+    if not request.user.is_anonymous:
+        try:
+            acc_pp = AccountPrivacy.objects.get(account=account)
+        except:
+            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+        context['is_write'] = acc_pp.is_write
+        context['is_open'] = acc_pp.is_open
+    else:
+        context['is_write'] = 0
+        context['is_open'] = 0
+
     return render(request, 'community/board/board.html', context)
 
 
 def account_cards(request):
-    PAGE_SIZE = 9
 
+    start = time.time()
+    PAGE_SIZE = 9
+    
+    result = {}
+    result['max-page'] = 1
     context = {}
     context['board'] = Board.objects.get(board_type="User")
+    context['account_list'] = []
+    context['is_open'] = 0
+
+    is_show = True
+    try:
+        acc_pp = AccountPrivacy.objects.get(account=request.user.id)
+        context['is_open'] = acc_pp.is_open
+        if not acc_pp.is_open:
+            is_show = False
+    except Exception as e:
+        print("community view account_cards error: ", e)
+        is_show = False
+    
+    if not is_show:
+        result['html'] = render_to_string('community/account-card.html', context, request=request)
+        return JsonResponse(result)
+
     # sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
 
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Account.objects.filter(user__is_superuser=False)
+    open_acc = AccountPrivacy.objects.filter(is_open=True).exclude(account=request.user.id).values('account_id')
+    print("open_acc", len(open_acc))
+
+    account_list = Account.objects.filter(user__is_superuser=False, user__id__in=open_acc)
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
 
-    import json
     team_li = json.loads(request.GET.get('team_li'))
     if request.user.is_anonymous:
         team_li = []
@@ -166,8 +201,8 @@ def account_cards(request):
 
 
     if keyword != '':
-        article_list = article_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
-        print(keyword, type(keyword), article_list)
+        account_list = account_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
+        print(keyword, type(keyword), account_list)
     # Filter Tag
     tag_list = request.GET.get('tag', False)
     if tag_list:
@@ -176,38 +211,39 @@ def account_cards(request):
         for tag in tag_list:
             tag_query = tag_query | Q(tag=tag)
         article_with_tag = AccountInterest.objects.filter(tag_query).values('account__user')
-        article_list = article_list.filter(user__in=article_with_tag)
+        account_list = account_list.filter(user__in=article_with_tag)
 
     user_list = []
     member_id = []
-    from itertools import chain
-    from team.recommend import get_team_recommendation
     print(team_li)
-    if team_li:
-        for team_id in team_li:
-            team = Team.objects.get(id=team_id)
-            member_li = get_team_recommendation(team)
-            member_id += member_li
-            tmps = article_list.filter(user__in=member_li)
-            for tmp in tmps:
-                tmp.recommend_team = team
-            user_list += list(tmps)
 
-    user_list += list(article_list.exclude(user__in=member_id))
+    team_list = Team.objects.filter(id__in=team_li)
+    print(team_list)
+    for team_obj in team_list:
+        # TODO: 추천함수 최적화
+        member_li = get_team_recommendation(team_obj)
+        member_id += member_li
+        tmps = account_list.filter(user__in=member_li)
+        for tmp in tmps:
+            tmp.recommend_team = team_obj
+        user_list += list(tmps)
 
-    article_list = user_list
+    user_list += list(account_list.exclude(user__in=member_id))
 
-    total_len = len(article_list)
+    account_list = user_list
+    total_len = len(account_list)
     # Order
     # article_list = article_list.order_by(*sort_field)
     # Slice to Page
-    article_list = article_list[PAGE_SIZE * (page - 1):]
-    article_list = article_list[:PAGE_SIZE]
+    account_list = account_list[PAGE_SIZE * (page - 1):]
+    account_list = account_list[:PAGE_SIZE]
+    context['account_list'] = account_list
 
-    context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/account-card.html', context, request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+    print("elapsed time account_cards", time.time() - start)
+
     return JsonResponse(result)
 
 
@@ -232,7 +268,7 @@ def article_list(request, board_name, board_id):
     
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Article.objects.filter(board_id=board)
+    article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
     if keyword != '':
@@ -257,31 +293,25 @@ def article_list(request, board_name, board_id):
     # print(article_list)
     
     # Get Article Metadata
-    article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict = get_article_metas(article_list)
-    for article in article_list:
-        article.comment_cnt = article_comments_dict.get(article.id, 0)
-        article.like_cnt = article_likes_dict.get(article.id, 0)
-        article.scrap_cnt = article_scraps_dict.get(article.id, 0)
-        article.tags = article_tags_dict.get(article.id, [])
-        if board.board_type == 'Recruit':
+    article_list = get_article_metas(article_list)
+    
+    if board.board_type == 'Recruit':
+        for article in article_list:
             tr = TeamRecruitArticle.objects.filter(article=article).first()
             if tr:
                 article.team = tr.team
             else:
                 article.team = None
 
-        if board.board_type == 'QnA':
-            # comment_by_like = ArticleCommentLike.objects.filter(
-            #     comment__in=ArticleComment.objects.filter(article=article).values_list('id', flat=True)
-            # ).annotate(like_cnt=Count('comment')).order_by('-like_cnt')
+    if board.board_type == 'QnA':
+        context['comment_visible'] = True
+        for article in article_list:
             comment_by_like = ArticleComment.objects.filter(
                 article=article
             ).prefetch_related('articlecommentlike_set')
             comment_by_like = comment_by_like.annotate(like_cnt=Count('articlecommentlike')).order_by('-like_cnt')
             if len(comment_by_like):
                 article.comment = comment_by_like[0]
-    if board.board_type == 'QnA':
-        context['comment_visible'] = True
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-bar.html', context,request=request)
@@ -317,6 +347,8 @@ class ArticleRegisterView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
 
         context['type'] = 'register'
+        context['type_kr'] = '등록'
+        context['anonymous_check'] = 'checked'
         board_name = kwargs.get('board_name')
         board_id = kwargs.get('board_id')
         try:
@@ -359,6 +391,8 @@ class ArticleView(TemplateView):
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         context['type'] = 'edit'
+        context['type_kr'] = '수정'
+        
         article_id = kwargs.get('article_id')
         context['article'] = Article.objects.get(id=article_id)
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
@@ -368,6 +402,7 @@ class ArticleView(TemplateView):
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
                 context['article'].team = teamrecruit.team
+        context['anonymous_check'] = "checked" if context['article'].anonymous_writer else ""
 
         result = {}
         result['html'] = render_to_string('community/article/includes/content-edit.html', context, request=request)
@@ -579,12 +614,16 @@ def article_scrap(request):
 @login_required
 def my_activity(request):
     account = Account.objects.get(user=request.user)
-    article = Article.objects.filter(writer=account)
-    scrap = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True))
-    comment = ArticleComment.objects.filter(writer=account)
+    article_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    scrap_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    comment = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
+
+    article_list = get_article_metas(article_list)
+    scrap_list = get_article_metas(scrap_list)
+
     context = {
-        'write_article': article,
-        'scrap_article': scrap,
+        'write_article': article_list,
+        'scrap_article': scrap_list,
         'comment_list': comment
     }
     return render(request, 'community/activity.html', context)
@@ -606,7 +645,7 @@ def comment_like(request):
 
 def get_article_metas(article_list):
     
-    if type(article_list) == list:
+    if type(article_list) != list:
         article_list = list(article_list)
     
     article_tags = ArticleTag.objects.filter(article__in=article_list).values('article', 'tag__name', 'tag__type')
@@ -642,5 +681,11 @@ def get_article_metas(article_list):
             article_scraps_dict[obj["article"]] = obj["scrap_num"]
     except Exception as e:
         print("scrap error: ", e)
+
+    for article in article_list:
+        article.tags = article_tags_dict.get(article.id, [])
+        article.like_cnt = article_likes_dict.get(article.id, 0)
+        article.comment_cnt = article_comments_dict.get(article.id, 0)
+        article.scrap_cnt = article_scraps_dict.get(article.id, 0)
         
-    return article_tags_dict, article_likes_dict, article_comments_dict, article_scraps_dict
+    return article_list

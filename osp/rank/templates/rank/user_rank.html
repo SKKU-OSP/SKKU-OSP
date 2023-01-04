@@ -2,6 +2,7 @@
 
 {% load static %}
 {% block content %}
+{% if user.is_staff %}
 <div class="container mt-4">
     <table class="table table-striped table-hover" id="scoreTable">
         <thead>
@@ -58,6 +59,11 @@
         </tbody>
     </table>
 </div>
+{% else %}
+<div class="my-5">
+    <p align="center">개인 이용자는 접근이 제한된 페이지입니다.</p>
+</div>
+{% endif %}
 {% endblock content %}
 {% block script %}
 <script src="{% static 'js/user_rank.js' %}" defer></script>

@@ -64,9 +64,9 @@ def articlelike_create_alert(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=TeamInviteMessage)
 def teaminvite_create_alert(sender, instance, created, **kwargs):
-    if instance.status  == 0: # 인스턴스가 새로 생성된 것
-        status = "대기중"
-    elif instance.status  == 1: # 인스턴스 status 0 -> 1
+    if instance.status == 0: # 인스턴스가 새로 생성된 것
+        status = "대기 중"
+    elif instance.status == 1: # 인스턴스 status 0 -> 1
         status = "승인"
     else: # 인스턴스 status 0 -> 2
         status = "거절"
@@ -76,7 +76,7 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
         direction = "팀 지원"
     tm_admin_li = list(TeamMember.objects.filter(is_admin=True, team=instance.team).values_list('member', flat=True))
     body_subject = instance.team.name
-    if direction=="팀 지원" and status=="대기중":
+    if direction=="팀 지원" and status=="대기 중":
         # 지원한 팀의 admin권한을 가진 유저들에게 모두 메세지를 보낸다.
         body_dict = {"type": "team_apply", "body": f"[{body_subject}] 팀 지원 요청이 있습니다."}
         body = json.dumps(body_dict)
@@ -103,7 +103,7 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
             sender_delete=False,
             receiver_delete=False
         )
-    elif direction=="팀원 초대" and status=="대기중":
+    elif direction=="팀원 초대" and status=="대기 중":
         # 초대하는 유저에게 메세지를 보낸다.
         body_dict = {"type": "team_invite", "body": "[" + body_subject + "]" + "팀 초대가 있습니다.", "team_id":str(instance.team.id)+""}
         body = json.dumps(body_dict)

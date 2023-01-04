@@ -24,45 +24,6 @@ $(document).ready(function () {
             },
         ],
         order: [[1, 'desc']],
-        drawCallback: function() {
-            $('.contributor_list').hover(function(){
-                $('.contributor_panel').show();
-                github_id = $(this).attr('data-id');
-                repo_name = $(this).attr('data-repo');
-                var top_coord = $(this).offset().top + $(this).height() / 2;
-                var left_coord = $(this).offset().left;
-                console.log(top_coord);
-                $.ajax(
-                    {
-                        url: '/rank/repo/api',
-                        data: {'github_id': github_id, 'repo_name': repo_name},
-                        method: 'GET',
-                        dataType: 'json'
-                    }
-                ).done(function(data) {
-                    $('.contributor_panel').html('');
-                    var table_tag = $('<table></table>');
-                    table_tag.append('<thead><tr><td>Name</td><td>GitHub</td><td>Commits</td><td>Issues</td><td>Pulls</td></tr></thead>')
-                    table_tag.attr('class', 'table table-light');
-                    var tbody = $('<tbody></tbody>');
-                    for(row in data){
-                        var row_tag = $('<tr></tr>');
-                        row_tag.append('<td>' + data[row].name + '</td>');
-                        row_tag.append('<td>' + data[row].github_id + '</td>');
-                        row_tag.append('<td>' + data[row].commit_cnt + '</td>');
-                        row_tag.append('<td>' + data[row].issue_cnt + '</td>');
-                        row_tag.append('<td>' + data[row].pull_cnt + '</td>');
-                        tbody.append(row_tag);
-                    }
-                    table_tag.append(tbody);
-                    $('.contributor_panel').append(table_tag);
-                    $('.contributor_panel').css('top', top_coord).css('left', left_coord - $('.contributor_panel').width());
-                });
-            }, function(){
-                $('.contributor_panel').hide();
-                $('.contributor_panel').html('');
-            });
-        }
     });
     $('.dtsp-titleRow').remove();
     $('.dtsp-panesContainer').insertAfter('#scoreTable_filter');
@@ -75,3 +36,44 @@ $(document).ready(function () {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     });
 });
+
+function showContr(e){
+    console.log("showContr");
+    const github_id = $(e.target).attr('data-id');
+    const repo_name = $(e.target).attr('data-repo');
+    let target_id = `div[id='${github_id}/${repo_name}']`;
+    let noti_window = $(target_id);
+    if(noti_window.hasClass("show")){
+        noti_window.removeClass("show");
+        return 0;
+    }else{
+        $(".show").removeClass("show");
+    }
+    noti_window.addClass("show");
+    $.ajax(
+        {
+            url: '/rank/repo/api',
+            data: {'github_id': github_id, 'repo_name': repo_name},
+            method: 'GET',
+            dataType: 'json'
+        }
+    ).done(function(data) {
+        noti_li = []
+        const DATA_IDS = ['Name', 'GitHub Id', 'Commits', 'Issues', 'Pulls'];
+        const DATA_KEYS = ["name", "github_id", "commit_cnt", "issue_cnt", "pull_cnt"];
+
+        for(let data_id of DATA_IDS){
+            noti_li.push(noti_window.children(`li[data-id='${data_id}']:eq(0)`));
+        }
+        noti_li.forEach((ele, idx)=>{
+            ele.empty();
+            ele.append('<div>' + DATA_IDS[idx]+ '</div>');
+        });
+        for(row in data){
+            noti_li.forEach((ele, idx)=>{
+                console.log(DATA_KEYS[idx], data[row][DATA_KEYS[idx]]);
+                ele.append('<div>' + data[row][DATA_KEYS[idx]] + '</div>');
+            });
+        }
+    });
+}

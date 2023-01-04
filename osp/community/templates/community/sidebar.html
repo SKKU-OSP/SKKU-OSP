@@ -3,14 +3,14 @@
 {% load static %}
 <div class="col-md-3 col-12" id="community-sidebar">
     <div id="profile-tab" class="w-100">
-        <div id="profile-image-wrap" class="m-auto">
+        <div class="m-auto user-info">
             {% if user.is_authenticated %}
             <a href="/user/{{user}}">
-                <img src="{{user|user_profile_image_url}}" id="profile-image" alt="profile-image">
+                <img src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image">
             </a>
             {% else %}
             <a href="/accounts/login">
-                <img src="/static/images/empty-profile.png" id="profile-image" alt="Log-In" style="background-color: #FFFFFF;">
+                <img src="/static/images/empty-profile.png" class="profile-img" alt="Log-In" style="background-color: #FFFFFF;">
             </a>
             {% endif %}
         </div>
@@ -27,13 +27,13 @@
         </div>
         {% if user.is_authenticated %}
         <div id="manage-tab" class="d-flex flex-column flex-wrap justify-content-center">
-            <div id="my-activity" onclick="location.href='/community/activity'">
+            <div id="my-activity" class="hover-opacity" onclick="location.href='/community/activity'">
                 <span class="material-icons">
                     collections_bookmark
                 </span>
                 내 활동 목록
             </div>
-            <div id="team-apply-list">
+            <div id="team-apply-list" class="hover-opacity">
                 <span class="material-icons" >
                 assignment_ind
                 </span>
@@ -65,6 +65,8 @@
 
     {% if user.is_authenticated %}
     <div class="modal modal-lg fade" id="AddTeamModal">
+    </div>
+    <div class="modal modal-lg fade" id="InviteTeamModal">
     </div>
     {% endif %}
     <script src="{% static 'js/community_sidebar.js' %}"></script>

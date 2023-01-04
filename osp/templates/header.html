@@ -17,6 +17,10 @@
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="/community">Community</a>
                 </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link" aria-current="page" href="/challenge">Challenge</a></li>
+                {% endif %}
+                {% if user.is_staff %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="NavRankDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
@@ -25,8 +29,6 @@
                         <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
                     </ul>
                 </li>
-                <li class="nav-item"><a class="nav-link" aria-current="page" href="/challenge">Challenge</a></li>
-                {% if user.is_staff %}
                 <li class="nav-item"> <a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
                 {% endif %}
             </ul>
@@ -46,54 +48,46 @@
                             notifications
                         </div>
                     </button>
-                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto;overflow-x:hidden;">
-                        {% for noti in notifications.list %}
+                    <div>
+                        <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto;overflow-x:hidden;">
+                            {% for noti in notifications.list %}
 
-                        <li
-                            {% if noti.receiver_read %}
-                            class="nav-item d-flex flex-row justify-content-between noti-item read"
-                            {% else %}
-                            class="nav-item d-flex flex-row justify-content-between noti-item" id="noti-{{noti.id}}"
-                            {% endif %}
-                            {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
-                            {% elif noti.body.type == "team_apply" %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                            {% elif noti.body.type == "team_invite" %}
-                                onclick="ReadNotification('{{ noti.body.type }}', '{{ noti.id }}' , '{% make_team_board_url noti.body.team_id %}' )"
-                            {% elif noti.body.type == "team_apply_result" %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                            {% else %}
-                                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
-                            {% endif %}
-                            style="cursor:pointer;"
-                        >
-                            <div class="d-flex">
-                                <div class="material-icons-outlined">
-                                    {{noti.icon}}
+                            <li
+                                {% if noti.receiver_read %}
+                                class="nav-item d-flex flex-row justify-content-between noti-item hover-opacity read"
+                                {% else %}
+                                class="nav-item d-flex flex-row justify-content-between noti-item hover-opacity" id="noti-{{noti.id}}"
+                                {% endif %}
+                                {% if noti.body.type == "comment" or noti.body.type == "articlelike" %}
+                                    onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.body.article_id}}')"
+                                {% elif noti.body.type == "team_invite" %}
+                                    onclick="ReadNotification('{{ noti.body.type }}', '{{ noti.id }}' , '{% make_team_board_url noti.body.team_id %}' )"
+                                {% else %}
+                                    onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '')"
+                                {% endif %}
+                            >
+                                <div class="d-flex">
+                                    <div class="material-icons-outlined">
+                                        {{noti.icon}}
+                                    </div>
+                                    <div>
+                                        {{ noti.body.body }}
+                                    </div>
                                 </div>
                                 <div>
-                                    {{ noti.body.body }}
+                                    {% if noti.body.type in notifications.open_types %}
+                                    <i class="bi bi-box-arrow-up-right pointer"></i>
+                                    {% endif %}
                                 </div>
-                            </div>
-                            <div>
+                            </li>
+                            {% empty %}
+                            <li class="nav-item empty d-flex flex-row justify-content-center noti-item">
+                                알림이 없습니다.
+                            </li>
+                            {% endfor %}
 
-                                {% if noti.body.type == "comment" or noti.body.type == "articlelike" or noti.body.type == 'team_invite' %}
-                                <i
-                                    class="bi bi-box-arrow-up-right pointer"></i>
-                                {% elif noti.body.type == "team_apply" %}
-                                <i
-                                    class="bi bi-box-arrow-up-right pointer"></i>
-                                {% endif %}
-                            </div>
-                        </li>
-                        {% empty %}
-                        <li class="nav-item empty d-flex flex-row justify-content-center noti-item">
-                            알림이 없습니다.
-                        </li>
-                        {% endfor %}
-
-                    </ul>
+                        </ul>
+                    </div>
                 </li>
 
                 <li id="message" class="nav-item pointer" style="position:relative;">
@@ -112,8 +106,7 @@
             </ul>
             <div class="d-flex">
                 <div class="dropdown">
-                    <div class="dropdown-toggle opacity-hover" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown"
-                        style="cursor:pointer;">
+                    <div class="dropdown-toggle hover-opacity" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown">
                         {{user.username}}
                     </div>
                     <ul class="dropdown-menu" aria-labelledby="ProfileDropdown">
@@ -148,3 +141,9 @@
 </div>
 <div class="modal modal-lg fade" id="ApplyTeamModal">
 </div>
+{% if user.is_authenticated %}
+<div class="modal modal-lg fade" id="consent-wirte">
+</div>
+<div class="modal modal-lg fade" id="consent-open">
+</div>
+{% endif %}

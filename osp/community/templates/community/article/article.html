@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="ko">
 {% extends 'main.html' %}
 
 {% load static %}
 {% load tag_templatetag %}
 {% block content %}
 {% if error_occur %}
-   <div class="container my-4">
-   잘못된 페이지 입니다.
-   </div>
+<div class="container my-4">
+잘못된 페이지 입니다.
+</div>
 {% else %}
 <div class="container my-4">
     <div style="height: 42px;"></div>
@@ -46,7 +44,7 @@
 {% block script %}
 <script>
     var category_select;
-    var board_type
+    let board_type = "{{ board.board_type }}" ;
     $(document).ready(function () {
         var view_type = "{{type}}";
         if (view_type != 'view') {
@@ -61,7 +59,7 @@
             });
         }
 
-        if (view_type == 'register') {
+        if (view_type == 'register' && board_type == "Recruit") {
             console.log('....');
             const linkedPicker1Element = document.getElementById('PeriodPickerStart');
             const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element, {
@@ -73,7 +71,6 @@
                     locale: 'en',
                 },
             });
-            //linked1.dates.setFromInput("{{article.period_start|date:'Y-m-d'}}T{{article.period_start|date:'H:i:s'}}");
             const linked2 = new tempusDominus.TempusDominus(document.getElementById(
                 'PeriodPickerEnd'), {
                 localization: {
@@ -85,7 +82,6 @@
                 },
                 useCurrent: false
             });
-            //linked2.dates.setFromInput("{{article.period_end|date:'Y-m-d'}}T{{article.period_end|date:'H:i:s'}}");
 
             //using event listeners
             linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
@@ -104,7 +100,6 @@
                 });
             });
         }
-        {% if not request.user.is_anonymous %}
         $('#comment-is-anonymous').click(function() {
             if($(this).is(":checked")){
                 $('#comment-writer-display').html('익명');
@@ -115,27 +110,149 @@
                 $('#comment-writer-display').removeClass('annonymous');
             }
         });
-        {% endif %}
     });
     function setToDateEnd(){
         $('#PeriodPickerEndInput').val(new Date().toLocaleString("en-US"));
     }
 
     function edit_submit(event) {
-        console.log('TEST');
         event.preventDefault();
         var t = $('#article-form').attr('edit-type');
         if (t == 'register') {
-            {#console.log('1');#}
             registerArticle();
         } else {
-            {#console.log('2');#}
             updateArticle();
         }
         return false;
     }
 
-    {% if article.writer.user == user %}
+    function registerArticle() {
+        ajax_form_data = new FormData();
+        ajax_form_data.append('title', $('#article-title').val());
+        ajax_form_data.append('body', $('#article-body').val());
+        ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
+        ajax_form_data.append('tags', category_select.selected().toString());
+        ajax_form_data.append('board_name', '{{ board.name }}');
+        ajax_form_data.append('board_id', '{{ board.id }}'); 
+        let board_type = "{{ board.board_type }}" ;
+        if(board_type == 'Recruit'){
+            ajax_form_data.append('team_id', $('#team-option').val());
+            const offset = new Date().getTimezoneOffset() * 60000;
+            var period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
+            var period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
+            if(period_start_date > period_end_date){
+                alert('날짜입력에 오류가 있습니다.');
+                return 0;
+            }
+            ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
+            ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
+        }
+        else if(board_type == 'Team'){
+            ajax_form_data.append('team_id', {{board.team.id}});
+        }
+
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if (confirm("글을 등록하시겠습니까?")) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'community:article-c' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+
+                success: function (data) {
+                    console.log(data);
+                    if (data['status'] == "success") {
+                        alert('등록이 완료되었습니다!');
+                        {% if board %}
+                        window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
+                        {% endif %}
+                    } else {
+                        alert(data['message']);
+                        // alert('Error Occured');
+                    }
+                },
+                error: function (data) {
+                    alert('Error Occured');
+                }
+            });
+        }
+    }
+    
+
+    function registerComment() {
+
+        ajax_form_data = new FormData();
+        ajax_form_data.append('body', $('#comment-body').val());
+        ajax_form_data.append('is_anonymous', $('#comment-is-anonymous').prop('checked'));
+        ajax_form_data.append('article_id', '{{ article.id }}');
+
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if (confirm("댓글을 등록하시겠습니까?")) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'community:comment-c' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+                success: function (data) {
+                    console.log(data);
+                    console.log('2');
+                    if (data['status'] == "success") {
+                        console.log('3');
+                        alert('등록이 완료되었습니다!');
+                        $('#comment-content').html(data['html']);
+                    } else {
+                        alert(data['message']);
+                    }
+                },
+                error: function (data) {
+                    console.log('5');
+                    alert('An error occured.\n다시 시도해주세요.');
+                }
+            });
+        }
+    }
+
+    function deleteComment(comment_id) {
+        ajax_form_data = new FormData();
+        ajax_form_data.append('comment_id', comment_id);
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+
+        if (confirm("댓글을 삭제하시겠습니까?")) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'community:comment-d' %}",
+                data: ajax_form_data,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+                success: function (data) {
+                    console.log(data);
+                    if (data['status'] == "success") {
+                        alert('삭제가 완료되었습니다!');
+                        $('#comment-content').html(data['html']);
+                    } else {
+                        alert('An error occured.\n 다시 시도해주세요.');
+                    }
+                },
+                error: function (data) {
+                    alert('An error occured.\n 다시 시도해주세요.');
+                }
+            });
+        }
+    }
+</script>
+{% if article.writer.user == user %}
+<script>
     function edit(){
         ajax_form_data=new FormData();
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
@@ -212,58 +329,12 @@
             });
         }
     } 
-    {% endif %}
 
-    function registerArticle() {
-        ajax_form_data = new FormData();
-        ajax_form_data.append('title', $('#article-title').val());
-        ajax_form_data.append('body', $('#article-body').val());
-        ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
-        ajax_form_data.append('tags', category_select.selected().toString());
-        ajax_form_data.append('board_name', '{{ board.name }}');
-        ajax_form_data.append('board_id', '{{ board.id }}'); 
-        {% if board.board_type == 'Recruit' %}
-            ajax_form_data.append('team_id', $('#team-option').val());
-            const offset = new Date().getTimezoneOffset() * 60000;
-            var period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
-            var period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
-            ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
-            ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
-        {% elif board.board_type == 'Team' %}
-        ajax_form_data.append('team_id', {{board.team.id}});
-        {% endif %}
+</script>
+{% endif %}
 
-        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-
-        if (confirm("글을 등록하시겠습니까?")) {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'community:article-c' %}",
-                data: ajax_form_data,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
-
-                success: function (data) {
-                    console.log(data);
-                    if (data['status'] == "success") {
-                        alert('등록이 완료되었습니다!') 
-                        {% if board %}
-                        window.location.href = "{% url 'community:Board' board_name=board.name board_id=board.id %}";
-                        {% endif %}
-                    } else {
-                        alert(data['message']);
-                        // alert('Error Occured');
-                    }
-                },
-                error: function (data) {
-                    alert('Error Occured');
-                }
-            });
-        }
-    }
-    {% if article %}
-
+{% if article %}
+<script>
     function updateArticle() {
         ajax_form_data = new FormData();
         ajax_form_data.append('title', $('#article-title').val());
@@ -300,7 +371,6 @@
                         {% endif %}
                     } else {
                         alert(data['message']);
-                        //alert('Error Occured');
                     }
                 },
                 error: function (data) {
@@ -334,7 +404,6 @@
                         {% endif %}
                     } else {
                         alert(data['message']);
-                        //alert('Error Occured');
                     }
                 },
                 error: function (data) {
@@ -343,78 +412,7 @@
             });
         }
     } 
-    {% endif %}
-
-    function registerComment() {
-
-        ajax_form_data = new FormData();
-        ajax_form_data.append('body', $('#comment-body').val());
-        ajax_form_data.append('is_anonymous', $('#comment-is-anonymous').prop('checked'));
-        ajax_form_data.append('article_id', '{{ article.id }}');
-
-        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-
-        if (confirm("댓글을 등록하시겠습니까?")) {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'community:comment-c' %}",
-                data: ajax_form_data,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-
-                success: function (data) {
-                    console.log(data);
-                    console.log('2');
-                    if (data['status'] == "success") {
-                        console.log('3');
-                        alert('등록이 완료되었습니다!');
-                        $('#comment-content').html(data['html']);
-                    } else {
-                        alert(data['message']);
-                    }
-                },
-                error: function (data) {
-                    console.log('5');
-                    alert('An error occured.\n다시 시도해주세요.');
-                }
-            });
-        }
-    }
-
-    function deleteComment(comment_id) {
-        ajax_form_data = new FormData();
-        ajax_form_data.append('comment_id', comment_id);
-        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-
-        if (confirm("댓글을 삭제하시겠습니까?")) {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'community:comment-d' %}",
-                data: ajax_form_data,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-
-                success: function (data) {
-                    console.log(data);
-                    if (data['status'] == "success") {
-                        alert('삭제가 완료되었습니다!');
-                        $('#comment-content').html(data['html']);
-                    } else {
-                        alert('An error occured.\n 다시 시도해주세요.');
-                    }
-                },
-                error: function (data) {
-                    alert('An error occured.\n 다시 시도해주세요.');
-                }
-            });
-        }
-    }
 </script>
+{% endif %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
-
-</html>

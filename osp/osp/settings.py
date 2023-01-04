@@ -67,6 +67,8 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
 mimetypes.add_type("application/javascript", ".js", True)

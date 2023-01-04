@@ -34,9 +34,9 @@ def remain_datetime(date):
     if delta < timedelta(seconds=3600):
         repr_string = f'{math.ceil(delta.seconds / 60) % 60}분 전'
     elif delta < timedelta(days=1):
-        repr_string = f'{math.ceil(delta.seconds / 3600) % 3600}시간 전'
+        repr_string = f'{math.ceil(delta.seconds / 3600) % 24}시간 전'
     else:
-        repr_string = f'{delta.days}일 {math.ceil(delta.seconds / 60) % 24}시간 전'
+        repr_string = f'{delta.days}일 {math.ceil(delta.seconds / 3600) % 24}시간 전'
     return repr_string
     
 @register.filter
@@ -74,13 +74,13 @@ def board_sidebar_normal_board(context, request):
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
         if board == context['board']:
             result += f'''
-            <div class="boardgroup-item selected">
+            <div class="boardgroup-item hover-opacity selected">
             <a href="{url}">{board.name.capitalize()}</a>
             </div>
             '''
         else:
             result += f'''
-            <div class="boardgroup-item">
+            <div class="boardgroup-item hover-opacity">
             <a href="{url}">{board.name.capitalize()}</a>
             </div>
             '''
@@ -100,13 +100,13 @@ def board_sidebar_team_board(context, request):
             url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
             if board == context['board']:
                 result += f'''
-                <div class="boardgroup-item selected">
+                <div class="boardgroup-item hover-opacity selected">
                 <a href="{url}">{board.name.capitalize()}</a>
                 </div>
                 '''
             else:
                 result += f'''
-                <div class="boardgroup-item">
+                <div class="boardgroup-item hover-opacity">
                 <a href="{url}">{board.name.capitalize()}</a>
                 </div>
                 '''
@@ -126,13 +126,13 @@ def board_sidebar_invite_team_board(context, request):
             url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
             if board == context['board']:
                 result += f'''
-                <div class="boardgroup-item selected">
+                <div class="boardgroup-item hover-opacity selected">
                 <a href="{url}">{board.name.capitalize()}</a>
                 </div>
                 '''
             else:
                 result += f'''
-                <div class="boardgroup-item">
+                <div class="boardgroup-item hover-opacity">
                 <a href="{url}">{board.name.capitalize()}</a>
                 </div>
                 '''
