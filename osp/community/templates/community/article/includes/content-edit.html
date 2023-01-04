@@ -9,8 +9,8 @@
             <input type="text" id="article-title" class="form-control" value="{{ article.title }}" placeholder="제목"  required autofocus>
             {% if board.board_type == 'Recruit' %}
             {% if team %}
-            <select id="team-option" name="team-option" class="form-control pointer" required>
-                <option value="{{ team.id }}" disabled selected>{{ team.name }}</option>
+            <select id="team-option" name="team-option" class="form-control pointer" disabled>
+                <option value="{{ team.id }}" selected>{{ team.name }}</option>
             </select>
             {% elif type == 'register' %}
             <select id="team-option" name="team-option" class="form-control pointer" required>
@@ -18,7 +18,7 @@
             </select>
             {% elif type == 'edit' %}
             <select id="team-option" name="team-option" class="form-control pointer" disabled>
-                <option value="{{ article.team.id }}" disabled selected>{{ article.team.name }}</option>
+                <option value="{{ article.team.id }}" selected>{{ article.team.name }}</option>
             </select>
             {% endif %}
             {% endif %}

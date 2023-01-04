@@ -1,11 +1,11 @@
 {% load static %}
 <div id="team-tab" class="row" style="margin-left:0px;margin-right:0px;" team-id="{{team.id}}">
-        <div class="col " >
-            <div class="d-flex flex-row ">
-                <div id="team-image-container" class=" " >
+        <div class="col">
+            <div class="d-flex">
+                <div id="team-image-container">
                     <img id="team-image" src="{{ team.image.url }}" alt="team-image">
                 </div>
-                <div class=" " style="flex:1">
+                <div>
                     <div id="team-name">
                         {{ team.name }}
                         {% if team_admin %}
@@ -22,12 +22,15 @@
                         {% endif %}
                     </div>
                     <div id="team-members">
-                        <div id="team-members-title">
-                            Members
-                            <i class="bi bi-person-plus-fill hover-opacity" style="font-size:15px;padding-left:3px;" onclick="inviteTeamModalOpen(-1, {{ team.id }})"></i>
-                            <button onclick="writeTeamArticle({{ team.id }})" style="margin-left:6px;font-size:11px;background:none;color:white;border:1px solid white; border-radius:5px;">모집글작성</button>
+                        <div id="team-members-title" class="d-flex justify-content-between me-2">
+                            <div>
+                                <span>Members</span>
+                                <i class="bi bi-person-plus-fill hover-opacity px-1" onclick="inviteTeamModalOpen(-1, {{ team.id }})"></i>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-light" 
+                            onclick="location.href='{% url "community:article-register" board_name="팀 모집" board_id=2 %}?team_id={{team.id}}'">모집글작성</button>
                         </div>
-                        <div id="team-member-list" style="height:80px; margin-right:5px;">
+                        <div id="team-member-list" class="me-2" style="height:80px;">
                             {% for member in team_members %}
 
                             <div class="btn-group" style="position:static;">
