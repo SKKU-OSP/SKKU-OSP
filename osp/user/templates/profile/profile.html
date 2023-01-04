@@ -6,7 +6,7 @@
 
 <div class="container my-4">
   {% if data.is_own %}
-  <div class="d-flex justify-content-end mb-1">
+  <div class="d-flex justify-content-end" style="margin-bottom:11px;">
     <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true">프로필 수정</a>
   </div>
   {% else %}
@@ -20,7 +20,7 @@
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
       {% endif %}
       >
-        <img src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+        <img src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
         <div class="info-body">
         {% if data.is_own %}
           <p class="font-focus">{{data.info.name}}</p>
@@ -38,7 +38,7 @@
         {% endif %}
         </div>
       </div>
-    {% if data.is_own %}
+    {% if data.is_own or data.open_lvl == 2%}
       <div class="d-flex flex-column user-detail">
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학번</span>
@@ -496,7 +496,7 @@
                   </div>
                 </div>
                 <div id="gbti-btn-group" class="d-flex justify-content-end btn-gbti-group">
-                  <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 저장</button>
+                  <button id="btn-save-id-card" class="btn-gbti pb-active">ID CARD 다운로드</button>
                   {% if user.is_authenticated and user.username == username%}
                   <button class="btn-gbti pb-inactive ms-3" onclick="location.href='./test'">다시 검사하기</button>
                   {% endif %}
@@ -725,6 +725,11 @@
     const end_year = {{end_year}};
     const github_id = '{{username}}';
   </script>
+  {% if data.privacy %}
+  <script>
+    window.alert("{{data.privacy}}");
+  </script>
+  {% endif %}
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>

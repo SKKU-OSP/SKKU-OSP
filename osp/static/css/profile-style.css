@@ -371,29 +371,6 @@ a.nav-link {
   display: block;
 }
 
-.user-info {
-  margin: auto;
-  background-color: var(--main-point-color);
-  min-height: 200px;
-  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
-  border-top-left-radius: 0.625rem;
-  border-top-right-radius: 0.625rem;
-}
-
-.user-info img {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: var(--profile-btn-inactive);
-  border: 2px solid var(--main-point-color);
-  z-index: 5;
-  position: relative;
-  margin-top: -40px;
-  display: inline-block;
-  margin-right: auto;
-  margin-left: auto;
-}
 
 .info-body {
   margin: 10px;
@@ -417,7 +394,6 @@ a.nav-link {
 }
 
 .row-userdata {
-  display: flex;
   flex-direction: row;
   align-items: center;
   border-top: 2px solid var(--profile-nav-border);

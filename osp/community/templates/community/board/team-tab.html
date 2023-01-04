@@ -10,7 +10,7 @@
                         {{ team.name }}
                         {% if team_admin %}
                         <button id="team-update">
-                            <i class="bi-pencil text-white"></i>
+                            <i class="bi-pencil text-white hover-opacity"></i>
                         </button>
                         {% endif %}
                         {% if team_members.count == 1 or not team_admin %}
@@ -24,7 +24,7 @@
                     <div id="team-members">
                         <div id="team-members-title">
                             Members
-                            <i class="bi bi-person-plus-fill opacity-hover pointer" style="font-size:15px;padding-left:3px;" onclick="inviteMsgModalOpen(-1, {{ team.id }})"></i>
+                            <i class="bi bi-person-plus-fill hover-opacity" style="font-size:15px;padding-left:3px;" onclick="inviteTeamModalOpen(-1, {{ team.id }})"></i>
                             <button onclick="writeTeamArticle({{ team.id }})" style="margin-left:6px;font-size:11px;background:none;color:white;border:1px solid white; border-radius:5px;">모집글작성</button>
                         </div>
                         <div id="team-member-list" style="height:80px; margin-right:5px;">

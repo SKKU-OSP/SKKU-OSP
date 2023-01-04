@@ -14,9 +14,12 @@
     <div class="container my-4" id="wholecontent">
       <div class="d-flex justify-content-end mb-1">
         <!--button type="submit" class="btn btn-primary" method='POST' action="">저장</button-->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          비밀번호 변경
+        </button>
         <button class="savebtn" onclick="saveImg(); saveAll(); return false;">저장하기</button>
         <button class="savebtn" onclick="location.href='..'">돌아가기</button >
-
+        
       </div>
       <div class="row">
         <div id="profile-info" class="col-md-3 col-12">
@@ -24,7 +27,7 @@
             <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
-                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="img-profile">
+                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
                 <label id="for-photo" for="photo">
                   <i class="bi bi-pen"></i>
                 </label>
@@ -50,11 +53,13 @@
               <span class="row-title text-center">학과</span>
               <span class="row-txt">{{data.info.dept}}</span>
             </div>
+            {% include 'profile/passwd-modal.html' %}
             <form id="infoform">
               {% csrf_token %}
+              
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">전공</span>
-                <div class="form-check plural-major-radio" value="{{data.info.plural_major}}">
+                <div class="form-check plural-major-radio" style="margin-left: 20px; margin-right: 20px;" value="{{data.info.plural_major}}">
                   <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
                   <label class="form-check-label" for="flexRadioDefault1">
                     원전공
@@ -66,7 +71,7 @@
                     복수전공
                   </label>
                 </div>
-                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value={{data.info.plural_major}} hidden>
+                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value="{{data.info.plural_major}}" hidden>
 
               </div>
               <div class="d-flex row-userdata">
@@ -85,6 +90,60 @@
                 <span class="row-title text-center" style="font-size: 13px;">Secondary Email</span>
                 <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
               </div>
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center" style="font-size: 13px;">팀원추천에 나를 노출</span>
+                <div>
+                  <h5 style="font-size: 9pt; color:darkgrey">팀원 추천 목록에 내정보가 검색됩니다.</h5>
+                  <div class="d-flex" style="flex-direction: row;">
+                    <div class="form-check team-privacy-radio" style="margin-left: 30px; margin-right: 30px;">
+                      <input class="form-check-input" type="radio" name="teamprivacyradio" id="teamprivacyradio0" value='0'>
+                      <label class="form-check-label" for="teamprivacyradio0">허용</label>
+                    </div>
+                    <div class="form-check team-privacy-radio">
+                      <input class="form-check-input" type="radio" name="teamprivacyradio" id="teamprivacyradio1" value="1">
+                      <label class="form-check-label" for="teamprivacyradio1">거부</label>
+                    </div>
+                  </div>
+                </div>
+                <input type="text" class="form-control infoform-element" id="teamprivacy" name="teamprivacy" value="{{data.privacy.is_open}}" hidden>
+              </div>
+              <div class="d-flex row-userdata">
+                <span class="row-title text-center" style="font-size: 13px;">게시판에서 나를 공개</span>
+                <div>
+                  <h5 style="font-size: 9pt; color:darkgrey">허용하여야 게시판에 글 작성이 가능합니다.</h5>
+                  <div class="d-flex" style="flex-direction: row;">
+                    <div class="form-check article-privacy-radio" style="margin-left: 30px; margin-right: 30px;">
+                      <input class="form-check-input" type="radio" name="articleprivacyradio" id="articleprivacyradio0" value='0'>
+                      <label class="form-check-label" for="articleprivacyradio0">허용</label>
+                    </div>
+                    <div class="form-check team-privacy-radio">
+                      <input class="form-check-input" type="radio" name="articleprivacyradio" id="articleprivacyradio1" value="1">
+                      <label class="form-check-label" for="articleprivacyradio1">거부</label>
+                    </div>
+                  </div>
+                </div>
+                <input type="text" class="form-control infoform-element" id="articleprivacy" name="articleprivacy" value="{{data.privacy.is_write}}" hidden>
+              </div>
+              <div class="d-flex row-userdata" style="height: 120px;">
+                <span class="row-title text-center" style="font-size: 13px;">프로필공개<br>범위설정</span>
+                <div>
+                  <h5 style="font-size: 9pt; color:darkgrey">내 프로필의 공개범위를 설정합니다.</h5>
+                  <div class="form-check profile-privacy-radio">
+                    <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio0" value="0">
+                    <label class="form-check-label" for="profileprivacyradio0">팀원제외 공개거부</label>
+                  </div>
+                  <div class="form-check profile-privacy-radio">
+                    <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio1" value="1">
+                    <label class="form-check-label" for="profileprivacyradio1">활동내역만 공개허용</label>
+                  </div>
+                  <div class="form-check profile-privacy-radio">
+                    <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio2" value="2">
+                    <label class="form-check-label" for="profileprivacyradio2">모두 공개허용</label>
+                  </div>
+                </div>
+                <input type="text" class="form-control infoform-element" id="profileprivacy" name="profileprivacy" value="{{data.privacy.open_lvl}}" hidden>
+              </div>
+              
             </form>
           </div>
         </div>
@@ -131,8 +190,9 @@
                     </div>
                     <div class="mb-3">
                       <form id="portform">
-                        <label for="id_portfolio" class="form-label">Detail</label>
-                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="12">{{data.account.portfolio}}</textarea></p>
+                        <label for="id_portfolio" class="form-label">Detail</label> <h5 style="font-size: 9pt; color:darkgrey">마크다운 문법을 적용해 작성가능합니다.</h5>
+                        
+                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="11">{{data.account.portfolio}}</textarea></p>
                       </form>
                     </div>
                   </div>
@@ -152,9 +212,9 @@
       <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
     </symbol>
   </svg>
-  {% if messages %}
 
-  {% endif %}
+  
+  
 </body>
 {% endblock %}
 
@@ -182,15 +242,12 @@
 
         if(!(intsarr.includes(selected))){
           $("#interestsdiv").append(`<span id='intspan_`+ selected +`'>
-
-            <span class="badge bg-tag-domain me-1">`+ selected +`</span>
-            <button type="submit" class="btn btn-outline-dark delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">x
+            <button type="submit" class="btn btn-outline-dark badge delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">` + selected +`
             </button>
-
             </span>`);
             $.ajax({
             cache : false,
-            url : "interestsupdate", // 요기에
+            url : "interests", // 요기에
             //processData: false,
             //contentType: false,
             type : 'POST', 
@@ -221,7 +278,7 @@
 
         $.ajax({
             cache : false,
-            url : "interestsupdate", // 요기에
+            url : "interests", // 요기에
             //processData: false,
             //contentType: false,
             type : 'POST', 
@@ -251,7 +308,6 @@
     async function reload(){
       let a = await reload_window();
       console.log('middle of async');
-      let b = await reload_bubble();
       return('hello');
     }
     $(document).ready(function() {
@@ -286,7 +342,7 @@
       
         $.ajax({
         cache : false,
-          url : "languageupdate",
+          url : "languages",
           type : 'POST', 
           data : formData,
           success : function(data) {
@@ -337,7 +393,7 @@
       $("div[id='langdiv_" +  divtarget + "']").remove();
       $.ajax({
         cache : false,
-        url : "languageupdate",
+        url : "languages",
         type : 'POST', 
         data : formData,
         success : function(data) {
@@ -449,8 +505,7 @@
 
   
   $(document).ready(function() {
-    console.log($('.plural-major-radio').attr('value'));
-    plural = $('.plural-major-radio').attr('value');
+    plural = $('#plural_major').attr('value');
     if(plural==0){
       $(":radio[id=flexRadioDefault1]").prop('checked', true);
     }
@@ -472,6 +527,82 @@
       
     });
   });
+  $(document).ready(function() {
+    team_privacy = $('#teamprivacy').attr('value');
+    if(team_privacy == "True"){
+      $(":radio[id=teamprivacyradio0]").prop('checked', true);
+    }
+    else{
+      $(":radio[id=teamprivacyradio1]").prop('checked', true);
+    }
+    $("#teamprivacyradio0").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="teamprivacyradio"]:checked').val();
+      $('#teamprivacy').val('True');
+      console.log($('#teamprivacy').attr('value'));
+      
+    });
+    $("#teamprivacyradio1").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="teamprivacyradio"]:checked').val();
+      $('#teamprivacy').val('False');
+      console.log($('#teamprivacy').attr('value'));
+    });
+  });
+  $(document).ready(function() {
+    article_privacy = $('#articleprivacy').attr('value');
+    if(article_privacy == "True"){
+      $(":radio[id=articleprivacyradio0]").prop('checked', true);
+    }
+    else{
+      $(":radio[id=articleprivacyradio1]").prop('checked', true);
+    }
+    $("#articleprivacyradio0").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="articleprivacyradio"]:checked').val();
+      $('#articleprivacy').val('True');
+      console.log($('#articleprivacy').attr('value'));
+      
+    });
+    $("#articleprivacyradio1").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="articleprivacyradio"]:checked').val();
+      $('#articleprivacy').val('False');
+      console.log($('#articleprivacy').attr('value'));
+    });
+  });
+  $(document).ready(function() {
+    profile_privacy = $('#profileprivacy').attr('value');
+    console.log(profile_privacy);
+    if(profile_privacy== '0'){
+      $(":radio[id=profileprivacyradio0]").prop('checked', true);
+    }
+    else if(profile_privacy == '1'){
+      $(":radio[id=profileprivacyradio1]").prop('checked', true);
+    }
+    else{
+      $(":radio[id=profileprivacyradio2]").prop('checked', true);
+    }
+    $("#profileprivacyradio0").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="profileprivacyradio"]:checked').val();
+      $('#profileprivacy').val('0');
+      console.log($('#profileprivacy').attr('value'));
+    });
+    $("#profileprivacyradio1").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="profileprivacyradio"]:checked').val();
+      $('#profileprivacy').val('1');
+      console.log($('#profileprivacy').attr('value'));
+    });
+    $("#profileprivacyradio2").change(function(){
+      console.log('라디오변경');
+      var radio = $(':radio[name="profileprivacyradio"]:checked').val();
+      $('#profileprivacy').val('2');
+      console.log($('#profileprivacy').attr('value'));
+    });
+  });
+
 
 </script>
 

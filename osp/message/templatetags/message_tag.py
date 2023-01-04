@@ -9,6 +9,7 @@ def get_notifications(user):
     if user.is_anonymous:
         return None
 
+    open_types = ["comment", "articlelike", "team_invite", "team_apply"]
     msgs = Message.objects.filter(sender__isnull=True, receiver__user=user).order_by('-send_date')
     new_msg = len(msgs.filter(receiver_read=False)) > 0
     for msg in msgs:
@@ -27,7 +28,7 @@ def get_notifications(user):
             tmp = msg.body
             msg.body={"body":tmp}
 
-    return {'new': new_msg, 'list': msgs}
+    return {'new': new_msg, 'list': msgs, 'open_types': open_types}
 
 @register.simple_tag
 def get_new_message(user):

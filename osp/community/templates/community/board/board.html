@@ -1,84 +1,83 @@
-<!DOCTYPE html>
-<html lang="ko">
 {% extends 'main.html' %}
 
 {% load static %}
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
-
-
-
-
-      <div class="d-flex flex-row-reverse">
+    <div class="d-flex flex-row-reverse">
         <button class="btn btn-outline-secondary ms-auto mb-1"
-          {% if request.user.is_anonymous %}
-                onclick="alert('로그인 후 이용해주세요')"
-            {% elif board %}
-          onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
-          {% endif %}
-          >
-          글쓰기
-          <i class="bi-pencil"></i>
+        {% if request.user.is_anonymous %}
+        onclick="alert('로그인 후 이용해주세요')"
+        {% elif not is_write %}
+        onclick="consentWriteOpen('{{request.user.username}}');"
+        {% elif team_cnt == 0 %}
+        onclick="alert('모집할 팀이 없습니다.')"
+        {% elif board %}
+        onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
+        {% endif %}
+        >
+            글쓰기<i class="bi-pencil"></i>
         </button>
-      </div>
-      <div id="community-container" class="row">
-            {% include "community/sidebar.html" %}
-            <div class="col-md-9">
-                  {% if board.board_type == 'Recruit' %}
-                    {% include "community/board/article-carousel.html" %}
-                  {% endif %}
-                  {% if board.board_type == 'Team' %}
-                    {% include "community/board/team-tab.html" %}
-                  {% endif %}
-                  {% if board.board_type == 'Team' and invited_user %}
-                    <div class="d-flex justify-content-between" id="board-title-bar" >
-                        <div id="board-title">
-                          <a href="/community/home/{{board.name}}/{{board.id}}">
-                            {{ board.name }} 게시판
-                            </a>
-                        </div>
-                  </div>
-                  <div style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px; border-radius:0.625rem;margin-bottom:10px;">
-                            팀 게시판은 팀원 승인 후에 이용 가능합니다.
-                  </div>
-                  <div class="d-flex flex-column" style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px 15px 20px; border-radius:0.625rem;margin-bottom:10px;">
-                  <div>초대 메세지</div>
-                  {% for msg in waitedinvitemessages %}
-                        <div class=" d-flex flex-row justify-content-between w-100" style="  box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);border-radius:0.625rem;padding:5px 10px;margin-bottom:10px;">
-                            <div style="width:75%;overflow:hidden;white-space:normal;display:inline-block;word-break:normal;overflow-wrap:break-word;">{{ msg.message }}</div>
-                            <div style="width:20%;font-size:10px;">{{ msg.send_date }}</div>
-                        </div>
-                    {% endfor %}
-                      <div class="d-flex flex-row justify-content-end w-100">
-                        <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username  }}',true)"  class="btn-accept">
-                            승인
-                        </button>
-                        <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username  }}',false)"  class="btn-refuse" style="margin-left:5px;">
-                            거절
-                        </button>
-                      </div>
-                  </div>
-                  {% else %}
-                  <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
-                        <div id="board-title">
-                          <a href="/community/home/{{board.name}}/{{board.id}}">
-                            {{ board.name }} 게시판
-                            </a>
-                        </div>
-                        <div class="my-auto col-3" id="tag-filter" style="position:absolute; right:15px;">
-                          <select style="min-width: 25%;" id="tag-select" name="tag-filter-select" multiple>
-                            {% category_tag request %}
-                          </select>
-                        </div>
-                  </div>
-
-                  <div id="article-list-body">
-                  </div>
-                  {% include "community/board/board-footer.html" with board=board %}
-                {% endif %}
+    </div>
+    <div id="community-container" class="row">
+        {% include "community/sidebar.html" %}
+        <div class="col-md-9">
+            {% if board.board_type == 'Recruit' %}
+                {% include "community/board/article-carousel.html" %}
+            {% endif %}
+            {% if board.board_type == 'Team' %}
+                {% include "community/board/team-tab.html" %}
+            {% endif %}
+            {% if board.board_type == 'Team' and invited_user %}
+            <div class="d-flex justify-content-between" id="board-title-bar" >
+                <div id="board-title">
+                    <a href="/community/home/{{board.name}}/{{board.id}}">
+                        {{ board.name }} 게시판
+                    </a>
+                </div>
             </div>
-      </div>
+            <div style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px; border-radius:0.625rem;margin-bottom:10px;">
+                팀 게시판은 팀원 승인 후에 이용 가능합니다.
+            </div>
+            <div class="d-flex flex-column" style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px 15px 20px; border-radius:0.625rem;margin-bottom:10px;">
+                <div>초대 메세지</div>
+                {% for msg in waitedinvitemessages %}
+                <div class=" d-flex flex-row justify-content-between w-100" style="  box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);border-radius:0.625rem;padding:5px 10px;margin-bottom:10px;">
+                    <div style="width:75%;overflow:hidden;white-space:normal;display:inline-block;word-break:normal;overflow-wrap:break-word;">{{ msg.message }}</div>
+                    <div style="width:20%;font-size:10px;">{{ msg.send_date }}</div>
+                </div>
+                {% endfor %}
+                <div class="d-flex flex-row justify-content-end w-100">
+                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',true)" class="btn-accept">
+                        승인
+                    </button>
+                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',false)" class="btn-refuse" style="margin-left:5px;">
+                        거절
+                    </button>
+                </div>
+            </div>
+            {% else %}
+            <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
+                <div id="board-title">
+                    <a href="/community/home/{{board.name}}/{{board.id}}">
+                        {{ board.name }} 게시판
+                    </a>
+                </div>
+                <div id="article-filter">
+                    {% include "community/board/searcher.html" with board=board %}
+                    <div id="tag-filter">
+                        <select id="tag-select" name="tag-filter-select" multiple>
+                            {% category_tag request %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="article-list-body"></div>
+            {% include "community/board/board-footer.html" with board=board %}
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock content %}
 {% block script %}

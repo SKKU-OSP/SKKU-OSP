@@ -1,0 +1,11 @@
+<div id="searcher" class="d-flex justify-content-between">
+    <div class="input-group" id="search-field">
+        {% if board and board.name != "User" %}
+        <input type="text" class="form-control" placeholder="제목/본문" id="search-keyword" aria-describedby="search-btn">
+        {% else %}
+        <input type="text" class="form-control" placeholder="Username" id="search-keyword" aria-describedby="search-btn">
+        {% endif %}
+        <button class="btn btn-secondary" type="button" id="tag-btn" onclick="toggleTag();">#</button>
+        <button class="btn btn-primary" type="button" id="search-btn">검색</button>
+    </div>
+</div>

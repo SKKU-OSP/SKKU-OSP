@@ -3,40 +3,46 @@
 
 
 <div class="d-flex flex-row flex-wrap " style="padding: 10px 3px;">
-
-    {% for account in article_list %}
-        <div class="article-card card d-flex flex-column"
-             style="cursor:pointer;width:33%;min-width:253px;padding:15px 10px;margin:5px 1px;position:relative;"
-        >
-            {% if account.recommend_team %}
-                <div style="position:absolute;right:16px;top:10px;font-size:13px;background:white; z-index:10;height:22px;border-radius:10px;" class=" d-flex flex-row">
-                    <div class="material-icons" style="font-size:20px;">recommend</div><div style="line-height:20px;padding-left:3px;">  {{ account.recommend_team.name }} 팀원 추천</div>
-                </div>
-            {% endif %}
-            <div class="account-data">
-                    {% if 0 %}
-                    익명
-                    {% elif 0 %}
-                    <a class="article-bar-writer" href="">사용자</a>
+{% if not is_open %}
+    
+    <div>
+        <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
+        <button class="btn btn-primary" onclick="consentUserOpen('{{request.user.username}}');">
+            정보공개하기
+        </button>
+    </div>
+{% else %}
+    {% for account in account_list %}
+    <div class="article-card card d-flex flex-column user-card">
+        {% if account.recommend_team %}
+        <div class=" d-flex rec-team">
+            <div class="material-icons" style="font-size:20px;">recommend</div>
+            <div style="line-height:20px;padding-left:3px;"> {{ account.recommend_team.name }} 팀원 추천</div>
+        </div>
+        {% endif %}
+        <div class="account-data">
+            {% if 0 %}
+            익명
+            {% elif 0 %}
+            <a class="article-bar-writer" href="">사용자</a>
+            {% else %}
+            <img class="account-img" src="{{account.photo.url}}" alt="">
+            <div class="dropdown writer-dropdown">
+                <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ account.user.username }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
+                    {% if account.recommend_team %}
+                    <li><a class="dropdown-item" href="#" onclick="inviteTeamModalOpen({{ account.user.id }},-1, {{ account.recommend_team.id }} )">팀 초대하기</a></li>
                     {% else %}
-                    <img class="account-img" src="{{account.photo.url}}" alt="">
-                    <div class="dropdown writer-dropdown">
-                        <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            {{account.user.username}}
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
-                            {% if account.recommend_team %}
-                            <li><a class="dropdown-item" href="#" onclick="inviteMsgModalOpen({{ account.user.id }},-1, {{ account.recommend_team.id }} )">팀 초대하기</a></li>
-                            {% else %}
-                            <li><a class="dropdown-item" href="#" onclick="inviteMsgModalOpen({{ account.user.id }})">팀 초대하기</a></li>
-                            {% endif %}
-                        </ul>
-                    </div>
+                    <li><a class="dropdown-item" href="#" onclick="inviteTeamModalOpen({{ account.user.id }})">팀 초대하기</a></li>
                     {% endif %}
-                </div>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
         <div class="account-intro">
             {{ account.introduction }}
         </div>
@@ -48,10 +54,9 @@
             <span style="padding-left:5px;">태그 없음</span>
             {% endfor %}
         </div>
-
     </div>
     {% empty %}
-
+    사용자를 표시하는 중 입니다.
     {% endfor %}
-
+{% endif %}
 </div>

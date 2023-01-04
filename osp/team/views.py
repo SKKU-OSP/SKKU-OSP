@@ -412,13 +412,14 @@ def TeamApply(request, team_id):
             try:
                 with transaction.atomic():
                     message = request.POST.get('desc')
-                    TeamInviteMessage.objects.create(team=team,
-                                                     account=account,
-                                                     message=message,
-                                                     status=0, # 대기중
-                                                     direction=False, # FROM ACCOUNT TO_TEAM
-                                                     send_date=datetime.now(),
-                                                     )
+                    TeamInviteMessage.objects.create(
+                        team=team,
+                        account=account,
+                        message=message,
+                        status=0, # 대기 중
+                        direction=False, # FROM ACCOUNT TO_TEAM
+                        send_date=datetime.now(),
+                    )
 
                     return JsonResponse({'status': 'success'})
             except DatabaseError as e:

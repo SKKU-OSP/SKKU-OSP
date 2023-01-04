@@ -6,16 +6,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-                <div class="mb-3">
-                    <div class="form-label">지원하는 팀: {{ team.name }}</div>
-                    <div class="desc-break">{{ team.description }}</div>
-                </div>
-                <div class="mb-3">
-                    <div class="form-label">지원자 정보: {{ request.user.username }}</div>
-                </div>
-            <form class="needs-validation row" id="team-apply-form" enctype="multipart/form-data" onsubmit="teamApply({{ team.id }});return false;" >
+            <div class="mb-3">
+                <div class="form-label">지원하는 팀: {{ team.name }}</div>
+                <div class="desc-break">{{ team.description }}</div>
+            </div>
+            <div class="mb-3">
+                <div class="form-label">지원자 정보: {{ request.user.username }}</div>
+            </div>
+            <form class="needs-validation row" id="team-apply-form" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="text" style="display:none;" name="team_id" val="{{ team.id }}">
+                <input type="text" style="display:none;" name="team_id" value="{{ team.id }}">
                 <div class="mb-3">
                     <label for="team-desc" class="form-label">지원 동기</label>
                     <textarea id="team-desc" placeholder="지원 동기를 작성해주세요." name="desc" class="form-control" rows="3" required></textarea>
@@ -36,3 +36,33 @@
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function(){
+    const teamApplyForm = document.getElementById("team-apply-form");
+    teamApplyForm.addEventListener("submit", (event) => {
+        const formData = new FormData(teamApplyForm);
+        event.preventDefault();
+        let team_id = $('input[name=team_id]').val();
+        if(confirm('지원을 완료하시겠습니까?')){
+            $.ajax({
+                url: "/team/api/team-apply"+"/"+team_id,
+                type: "POST",
+                data: formData,
+                dataType: 'JSON',
+                cache: false,
+                contentType: false,
+                processData: false
+            }).done(function (data) {
+                console.log(data);
+                if (data.status == 'fail') {
+                    alert('다시 시도해주세요.');
+                }
+                window.location.reload();
+            }).fail(function (data) {
+                alert('Server Error!');
+            });
+        }
+    });
+});
+</script>
