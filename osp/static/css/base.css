@@ -728,3 +728,19 @@ footer {
   box-sizing: border-box;
   padding: 0;
 }
+
+.flex-harf {
+  flex: 1 0 40%;
+}
+
+.lh-xl{
+  line-height: 2.5 !important;
+}
+
+.fs-7 {
+  font-size: 14px;
+}
+
+.fs-8 {
+  font-size: 12px;
+}
