@@ -1,10 +1,6 @@
 @import url("/static/css/color.css");
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.0/font/bootstrap-icons.css");
 
-/* #community-container {
-    margin-top: 59px;
-} */
-
 #community-sidebar {
     display: flex;
     flex-direction: column;
@@ -362,32 +358,14 @@
     padding:35px 20px;
 }
 
-#team-update {
-    background: none;
-    border: none;
-    font-size: 17px;
-}
-
 #team-image-container {
-    /*margin: 25px;*/
-    margin-right:25px;
     min-height: 160px;
     height: 160px;
     min-width: 160px;
     width: 160px;
-    padding: 10px;
     background: white;
     border: 1px solid var(--main-border-color);
-    border-radius: 10px;
 }
-
-#team-image {
-    height: 100%;
-    width: 100%;
-    border-radius: 10px;
-}
-
-
 
 #team-desc {
     padding-bottom: 10px;
@@ -399,56 +377,11 @@
     overflow-wrap:break-word;
 }
 
-#team-name {
-    font-weight: 500;
-    font-size: 28px;
-    margin-bottom: 5px;
-}
-
-#team-out {
-    background: none;
-    border: none;
-    padding-left: 4px;
-}
-
-#team-members {
-    /*width: 220px;*/
-    border-right: 1px solid var(--main-border-color);
-}
-
-#team-members-title {
-    font-weight: 400;
-    font-size: 18px;
-    margin-bottom: 5px;
-}
-
 #team-member-list {
+    height:80px;
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
     overflow-y: auto;
-    /*min-width: 150px;*/
-}
-
-#team-info {
-    padding-left: 10px;
-    width: 50%;
-}
-
-.team-member {
-    margin-bottom: 1px;
-    padding-right: 4px;
-    height:25px;
-}
-
-.team-member>* {
-    color: white;
-    font-weight: 400;
-    font-size: 15px;
-}
-
-.team-member>a {
-    text-decoration: underline;
 }
 
 .team-admin-icon {
@@ -1012,8 +945,4 @@
     display: block;
     word-break: break-all;
     overflow: hidden;
-}
-
-.lh-xl{
-    line-height: 2.5 !important;
 }
