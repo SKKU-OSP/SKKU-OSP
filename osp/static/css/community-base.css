@@ -367,18 +367,7 @@
     border: 1px solid var(--main-border-color);
 }
 
-#team-desc {
-    padding-bottom: 10px;
-    width:100%;
-    overflow:hidden;
-    white-space:normal;
-    display:inline-block;
-    word-break:normal;
-    overflow-wrap:break-word;
-}
-
 #team-member-list {
-    height:80px;
     display: flex;
     flex-wrap: wrap;
     overflow-y: auto;
