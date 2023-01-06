@@ -906,8 +906,8 @@
 }
 
 .account-img{
-    height: 2.5rem;
-    width: 2.5rem;
+    height: 3rem;
+    width: 3rem;
 }
 
 .user-card{
@@ -920,17 +920,10 @@
 
 .rec-team{
     position:absolute;
-    right:16px;
+    right:10px;
     top:10px;
-    font-size:13px;
     background:white;
     z-index:10;
-    height:22px;
-    border-radius:10px;
-}
-
-.account-intro{
-    flex: 1;
 }
 
 .account-tag{
