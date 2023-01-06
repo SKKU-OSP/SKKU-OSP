@@ -42,10 +42,10 @@
                             <div class="team-apply-action">
                                 <button
                                     onclick="apply_result({{ applymsg.team.id }},'{{ applymsg.account.user.username }}',false)"
-                                    class="btn-refuse">거절</button>
+                                    class="btn-xs btn-refuse">거절</button>
                                 <button
                                     onclick="apply_result({{ applymsg.team.id }},'{{ applymsg.account.user.username }}',true)"
-                                    class="btn-accept">수락</button>
+                                    class="btn-xs btn-accept">수락</button>
                             </div>
                         </div>
                         <div id="msg-id-{{ applymsg.id }}" class="collapse team-apply-detail">
@@ -76,25 +76,25 @@
                             </div>
                             <div class="team-apply-action">
                                 {% if applymsg.status == 0 %}
-                                <button class="btn-wait" disabled>
+                                <button class="btn-xs btn-wait" disabled>
                                     검토 중
                                 </button>
                                 {% elif applymsg.status == 1 %}
-                                <button class="btn-accept" disabled>
+                                <button class="btn-xs btn-accept" disabled>
                                     승인
                                 </button>
                                 {% elif applymsg.status == 2 %}
-                                <button class="btn-refuse" disabled>
+                                <button class="btn-xs btn-refuse" disabled>
                                     거절
                                 </button>
                                 {% endif %}
                             </div>
                             {% if applymsg.status == 0 %}
-                            <button class="team-apply-delete btn btn-outline-danger" onclick="ApplyDelete({{applymsg.id}})">
+                            <button class="btn-xs btn-remove team-apply-delete" onclick="ApplyDelete({{applymsg.id}})">
                                 취소
                             </button>
                             {% else %}
-                            <button class="team-apply-delete btn btn-outline-danger" onclick="ApplyDelete({{applymsg.id}})">
+                            <button class="btn-xs btn-remove team-apply-delete" onclick="ApplyDelete({{applymsg.id}})">
                                 삭제
                             </button>
                             {% endif %}
