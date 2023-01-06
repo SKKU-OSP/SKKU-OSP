@@ -37,7 +37,7 @@ $().ready(function () {
               for (const [field, errors] of Object.entries(data.errors)) {
                 console.log(field, errors)
                 $(`[name=${field}`).addClass('is-invalid')
-                $(`.invalid-feedback[for=team-${field}`).html(errors)
+                $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors)
               }
             } else {
               window.location.reload();
@@ -55,6 +55,7 @@ $().ready(function () {
 
 
 function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
+  $.LoadingOverlay("show");
   console.log(rec_team_id);
   $.ajax({
     url: "/team/api/team-invite",
@@ -64,15 +65,16 @@ function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
   }).done(function (data) {
     $('#InviteTeamModal').addClass('ready').html(data)
     $('#InviteTeamModal').modal('show');
+    $.LoadingOverlay("hide");
     if(user_id==-1){
       option_select = new SlimSelect({
         select: '#invite-team-username',
-        // placeholder: 'Tag',
+        placeholder: '팀원 선택',
       });
     }else{
       option_select = new SlimSelect({
         select: '#invite-team-id',
-        // placeholder: 'Tag',
+        placeholder: '팀 선택',
       });
     }
     $('#team-invite-submit').click(function () {
@@ -98,9 +100,8 @@ function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
           console.log(data);
           if (data.status == 'fail') {
             for (const [field, errors] of Object.entries(data.errors)) {
-              console.log(field, errors)
               $(`[name=${field}`).addClass('is-invalid')
-              $(`.invalid-feedback[for=team-${field}`).html(errors)
+              $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors)
             }
           } else {
             alert('초대 메세지를 전송하였습니다!');
@@ -111,7 +112,7 @@ function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
         });
       }
     });
-  })
+  });
 }
 
 
@@ -176,7 +177,7 @@ function invite_result(team_id, username, is_okay) {
 
   var status = is_okay ? "수락" : "거절";
 
-  if (!confirm("팀 초대를" + status + "하시겠습니까?")) {
+  if (!confirm("팀 초대를 " + status + "하시겠습니까?")) {
     return;
   }
 
