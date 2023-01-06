@@ -47,11 +47,11 @@
                     <div style="width:20%;font-size:10px;">{{ msg.send_date }}</div>
                 </div>
                 {% endfor %}
-                <div class="d-flex flex-row justify-content-end w-100">
-                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',true)" class="btn-accept">
+                <div class="d-flex flex-row justify-content-end w-100 gap-2">
+                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',true)" class="btn-xs btn-accept">
                         승인
                     </button>
-                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',false)" class="btn-refuse" style="margin-left:5px;">
+                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',false)" class="btn-xs btn-refuse">
                         거절
                     </button>
                 </div>
