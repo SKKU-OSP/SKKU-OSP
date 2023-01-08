@@ -356,7 +356,6 @@ class ProfileView(TemplateView):
         return context
 
 class ProfileEditView(TemplateView):
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         username = context['username']
@@ -400,7 +399,7 @@ class ProfileEditView(TemplateView):
 
         print('redirectionaasdfasd')
         return redirect(f'/user/{username}/profile-edit')
-    @csrf_exempt
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         
@@ -643,50 +642,49 @@ class ProfileLanguagesView(UpdateView):
             print("Selected tag is successfully deleted")
             return JsonResponse({'data':'asdfas'})
 
+class ProfileImageView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        print("asdfds")
+        user = User.objects.get(username=username)
+        
+        user_account = Account.objects.get(user=user.id)
 
+        pre_img = user_account.photo.path
+        field_check_list = {}
+        profile_img = request.FILES.get('photo', False)
+        print('img 상태')
+        print(profile_img)
+        is_valid = True
+        if profile_img:
+            img_width, img_height = get_image_dimensions(profile_img)
+            print(img_width, img_height)
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
-@csrf_exempt
-def load_img_data(request, username):
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-
-    pre_img = user_account.photo.path
-    field_check_list = {}
-    profile_img = request.FILES.get('photo', False)
-    print('img 상태')
-    print(profile_img)
-    is_valid = True
-    if profile_img:
-        img_width, img_height = get_image_dimensions(profile_img)
-        print(img_width, img_height)
-        if img_width > 500 or img_height > 500:
-            is_valid = False
-            field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-            print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
-
-    img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-    print(img_form)
-    print(pre_img)
-    if bool(img_form.is_valid()) and is_valid:
-        if 'photo' in request.FILES: # 폼에 이미지가 있으면
-            print('form에 이미지 존재')
-            try:
-                print(" path of pre_image is "+ pre_img)
-                if(pre_img.split("/")[-1] == "default.jpg"):
-                    pass
-                else:
-                    os.remove(pre_img) # 기존 이미지 삭제
+        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+        print(img_form)
+        print(pre_img)
+        if bool(img_form.is_valid()) and is_valid:
+            if 'photo' in request.FILES: # 폼에 이미지가 있으면
+                print('form에 이미지 존재')
+                try:
+                    print(" path of pre_image is "+ pre_img)
+                    if(pre_img.split("/")[-1] == "default.jpg"):
+                        pass
+                    else:
+                        os.remove(pre_img) # 기존 이미지 삭제
                 
-            except:                # 기존 이미지가 없을 경우에 pass
-                pass    
+                except:                # 기존 이미지가 없을 경우에 pass
+                    pass    
 
-        print('Image is valid form')
-        img_form.save()
+            print('Image is valid form')
+            img_form.save()
 
-    else:
-        print(field_check_list['photo'])
-
-    return redirect(f'/user/{username}/profile-edit/')
+        else:
+            print(field_check_list['photo'])
+        return redirect(f'/user/{username}/profile-edit/')
 
 @csrf_exempt
 def save_all(request, username):

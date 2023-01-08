@@ -200,12 +200,14 @@ function saveImg(){
     $.ajax({
       type:"POST",
       url: "image",
+      headers: {'X-CSRFToken': csrftoken},
+      mode: 'same-origin',
       processData: false,
       contentType: false,
       data: formData,
       success: function(rtn){
-        const message = rtn.data.values[0];
-        console.log("message: ", message)
+        //const message = rtn.data.values[0];
+        //console.log("message: ", message)
       },
       err: function(err){
         //console.log("err:", err)
