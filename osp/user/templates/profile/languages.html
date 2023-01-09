@@ -19,14 +19,13 @@
 <h5 style="font-size: 9pt; color:darkgrey">바를 움직여 숙련도를 조절해주세요</h5>
 <div>
     <div class="form-group" id="languagediv">
-    {% for row in data.tags_lang %}
+    {% for row in lang %}
     <div id='langdiv_{{row.tag.name |cut:" "}}' class="langdiv">
         <span style="display:inline-block; width: 120px;">
             <label for="tag_{{row.tag.name}}" class="badge bg-tag-{{row.tag.type}} me-1 langlabel" style="height:20px; margin-bottom:5px; ">{{row.tag.name}}</label>
         </span>
         <span class="range-wrap" style="margin-right:30px;">
             <input style="width:50%; color:#0094FF;" type="range" class="form-control-range lang-tag" min="0" max="4" step="1" value ="{{row.level}}" name ="tag_{{row.tag.name}}" id="tag_{{row.tag.name}}" list="tickmarks">
-            <!--output for="range" class="bubble" id="out_{{row.tag.name}}"></output-->
         </span>  
         <button class="btn delete-lang" name="action" onclick="languageDelete('{{row.tag.name}}'); return false;">
             <svg width="14" height="19" viewBox="0 0 14 19" xmlns="http://www.w3.org/2000/svg">
