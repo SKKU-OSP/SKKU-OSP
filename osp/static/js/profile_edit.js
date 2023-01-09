@@ -227,7 +227,7 @@ function saveAll(){
   console.log(formData);
   $.ajax({
     cache : false,
-    url : "save_all",
+    url : "all",
     type : 'POST', 
     data : formData,
     success : function(data, response) {

@@ -686,41 +686,42 @@ class ProfileImageView(UpdateView):
             print(field_check_list['photo'])
         return redirect(f'/user/{username}/profile-edit/')
 
-@csrf_exempt
-def save_all(request, username):
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-    user_tab = StudentTab.objects.get(id=student_id)
-    tags_all = Tag.objects
-    tags_domain = tags_all.filter(type='domain')
+class ProfileEditSaveView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        student_id = user_account.student_data.id
+        user_tab = StudentTab.objects.get(id=student_id)
+        tags_all = Tag.objects
+        tags_domain = tags_all.filter(type='domain')
 
-    lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-    user_privacy = AccountPrivacy.objects.get(account=user_account)
-    print(user_privacy)
-    for l in lang:
-        if "tag_" + l.tag.name in request.POST:
-            added_tag = Tag.objects.get(name=l.tag.name)
-            AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+        user_privacy = AccountPrivacy.objects.get(account=user_account)
+        print(user_privacy)
+        for l in lang:
+            if "tag_" + l.tag.name in request.POST:
+                added_tag = Tag.objects.get(name=l.tag.name)
+                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
 
-    user_tab.plural_major = request.POST['plural_major']
-    user_tab.personal_email = request.POST['personal_email']
-    user_tab.primary_email = request.POST['primary_email']
-    user_tab.secondary_email = request.POST['secondary_email']
-    user_tab.save()
+        user_tab.plural_major = request.POST['plural_major']
+        user_tab.personal_email = request.POST['personal_email']
+        user_tab.primary_email = request.POST['primary_email']
+        user_tab.secondary_email = request.POST['secondary_email']
+        user_tab.save()
 
-    user_account.introduction = request.POST['introduction']
-    user_account.portfolio = request.POST['portfolio']
-    user_account.save()
-
-
-    user_privacy.open_lvl = request.POST['profileprivacy']
-    user_privacy.is_write = request.POST['articleprivacy']
-    user_privacy.is_open = request.POST['teamprivacy']
-    user_privacy.save()
+        user_account.introduction = request.POST['introduction']
+        user_account.portfolio = request.POST['portfolio']
+        user_account.save()
 
 
-    return redirect(f'/user/{username}/')
+        user_privacy.open_lvl = request.POST['profileprivacy']
+        user_privacy.is_write = request.POST['articleprivacy']
+        user_privacy.is_open = request.POST['teamprivacy']
+        user_privacy.save()
+
+
+        return redirect(f'/user/{username}/')
+
 
 @csrf_exempt
 def change_passwd(request, username):
