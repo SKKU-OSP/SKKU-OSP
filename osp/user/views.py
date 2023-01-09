@@ -355,93 +355,48 @@ class ProfileView(TemplateView):
         
         return context
 
+
 class ProfileEditView(TemplateView):
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        username = context['username']
-    
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
+    '''
+    유저 프로필 수정 페이지
+    url        : /user/<username>
+    template   : profile/profile.html 
 
-        pre_img = user_account.photo.path
-        field_check_list = {}
-        print(request.FILES)
-        profile_img = request.FILES.get('photo', False)
-        print('img 상태')
-        print(profile_img)
-        is_valid = True
-        if profile_img:
-            img_width, img_height = get_image_dimensions(profile_img)
-            if img_width > 500 or img_height > 500:
-                is_valid = False
-                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
-
-        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-        print(img_form)
-        print(pre_img)
-        if bool(img_form.is_valid()) and is_valid:
-            if 'photo' in request.FILES: # 폼에 이미지가 있으면
-                print('form에 이미지 존재 에딧뷰')
-                try:
-                    os.remove(pre_img) # 기존 이미지 삭제
-                    
-                except:                # 기존 이미지가 없을 경우에 pass
-                    pass    
-
-            print('Image is valid form')
-            img_form.save()
-
-        else:
-            print(field_check_list['photo'])
-
-        print('redirectionaasdfasd')
-        return redirect(f'/user/{username}/profile-edit')
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        
-        username = context['username']
-        user = User.objects.get(username=username)
-        student_account = Account.objects.get(user=user.id)
-        student_id = student_account.student_data.id
-        student_info = StudentTab.objects.get(id=student_id)
-        
-        # developing....
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
-        pri = AccountPrivacy.objects.get(account=student_account)
-        # developing....
-
-        img_form = ProfileImgUploadForm(prefix="imgform")
-
-        form = {
-            'img_form': img_form,
-
-        }
-        data = {
-            'account': student_account,
-            'form': form,
-            'info': student_info,
-            'ints': ints,
-            'tags_lang' : lang,
-            'privacy' : pri
-        }
-
-        if str(request.user) != username : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
-            print("허용되지 않는 접근 입니다.")
-            return redirect(f'/user/{username}/')
-
-        return render(request, 'profile/profile-edit.html', {'data': data})
+    Returns :
+        GET     : render, redirect
+    '''
 
     def get_context_data(self, request, *args, **kwargs):
-        
+        # context 는 username과 view 인스턴스를 가진 딕셔너리
         context = super().get_context_data(**kwargs)
+        if str(request.user) != context["username"] : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
+            print("허용되지 않는 접근 입니다.")
+            context['valid'] = 0
+            return context
+        context['valid'] = 1
+        username = context['username']
+        user = User.objects.get(username=username)
+
+        student_account = Account.objects.get(user=user.id)
+        student_id = student_account.student_data.id
+
+        tags_domain = Tag.objects.filter(type='domain')
+
+        context["account"] = Account.objects.get(user=user.id)
+        context["info"] = StudentTab.objects.get(id=student_id)
+        context["ints"] = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
+        context["lang"] = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
+        context["privacy"] = AccountPrivacy.objects.get(account=student_account)
         return context
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context_data(request, *args, **kwargs)
+        if(context['valid'] == 0):
+            return redirect(f'/user/{context["username"]}/')
+
+        return render(request, 'profile/profile-edit.html', context)
+
 
 def student_id_to_username(request, student_id):
     username = Account.objects.get(student_data=student_id).user.username
@@ -722,21 +677,21 @@ class ProfileEditSaveView(UpdateView):
 
         return redirect(f'/user/{username}/')
 
+class ProfilePasswdView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        user = User.objects.get(username=username)
 
-@csrf_exempt
-def change_passwd(request, username):
-    user = User.objects.get(username=username)
+        if(user.check_password(request.POST['inputOldPassword']) == False):
+            return JsonResponse({"status" : "error"})
 
-    if(user.check_password(request.POST['inputOldPassword']) == False):
-        return JsonResponse({"status" : "error"})
+        if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
+            return JsonResponse({"status" : "error"})
 
-    if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
-        return JsonResponse({"status" : "error"})
+        user.set_password(request.POST['inputNewPassword'])
+        user.save()
+        print("비밀번호가 변경되었습니다. ")
+        return 1
 
-    user.set_password(request.POST['inputNewPassword'])
-    user.save()
-    print("비밀번호가 변경되었습니다. ")
-    return 1
 
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
