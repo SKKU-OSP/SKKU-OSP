@@ -27,7 +27,7 @@
             <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
-                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
+                  <img id="image_section" src= {{account.photo.url}} alt="No Image now" class="profile-img">
                 <label id="for-photo" for="photo">
                   <i class="bi bi-pen"></i>
                 </label>
@@ -36,22 +36,22 @@
               </form>
             </div>
             <div class="info-body">
-              <p class="font-focus">{{data.info.name}}</p>
-              <p>{{data.info.github_id}}</p>
+              <p class="font-focus">{{info.name}}</p>
+              <p>{{info.github_id}}</p>
             </div>
           </div>
           <div class="d-flex flex-column user-detail">
             <div class="d-flex row-userdata">
               <span class="row-title text-center">학번</span>
-              <span class="row-txt">{{data.info.id}}</span>
+              <span class="row-txt">{{info.id}}</span>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">대학</span>
-              <span class="row-txt">{{data.info.college}}</span>
+              <span class="row-txt">{{info.college}}</span>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">학과</span>
-              <span class="row-txt">{{data.info.dept}}</span>
+              <span class="row-txt">{{info.dept}}</span>
             </div>
             {% include 'profile/passwd-modal.html' %}
             <form id="infoform">
@@ -59,7 +59,7 @@
               
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">전공</span>
-                <div class="form-check plural-major-radio" style="margin-left: 20px; margin-right: 20px;" value="{{data.info.plural_major}}">
+                <div class="form-check plural-major-radio" style="margin-left: 20px; margin-right: 20px;" value="{{info.plural_major}}">
                   <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
                   <label class="form-check-label" for="flexRadioDefault1">
                     원전공
@@ -71,24 +71,24 @@
                     복수전공
                   </label>
                 </div>
-                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value="{{data.info.plural_major}}" hidden>
+                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value="{{info.plural_major}}" hidden>
 
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">GitHub</span>
-                <span class="row-txt">{{data.info.github_id}}</span>
+                <span class="row-txt">{{info.github_id}}</span>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">개인 Email</span>
-                <input type="text" class="form-control infoform-element" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+                <input type="text" class="form-control infoform-element" id="personal_email" name="personal_email" value={{info.personal_email}}>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">Github Email</span>
-                <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+                <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{info.primary_email}}>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center" style="font-size: 13px;">Secondary Email</span>
-                <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
+                <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{info.secondary_email}}>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center" style="font-size: 13px;">팀원추천에 나를 노출</span>
@@ -105,7 +105,7 @@
                     </div>
                   </div>
                 </div>
-                <input type="text" class="form-control infoform-element" id="teamprivacy" name="teamprivacy" value="{{data.privacy.is_open}}" hidden>
+                <input type="text" class="form-control infoform-element" id="teamprivacy" name="teamprivacy" value="{{privacy.is_open}}" hidden>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center" style="font-size: 13px;">게시판에서 나를 공개</span>
@@ -122,7 +122,7 @@
                     </div>
                   </div>
                 </div>
-                <input type="text" class="form-control infoform-element" id="articleprivacy" name="articleprivacy" value="{{data.privacy.is_write}}" hidden>
+                <input type="text" class="form-control infoform-element" id="articleprivacy" name="articleprivacy" value="{{privacy.is_write}}" hidden>
               </div>
               <div class="d-flex row-userdata" style="height: 120px;">
                 <span class="row-title text-center" style="font-size: 13px;">프로필공개<br>범위설정</span>
@@ -141,7 +141,7 @@
                     <label class="form-check-label" for="profileprivacyradio2">모두 공개허용</label>
                   </div>
                 </div>
-                <input type="text" class="form-control infoform-element" id="profileprivacy" name="profileprivacy" value="{{data.privacy.open_lvl}}" hidden>
+                <input type="text" class="form-control infoform-element" id="profileprivacy" name="profileprivacy" value="{{privacy.open_lvl}}" hidden>
               </div>
               
             </form>
@@ -185,14 +185,14 @@
                     <div class="mb-3">
                       <label for="id_introduction" class="form-label">Introduction</label>
                       <form id="introform">
-                        <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+                        <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{account.introduction}}</textarea>
                       </form>
                     </div>
                     <div class="mb-3">
                       <form id="portform">
                         <label for="id_portfolio" class="form-label">Detail</label> <h5 style="font-size: 9pt; color:darkgrey">마크다운 문법을 적용해 작성가능합니다.</h5>
                         
-                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="11">{{data.account.portfolio}}</textarea></p>
+                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="11">{{account.portfolio}}</textarea></p>
                       </form>
                     </div>
                   </div>
