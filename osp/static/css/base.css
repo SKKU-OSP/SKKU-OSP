@@ -717,3 +717,9 @@ footer {
 .fs-8 {
   font-size: 12px;
 }
+
+.ss-main .ss-single-selected>.placeholder {
+  cursor: pointer;
+  background-color: transparent;
+  opacity: 1;
+}

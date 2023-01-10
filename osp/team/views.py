@@ -30,7 +30,7 @@ def teamInviteValidation(user, username, team_id, invite_msg):
     
     if user.is_anonymous:
         is_valid = False
-    if username=='null':
+    if not username:
         is_valid = False
         field_check_list['name'] = '필수 입력값입니다.'
     else:
@@ -40,9 +40,9 @@ def teamInviteValidation(user, username, team_id, invite_msg):
             is_valid = False
 
     # Team Name Check
-    if team_id=='null':
+    if not team_id:
         is_valid = False
-        field_check_list['name'] = '필수 입력값입니다.'
+        field_check_list['id'] = '필수 입력값입니다.'
     else:
         try:
             Team.objects.get(id=team_id)
@@ -52,7 +52,7 @@ def teamInviteValidation(user, username, team_id, invite_msg):
 
     if len(invite_msg) > 150:
         is_valid = False
-        field_check_list['desc'] = f'초대 메세지은 이상 50자 이하입니다. 현재 {len(invite_msg)}자'
+        field_check_list['desc'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
 
     return field_check_list, is_valid
 

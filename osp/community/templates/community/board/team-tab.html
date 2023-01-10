@@ -46,7 +46,7 @@
         </div>
     </div>
     <div class="d-flex flex-column flex-harf mt-2 ms-3 overflow-y-auto">
-        <div id="team-desc" >
+        <div class="text-break">
             {{team.description|linebreaksbr}}
         </div>
         <div id="team-tag" class="d-flex flex-wrap">
@@ -131,7 +131,7 @@
     function removeMember(member_name){
         var username = $('#username').attr('val');
         var id = "#member-id-"+member_name;
-        if(confirm(member_name+"을 삭제하시겠습니까?")){
+        if(confirm(member_name+"을 내보내시겠습니까?")){
             if(member_name==username){
                 alert('자기 자신은 삭제할 수 없습니다.\n 팀을 탈퇴하려면 탈퇴 버튼을 이용해주세요.');
                 return;

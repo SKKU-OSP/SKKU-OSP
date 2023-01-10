@@ -752,6 +752,9 @@ window.addEventListener('load', function () {
   }
   function render_repo_list(repos=[]){
     repos.forEach((repo)=>{
+      if(repo["desc"] == null){
+        repo["desc"] = "Repositroy description이 없습니다.";
+      }
       $("#recent-repos").append(
         `<div class="card w-100 mb-2 recent_repos">
           <div class="card-body">

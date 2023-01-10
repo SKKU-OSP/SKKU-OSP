@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="container my-4">
-  {% if data.is_own %}
+  {% if is_own %}
   <div class="d-flex justify-content-end" style="margin-bottom:11px;">
     <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true">프로필 수정</a>
   </div>
@@ -16,21 +16,21 @@
   <div class="row">
     <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info"
-      {% if not data.is_own %}
+      {% if not is_own %}
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
       {% endif %}
       >
-        <img src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
+        <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
         <div class="info-body">
-        {% if data.is_own %}
-          <p class="font-focus">{{data.info.name}}</p>
-          <p>{{data.info.github_id}}</p>
+        {% if is_own %}
+          <p class="font-focus">{{info.name}}</p>
+          <p>{{info.github_id}}</p>
         {% else %}
           <div class="d-flex flex-row justify-content-between w-100" style="padding: 5px 0px;">
             <div style="margin:auto;">
                 Github:
-              <a class="row-txt" href="https://github.com/{{data.info.github_id}}">
-                {{data.info.github_id}}
+              <a class="row-txt" href="https://github.com/{{info.github_id}}">
+                {{info.github_id}}
                 <i class="bi bi-box-arrow-up-right pointer"></i>
               </a>
             </div>
@@ -38,24 +38,25 @@
         {% endif %}
         </div>
       </div>
-    {% if data.is_own or data.open_lvl == 2%}
+    {% if is_own or open_lvl == 2%}
+    {{is_own}}
       <div class="d-flex flex-column user-detail">
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학번</span>
-          <span class="row-txt">{{data.info.id}}</span>
+          <span class="row-txt">{{info.id}}</span>
         </div>
         <div class="d-flex row-userdata">
           <span class="row-title text-center">대학</span>
-          <span class="row-txt">{{data.info.college}}</span>
+          <span class="row-txt">{{info.college}}</span>
         </div>
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학과</span>
-          <span class="row-txt">{{data.info.dept}}</span>
+          <span class="row-txt">{{info.dept}}</span>
         </div>
         <div class="d-flex row-userdata">
           <span class="row-title text-center">전공</span>
           <span class="row-txt">
-            {% if data.info.plural_major %}
+            {% if info.plural_major %}
             복수전공
             {% else %}
             원전공
@@ -64,15 +65,15 @@
         </div>
         <div class="d-flex row-userdata">
           <span class="row-title text-center">GitHub</span>
-          <a class="row-txt" href="https://github.com/{{data.info.github_id}}">{{data.info.github_id}}</a>
+          <a class="row-txt" href="https://github.com/{{info.github_id}}">{{info.github_id}}</a>
         </div>
         <div class="d-flex row-userdata">
           <span class="row-title text-center">개인 Email</span>
-          <span class="row-txt">{{data.info.personal_email}}</span>
+          <span class="row-txt">{{info.personal_email}}</span>
         </div>
         <div class="d-flex row-userdata">
           <span class="row-title text-center">Github Email</span>
-          <span class="row-txt">{{data.info.primary_email}}</span>
+          <span class="row-txt">{{info.primary_email}}</span>
         </div>
       </div>
     {% endif %}
@@ -297,27 +298,27 @@
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
               <h5 class="card-title mb-2">{{end_year}} Score</h5>
-              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{data.score.total_score|floatformat:2}}</span>
+              <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{score.total_score|floatformat:2}}</span>
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title" style="width:70%;">Repositories</span>
-                  <span class="row-raw">{{data.score.repo_cnt}}</span>
+                  <span class="row-raw">{{score.repo_cnt}}</span>
                 </div>
               </div>
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title">Commits</span>
-                  <span class="row-raw">{{data.score.commit_cnt}}</span>
+                  <span class="row-raw">{{score.commit_cnt}}</span>
                 </div>
                 <div class="row-contr">
                   <span class="row-title">Issues</span>
-                  <span class="row-raw">{{data.score.issue_cnt}}</span>
+                  <span class="row-raw">{{score.issue_cnt}}</span>
                 </div>
               </div>
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title">Pull Requests</span>
-                  <span class="row-raw">{{data.score.pr_cnt}}</span>
+                  <span class="row-raw">{{score.pr_cnt}}</span>
                 </div>
                 <div class="row-contr">
                   <span class="row-title">Stars</span>
@@ -339,10 +340,10 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body-markdown">
-                  {% if data.account.portfolio == '' %}
+                  {% if account.portfolio == '' %}
                     <span class="weak-text">포트폴리오를 설정해주세요</span>
                   {% endif %}
-                  {{ data.account.portfolio|mark }}
+                  {{ account.portfolio|mark }}
                 </div>
               </div>
             </div>
@@ -353,10 +354,10 @@
                 자기소개
                 <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
               </h5>
-              {% if data.account.introduction == '' %}
+              {% if account.introduction == '' %}
                 <span class="weak-text">자기소개를 설정해주세요</span>
               {% endif %}
-              {{data.account.introduction}}
+              {{account.introduction}}
             </div>
           </div>
         </div>
@@ -366,17 +367,17 @@
               <h5 class="card-title d-flex justify-content-between">관심분야
                 <i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              {% if data.relations|length == 0 and data.remains|length == 0 %}
+              {% if relations|length == 0 and remains|length == 0 %}
                 <span class="weak-text">관심분야를 설정해주세요</span>
               {% endif %}
-              {% for row in data.relations %}
+              {% for row in relations %}
                 <span class="badge bg-tag-domain me-1" style="height:20px">{{row.parent}}</span>
                 {% for child in row.children %}
                   <span class="badge bg-tag-domain me-1" style="height:20px">{{child}}</span>
                 {% endfor %}
                 <hr>
               {% endfor %}
-              {% for row in data.remains %}
+              {% for row in remains %}
                 <span class="badge bg-tag-domain me-1" style="height:20px">{{row.child_tag}}</span>
               {% endfor %}
             </div>
@@ -389,10 +390,10 @@
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
               <div class="d-flex flex-wrap" style="margin:auto;">
-                {% if data.lang|length == 0%}
+                {% if lang|length == 0%}
                   <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
                 {% endif %}
-                {% for row in data.lang %}
+                {% for row in lang %}
                 <div>
                   <div class="d-flex justify-content-between flex-fill">
                     <span class="badge bg-tag-{{row.type}} mx-2" style="height:20px; min-width: 80px;">{{row.name}}</span>
@@ -710,12 +711,6 @@
             </svg></span>`);
         }
       }
-    });
-  </script>
-  <script>
-    $(document).ready(function() {
-      var level_value = 0;
-      var contains = $('.span_language');
     });
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
