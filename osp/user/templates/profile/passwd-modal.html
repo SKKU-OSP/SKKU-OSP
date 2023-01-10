@@ -65,6 +65,8 @@
           //contentType: false,
           type : 'POST', 
           data : formData,
+          headers: {'X-CSRFToken': csrftoken},
+          mode: 'same-origin',
           success : function(data) {
             //var jsonObj = JSON.parse(data);
             console.log('success');

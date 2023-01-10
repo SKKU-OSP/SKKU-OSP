@@ -1,6 +1,11 @@
+import json
+import math
+import logging
+import requests
 from bs4 import BeautifulSoup
-import scrapy, json, math
 from datetime import datetime, timedelta
+import scrapy
+
 from ..items import *
 from ..configure import *
 
@@ -12,6 +17,7 @@ class GithubSpider(scrapy.Spider):
 
     def __init__(self, ids='', **kwargs):
         self.ids = []
+        self.recent = None
         if ids != '' :
             self.ids = ids.split(',')
 
@@ -25,6 +31,24 @@ class GithubSpider(scrapy.Spider):
         return datetime(next_year, next_month, 1) - timedelta(seconds=1)
 
     def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100) :
+
+        try:
+            GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=updated"
+            res = requests.get(GITHUB_API_URL)
+            res_json =  json.loads(res.text)
+            updated_at = res_json[0]["updated_at"]
+            self.compare_recent(updated_at)
+        except Exception as e:
+            logging.warning("recent update", e)
+        try:
+            GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=pushed"
+            res = requests.get(GITHUB_API_URL)
+            res_json =  json.loads(res.text)
+            updated_at = res_json[0]["pushed_at"]
+            self.compare_recent(updated_at)
+        except Exception as e:
+            logging.warning("recent update", e)
+        
         req = scrapy.Request(
                 f'{API_URL}/{endpoint}?page={page}&per_page={per_page}',
                 callback,
@@ -33,6 +57,15 @@ class GithubSpider(scrapy.Spider):
                 )
         
         return req
+
+    def compare_recent(self, updated_at) :
+        if self.recent == None:
+            self.recent = updated_at
+        if int(self.recent[:4]) < int(updated_at[:4]):
+            self.recent = updated_at
+        elif int(self.recent[:4]) == int(updated_at[:4]):
+            if int(self.recent[5:7]) < int(updated_at[5:7]):
+                self.recent = updated_at
 
     def parse_user(self, res) :
         user_json = json.loads(res.body)
@@ -49,9 +82,16 @@ class GithubSpider(scrapy.Spider):
         user_item['request_cnt'] = 1 + max(math.ceil(user_json['public_repos'] / 100), 1)
 
         created_date = user_json['created_at'][:7]
-        updated_date = user_json['updated_at'][:7]
         pivot_date = datetime.strptime(created_date, '%Y-%m')
-        end_date = datetime.strptime(updated_date, '%Y-%m')
+        if self.recent == None:
+            end_date = datetime.now()
+        else:
+            end_date = self.recent
+            end_date = datetime.strptime(end_date, '%Y-%m')
+            self.recent = None
+
+        logging.info(f"parse_user: created_date:{created_date} end_date {end_date}")
+
         end_date = self.__end_of_month(end_date)
         while pivot_date < end_date :
             pivot_date = self.__end_of_month(pivot_date) + timedelta(days=1)

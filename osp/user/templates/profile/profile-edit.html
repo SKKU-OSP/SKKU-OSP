@@ -17,7 +17,7 @@
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
           비밀번호 변경
         </button>
-        <button class="savebtn" onclick="saveImg(); saveAll(); return false;">저장하기</button>
+        <button class="savebtn" onclick="saveImg(); saveAll();">저장하기</button>
         <button class="savebtn" onclick="location.href='..'">돌아가기</button >
         
       </div>
@@ -27,7 +27,7 @@
             <div style="position:relative; margin:auto;" id="profileimg">
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
                   {% csrf_token %}
-                  <img id="image_section" src= {{data.account.photo.url}} alt="No Image now" class="profile-img">
+                  <img id="image_section" src= {{account.photo.url}} alt="No Image now" class="profile-img">
                 <label id="for-photo" for="photo">
                   <i class="bi bi-pen"></i>
                 </label>
@@ -36,22 +36,22 @@
               </form>
             </div>
             <div class="info-body">
-              <p class="font-focus">{{data.info.name}}</p>
-              <p>{{data.info.github_id}}</p>
+              <p class="font-focus">{{info.name}}</p>
+              <p>{{info.github_id}}</p>
             </div>
           </div>
           <div class="d-flex flex-column user-detail">
             <div class="d-flex row-userdata">
               <span class="row-title text-center">학번</span>
-              <span class="row-txt">{{data.info.id}}</span>
+              <span class="row-txt">{{info.id}}</span>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">대학</span>
-              <span class="row-txt">{{data.info.college}}</span>
+              <span class="row-txt">{{info.college}}</span>
             </div>
             <div class="d-flex row-userdata">
               <span class="row-title text-center">학과</span>
-              <span class="row-txt">{{data.info.dept}}</span>
+              <span class="row-txt">{{info.dept}}</span>
             </div>
             {% include 'profile/passwd-modal.html' %}
             <form id="infoform">
@@ -59,7 +59,7 @@
               
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">전공</span>
-                <div class="form-check plural-major-radio" style="margin-left: 20px; margin-right: 20px;" value="{{data.info.plural_major}}">
+                <div class="form-check plural-major-radio" style="margin-left: 20px; margin-right: 20px;" value="{{info.plural_major}}">
                   <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
                   <label class="form-check-label" for="flexRadioDefault1">
                     원전공
@@ -71,24 +71,24 @@
                     복수전공
                   </label>
                 </div>
-                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value="{{data.info.plural_major}}" hidden>
+                <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value="{{info.plural_major}}" hidden>
 
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">GitHub</span>
-                <span class="row-txt">{{data.info.github_id}}</span>
+                <span class="row-txt">{{info.github_id}}</span>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">개인 Email</span>
-                <input type="text" class="form-control infoform-element" id="personal_email" name="personal_email" value={{data.info.personal_email}}>
+                <input type="text" class="form-control infoform-element" id="personal_email" name="personal_email" value={{info.personal_email}}>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center">Github Email</span>
-                <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{data.info.primary_email}}>
+                <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{info.primary_email}}>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center" style="font-size: 13px;">Secondary Email</span>
-                <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{data.info.secondary_email}}>
+                <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{info.secondary_email}}>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center" style="font-size: 13px;">팀원추천에 나를 노출</span>
@@ -105,7 +105,7 @@
                     </div>
                   </div>
                 </div>
-                <input type="text" class="form-control infoform-element" id="teamprivacy" name="teamprivacy" value="{{data.privacy.is_open}}" hidden>
+                <input type="text" class="form-control infoform-element" id="teamprivacy" name="teamprivacy" value="{{privacy.is_open}}" hidden>
               </div>
               <div class="d-flex row-userdata">
                 <span class="row-title text-center" style="font-size: 13px;">게시판에서 나를 공개</span>
@@ -122,7 +122,7 @@
                     </div>
                   </div>
                 </div>
-                <input type="text" class="form-control infoform-element" id="articleprivacy" name="articleprivacy" value="{{data.privacy.is_write}}" hidden>
+                <input type="text" class="form-control infoform-element" id="articleprivacy" name="articleprivacy" value="{{privacy.is_write}}" hidden>
               </div>
               <div class="d-flex row-userdata" style="height: 120px;">
                 <span class="row-title text-center" style="font-size: 13px;">프로필공개<br>범위설정</span>
@@ -141,7 +141,7 @@
                     <label class="form-check-label" for="profileprivacyradio2">모두 공개허용</label>
                   </div>
                 </div>
-                <input type="text" class="form-control infoform-element" id="profileprivacy" name="profileprivacy" value="{{data.privacy.open_lvl}}" hidden>
+                <input type="text" class="form-control infoform-element" id="profileprivacy" name="profileprivacy" value="{{privacy.open_lvl}}" hidden>
               </div>
               
             </form>
@@ -185,14 +185,14 @@
                     <div class="mb-3">
                       <label for="id_introduction" class="form-label">Introduction</label>
                       <form id="introform">
-                        <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{data.account.introduction}}</textarea>
+                        <textarea class="form-control" cols="50" id="id_introduction" name="introduction" rows="1">{{account.introduction}}</textarea>
                       </form>
                     </div>
                     <div class="mb-3">
                       <form id="portform">
                         <label for="id_portfolio" class="form-label">Detail</label> <h5 style="font-size: 9pt; color:darkgrey">마크다운 문법을 적용해 작성가능합니다.</h5>
                         
-                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="11">{{data.account.portfolio}}</textarea></p>
+                        <p><textarea class="form-control" cols="55" id="id_portfolio" name="portfolio" rows="11">{{account.portfolio}}</textarea></p>
                       </form>
                     </div>
                   </div>
@@ -221,389 +221,6 @@
 {% block script %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/profile-style.css' %}"> 
 <link rel="stylesheet" type="text/css "href="{% static 'css/profile-edit-style.css' %}">
-
-<script>
-    function intsAppend(){
-        var formData = $("#intsform").serialize();
-        formData += "&act=" + 'append';
-        formData += "&target=" + '';
-        console.log(formData);
-
-        var selected = $("#intsform").find(".placeholder").text();
-        console.log(selected);
-        var ints = $('.bg-tag-domain');
-        var intsarr = [];
-        console.log(ints);
-
-        for(int of ints){
-          console.log($(int).text());
-          intsarr.push($(int).text());
-        }
-
-        if(!(intsarr.includes(selected))){
-          $("#interestsdiv").append(`<span id='intspan_`+ selected +`'>
-            <button type="submit" class="btn btn-outline-dark badge delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">` + selected +`
-            </button>
-            </span>`);
-            $.ajax({
-            cache : false,
-            url : "interests", // 요기에
-            //processData: false,
-            //contentType: false,
-            type : 'POST', 
-            data : formData,
-            success : function(data) {
-                //var jsonObj = JSON.parse(data);
-                console.log('success');
-            }, // success 
-
-            error : function(xhr, status) {
-                // alert(xhr + " : " + status);
-                console.log('error');
-                // alert("선택하고 추가해주세요")
-
-            }
-            });
-
-        }
-    }
-    function intsDelete(target){
-        var formData = $("#intsform").serialize();
-        formData += "&act=" + 'delete';
-        formData += "&target=" + target;
-        console.log(formData);
-
-        console.log("span[id='intspan_" +  target + "']");
-        $("span[id='intspan_" +  target + "']").remove();
-
-        $.ajax({
-            cache : false,
-            url : "interests", // 요기에
-            //processData: false,
-            //contentType: false,
-            type : 'POST', 
-            data : formData,
-            success : function(data) {
-                //var jsonObj = JSON.parse(data);
-                console.log('success');
-            }, // success 
-    
-            error : function(xhr, status) {
-                // alert(xhr + " : " + status);
-                console.log('error');
-            }
-        });
- 
-    }
-
-
-    
-    function reload_window(){
-        return new Promise(function(resolve){
-          console.log('language is deleted, reload window');
-          $('#languagediv').load(window.location.href + ' #languagediv');
-          resolve('hello');
-        });
-      }
-    async function reload(){
-      let a = await reload_window();
-      console.log('middle of async');
-      return('hello');
-    }
-    $(document).ready(function() {
-        var langlists = $('.langlabel');
-        console.log(langlists);
-
-
-    });
-    function languageAppend(){
-      var formData = $("#languageform").serialize();
-      formData += "&act=" + 'append';
-      formData += "&target=" + '';
-      console.log(formData);
-      var langs = $('.langlabel');
-      var langsarr = [];
-      console.log(langs);
-      for(lang of langs){
-          console.log($(lang).attr('for').slice(4));
-          langsarr.push($(lang).attr('for').slice(4));
-      }
-      var selected = $("#langdiv").find(".placeholder").text();
-      //selected = selected.slice(3);
-      
-      var selected_nospace;
-
-      selected_nospace = selected.replace(/ /g, "");
-      console.log(langsarr);
-      console.log(selected);
-
-      console.log(!(langsarr.includes(selected)));
-      if(!(langsarr.includes(selected))){
-      
-        $.ajax({
-        cache : false,
-          url : "languages",
-          type : 'POST', 
-          data : formData,
-          success : function(data) {
-            console.log('success');
-          }, 
-          error : function(xhr, status) {
-              // alert(xhr + " : " + status);
-              console.log('선택하고 추가해주세요');
-              // alert("선택하고 추가해주세요")
-          }  
-        });
-        $("#languagediv").append(`
-        <div id="langdiv_`+ selected_nospace + `"class="langdiv">
-        <span style="display:inline-block; width: 120px;">
-            <label for="tag_`+ selected_nospace + `" class="badge bg-tag-language me-1 langlabel" style="height:20px; margin-bottom:5px; ">` + selected + `</label>
-        </span>
-        <span class="range-wrap" style="margin-right:30px;">
-            <input style="width:50%; color:#0094FF;" type="range" class="form-control-range lang-tag" min="0" max="4" step="1" value ="0" name ="tag_`+ selected +`" id="tag_`+ selected +`" list="tickmarks">
-            <!--output for="range" class="bubble" id="out_` + selected_nospace + `"></output-->
-        </span>  
-        <button class="btn delete-lang" name="action" onclick="languageDelete('`+ selected +`', '`+ selected_nospace + `'); return false;">
-            <svg width="14" height="19" viewBox="0 0 14 19" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 16.5C1 17.6 1.9 18.5 3 18.5H11C12.1 18.5 13 17.6 13 16.5V4.5H1V16.5ZM3 6.5H11V16.5H3V6.5ZM10.5 1.5L9.5 0.5H4.5L3.5 1.5H0V3.5H14V1.5H10.5Z"/>
-            </svg>
-        </button>
-        <hr>
-        </div>
-      `);
-      }
-
-      // reload();
-    }
-    function languageDelete(target){
-      var formData = $("#languageform").serialize();
-      formData += "&act=" + 'delete';
-      target = encodeURIComponent(target);
-      formData += "&target=" + target;
-
-      // console.log(target);
-      // console.log(formData);
-      
-      target = decodeURI(target);
-      
-      divtarget = target.replace(/ /g, "");
-      divtarget = decodeURIComponent(divtarget);
-      console.log(divtarget);
-      console.log("div[id='langdiv_" +  divtarget + "']");
-      $("div[id='langdiv_" +  divtarget + "']").remove();
-      $.ajax({
-        cache : false,
-        url : "languages",
-        type : 'POST', 
-        data : formData,
-        success : function(data) {
-          //var jsonObj = JSON.parse(data);
-          console.log('success');
-        },
-    
-        error : function(xhr, status) {
-          console.log('error');
-        }
-
-      });
-      /*
-      reload();
-      */
-    }
-    
-    function saveImg(){
-      const imageInput = $("#photo")[0];
-      console.log("imageInput: ", imageInput.files)
-      
-      if(imageInput.files.length > 0){
-        const formData = new FormData();
-        formData.append("photo", imageInput.files[0]);
-        $.ajax({
-          type:"POST",
-          url: "imgupdate",
-          processData: false,
-          contentType: false,
-          data: formData,
-          success: function(rtn){
-            //const message = rtn.data.values[0];
-            //console.log("message: ", message)
-          },
-          err: function(err){
-            //console.log("err:", err)
-          }
-        })
-      setTimeout(function() {
-
-          location.reload();
-        }, 1000);
-
-
-      }
-
-
-    }
-    
-    function saveAll(){
-      var formData = $("#portform").serialize();
-      formData += '&' + $('#infoform').serialize();
-      formData += '&' + $('#introform').serialize();
-      formData += '&' + $('.lang-tag').serialize();
-      formData += ''
-      alert("저장되었습니다.");
-      console.log(formData);
-      $.ajax({
-        cache : false,
-        url : "save_all",
-        type : 'POST', 
-        data : formData,
-        success : function(data, response) {
-          //var jsonObj = JSON.parse(data);
-          
-          console.log('success');
-
-        }, // success 
-    
-        error : function(xhr, status) {
-          // alert(xhr + " : " + status);
-          console.log('error');
-        }
-
-        });
-      reload();
-
-    }
-  
-  function readURL(input) {
-    if (input.files && input.files[0]) {
-    var reader = new FileReader();  
-    reader.onload = function (e) {
-      $('#image_section').attr('src', e.target.result);  
-    }
-      reader.readAsDataURL(input.files[0]);
-    }
-    console.log('이미지 확인2');
-  }
- 
-  $("#profileimg").ready(function() {
-    console.log('change detected');
-    $("#photo").change(function(){
-      console.log('이미지 확인1-로드');
-      let input = this;
-      console.log(input);
-      if (input.files && input.files[0]) {
-        console.log('preview avaliable');
-        var reader = new FileReader();  
-        reader.onload = function (e) {
-          console.log($('#image_section'));
-          $('#image_section').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(input.files[0]);
-      }
-      console.log('이미지 확인2');
-    });
-  });
-
-  
-  $(document).ready(function() {
-    plural = $('#plural_major').attr('value');
-    if(plural==0){
-      $(":radio[id=flexRadioDefault1]").prop('checked', true);
-    }
-    else{
-      $(":radio[id=flexRadioDefault2]").prop('checked', true);
-    }
-    $("#flexRadioDefault1").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="flexRadioDefault"]:checked').val();
-      $('#plural_major').val('0');
-      console.log(radio);
-      
-    });
-    $("#flexRadioDefault2").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="flexRadioDefault"]:checked').val();
-      $('#plural_major').val('1');
-      console.log(radio);
-      
-    });
-  });
-  $(document).ready(function() {
-    team_privacy = $('#teamprivacy').attr('value');
-    if(team_privacy == "True"){
-      $(":radio[id=teamprivacyradio0]").prop('checked', true);
-    }
-    else{
-      $(":radio[id=teamprivacyradio1]").prop('checked', true);
-    }
-    $("#teamprivacyradio0").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="teamprivacyradio"]:checked').val();
-      $('#teamprivacy').val('True');
-      console.log($('#teamprivacy').attr('value'));
-      
-    });
-    $("#teamprivacyradio1").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="teamprivacyradio"]:checked').val();
-      $('#teamprivacy').val('False');
-      console.log($('#teamprivacy').attr('value'));
-    });
-  });
-  $(document).ready(function() {
-    article_privacy = $('#articleprivacy').attr('value');
-    if(article_privacy == "True"){
-      $(":radio[id=articleprivacyradio0]").prop('checked', true);
-    }
-    else{
-      $(":radio[id=articleprivacyradio1]").prop('checked', true);
-    }
-    $("#articleprivacyradio0").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="articleprivacyradio"]:checked').val();
-      $('#articleprivacy').val('True');
-      console.log($('#articleprivacy').attr('value'));
-      
-    });
-    $("#articleprivacyradio1").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="articleprivacyradio"]:checked').val();
-      $('#articleprivacy').val('False');
-      console.log($('#articleprivacy').attr('value'));
-    });
-  });
-  $(document).ready(function() {
-    profile_privacy = $('#profileprivacy').attr('value');
-    console.log(profile_privacy);
-    if(profile_privacy== '0'){
-      $(":radio[id=profileprivacyradio0]").prop('checked', true);
-    }
-    else if(profile_privacy == '1'){
-      $(":radio[id=profileprivacyradio1]").prop('checked', true);
-    }
-    else{
-      $(":radio[id=profileprivacyradio2]").prop('checked', true);
-    }
-    $("#profileprivacyradio0").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="profileprivacyradio"]:checked').val();
-      $('#profileprivacy').val('0');
-      console.log($('#profileprivacy').attr('value'));
-    });
-    $("#profileprivacyradio1").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="profileprivacyradio"]:checked').val();
-      $('#profileprivacy').val('1');
-      console.log($('#profileprivacy').attr('value'));
-    });
-    $("#profileprivacyradio2").change(function(){
-      console.log('라디오변경');
-      var radio = $(':radio[name="profileprivacyradio"]:checked').val();
-      $('#profileprivacy').val('2');
-      console.log($('#profileprivacy').attr('value'));
-    });
-  });
-
-
-</script>
+<script type="text/javascript" src="{% static 'js/profile_edit.js' %}"></script>
 
 {% endblock %}
