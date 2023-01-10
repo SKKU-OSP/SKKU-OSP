@@ -37,110 +37,8 @@ class ProfileView(TemplateView):
     
     template_name = 'profile/profile.html'
     start_year = 2019
+
     # 새로 고침 시 GET 요청으로 처리됨.
-    def get(self, request, *args, **kwargs):
-
-        start = time.time()
-
-        # 비 로그인 시 프로필 열람 불가
-        if request.user.is_anonymous:
-            return redirect('/community')
-
-        context = self.get_context_data(request, *args, **kwargs)
-        if not context:
-            return redirect('/community')
-
-        student_info = context['account'].student_data
-
-        # student repository info
-        context['cur_repo_type'] = 'owned'
-        ## owned repository
-        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
-
-        tags_all = Tag.objects # 태그 전체
-        tags_domain = tags_all.filter(type='domain') # 분야 태그
-
-        student_account = context['account']
-        acc_pp = AccountPrivacy.objects.get(account=student_account)
-        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
-        
-        # 유저의 관심분야
-        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-
-        # 유저의 사용언어, 기술스택
-        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
-        account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
-        level_list = [ al.level for al in account_lang ]
-        lang = []
-
-        for tag in lang_tags:
-            lang_tag_dict = {"name":tag.name, "type":tag.type}
-            lang_tag_dict["level"] = level_list[len(lang)]
-            lang.append(lang_tag_dict)
-        domain_layer = DomainLayer.objects
-        
-        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
-        ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
-        relation_origin = domain_layer.values('parent_tag', 'child_tag')
-        relations = []
-        remain_children = list(ints_child_layer)
-
-        for par in ints_parent_layer:
-            relation = {
-                'parent' :par['parent_tag'],
-                'children' : [],
-            }
-            for chi in ints_child_layer:
-                if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
-                    relation['children'].append(chi['child_tag'])
-                    remain_children.remove({'child_tag' : chi['child_tag']})
-            relations.append(relation)
-
-        is_own = request.user.username == context['username']
-        # initialize
-        is_redirect = True
-        if 'privacy' in request.session:
-            del request.session['privacy']
-        if 'alert' in request.session:
-            del request.session['alert']
-        if not is_own and acc_pp.open_lvl == 0:
-            target_team = TeamMember.objects.filter(member=context['account']).values('team')
-            if target_team:
-                # team check
-                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
-                if cowork:
-                    is_redirect = False
-                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
-                    request.session['alert'] = True
-                    acc_pp.open_lvl = 1
-            if is_redirect:
-                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
-                request.session['alert'] = True
-                return redirect('../'+request.user.username+'/')
-
-        data = {
-            'info': student_info,
-            'score': student_score,
-            'ints': ints,
-            'lang': lang,
-            'relations': relations,
-            'remains': remain_children,
-            'account': context['account'],
-            'is_own' : is_own,
-            'open_lvl': acc_pp.open_lvl,
-            'is_write': acc_pp.is_write, 
-            'is_open': acc_pp.is_open,
-        }
-
-        if 'alert' in request.session and request.session['alert']:
-            print(request.session['privacy'])
-            if 'privacy' in request.session and request.session['privacy']:
-                data['privacy'] = request.session['privacy']
-        context['data'] = data
-        print("ProfileView get time :", time.time() - start)
-
-        return render(request=request, template_name=self.template_name, context=context)
-
     def get_context_data(self, request, *args, **kwargs):
         try:
             context = super().get_context_data(**kwargs)
@@ -352,97 +250,157 @@ class ProfileView(TemplateView):
             context["gbti"] = gbti_data
         context["test"] = test_data
         context["success"] = True
+
+        tags_domain = Tag.objects.filter(type='domain') # 분야 태그
+        ints = AccountInterest.objects.filter(account=account).filter(tag__in=tags_domain)
+        student_id = account.student_data.id
+        domain_layer = DomainLayer.objects
+        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=account).exclude(tag__type="domain").values("tag")).order_by("name")
+        account_lang = AccountInterest.objects.filter(account=account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
+        level_list = [ al.level for al in account_lang ]
+
+        lang = []
+
+        for tag in lang_tags:
+            lang_tag_dict = {"name":tag.name, "type":tag.type}
+            lang_tag_dict["level"] = level_list[len(lang)]
+            lang.append(lang_tag_dict)
+        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
+        ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
+        relation_origin = domain_layer.values('parent_tag', 'child_tag')
+        relations = []
+        remain_children = list(ints_child_layer)
+
+        for par in ints_parent_layer:
+            relation = {
+                'parent' :par['parent_tag'],
+                'children' : [],
+            }
+            for chi in ints_child_layer:
+                if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
+                    relation['children'].append(chi['child_tag'])
+                    remain_children.remove({'child_tag' : chi['child_tag']})
+            relations.append(relation)
+
+        context["relations"] =  relations
+        context["remains"] = remain_children
+        context["account"] = Account.objects.get(user=user.id)
+        context["info"] = StudentTab.objects.get(id=student_id)
+        context["ints"] = ints
+        context["lang"] = lang
         
         return context
+
+    def get(self, request, *args, **kwargs):
+
+        start = time.time()
+
+        # 비 로그인 시 프로필 열람 불가
+        if request.user.is_anonymous:
+            return redirect('/community')
+
+        context = self.get_context_data(request, *args, **kwargs)
+        if not context:
+            return redirect('/community')
+
+        student_info = context['account'].student_data
+
+        # student repository info
+        context['cur_repo_type'] = 'owned'
+        ## owned repository
+        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
+
+       
+
+        student_account = context['account']
+        acc_pp = AccountPrivacy.objects.get(account=student_account)
+        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+        
+        is_own = request.user.username == context['username']
+        # initialize
+        is_redirect = True
+        if 'privacy' in request.session:
+            del request.session['privacy']
+        if 'alert' in request.session:
+            del request.session['alert']
+        if not is_own and acc_pp.open_lvl == 0:
+            target_team = TeamMember.objects.filter(member=context['account']).values('team')
+            if target_team:
+                # team check
+                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                if cowork:
+                    is_redirect = False
+                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
+                    request.session['alert'] = True
+                    acc_pp.open_lvl = 1
+            if is_redirect:
+                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
+                request.session['alert'] = True
+                return redirect('../'+request.user.username+'/')
+        data = {
+
+        }
+
+        context['score'] = student_score
+        context['is_own'] = is_own
+        context['open_lvl'] = acc_pp.open_lvl
+        context['is_write'] = acc_pp.is_write
+        context['is_open'] = acc_pp.is_open
+
+        if 'alert' in request.session and request.session['alert']:
+            print(request.session['privacy'])
+            if 'privacy' in request.session and request.session['privacy']:
+                data['privacy'] = request.session['privacy']
+        context['data'] = data
+        print("ProfileView get time :", time.time() - start)
+
+        return render(request=request, template_name=self.template_name, context=context)
+
+    
+
 
 class ProfileEditView(TemplateView):
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        username = context['username']
-    
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
+    '''
+    유저 프로필 수정 페이지
+    url        : /user/<username>
+    template   : profile/profile.html 
 
-        pre_img = user_account.photo.path
-        field_check_list = {}
-        print(request.FILES)
-        profile_img = request.FILES.get('photo', False)
-        print('img 상태')
-        print(profile_img)
-        is_valid = True
-        if profile_img:
-            img_width, img_height = get_image_dimensions(profile_img)
-            if img_width > 500 or img_height > 500:
-                is_valid = False
-                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
-
-        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-        print(img_form)
-        print(pre_img)
-        if bool(img_form.is_valid()) and is_valid:
-            if 'photo' in request.FILES: # 폼에 이미지가 있으면
-                print('form에 이미지 존재 에딧뷰')
-                try:
-                    os.remove(pre_img) # 기존 이미지 삭제
-                    
-                except:                # 기존 이미지가 없을 경우에 pass
-                    pass    
-
-            print('Image is valid form')
-            img_form.save()
-
-        else:
-            print(field_check_list['photo'])
-
-        print('redirectionaasdfasd')
-        return redirect(f'/user/{username}/profile-edit')
-    @csrf_exempt
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        
-        username = context['username']
-        user = User.objects.get(username=username)
-        student_account = Account.objects.get(user=user.id)
-        student_id = student_account.student_data.id
-        student_info = StudentTab.objects.get(id=student_id)
-        
-        # developing....
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        lang = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
-        pri = AccountPrivacy.objects.get(account=student_account)
-        # developing....
-
-        img_form = ProfileImgUploadForm(prefix="imgform")
-
-        form = {
-            'img_form': img_form,
-
-        }
-        data = {
-            'account': student_account,
-            'form': form,
-            'info': student_info,
-            'ints': ints,
-            'tags_lang' : lang,
-            'privacy' : pri
-        }
-
-        if str(request.user) != username : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
-            print("허용되지 않는 접근 입니다.")
-            return redirect(f'/user/{username}/')
-
-        return render(request, 'profile/profile-edit.html', {'data': data})
+    Returns :
+        GET     : render, redirect
+    '''
 
     def get_context_data(self, request, *args, **kwargs):
-        
+        # context 는 username과 view 인스턴스를 가진 딕셔너리
         context = super().get_context_data(**kwargs)
+        if str(request.user) != context["username"] : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
+            print("허용되지 않는 접근 입니다.")
+            context['valid'] = 0
+            return context
+        context['valid'] = 1
+        username = context['username']
+        user = User.objects.get(username=username)
+
+        student_account = Account.objects.get(user=user.id)
+        student_id = student_account.student_data.id
+
+        tags_domain = Tag.objects.filter(type='domain')
+
+        
+        context["account"] = Account.objects.get(user=user.id)
+        context["info"] = StudentTab.objects.get(id=student_id)
+        context["ints"] = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
+        context["lang"] = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
+        context["privacy"] = AccountPrivacy.objects.get(account=student_account)
         return context
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context_data(request, *args, **kwargs)
+        if(context['valid'] == 0):
+            return redirect(f'/user/{context["username"]}/')
+
+        return render(request, 'profile/profile-edit.html', context)
+
 
 def student_id_to_username(request, student_id):
     username = Account.objects.get(student_data=student_id).user.username
@@ -643,101 +601,101 @@ class ProfileLanguagesView(UpdateView):
             print("Selected tag is successfully deleted")
             return JsonResponse({'data':'asdfas'})
 
+class ProfileImageView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        print("asdfds")
+        user = User.objects.get(username=username)
+        
+        user_account = Account.objects.get(user=user.id)
 
+        pre_img = user_account.photo.path
+        field_check_list = {}
+        profile_img = request.FILES.get('photo', False)
+        print('img 상태')
+        print(profile_img)
+        is_valid = True
+        if profile_img:
+            img_width, img_height = get_image_dimensions(profile_img)
+            print(img_width, img_height)
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
+                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
 
-@csrf_exempt
-def load_img_data(request, username):
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-
-    pre_img = user_account.photo.path
-    field_check_list = {}
-    profile_img = request.FILES.get('photo', False)
-    print('img 상태')
-    print(profile_img)
-    is_valid = True
-    if profile_img:
-        img_width, img_height = get_image_dimensions(profile_img)
-        print(img_width, img_height)
-        if img_width > 500 or img_height > 500:
-            is_valid = False
-            field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-            print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
-
-    img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-    print(img_form)
-    print(pre_img)
-    if bool(img_form.is_valid()) and is_valid:
-        if 'photo' in request.FILES: # 폼에 이미지가 있으면
-            print('form에 이미지 존재')
-            try:
-                print(" path of pre_image is "+ pre_img)
-                if(pre_img.split("/")[-1] == "default.jpg"):
-                    pass
-                else:
-                    os.remove(pre_img) # 기존 이미지 삭제
+        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+        print(img_form)
+        print(pre_img)
+        if bool(img_form.is_valid()) and is_valid:
+            if 'photo' in request.FILES: # 폼에 이미지가 있으면
+                print('form에 이미지 존재')
+                try:
+                    print(" path of pre_image is "+ pre_img)
+                    if(pre_img.split("/")[-1] == "default.jpg"):
+                        pass
+                    else:
+                        os.remove(pre_img) # 기존 이미지 삭제
                 
-            except:                # 기존 이미지가 없을 경우에 pass
-                pass    
+                except:                # 기존 이미지가 없을 경우에 pass
+                    pass    
 
-        print('Image is valid form')
-        img_form.save()
+            print('Image is valid form')
+            img_form.save()
 
-    else:
-        print(field_check_list['photo'])
+        else:
+            print(field_check_list['photo'])
+        return redirect(f'/user/{username}/profile-edit/')
 
-    return redirect(f'/user/{username}/profile-edit/')
+class ProfileEditSaveView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        student_id = user_account.student_data.id
+        user_tab = StudentTab.objects.get(id=student_id)
+        tags_all = Tag.objects
+        tags_domain = tags_all.filter(type='domain')
 
-@csrf_exempt
-def save_all(request, username):
-    user = User.objects.get(username=username)
-    user_account = Account.objects.get(user=user.id)
-    student_id = user_account.student_data.id
-    user_tab = StudentTab.objects.get(id=student_id)
-    tags_all = Tag.objects
-    tags_domain = tags_all.filter(type='domain')
+        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
+        user_privacy = AccountPrivacy.objects.get(account=user_account)
+        print(user_privacy)
+        for l in lang:
+            if "tag_" + l.tag.name in request.POST:
+                added_tag = Tag.objects.get(name=l.tag.name)
+                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
 
-    lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-    user_privacy = AccountPrivacy.objects.get(account=user_account)
-    print(user_privacy)
-    for l in lang:
-        if "tag_" + l.tag.name in request.POST:
-            added_tag = Tag.objects.get(name=l.tag.name)
-            AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
+        user_tab.plural_major = request.POST['plural_major']
+        user_tab.personal_email = request.POST['personal_email']
+        user_tab.primary_email = request.POST['primary_email']
+        user_tab.secondary_email = request.POST['secondary_email']
+        user_tab.save()
 
-    user_tab.plural_major = request.POST['plural_major']
-    user_tab.personal_email = request.POST['personal_email']
-    user_tab.primary_email = request.POST['primary_email']
-    user_tab.secondary_email = request.POST['secondary_email']
-    user_tab.save()
-
-    user_account.introduction = request.POST['introduction']
-    user_account.portfolio = request.POST['portfolio']
-    user_account.save()
-
-
-    user_privacy.open_lvl = request.POST['profileprivacy']
-    user_privacy.is_write = request.POST['articleprivacy']
-    user_privacy.is_open = request.POST['teamprivacy']
-    user_privacy.save()
+        user_account.introduction = request.POST['introduction']
+        user_account.portfolio = request.POST['portfolio']
+        user_account.save()
 
 
-    return redirect(f'/user/{username}/')
+        user_privacy.open_lvl = request.POST['profileprivacy']
+        user_privacy.is_write = request.POST['articleprivacy']
+        user_privacy.is_open = request.POST['teamprivacy']
+        user_privacy.save()
 
-@csrf_exempt
-def change_passwd(request, username):
-    user = User.objects.get(username=username)
 
-    if(user.check_password(request.POST['inputOldPassword']) == False):
-        return JsonResponse({"status" : "error"})
+        return redirect(f'/user/{username}/')
 
-    if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
-        return JsonResponse({"status" : "error"})
+class ProfilePasswdView(UpdateView):
+    def post(self, request, username, *args, **kwargs):
+        user = User.objects.get(username=username)
 
-    user.set_password(request.POST['inputNewPassword'])
-    user.save()
-    print("비밀번호가 변경되었습니다. ")
-    return 1
+        if(user.check_password(request.POST['inputOldPassword']) == False):
+            return JsonResponse({"status" : "error"})
+
+        if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
+            return JsonResponse({"status" : "error"})
+
+        user.set_password(request.POST['inputNewPassword'])
+        user.save()
+        print("비밀번호가 변경되었습니다. ")
+        return 1
+
 
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
