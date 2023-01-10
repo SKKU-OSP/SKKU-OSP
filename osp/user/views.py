@@ -37,110 +37,8 @@ class ProfileView(TemplateView):
     
     template_name = 'profile/profile.html'
     start_year = 2019
+
     # 새로 고침 시 GET 요청으로 처리됨.
-    def get(self, request, *args, **kwargs):
-
-        start = time.time()
-
-        # 비 로그인 시 프로필 열람 불가
-        if request.user.is_anonymous:
-            return redirect('/community')
-
-        context = self.get_context_data(request, *args, **kwargs)
-        if not context:
-            return redirect('/community')
-
-        student_info = context['account'].student_data
-
-        # student repository info
-        context['cur_repo_type'] = 'owned'
-        ## owned repository
-        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
-
-        tags_all = Tag.objects # 태그 전체
-        tags_domain = tags_all.filter(type='domain') # 분야 태그
-
-        student_account = context['account']
-        acc_pp = AccountPrivacy.objects.get(account=student_account)
-        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
-        
-        # 유저의 관심분야
-        ints = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-
-        # 유저의 사용언어, 기술스택
-        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
-        account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
-        level_list = [ al.level for al in account_lang ]
-        lang = []
-
-        for tag in lang_tags:
-            lang_tag_dict = {"name":tag.name, "type":tag.type}
-            lang_tag_dict["level"] = level_list[len(lang)]
-            lang.append(lang_tag_dict)
-        domain_layer = DomainLayer.objects
-        
-        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
-        ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
-        relation_origin = domain_layer.values('parent_tag', 'child_tag')
-        relations = []
-        remain_children = list(ints_child_layer)
-
-        for par in ints_parent_layer:
-            relation = {
-                'parent' :par['parent_tag'],
-                'children' : [],
-            }
-            for chi in ints_child_layer:
-                if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
-                    relation['children'].append(chi['child_tag'])
-                    remain_children.remove({'child_tag' : chi['child_tag']})
-            relations.append(relation)
-
-        is_own = request.user.username == context['username']
-        # initialize
-        is_redirect = True
-        if 'privacy' in request.session:
-            del request.session['privacy']
-        if 'alert' in request.session:
-            del request.session['alert']
-        if not is_own and acc_pp.open_lvl == 0:
-            target_team = TeamMember.objects.filter(member=context['account']).values('team')
-            if target_team:
-                # team check
-                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
-                if cowork:
-                    is_redirect = False
-                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
-                    request.session['alert'] = True
-                    acc_pp.open_lvl = 1
-            if is_redirect:
-                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
-                request.session['alert'] = True
-                return redirect('../'+request.user.username+'/')
-
-        data = {
-            'info': student_info,
-            'score': student_score,
-            'ints': ints,
-            'lang': lang,
-            'relations': relations,
-            'remains': remain_children,
-            'account': context['account'],
-            'is_own' : is_own,
-            'open_lvl': acc_pp.open_lvl,
-            'is_write': acc_pp.is_write, 
-            'is_open': acc_pp.is_open,
-        }
-
-        if 'alert' in request.session and request.session['alert']:
-            print(request.session['privacy'])
-            if 'privacy' in request.session and request.session['privacy']:
-                data['privacy'] = request.session['privacy']
-        context['data'] = data
-        print("ProfileView get time :", time.time() - start)
-
-        return render(request=request, template_name=self.template_name, context=context)
-
     def get_context_data(self, request, *args, **kwargs):
         try:
             context = super().get_context_data(**kwargs)
@@ -352,8 +250,113 @@ class ProfileView(TemplateView):
             context["gbti"] = gbti_data
         context["test"] = test_data
         context["success"] = True
+
+        tags_domain = Tag.objects.filter(type='domain') # 분야 태그
+        ints = AccountInterest.objects.filter(account=account).filter(tag__in=tags_domain)
+        student_id = account.student_data.id
+        domain_layer = DomainLayer.objects
+        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=account).exclude(tag__type="domain").values("tag")).order_by("name")
+        account_lang = AccountInterest.objects.filter(account=account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
+        level_list = [ al.level for al in account_lang ]
+
+        lang = []
+
+        for tag in lang_tags:
+            lang_tag_dict = {"name":tag.name, "type":tag.type}
+            lang_tag_dict["level"] = level_list[len(lang)]
+            lang.append(lang_tag_dict)
+        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
+        ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
+        relation_origin = domain_layer.values('parent_tag', 'child_tag')
+        relations = []
+        remain_children = list(ints_child_layer)
+
+        for par in ints_parent_layer:
+            relation = {
+                'parent' :par['parent_tag'],
+                'children' : [],
+            }
+            for chi in ints_child_layer:
+                if {'parent_tag':par['parent_tag'],'child_tag':chi['child_tag']} in relation_origin:
+                    relation['children'].append(chi['child_tag'])
+                    remain_children.remove({'child_tag' : chi['child_tag']})
+            relations.append(relation)
+
+        context["relations"] =  relations
+        context["remains"] = remain_children
+        context["account"] = Account.objects.get(user=user.id)
+        context["info"] = StudentTab.objects.get(id=student_id)
+        context["ints"] = ints
+        context["lang"] = lang
         
         return context
+
+    def get(self, request, *args, **kwargs):
+
+        start = time.time()
+
+        # 비 로그인 시 프로필 열람 불가
+        if request.user.is_anonymous:
+            return redirect('/community')
+
+        context = self.get_context_data(request, *args, **kwargs)
+        if not context:
+            return redirect('/community')
+
+        student_info = context['account'].student_data
+
+        # student repository info
+        context['cur_repo_type'] = 'owned'
+        ## owned repository
+        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
+
+       
+
+        student_account = context['account']
+        acc_pp = AccountPrivacy.objects.get(account=student_account)
+        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+        
+        is_own = request.user.username == context['username']
+        # initialize
+        is_redirect = True
+        if 'privacy' in request.session:
+            del request.session['privacy']
+        if 'alert' in request.session:
+            del request.session['alert']
+        if not is_own and acc_pp.open_lvl == 0:
+            target_team = TeamMember.objects.filter(member=context['account']).values('team')
+            if target_team:
+                # team check
+                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                if cowork:
+                    is_redirect = False
+                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
+                    request.session['alert'] = True
+                    acc_pp.open_lvl = 1
+            if is_redirect:
+                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
+                request.session['alert'] = True
+                return redirect('../'+request.user.username+'/')
+        data = {
+
+        }
+
+        context['score'] = student_score
+        context['is_own'] = is_own
+        context['open_lvl'] = acc_pp.open_lvl
+        context['is_write'] = acc_pp.is_write
+        context['is_open'] = acc_pp.is_open
+
+        if 'alert' in request.session and request.session['alert']:
+            print(request.session['privacy'])
+            if 'privacy' in request.session and request.session['privacy']:
+                data['privacy'] = request.session['privacy']
+        context['data'] = data
+        print("ProfileView get time :", time.time() - start)
+
+        return render(request=request, template_name=self.template_name, context=context)
+
+    
 
 
 class ProfileEditView(TemplateView):
@@ -382,6 +385,7 @@ class ProfileEditView(TemplateView):
 
         tags_domain = Tag.objects.filter(type='domain')
 
+        
         context["account"] = Account.objects.get(user=user.id)
         context["info"] = StudentTab.objects.get(id=student_id)
         context["ints"] = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
