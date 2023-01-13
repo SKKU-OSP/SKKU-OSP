@@ -83,6 +83,7 @@ def board(request, board_name, board_id):
         context['is_write'] = acc_pp.is_write
         context['is_open'] = acc_pp.is_open
     else:
+        account = None
         context['is_write'] = 0
         context['is_open'] = 0
 
