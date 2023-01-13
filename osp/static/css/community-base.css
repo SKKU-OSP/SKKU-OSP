@@ -391,6 +391,7 @@
     box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
     margin-bottom: 1rem;
     border-radius: 0.75rem;
+    position: relative;
 }
 
 #board-title {
@@ -871,6 +872,12 @@
 .recruit-active {
     background-color: var(--tag-bg-recruit);
     color: var(--sub-point-color);
+}
+
+.btn-filter {
+    border: 1px solid black;
+    padding: 8px 12px;
+    border-radius: 10px;
 }
 
 .team-apply-delete {
