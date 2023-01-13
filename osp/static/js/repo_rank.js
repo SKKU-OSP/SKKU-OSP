@@ -72,7 +72,11 @@ function showContr(e){
         for(row in data){
             noti_li.forEach((ele, idx)=>{
                 console.log(DATA_KEYS[idx], data[row][DATA_KEYS[idx]]);
-                ele.append('<div>' + data[row][DATA_KEYS[idx]] + '</div>');
+                if(DATA_KEYS[idx] == "github_id"){
+                    ele.append(`<div><a href="https://github.com/${data[row][DATA_KEYS[idx]]}">` + data[row][DATA_KEYS[idx]] + '</a></div>');
+                }else{
+                    ele.append('<div>' + data[row][DATA_KEYS[idx]] + '</div>');
+                }
             });
         }
     });
