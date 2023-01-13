@@ -29,9 +29,8 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    boards = Board.objects.filter(team_board_query | Q(team_id=None))
-    # if request.user.is_anonymous:
-    boards = boards.exclude(board_type='User')
+    boards = Board.objects.filter(team_board_query | Q(team_id=None)).exclude(board_type='User')
+
     for board in boards:
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
@@ -47,6 +46,7 @@ def main(request):
         #     board.article_list = article_list[:min(3, len(article_list))]
         # else:
         #     board.article_list = []
+
         # 최신 게시물
         article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
         board.article_list = article_list[:min(3, len(article_list))]
@@ -71,11 +71,21 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
-
-    if request.user: 
-        account = Account.objects.get(user=request.user)
-
     context = {'board': board}
+
+    if request.user.is_authenticated:
+        account = Account.objects.get(user_id=request.user.id)
+        
+        try:
+            acc_pp = AccountPrivacy.objects.get(account=account)
+        except:
+            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+        context['is_write'] = acc_pp.is_write
+        context['is_open'] = acc_pp.is_open
+    else:
+        context['is_write'] = 0
+        context['is_open'] = 0
+
     if board.team_id is not None:
         if not request.user.is_authenticated:
             return redirect('/community')
@@ -87,13 +97,9 @@ def board(request, board_name, board_id):
         elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
             return redirect('/community')
 
-    #todo: account 지워도됨.
     if board.board_type == 'User':
         if request.user.is_anonymous:
             return redirect('/community')
-        #todo: admin 제외시키
-        context['accounts'] = Account.objects.all()[:9]
-        # context['account_all_cnt'] = Account.objects.all()
         return render(request, 'community/board/user-board.html', context)
 
     if board.board_type == 'Recruit':
@@ -108,20 +114,11 @@ def board(request, board_name, board_id):
             else:
                 article.team = None
 
-
-        # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
-        cnt = active_article.count()
-        # if cnt == 2:
-        #     active_article = list(chain(active_article, active_article))
-        # elif cnt == 1:
-        #     active_article = list(chain(active_article, active_article)) # 2개
-        #     active_article = list(chain(active_article, active_article)) # 4개
-
         team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
-
         context['team_cnt'] = team_cnt
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
+
     if board.board_type == 'Team':
         team = board.team
         team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
@@ -142,17 +139,7 @@ def board(request, board_name, board_id):
         context['team'] = team
         context['team_tags'] = team_tags_list
         context['team_members'] = team_members
-    if not request.user.is_anonymous:
-        try:
-            acc_pp = AccountPrivacy.objects.get(account=account)
-        except:
-            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
-        context['is_write'] = acc_pp.is_write
-        context['is_open'] = acc_pp.is_open
-    else:
-        context['is_write'] = 0
-        context['is_open'] = 0
-
+        
     return render(request, 'community/board/board.html', context)
 
 

@@ -4,17 +4,17 @@
 {% else %}
 <form id="comment-form" method="post" action="." onsubmit="registerComment();return false;">
     {% csrf_token %}
-    <div id="comment-input" class="comment-input">
+    <div id="comment-input" class="mt-3">
         <div id="comment-cnt">
             <i class="bi-chat-right-dots"></i>
             <div id="comment-cnt-number">{{comments|length}}</div>
         </div>
         <div id="comment-annonymous">
             <div id="comment-writer-display" class="annonymous" value="{{user.username}}">익명</div>
-            <input id="comment-is-anonymous" type="checkbox" checked>
+            <input type="checkbox" id="comment-is-anonymous" checked>
         </div>
         <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>
-        <button id="comment-submit" class="hover-opacity" type="submit">
+        <button type="submit" id="comment-submit" class="hover-opacity">
             댓글 쓰기
         </button>
     </div>
