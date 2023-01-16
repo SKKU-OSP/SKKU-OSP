@@ -249,6 +249,7 @@ function saveAll(){
   formData += ''
   alert("저장되었습니다.");
   console.log(formData);
+  
   $.ajax({
     cache : false,
     url : "all",
@@ -267,7 +268,8 @@ function saveAll(){
     }
 
     });
-  reload();
+    window.location.href='..';
+    
 
 }
 
