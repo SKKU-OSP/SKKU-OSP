@@ -14,8 +14,8 @@
     <div class="container my-4" id="wholecontent">
       <div class="d-flex justify-content-end mb-1">
         <!--button type="submit" class="btn btn-primary" method='POST' action="">저장</button-->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          비밀번호 변경
+        <button class="savebtn" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          PW 변경
         </button>
         <button class="savebtn" onclick="saveImg(); saveAll();">저장하기</button>
         <button class="savebtn" onclick="location.href='..'">돌아가기</button >
@@ -25,13 +25,18 @@
         <div id="profile-info" class="col-md-3 col-12">
           <div class="d-flex flex-column justify-content-end text-center user-info" id="profileimg_pa">
             <div style="position:relative; margin:auto;" id="profileimg">
+
               <form id="imgform" method='POST' action='' enctype="multipart/form-data">
-                  {% csrf_token %}
-                  <img id="image_section" src= {{account.photo.url}} alt="No Image now" class="profile-img">
+                {% csrf_token %}
+                
+                <img id="image_section" src= {{account.photo.url}} alt="No Image now" class="profile-img">
                 <label id="for-photo" for="photo">
                   <i class="bi bi-pen"></i>
                 </label>
-                <div><input id="photo" class="form-control" name="photo" type="file" hidden/>
+                <label id="for-photo-delete" onclick="deleteImg();">
+                  <i class="bi bi-trash"></i>
+                </label>
+                <div><input id="photo" class="form-control" name="photo" type="file" hidden />
                 <!--button type="submit" class="btn btn-primary" onclick="saveImg(); return false;">저장</button--></div>
               </form>
             </div>

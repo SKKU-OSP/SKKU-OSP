@@ -193,10 +193,34 @@ function languageDelete(target){
 function saveImg(){
   const imageInput = $("#photo")[0];
   console.log("imageInput: ", imageInput.files)
-  
+  console.log("이미지 섹션의 값");
+  console.log($("#image_section").attr('src'));
+
+  if($("#image_section").attr('src') == "/data/media/img/profile_img/default.jpg"){
+    console.log("잡앗다.");
+    
+    $.ajax({
+      type: "POST",
+      url: "imagedefault",
+      headers: {'X-CSRFToken': csrftoken},
+      success: function(rtn){
+        //const message = rtn.data.values[0];
+        //console.log("message: ", message)
+      },
+      err: function(err){
+        //console.log("err:", err)
+      }
+    })
+    return;
+  }
+
+
+
   if(imageInput.files.length > 0){
     const formData = new FormData();
+
     formData.append("photo", imageInput.files[0]);
+
     $.ajax({
       type:"POST",
       url: "image",
@@ -259,24 +283,24 @@ console.log('이미지 확인2');
 }
 
 $("#profileimg").ready(function() {
-console.log('change detected');
-$("#photo").change(function(){
-  console.log('이미지 확인1-로드');
-  let input = this;
-  console.log(input);
-  if (input.files && input.files[0]) {
-    console.log('preview avaliable');
-    var reader = new FileReader();  
-    reader.onload = function (e) {
-      console.log($('#image_section'));
-      $('#image_section').attr('src', e.target.result);
-    }
-    reader.readAsDataURL(input.files[0]);
-  }
-  console.log('이미지 확인2');
-});
-});
+  console.log('change detected');
+  $("#photo").change(function(){
+    console.log('이미지 확인1-로드');
+    let input = this;
+    console.log(input);
 
+    if (input.files && input.files[0]) {
+      console.log('preview avaliable');
+      var reader = new FileReader();  
+      reader.onload = function (e) {
+        console.log($('#image_section'));
+        $('#image_section').attr('src', e.target.result);
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+    console.log('이미지 확인2');
+  });
+});
 
 $(document).ready(function() {
 plural = $('#plural_major').attr('value');
@@ -376,3 +400,10 @@ $("#profileprivacyradio2").change(function(){
   console.log($('#profileprivacy').attr('value'));
 });
 });
+
+function deleteImg(){
+  $("#image_section").attr('src', "/data/media/img/profile_img/default.jpg");
+  return;
+}
+
+
