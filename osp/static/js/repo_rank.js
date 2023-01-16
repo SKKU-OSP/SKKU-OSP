@@ -1,22 +1,46 @@
 $(document).ready(function () {
+    $.LoadingOverlay("show");
     var table = $('#scoreTable').DataTable({
         dom: 'Bfrtp',
         language: {
             searchPanes: {
                 clearMessage: '초기화',
-                collapse: {0: '&#61263', _: '&#61263'}
+                collapse: {0: '<i class="bi bi-funnel"></i>', _: '<i class="bi bi-funnel-fill"></i>'}
             }
         },
-        buttons: [{
-            extend: 'searchPanes',
-            config: {
-                layout: 'columns-1',
-                viewTotal: true,
-                orderable: false,
-                columns: [7],
-                initCollapsed: true,
+        lengthChange: false,
+        buttons: {
+            dom: {
+                button: {
+                    className: ''
+                },
+                container: {
+                    className: 'dt-buttons mb-2'
+                },
             },
-        }],
+            buttons:[
+                {
+                    extend: 'searchPanes',
+                    className: 'btn btn-sm btn-light',
+                    config: {
+                        layout: 'columns-1',
+                        viewTotal: true,
+                        orderable: false,
+                        columns: [7],
+                        initCollapsed: true,
+                    },
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn btn-sm btn-success',
+                    title: 'repository_rank'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn btn-sm btn-success',
+                    title: 'repository_rank'
+                },
+            ]},
         columnDefs: [
             {
                 orderable: false, 
@@ -35,6 +59,7 @@ $(document).ready(function () {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     });
+    $.LoadingOverlay("hide");
 });
 
 function showContr(e){
