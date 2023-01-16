@@ -4,7 +4,7 @@
 {% block content %}
 {% if user.is_staff %}
 <div class="container mt-4">
-    <table class="table table-striped table-hover" id="scoreTable">
+    <table id="scoreTable" class="table table-striped table-hover">
         <thead>
             <tr>
                 <th>Repository</th>
@@ -37,7 +37,7 @@
                 <td>{{row.contributors_count}}</td>
                 <td class="contributor_list" data-id="{{row.github_id}}" data-repo="{{row.repo_name}}">
                     <span>{{row.student_contributor|length}}</span>
-                    <button class="btn btn-sm btn-outline-dark btn-show" data-id="{{row.github_id}}" data-repo="{{row.repo_name}}" onclick="showContr(event);">+</button>
+                    <i class="bi bi-search hover-opacityr mx-3" role="button" data-id="{{row.github_id}}" data-repo="{{row.repo_name}}" onclick="showContr(event);"></i>
                     <div id="{{row.github_id}}/{{row.repo_name}}" class="dropdown-menu noti-dropdown col-dropdown text-center d-flex">
                         <li class="col-item d-flex flex-column" data-id="Name">
                         </li>
