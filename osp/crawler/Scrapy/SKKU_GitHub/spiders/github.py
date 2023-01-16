@@ -17,37 +17,41 @@ class GithubSpider(scrapy.Spider):
 
     def __init__(self, ids='', **kwargs):
         self.ids = []
-        self.recent = None
         if ids != '' :
             self.ids = ids.split(',')
 
     def start_requests(self):
         for id in self.ids :
-            yield self.api_get(f'users/{id}', self.parse_user)
+            yield self.get_recent(f'users/{id}')
     
     def __end_of_month(self, now: datetime) :
         next_month = now.month % 12 + 1
         next_year = now.year + now.month // 12
         return datetime(next_year, next_month, 1) - timedelta(seconds=1)
-
-    def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100) :
-
-        try:
-            GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=updated"
-            res = requests.get(GITHUB_API_URL)
-            res_json =  json.loads(res.text)
-            updated_at = res_json[0]["updated_at"]
-            self.compare_recent(updated_at)
-        except Exception as e:
-            logging.warning("recent update", e)
+    
+    def get_recent(self, endpoint) :
+        # 타겟 유저의 최신 push 기록을 확인한다.
         try:
             GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=pushed"
-            res = requests.get(GITHUB_API_URL)
-            res_json =  json.loads(res.text)
-            updated_at = res_json[0]["pushed_at"]
-            self.compare_recent(updated_at)
+            return scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint":endpoint})
         except Exception as e:
-            logging.warning("recent update", e)
+            logging.warning("recent pushed")
+            return self.api_get(endpoint, self.parse_user)
+            
+    def find_recent(self, res) :
+        # push 기록을 저장한 후 api_get을 호출해 크롤링을 진행한다.
+        try:
+            endpoint = res.meta["endpoint"]
+            recent_json = json.loads(res.body)
+            recent_at = recent_json[0]["pushed_at"]
+            metadata = {"recent":recent_at[:7]}
+        except Exception:
+            logging.warning("parse err: recent pushed")
+            metadata = {"recent":None}
+        
+        return self.api_get(endpoint, self.parse_user, metadata=metadata)
+    
+    def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100) :
         
         req = scrapy.Request(
                 f'{API_URL}/{endpoint}?page={page}&per_page={per_page}',
@@ -58,14 +62,6 @@ class GithubSpider(scrapy.Spider):
         
         return req
 
-    def compare_recent(self, updated_at) :
-        if self.recent == None:
-            self.recent = updated_at
-        if int(self.recent[:4]) < int(updated_at[:4]):
-            self.recent = updated_at
-        elif int(self.recent[:4]) == int(updated_at[:4]):
-            if int(self.recent[5:7]) < int(updated_at[5:7]):
-                self.recent = updated_at
 
     def parse_user(self, res) :
         user_json = json.loads(res.body)
@@ -82,15 +78,17 @@ class GithubSpider(scrapy.Spider):
         user_item['request_cnt'] = 1 + max(math.ceil(user_json['public_repos'] / 100), 1)
 
         created_date = user_json['created_at'][:7]
-        pivot_date = datetime.strptime(created_date, '%Y-%m')
-        if self.recent == None:
-            end_date = datetime.now()
-        else:
-            end_date = self.recent
-            end_date = datetime.strptime(end_date, '%Y-%m')
-            self.recent = None
+        updated_date = user_json['updated_at'][:7]
 
-        logging.info(f"parse_user: created_date:{created_date} end_date {end_date}")
+        pivot_date = datetime.strptime(created_date, '%Y-%m')
+        end_date = datetime.strptime(updated_date, '%Y-%m')
+
+        recent_date = res.meta['recent']
+        if recent_date != None:
+            recent_date = datetime.strptime(recent_date, '%Y-%m')
+            end_date = recent_date if end_date < recent_date else end_date
+
+        logging.info(f"parse_user: created_date:{pivot_date} end_date {end_date}")
 
         end_date = self.__end_of_month(end_date)
         while pivot_date < end_date :
