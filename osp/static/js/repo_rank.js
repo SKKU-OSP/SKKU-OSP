@@ -4,19 +4,42 @@ $(document).ready(function () {
         language: {
             searchPanes: {
                 clearMessage: '초기화',
-                collapse: {0: '&#61263', _: '&#61263'}
+                collapse: {0: '<i class="bi bi-funnel"></i>', _: '<i class="bi bi-funnel-fill"></i>'}
             }
         },
-        buttons: [{
-            extend: 'searchPanes',
-            config: {
-                layout: 'columns-1',
-                viewTotal: true,
-                orderable: false,
-                columns: [7],
-                initCollapsed: true,
+        lengthChange: false,
+        buttons: {
+            dom: {
+                button: {
+                    className: ''
+                },
+                container: {
+                    className: 'dt-buttons mb-2'
+                },
             },
-        }],
+            buttons:[
+                {
+                    extend: 'searchPanes',
+                    className: 'btn btn-sm btn-light',
+                    config: {
+                        layout: 'columns-1',
+                        viewTotal: true,
+                        orderable: false,
+                        columns: [7],
+                        initCollapsed: true,
+                    },
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn btn-sm btn-success',
+                    title: 'repository_rank'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn btn-sm btn-success',
+                    title: 'repository_rank'
+                },
+            ]},
         columnDefs: [
             {
                 orderable: false, 
@@ -72,7 +95,11 @@ function showContr(e){
         for(row in data){
             noti_li.forEach((ele, idx)=>{
                 console.log(DATA_KEYS[idx], data[row][DATA_KEYS[idx]]);
-                ele.append('<div>' + data[row][DATA_KEYS[idx]] + '</div>');
+                if(DATA_KEYS[idx] == "github_id"){
+                    ele.append(`<div><a href="https://github.com/${data[row][DATA_KEYS[idx]]}">` + data[row][DATA_KEYS[idx]] + '</a></div>');
+                }else{
+                    ele.append('<div>' + data[row][DATA_KEYS[idx]] + '</div>');
+                }
             });
         }
     });

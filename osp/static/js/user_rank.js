@@ -8,25 +8,58 @@ $(document).ready(function () {
         language: {
             searchPanes: {
                 clearMessage: '초기화',
-                collapse: {0: '&#61263', _: '&#61263'}
+                collapse: {0: '<i class="bi bi-funnel"></i>', _: '<i class="bi bi-funnel-fill"></i>'}
             }
         },
-        buttons: [{
-            extend: 'searchPanes',
-            config: {
-                layout: 'columns-5',
-                viewTotal: true,
-                orderable: false,
-                columns: [2, 3, 4, 6, 7],
-                preSelect: [{
-                    column: 6,
-                    rows: [String(last_year)]
-                }]
+        lengthChange: false,
+        select: {
+            style: 'multi'
+        },
+        buttons: {
+            dom: {
+                button: {
+                    className: ''
+                },
+                container: {
+                    className: 'dt-buttons mb-2'
+                },
             },
-        }],
+            buttons:[
+                {
+                    extend: 'searchPanes',
+                    className: 'btn btn-sm btn-light',
+                    config: {
+                        layout: 'columns-5',
+                        viewTotal: true,
+                        orderable: false,
+                        columns: [2, 3, 4, 6, 7],
+                        preSelect: [{
+                            column: 6,
+                            rows: [String(last_year)]
+                        }]
+                    },
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn btn-sm btn-success',
+                    title: 'user_rank'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn btn-sm btn-success',
+                    title: 'user_rank'
+                },
+            ]},
         columnDefs: [{
             orderable: false,
-            targets: [0, 1, 2, 3, 4, 5, 6]
+            targets: [0, 1, 2, 3, 4, 5, 6],
+            searchPanes: {
+                dtOpts: {
+                    select: {
+                        style: 'multi'
+                    }
+                }
+            }
         }, ],
         order: [
             [7, 'desc']
