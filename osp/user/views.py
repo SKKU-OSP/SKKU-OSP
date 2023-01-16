@@ -651,7 +651,7 @@ class ProfileImageView(UpdateView):
 
         else:
             print(field_check_list['photo'])
-        return redirect(f'/user/{username}/profile-edit/')
+        return redirect(f'/user/{username}/')
 
 class ProfileImageDefaultView(DeleteView):
     def post(self, request, username, *args, **kwargs):
@@ -660,7 +660,7 @@ class ProfileImageDefaultView(DeleteView):
         user_account = Account.objects.get(user=user.id)
         user_account.photo = "img/profile_img/default.jpg"
         user_account.save()
-        return redirect(f'/user/{username}/profile-edit/')
+        return redirect(f'/user/{username}/')
 
 
 
