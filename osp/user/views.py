@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
@@ -602,8 +602,10 @@ class ProfileLanguagesView(UpdateView):
             return JsonResponse({'data':'asdfas'})
 
 class ProfileImageView(UpdateView):
+
     def post(self, request, username, *args, **kwargs):
         print("asdfds")
+        print('img 상태dffffffffffffffffffffffffff')
         user = User.objects.get(username=username)
         
         user_account = Account.objects.get(user=user.id)
@@ -611,9 +613,14 @@ class ProfileImageView(UpdateView):
         pre_img = user_account.photo.path
         field_check_list = {}
         profile_img = request.FILES.get('photo', False)
-        print('img 상태')
+        
         print(profile_img)
         is_valid = True
+        print(request.POST.get('is_default'))
+        if request.POST.get('is_default') == 'true':
+            print("is true!!")
+
+
         if profile_img:
             img_width, img_height = get_image_dimensions(profile_img)
             print(img_width, img_height)
@@ -630,9 +637,10 @@ class ProfileImageView(UpdateView):
                 print('form에 이미지 존재')
                 try:
                     print(" path of pre_image is "+ pre_img)
-                    if(pre_img.split("/")[-1] == "default.jpg"):
+                    if(pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
                         pass
                     else:
+                        print(pre_img.split("/")[-1])
                         os.remove(pre_img) # 기존 이미지 삭제
                 
                 except:                # 기존 이미지가 없을 경우에 pass
@@ -644,6 +652,17 @@ class ProfileImageView(UpdateView):
         else:
             print(field_check_list['photo'])
         return redirect(f'/user/{username}/profile-edit/')
+
+class ProfileImageDefaultView(DeleteView):
+    def post(self, request, username, *args, **kwargs):
+        user = User.objects.get(username=username)
+        
+        user_account = Account.objects.get(user=user.id)
+        user_account.photo = "img/profile_img/default.jpg"
+        user_account.save()
+        return redirect(f'/user/{username}/profile-edit/')
+
+
 
 class ProfileEditSaveView(UpdateView):
     def post(self, request, username, *args, **kwargs):

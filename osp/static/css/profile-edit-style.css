@@ -122,6 +122,22 @@ a.nav-link {
   z-index: 6;
 }
 
+#for-photo-delete{
+  position:relative;
+  display:block;
+  text-align: center;
+  background-color: rgb(234, 10, 10);
+  color: white;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  width: 25px;
+  margin:auto;
+  margin-top: -26px;
+  margin-right: 115px;
+
+  z-index: 6;
+}
+
 .range-wrap {
   position: relative;
   margin: 0 auto 3rem;

@@ -37,9 +37,9 @@
   <script>
     const myModal = document.getElementById('myModal')
     const myInput = document.getElementById('myInput')
-    myModal.addEventListener('shown.bs.modal', () => {
-        myInput.focus()
-    })
+    $(document).on('show.bs.modal','#myModal', function () {
+      myInput.focus()
+    });
     function passwdChange(){
       var formData = $("#passwdchangeform").serialize();
       formData += "&act=" + 'append';
