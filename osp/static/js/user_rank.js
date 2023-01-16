@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    $.LoadingOverlay("show");
     var last_year = 0;
     $('#scoreTable > tbody > tr > td:nth-child(7)').each(function () {
         last_year = Math.max(Number($(this).html()), last_year);
@@ -13,6 +12,9 @@ $(document).ready(function () {
             }
         },
         lengthChange: false,
+        select: {
+            style: 'multi'
+        },
         buttons: {
             dom: {
                 button: {
@@ -50,7 +52,14 @@ $(document).ready(function () {
             ]},
         columnDefs: [{
             orderable: false,
-            targets: [0, 1, 2, 3, 4, 5, 6]
+            targets: [0, 1, 2, 3, 4, 5, 6],
+            searchPanes: {
+                dtOpts: {
+                    select: {
+                        style: 'multi'
+                    }
+                }
+            }
         }, ],
         order: [
             [7, 'desc']
@@ -60,5 +69,4 @@ $(document).ready(function () {
         return this.nodeType === 3;
     }).remove();
     $('#scoreTable_filter > label > input').attr('placeholder', 'Search')
-    $.LoadingOverlay("hide");
 });

@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    $.LoadingOverlay("show");
     var table = $('#scoreTable').DataTable({
         dom: 'Bfrtp',
         language: {
@@ -59,7 +58,6 @@ $(document).ready(function () {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     });
-    $.LoadingOverlay("hide");
 });
 
 function showContr(e){
