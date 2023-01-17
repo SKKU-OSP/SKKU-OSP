@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db import DatabaseError, transaction
@@ -13,12 +12,11 @@ from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
-from team.recommend import get_team_recommendation
+from team.recommend import get_team_recommendation_list
 
 import hashlib
 import math, json, time
 from django.views.generic import TemplateView
-from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 
 # Create your views here.
@@ -207,14 +205,17 @@ def account_cards(request):
 
     team_list = Team.objects.filter(id__in=team_li)
     print(team_list)
+
+    # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
+    team_member_dict = get_team_recommendation_list(team_list)
     for team_obj in team_list:
-        # TODO: 추천함수 최적화
-        member_li = get_team_recommendation(team_obj)
-        member_id += member_li
-        tmps = account_list.filter(user__in=member_li)
-        for tmp in tmps:
-            tmp.recommend_team = team_obj
-        user_list += list(tmps)
+        if team_obj.id in team_member_dict:
+            member_li = team_member_dict[team_obj.id]
+            member_id += member_li
+            tmps = account_list.filter(user__in=member_li)
+            for tmp in tmps:
+                tmp.recommend_team = team_obj
+            user_list += list(tmps)
 
     user_list += list(account_list.exclude(user__in=member_id))
 
