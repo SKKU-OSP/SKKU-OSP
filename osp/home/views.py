@@ -22,7 +22,7 @@ def statistic(request):
     
     # 5. MODEL Student
     def getStudentYear(end_year):
-        stdnt_case_list = [[[] for i in range(start_year, end_year+1)] for j in range(4)]
+        stdnt_case_list = [[[] for _ in range(start_year, end_year+1)] for _ in range(4)]
         stdnt_list = Student.objects.all()
         for stdnt_data in stdnt_list:
             stdnt_json = stdnt_data.to_json()
@@ -43,16 +43,16 @@ def statistic(request):
         return stdnt_case_list
 
     annual_total_list = AnnualTotal.objects.order_by('case_num')
-    annual_total = [[] for i in range(4)]
+    annual_total = [[] for _ in range(4)]
     for annual_data in annual_total_list:
         annual_total[annual_data.case_num].append(annual_data.to_json())
     
-    dist_score_total_list = DistScore.objects.order_by('case_num')
-    dist_score_total = [[] for i in range(4)]
+    dist_score_total_list = DistScore.objects.order_by('case_num', 'year')
+    dist_score_total = [[] for _ in range(4)]
     for dist_score in dist_score_total_list:
         dist_score_total[dist_score.case_num].append(dist_score.to_json())
-    dist_factor_list = DistFactor.objects.order_by('case_num')
-    dist_factor = [[] for i in range(4)]
+    dist_factor_list = DistFactor.objects.order_by('case_num', 'year')
+    dist_factor = [[] for _ in range(4)]
     for dist in dist_factor_list:
         dist_factor[dist.case_num].append(dist)
     for case in range(4):
@@ -68,7 +68,7 @@ def statistic(request):
         if case == 0:
             stdnt_case_list = getStudentYear(end_year)
             repo_total_list = Repository.objects.all()
-            repo_list = [ [] for i in range(end_year-start_year+1)]
+            repo_list = [ [] for _ in range(end_year-start_year+1)]
             for repo in repo_total_list:
                 if repo.year >= start_year:
                     repo_list[repo.year-start_year].append(repo.to_json())
