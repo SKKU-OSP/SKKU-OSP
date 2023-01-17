@@ -1,7 +1,5 @@
 {% load community_tag %}
-{% if request.user.is_anonymous %}
-댓글 쓰기 기능은 로그인 후 이용 가능합니다.
-{% else %}
+{% if request.user.is_authenticated %}
 <form id="comment-form" method="post" action="." onsubmit="registerComment();return false;">
     {% csrf_token %}
     <div id="comment-input" class="mt-3">
@@ -29,7 +27,7 @@
         <div class="comment-item-left">
             <div class="comment-item-writer-wrapper">
                 {% if request.user.is_anonymous %}
-                <a class="comment-item-writer annonymous">사용자</a>
+                <div class="comment-item-writer annonymous">사용자</div>
                 {% elif comment.anonymous_writer %}
                 <div class="comment-item-writer annonymous">익명</div>
                 {% else %}
@@ -91,7 +89,7 @@
         {% endif %}
     </div>
     {% empty %}
-    {% if not request.user.is_anonymous %}
+    {% if request.user.is_authenticated %}
     <div>댓글을 등록해주세요.</div>
     {% endif %}
     {% endfor %}
