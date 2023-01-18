@@ -1,6 +1,3 @@
-@import url("/static/css/color.css");
-@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.0/font/bootstrap-icons.css");
-
 #community-sidebar {
     display: flex;
     flex-direction: column;
@@ -26,9 +23,7 @@
 }
 
 #profile-username {
-    font-family: 'Roboto' !important;
     font-style: normal;
-    font-weight: 400;
     font-size: 25px;
     text-align: center;
 }
