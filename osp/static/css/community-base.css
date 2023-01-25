@@ -344,7 +344,7 @@
     background-image: none;
 }
 
-#team-tab {
+#teamTab {
     background-color: var(--main-point-color) !important;
     color: white;
     margin-bottom: 10px;
@@ -362,7 +362,7 @@
     border: 1px solid var(--main-border-color);
 }
 
-#team-member-list {
+#teamMemberList {
     display: flex;
     flex-wrap: wrap;
     overflow-y: auto;
@@ -890,4 +890,14 @@
     display: block;
     word-break: break-all;
     overflow: hidden;
+}
+
+/* admin이 아닌 팀원의 아이콘 색을 연하게 설정 */
+.icon-normal-user{
+    color:#CDCDCD;
+}
+
+#membersList{
+    max-height: 200px;
+    overflow-y: auto;
 }
