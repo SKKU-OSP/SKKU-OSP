@@ -112,32 +112,6 @@ def board_sidebar_team_board(context, request):
                 '''
     return mark_safe(result)
 
-#todo: 사용 x
-@register.simple_tag(takes_context=True)
-def board_sidebar_invite_team_board(context, request):
-    team_board_query = Q()
-    result = ''
-    if request.user and request.user.is_authenticated:
-        team_list = list(TeamInviteMessage.objects.filter(account__user=request.user, status=0, direction=True).values_list('team__name',flat=True))
-
-        team_board_query = Q(name__in=team_list)
-
-        for board in Board.objects.filter(team_board_query):
-            url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
-            if board == context['board']:
-                result += f'''
-                <div class="boardgroup-item hover-opacity selected">
-                <a href="{url}">{board.name.capitalize()}</a>
-                </div>
-                '''
-            else:
-                result += f'''
-                <div class="boardgroup-item hover-opacity">
-                <a href="{url}">{board.name.capitalize()}</a>
-                </div>
-                '''
-    return mark_safe(result)
-
 @register.simple_tag()
 def is_period_end(date):
     if isinstance(date, datetime):
