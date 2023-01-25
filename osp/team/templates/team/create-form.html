@@ -1,43 +1,30 @@
 {% load tag_templatetag %}
-<div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">새로운 팀 만들기</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <form class="needs-validation row" id="team-create-form" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label for="team-name"  class="form-label">팀 이름</label>
-                    <input type="text" id="team-name" name="name" style="font-size:14px;" class="form-control" required>
-                    <div class="valid-feedback" for="team-name"></div>
-                    <div class="invalid-feedback" for="team-name"></div>
-                </div>
-                <div class="mb-4">
-                    <label for="team-desc" class="form-label">팀 설명</label>
-                    <textarea id="team-desc"  style="font-size:14px;" name="desc" class="form-control" rows="3"></textarea>
-                    <div class="valid-feedback" for="team-desc"></div>
-                    <div class="invalid-feedback" for="team-desc"></div>
-                </div>
-                <div class="mb-4">
-                    <label for="team-image-input" class="form-label">팀 대표 이미지</label>
-                    <input type="file" id="team-image-input" name="image" class="form-control" required>
-                    <div class="valid-feedback" for="team-image"></div>
-                    <div class="invalid-feedback" for="team-image"></div>
-                </div>
-                <div class="mb-4">
-                    <label for="team-tag" class="form-label">팀 분야</label>
-                    <select name="tag" id="team-tag-input" multiple required>
-                        {% category_tag request %}
-                    </select>
-                    <div class="valid-feedback" for="team-tag"></div>
-                    <div class="invalid-feedback" for="team-tag"></div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-default" id="team-submit">저장</button>
-        </div>
+<form class="needs-validation row" id="team-create-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-4">
+        <label for="team-name" class="form-label">팀 이름</label>
+        <input type="text" id="team-name" name="name" class="form-control fs-7" required>
+        <div class="valid-feedback" data-feedback-type="team-name" ></div>
+        <div class="invalid-feedback" data-feedback-type="team-name"></div>
     </div>
-</div>
+    <div class="mb-4">
+        <label for="team-desc" class="form-label">팀 설명</label>
+        <textarea id="team-desc" name="desc" class="form-control fs-7" rows="3"></textarea>
+        <div class="valid-feedback" data-feedback-type="team-desc"></div>
+        <div class="invalid-feedback" data-feedback-type="team-desc"></div>
+    </div>
+    <div class="mb-4">
+        <label for="team-image-input" class="form-label">팀 대표 이미지</label>
+        <input type="file" id="team-image-input" name="image" class="form-control" required>
+        <div class="valid-feedback" data-feedback-type="team-image"></div>
+        <div class="invalid-feedback" data-feedback-type="team-image"></div>
+    </div>
+    <div class="mb-4">
+        <label for="team-tag" class="form-label">팀 분야</label>
+        <select name="tag" id="team-tag-input" multiple required>
+            {% category_tag request %}
+        </select>
+        <div class="valid-feedback" data-feedback-type="team-tag"></div>
+        <div class="invalid-feedback" data-feedback-type="team-tag"></div>
+    </div>
+</form>
