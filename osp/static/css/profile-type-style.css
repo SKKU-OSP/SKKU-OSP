@@ -100,6 +100,3 @@ section#main, section#result, section .qbox{
     box-shadow: 0px 4px 4px var(--card-box-shadow);
     border-radius: 15px;
 }
-.none{
-    display: none;
-}
