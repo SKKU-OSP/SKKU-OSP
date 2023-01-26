@@ -64,7 +64,50 @@ $(document).ready(function () {
         {
             targets:[2, 3],
             visible: false
-        }],
+        },
+        {
+            searchPanes: {
+                options: [
+                    {
+                        label: '0',
+                        value: function(rowData, rowIdx) {
+                            return rowData[9] == 0;
+                        }
+                    },
+                    {
+                        label: '0 ~ 1.0',
+                        value: function(rowData, rowIdx) {
+                            return rowData[9] <= 1.0 && rowData[9] > 0;
+                        }
+                    },
+                    {
+                        label: '1.0 ~ 2.0',
+                        value: function(rowData, rowIdx) {
+                            return rowData[9] <= 2.0 && rowData[9] > 1.0;
+                        }
+                    },
+                    {
+                        label: '2.0 ~ 3.0',
+                        value: function(rowData, rowIdx) {
+                            return rowData[9] <= 3.0 && rowData[9] > 2.0;
+                        }
+                    },
+                    {
+                        label: '3.0 ~ 4.0',
+                        value: function(rowData, rowIdx) {
+                            return rowData[9] <= 4.0 && rowData[9] >= 3.0;
+                        }
+                    },
+                    {
+                        label: '4.0 ~ 5.0',
+                        value: function(rowData, rowIdx) {
+                            return rowData[9] > 4.0;
+                        }
+                    }
+                ]
+            },
+            targets: [9]
+        },],
         order: [
             [0, 'asc']
         ],
