@@ -207,6 +207,7 @@ class GitHubScoreTable(models.Model):
     dept = models.CharField(max_length=45)
     absence = models.IntegerField()
     plural_major = models.IntegerField()
+    personal_email = models.CharField(max_length=100, default=None)
 
     class Meta:
         constraints = [
@@ -230,4 +231,5 @@ class GitHubScoreTable(models.Model):
             "dept":self.dept,
             "absence":self.absence,
             "plural_major":self.plural_major,
+            "personal_email":self.personal_email,
         }
