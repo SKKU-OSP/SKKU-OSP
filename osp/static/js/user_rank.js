@@ -3,6 +3,28 @@ $(document).ready(function () {
     $('#scoreTable > tbody > tr > td:nth-child(9)').each(function () {
         last_year = Math.max(Number($(this).html()), last_year);
     })
+    var selectYear = $("#dropdownYearButton").text();
+    var searchPanesConfig =
+        {
+            layout: 'columns-4',
+            viewTotal: true,
+            orderable: false,
+            columns: [4, 5, 6, 9]
+        };
+    if(isNaN(parseInt(selectYear))){
+        searchPanesConfig=
+        {
+            layout: 'columns-5',
+            viewTotal: true,
+            orderable: false,
+            columns: [8, 4, 5, 6, 9],
+            preSelect: [{
+                column: 8,
+                rows: [String(last_year)]
+            }]
+        }
+    }
+
     var table = $('#scoreTable').DataTable({
         dom: 'Bfrtp',
         language: {
@@ -28,16 +50,7 @@ $(document).ready(function () {
                 {
                     extend: 'searchPanes',
                     className: 'btn btn-sm btn-light',
-                    config: {
-                        layout: 'columns-5',
-                        viewTotal: true,
-                        orderable: false,
-                        columns: [4, 5, 6, 8, 9],
-                        preSelect: [{
-                            column: 8,
-                            rows: [String(last_year)]
-                        }]
-                    },
+                    config: searchPanesConfig
                 },
                 {
                     extend: 'csv',
