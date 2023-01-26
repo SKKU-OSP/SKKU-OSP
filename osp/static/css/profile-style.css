@@ -1,15 +1,5 @@
-body {
-  background-color: var(--sub-bg-color);
-}
-
 .recent_repos {
   min-height: 100px;
-}
-
-h5.modal-title {
-  font: 16px;
-  font-weight: 500;
-  text-indent: 20px;
 }
 
 /* Bootstrap Change */
@@ -67,11 +57,6 @@ h5.modal-title {
   border: 1.5px solid var(--main-border-color);
   color: var(--bootstrap-primary);
   background-color: var(--main-bg-color);
-}
-
-#copyright {
-  margin-bottom: 0px;
-  font-size: 12px;
 }
 
 a.nav-link {
