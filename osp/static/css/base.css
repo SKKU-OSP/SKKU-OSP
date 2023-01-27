@@ -17,6 +17,20 @@ body {
   background-color: var(--sub-bg-color);
   -ms-overflow-style: none;
 }
+#body-wrapper {
+  min-height: 100%;
+  position: relative;
+  padding-bottom: 80px;
+}
+footer {
+  width: 100%;
+  height: 80px;
+  position: absolute;
+  bottom: 0;
+  border-top: solid 2px black;
+  text-align: center;
+}
+
 /* body 스크롤바 제거 */
 body::-webkit-scrollbar {
   display: none;
@@ -43,27 +57,11 @@ li, a, button {
   text-decoration: none;
 }
 
-footer {
-  width: 100%;
-  height: 80px;
-  position: absolute;
-  bottom: 0;
-  border-top: solid 2px black;
-  text-align: center;
-}
-
 .row {
   --bs-gutter-x: 0.8rem !important;
 }
 
-#body-wrapper {
-  min-height: 100%;
-  position: relative;
-}
 
-#body-content {
-  padding-bottom: 80px;
-}
 
 .bold {
   font-weight: bold;
