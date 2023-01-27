@@ -1,9 +1,10 @@
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
 class Tag(models.Model):
     name = models.CharField(primary_key=True, max_length=20)
     type = models.CharField(max_length=20)
+    logo = models.FilePathField(path=settings.STATICFILES_DIRS, default="default.svg")
 
 class LanguageExtension(models.Model):
     ext = models.CharField(primary_key=True, max_length=20)
