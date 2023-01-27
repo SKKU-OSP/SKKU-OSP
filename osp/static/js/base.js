@@ -217,8 +217,13 @@ $().ready(function () {
         ApplyTeamModalOpen();
     });
 });
-
-function ReadNotification(type, noti_id, target_id) {
+/**
+ * 알림 메시지를 클릭하면 읽음과 피드백을 하는 함수
+ * @param {string} type 알림 메시지의 타입
+ * @param {string} noti_id 알림 메시지의 아이디
+ * @param {string} target_id 팀초대면 url, 게시글 관련이면 숫자
+ */
+function ReadNotification(type, noti_id, target_id="") {
     console.log(type, noti_id, target_id)
     $.ajax({
         url: '/message/noti-read/' + noti_id,
