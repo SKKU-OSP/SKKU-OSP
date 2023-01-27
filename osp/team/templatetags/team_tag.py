@@ -10,6 +10,7 @@ register = template.Library()
 def var_set(var):
     return var
 
+# message_tag에만 사용하여 이동, 사용하지 않음
 @register.simple_tag
 def make_team_board_url(team_id):
     from django.shortcuts import resolve_url
