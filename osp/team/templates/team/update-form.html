@@ -1,78 +1,62 @@
-{% load static %}
 {% load tag_templatetag %}
-
-<div class="modal-dialog">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">
-        팀 정보 수정
-      </div>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<form id="team-update-form" onsubmit="submit_update_form(event);">
+    {% csrf_token %}
+    <input type="hidden" name="team-id" value="{{ team.id }}">
+    <input type="hidden" id="username" value="{{ request.user.username }}">
+    <div class="mb-4">
+        <label for="team-name" class="form-label">팀 이름</label>
+    <input type="text" id="team-name" name="team-name" class="form-control" value="{{ team.name }}" required>
     </div>
-    <div class="modal-body">
-      <form id="team-update-form" onsubmit="submit_update_form(event);">
-        {% csrf_token %}
-        <input style="display:none" name="team-id" value="{{ team.id }}">
-        <div style="margin-bottom:5px;">
-          <label for="team-name">팀 이름:</label>
-          <input type="text" name="team-name" class="form-control" value="{{ team.name }}" required>
-        </div>
-        <div style="margin-bottom:5px;">
-          <label for="team-desc">팀 설명</label>
-          <textarea type="text" name="team-desc" class="form-control" required>{{ team.description }}</textarea>
-        </div>
-        <div style="margin-bottom:5px;">
-          <label for="team-image">팀 대표 이미지</label>
-          <input type="file" name="team-image" id="team-image-submit" class="form-control">
-        </div>
-        <div class="w-100 d-flex flex-row justify-content-between">
-          <div><label for="">팀 멤버</label></div>
-          <div><i id="refresh-members" class="material-icons hover-opacity"
-              style="padding-top:5px;">autorenew</i></div>
-        </div>
-        <div id="members-list" class="w-100 text-left"
-          style="height:200px;max-height:200px;overflow-y:auto;margin-bottom:5px;">
-          <table class="w-100" id="username" value="{{ request.user.username }}">
-            <colgroup>
-              <col width="10%">
-              <col width="80%">
-              <col width="10%">
-            </colgroup>
-            {% for member in team_members %}
-            <tr class="member-tr" id="member-id-{{ member.member.user.username }}" style="height:50px;">
-              <td class="text-center">
-                <i id="admin-{{ member.member.user.username }}"
-                  onclick="toggleIsAdmin('{{ member.member.user.username }}')"
-                  class="material-icons hover-opacity" {% if member.is_admin %} style="color:black" {% else %}
-                  style="color:#CDCDCD" {% endif %}>military_tech
-                </i>
-              </td>
-              <td class="text-left">
-                <a href="{% url 'user:profile' member.member.user.username %}"
-                  style="text-decoration:underline;color:black;">
-                  {{member.member.user.username}}
-                </a>
-              </td>
-              <td class="text-center">
-                {% if member.member.user != request.user %}
-                <i onclick="removeMember('{{ member.member.user.username }}')"
-                  class="material-icons hover-opacity" style="color:#CDCDCD;">delete</i>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </table>
-        </div>
-        <div>
-          <div>관련 분야</div>
-          <select name="tag" id="team-tag" multiple>
+    <div class="mb-4">
+        <label for="team-desc" class="form-label">팀 설명</label>
+        <textarea type="text" id="team-desc" name="team-desc" class="form-control text-break" rows="3" required>{{ team.description }}</textarea>
+    </div>
+    <div class="mb-4">
+        <label for="team-image-submit" class="form-label">팀 대표 이미지</span>
+        <input type="file" id="team-image-submit" name="team-image" class="form-control">
+    </div>
+    <div class="form-label">
+        팀 멤버 
+        <i id="refreshMembers" class="fade bi bi-arrow-counterclockwise hover-opacity align-middle"></i>
+    </div>
+    <div id="membersList" class="w-100 mb-2">
+    <table class="w-100">
+        <colgroup>
+        <col width="8%">
+        <col width="84%">
+        <col width="8%">
+        </colgroup>
+        {% for member in team_members %}
+        <tr id="member-id-{{ member.member.user.username }}" class="member-tr my-2">
+        {% if member.is_admin %} 
+        <td id="admin-{{ member.member.user.username }}">
+        {% else %}
+        <td id="admin-{{ member.member.user.username }}" class="icon-normal-user">
+        {% endif %}
+            <i class="material-icons align-middle hover-opacity" onclick="toggleIsAdmin('{{ member.member.user.username }}')">
+                military_tech
+            </i>
+        </td>
+        <td class="text-left text-decoration-underline">
+            <a href="{% url 'user:profile' member.member.user.username %}">
+                {{member.member.user}}
+            </a>
+        </td>
+        <td class="text-center">
+            {% if member.member.user != request.user %}
+            <i class="material-icons align-middle hover-opacity" onclick="removeMember('{{ member.member.user.username }}')">
+                logout
+            </i>
+            {% endif %}
+        </td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+    <div class="mb-4">
+        <div class="form-label">팀 분야</div>
+        <select id="team-tag" name="tag" multiple>
             {% category_tag request %}
-          </select>
-        </div>
-      </form>
+        </select>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-primary" id="team-update-submit">저장</button>
-    </div>
-  </div>
-</div>
+</form>

@@ -1,4 +1,3 @@
-@import url("/static/css/color.css");
 section#main, section#result, section .qbox{
     text-align: center;
     align-items: center;
@@ -100,7 +99,4 @@ section#main, section#result, section .qbox{
     background: white;
     box-shadow: 0px 4px 4px var(--card-box-shadow);
     border-radius: 15px;
-}
-.none{
-    display: none;
 }

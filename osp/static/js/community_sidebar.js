@@ -1,13 +1,12 @@
 $().ready(function () {
   $('#team-create').click(function () {
-    if (!$('#AddTeamModal').hasClass('ready')) {
-      $.LoadingOverlay("show");
+    if (!$('#AddTeamModalBody').hasClass('ready')) {
       $.ajax({
         url: "/team/api/team-create",
         type: "GET",
         dataType: 'HTML'
       }).done(function (data) {
-        $('#AddTeamModal').addClass('ready').html(data)
+        $('#AddTeamModalBody').addClass('ready').html(data);
         $('#AddTeamModal').modal('show');
         new_team_tag = new SlimSelect({
           select: 'select[name=tag]',
@@ -18,7 +17,6 @@ $().ready(function () {
           },
           placeholder: 'Tag',
         });
-        $.LoadingOverlay("hide");
         $('#team-submit').click(function () {
           console.log('Submit');
           var form = $('#team-create-form')[0];
@@ -34,10 +32,12 @@ $().ready(function () {
           }).done(function (data) {
             console.log(data);
             if (data.status == 'fail') {
+              $('input').removeClass('is-invalid');
+              $('.invalid-feedback').html("");
               for (const [field, errors] of Object.entries(data.errors)) {
-                console.log(field, errors)
-                $(`[name=${field}`).addClass('is-invalid')
-                $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors)
+                console.log(field, errors);
+                $(`[name=${field}`).addClass('is-invalid');
+                $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
               }
             } else {
               window.location.reload();
@@ -55,7 +55,6 @@ $().ready(function () {
 
 
 function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
-  $.LoadingOverlay("show");
   console.log(rec_team_id);
   $.ajax({
     url: "/team/api/team-invite",
@@ -63,9 +62,8 @@ function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {
     data:{'user_id':user_id, 'team_id':team_id, 'recommend_team': rec_team_id},
     dataType: 'HTML'
   }).done(function (data) {
-    $('#InviteTeamModal').addClass('ready').html(data)
+    $('#InviteTeamModalBody').addClass('ready').html(data);
     $('#InviteTeamModal').modal('show');
-    $.LoadingOverlay("hide");
     if(user_id==-1){
       option_select = new SlimSelect({
         select: '#invite-team-username',

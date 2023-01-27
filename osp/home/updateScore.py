@@ -11,6 +11,7 @@ def user_score_update(user: Account, year: int):
     github_id = user.student_data.github_id
     pri_email = user.student_data.primary_email
     sec_email = user.student_data.secondary_email
+    personal_email = user.student_data.personal_email
     github_score = GithubScore.objects.filter(
         yid=f'{year}{github_id}'
     )
@@ -141,7 +142,8 @@ def user_score_update(user: Account, year: int):
                     repo_cnt=0,
                     dept=user.student_data.dept,
                     absence=user.student_data.absence,
-                    plural_major=user.student_data.plural_major
+                    plural_major=user.student_data.plural_major,
+                    personal_email=personal_email
                 )
             score_table.total_score=min(
                 github_score.repo_score_sum + github_score.score_other_repo_sum \
@@ -153,6 +155,7 @@ def user_score_update(user: Account, year: int):
             score_table.issue_cnt=len(issue_data)
             score_table.pr_cnt=len(pull_data)
             score_table.repo_cnt=len(contr_repos)
+            score_table.personal_email=personal_email
             score_table.save()
     except DatabaseError as e:
         print(year, user, 'ERROR')
@@ -167,6 +170,7 @@ def user_score_update_ver2(user: Account, year: int):
     plural_major = user.student_data.plural_major
     absence = user.student_data.absence
     dept = user.student_data.dept
+    personal_email = user.student_data.personal_email
     github_score = GithubScore.objects.filter(
         yid=f'{year}{github_id}'
     )
@@ -310,7 +314,8 @@ def user_score_update_ver2(user: Account, year: int):
                     repo_cnt=0,
                     dept=dept,
                     absence=absence,
-                    plural_major=plural_major
+                    plural_major=plural_major,
+                    personal_email=personal_email
                 )
             score_table.total_score=min(
                 github_score.repo_score_sum + github_score.score_other_repo_sum \
@@ -325,6 +330,7 @@ def user_score_update_ver2(user: Account, year: int):
             score_table.issue_cnt=len(issue_data)
             score_table.pr_cnt=len(pull_data)
             score_table.repo_cnt=len(contr_repos)
+            score_table.personal_email=personal_email
             score_table.save()
     except DatabaseError as e:
         print(year, user, 'ERROR')

@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
@@ -92,7 +92,7 @@ class ProfileView(TemplateView):
         own_star["avg"] = mean
         sigma = math.sqrt(sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
         own_star["std"] = sigma
-        star_dist = [star_temp_dist for i in range(num_year)]
+        star_dist = [star_temp_dist for _ in range(num_year)]
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -114,27 +114,31 @@ class ProfileView(TemplateView):
             key_name = "year"+str(annual_key)
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
 
+        # 유저 점수를 모두 가져와서 각 요소별로 분포 데이터를 만든다.
+        # 연도를 인덱스로 하여 저장한다.
         score_data = GitHubScoreTable.objects.all()
-        total_factor_data_list = []
         user_data_list = []
+        score_dist = [[] for _ in range(num_year)]
+        commit_dist = [[] for _ in range(num_year)]
+        pr_dist = [[] for _ in range(num_year)]
+        issue_dist = [[] for _ in range(num_year)]
+        repo_dist = [[] for _ in range(num_year)]
         for row in score_data:
-            total_factor_data_list.append(row.to_json())
+            score_json = row.to_json()
+
+            if score_json["year"] >= self.start_year :
+                yid = score_json["year"] - self.start_year
+                score_dist[yid].append(score_json["total_score"])
+                commit_dist[yid].append(score_json["commit_cnt"])
+                pr_dist[yid].append(score_json["pr_cnt"])
+                issue_dist[yid].append(score_json["issue_cnt"])
+                repo_dist[yid].append(score_json["repo_cnt"])
             if row.github_id == github_id:
-                user_data_list.append(row.to_json())
+                user_data_list.append(score_json)
+        
         chartdata["user_data"] = json.dumps(user_data_list)
-        score_dist = [[]] * num_year
-        commit_dist = [[]] * num_year
-        pr_dist = [[]] * num_year
-        issue_dist = [[]] * num_year
-        repo_dist = [[]] * num_year
-        for factor_data in total_factor_data_list:
-            if factor_data["year"] >= self.start_year :
-                yid = factor_data["year"]-self.start_year
-                score_dist[yid].append(factor_data["total_score"])
-                commit_dist[yid].append(factor_data["commit_cnt"])
-                pr_dist[yid].append(factor_data["pr_cnt"])
-                issue_dist[yid].append(factor_data["issue_cnt"])
-                repo_dist[yid].append(factor_data["repo_cnt"])
+        
+        # 연도별로 각 요소별 평균, 표준편차를 구해 확률밀도함수를 구할 수 있도록 한다.
         annual_dist_data = {"score":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
         for sub_dist in score_dist:
             sub_dist.sort()
@@ -174,7 +178,7 @@ class ProfileView(TemplateView):
         chartdata["issue_dist"] = issue_dist
         chartdata["repo_dist"] = repo_dist
         
-        monthly_contr = [ [] for i in range(num_year)]
+        monthly_contr = [ [] for _ in range(num_year)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
             row_json = row.to_json()
@@ -183,7 +187,7 @@ class ProfileView(TemplateView):
                 monthly_contr[row_json["year"] - self.start_year].append(row_json)
         total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
         
-        monthly_avg = [ [] for i in range(num_year)]
+        monthly_avg = [ [] for _ in range(num_year)]
         for avg in total_avg_queryset:
             yid = avg["start_yymm"].year - self.start_year
             if avg["start_yymm"].year >= self.start_year and avg["start_yymm"].year <= end_year :
@@ -424,7 +428,7 @@ def compare_stat(request, username):
         except Exception as e:
             print(e)
         
-        monthly_contr = [ [] for i in range(end_year-start_year+1)]
+        monthly_contr = [ [] for _ in range(end_year-start_year+1)]
         gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
         for row in gitstat_year:
             row_json = row.to_json()
@@ -602,8 +606,10 @@ class ProfileLanguagesView(UpdateView):
             return JsonResponse({'data':'asdfas'})
 
 class ProfileImageView(UpdateView):
+
     def post(self, request, username, *args, **kwargs):
         print("asdfds")
+        print('img 상태dffffffffffffffffffffffffff')
         user = User.objects.get(username=username)
         
         user_account = Account.objects.get(user=user.id)
@@ -611,9 +617,14 @@ class ProfileImageView(UpdateView):
         pre_img = user_account.photo.path
         field_check_list = {}
         profile_img = request.FILES.get('photo', False)
-        print('img 상태')
+        
         print(profile_img)
         is_valid = True
+        print(request.POST.get('is_default'))
+        if request.POST.get('is_default') == 'true':
+            print("is true!!")
+
+
         if profile_img:
             img_width, img_height = get_image_dimensions(profile_img)
             print(img_width, img_height)
@@ -630,9 +641,10 @@ class ProfileImageView(UpdateView):
                 print('form에 이미지 존재')
                 try:
                     print(" path of pre_image is "+ pre_img)
-                    if(pre_img.split("/")[-1] == "default.jpg"):
+                    if(pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
                         pass
                     else:
+                        print(pre_img.split("/")[-1])
                         os.remove(pre_img) # 기존 이미지 삭제
                 
                 except:                # 기존 이미지가 없을 경우에 pass
@@ -643,7 +655,18 @@ class ProfileImageView(UpdateView):
 
         else:
             print(field_check_list['photo'])
-        return redirect(f'/user/{username}/profile-edit/')
+        return redirect(f'/user/{username}/')
+
+class ProfileImageDefaultView(DeleteView):
+    def post(self, request, username, *args, **kwargs):
+        user = User.objects.get(username=username)
+        
+        user_account = Account.objects.get(user=user.id)
+        user_account.photo = "img/profile_img/default.jpg"
+        user_account.save()
+        return redirect(f'/user/{username}/')
+
+
 
 class ProfileEditSaveView(UpdateView):
     def post(self, request, username, *args, **kwargs):

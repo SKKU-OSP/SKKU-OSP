@@ -29,7 +29,7 @@
                 {% include "community/board/team-tab.html" %}
             {% endif %}
             {% if board.board_type == 'Team' and invited_user %}
-            <div class="d-flex justify-content-between" id="board-title-bar" >
+            <div id="board-title-bar" class="d-flex justify-content-between">
                 <div id="board-title">
                     <a href="/community/home/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
@@ -57,7 +57,7 @@
                 </div>
             </div>
             {% else %}
-            <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
+            <div id="board-title-bar" class="d-flex justify-content-between">
                 <div id="board-title">
                     <a href="/community/home/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
@@ -82,6 +82,5 @@
 {% endblock content %}
 {% block script %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.js"></script>
 <script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>
 {% endblock script %}

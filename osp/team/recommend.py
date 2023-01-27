@@ -1,4 +1,6 @@
 import os
+from datetime import datetime, timedelta
+import time
 import pandas as pd
 
 from osp.settings import STATICFILES_DIRS
@@ -6,7 +8,6 @@ from user.models import Account, GithubUserFollowing, GithubUserStarred
 from repository.models import GithubRepoContributor
 from .models import Team, TeamMember
 
-from datetime import datetime, timedelta
 from sklearn.metrics.pairwise import cosine_similarity
 
 def cossim_matrix(a, b):
@@ -68,3 +69,51 @@ def get_team_recommendation(team: Team):
     # print( list(member_list))
     sim = sim.drop(labels='!Team!', axis=0)
     return list(set(sim.index) - set(member_list))
+
+
+def get_team_recommendation_list(team_list: list):
+
+    '''
+    추천 팀원 검색
+
+    Returns:
+        team_id를 key로 하고 추천 멤버 아이디 리스트를 value로 갖는 dictionary
+    Caller:
+        community/views.py
+    '''
+
+    start = time.time()
+    if not os.path.exists(os.path.join(STATICFILES_DIRS[0], f'data/recommend_dataset.csv')):
+        dataset = build_dataset()
+    else:
+        dataset_mod_time = os.path.getmtime(os.path.join(STATICFILES_DIRS[0], f'data/recommend_dataset.csv'))
+        if datetime.now() - datetime.fromtimestamp(dataset_mod_time) > timedelta(days=0.25):
+            dataset = build_dataset()
+        else:
+            dataset = pd.read_csv(os.path.join(STATICFILES_DIRS[0], f'data/recommend_dataset.csv'), index_col=0)
+
+    team_dict = {}
+    member_list = TeamMember.objects.filter(team__in=team_list)
+    for ml in member_list:
+        if ml.team_id in team_dict:
+            team_dict[ml.team_id].append(ml.member_id)
+        else:
+            team_dict[ml.team_id] = [ml.member_id]
+
+    recomm_dict = {}
+    # cossim_matrix 실행에 대부분의 시간 소요
+    for team_id in team_dict:
+        member_list = team_dict[team_id]
+        team_df = dataset[dataset['user'].isin(member_list)].copy().drop(['user'], axis=1).astype('int64')
+        team_vector = get_team_vector(team_df)
+        target_dataset = pd.concat([dataset, team_vector], axis=0, ignore_index=True).set_index('user')
+        cossim = cossim_matrix(target_dataset, target_dataset)
+        sim = cossim['!Team!'][(cossim['!Team!'] > 0.0)].sort_values(ascending=False)
+        # print(sim)
+        # print(list(member_list))
+        sim = sim.drop(labels='!Team!', axis=0)
+        mem_li = list(set(sim.index) - set(member_list))
+        recomm_dict[team_id] = mem_li
+
+    print("elapsed time get_team_recommendation_list", time.time()-start)
+    return recomm_dict

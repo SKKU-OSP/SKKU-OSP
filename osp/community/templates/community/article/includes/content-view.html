@@ -31,7 +31,7 @@
                 <span class="hover-opacity" onclick="edit();">수정</span>
                 <span class="hover-opacity" onclick="deleteArticle();">삭제</span>
                 {% elif request.user.is_anonymous %}
-                <a href="">사용자</a>
+                    사용자
                 {% elif not article.anonymous_writer and article.writer.user.username is not null%}
                 <div class="dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">

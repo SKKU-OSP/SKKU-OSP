@@ -10,7 +10,7 @@
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-      <div class="d-flex justify-content-between" id="board-title-bar" style="position:relative;">
+      <div id="board-title-bar" class="d-flex justify-content-between">
         <div id="board-title">
           <a href="/community/home/{{board.name}}/{{board.id}}">
             {{ board.name }} 게시판
@@ -25,15 +25,18 @@
           </div>
         </div>
       </div>
-      <div id="team-filter" class="w-100 border d-flex flex-row flex-wrap">
+      <!-- 팀 목록이 표시되는 영역 -->
+      <div id="team-filter" class="w-100 border d-flex flex-wrap gap-2 fs-7">
         {% get_team request.user as teams %}
         {% for team in teams %}
-          <div id="filter-{{ team.name }}" onclick="teamFilterBtn('{{ team.name }}')" value="{{ team.id }}"  style="border: 1px solid black;padding:5px 10px 5px 10px;font-size:14px;border-radius:10px;margin-right:7px;" class="hover-opacity bg-gray">
-            {{ team.name }} 추천<i class="bi bi-check2" style="font-size:15px;padding-left:3px;"></i>
-          </div>
+          <button type="button" id="filter-{{ team.id }}" class="btn-filter hover-opacity bg-gray" onclick="teamFilterBtn(event);" value="{{ team.id }}">
+            {{ team.name }} 추천<i class="bi bi-check2 fs-6 ps-1"></i>
+          </button>
         {% endfor %}
       </div>
+      <!-- 팀원 추천 목록이 표시되는 영역 -->
       <div id="article-card-body" class="d-flex flex-wrap">
+        <div class="spinner-border m-auto mt-5" role="status"></div>
       </div>
       {% include "community/board/board-footer.html" with board=board %}
     </div>
@@ -42,26 +45,11 @@
 {% endblock content %}
 {% block script %}
 <script>
-  {% comment %} $(function () {
-    var tag_selector = new SlimSelect({
-      select: '#tag-select',
-      onChange: (selected_list) => {
-        for (selected of selected_list) {
-          $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
-        }
-        redraw();
-      },
-      placeholder: 'Tag',
-    });
-  }); {% endcomment %}
-  function teamFilterBtn(team_name){
-      var id = "#filter-"+team_name;
-      var obj = $(id);
-      {#$(id).css('background','none');#}
+  function teamFilterBtn(e){
+      var id = e.target.id;
+      var obj = $("#"+id);
       obj.toggleClass('bg-gray');
-      redraw(to_page_1=1)
-      {#console.log(team_li);#}
-
+      redraw(to_page_1=1);
   }
 </script>
 <script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>

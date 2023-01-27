@@ -1,8 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
-
-.row {
-  --bs-gutter-x: 0.8rem !important;
-}
 @media (min-width: 768px) {
   .col-my-p20 {
     flex: 0 0 auto;
@@ -15,34 +10,24 @@ div.edit-container {
   margin-bottom: 1rem;
 }
 
-
 h5.card-title {
   margin-top: 15px;
   font: 16px;
-  font-family: "Noto Sans KR", sans-serif;
   font-weight: 500;
   text-indent: 20px;
 }
 
 .card {
   height: 500px;
-  font-family: "Roboto", sans-serif;
 }
 
-#copyright {
-  margin-bottom: 0px;
-  font-size: 12px;
-}
 a.nav-link {
   cursor: pointer;
 }
 
 .infoform-element{
   margin-right: 5px;
-
-
 }
-
 
 .d-flex.text-lg > .btn-toolbar {
   margin-right: 20px;
@@ -51,22 +36,11 @@ a.nav-link {
   margin-right: 30px;
 }
 
-.bold {
-  font-weight: bold;
-  color: black;
-}
-
-.none {
-  display: none;
-}
-
 .dropdown-scrollbar
 {
     height: 400px;
     overflow: scroll;
-
 }
-
 
 .delete-domain{
   background-color: rgb(211,211,211);
@@ -118,6 +92,22 @@ a.nav-link {
   margin:auto;
   margin-top: -20px;
   margin-right: 20px;
+
+  z-index: 6;
+}
+
+#for-photo-delete{
+  position:relative;
+  display:block;
+  text-align: center;
+  background-color: rgb(234, 10, 10);
+  color: white;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  width: 25px;
+  margin:auto;
+  margin-top: -26px;
+  margin-right: 115px;
 
   z-index: 6;
 }
