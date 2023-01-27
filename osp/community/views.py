@@ -88,12 +88,16 @@ def board(request, board_name, board_id):
     if board.team_id is not None:
         if not request.user.is_authenticated:
             return redirect('/community')
-        if TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
-                                            status=0).exists():
+
+        # 팀 소속일 경우 팀 게시판 로드
+        # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
+        # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
+        context['waitedInviteMessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
+        if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
+            context['invited_user'] = False
+        elif context['waitedInviteMessages'].exists():
             context['invited_user'] = True
-            context['waitedinvitemessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
-                                            status=0)
-        elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+        else :
             return redirect('/community')
 
     if board.board_type == 'User':
