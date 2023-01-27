@@ -58,6 +58,8 @@ $(document).ready(function () {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     });
+    $("#loading").css("display", "none");
+    $("#scoreTable").addClass("show");
 });
 
 function showContr(e){
@@ -70,7 +72,7 @@ function showContr(e){
         noti_window.removeClass("show");
         return 0;
     }else{
-        $(".show").removeClass("show");
+        $("div.show").removeClass("show");
     }
     noti_window.addClass("show");
     $.ajax(
