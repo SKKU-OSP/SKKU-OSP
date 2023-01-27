@@ -1,6 +1,3 @@
-.row {
-  --bs-gutter-x: 0.8rem !important;
-}
 @media (min-width: 768px) {
   .col-my-p20 {
     flex: 0 0 auto;
@@ -13,7 +10,6 @@ div.edit-container {
   margin-bottom: 1rem;
 }
 
-
 h5.card-title {
   margin-top: 15px;
   font: 16px;
@@ -25,20 +21,13 @@ h5.card-title {
   height: 500px;
 }
 
-#copyright {
-  margin-bottom: 0px;
-  font-size: 12px;
-}
 a.nav-link {
   cursor: pointer;
 }
 
 .infoform-element{
   margin-right: 5px;
-
-
 }
-
 
 .d-flex.text-lg > .btn-toolbar {
   margin-right: 20px;
@@ -47,22 +36,11 @@ a.nav-link {
   margin-right: 30px;
 }
 
-.bold {
-  font-weight: bold;
-  color: black;
-}
-
-.none {
-  display: none;
-}
-
 .dropdown-scrollbar
 {
     height: 400px;
     overflow: scroll;
-
 }
-
 
 .delete-domain{
   background-color: rgb(211,211,211);

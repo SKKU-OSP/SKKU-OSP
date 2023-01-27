@@ -1,5 +1,6 @@
 from django import template
 from message.models import Message
+from community.models import Board
 
 import json
 
@@ -17,14 +18,23 @@ def get_notifications(user):
             tmp = json.loads(msg.body)
             if tmp['type'] == 'comment':
                 msg.icon = 'comment'
-            if tmp['type'] == 'articlelike':
+                msg.feedback = tmp["article_id"]
+            elif tmp['type'] == 'articlelike':
                 msg.icon = 'thumb_up'
-            if tmp['type'] == 'team_apply' or tmp['type'] == 'team_apply_result':
+                msg.feedback = tmp["article_id"]
+            elif tmp['type'] == 'team_apply' or tmp['type'] == 'team_apply_result':
                 msg.icon = 'assignment_ind'
-            if tmp['type'] == 'team_invite' or tmp['type'] == 'team_invite_result':
+                msg.feedback = ''
+            elif tmp['type'] == 'team_invite':
                 msg.icon = 'group_add'
+                msg.feedback = make_team_board_url(tmp["team_id"])
+            elif tmp['type'] == 'team_invite_result':
+                msg.icon = 'group_add'
+                msg.feedback = ''
             msg.body = tmp
-        except:
+            msg.receiver_read = "read" if msg.receiver_read else ""
+        except Exception as e:
+            print("Exception get_notifications", e)
             tmp = msg.body
             msg.body={"body":tmp}
 
@@ -36,3 +46,12 @@ def get_new_message(user):
         return None
     msgs = Message.objects.filter(receiver__user=user, receiver_read=False,sender__isnull=False)
     return len(msgs) > 0
+
+@register.simple_tag
+def make_team_board_url(team_id):
+    from django.shortcuts import resolve_url
+    try:
+        board = Board.objects.get(team__id=team_id)
+        return resolve_url('community:Board', board_name=board.name, board_id=board.id)
+    except:
+        return ''
