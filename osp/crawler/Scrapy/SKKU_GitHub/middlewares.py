@@ -58,7 +58,11 @@ class TokenRetryMiddleware(RetryMiddleware):
                 req_hds[key.decode()] = request.headers[key].decode()
 
             now_token = req_hds["Authorization"].split()[1]
-            reset_time = int(res_hds['X-Ratelimit-Reset'])
+            if 'X-Ratelimit-Reset' in res_hds:
+                reset_time = int(res_hds['X-Ratelimit-Reset'])
+            else:
+                reset_time = int(datetime.now().timestamp()) + 1800
+
             self.exhausted_token.put((reset_time, now_token))
             if now_token in self.remain_token:
                 self.remain_token.remove(now_token)

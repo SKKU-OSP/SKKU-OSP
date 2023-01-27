@@ -1,18 +1,5 @@
-@import url("/static/css/color.css");
-
-
-body {
-  background-color: var(--sub-bg-color);
-}
-
 .recent_repos {
   min-height: 100px;
-}
-
-h5.modal-title {
-  font: 16px;
-  font-weight: 500;
-  text-indent: 20px;
 }
 
 /* Bootstrap Change */
@@ -72,11 +59,6 @@ h5.modal-title {
   background-color: var(--main-bg-color);
 }
 
-#copyright {
-  margin-bottom: 0px;
-  font-size: 12px;
-}
-
 a.nav-link {
   cursor: pointer;
 }
@@ -99,14 +81,7 @@ a.nav-link {
   margin-right: 30px;
 }
 
-.bold {
-  font-weight: bold;
-  color: black;
-}
 
-.none {
-  display: none;
-}
 
 /* Canvas */
 .modal-light-header {

@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db import DatabaseError, transaction
@@ -13,12 +12,11 @@ from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
-from team.recommend import get_team_recommendation
+from team.recommend import get_team_recommendation_list
 
 import hashlib
 import math, json, time
 from django.views.generic import TemplateView
-from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 
 # Create your views here.
@@ -29,9 +27,8 @@ def main(request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
-    boards = Board.objects.filter(team_board_query | Q(team_id=None))
-    # if request.user.is_anonymous:
-    boards = boards.exclude(board_type='User')
+    boards = Board.objects.filter(team_board_query | Q(team_id=None)).exclude(board_type='User')
+
     for board in boards:
     # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
         # 주간 Hot 게시물
@@ -47,6 +44,7 @@ def main(request):
         #     board.article_list = article_list[:min(3, len(article_list))]
         # else:
         #     board.article_list = []
+
         # 최신 게시물
         article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
         board.article_list = article_list[:min(3, len(article_list))]
@@ -71,29 +69,40 @@ def board(request, board_name, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         return redirect('/community')
-
-    if request.user: 
-        account = Account.objects.get(user=request.user)
-
     context = {'board': board}
+
+    if request.user.is_authenticated:
+        account = Account.objects.get(user_id=request.user.id)
+        
+        try:
+            acc_pp = AccountPrivacy.objects.get(account=account)
+        except:
+            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+        context['is_write'] = acc_pp.is_write
+        context['is_open'] = acc_pp.is_open
+    else:
+        account = None
+        context['is_write'] = 0
+        context['is_open'] = 0
+
     if board.team_id is not None:
         if not request.user.is_authenticated:
             return redirect('/community')
-        if TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
-                                            status=0).exists():
+
+        # 팀 소속일 경우 팀 게시판 로드
+        # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
+        # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
+        context['waitedInviteMessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
+        if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
+            context['invited_user'] = False
+        elif context['waitedInviteMessages'].exists():
             context['invited_user'] = True
-            context['waitedinvitemessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True,
-                                            status=0)
-        elif len(TeamMember.objects.filter(team=board.team_id, member_id=request.user.id)) == 0:
+        else :
             return redirect('/community')
 
-    #todo: account 지워도됨.
     if board.board_type == 'User':
         if request.user.is_anonymous:
             return redirect('/community')
-        #todo: admin 제외시키
-        context['accounts'] = Account.objects.all()[:9]
-        # context['account_all_cnt'] = Account.objects.all()
         return render(request, 'community/board/user-board.html', context)
 
     if board.board_type == 'Recruit':
@@ -108,20 +117,11 @@ def board(request, board_name, board_id):
             else:
                 article.team = None
 
-
-        # active_article --> 무조건 3 개 이상이어야 제대로 작동함.
-        cnt = active_article.count()
-        # if cnt == 2:
-        #     active_article = list(chain(active_article, active_article))
-        # elif cnt == 1:
-        #     active_article = list(chain(active_article, active_article)) # 2개
-        #     active_article = list(chain(active_article, active_article)) # 4개
-
         team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
-
         context['team_cnt'] = team_cnt
         context['active_article'] = active_article
         context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
+
     if board.board_type == 'Team':
         team = board.team
         team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
@@ -142,17 +142,7 @@ def board(request, board_name, board_id):
         context['team'] = team
         context['team_tags'] = team_tags_list
         context['team_members'] = team_members
-    if not request.user.is_anonymous:
-        try:
-            acc_pp = AccountPrivacy.objects.get(account=account)
-        except:
-            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
-        context['is_write'] = acc_pp.is_write
-        context['is_open'] = acc_pp.is_open
-    else:
-        context['is_write'] = 0
-        context['is_open'] = 0
-
+        
     return render(request, 'community/board/board.html', context)
 
 
@@ -219,14 +209,17 @@ def account_cards(request):
 
     team_list = Team.objects.filter(id__in=team_li)
     print(team_list)
+
+    # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
+    team_member_dict = get_team_recommendation_list(team_list)
     for team_obj in team_list:
-        # TODO: 추천함수 최적화
-        member_li = get_team_recommendation(team_obj)
-        member_id += member_li
-        tmps = account_list.filter(user__in=member_li)
-        for tmp in tmps:
-            tmp.recommend_team = team_obj
-        user_list += list(tmps)
+        if team_obj.id in team_member_dict:
+            member_li = team_member_dict[team_obj.id]
+            member_id += member_li
+            tmps = account_list.filter(user__in=member_li)
+            for tmp in tmps:
+                tmp.recommend_team = team_obj
+            user_list += list(tmps)
 
     user_list += list(account_list.exclude(user__in=member_id))
 

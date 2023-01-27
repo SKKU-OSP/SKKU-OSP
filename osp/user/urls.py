@@ -15,6 +15,7 @@ urlpatterns = [
     path('<username>/profile-edit/interests', views.ProfileInterestsView.as_view(), name='interestsupdate'),
     path('<username>/profile-edit/languages', views.ProfileLanguagesView.as_view(), name='languagesupdate'),
     path('<username>/profile-edit/image', views.ProfileImageView.as_view(), name='imgupdate'),
+    path('<username>/profile-edit/imagedefault', views.ProfileImageDefaultView.as_view(), name='imgupdatedefault'),
     path('<username>/profile-edit/all', views.ProfileEditSaveView.as_view(), name='save_all'),
     path('<username>/profile-edit/passwd', views.ProfilePasswdView.as_view(), name='change_passwd'),
 
