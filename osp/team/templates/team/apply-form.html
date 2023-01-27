@@ -15,7 +15,7 @@
             </div>
             <form class="needs-validation row" id="team-apply-form" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="text" style="display:none;" name="team_id" value="{{ team.id }}">
+                <input type="hidden" name="team-id" value="{{ team.id }}">
                 <div class="mb-3">
                     <label for="team-desc" class="form-label">지원 동기</label>
                     <textarea id="team-desc" placeholder="지원 동기를 작성해주세요." name="desc" class="form-control" rows="3" required></textarea>
@@ -23,12 +23,9 @@
                     <div class="invalid-feedback" for="team-desc"></div>
                 </div>
                 <div class="mb-3">
-                    <div>
-                        <span style="padding-right:3px;line-height:40px;">지원 시 지원한 팀의 사용자 프로필 열람에 동의합니다.</span>
-                        <input id="required-checkbox" type="checkbox" style="line-height:35px;" required>
-                    </div>
+                    <label for="required-checkbox" class="form-label">지원 시 지원한 팀의 사용자 프로필 열람에 동의합니다.</label>
+                    <input id="required-checkbox" type="checkbox" required>
                 </div>
-
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-default" id="team-apply-submit">지원하기</button>
                 </div>
@@ -43,10 +40,10 @@ $(document).ready(function(){
     teamApplyForm.addEventListener("submit", (event) => {
         const formData = new FormData(teamApplyForm);
         event.preventDefault();
-        let team_id = $('input[name=team_id]').val();
+        let teamId = $('input[name=team-id]').val();
         if(confirm('지원을 완료하시겠습니까?')){
             $.ajax({
-                url: "/team/api/team-apply"+"/"+team_id,
+                url: "/team/api/team-apply"+"/"+teamId,
                 type: "POST",
                 data: formData,
                 dataType: 'JSON',

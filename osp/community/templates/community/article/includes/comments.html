@@ -1,20 +1,18 @@
 {% load community_tag %}
-{% if request.user.is_anonymous %}
-댓글 쓰기 기능은 로그인 후 이용 가능합니다.
-{% else %}
+{% if request.user.is_authenticated %}
 <form id="comment-form" method="post" action="." onsubmit="registerComment();return false;">
     {% csrf_token %}
-    <div id="comment-input" class="comment-input">
+    <div id="comment-input" class="mt-3">
         <div id="comment-cnt">
             <i class="bi-chat-right-dots"></i>
             <div id="comment-cnt-number">{{comments|length}}</div>
         </div>
         <div id="comment-annonymous">
             <div id="comment-writer-display" class="annonymous" value="{{user.username}}">익명</div>
-            <input id="comment-is-anonymous" type="checkbox" checked>
+            <input type="checkbox" id="comment-is-anonymous" checked>
         </div>
         <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>
-        <button id="comment-submit" class="hover-opacity" type="submit">
+        <button type="submit" id="comment-submit" class="hover-opacity">
             댓글 쓰기
         </button>
     </div>
@@ -29,7 +27,7 @@
         <div class="comment-item-left">
             <div class="comment-item-writer-wrapper">
                 {% if request.user.is_anonymous %}
-                <a class="comment-item-writer annonymous">사용자</a>
+                <div class="comment-item-writer annonymous">사용자</div>
                 {% elif comment.anonymous_writer %}
                 <div class="comment-item-writer annonymous">익명</div>
                 {% else %}
@@ -91,7 +89,7 @@
         {% endif %}
     </div>
     {% empty %}
-    {% if not request.user.is_anonymous %}
+    {% if request.user.is_authenticated %}
     <div>댓글을 등록해주세요.</div>
     {% endif %}
     {% endfor %}

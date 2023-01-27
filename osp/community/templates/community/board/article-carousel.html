@@ -1,92 +1,50 @@
 {% load static %}
 {% if active_article|length != 0 %}
-{#<div id="active-article">#}
-{##}
-{#    <div id="carouselExampleIndicators" class="active-article-list carousel slide active-article" data-ride="carousel">#}
-{#        <ol class="carousel-indicators">#}
-{#            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>#}
-{#        </ol>#}
-{#        <div class="carousel-inner">#}
-{##}
-{##}
-{#          </div>#}
-{#          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControlsNoTouching" data-bs-slide="prev">#}
-{#            <span class="carousel-control-prev-icon" aria-hidden="true"></span>#}
-{#            <span class="visually-hidden">Previous</span>#}
-{#          </button>#}
-{#          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControlsNoTouching" data-bs-slide="next">#}
-{#            <span class="carousel-control-next-icon" aria-hidden="true"></span>#}
-{#            <span class="visually-hidden">Next</span>#}
-{#          </button>#}
-{#    </div>#}
-{#{% endif %}#}
-{#</div>#}
 <div class="active-article">
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-indicators" style="bottom:-43px;">
-          {% for article in active_article %}
-              <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.counter0 == 0 %}class="active"{% endif %} aria-current="true" aria-label="Slide 1"></button>
-          {% endfor %}
-{#        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>#}
-{#        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>#}
-      </div>
-      <div class="carousel-inner">
-        {% for article in active_article %}
-        <div class="carousel-item {% if article == active_article.0 %}active{% endif %}">
-                <div style="height:160px;min-width:480px;width:92%;margin:auto;margin-top:10px;"  class="d-flex flex-column active-article-item justify-content-between" onclick="location.href='{% url 'community:article-view' article.id %}'" >
-                    <div class="" style="font-size:14px;">
+    <div id="carouselTeam" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for article in active_article %}
+            {% if forloop.first %}
+            <button type="button" class="active" data-bs-target="#carouselTeam" data-bs-slide-to="{{ forloop.counter0 }}" aria-current="true"></button>
+            {% else %}
+            <button type="button" data-bs-target="#carouselTeam" data-bs-slide-to="{{ forloop.counter0 }}"></button>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            {% for article in active_article %}
+            {% if forloop.first %}
+            <div class="carousel-item active">
+            {% else %}
+            <div class="carousel-item">
+            {% endif %}
+                <a href="{% url 'community:article-view' article.id %}" role="button" class="active-article-item d-flex flex-column justify-content-between">
+                    <div class="fs-5">
                         {{ article.title }}
                     </div>
-                    <div class="" style="font-size:13px;">
+                    <div class="fs-6">
                         {{ article.team.name }}
                     </div>
-                    <div class="" style="font-size:13px;height:62px;white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                    <div class="fs-6 flex-grow-1 overflow-hidden">
                         {{ article.body }}
                     </div>
-                    <div class="">
+                    <div>
                         {% for tag in article.tags %}
                         <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>
                         {% endfor %}
                     </div>
-                </div>
+                </a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-        <span style="" class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button  class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-        <span style="" class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselTeam" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselTeam" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
 </div>
-{#{% for article in active_article %}#}
-{#<div class="carousel-item {% if article == active_article.0 %}active{% endif %}">#}
-{#        <div style="height:140px;width:480px;margin:auto;"  class="d-flex flex-column active-article-item" onclick="location.href='{% url 'community:article-view' article.id %}'" >#}
-{#            <div style="height:90px;" class="d-flex flex-row recruit-team-info">#}
-{#                <div class="recruit-team-info-image">#}
-{#                    <img src="{{article.team.image.url}}" alt="team-image">#}
-{#                </div>#}
-{#                <div class="d-flex flex-column w-100" >#}
-{#                    <div class="d-flex flex-row w-100" style="height:40px;">#}
-{#                        <div class=" active-article-item-team-name fw-bold color-b">{{ article.team.name }} </div>#}
-{#                        <div class=" w-100 active-article-item-team-desc color-b " style="font-size:10px;padding-left:10px;" >{{ article.team.description }}</div>#}
-{#                    </div>#}
-{#                    <div class="color-b w-100 h-100 border" style="font-size:0.2em;text-overflow: ellipsis;">#}
-{#                        {{ article.title }}#}
-{#                        <br>#}
-{#                        {{ article.body|linebreaksbr }}#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#            <div class="border">#}
-{#                {% for tag in article.tags %}#}
-{#                <span class="badge bg-tag-{{tag.type}}">{{tag.name}}</span>#}
-{#                {% endfor %}#}
-{#            </div>#}
-{#        </div>#}
-{#</div>#}
-{#{% endfor %}#}
 {% endif %}
