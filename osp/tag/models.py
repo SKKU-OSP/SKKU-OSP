@@ -5,7 +5,7 @@ class Tag(models.Model):
     name = models.CharField(primary_key=True, max_length=20)
     type = models.CharField(max_length=20)
     logo = models.FilePathField(path=settings.STATICFILES_DIRS, default="default.svg")
-
+    color = models.CharField(max_length=10, default="#D3D3D3")
 class LanguageExtension(models.Model):
     ext = models.CharField(primary_key=True, max_length=20)
     language = models.ForeignKey(Tag, models.CASCADE)
