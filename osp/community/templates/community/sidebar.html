@@ -1,7 +1,7 @@
 {% load community_tag %}
 {% load user_templatetag %}
 {% load static %}
-<div class="col-md-3 col-12" id="community-sidebar">
+<div class="col-md-3" id="community-sidebar">
     <div id="profile-tab" class="w-100">
         {% if user.is_authenticated %}
         <div id="sidebar-user-info">
@@ -12,9 +12,9 @@
         </div>
         {% else %}
         <div id="sidebar-user-info">
-            <a href="/user/{{user.username}}/">
+            <a href="/accounts/login/">
                 <img width="42px" height="42px" src="/static/images/empty-profile.png" class="profile-img" alt="profile-image">
-                <a href="/accounts/login/"><span id="profile-username">Log In</span></a>
+                <span id="profile-username">Log In</span>
             </a>
         </div>
         {% endif %}
@@ -28,19 +28,19 @@
         <div class="boardgroup-item link-activity hover-opacity">
             <a href="/community/activity/" class="sidebar-link">
                 <i class="bi bi-file-text-fill fa-lg"></i>
-                내 활동 목록
+                <span>내 활동 목록</span>
             </a>
         </div>
         <div class="boardgroup-item link-activity hover-opacity">
             <a href="/challenge/" class="sidebar-link">
                 <i class="bi bi-trophy-fill fa-lg"></i>
-                챌린지
+                <span>챌린지</span>
             </a>
         </div>
         <div class="boardgroup-item link-activity hover-opacity">
             <a href="/community/recommender/user/" class="sidebar-link">
                 <i class="bi bi-hand-thumbs-up-fill fa-lg"></i>
-                맞춤 유저 추천
+                <span>맞춤 유저 추천</span>
             </a>
         </div>
         <!-- 일반 게시판 -->
@@ -61,7 +61,7 @@
         <div id="team-create" class="boardgroup-item hover-opacity">
             <a herf="#" role="button">
                 <i class="bi bi-plus-lg fa-lg"></i>
-                팀 만들기
+                <span>팀 만들기</span>
             </a>
         </div>
         {% endif %}
