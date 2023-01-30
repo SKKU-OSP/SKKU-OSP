@@ -4,6 +4,22 @@
     flex-direction: column;
     align-items: flex-start;
 }
+@media screen and (max-width: 768px) {
+    #community-sidebar{
+        position: absolute;
+        left:0;
+        width: 50px;
+    }
+    #sidebar-user-info>a>span, 
+    .boardgroup-title,
+    .boardgroup-item>a>span{
+        display: none!important;
+    }
+    .profile-img{
+        width: 22px;
+        height: 22px;
+    }
+}
 
 #profile-tab {
     background: var(--main-point-color);

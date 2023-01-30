@@ -82,7 +82,7 @@ def board_sidebar_normal_board(context, request):
         result += f'''
             <a href="{url}">
                 <i class="bi {icons[board.board_type]} fa-lg"></i>
-                {board.name.capitalize()}
+                <span>{board.name.capitalize()}</span>
             </a>
         </div>
         '''
@@ -110,7 +110,7 @@ def board_sidebar_team_board(context, request):
             result += f'''
                 <a href="{url}">
                     <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
-                    {board.name.capitalize()}
+                    <span>{board.name.capitalize()}</span>
                 </a>
             </div>
             '''
