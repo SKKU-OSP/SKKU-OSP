@@ -61,7 +61,9 @@ li, a, button {
   --bs-gutter-x: 0.8rem !important;
 }
 
-
+.material-icons {
+  vertical-align: middle;
+}
 
 .bold {
   font-weight: bold;
