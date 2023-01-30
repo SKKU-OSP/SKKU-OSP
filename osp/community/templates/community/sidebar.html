@@ -1,73 +1,78 @@
 {% load community_tag %}
 {% load user_templatetag %}
 {% load static %}
-<div class="col-md-3 col-12" id="community-sidebar">
+<div class="col-md-3" id="community-sidebar">
     <div id="profile-tab" class="w-100">
-        <div class="m-auto user-info">
-            {% if user.is_authenticated %}
-            <a href="/user/{{user}}">
-                <img src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image">
-            </a>
-            {% else %}
-            <a href="/accounts/login">
-                <img src="/static/images/empty-profile.png" class="profile-img" alt="Log-In" style="background-color: #FFFFFF;">
-            </a>
-            {% endif %}
-        </div>
-        <div id="profile-sum">
-            {% if user.is_authenticated %}
-            <div id="profile-username">
-                <a href="/user/{{user.username}}">{{user.username}}</a>
-            </div>
-            {% else %}
-            <div id="profile-username">
-                <a href="/accounts/login">Log In</a>
-            </div>
-            {% endif %}
-        </div>
         {% if user.is_authenticated %}
-        <div id="manage-tab" class="d-flex flex-column flex-wrap justify-content-center">
-            <div id="my-activity" class="hover-opacity" onclick="location.href='/community/activity'">
-                <span class="material-icons">
-                    collections_bookmark
-                </span>
-                내 활동 목록
-            </div>
-            <div id="team-apply-list" class="hover-opacity">
-                <span class="material-icons" >
-                assignment_ind
-                </span>
-                지원서 목록
-            </div>
+        <div id="sidebar-user-info">
+            <a href="/user/{{user.username}}/">
+                <img width="42px" height="42px" src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image">
+                <span id="profile-username">{{user.username}}</span>
+            </a>
+        </div>
+        {% else %}
+        <div id="sidebar-user-info">
+            <a href="/accounts/login/">
+                <img width="42px" height="42px" src="/static/images/empty-profile.png" class="profile-img" alt="profile-image">
+                <span id="profile-username">Log In</span>
+            </a>
         </div>
         {% endif %}
     </div>
     <div id="community-tab" class="w-100">
-        <div id="normal-boardgroup" class="boardgroup-title">
-            <a href="/community">
-                게시판
+        <!-- 내 활동 -->
+        <div class="boardgroup-title">
+            <span>내 활동</span>
+            <i class="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-activity"></i>
+        </div>
+        <div class="boardgroup-item link-activity hover-opacity">
+            <a href="/community/activity/" class="sidebar-link">
+                <i class="bi bi-file-text-fill fa-lg"></i>
+                <span>내 활동 목록</span>
             </a>
         </div>
+        <div class="boardgroup-item link-activity hover-opacity">
+            <a href="/challenge/" class="sidebar-link">
+                <i class="bi bi-trophy-fill fa-lg"></i>
+                <span>챌린지</span>
+            </a>
+        </div>
+        <div class="boardgroup-item link-activity hover-opacity">
+            <a href="/community/recommender/user/" class="sidebar-link">
+                <i class="bi bi-hand-thumbs-up-fill fa-lg"></i>
+                <span>맞춤 유저 추천</span>
+            </a>
+        </div>
+        <!-- 일반 게시판 -->
+        <div id="normal-boardgroup" class="boardgroup-title">
+            <a href="/community/">
+                게시판
+            </a>
+            <i class="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-board"></i>
+        </div>
         {% board_sidebar_normal_board request %}
+        <!-- 팀 게시판 -->
         {% if user.is_authenticated %}
-        <div id="team-boardgroup" class="boardgroup-title d-flex justify-content-between">
-            <div>팀 게시판</div>
-            <div id="team-create">
-                <span class="material-icons">
-                    group_add
-                </span>
-            </div>
+        <div id="team-boardgroup" class="boardgroup-title">
+            <span>팀 게시판</span>
+            <i class="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-team-board"></i>
         </div>
         {% board_sidebar_team_board request %}
+        <div id="team-create" class="boardgroup-item hover-opacity">
+            <a herf="#" role="button">
+                <i class="bi bi-plus-lg fa-lg"></i>
+                <span>팀 만들기</span>
+            </a>
+        </div>
         {% endif %}
     </div>
-
+    <!-- 모달 창 -->
     {% if user.is_authenticated %}
     <div id="AddTeamModal" class="modal modal-lg fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">새로운 팀 만들기</h5>
+                    <h5 class="modal-title">팀 만들기</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div id="AddTeamModalBody" class="modal-body">
@@ -101,5 +106,4 @@
     </div>
     {% endif %}
     <script src="{% static 'js/community_sidebar.js' %}"></script>
-
 </div>

@@ -8,7 +8,7 @@ import math
 from datetime import datetime, timedelta
 
 from community.models import ArticleComment, ArticleLike, ArticleScrap, Board, ArticleCommentLike
-from team.models import TeamMember,TeamInviteMessage
+from team.models import Team, TeamMember,TeamInviteMessage
 from user.models import Account
 
 register = template.Library()
@@ -67,23 +67,25 @@ def anonymous_checked(a_writer):
 @register.simple_tag(takes_context=True)
 def board_sidebar_normal_board(context, request):
     result = ''
-    boards = Board.objects.filter(team_id=None)
-    if request.user.is_anonymous:
-        boards = boards.exclude(board_type='User')
+    boards = Board.objects.filter(team_id=None).exclude(board_type='User')
+    # 일반 게시판이 팀 게시판과 분리되어있지 않아 DB에 넣기 애매함 
+    icons = {"QnA": "bi-question-circle-fill",
+    "Recruit": "bi-person-fill-add",
+    "Normal": "bi-info-circle-fill",
+    "Notice": "bi-megaphone-fill"}
     for board in boards:
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
         if board == context['board']:
-            result += f'''
-            <div class="boardgroup-item hover-opacity selected">
-            <a href="{url}">{board.name.capitalize()}</a>
-            </div>
-            '''
+            result += '<div class="boardgroup-item link-board hover-opacity selected">'
         else:
-            result += f'''
-            <div class="boardgroup-item hover-opacity">
-            <a href="{url}">{board.name.capitalize()}</a>
-            </div>
-            '''
+            result += '<div class="boardgroup-item link-board hover-opacity">'
+        result += f'''
+            <a href="{url}">
+                <i class="bi {icons[board.board_type]} fa-lg"></i>
+                <span>{board.name.capitalize()}</span>
+            </a>
+        </div>
+        '''
         
     return mark_safe(result)
 
@@ -95,21 +97,23 @@ def board_sidebar_team_board(context, request):
         account = Account.objects.get(user=request.user)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
+        team_objs = Team.objects.filter(team_board_query)
 
         for board in Board.objects.filter(team_board_query):
+            board_team = team_objs.get(id=board.team_id)
+
             url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
             if board == context['board']:
-                result += f'''
-                <div class="boardgroup-item hover-opacity selected">
-                <a href="{url}">{board.name.capitalize()}</a>
-                </div>
-                '''
+                result += f'<div class="boardgroup-item link-team-board hover-opacity selected">'
             else:
-                result += f'''
-                <div class="boardgroup-item hover-opacity">
-                <a href="{url}">{board.name.capitalize()}</a>
-                </div>
-                '''
+                result += f'<div class="boardgroup-item link-team-board hover-opacity">'
+            result += f'''
+                <a href="{url}">
+                    <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
+                    <span>{board.name.capitalize()}</span>
+                </a>
+            </div>
+            '''
     return mark_safe(result)
 
 @register.simple_tag()

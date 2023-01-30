@@ -51,6 +51,28 @@ $().ready(function () {
       $('#AddTeamModal').modal('show');
     }
   });
+
+  // 현재 주소를 체크해서 사이드바의 아이템의 폰트 색을 변경
+  $('.sidebar-link').each(function() {
+      if($(this).attr('href') === window.location.pathname) {
+        $(this).parent().addClass('selected');
+      }
+  });
+  $('.folder').click(function () {
+    console.log("folder click");
+    console.log($(this).data('fold-target'));
+    var target = $(this).data('fold-target');
+    if ($(target).hasClass("none")) {
+      $(this).addClass('bi-chevron-up');
+      $(this).removeClass('bi-chevron-down');
+      $(target).removeClass('none');
+    }
+    else {
+      $(this).addClass('bi-chevron-down');
+      $(this).removeClass('bi-chevron-up');
+      $(target).addClass('none');
+    }
+  })
 });
 
 

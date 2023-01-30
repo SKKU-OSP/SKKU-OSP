@@ -99,7 +99,7 @@ def board(request, board_name, board_id):
             context['invited_user'] = True
         else :
             return redirect('/community')
-
+    # deprecated -> user_board
     if board.board_type == 'User':
         if request.user.is_anonymous:
             return redirect('/community')
@@ -145,6 +145,16 @@ def board(request, board_name, board_id):
         
     return render(request, 'community/board/board.html', context)
 
+def user_board(request):
+    try:
+        board = Board.objects.get(name="User")
+    except Board.DoesNotExist:
+        return redirect('/community')
+    context = {'board': board}
+
+    if request.user.is_anonymous:
+        return redirect('/community')
+    return render(request, 'community/board/user-board.html', context)
 
 def account_cards(request):
 
