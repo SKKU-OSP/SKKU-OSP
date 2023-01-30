@@ -1,3 +1,4 @@
+/* sidebar */
 #community-sidebar {
     display: flex;
     flex-direction: column;
@@ -6,52 +7,27 @@
 
 #profile-tab {
     background: var(--main-point-color);
-    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    box-shadow: 0rem 0.25rem 0.25rem var(--card-box-shadoww);
     border-top-left-radius: 0.625rem;
     border-top-right-radius: 0.625rem;
 }
 
-#profile-sum {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px 10px 10px;
-    gap: 10px;
-    background: var(--main-point-color);
-    color: var(--main-white);
+#sidebar-user-info .profile-img {
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--main-white);
+    border: 2px solid var(--main-point-color);
+    margin: 0.5rem;
+    box-sizing: border-box;
 }
 
 #profile-username {
-    font-style: normal;
-    font-size: 25px;
-    text-align: center;
-}
-
-#profile-username>a {
+    font-size: 20px;
     color: var(--main-white);
-}
-
-#manage-tab {
-    padding-bottom: 20px;
-    gap: 10px;
-    align-items: center;
-}
-
-#manage-tab>* {
-    cursor: pointer;
-    color: var(--main-white);
-    text-align: center;
-    border: 1px solid var(--main-white);
-    border-radius: .5rem;
-    padding: 0.4rem 0.6rem;
-    order: 0;
-    flex-grow: 0;
-    width: 10rem;
-}
-
-#manage-tab>*>span {
     vertical-align: middle;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #community-tab {
@@ -66,15 +42,6 @@
     border-bottom-right-radius: 0.625rem;
 }
 
-#community-stat div {
-    font-style: normal;
-    font-weight: 400;
-    font-size: 20px;
-    text-align: center;
-    text-decoration-line: underline;
-}
-
-/* sidebar */
 .boardgroup {
     border: none;
 }
@@ -110,6 +77,9 @@
     height: 100%;
     padding: 0.5rem;
     vertical-align: middle;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .boardgroup-item>a>i{
     width:24px;
@@ -118,9 +88,6 @@
     padding-top: 2px; 
 }
 
-.boardgroup-item.selected {
-    background: var(--main-bg-color);
-}
 .boardgroup-item.selected>a {
     color: var(--sub-point-color);
     font-weight: 600;

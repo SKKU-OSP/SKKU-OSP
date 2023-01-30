@@ -71,7 +71,7 @@ li, a, button {
 }
 
 .none {
-  display: none;
+  display: none !important; 
 }
 
 .nav-icon {
@@ -542,7 +542,7 @@ img.opponent-profile {
   height: 160px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: var(--profile-btn-inactive);
+  background-color: var(--main-white);
   border: 2px solid var(--main-point-color);
   z-index: 5;
   position: relative;
@@ -568,4 +568,8 @@ img.opponent-profile {
 
 .fs-8 {
   font-size: 12px;
+}
+
+.text-white {
+  color: var(--main-white);
 }
