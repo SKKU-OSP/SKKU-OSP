@@ -6,10 +6,10 @@ app_name = 'community'
 
 urlpatterns = [
     path('', views.main, name='Community-Main'),
-    path('home/<board_name>/<board_id>', views.board, name='Board'),
+    path('board/<board_name>/<board_id>', views.board, name='Board'),
     path('activity/', views.my_activity, name='Activity'),
 
-    # path('home/Users/', views.user_board, name='user-board'),
+    path('recommender/user/', views.user_board, name='user-board'),
     path('article-list/<board_name>/<board_id>/', views.article_list ,name='Article_List'),
     path('account-cards/', views.account_cards ,name='Account_Cards'),
 
