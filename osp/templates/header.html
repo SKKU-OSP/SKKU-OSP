@@ -1,25 +1,20 @@
 {% load tag_templatetag %}
 {% load message_tag %}
 <header id="main-navbar" class="container navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand fs-5 bold" href="/community">
+    <a class="navbar-brand fs-3 bold" href="/community">
         <img width="40px" height="40px" src="/static/images/logo-simple.svg" alt="로고">
         SKKU SOSD
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon">
-        </span>
+        <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse container-fluid" id="navbarSupportedContent">
-        <!-- TODO 사이드바로 이동 -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% if user.is_staff %}
             <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="/community">Community</a>
             </li>
-            {% if user.is_authenticated %}
-            <li class="nav-item"><a class="nav-link" aria-current="page" href="/challenge">Challenge</a></li>
-            {% endif %}
-            {% if user.is_staff %}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
                 <ul class="dropdown-menu">
@@ -30,8 +25,6 @@
             <li class="nav-item"><a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
             {% endif %}
         </ul>
-        <!-- TODO 통합검색창 -->
-
         {% if user.is_authenticated %}
         <ul class="navbar-nav d-flex mx-2">
             <li class="dropdown noti-dropdown-btn">
@@ -85,6 +78,13 @@
                 <button class="default-btn p-0">
                     <span class="material-icons-outlined nav-icon fs-4">
                         email
+                    </span>
+                </button>
+            </li>
+            <li id="team-apply-list" class="position-relative pointer">
+                <button class="default-btn p-0">
+                    <span class="material-icons-outlined nav-icon fs-4">
+                        assignment_ind
                     </span>
                 </button>
             </li>

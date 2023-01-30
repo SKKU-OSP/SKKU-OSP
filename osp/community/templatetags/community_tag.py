@@ -76,22 +76,16 @@ def board_sidebar_normal_board(context, request):
     for board in boards:
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
         if board == context['board']:
-            result += f'''
-            <div class="boardgroup-item hover-opacity selected">
-            <a href="{url}">
-            <i class="bi {icons[board.board_type]} fa-lg"></i>
-            {board.name.capitalize()}
-            </a>
-            </div>
-            '''
+            result += '<div class="boardgroup-item link-board hover-opacity selected">'
         else:
-            result += f'''
-            <div class="boardgroup-item hover-opacity">
+            result += '<div class="boardgroup-item link-board hover-opacity">'
+        result += f'''
             <a href="{url}">
-            <i class="bi {icons[board.board_type]} fa-lg"></i>
-            {board.name.capitalize()}</a>
-            </div>
-            '''
+                <i class="bi {icons[board.board_type]} fa-lg"></i>
+                {board.name.capitalize()}
+            </a>
+        </div>
+        '''
         
     return mark_safe(result)
 
@@ -110,23 +104,16 @@ def board_sidebar_team_board(context, request):
 
             url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
             if board == context['board']:
-                result += f'''
-                <div class="boardgroup-item hover-opacity selected">
-                <a href="{url}">
-                <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
-                {board.name.capitalize()}
-                </a>
-                </div>
-                '''
+                result += f'<div class="boardgroup-item link-team-board hover-opacity selected">'
             else:
-                result += f'''
-                <div class="boardgroup-item hover-opacity">
+                result += f'<div class="boardgroup-item link-team-board hover-opacity">'
+            result += f'''
                 <a href="{url}">
-                <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
-                {board.name.capitalize()}
+                    <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
+                    {board.name.capitalize()}
                 </a>
-                </div>
-                '''
+            </div>
+            '''
     return mark_safe(result)
 
 @register.simple_tag()
