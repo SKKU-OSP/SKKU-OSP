@@ -27,12 +27,6 @@
         </div>
         {% if user.is_authenticated %}
         <div id="manage-tab" class="d-flex flex-column flex-wrap justify-content-center">
-            <div id="my-activity" class="hover-opacity" onclick="location.href='/community/activity'">
-                <span class="material-icons">
-                    collections_bookmark
-                </span>
-                내 활동 목록
-            </div>
             <div id="team-apply-list" class="hover-opacity">
                 <span class="material-icons" >
                 assignment_ind
@@ -43,22 +37,50 @@
         {% endif %}
     </div>
     <div id="community-tab" class="w-100">
+        <!-- 내 활동 -->
+        <div class="boardgroup-title">
+            <span>내 활동</span>
+            <i class="bi bi-chevron-down"></i>
+        </div>
+        <div class="boardgroup-item hover-opacity">
+            <a href="/community/activity/">
+                <i class="bi bi-file-text-fill fa-lg"></i>
+                내 활동 목록
+            </a>
+        </div>
+        <div class="boardgroup-item hover-opacity">
+            <a href="/challenge/" class="align-middle">
+                <i class="bi bi-trophy-fill fa-lg"></i>
+                챌린지
+            </a>
+        </div>
+        <div class="boardgroup-item hover-opacity">
+            <a href="/community/recommender/user/">
+                <i class="bi bi-hand-thumbs-up-fill fa-lg"></i>
+                맞춤 유저 추천
+            </a>
+        </div>
+        <!-- 일반 게시판 -->
         <div id="normal-boardgroup" class="boardgroup-title">
             <a href="/community">
                 게시판
             </a>
+            <i class="bi bi-chevron-down"></i>
         </div>
         {% board_sidebar_normal_board request %}
+        <!-- 팀 게시판 -->
         {% if user.is_authenticated %}
-        <div id="team-boardgroup" class="boardgroup-title d-flex justify-content-between">
-            <div>팀 게시판</div>
-            <div id="team-create">
-                <span class="material-icons">
-                    group_add
-                </span>
-            </div>
+        <div id="team-boardgroup" class="boardgroup-title">
+            <span>팀 게시판</span>
+            <i class="bi bi-chevron-down"></i>
         </div>
         {% board_sidebar_team_board request %}
+        <div id="team-create" class="boardgroup-item hover-opacity">
+            <a herf="#" role="button">
+                <i class="bi bi-plus-lg fa-lg"></i>
+                팀 만들기
+            </a>
+        </div>
         {% endif %}
     </div>
 
@@ -67,7 +89,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">새로운 팀 만들기</h5>
+                    <h5 class="modal-title">팀 만들기</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div id="AddTeamModalBody" class="modal-body">
