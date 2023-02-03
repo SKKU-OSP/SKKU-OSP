@@ -13,7 +13,7 @@
         {% elif team_cnt == 0 %}
         onclick="alert('모집할 팀이 없습니다.')"
         {% elif board %}
-        onclick='location.href="{% url 'community:article-register' board_name=board.name board_id=board.id %}"'
+        onclick='location.href="{% url 'community:article-save' board_name=board.name board_id=board.id %}"'
         {% endif %}
         >
             글쓰기<i class="bi-pencil"></i>
@@ -42,7 +42,7 @@
             <div class="d-flex flex-column" style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px 15px 20px; border-radius:0.625rem;margin-bottom:10px;">
                 <div>초대 메세지</div>
                 {% for msg in waitedinvitemessages %}
-                <div class=" d-flex flex-row justify-content-between w-100" style="  box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);border-radius:0.625rem;padding:5px 10px;margin-bottom:10px;">
+                <div class=" d-flex flex-row justify-content-between w-100" style="box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);border-radius:0.625rem;padding:5px 10px;margin-bottom:10px;">
                     <div style="width:75%;overflow:hidden;white-space:normal;display:inline-block;word-break:normal;overflow-wrap:break-word;">{{ msg.message }}</div>
                     <div style="width:20%;font-size:10px;">{{ msg.send_date }}</div>
                 </div>
