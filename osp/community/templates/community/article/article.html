@@ -43,16 +43,16 @@
 {% endblock content %}
 {% block script %}
 <script>
-    var category_select;
+    let category_select;
     let board_type = "{{ board.board_type }}" ;
     $(document).ready(function () {
         var view_type = "{{type}}";
         if (view_type != 'view') {
             category_select = new SlimSelect({
-                select: '#multiple',
+                select: '#content-category',
                 placeholder: 'Tag',
                 onChange: (selected_list) => {
-                    for (selected of selected_list) {
+                    for (let selected of selected_list) {
                         $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
                     }
                 }
@@ -268,12 +268,11 @@
                 success: function (data) {
                     $('#article-content').html(data['html']);
                     category_select = new SlimSelect({
-                        select: '#multiple',
+                        select: '#content-category',
                         placeholder: 'Tag',
                         onChange: (selected_list) => {
-                            for (selected of selected_list) {
-                                $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' +
-                                    selected.class)
+                            for (let selected of selected_list) {
+                                $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
                             }
                         }
                     });
