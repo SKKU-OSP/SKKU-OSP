@@ -1,0 +1,32 @@
+{% extends 'main.html' %}
+
+{% load static %}
+{% load tag_templatetag %}
+{% block content %}
+<div class="container my-4">
+    <div id="community-container" class="row">
+        {% include "community/sidebar.html" %}
+        <div class="col-md-9">
+            <div id="board-title-bar" class="d-flex justify-content-between">
+                <span id="board-title">{{ board_name }}</span>
+                <a href="save" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
+            </div>
+            {% if need_login %}
+            <div class="m-2">
+                로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
+            </div>
+            {% elif need_member %}
+            <div class="m-2">
+                팀 멤버만 열람할 수 있습니다. <a href="/accounts/login/">팀 모집 게시판 확인하기</a>
+            </div>
+            {% else %}
+                Table Board
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
+<script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>
+{% endblock script %}
