@@ -12,9 +12,9 @@
         <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
             <div class="col-md-6 mb-3">
-                <label for="github_id" class="form-label">GitHub ID</label>
+                <label for="github-id" class="form-label">GitHub ID</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="github_id" name="github_id" placeholder="GitHub ID"
+                    <input type="text" class="form-control" id="github-id" name="github-id" placeholder="GitHub ID"
                     required>
                     <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
                 </div>
@@ -32,13 +32,13 @@
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
-                <label for="password_check">Password Check</label>
+                <label for="password-check">Password Check</label>
                 <div id="password-check-sign" class="weak-text form-label">비밀번호를 다시 입력해주세요.</div>
-                <input type="password" class="form-control" id="password_check" name="password_check" placeholder="Password" minlength="4" required onChange="checkPassword();">
+                <input type="password" class="form-control" id="password-check" name="password-check" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
-                <label for="student_id" class="form-label">학번</label>
-                <input type="text" class="form-control" id="student_id" name="student_id" placeholder="ex) 20XXXXXXXX"
+                <label for="student-id" class="form-label">학번</label>
+                <input type="text" class="form-control" id="student-id" name="student-id" placeholder="ex) 20XXXXXXXX"
                     required>
             </div>
             <div class="col-md-6 mb-3">
@@ -96,55 +96,53 @@
                 </div>
                 <div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="plural_major" id="pluralFalse" value="0"
+                        <input class="form-check-input" type="radio" name="plural-major" id="pluralFalse" value="0"
                             checked>
                         <label class="form-check-label" for="pluralFalse">원전공</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="plural_major" id="pluralTrue" value="1">
+                        <input class="form-check-input" type="radio" name="plural-major" id="pluralTrue" value="1">
                         <label class="form-check-label" for="pluralTrue">복수전공</label>
                     </div>
                 </div>
             </div>
             <div class="col-md-12 mb-3">
-                <label for="personal_email" class="form-label">Email</label>
+                <label for="personal-email" class="form-label">Email</label>
                 <div class="d-flex">
-                    <input type="text" class="form-control email-input" id="personal_email" name="personal_email" placeholder="연락용 Email"
+                    <input type="text" class="form-control email-input" id="personal-email" name="personal-email" placeholder="연락용 Email"
                     required>
                     <span style="line-height: 38px;">@</span>
-                    <input type="text" id="email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
-                    <select id="email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);" aria-label="email-select">
+                    <input type="text" id="email-domain" name="personal-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
                     </select>
                 </div>
             </div>
             <div class="col-md-12 mb-3">
-                <label for="primary_email" class="form-label">GitHub Email</label>
+                <label for="primary-email" class="form-label">GitHub Email</label>
                 <div class="d-flex">
-                    <input type="text" class="form-control email-input" id="primary_email" name="primary_email"
-                    placeholder="GitHub 계정 연동 Email" required>
+                    <input type="text" class="form-control email-input" id="primary-email" name="primary-email" placeholder="GitHub 계정 연동 Email" required>
                     <span style="line-height: 38px;">@</span>
-                    <input type="text" id="primary-email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
-                    <select id="primary-email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);">
+                    <input type="text" id="primary-email-domain" name="primary-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="primary-email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
                     </select>
                 </div>
             </div>
             <div class="col-md-12 mb-3">
-                <label for="secondary_email" class="form-label">기타 연동 Email (선택)</label>
+                <label for="secondary-email" class="form-label">기타 연동 Email (선택)</label>
                 <div class="d-flex">
-                    <input type="text" class="form-control email-input" id="secondary_email" name="secondary_email"
-                    placeholder="기타 연동 Email">
+                    <input type="text" id="secondary-email" name="secondary-email" class="form-control email-input" placeholder="기타 연동 Email">
                     <span style="line-height: 38px;">@</span>
-                    <input type="text" id="secondary-email-domain" class="form-control email-input email-select" value="" title="이메일 도메인" placeholder="이메일 도메인" maxlength="18"/> 
-                    <select id="secondary-email-domain-select" class="form-select form-control email-input email-select" title="이메일 도메인 주소 선택" onChange="setEmailDomain(this.id, this.value);">
+                    <input type="text" id="secondary-email-domain" name="secondary-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
+                    <select id="secondary-email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
                     </select>
                 </div>
             </div>
             <div class="col-md-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
-                <select name="" id="multiple" multiple>
+                <select id="preferLanguage" name="preferLanguage" multiple>
                     {% category_tag request %}
                 </select>
             </div>
@@ -166,11 +164,9 @@
                                 {% consent_text request "signin" as consents %}
                                 {% for obj in consents %}
                                 <div class="team-apply-item received">
-                                    <p>
-                                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{obj.id}}" aria-expanded="true" aria-controls="collapse-{{obj.id}}">
-                                            {{obj.title}}
-                                        </button>
-                                    </p>
+                                    <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{obj.id}}" aria-expanded="true" aria-controls="collapse-{{obj.id}}">
+                                        {{obj.title}}
+                                    </button>
                                     <div class="collapse show" id="collapse-{{obj.id}}">
                                         <div class="card card-body">
                                             {% for body in obj.body%}
@@ -204,7 +200,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12" align="right">
+            <div class="col-12 text-end">
                 <button type="submit" class="btn btn-primary">가입하기</button>
             </div>
         </form>
@@ -214,33 +210,35 @@
 {% block script %}
 <script>
     let is_modal_open = 0;
-    var category_select
+    let categorySelect;
     $(document).ready(function(){
-        category_select = new SlimSelect({
-            select: '#multiple',
+        categorySelect = new SlimSelect({
+            select: '#preferLanguage',
             placeholder: 'Tag',
             onChange: (selected_list) => {
-                for (selected of selected_list) {
+                for (let selected of selected_list) {
                     $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
                 }
             },
-        })
+        });
+        {#유저 이름의 중복을 체크하는 함수 실행#}
         $("#duplicate-check").on("click", ()=>{
             ajaxCheckDup();
         })
+        {#Github id의 중복을 체크하는 함수 실행#}
         $("#github-id-check").on("click", ()=>{
             ajaxCheckIdValid();
         })
         // sign form
         const signinForm = document.getElementById("signin-form");
         signinForm.addEventListener("submit", (event) => {
+            event.preventDefault();
             if(!is_modal_open){
                 alert('개인정보 이용내역 동의를 확인해주세요.');
                 event.preventDefault();
                 return;
             }else{
                 const ajax_form_data = new FormData(signinForm);
-                event.preventDefault();
                 $.ajax({
                     type: "POST",
                     url: "{% url 'common:signup' %}",
@@ -256,7 +254,7 @@
                             window.location.href = "{% url 'common:login' %}";
                         }
                         else{
-                            alert( data['message'] );
+                            alert( data['message'].join(',\n') );
                         }
                     },
                     error: function(data){
@@ -267,14 +265,14 @@
         });
     });
     function setEmailDomain(id, email_domain){
-        if(email_domain == "직접입력") return;
+        if(email_domain == "") return;
         console.log("setEmailDomain", id, email_domain)
         let target_id = id.split("-select")[0]
         $(`#${target_id}`).val(email_domain)
     }
     function checkPassword(){
         let pswd = $("#password").val();
-        let checkpswd = $("#password_check").val();
+        let checkpswd = $("#password-check").val();
         if (checkpswd.length > 0){
             if(pswd == checkpswd){
                 $("#password-check-sign").text("비밀번호가 일치합니다.")
@@ -328,7 +326,7 @@
     function ajaxCheckIdValid(){
         console.log("ajaxCheckIdValid")
         ajax_form_data=new FormData();
-        ajax_form_data.append('github_id',$('#github_id').val());
+        ajax_form_data.append('github-id',$('#github-id').val());
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
         $('#github-id-check').html(`<div class="spinner-border text-dark spinner-border-sm" role="status">
             <span class="sr-only">Loading...</span>

@@ -67,11 +67,11 @@ def category_tag_language(request):
 
 @register.simple_tag
 def email_domain_tag(request):
-    result = '<optgroup>'
-    result += '<option class="email-domain" selected>직접입력</option>'
-    domain_list  = ["naver.com", "gmail.com", "daum.net", "nate.com", "yahoo.com"]
+    result = ''
+    result += '<option value="" selected>직접입력</option>'
+    domain_list  = ["g.skku.edu", "skku.edu", "naver.com", "gmail.com", "kakao.com", "nate.com", "yahoo.com"]
     for d in domain_list:
-        result += f'<option class="email-domain" value="{d}">{d}</option>'
-    result += '</optgroup><span>V</span>'
+        result += f'<option value="{d}">{d}</option>'
+    result += '<span>V</span>'
 
     return mark_safe(result)
