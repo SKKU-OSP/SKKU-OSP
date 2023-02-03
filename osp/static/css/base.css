@@ -126,6 +126,9 @@ li, a, button {
   height: 60%;
   min-width: 700px;
 }
+#message-modal-body {
+  height: inherit;
+}
 #oppo-list {
   width: 40%;
   z-index: 1;
@@ -146,11 +149,14 @@ li, a, button {
 }
 #chat-view-tab {
   width: 60%;
+  height: 100%;
   padding: 1rem;
   border-bottom-right-radius: 0.625rem;
   background-color: var(--main-bg-color);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 img.opponent-profile {
   height: 2rem;
@@ -215,7 +221,7 @@ img.opponent-profile {
 .chat-text-body {
   max-width: 80%;
   padding: 0.5rem;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0.125rem 0.25rem var(--card-box-shadow);
   border-radius: 10px;
   overflow: hidden;
   white-space: normal;
@@ -241,7 +247,7 @@ img.opponent-profile {
   flex: 2;
   margin-right: 0.25rem;
   background: #FFFFFF;
-  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
   padding: 0.5em;
   border-radius: 0.5rem;
   border: none;
@@ -271,7 +277,7 @@ img.opponent-profile {
   border: none;
 }
 .modal-body .form-control {
-  box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0.125rem 0.25rem var(--card-box-shadow);
 }
 
 .email-input {
@@ -284,7 +290,7 @@ img.opponent-profile {
 /* SlimSelect Override */
 .ss-multi-selected {
   border: none !important;
-  box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0.125rem 0.25rem var(--card-box-shadow);
 }
 .ss-single-selected>.placeholder {
   background: none;
@@ -382,7 +388,7 @@ img.opponent-profile {
   color: #000000;
   border-top-color: transparent;
   border-bottom-color: #000000;
-  border-radius: 0px
+  border-radius: 0;
 }
 
 #ApplyTeamModal .nav-pills .nav-link.active,
@@ -391,7 +397,7 @@ img.opponent-profile {
   color: var(--sub-point-color);
   border-color: #000000;
   border-bottom-color: transparent;
-  border-radius: 10px 10px 0px 0px;
+  border-radius: 10px 10px 0 0;
 }
 
 #apply-recv-tab{
@@ -530,7 +536,7 @@ img.opponent-profile {
 .user-info {
   margin: auto;
   background-color: var(--main-point-color);
-  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  box-shadow: 0 4px 4px var(--card-box-shadow);
   border-top-left-radius: 0.625rem;
   border-top-right-radius: 0.625rem;
   width: 100%;

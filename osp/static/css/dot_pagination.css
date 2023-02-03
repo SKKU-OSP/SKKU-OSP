@@ -46,7 +46,7 @@
 
 @keyframes slideLeft {
   0% {
-    transform: translateX(0px);
+    transform: translateX(0);
   }
 
   100% {
@@ -79,7 +79,7 @@
 
 @keyframes slideRight {
   0% {
-    transform: translateX(0px);
+    transform: translateX(0);
     opacity: 1;
   }
 

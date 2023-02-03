@@ -11,7 +11,7 @@ $().ready(function () {
         new_team_tag = new SlimSelect({
           select: 'select[name=tag]',
           onChange: (selected_list) => {
-            for (selected of selected_list) {
+            for (let selected of selected_list) {
               $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
             }
           },
@@ -59,8 +59,6 @@ $().ready(function () {
       }
   });
   $('.folder').click(function () {
-    console.log("folder click");
-    console.log($(this).data('fold-target'));
     var target = $(this).data('fold-target');
     if ($(target).hasClass("none")) {
       $(this).addClass('bi-chevron-up');
@@ -72,7 +70,7 @@ $().ready(function () {
       $(this).removeClass('bi-chevron-up');
       $(target).addClass('none');
     }
-  })
+  });
 });
 
 

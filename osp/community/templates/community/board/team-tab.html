@@ -212,7 +212,7 @@
                 team_tag_select = new SlimSelect({
                     select: 'select#team-tag',
                     onChange: (selected_list) => {
-                        for (selected of selected_list) {
+                        for (let selected of selected_list) {
                             $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
                         }
                     },
