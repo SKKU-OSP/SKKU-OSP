@@ -277,7 +277,7 @@ img.opponent-profile {
 .email-input {
   flex: 2 1 60%;
 }
-.email-input.email-select{
+.email-domain{
   flex: 0 1 40%;
 }
 
