@@ -2,7 +2,7 @@
 
 {% load static %}
 {% block content %}
-<div class="d-flex justify-content-center container mt-5">
+<div class="d-flex justify-content-center container my-4">
     <div class="col-3">
         <div class="d-flex justify-content-center">
             <img src="/static/images/logo.svg" alt="Logo" style="width: 70%;"/>
@@ -20,15 +20,15 @@
             {% csrf_token %}
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" name="username" id="username" placeholder="exampleusername" required>
-                <label for="UsernameHelp">Username</label>
+                <label for="username">Username</label>
             </div>
             <div class="form-floating mb-3">
-                <input type="password" class="form-control" name="password" id="password" placeholder="examplepw"
-                    required>
+                <input type="password" class="form-control" name="password" id="password" placeholder="examplepw" required>
                 <label for="password">Password</label>
             </div>
+            {# TODO: 계정 정보 찾기 #}
             <div class="d-flex flex-column">
-                <button type="submit" class="btn btn-outline-secondary mb-3">Log In</button>
+                <button type="submit" class="btn btn-outline-primary mb-3">Log In</button>
                 <a class="btn btn-outline-secondary mb-3" href="/accounts/register">Sign Up</a>
             </div>
         </form>
