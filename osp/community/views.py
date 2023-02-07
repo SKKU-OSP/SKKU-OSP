@@ -1,8 +1,7 @@
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse, Http404
+from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 from django.db import DatabaseError, transaction
 from django.db.models import F, Q, Count
 from django.views.decorators.csrf import csrf_exempt
@@ -64,96 +63,111 @@ def main(request):
         board_list.append(board)
     return render(request, 'community/main.html', {'boards': board_list})
 
-def board(request, board_name, board_id):
-    try:
-        board = Board.objects.get(id=board_id)
-    except Board.DoesNotExist:
-        return redirect('/community')
-    context = {'board': board}
 
-    if request.user.is_authenticated:
-        account = Account.objects.get(user_id=request.user.id)
-        
+class TableBoardView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+        board_name = context["board_name"]
+        board_id = context["board_id"]
+        context["need_login"] = False
+        context["need_member"] = False
         try:
-            acc_pp = AccountPrivacy.objects.get(account=account)
-        except:
-            acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
-        context['is_write'] = acc_pp.is_write
-        context['is_open'] = acc_pp.is_open
-    else:
-        account = None
-        context['is_write'] = 0
-        context['is_open'] = 0
+            board = Board.objects.get(id=board_id, name=board_name)
+            context["board"] = board
 
-    if board.team_id is not None:
-        if not request.user.is_authenticated:
-            return redirect('/community')
-
-        # 팀 소속일 경우 팀 게시판 로드
-        # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
-        # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
-        context['waitedInviteMessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
-        if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
-            context['invited_user'] = False
-        elif context['waitedInviteMessages'].exists():
-            context['invited_user'] = True
-        else :
-            return redirect('/community')
-    # deprecated -> user_board
-    if board.board_type == 'User':
-        if request.user.is_anonymous:
-            return redirect('/community')
-        return render(request, 'community/board/user-board.html', context)
-
-    if board.board_type == 'Recruit':
-
-        active_article = Article.objects.filter(board_id=board)
-        active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        for article in active_article:
-            article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-            teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
-            if teamrecruitarticle:
-                article.team = teamrecruitarticle.team
-            else:
-                article.team = None
-
-        team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
-        context['team_cnt'] = team_cnt
-        context['active_article'] = active_article
-        context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-
-    if board.board_type == 'Team':
-        team = board.team
-        team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
-        team_tags_list= []
-        try:
-            for atg in team_tags:
-                team_tags_list.append({'name':atg["tag__name"], 'type':atg["tag__type"]})
-        except Exception as e:
-            print("error tag", e)
+        except Board.DoesNotExist:
+            raise Http404("게시판을 찾을 수 없습니다.")
         
-        team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
-
-        tm = team_members.filter(member=account).first()
-        # if not tm:
-        #     return redirect('/community')
-        if tm:
-            context['team_admin'] = tm.is_admin
-        context['team'] = team
-        context['team_tags'] = team_tags_list
-        context['team_members'] = team_members
+        # 로그인된 정보공개 설정을 확인한다.
+        if request.user.is_authenticated:
+            account = Account.objects.get(user_id=request.user.id)
+            
+            try:
+                acc_pp = AccountPrivacy.objects.get(account=account)
+            except:
+                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+            context['is_write'] = acc_pp.is_write
+            context['is_open'] = acc_pp.is_open
+        else:
+            account = None
+            context['is_write'] = 0
+            context['is_open'] = 0
         
-    return render(request, 'community/board/board.html', context)
+        # 게시판 별로 다른 데이터를 전달한다.
+        if board.board_type == 'User':
+            return redirect("/community/recommender/user/")
+
+        if board.board_type == 'Team':
+            if not request.user.is_authenticated:
+                context["need_login"] = True
+                return render(request, 'community/tableBoard/table-board.html', context)
+
+            # 팀 소속일 경우 팀 게시판 로드
+            # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
+            # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
+            context['waitedInviteMsg'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
+            if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
+                # 팀 멤버라면 초대 상태 리셋
+                context['invited_user'] = False
+            elif context['waitedInviteMsg'].exists():
+                # 초대 상태로 설정
+                context['invited_user'] = True
+            else :
+                # 팀 멤버도 아니고 초대 받지 않았다면 열람 불가
+                context["need_member"] = True
+                return render(request, 'community/tableBoard/table-board.html', context)
+        
+            team = board.team
+            team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
+            team_tags_list= []
+            try:
+                for atg in team_tags:
+                    team_tags_list.append({'name':atg["tag__name"], 'type':atg["tag__type"]})
+            except Exception as e:
+                print("error in team tag", e)
+            
+            team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
+
+            # 검색한 팀 멤버에서 유저 검색
+            tm = team_members.filter(member=account).first()
+            if tm:
+                context['team_admin'] = tm.is_admin
+            context['team'] = team
+            context['team_tags'] = team_tags_list
+            context['team_members'] = team_members
+
+        
+        if board.board_type == 'Recruit':
+
+            active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            for article in active_article:
+                article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+                teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
+                if teamrecruitarticle:
+                    article.team = teamrecruitarticle.team
+                else:
+                    article.team = None
+
+            team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
+            context['team_cnt'] = team_cnt
+            context['active_article'] = active_article
+            context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
+
+        return render(request, 'community/tableBoard/table-board.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+        
 
 def user_board(request):
     try:
         board = Board.objects.get(name="User")
     except Board.DoesNotExist:
-        return redirect('/community')
+        return Http404("유저 추천 게시판이 없습니다.")
     context = {'board': board}
 
-    if request.user.is_anonymous:
-        return redirect('/community')
     return render(request, 'community/board/user-board.html', context)
 
 def account_cards(request):
@@ -317,16 +331,22 @@ def article_list(request, board_name, board_id):
                 article.comment = comment_by_like[0]
     context['article_list'] = article_list
     result = {}
-    result['html'] = render_to_string('community/article-bar.html', context,request=request)
+    result['html'] = render_to_string('community/article-table.html', context,request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
 
     return JsonResponse(result)
 
 
-class ArticleRegisterView(TemplateView):
-
+class ArticleSaveView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
+        board_name = context["board_name"]
+        board_id = context["board_id"]
+        if request.user.is_anonymous:
+            context["alert"] = "로그인이 필요한 서비스입니다."
+            context["url"] = f"/community/board/{board_name}/{board_id}/"
+            return render(request, "community/redirect.html", context)
+        # 쿼리스트링의 값을 가져온다.
         if 'team_id' in request.GET:
             team_id = request.GET['team_id']
             members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
@@ -401,202 +421,6 @@ class ArticleView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
-@csrf_exempt
-def article_create(request):
-    message = ''
-
-    status = 'success'
-    board_name = request.POST.get('board_name')
-    board_id = request.POST.get('board_id')
-    board = Board.objects.get(id=board_id)
-
-    try:
-        with transaction.atomic():
-
-            account = Account.objects.get(user=request.user)
-            article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
-                pub_date=datetime.now(), mod_date=datetime.now(),
-                anonymous_writer=request.POST.get('is_anonymous') == 'true',
-                board_id_id=board.id,
-                writer=account)
-            if request.POST.get('period_start', False):
-                article.period_start = request.POST.get('period_start')[:-1]
-                article.period_end = request.POST.get('period_end')[:-1]
-                article.save()
-            tag_list = request.POST.get('tags').split(',')
-            for tag_name in tag_list:
-                if tag_name:
-                    tag = Tag.objects.get(name=tag_name)
-                    ArticleTag.objects.create(article=article, tag=tag)
-            if board.board_type == 'Recruit':
-                team = Team.objects.get(id=request.POST.get('team_id'))
-                TeamRecruitArticle.objects.create(team=team,article=article)
-
-    except Exception as e:
-            status = 'fail'
-            message = str(e)
-            if request.user.is_anonymous:
-                message = "로그인 후 이용해주세요."
-            # message = str(e) + "\n" + str(trace_back)
-
-    return JsonResponse({'status': status, 'message': message})
-
-@csrf_exempt
-def article_update(request):
-    message = ''
-    status = 'success'
-    article_id = request.POST.get('article_id')
-    try:
-        with transaction.atomic():
-            article = Article.objects.get(id=article_id)
-
-            if article.writer.user == request.user:
-                target_article = Article.objects.filter(id=article_id)
-                target_article.update(
-                    title=request.POST.get('title'), 
-                    body=request.POST.get('body'), 
-                    mod_date=datetime.now(), 
-                    anonymous_writer=request.POST.get('is_anonymous') == 'true'
-                )
-                if request.POST.get('period_start', False):
-                    target_article.update(
-                        period_start=request.POST.get('period_start')[:-1],
-                        period_end=request.POST.get('period_end')[:-1]
-                    )
-                tag_list = request.POST.get('tags').split(',')
-                tag_list_old = list(ArticleTag.objects.filter(article=article).values_list('tag__name', flat=True))
-
-                for tag in tag_list:
-                    if not tag:
-                        tag_list = []
-                        break
-                for tag_name in list(set(tag_list_old)-set(tag_list)):
-                    ArticleTag.objects.get(article=article, tag__name=tag_name).delete()
-                for tag_name in list(set(tag_list)-set(tag_list_old)):
-                    tag = Tag.objects.get(name=tag_name)
-                    ArticleTag.objects.create(article=article, tag=tag)
-            else:
-                status = 'fail'
-                message = '작성자만 수정할 수 있습니다.'
-
-    except DatabaseError:
-        status = 'fail'
-        message = 'Internal Database Error'
-
-    return JsonResponse({'status': status, 'message': message})
-
-@csrf_exempt
-def article_delete(request):
-    message = ''
-
-    status = 'success'
-    article_id = request.POST.get('article_id')
-
-    try:
-        with transaction.atomic():
-
-            article = Article.objects.get(id=article_id)
-            #cascade 달려있음.
-
-            if article.writer.user == request.user:
-                article.delete()
-
-            else:
-                status = 'fail'
-                message = '작성자만 삭제할 수 있습니다.'
-
-
-    except Exception as e:
-        status = 'fail'
-        message = str(e)
-        if request.user.is_anonymous:
-            message = "로그인 후 이용해주세요."
-
-    return JsonResponse({'status': status, 'message': message})
-
-@csrf_exempt
-def comment_create(request):
-
-    message = ''
-
-    status = 'success'
-    article_id = request.POST.get('article_id')
-    try:
-        with transaction.atomic():
-            writer = Account.objects.get(user=request.user)
-            article = Article.objects.get(id=article_id)
-            comment = ArticleComment.objects.create(article=article,body=request.POST.get('body'),pub_date=datetime.now(),del_date=datetime.now(),anonymous_writer=request.POST.get('is_anonymous') == 'true',writer=writer)
-    except Exception as e:
-            status = 'fail'
-            message = str(e)
-            if request.user.is_anonymous:
-                message = "로그인 후 이용해주세요."
-
-    html = ''
-    if status == 'success':
-        comments = ArticleComment.objects.filter(article=article)
-        context = {'article':article, 'comments':comments}
-        html = render_to_string('community/article/includes/comments.html',context, request=request)
-
-    return JsonResponse({'status': status, 'message': message, 'html':html})
-
-@csrf_exempt
-def comment_delete(request):
-    message = ''
-
-    status = 'success'
-    comment_id = request.POST.get('comment_id')
-
-    try:
-        with transaction.atomic():
-            comment_f = ArticleComment.objects.filter(id=comment_id)
-            comment_f.update(del_date=datetime.now(),is_deleted=True)
-            comment = comment_f.get()
-            article = Article.objects.get(id=comment.article.id)
-            if comment.writer.user == request.user:
-                comment.delete()
-            else:
-                status = 'fail'
-                message = '작성자만 삭제할 수 있습니다.'
-    except:
-        status = 'fail'
-
-    html = ''
-    if status == 'success':
-        comments = ArticleComment.objects.filter(article=article)
-        context = {'article':article, 'comments':comments}
-        html = render_to_string('community/article/includes/comments.html',context,request=request)
-    return JsonResponse({'status': status, 'message': message, 'html':html})
-
-def article_like(request):
-    try:
-        article_id = request.POST.get('article_id')
-        user = request.user
-        article = Article.objects.get(id=article_id)
-        account = Account.objects.get(user=user)
-
-        obj, created = ArticleLike.objects.get_or_create(article=article,account=account)
-
-        if not created:
-            obj.delete()
-        like_cnt = len(ArticleLike.objects.filter(article=article))
-        return JsonResponse({'status': 'success', 'created': created, 'result': like_cnt})
-    except:
-        return JsonResponse({'status':'false'})
-
-def article_scrap(request):
-    try:
-        article_id = request.POST.get('article_id')
-        user = request.user
-        article = Article.objects.get(id=article_id)
-        account = Account.objects.get(user=user)
-        obj, created = ArticleScrap.objects.get_or_create(article=article,account=account)
-        if not created:
-            obj.delete()
-        scrap_cnt = len(ArticleScrap.objects.filter(article=article))
-        return JsonResponse({'status': 'success', 'created': created, 'result': scrap_cnt})
-    except DatabaseError:
-        return JsonResponse({'status':'false'})
 
 @login_required
 def my_activity(request):
@@ -614,21 +438,6 @@ def my_activity(request):
         'comment_list': comment
     }
     return render(request, 'community/activity.html', context)
-
-
-def comment_like(request):
-    try:
-        comment_id = request.POST.get('comment_id')
-        comment = ArticleComment.objects.get(id=comment_id)
-        account = Account.objects.get(user=request.user)
-        obj, created = ArticleCommentLike.objects.get_or_create(comment=comment,account=account)
-        if not created:
-            obj.delete()
-        like_cnt = len(ArticleCommentLike.objects.filter(comment=comment))
-        return JsonResponse({'status': 'success', 'result': like_cnt})
-    except DatabaseError as e:
-        return JsonResponse({'status':'fail', 'message': str(e)})
-    
 
 def get_article_metas(article_list):
     
@@ -676,3 +485,8 @@ def get_article_metas(article_list):
         article.scrap_cnt = article_scraps_dict.get(article.id, 0)
         
     return article_list
+
+class redirectView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return render(request, 'community/redirect.html', context)
