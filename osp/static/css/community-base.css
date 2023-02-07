@@ -223,7 +223,7 @@
     margin-bottom: auto;
     margin-left: auto;
     text-align: end;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--main-black);
 }
 
@@ -231,7 +231,7 @@
     margin-left: 0.25em;
     margin-right: 0.25em;
     justify-content: end;
-    text-align: end;
+    text-align: center;
     color: #2F2F2F;
 }
 
@@ -366,7 +366,7 @@
 
 #board-title {
     font-size: 18px;
-    margin:auto;
+    padding: 6px 12px;
 }
 #article-filter{
     position:absolute;
@@ -609,7 +609,7 @@
 .tag-recruit {
     font-size: 0.75rem;
     height: 1.5rem;
-    /* width: 4rem; */
+    width: 4rem;
     margin-right: 0.5rem;
     display: flex;
     align-items: center;
@@ -872,4 +872,44 @@
 #membersList{
     max-height: 200px;
     overflow-y: auto;
+}
+/* 새로운 디자인 */
+.thead-board {
+    background-color: var(--main-bg-color);
+    border: transparent;
+}
+
+.thead-board > tr > th:first-child{
+    border-radius: 0.5rem 0 0 0;
+}
+.thead-board > tr > th:last-child{
+    border-radius: 0 0.5rem 0 0;
+}
+.white-box {
+    background-color: var(--main-white);
+}
+.shadow-box {
+    box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
+}
+#tbody > tr:last-child > td {
+    border-width: 0;
+}
+#tbody > tr > td {
+    vertical-align: middle;
+}
+#tbody > tr > td > a, #tbody > tr > td > button {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+    color: var(--main-black);
+}
+#tbody > tr > td >a:hover, #tbody > tr > td > button:hover{
+    text-decoration: underline;
+}
+.article-tag{
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    overflow-x: auto;
 }

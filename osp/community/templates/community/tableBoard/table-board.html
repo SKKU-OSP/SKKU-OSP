@@ -20,7 +20,8 @@
                 팀 멤버만 열람할 수 있습니다. <a href="/accounts/login/">팀 모집 게시판 확인하기</a>
             </div>
             {% else %}
-                Table Board
+            <div id="article-list-body"></div>
+            {% include "community/board/board-footer.html" with board=board %}
             {% endif %}
         </div>
     </div>
