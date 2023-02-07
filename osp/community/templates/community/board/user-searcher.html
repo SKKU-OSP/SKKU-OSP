@@ -1,0 +1,15 @@
+{% load tag_templatetag %}
+<div id="user-searcher">
+    <div id="article-filter" class="d-flex justify-content-between shadow-box rounded-2">
+        <div class="input-group" id="search-field">
+            <input type="text" class="form-control" placeholder="Username" id="search-keyword" aria-describedby="search-btn">
+            <button class="btn btn-light" type="button" id="user-tag-btn" onclick="toggleUserTag();">#</button>
+            <button class="btn btn-light" type="button" id="user-search-btn">검색</button>
+        </div>
+    </div>
+    <div id="user-tag-filter">
+        <select id="tag-select" name="tag-filter-select" multiple>
+            {% category_tag request %}
+        </select>
+    </div>
+</div>

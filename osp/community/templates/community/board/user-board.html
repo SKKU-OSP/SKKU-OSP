@@ -16,13 +16,8 @@
             맞춤 유저 추천
           </a>
         </div>
-        <div id="article-filter">
-          {% include "community/board/searcher.html" with board=board %}
-          <div id="tag-filter">
-            <select id="tag-select" name="tag-filter-select" multiple>
-              {% category_tag request %}
-            </select>
-          </div>
+        <div id="user-filter">
+          {% include "community/board/user-searcher.html" with board=board %}
         </div>
       </div>
       {% if user.is_authenticated %}

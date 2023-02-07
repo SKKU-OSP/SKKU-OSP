@@ -151,7 +151,7 @@ function send_msg(event) {
         } else {
             alert(data.message);
         }
-    }.bind(random_id))
+    }.bind(random_id));
     return false;
 }
 
@@ -176,10 +176,43 @@ function msgModalOpen(selected_oppo = 0) {
                 RefreshNewMessage();
             }
         });
-    })
+    });
 }
 
-function ApplyTeamModalOpen(isResult=false) {
+/**
+ * 알림 메시지를 클릭하면 읽음과 피드백을 하는 함수
+ * @param {string} type 알림 메시지의 타입
+ * @param {string} noti_id 알림 메시지의 아이디
+ * @param {string} target_id 팀초대면 url, 게시글 관련이면 숫자
+ */
+function ReadNotification(type, noti_id, target_id="") {
+    console.log(type, noti_id, target_id)
+    $.ajax({
+        url: '/message/noti-read/' + noti_id,
+        dataType: 'JSON',
+    }).done(function (data) {
+        if (data['status'] == 'success') {
+            if (type == 'comment' || type == 'articlelike') {
+                window.location = '/community/article/' + target_id;
+            }
+            if(type=='team_invite'){
+                window.location = target_id;
+            }
+            if (type == 'team_apply') {
+                appListModalOpen();
+            }
+            if (type == 'team_apply_result') {
+                appListModalOpen(isResult=true);
+            }
+
+            $('#noti-' + noti_id).addClass('read');
+        } else {
+            alert(data['message']);
+        }
+    });
+}
+
+function appListModalOpen(isResult=false) {
     if (!$('#ApplyTeamModal').hasClass('ready')) {
         $.ajax({
             url: "/team/api/team-apply-list",
@@ -202,54 +235,60 @@ function ApplyTeamModalOpen(isResult=false) {
                 $("#apply-recv").toggleClass("show active");
                 $("#apply-send").toggleClass("show active");
             }
-        })
+        });
     } else {
         $('#ApplyTeamModal').modal('show');
     }
 }
-
 
 $().ready(function () {
     $('#message').click(function () {
         msgModalOpen();
     })
     $('#team-apply-list').click(function (){
-        ApplyTeamModalOpen();
+        appListModalOpen();
     });
-});
-/**
- * 알림 메시지를 클릭하면 읽음과 피드백을 하는 함수
- * @param {string} type 알림 메시지의 타입
- * @param {string} noti_id 알림 메시지의 아이디
- * @param {string} target_id 팀초대면 url, 게시글 관련이면 숫자
- */
-function ReadNotification(type, noti_id, target_id="") {
-    console.log(type, noti_id, target_id)
-    $.ajax({
-        url: '/message/noti-read/' + noti_id,
-        dataType: 'JSON',
-    }).done(function (data) {
-        if (data['status'] == 'success') {
-            if (type == 'comment' || type == 'articlelike') {
-                window.location = '/community/article/' + target_id;
-            }
-            if(type=='team_invite'){
-                window.location = target_id;
-            }
-            if (type == 'team_apply') {
-                ApplyTeamModalOpen();
-            }
-            if (type == 'team_apply_result') {
-                ApplyTeamModalOpen(isResult=true);
-            }
-
-            $('#noti-' + noti_id).addClass('read');
-        } else {
-            alert(data['message']);
+    /** 
+     * 검색창 
+    */
+    $('#search-btn').click(function() {
+        searchArticle();
+    });
+    $('#search-keyword').keypress(function(e) {
+        if(e.keyCode==13) {
+            console.log("enter");
         }
-    })
+    });
+    let tagSeacher = new SlimSelect({
+        select: '#tag-searcher',
+        onChange: (selected_list) => {
+            for (let selected of selected_list) {
+                $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class);
+            }
+            if(selected_list.length > 0){
+                $("#tag-btn").addClass("btn-primary");
+                $("#tag-btn").removeClass("btn-light");
+            }else{
+                $("#tag-btn").removeClass("btn-primary");
+                $("#tag-btn").addClass("btn-light");
+            }
+        },
+        placeholder: 'Tag',
+    });
+    $('#searcher').addClass('show');
+});
+function toggleTag(){
+    $("#tag-filter").toggleClass("show");
 }
-
+function toggleUserTag(){
+    $("#user-tag-filter").toggleClass("show");
+}
+function searchArticle(){
+    console.log("search btn click");
+}
+/**
+ * 회원가입에 필요한 동의서
+ */
 function consentSignInOpen(){
     $('#consent-signin').modal('show');
     // set is_modal_open in register.html
@@ -258,86 +297,4 @@ function consentSignInOpen(){
         $("#consentSignUp").removeClass("btn-secondary");
         $("#consentSignUp").addClass("btn-primary");
     }
-}
-
-function consentWriteOpen(user){
-    console.log("open_consent_write");
-    $.ajax({
-        url: `/user/${user}/api/consent-write`,
-        type: "GET",
-        data: null,
-        dataType: 'HTML'
-    }).done(function (data) {
-        $('#consent-wirte').addClass('ready').html(data)
-        $('#consent-wirte').modal('show');
-    })
-}
-
-function submitWriteConsent(e, user){
-    e.preventDefault();
-    formHTML = $("#write-consent-form")[0]
-    
-    let form_data = new FormData(formHTML);
-    let opt1 = form_data.get('radio-1')
-    let opt2 = form_data.get('radio-2')
-
-    if(Number(opt1[0])&Number(opt2[0])){
-        $.ajax({
-            url: `/user/${user}/api/consent-write`,
-            method: 'POST',
-            data: form_data,
-            dataType: 'JSON',
-            processData: false,
-            contentType: false,
-        }).done(function (data) {
-            console.log(data);
-            alert(data.msg);
-            window.location.reload();
-        });
-    }else{
-        alert("정보 공개에 동의하지 않아 글쓰기 작업이 제한됩니다.");
-    }
-
-    return false;
-}
-
-function consentUserOpen(user){
-    console.log("open_consent_user");
-    $.ajax({
-        url: `/user/${user}/api/consent-open`,
-        type: "GET",
-        data: null,
-        dataType: 'HTML'
-    }).done(function (data) {
-        $('#consent-open').addClass('ready').html(data)
-        $('#consent-open').modal('show');
-    })
-}
-
-function submitUserConsent(e, user){
-    e.preventDefault();
-    formHTML = $("#open-consent-form")[0]
-    
-    let form_data = new FormData(formHTML);
-    let opt1 = form_data.get('radio-1')
-    let opt2 = form_data.get('radio-2')
-
-    if(Number(opt1[0])&Number(opt2[0])){
-        $.ajax({
-            url: `/user/${user}/api/consent-open`,
-            method: 'POST',
-            data: form_data,
-            dataType: 'JSON',
-            processData: false,
-            contentType: false,
-        }).done(function (data) {
-            console.log(data);
-            alert(data.msg);
-            window.location.reload();
-        });
-    }else{
-        alert("정보 공개에 동의하지 않아 유저 추천시스템에 대한 접근이 제한됩니다.");
-    }
-
-    return false;
 }
