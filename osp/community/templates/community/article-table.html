@@ -1,7 +1,7 @@
 {% load community_tag %}
 {# board의 article-list-body 에 출력되는 내용 #}
 <div class="shadow-box white-box rounded-3">
-    <table class="table table-horizontal" style="table-layout:fixed">
+    <table class="table" style="table-layout:fixed">
         <colgroup>
             <col width="36%">
             <col width="12%">
@@ -24,30 +24,38 @@
         {% for article in article_list %}
             <tr>
                 {#제목#}
-                <td class="d-flex">
+                <td>
+                    <div class="d-flex">
                     {% if board.board_type == 'Recruit' %}
                         {% is_period_end article.period_start as is_start %}
                         {% is_period_end article.period_end as is_end %}
                         {% if article.team %}
                             {% if not is_start %}
-                            <span class="badge tag-recruit tag-recruit-end">모집 전</span>
+                            <span class="badge tag-recruit tag-recruit-end">
+                                <span class="tag-text">모집 전</span>
+                            </span>
                             {% elif not is_end %}
-                            <span class="badge tag-recruit tag-recruit-ing">모집 중</span>
+                            <span class="badge tag-recruit tag-recruit-ing">
+                                <span class="tag-text">모집 중</span>
+                            </span>
                             {% else %}
-                            <span class="badge tag-recruit tag-recruit-end">모집 마감</span>
+                            <span class="badge tag-recruit tag-recruit-end">
+                                <span class="tag-text">모집 마감</span>
+                            </span>
                             {% endif %}
                         {% endif %}
                     {% endif %}
-                    <a href="{% url 'community:article-view' article.id %}">
-                        {% if board.board_type == 'Recruit' %}
-                            {% if article.team %}
-                            [{{ article.team.name }}]
-                            {% else %}
-                            [삭제된 팀]
+                        <a href="{% url 'community:article-view' article.id %}">
+                            {% if board.board_type == 'Recruit' %}
+                                {% if article.team %}
+                                [{{ article.team.name }}]
+                                {% else %}
+                                [삭제된 팀]
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                        {{article.title}}
-                    </a>
+                            {{article.title}}
+                        </a>
+                    </div>
                 </td>
                 {#태그#}
                 <td>
@@ -67,15 +75,17 @@
                     {% if article.writer_name is null %}
                         탈퇴한 이용자
                     {% else %}
-                    <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{article.writer_name}}
-                    </button>
-                    <ul class="dropdown-menu">
-                        {% if not article.is_superuser %}
-                        <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
-                        {% endif %}
-                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
-                    </ul>
+                    <div class="d-flex">
+                        <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{article.writer_name}}
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% if not article.is_superuser %}
+                            <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
+                        </ul>
+                    </div>
                     {% endif %}
                 </td>
                 {% endif %}

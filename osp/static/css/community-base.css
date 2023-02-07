@@ -619,13 +619,15 @@
 .tag-recruit {
     font-size: 0.75rem;
     height: 1.5rem;
-    width: 4rem;
     margin-right: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.tag-text {
+    width: 3rem!important;
+}
 .tag-recruit-ing{
     background: var(--tag-bg-recruit);
     color: var(--sub-point-color);
@@ -907,14 +909,14 @@
 #tbody > tr > td {
     vertical-align: middle;
 }
-#tbody > tr > td > a, #tbody > tr > td > button {
+#tbody > tr > td a, #tbody > tr > td button {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
     display: block;
     color: var(--main-black);
 }
-#tbody > tr > td >a:hover, #tbody > tr > td > button:hover{
+#tbody > tr > td a:hover, #tbody > tr > td button:hover{
     text-decoration: underline;
 }
 .article-tag{
