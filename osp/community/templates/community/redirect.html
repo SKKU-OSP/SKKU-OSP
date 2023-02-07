@@ -1,0 +1,13 @@
+{% extends 'main.html' %}
+{% block content %}
+<script type="text/javascript">
+    {% if alert %}
+    window.alert('{{alert}}');
+    {% endif %}
+    {% if url %}
+    window.location.href = '{{url}}';
+    {% else %}
+    window.location.href = '/';
+    {% endif %}
+</script>
+{% endblock content %}

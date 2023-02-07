@@ -25,6 +25,7 @@
           </div>
         </div>
       </div>
+      {% if user.is_authenticated %}
       <!-- 팀 목록이 표시되는 영역 -->
       <div id="team-filter" class="w-100 border d-flex flex-wrap gap-2 fs-7">
         {% get_team request.user as teams %}
@@ -39,6 +40,11 @@
         <div class="spinner-border m-auto mt-5" role="status"></div>
       </div>
       {% include "community/board/board-footer.html" with board=board %}
+      {% else %}
+      <div class="m-2">
+        로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
