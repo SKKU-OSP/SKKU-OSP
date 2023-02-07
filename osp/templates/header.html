@@ -1,98 +1,100 @@
 {% load tag_templatetag %}
 {% load message_tag %}
-<header id="main-navbar" class="container navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand fs-3 bold" href="/community">
-        <img width="40px" height="40px" src="/static/images/logo-simple.svg" alt="로고">
-        SKKU SOSD
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse container-fluid" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            {% if user.is_staff %}
-            <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="/community">Community</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/rank/user">User</a></li>
-                    <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
-                </ul>
-            </li>
-            <li class="nav-item"><a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
-            {% endif %}
-        </ul>
-        {#검색창#}
-        <div id="searcher-box">
-            {% include "community/board/searcher.html" with board=board %}
-        </div>
+<header id="main-navbar" class="container d-flex flex-row gap-3 py-3">
+    <div class="col-lg-3 col-1">
+        <a href="/community">
+            <img width="42px" height="42px" src="/static/images/logo-simple.svg" alt="로고">
+        </a>
+        <a id="text-logo" class="fs-3 bold text-nowrap align-middle" href="/community">
+            <span>SKKU SOSD</span>
+        </a>
+    </div>
+    {# TODO: admin용도 사이드바로 이동시켜야함. #}
+    {% if user.is_staff %}
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/community">Community</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/rank/user">User</a></li>
+                <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
+            </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
+    </ul>
+    {% endif %}
+    {#검색창#}
+    <div id="searcher-box">
+    {% include "community/board/searcher.html" with board=board %}
+    </div>
+    {#헤더 아이콘 모음#}
+    <div class="d-flex flex-row p-2">
         {% if user.is_authenticated %}
-        <ul class="navbar-nav d-flex mx-2">
-            <li class="dropdown noti-dropdown-btn">
-                {% get_notifications request.user as notifications %}
-                {% if notifications.new %}
-                <span id="new-noti" class="badge">
-                    <span class="visually-hidden">New alerts</span>
+        {#1.지원서#}
+        <div id="team-apply-list" class="position-relative pointer">
+            <button class="default-btn p-0">
+                <span class="material-icons-outlined nav-icon fs-4">
+                    assignment_ind
                 </span>
-                {% endif %}
-                <button class="noti-dropdown dropdown-toggle default-btn" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <div id="notification" class="notification material-icons-outlined nav-icon pointer">
-                        notifications
-                    </div>
-                </button>
-                <div>
-                    <ul class="dropdown-menu noti-dropdown" style="position:absolute;max-height:185px;overflow-y:auto;overflow-x:hidden;">
-                        {% for noti in notifications.list %}
-                        <li class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
-                        onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
-                            <div class="d-flex">
-                                <div class="material-icons-outlined">
-                                    {{noti.icon}}
-                                </div>
-                                <div>
-                                    {{ noti.body.body }}
-                                </div>
-                            </div>
-                            <div>
-                                {% if noti.body.type in notifications.open_types %}
-                                <i class="bi bi-box-arrow-up-right"></i>
-                                {% endif %}
-                            </div>
-                        </li>
-                        {% empty %}
-                        <li class="empty text-center noti-item">
-                            알림이 없습니다.
-                        </li>
-                        {% endfor %}
-                    </ul>
+            </button>
+        </div>
+        
+        {#2.메시지#}
+        <div id="message" class="position-relative pointer">
+            {% get_new_message request.user as is_new_msg %}
+            {% if is_new_msg %}
+            <span id="new-msg" class="badge">
+                <span class="visually-hidden">New Message</span>
+            </span>
+            {% endif %}
+            <button class="default-btn p-0">
+                <span class="material-icons-outlined nav-icon fs-4">
+                    email
+                </span>
+            </button>
+        </div>
+        {#3.알림#}
+        <div class="dropdown noti-dropdown-btn">
+            {% get_notifications request.user as notifications %}
+            {% if notifications.new %}
+            <span id="new-noti" class="badge">
+                <span class="visually-hidden">New alerts</span>
+            </span>
+            {% endif %}
+            <button class="noti-dropdown dropdown-toggle default-btn p-0" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <div id="notification" class="notification material-icons-outlined nav-icon pointer">
+                    notifications
                 </div>
-            </li>
-
-            <li id="message" class="position-relative pointer">
-                {% get_new_message request.user as is_new_msg %}
-                {% if is_new_msg %}
-                <span id="new-msg" class="badge">
-                    <span class="visually-hidden">New Message</span>
-                </span>
-                {% endif %}
-                <button class="default-btn p-0">
-                    <span class="material-icons-outlined nav-icon fs-4">
-                        email
-                    </span>
-                </button>
-            </li>
-            <li id="team-apply-list" class="position-relative pointer">
-                <button class="default-btn p-0">
-                    <span class="material-icons-outlined nav-icon fs-4">
-                        assignment_ind
-                    </span>
-                </button>
-            </li>
-        </ul>
+            </button>
+            <ul id="noti-list" class="dropdown-menu noti-dropdown">
+                {% for noti in notifications.list %}
+                <li class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
+                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
+                    <div class="d-flex">
+                        <div class="material-icons-outlined">
+                            {{noti.icon}}
+                        </div>
+                        <div>
+                            {{ noti.body.body }}
+                        </div>
+                    </div>
+                    <div>
+                        {% if noti.body.type in notifications.open_types %}
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        {% endif %}
+                    </div>
+                </li>
+                {% empty %}
+                <li class="empty text-center noti-item">
+                    알림이 없습니다.
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {#4.계정#}
         <div class="dropdown">
             <div class="dropdown-toggle hover-opacity" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown">
                 {{user.username}}
@@ -109,6 +111,7 @@
         {% endif %}
     </div>
 </header>
+{% if user.is_authenticated %}
 <div id="message-modal" class="modal modal-lg fade">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -126,7 +129,6 @@
 </div>
 <div id="ApplyTeamModal" class="modal modal-lg fade">
 </div>
-{% if user.is_authenticated %}
 <div id="consent-wirte" class="modal modal-lg fade">
 </div>
 <div id="consent-open" class="modal modal-lg fade">
