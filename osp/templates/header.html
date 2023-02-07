@@ -25,6 +25,10 @@
             <li class="nav-item"><a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
             {% endif %}
         </ul>
+        {#검색창#}
+        <div id="searcher-box">
+            {% include "community/board/searcher.html" with board=board %}
+        </div>
         {% if user.is_authenticated %}
         <ul class="navbar-nav d-flex mx-2">
             <li class="dropdown noti-dropdown-btn">

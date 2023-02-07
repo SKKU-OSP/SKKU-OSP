@@ -377,18 +377,17 @@
     margin-bottom: 1rem;
     border-radius: 0.75rem;
 }
-
-#article-filter{
+#user-filter{
     position:absolute;
     right:5px;
-    top:5px;
+    top:10px;
     flex: 0 0 auto;
     width: 33.33333333%;
 }
-#tag-filter{
+#user-tag-filter{
     transition-duration: 0.15s;
 }
-#tag-filter:not(.show){
+#user-tag-filter:not(.show){
     opacity: 0;
     visibility: hidden;
 }
@@ -396,7 +395,7 @@
     #board-title {
         margin-left: 1rem;
     }
-    #article-filter{
+    #user-filter{
         width: 41.6%;
     }
 }

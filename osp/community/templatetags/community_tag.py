@@ -116,6 +116,39 @@ def board_sidebar_team_board(context, request):
             '''
     return mark_safe(result)
 
+# 검색에 사용될 일반 게시판 목록
+@register.simple_tag(takes_context=True)
+def searcher_normal_board(context, request):
+    result = ''
+    boards = Board.objects.filter(team_id=None).exclude(board_type='User')
+    for board in boards:
+        if board == context['board']:
+            result += f'<option value="{board.id}" selected>{board.name}</option>'
+        else:
+            result += f'<option val="{board.id}">{board.name}</option>'
+        
+    return mark_safe(result)
+
+# 검색에 사용될 팀 게시판 목록
+@register.simple_tag(takes_context=True)
+def searcher_team_board(context, request):
+    team_board_query = Q()
+    result = ''
+    if request.user and request.user.is_authenticated:
+        account = Account.objects.get(user=request.user)
+        team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+        team_board_query = Q(name__in=team_list)
+        team_objs = Team.objects.filter(team_board_query)
+
+        for board in Board.objects.filter(team_board_query):
+            board_team = team_objs.get(id=board.team_id)
+            if board == context['board']:
+                result += f'<option value="{board.id}" selected>{board.name}</option>'
+            else:
+                result += f'<option value="{board.id}">{board.name}</option>'
+
+    return mark_safe(result)
+
 @register.simple_tag()
 def is_period_end(date):
     if isinstance(date, datetime):
