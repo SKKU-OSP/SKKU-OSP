@@ -91,10 +91,10 @@ def board(request, board_name, board_id):
         # 팀 소속일 경우 팀 게시판 로드
         # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
         # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
-        context['waitedInviteMessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
+        context['waitedInviteMsg'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
         if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
             context['invited_user'] = False
-        elif context['waitedInviteMessages'].exists():
+        elif context['waitedInviteMsg'].exists():
             context['invited_user'] = True
         else :
             return redirect('/community')
@@ -186,11 +186,11 @@ class TableBoardView(TemplateView):
             # 팀 소속일 경우 팀 게시판 로드
             # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
             # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
-            context['waitedInviteMessages'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
+            context['waitedInviteMsg'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
             if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
                 # 팀 멤버라면 초대 상태 리셋
                 context['invited_user'] = False
-            elif context['waitedInviteMessages'].exists():
+            elif context['waitedInviteMsg'].exists():
                 # 초대 상태로 설정
                 context['invited_user'] = True
             else :
@@ -422,10 +422,11 @@ class ArticleSaveView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         board_name = context["board_name"]
         board_id = context["board_id"]
-        if 'user' not in request.GET:
+        if request.user.is_anonymous:
             context["alert"] = "로그인이 필요한 서비스입니다."
             context["url"] = f"/community/board/{board_name}/{board_id}/"
             return render(request, "community/redirect.html", context)
+        # 쿼리스트링의 값을 가져온다.
         if 'team_id' in request.GET:
             team_id = request.GET['team_id']
             members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)

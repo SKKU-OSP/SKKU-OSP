@@ -41,17 +41,17 @@
             </div>
             <div class="d-flex flex-column" style="background:white;box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);padding: 35px 20px 15px 20px; border-radius:0.625rem;margin-bottom:10px;">
                 <div>초대 메세지</div>
-                {% for msg in waitedinvitemessages %}
+                {% for msg in waitedInviteMsg %}
                 <div class=" d-flex flex-row justify-content-between w-100" style="box-shadow:0rem 0.25rem 0.25rem rgb(0 0 0 / 25%);border-radius:0.625rem;padding:5px 10px;margin-bottom:10px;">
                     <div style="width:75%;overflow:hidden;white-space:normal;display:inline-block;word-break:normal;overflow-wrap:break-word;">{{ msg.message }}</div>
                     <div style="width:20%;font-size:10px;">{{ msg.send_date }}</div>
                 </div>
                 {% endfor %}
                 <div class="d-flex flex-row justify-content-end w-100 gap-2">
-                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',true)" class="btn-xs btn-accept">
+                    <button onclick="invite_result({{ waitedInviteMsg.0.team_id }},'{{ waitedInviteMsg.0.account.user.username }}',true)" class="btn-xs btn-accept">
                         승인
                     </button>
-                    <button onclick="invite_result({{ waitedinvitemessages.0.team_id }},'{{ waitedinvitemessages.0.account.user.username }}',false)" class="btn-xs btn-refuse">
+                    <button onclick="invite_result({{ waitedInviteMsg.0.team_id }},'{{ waitedInviteMsg.0.account.user.username }}',false)" class="btn-xs btn-refuse">
                         거절
                     </button>
                 </div>

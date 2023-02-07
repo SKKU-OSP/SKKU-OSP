@@ -7,9 +7,10 @@ app_name = 'community'
 urlpatterns = [
     path('', views.main, name='Community-Main'),
     path('redirect/', views.redirectView.as_view(), name='RedirectView'),
-    path('board/<board_name>/<board_id>/', views.board, name='Board'),
-    path('tableboard/<board_name>/<board_id>/', views.TableBoardView.as_view(), name='TableBoard'),
-    path('tableboard/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='tabel-article-save'),
+    path('legacy-board/<board_name>/<board_id>/', views.board, name='LegacyBoard'),
+    path('legacy-board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='legacy-article-save'),
+    path('board/<board_name>/<board_id>/', views.TableBoardView.as_view(), name='Board'),
+    path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
 
     path('activity/', views.my_activity, name='Activity'),
 
@@ -18,7 +19,6 @@ urlpatterns = [
     path('account-cards/', views.account_cards ,name='Account_Cards'),
 
 
-    path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
     path('article/<article_id>/', views.ArticleView.as_view(), name='article-view'),
 
 
