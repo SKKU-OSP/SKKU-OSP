@@ -51,7 +51,25 @@ div> ::-webkit-scrollbar-thumb {
 div> ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
 }
-
+body::-webkit-scrollbar {
+  display: none;
+}
+/* table 내부 스크롤바 스타일 */
+td> ::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 0.25rem;
+}
+td> ::-webkit-scrollbar-track {
+  background: var(--main-border-color);
+  border-radius: 0.625rem;
+}
+td> ::-webkit-scrollbar-thumb {
+  background: var(--profile-btn-inactive);
+  border-radius: 0.625rem;
+}
+td> ::-webkit-scrollbar-thumb:hover {
+  background: var(--profile-btn-inactive);
+}
 li, a, button {
   font-weight: 500;
   text-decoration: none;

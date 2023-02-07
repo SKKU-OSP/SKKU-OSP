@@ -411,7 +411,7 @@ def article_list(request, board_name, board_id):
                 article.comment = comment_by_like[0]
     context['article_list'] = article_list
     result = {}
-    result['html'] = render_to_string('community/article-bar.html', context,request=request)
+    result['html'] = render_to_string('community/article-table.html', context,request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
 
     return JsonResponse(result)
