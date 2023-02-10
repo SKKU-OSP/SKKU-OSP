@@ -121,6 +121,16 @@
                 draw_page();
             });
         }
+
+        {% if max_page %}
+        MAX_PAGE = {{max_page}};
+        {% endif %}
+
+        {% if not html %}
+        console.log("there no html");
         redraw();
+        {%else%}
+        draw_page();
+        {% endif %}
     </script>
 </div>

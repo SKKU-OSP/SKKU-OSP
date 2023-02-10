@@ -123,9 +123,9 @@ def searcher_normal_board(context, request):
     boards = Board.objects.filter(team_id=None).exclude(board_type='User')
     for board in boards:
         if board == context['board']:
-            result += f'<option value="{board.id}" selected>{board.name}</option>'
+            result += f'<option value="{board.name}_{board.id}" selected>{board.name}</option>'
         else:
-            result += f'<option val="{board.id}">{board.name}</option>'
+            result += f'<option value="{board.name}_{board.id}">{board.name}</option>'
         
     return mark_safe(result)
 
