@@ -14,10 +14,6 @@ const searcher = {
             targetTag = "#article-filter";
             _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
-        $('#search-word').keypress(function(e) {
-            if(e.keyCode==13) _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
-        });
-
         // 유저 게시판 검색
         $('#user-search-btn').click(function() {
             targetBoard = "#user-board";
@@ -25,16 +21,32 @@ const searcher = {
             targetTag = "#user-tag-filter";
             _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=1);
         });
-        $('#search-username').keypress(function(e) {
-            if(e.keyCode==13) _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
-        });
-        
         // 내 활동 목록 검색
         $('#activity-search-btn').click(function() {
             targetBoard = "#activity-searcher";
             targetSearch = "#search-activity";
             targetTag = "#tag-select";
             _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
+        });
+        // 엔터키 검색 이벤트
+        $(document).keypress(function(e) {
+            if ($("#search-username").val() !== "" && $("#search-username").val() !== undefined){
+                targetBoard = "#user-board";
+                targetSearch = "#search-username";
+                targetTag = "#user-tag-filter";
+            }
+            else if($("#search-activity").val() !== "" && $("#search-activity").val() !== undefined){
+                targetBoard = "#activity-searcher";
+                targetSearch = "#search-activity";
+                targetTag = "#tag-select";
+            }
+            else if($("#search-word").val() !== ""){
+                targetBoard = "#board-searcher";
+                targetSearch = "#search-word";
+                targetTag = "#article-filter";
+            }
+            if(e.keyCode==13 && $(targetSearch).val() !== "") 
+                _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
     },
     pageItem: function (page) {
