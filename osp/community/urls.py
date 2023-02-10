@@ -9,6 +9,7 @@ urlpatterns = [
     path('redirect/', views.redirectView.as_view(), name='RedirectView'),
     path('board/<board_name>/<board_id>/', views.TableBoardView.as_view(), name='Board'),
     path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
+    path('search/', views.SearchView.as_view(), name='Search'),
 
     path('activity/', views.my_activity, name='Activity'),
     path('recommender/user/', views.user_board, name='user-board'),

@@ -64,12 +64,12 @@ const searcher = {
         let pageBody = $('#pagination-body');
         pageBody.empty();
         if(this.nowPage != 1) {
-            pageBody.append(page_item('<i class="bi-chevron-double-left">'));
-            pageBody.append(page_item('<i class="bi-chevron-left">'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-double-left">'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-left">'));
         }
         else{
-            pageBody.append(page_item('<i class="bi-chevron-double-left">').addClass('disabled'));
-            pageBody.append(page_item('<i class="bi-chevron-left">').addClass('disabled'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-double-left">').addClass('disabled'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-left">').addClass('disabled'));
         }
         let startLimit = Math.max(1, this.nowPage - 2);
         let endLimit = Math.min(this.MAX_PAGE, this.nowPage + 2);
@@ -82,15 +82,15 @@ const searcher = {
             }
         }
         for(i = startLimit; i <= endLimit; i++){
-            pageBody.append(page_item(i));
+            pageBody.append(this.pageItem(i));
         }
         if(this.nowPage < this.MAX_PAGE) {
-            pageBody.append(page_item('<i class="bi-chevron-right">'));
-            pageBody.append(page_item('<i class="bi-chevron-double-right">'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-right">'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-double-right">'));
         }
         else{
-            pageBody.append(page_item('<i class="bi-chevron-right">').addClass('disabled'));
-            pageBody.append(page_item('<i class="bi-chevron-double-right">').addClass('disabled'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-right">').addClass('disabled'));
+            pageBody.append(this.pageItem('<i class="bi-chevron-double-right">').addClass('disabled'));
         }
         $('.page-link').click(function(){
             var val = $(this).attr('value');
@@ -154,7 +154,12 @@ const searcher = {
 
 
         let board = $(boardFilter).val();
-        console.log("board", board);
+        let lastIdx = board.lastIndexOf("_");
+        let boardName = board.substring(0, lastIdx);
+        let boardId = board.substring(lastIdx+1);
+
+        
+
         let url = this.getUrl(board);
         console.log("url", url);
         
@@ -185,16 +190,24 @@ const searcher = {
         if(to_page_1){
             this.nowPage = 1;
         }
+        data = {
+            'page': this.nowPage,
+            'keyword': searchWord,
+            'tag': tag_list.join(','),
+            'team_li': JSON.stringify(team_li),
+        }
+        // boardId가 아이디 값이 아니면 통합검색 외의 검색으로 api 호출
+        // 아이디 값이라면 통합검색이므로 링크 이동
+        if(!isNaN(boardId)){
+            data["board"] = boardId;
+            console.log("get data", data);
+            location.href = "/community/search/?" + jQuery.param(data);
+        }
 
         $.ajax(
             {
                 url: url,
-                data: {
-                    'page': this.nowPage,
-                    'keyword': searchWord,
-                    'tag': tag_list.join(','),
-                    'team_li': JSON.stringify(team_li),
-                },
+                data: data,
                 method: 'GET',
                 dataType: 'JSON'
             }
