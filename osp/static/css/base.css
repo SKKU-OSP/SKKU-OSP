@@ -149,7 +149,7 @@ li, a, button {
 #board-searcher {
   flex-grow: 2;
 }
-#search-keyword {
+#search-word {
   flex-grow:7;
 }
 #search-field {
