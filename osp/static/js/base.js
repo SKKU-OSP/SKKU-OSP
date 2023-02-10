@@ -248,17 +248,6 @@ $().ready(function () {
     $('#team-apply-list').click(function (){
         appListModalOpen();
     });
-    /** 
-     * 검색창 
-    */
-    $('#search-btn').click(function() {
-        searchArticle();
-    });
-    $('#search-keyword').keypress(function(e) {
-        if(e.keyCode==13) {
-            console.log("enter");
-        }
-    });
     let tagSeacher = new SlimSelect({
         select: '#tag-searcher',
         onChange: (selected_list) => {
@@ -282,9 +271,6 @@ function toggleTag(){
 }
 function toggleUserTag(){
     $("#user-tag-filter").toggleClass("show");
-}
-function searchArticle(){
-    console.log("search btn click");
 }
 /**
  * 회원가입에 필요한 동의서
