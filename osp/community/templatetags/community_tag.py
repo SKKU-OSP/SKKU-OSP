@@ -94,7 +94,7 @@ def board_sidebar_team_board(context, request):
     team_board_query = Q()
     result = ''
     if request.user and request.user.is_authenticated:
-        account = Account.objects.get(user=request.user)
+        account = Account.objects.get(user=request.user.id)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
         team_objs = Team.objects.filter(team_board_query)
@@ -135,7 +135,7 @@ def searcher_team_board(context, request):
     team_board_query = Q()
     result = ''
     if request.user and request.user.is_authenticated:
-        account = Account.objects.get(user=request.user)
+        account = Account.objects.get(user=request.user.id)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
         team_objs = Team.objects.filter(team_board_query)

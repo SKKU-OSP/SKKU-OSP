@@ -3,26 +3,40 @@
 <div class="shadow-box white-box rounded-3">
     <table class="table" style="table-layout:fixed">
         <colgroup>
+            {% if type == 'search' %}
+            <col width="20%">
+            {% endif %}
             <col width="36%">
             <col width="12%">
             <col width="22%">
             <col width="14%">
+            {% if type != 'search' %}
             <col width="8%">
             <col width="8%">
+            {% endif %}
         </colgroup>
         <thead class="thead-strong thead-board">
         <tr>
+            {% if type == 'search' %}
+            <th>게시판</th>
+            {% endif %}
             <th>제목</th>
             <th>태그</th>
             <th>작성자</th>
             <th>작성일</th>
+            {% if type != 'search' %}
             <th class="article-meta-stat">스크랩</th>
             <th class="article-meta-stat">댓글</th>
+            {% endif %}
         </tr>
         </thead>
         <tbody id="tbody">
         {% for article in article_list %}
             <tr>
+                {% if type == 'search' %}
+                {#게시판#}
+                <td>{{article.board_name}}</td>
+                {% endif %}
                 {#제목#}
                 <td>
                     <div class="d-flex">
@@ -93,6 +107,7 @@
                 <td>
                     {{article.pub_date|time_before}}
                 </td>
+                {% if type != 'search' %}
                 {#스크랩#}
                 <td class="article-meta-stat">
                     <span>{{article.scrap_cnt}}</span>
@@ -103,6 +118,7 @@
                         <span>{{article.comment_cnt}}</span>
                     </a>
                 </td>
+                {% endif %}
             </tr>
             {%empty%}
             <td class="empty">

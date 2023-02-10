@@ -2,12 +2,10 @@ from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from django.db import DatabaseError, transaction
 from django.db.models import F, Q, Count
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
-from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
@@ -16,14 +14,14 @@ from team.recommend import get_team_recommendation_list
 import hashlib
 import math, json, time
 from django.views.generic import TemplateView
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Create your views here.
 def main(request):
     board_list = []
     team_board_query = Q()
     if request.user.is_authenticated:
-        account = Account.objects.get(user=request.user)
+        account = Account.objects.get(user=request.user.id)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
     boards = Board.objects.filter(team_board_query | Q(team_id=None)).exclude(board_type='User')
@@ -170,9 +168,11 @@ class SearchView(TemplateView):
         try:
             if(board_id):
                 board = Board.objects.get(id=board_id)
+                board_name = board.name
                 context["board"] = board
             else:
-                board = {"name":"전체 게시판", "id":0}
+                board_name = "전체 게시판"
+                board = {"name":board_name, "id":0, "board_type":"Total"}
                 context["board"] = board
         except Board.DoesNotExist:
             raise Http404("게시판을 찾을 수 없습니다.")
@@ -191,72 +191,38 @@ class SearchView(TemplateView):
             account = None
             context['is_write'] = 0
             context['is_open'] = 0
+
         
-        # 게시판 별로 다른 데이터를 전달한다.
-        if board.board_type == 'User':
-            return redirect("/community/recommender/user/")
+        # if board.board_type == 'Recruit':
 
-        if board.board_type == 'Team':
-            if not request.user.is_authenticated:
-                context["need_login"] = True
-                return render(request, 'community/tableBoard/table-board.html', context)
+        #     active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        #     for article in active_article:
+        #         article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+        #         teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
+        #         if teamrecruitarticle:
+        #             article.team = teamrecruitarticle.team
+        #         else:
+        #             article.team = None
 
-            # 팀 소속일 경우 팀 게시판 로드
-            # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
-            # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
-            context['waitedInviteMsg'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
-            if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
-                # 팀 멤버라면 초대 상태 리셋
-                context['invited_user'] = False
-            elif context['waitedInviteMsg'].exists():
-                # 초대 상태로 설정
-                context['invited_user'] = True
-            else :
-                # 팀 멤버도 아니고 초대 받지 않았다면 열람 불가
-                context["need_member"] = True
-                return render(request, 'community/tableBoard/table-board.html', context)
-        
-            team = board.team
-            team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
-            team_tags_list= []
-            try:
-                for atg in team_tags:
-                    team_tags_list.append({'name':atg["tag__name"], 'type':atg["tag__type"]})
-            except Exception as e:
-                print("error in team tag", e)
-            
-            team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
+        #     team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
+        #     context['team_cnt'] = team_cnt
+        #     context['active_article'] = active_article
+        #     context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
 
-            # 검색한 팀 멤버에서 유저 검색
-            tm = team_members.filter(member=account).first()
-            if tm:
-                context['team_admin'] = tm.is_admin
-            context['team'] = team
-            context['team_tags'] = team_tags_list
-            context['team_members'] = team_members
-        
-        if board.board_type == 'Recruit':
 
-            active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            for article in active_article:
-                article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-                teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
-                if teamrecruitarticle:
-                    article.team = teamrecruitarticle.team
-                else:
-                    article.team = None
+        result = search_article(request, board_name, board_id)
+        context['html'] = result['html']
+        context['max_page'] = result['max-page']
 
-            team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
-            context['team_cnt'] = team_cnt
-            context['active_article'] = active_article
-            context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
+        keyword = request.GET.get('keyword', '')
+        tags = request.GET.get('tag', False)
+        context['title'] = board_name 
+        if keyword:
+            context['title'] += f" 검색어 '{keyword}'" 
+        if tags:
+            context['title'] += f" 태그 '{tags}'" 
+        context['title'] += " 검색 결과"
 
-        try:
-            result = search_article(request, context["board"].name, board_id)
-            context['html'] = result['html']
-            context['max_page'] = result['max-page']
-        except Exception as e:
-            print("search_article Exception", e)
 
         return render(request, 'community/tableBoard/searched.html', context)
 
@@ -265,58 +231,108 @@ class SearchView(TemplateView):
         return context
 
 def search_article(request, board_name, board_id):
+    # 반복문으로 구현
+    keyword = request.GET.get('keyword', '')
+    tags = request.GET.get('tag', False)
+    sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
+    page = int(request.GET.get('page', 1))
+    print("keyword", keyword, " tags", tags)
     try:
-        board = Board.objects.get(id=board_id)
+        if board_id == 0:
+            #전체 검색
+            boardList = []
+
+            boards = Board.objects.filter(team_id=None).exclude(board_type='User')
+            for board in boards:
+                boardList.append(board)
+
+            if request.user.is_authenticated:
+                account = Account.objects.get(user=request.user.id)
+                team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+                team_board_query = Q(name__in=team_list)
+
+                for board in Board.objects.filter(team_board_query):
+                    boardList.append(board)
+
+            print("total 검색", boardList)
+            board_type = "Total"
+            board_name = "전체 게시판"
+            board_data = {"name":board_name, "id":0, "board_type":board_type}
+        else:
+            board_data = Board.objects.get(id=board_id)
+            board_type = board_data.board_type
+            board_name = board_data.name
+            boardList = [board_data]
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
     
-    if board.board_type == 'Recruit':
+    if board_type == 'Recruit':
         PAGE_SIZE = 5
     else:
         PAGE_SIZE = 10
-    context = {}
-    context['board'] = board
-    context['bartype'] = 'normal'
-    
-    sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
-    
-    page = int(request.GET.get('page', 1))
-    # Filter Board
-    article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
-    # Filter Keyword
-    keyword = request.GET.get('keyword', '')
-    if keyword != '':
-        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-        print(keyword, type(keyword),article_list)
-    # Filter Tag
-    tag_list = request.GET.get('tag', False)
-    if tag_list:
-        tag_list = tag_list.split(',')
-        tag_query = Q()
-        for tag in tag_list:
-            tag_query = tag_query | Q(tag=tag)
-        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
-        article_list = article_list.filter(id__in=article_with_tag)
-    
-    total_len = len(article_list)
-    # Order
-    article_list = article_list.order_by(*sort_field)
-    # Slice to Page
-    article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-    
-    # Get Article Metadata
-    article_list = get_article_metas(article_list)
-    
-    if board.board_type == 'Recruit':
-        for article in article_list:
-            tr = TeamRecruitArticle.objects.filter(article=article).first()
-            if tr:
-                article.team = tr.team
-            else:
-                article.team = None
 
-    context['article_list'] = article_list
+    context = {}
+    context['board'] = board_data
+    context['bartype'] = 'normal'
+    context['type'] = "search"
+
+    # if 
+    total_article_list = []
+    for board in boardList:
+        # Filter Board
+        print("board", board)
+        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        print("article_list", article_list)
+
+        # Filter Keyword
+        
+        if keyword != '':
+            article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+            print(keyword, type(keyword),article_list)
+        # Filter Tag
+        if tags:
+            print("tags", tags)
+            tag_list = tags.split(',')
+
+            print("tag_list2", tag_list)
+
+            tag_query = Q()
+            for tag in tag_list:
+                tag_query = tag_query | Q(tag=tag)
+            article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
+            article_list = article_list.filter(id__in=article_with_tag)
+        
+        total_len = len(article_list)
+        # Order
+        article_list = article_list.order_by(*sort_field)
+        # Slice to Page
+        article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+        
+        # Get Article Metadata
+        article_list = get_article_metas(article_list)
+
+        
+        if board.board_type == 'Recruit':
+            for article in article_list:
+                tr = TeamRecruitArticle.objects.filter(article=article).first()
+                if tr:
+                    article.team = tr.team
+                else:
+                    article.team = None
+        total_article_list += article_list
+    
+    article_board = {}
+    for idx, article in enumerate(total_article_list):
+        if article.board_id_id not in article_board:
+            board_q = Board.objects.get(id=article.board_id_id)
+            print("board_name", board_q.name)
+            article_board[article.board_id_id] = board_q.name
+
+    for article in total_article_list:
+        article.board_name = article_board[article.board_id_id]
+
+    context['article_list'] = total_article_list
     result = {}
     result['html'] = render_to_string('community/article-table.html', context,request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
@@ -344,6 +360,7 @@ def account_cards(request):
     context['board'] = Board.objects.get(board_type="User")
     context['account_list'] = []
     context['is_open'] = 0
+    context['type'] = "user"
 
     is_show = True
     try:
@@ -440,6 +457,7 @@ def article_list(request, board_name, board_id):
     context = {}
     context['board'] = board
     context['bartype'] = 'normal'
+    context['type'] = "board"
     
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     
@@ -575,7 +593,7 @@ class ArticleView(TemplateView):
 
 @login_required
 def my_activity(request):
-    account = Account.objects.get(user=request.user)
+    account = Account.objects.get(user=request.user.id)
     article_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
     scrap_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
     comment = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
