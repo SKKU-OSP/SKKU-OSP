@@ -6,12 +6,12 @@ const searcher = {
         let targetBoard = "#board-searcher";
         let targetSearch = "#search-word";
         let targetTag = "#tag-searcher";
-    
+
         // 통합 검색
         $('#search-btn').click(function() {
             targetBoard = "#board-searcher";
             targetSearch = "#search-word";
-            targetTag = "#article-filter";
+            targetTag = "#tag-filter";
             _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
         // 유저 게시판 검색
@@ -43,7 +43,7 @@ const searcher = {
             else if($("#search-word").val() !== ""){
                 targetBoard = "#board-searcher";
                 targetSearch = "#search-word";
-                targetTag = "#article-filter";
+                targetTag = "#tag-filter";
             }
             if(e.keyCode==13 && $(targetSearch).val() !== "") 
                 _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
@@ -152,30 +152,23 @@ const searcher = {
         console.log("boardFilter", boardFilter);
         console.log("to_page_1", to_page_1);
 
-
         let board = $(boardFilter).val();
         let lastIdx = board.lastIndexOf("_");
         let boardName = board.substring(0, lastIdx);
         let boardId = board.substring(lastIdx+1);
 
-        
-
-        let url = this.getUrl(board);
-        console.log("url", url);
-        
-        let containerId = this.getContainerId(board);
-        
         // 키워드 필터
         let searchWord = $(wordFilter).val();
         // 태그 필터
         const tag_list = [];
-        console.log("$(tagFilter)", $(tagFilter));
-
         for(let tag of $(tagFilter).find('.ss-value-text')){
             tag_list.push($(tag).html());
         }
-        console.log("tag_list", tag_list);
-        
+
+        if((searchWord === "" || searchWord === undefined) && tag_list.length === 0){
+            // 전부 빈값이면 검색하지 않음
+            return;
+        }
         // 유저 추천에 사용하는 팀 필터 
         const team_li = [];
         $('#team-filter').children().each(function(){
@@ -194,7 +187,6 @@ const searcher = {
             'page': this.nowPage,
             'keyword': searchWord,
             'tag': tag_list.join(','),
-            'team_li': JSON.stringify(team_li),
         }
         // boardId가 아이디 값이 아니면 통합검색 외의 검색으로 api 호출
         // 아이디 값이라면 통합검색이므로 링크 이동
@@ -204,19 +196,21 @@ const searcher = {
             location.href = "/community/search/?" + jQuery.param(data);
         }
 
-        $.ajax(
-            {
-                url: url,
-                data: data,
-                method: 'GET',
-                dataType: 'JSON'
-            }
-        ).done(function(data){
+        let url = this.getUrl(board);
+        console.log("url", url);
+        let containerId = this.getContainerId(board);
+
+        data["team_li"] = JSON.stringify(team_li);
+        $.ajax({
+            url: url,
+            data: data,
+            method: 'GET',
+            dataType: 'JSON'
+        }).done(function(data){
             $(containerId).html(data['html']);
             this.MAX_PAGE = data['max-page'];
             draw_page();
         });
     },
-
 }
 searcher.init();
