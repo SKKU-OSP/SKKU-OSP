@@ -1,6 +1,7 @@
 const searcher = {
     nowPage: 1,
     MAX_PAGE: 1,
+    activityType: 'article',
     init: function () {
         let _this = this;
         let targetBoard = "#board-searcher";
@@ -19,14 +20,29 @@ const searcher = {
             targetBoard = "#user-board";
             targetSearch = "#search-username";
             targetTag = "#user-tag-filter";
-            _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=1);
+            _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
         // 내 활동 목록 검색
         $('#activity-search-btn').click(function() {
-            targetBoard = "#activity-searcher";
+            targetBoard = "#activity-board";
             targetSearch = "#search-activity";
-            targetTag = "#tag-select";
+            targetTag = "#activity-tag-filter";
             _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
+        });
+        $('#pills-article-tab').click(function() {
+            _this.activityType = 'article';
+            _this.nowPage = 1;
+            _this.draw();
+        });
+        $('#pills-scrap-tab').click(function() {
+            _this.activityType = 'scrap';
+            _this.nowPage = 1;
+            _this.draw();
+        });        
+        $('#pills-comment-tab').click(function() {
+            _this.activityType = 'comment';
+            _this.nowPage = 1;
+            _this.draw();
         });
         // 엔터키 검색 이벤트
         $(document).keypress(function(e) {
@@ -36,7 +52,7 @@ const searcher = {
                 targetTag = "#user-tag-filter";
             }
             else if($("#search-activity").val() !== "" && $("#search-activity").val() !== undefined){
-                targetBoard = "#activity-searcher";
+                targetBoard = "#activity-board";
                 targetSearch = "#search-activity";
                 targetTag = "#tag-select";
             }
@@ -182,7 +198,7 @@ const searcher = {
         const url ={
             total: "/community/article-list/",
             user: "/community/account-cards/",
-            activity: "/community/activity/",
+            activity: "/community/activity/contents/",
         }
         let urlKey = board.split("_")[0].toLowerCase();
         if (Object.keys(url).includes(urlKey)){
@@ -197,7 +213,8 @@ const searcher = {
     },
     getContainerId: function(board) {
         const container ={
-            user: "#article-card-body"
+            user: "#article-card-body",
+            activity: "#pills-tabContent",
         }
         if (Object.keys(container).includes(board)){
             return container[board];
@@ -225,6 +242,7 @@ const searcher = {
         for(let tag of $(tagFilter).find('.ss-value-text')){
             tag_list.push($(tag).html());
         }
+        console.log("searchWord", searchWord, "tag_list", tag_list);
 
         if((searchWord === "" || searchWord === undefined) && tag_list.length === 0){
             // 전부 빈값이면 검색하지 않음
@@ -251,6 +269,7 @@ const searcher = {
         }
         // boardId가 아이디 값이 아니면 통합검색 외의 검색으로 api 호출
         // 아이디 값이라면 통합검색이므로 링크 이동
+        console.log("boardId", boardId);
         if(!isNaN(boardId)){
             data["board"] = boardId;
             console.log("get data", data);
@@ -262,6 +281,7 @@ const searcher = {
         let containerId = this.getContainerId(board);
 
         data["team_li"] = JSON.stringify(team_li);
+        data["type"] = this.activityType;
         $.ajax({
             url: url,
             data: data,
@@ -290,12 +310,14 @@ const searcher = {
             }
         });
         console.log("js team_li", team_li);
+        console.log("this.activityType", this.activityType);
         $.ajax(
             {
                 url: url,
                 data: {
                     'page': this.nowPage,
                     'team_li': JSON.stringify(team_li),
+                    'type': this.activityType,
                 },
                 method: 'GET',
                 dataType: 'JSON',
@@ -309,6 +331,8 @@ const searcher = {
             console.log("draw get data");
             if(boardValue.split("_")[0].toLowerCase() === "user")
                 $('#article-card-body').html(data['html']);
+            if(boardValue.split("_")[0].toLowerCase() === "activity")
+                $('#pills-tabContent').html(data['html']);
             else
                 $('#article-list-body').html(data['html']);
             searcher.MAX_PAGE = data['max-page'];

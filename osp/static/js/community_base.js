@@ -6,13 +6,16 @@ $(function () {
                 for (let selected of selected_list) {
                     $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class);
                 }
-                redraw();
                 if(selected_list.length > 0){
-                    $("#tag-btn").addClass("btn-primary");
-                    $("#tag-btn").removeClass("btn-secondary");
+                    $("#activity-tag-btn").addClass("btn-primary");
+                    $("#activity-tag-btn").removeClass("btn-light");
+                    $("#user-tag-btn").addClass("btn-primary");
+                    $("#user-tag-btn").removeClass("btn-light");
                 }else{
-                    $("#tag-btn").removeClass("btn-primary");
-                    $("#tag-btn").addClass("btn-secondary");
+                    $("#activity-tag-btn").removeClass("btn-primary");
+                    $("#activity-tag-btn").addClass("btn-light");
+                    $("#user-tag-btn").addClass("btn-primary");
+                    $("#user-tag-btn").removeClass("btn-light");
                 }
             },
             placeholder: 'Tag',
