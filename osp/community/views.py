@@ -275,7 +275,7 @@ def search_article(request, board_name, board_id):
     context = {}
     context['board'] = board_data
     context['bartype'] = 'normal'
-    context['type'] = "search"
+    context['type'] = "mix"
 
     # if 
     total_article_list = []
@@ -593,21 +593,64 @@ class ArticleView(TemplateView):
 
 @login_required
 def my_activity(request):
+    keyword = request.GET.get('keyword', '')
+    tags = request.GET.get('tag', False)
+    page = int(request.GET.get('page', 1))
+
     account = Account.objects.get(user=request.user.id)
     article_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
     scrap_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-    comment = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
-
+    comment_list = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
+    if keyword != '':
+        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+        print(keyword, type(keyword), article_list)
+        scrap_list = scrap_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+        comment_list = comment_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+    if tags:
+        tag_list = tags.split(',')
+        tag_query = Q()
+        for tag in tag_list:
+            tag_query = tag_query | Q(tag=tag)
+        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
+        article_list = article_list.filter(id__in=article_with_tag)
+        
     article_list = get_article_metas(article_list)
     scrap_list = get_article_metas(scrap_list)
+
+    article_list = get_board_name(article_list)
+    scrap_list = get_board_name(scrap_list)
+
+    comment_board = {}
+    for comment in comment_list:
+        if comment.article.board_id_id not in comment_board:
+            board_id = comment.article.board_id_id
+            board_q = Board.objects.get(id=board_id)
+            comment_board[board_id] = board_q.name
+    for comment in comment_list:
+        comment.board_name = comment_board[comment.article.board_id_id]
 
     context = {
         'write_article': article_list,
         'scrap_article': scrap_list,
-        'comment_list': comment
+        'comment_list': comment_list
     }
+    context['type'] = 'mix'
     return render(request, 'community/activity.html', context)
 
+# 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
+def get_board_name(article_list):
+    article_board = {}
+    for article in article_list:
+        if article.board_id_id not in article_board:
+            board_q = Board.objects.get(id=article.board_id_id)
+            article_board[article.board_id_id] = board_q.name
+
+    for article in article_list:
+        article.board_name = article_board[article.board_id_id]
+
+    return article_list
+
+# 게시글 리스트를 받아서 태그, 좋아요 수, 스크랩 수, 댓글 수를 게시글 객체에 포함시키는 함수
 def get_article_metas(article_list):
     
     if type(article_list) != list:
