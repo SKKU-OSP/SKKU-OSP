@@ -5,7 +5,7 @@ from community import views, views_api, views_legacy
 app_name = 'community'
 
 urlpatterns = [
-    path('', views.main, name='Community-Main'),
+    path('', views.CommunityMainView.as_view(), name='Community-Main'),
     path('redirect/', views.redirectView.as_view(), name='RedirectView'),
     path('board/<board_name>/<board_id>/', views.TableBoardView.as_view(), name='Board'),
     path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
