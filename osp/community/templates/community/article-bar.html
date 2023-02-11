@@ -23,30 +23,6 @@
     </div>
     {% if board.board_type != 'Recruit'%}
     <div class="article-meta">
-        <!--div class="color-b">
-            {% if request.user.is_anonymous %}
-            <span>사용자</span>
-            {% elif article.anonymous_writer %}
-            <span>익명</span>
-            {% else %}
-            <div class="dropdown writer-dropdown">
-                {% if article.writer_name is null %}
-                    탈퇴한 이용자
-                {% else %}
-                <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {{article.writer_name}}
-                </button>
-                <ul class="dropdown-menu">
-                    {% if not article.is_superuser %}
-                    <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
-                    {% endif %}
-                    <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
-                </ul>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div-->
-        <!--div>{{article.pub_date|time_before}}</div-->
         <div class="d-flex justify-content-between">
             <div class="article-meta-stat d-flex">
                 <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
@@ -60,10 +36,6 @@
                 <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
                 {{article.scrap_cnt}}
             </div>
-            <!--div class="article-meta-stat d-flex">
-                <div class="article-meta-stat-icon material-icons-outlined">visibility</div>
-                {{article.view_cnt}}
-            </div-->
         </div>
     </div>
     {% else %}
