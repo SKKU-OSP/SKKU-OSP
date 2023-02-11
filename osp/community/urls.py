@@ -11,7 +11,8 @@ urlpatterns = [
     path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
     path('search/', views.SearchView.as_view(), name='Search'),
 
-    path('activity/', views.my_activity, name='Activity'),
+    path('activity/', views.activity_board, name='Activity'),
+    path('activity/contents/', views.my_activity, name='Activity_List'),
     path('recommender/user/', views.user_board, name='user-board'),
     path('article-list/<board_name>/<board_id>/', views.article_list ,name='Article_List'),
     path('account-cards/', views.account_cards ,name='Account_Cards'),

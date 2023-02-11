@@ -162,7 +162,8 @@ class SearchView(TemplateView):
     # page, keyword, tag, team_li
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
-        board_id = int(request.GET.get('board', 0))
+        board_id = request.GET.get('board', 0)
+        board_id = int(board_id) if board_id.isdigit() else 0
         context["need_login"] = False
         context["need_member"] = False
         try:
@@ -539,51 +540,77 @@ class ArticleView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
+@login_required
+def activity_board(request):
+    context = {'board_name': 'activity', 'board_type': 'activity', 'board_id':0}
+
+    return render(request, 'community/activity.html', context)
+
 
 @login_required
 def my_activity(request):
     keyword = request.GET.get('keyword', '')
     tags = request.GET.get('tag', False)
     page = int(request.GET.get('page', 1))
+    activity_type = request.GET.get('type', 'article')
+    print("activity_type", activity_type)
 
     account = Account.objects.get(user=request.user.id)
-    article_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-    scrap_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-    comment_list = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
-    if keyword != '':
-        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-        scrap_list = scrap_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-        comment_list = comment_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-    if tags:
-        tag_list = tags.split(',')
-        tag_query = Q()
-        for tag in tag_list:
-            tag_query = tag_query | Q(tag=tag)
-        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
-        article_list = article_list.filter(id__in=article_with_tag)
-        
-    article_list = get_article_metas(article_list)
-    scrap_list = get_article_metas(scrap_list)
 
-    article_list = get_article_board_data(article_list)
-    scrap_list = get_article_board_data(scrap_list)
 
-    comment_board = {}
-    for comment in comment_list:
-        if comment.article.board_id_id not in comment_board:
-            board_id = comment.article.board_id_id
-            board_q = Board.objects.get(id=board_id)
-            comment_board[board_id] = board_q.name
-    for comment in comment_list:
-        comment.board_name = comment_board[comment.article.board_id_id]
+    if activity_type == "scrap":
+        target_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    elif activity_type == "comment":
+        target_list = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
+    else :
+        target_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
 
+    if activity_type != "comment":
+        target_list = filter_keyword_tag(target_list, keyword, tags)
+        target_list = get_article_metas(target_list)
+        target_list = get_article_board_data(target_list)
+        for article in target_list:
+            if article.board_type == 'Recruit':
+                tr = TeamRecruitArticle.objects.filter(article=article).first()
+                if tr:
+                    article.team = tr.team
+                else:
+                    article.team = None
+    else:
+        if keyword != '':
+            target_list = target_list.filter(Q(body__icontains=keyword))
+        comment_board = {}
+        for comment in target_list:
+            if comment.article.board_id_id not in comment_board:
+                board_id = comment.article.board_id_id
+                board_q = Board.objects.get(id=board_id)
+                comment_board[board_id] = board_q.name
+        for comment in target_list:
+            comment.board_name = comment_board[comment.article.board_id_id]
+
+    PAGE_SIZE = 10
+    total_len = len(target_list)
+    target_list = list(target_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
     context = {
-        'write_article': article_list,
-        'scrap_article': scrap_list,
-        'comment_list': comment_list
+        'target_list': target_list,
+        # 'scrap_article': list(scrap_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]),
+        # 'comment_list': list(comment_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]), 
     }
+    context['activity_type'] = activity_type
+    print("context['activity_type']", context['activity_type'])
     context['type'] = 'mix'
-    return render(request, 'community/activity.html', context)
+
+    result = {}
+    # result['html'] = render_to_string('community/activity-tab.html', context, request=request)
+    result['html'] = render_to_string('community/activity-tab.html', context, request=request)
+    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+
+    return JsonResponse(result)
+
+
+    #  JsonResponse(result)
+
+    # return render(request, 'community/activity.html', context)
 
 # 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
 def get_article_board_data(article_list):

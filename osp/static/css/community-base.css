@@ -377,17 +377,17 @@
     margin-bottom: 1rem;
     border-radius: 0.75rem;
 }
-#user-filter{
+#user-filter, #activity-filter{
     position:absolute;
     right:5px;
     top:10px;
     flex: 0 0 auto;
     width: 33.33333333%;
 }
-#user-tag-filter{
+#user-tag-filter, #activity-tag-filter{
     transition-duration: 0.15s;
 }
-#user-tag-filter:not(.show){
+#user-tag-filter:not(.show), #activity-tag-filter:not(.show){
     opacity: 0;
     visibility: hidden;
 }

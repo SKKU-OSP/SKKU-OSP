@@ -272,6 +272,9 @@ function toggleTag(){
 function toggleUserTag(){
     $("#user-tag-filter").toggleClass("show");
 }
+function toggleActivityTag(){
+    $("#activity-tag-filter").toggleClass("show");
+}
 /**
  * 회원가입에 필요한 동의서
  */
