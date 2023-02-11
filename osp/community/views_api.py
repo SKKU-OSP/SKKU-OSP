@@ -23,7 +23,7 @@ def article_create(request):
     try:
         with transaction.atomic():
 
-            account = Account.objects.get(user=request.user)
+            account = Account.objects.get(user=request.user.id)
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
                 pub_date=datetime.now(), mod_date=datetime.now(),
                 anonymous_writer=request.POST.get('is_anonymous') == 'true',
@@ -165,7 +165,7 @@ def comment_create(request):
     article_id = request.POST.get('article_id')
     try:
         with transaction.atomic():
-            writer = Account.objects.get(user=request.user)
+            writer = Account.objects.get(user=request.user.id)
             article = Article.objects.get(id=article_id)
             comment = ArticleComment.objects.create(article=article,body=request.POST.get('body'),pub_date=datetime.now(),del_date=datetime.now(),anonymous_writer=request.POST.get('is_anonymous') == 'true',writer=writer)
     except Exception as e:
@@ -214,7 +214,7 @@ def comment_like(request):
     try:
         comment_id = request.POST.get('comment_id')
         comment = ArticleComment.objects.get(id=comment_id)
-        account = Account.objects.get(user=request.user)
+        account = Account.objects.get(user=request.user.id)
         obj, created = ArticleCommentLike.objects.get_or_create(comment=comment,account=account)
         if not created:
             obj.delete()

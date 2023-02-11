@@ -2,12 +2,10 @@ from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from django.db import DatabaseError, transaction
 from django.db.models import F, Q, Count
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import *
-from tag.models import Tag
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
@@ -16,7 +14,7 @@ from team.recommend import get_team_recommendation_list
 import hashlib
 import math, json, time
 from django.views.generic import TemplateView
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Create your views here.
 
@@ -73,7 +71,7 @@ def main(request):
     board_list = []
     team_board_query = Q()
     if request.user.is_authenticated:
-        account = Account.objects.get(user=request.user)
+        account = Account.objects.get(user=request.user.id)
         team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
         team_board_query = Q(name__in=team_list)
     boards = Board.objects.filter(team_board_query | Q(team_id=None)).exclude(board_type='User')
@@ -210,6 +208,139 @@ class TableBoardView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
         
+class SearchView(TemplateView):
+    # page, keyword, tag, team_li
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+        board_id = request.GET.get('board', 0)
+        board_id = int(board_id) if board_id.isdigit() else 0
+        context["need_login"] = False
+        context["need_member"] = False
+        try:
+            if(board_id):
+                board = Board.objects.get(id=board_id)
+                board_name = board.name
+                context["board"] = board
+            else:
+                board_name = "전체 게시판"
+                board = {"name":board_name, "id":0, "board_type":"Total"}
+                context["board"] = board
+        except Board.DoesNotExist:
+            raise Http404("게시판을 찾을 수 없습니다.")
+        
+        # 로그인된 정보공개 설정을 확인한다.
+        if request.user.is_authenticated:
+            account = Account.objects.get(user_id=request.user.id)
+            
+            try:
+                acc_pp = AccountPrivacy.objects.get(account=account)
+            except:
+                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+            context['is_write'] = acc_pp.is_write
+            context['is_open'] = acc_pp.is_open
+        else:
+            account = None
+            context['is_write'] = 0
+            context['is_open'] = 0
+
+        result = search_article(request, board_name, board_id)
+        context['html'] = result['html']
+        context['max_page'] = result['max-page']
+
+        keyword = request.GET.get('keyword', '')
+        tags = request.GET.get('tag', False)
+        context['title'] = board_name 
+        if keyword:
+            context['title'] += f" 검색어 '{keyword}'" 
+        if tags:
+            context['title'] += f" 태그 '{tags}'" 
+        context['title'] += " 검색 결과"
+
+
+        return render(request, 'community/tableBoard/searched.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+def search_article(request, board_name, board_id):
+    # 반복문으로 구현
+    keyword = request.GET.get('keyword', '')
+    tags = request.GET.get('tag', False)
+    sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
+    page = request.GET.get('page', 1)
+    page = int(page) if page.isdigit() else 1
+    print("keyword", keyword, " tags", tags)
+    try:
+        if board_id == 0:
+            #전체 검색
+            boardList = []
+            boards = Board.objects.filter(team_id=None).exclude(board_type='User')
+            for board in boards:
+                boardList.append(board)
+
+            if request.user.is_authenticated:
+                account = Account.objects.get(user=request.user.id)
+                team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+                team_board_query = Q(name__in=team_list)
+
+                for board in Board.objects.filter(team_board_query):
+                    boardList.append(board)
+
+            print("total 검색", boardList)
+            board_type = "Total"
+            board_name = "전체 게시판"
+            board_data = {"name":board_name, "id":0, "board_type":board_type}
+        else:
+            board_data = Board.objects.get(id=board_id)
+            board_type = board_data.board_type
+            board_name = board_data.name
+            boardList = [board_data]
+    except Board.DoesNotExist:
+        result = {'html': '', 'max-page': 0}
+        return JsonResponse(result)
+    
+    if board_type == 'Recruit':
+        PAGE_SIZE = 5
+    else:
+        PAGE_SIZE = 10
+
+    context = {}
+    context['board'] = board_data
+    context['type'] = "mix"
+
+    total_article_list = Article.objects.none()
+    for board in boardList:
+        # Filter Board
+        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        article_list = filter_keyword_tag(article_list, keyword, tags)
+        total_article_list = total_article_list.union(article_list)
+    
+    total_len = len(total_article_list)
+    # Order
+    total_article_list = total_article_list.order_by(*sort_field)
+    # Slice to Page
+    total_article_list = list(total_article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+
+    total_article_list = get_article_board_data(total_article_list)
+    if board_type == 'Recruit' or board_type == "Total":
+        for article in total_article_list:
+            if article.board_type == 'Recruit':
+                tr = TeamRecruitArticle.objects.filter(article=article).first()
+                if tr:
+                    article.team = tr.team
+                else:
+                    article.team = None
+    # Get Article Metadata
+    total_article_list = get_article_metas(total_article_list)
+
+    context['article_list'] = total_article_list
+    result = {}
+    result['html'] = render_to_string('community/article-table.html', context,request=request)
+    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+
+    return result
+
 
 def user_board(request):
     try:
@@ -231,6 +362,7 @@ def account_cards(request):
     context['board'] = Board.objects.get(board_type="User")
     context['account_list'] = []
     context['is_open'] = 0
+    context['type'] = "user"
 
     is_show = True
     try:
@@ -266,7 +398,6 @@ def account_cards(request):
 
     if keyword != '':
         account_list = account_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
-        print(keyword, type(keyword), account_list)
     # Filter Tag
     tag_list = request.GET.get('tag', False)
     if tag_list:
@@ -322,14 +453,12 @@ def article_list(request, board_name, board_id):
         return JsonResponse(result)
     if board.board_type == 'Recruit':
         PAGE_SIZE = 5
-    elif board.board_type == 'QnA':
-        PAGE_SIZE = 7
     else:
         PAGE_SIZE = 10
     context = {}
-    board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
     context['board'] = board
     context['bartype'] = 'normal'
+    context['type'] = "board"
     
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     
@@ -340,7 +469,6 @@ def article_list(request, board_name, board_id):
     keyword = request.GET.get('keyword', '')
     if keyword != '':
         article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-        print(keyword, type(keyword),article_list)
     # Filter Tag
     tag_list = request.GET.get('tag', False)
     if tag_list:
@@ -370,15 +498,6 @@ def article_list(request, board_name, board_id):
             else:
                 article.team = None
 
-    if board.board_type == 'QnA':
-        context['comment_visible'] = True
-        for article in article_list:
-            comment_by_like = ArticleComment.objects.filter(
-                article=article
-            ).prefetch_related('articlecommentlike_set')
-            comment_by_like = comment_by_like.annotate(like_cnt=Count('articlecommentlike')).order_by('-like_cnt')
-            if len(comment_by_like):
-                article.comment = comment_by_like[0]
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-table.html', context,request=request)
@@ -471,24 +590,92 @@ class ArticleView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
+@login_required
+def activity_board(request):
+    context = {'board_name': 'activity', 'board_type': 'activity', 'board_id':0}
+
+    return render(request, 'community/activity.html', context)
+
 
 @login_required
 def my_activity(request):
-    account = Account.objects.get(user=request.user)
-    article_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-    scrap_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-    comment = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
+    keyword = request.GET.get('keyword', '')
+    tags = request.GET.get('tag', False)
+    page = int(request.GET.get('page', 1))
+    activity_type = request.GET.get('type', 'article')
+    print("activity_type", activity_type)
 
-    article_list = get_article_metas(article_list)
-    scrap_list = get_article_metas(scrap_list)
+    account = Account.objects.get(user=request.user.id)
 
+
+    if activity_type == "scrap":
+        target_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    elif activity_type == "comment":
+        target_list = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
+    else :
+        target_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+
+    if activity_type != "comment":
+        target_list = filter_keyword_tag(target_list, keyword, tags)
+        target_list = get_article_metas(target_list)
+        target_list = get_article_board_data(target_list)
+        for article in target_list:
+            if article.board_type == 'Recruit':
+                tr = TeamRecruitArticle.objects.filter(article=article).first()
+                if tr:
+                    article.team = tr.team
+                else:
+                    article.team = None
+    else:
+        if keyword != '':
+            target_list = target_list.filter(Q(body__icontains=keyword))
+        comment_board = {}
+        for comment in target_list:
+            if comment.article.board_id_id not in comment_board:
+                board_id = comment.article.board_id_id
+                board_q = Board.objects.get(id=board_id)
+                comment_board[board_id] = board_q.name
+        for comment in target_list:
+            comment.board_name = comment_board[comment.article.board_id_id]
+
+    PAGE_SIZE = 10
+    total_len = len(target_list)
+    target_list = list(target_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
     context = {
-        'write_article': article_list,
-        'scrap_article': scrap_list,
-        'comment_list': comment
+        'target_list': target_list,
+        # 'scrap_article': list(scrap_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]),
+        # 'comment_list': list(comment_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]), 
     }
-    return render(request, 'community/activity.html', context)
+    context['activity_type'] = activity_type
+    print("context['activity_type']", context['activity_type'])
+    context['type'] = 'mix'
 
+    result = {}
+    # result['html'] = render_to_string('community/activity-tab.html', context, request=request)
+    result['html'] = render_to_string('community/activity-tab.html', context, request=request)
+    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+
+    return JsonResponse(result)
+
+
+    #  JsonResponse(result)
+
+    # return render(request, 'community/activity.html', context)
+
+# 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
+def get_article_board_data(article_list):
+    article_board = {}
+    for article in article_list:
+        if article.board_id_id not in article_board:
+            board_q = Board.objects.get(id=article.board_id_id)
+            article_board[article.board_id_id] = (board_q.name, board_q.board_type)
+
+    for article in article_list:
+        article.board_name, article.board_type = article_board[article.board_id_id]
+
+    return article_list
+
+# 게시글 리스트를 받아서 태그, 좋아요 수, 스크랩 수, 댓글 수를 게시글 객체에 포함시키는 함수
 def get_article_metas(article_list):
     
     if type(article_list) != list:
@@ -534,6 +721,21 @@ def get_article_metas(article_list):
         article.comment_cnt = article_comments_dict.get(article.id, 0)
         article.scrap_cnt = article_scraps_dict.get(article.id, 0)
         
+    return article_list
+
+def filter_keyword_tag(article_list, keyword, tags):
+    # Filter Keyword
+    if keyword != '':
+        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+    # Filter Tag
+    if tags:
+        tag_list = tags.split(',')
+        tag_query = Q()
+        for tag in tag_list:
+            tag_query = tag_query | Q(tag=tag)
+        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
+        article_list = article_list.filter(id__in=article_with_tag)
+
     return article_list
 
 class redirectView(TemplateView):

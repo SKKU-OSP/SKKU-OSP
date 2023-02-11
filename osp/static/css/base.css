@@ -102,14 +102,59 @@ li, a, button {
   visibility: hidden;
   opacity: 0;
 }
-@media (min-width: 991px) {
+@media (min-width: 992px) {
   .noti-dropdown {
     padding: 0;
     left:auto !important;
     right: 0 !important;
   }
 }
-
+@media (max-width: 991px) {
+  #text-logo{
+    display: none!important;
+  }
+}
+/*검색창*/
+#search-btn {
+  margin: 1px;
+  background-color: var(--main-point-color);
+  padding: 0.5rem;
+  --bs-btn-color: var(--main-white);
+  --bs-btn-hover-color: var(--main-white);
+  --bs-btn-active-color: var(--main-white);
+  --bs-btn-active-border-color: var(--main-point-color);
+}
+#tag-btn {
+  margin: 1px 0;
+  padding: 0.2rem;
+  font-size: 24px;
+  border: 2px 0 var(--main-border-color);
+}
+#searcher-box {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+#searcher{
+  position:relative;
+  flex: 0 0 auto;
+}
+#tag-filter{
+  transition-duration: 0.15s;
+}
+#tag-filter:not(.show){
+  opacity: 0;
+  visibility: hidden;
+  cursor: default;
+}
+#board-searcher {
+  flex-grow: 2;
+}
+#search-word {
+  flex-grow:7;
+}
+#search-field {
+  flex-wrap: nowrap;
+}
 /*알림 스타일*/
 .noti-item {
   width: 20em;
@@ -134,7 +179,12 @@ li, a, button {
   border-radius: 50%;
   padding: 0.25rem;
 }
-
+#noti-list {
+  position:absolute;
+  max-height:185px;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
 /* 메시지 모달 스타일 */
 #message-modal .modal-header {
   border-bottom: 1px solid var(--main-border-color);
