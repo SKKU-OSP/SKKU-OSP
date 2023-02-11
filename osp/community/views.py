@@ -19,6 +19,56 @@ from django.views.generic import TemplateView
 from datetime import datetime, timedelta
 
 # Create your views here.
+
+class CommunityMainView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        board_list = []
+        team_board_query = Q()
+        if request.user.is_authenticated:
+            account = Account.objects.get(user=request.user)
+            team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+            team_board_query = Q(name__in=team_list)
+        boards = Board.objects.exclude(board_type='User').exclude(board_type='Team')
+
+        for board in boards:
+        # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
+            # 주간 Hot 게시물
+            # week_ago = datetime.now() - timedelta(days=7)
+            # article_list = Article.objects.filter(board_id=board,
+            #                                       pub_date__range=[
+            #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
+            #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
+            #                                       ]
+            #                                       )
+            # if len(article_list) > 0:
+            #     article_list = article_list.order_by('-view_cnt')
+            #     board.article_list = article_list[:min(3, len(article_list))]
+            # else:
+            #     board.article_list = []
+
+            # 최신 게시물
+            article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+            board.article_list = article_list[:min(8, len(article_list))]
+            
+            board.article_list = get_article_metas(board.article_list)
+            
+            if board.board_type == 'Recruit':
+                for article in board.article_list:
+                    tr = TeamRecruitArticle.objects.filter(article=article).first()
+                    if tr:
+                        article.team = tr.team
+                    else:
+                        article.team = None
+
+
+            board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
+            board_list.append(board)
+
+        return render(request, 'community/main.html', {'boards': board_list})
+
+
+
+
 def main(request):
     board_list = []
     team_board_query = Q()
