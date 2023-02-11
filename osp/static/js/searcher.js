@@ -48,13 +48,15 @@ const searcher = {
             if(e.keyCode==13 && $(targetSearch).val() !== "") 
                 _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
-        _this.drawPage();
+        // 검색결과는 페이지 번호만 렌더링, 게시판은 전체 렌더링
+        const boardValue = $("#board-title-bar").data("board-value");
+        if(boardValue === "search") _this.drawSearchPage();
+        else _this.draw();
     },
-    pageItem: function (page) {
+    pageSearchItem: function (page) {
         const pathname = location.pathname;
         const qeuryString = new URLSearchParams(location.search);
         if(isNaN(page)){
-            console.log('Special: value is NaN', page);
             special_code = $(page).attr('class');
             console.log(special_code);
             if(special_code == 'bi-chevron-left'){
@@ -84,7 +86,17 @@ const searcher = {
             $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', hrefLink).attr('value', page).html(page)
         )
     },
-    drawPage: function () {
+    pageItem: function (page) {
+        if(page == this.nowPage){
+            return $('<div></div>').addClass('page-item').addClass('active').append(
+                $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
+            )
+        }
+        return $('<div></div>').addClass('page-item').append(
+            $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
+        )
+    },
+    drawSearchPage: function () {
         const qeuryString = new URLSearchParams(location.search);
         this.nowPage = qeuryString.get("page");
         if (!isNaN(parseInt(this.nowPage))){
@@ -93,19 +105,20 @@ const searcher = {
         else this.nowPage = 1;
         console.log("nowPage", this.nowPage);
         let pageBody = $('#pagination-body');
-        this.MAX_PAGE = pageBody.data("max-page");
-        if (!isNaN( this.MAX_PAGE)){
-            this.MAX_PAGE = parseInt(this.MAX_PAGE);
+        let preRenderPage = pageBody.data("max-page");
+        if (!isNaN(parseInt(preRenderPage))){
+            this.MAX_PAGE = parseInt(preRenderPage);
         }
-        else this.MAX_PAGE = 1;
+        console.log("searcher.MAX_PAGE", this.MAX_PAGE);
+        
         pageBody.empty();
         if(this.nowPage != 1) {
-            pageBody.append(this.pageItem('<i class="bi-chevron-double-left">'));
-            pageBody.append(this.pageItem('<i class="bi-chevron-left">'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-double-left">'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-left">'));
         }
         else{
-            pageBody.append(this.pageItem('<i class="bi-chevron-double-left">').addClass('disabled'));
-            pageBody.append(this.pageItem('<i class="bi-chevron-left">').addClass('disabled'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-double-left">').addClass('disabled'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-left">').addClass('disabled'));
         }
         let startLimit = Math.max(1, this.nowPage - 2);
         let endLimit = Math.min(this.MAX_PAGE, this.nowPage + 2);
@@ -118,15 +131,51 @@ const searcher = {
             }
         }
         for(i = startLimit; i <= endLimit; i++){
-            pageBody.append(this.pageItem(i));
+            pageBody.append(this.pageSearchItem(i));
         }
         if(this.nowPage < this.MAX_PAGE) {
-            pageBody.append(this.pageItem('<i class="bi-chevron-right">'));
-            pageBody.append(this.pageItem('<i class="bi-chevron-double-right">'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-right">'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-double-right">'));
         }
         else{
-            pageBody.append(this.pageItem('<i class="bi-chevron-right">').addClass('disabled'));
-            pageBody.append(this.pageItem('<i class="bi-chevron-double-right">').addClass('disabled'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-right">').addClass('disabled'));
+            pageBody.append(this.pageSearchItem('<i class="bi-chevron-double-right">').addClass('disabled'));
+        }
+    },
+    drawPage: function() {
+        console.log("footer this.nowPage", this.nowPage);
+        var page_body = $('#pagination-body');
+        page_body.empty();
+        if(this.nowPage != 1) {
+            page_body.append(this.pageItem('<i class="bi-chevron-double-left">'));
+            page_body.append(this.pageItem('<i class="bi-chevron-left">'));
+            console.log("footer if(this.nowPage != 1) {");
+        }
+        else{
+            page_body.append(this.pageItem('<i class="bi-chevron-double-left">').addClass('disabled'));
+            page_body.append(this.pageItem('<i class="bi-chevron-left">').addClass('disabled'));
+        }
+        var left_limit = Math.max(1, this.nowPage - 2);
+        var right_limit = Math.min(this.MAX_PAGE, this.nowPage + 2);
+
+        if(right_limit - left_limit < 5){
+            if(this.nowPage - left_limit < 2){
+                right_limit = Math.min(this.MAX_PAGE, right_limit + 2 - (this.nowPage - left_limit));
+            }
+            if(right_limit - this.nowPage < 2){
+                left_limit = Math.max(1, left_limit - (2 - (right_limit - this.nowPage)));
+            }
+        }
+        for(i = left_limit; i <= right_limit; i++){
+            page_body.append(this.pageItem(i));
+        }
+        if(this.nowPage < this.MAX_PAGE) {
+            page_body.append(this.pageItem('<i class="bi-chevron-right">'));
+            page_body.append(this.pageItem('<i class="bi-chevron-double-right">'));
+        }
+        else{
+            page_body.append(this.pageItem('<i class="bi-chevron-right">').addClass('disabled'));
+            page_body.append(this.pageItem('<i class="bi-chevron-double-right">').addClass('disabled'));
         }
     },
     getUrl: function (board) {
@@ -135,14 +184,14 @@ const searcher = {
             user: "/community/account-cards/",
             activity: "/community/activity/",
         }
-        if (Object.keys(url).includes(board)){
-            return url[board];
+        let urlKey = board.split("_")[0].toLowerCase();
+        if (Object.keys(url).includes(urlKey)){
+            return url[urlKey];
         }
         else{
             let lastIdx = board.lastIndexOf("_");
             let boardName = board.substring(0, lastIdx);
             let boardId = board.substring(lastIdx+1);
-
             return `/community/article-list/${boardName}/${boardId}/`; 
         }
     },
@@ -220,9 +269,74 @@ const searcher = {
             dataType: 'JSON'
         }).done(function(data){
             $(containerId).html(data['html']);
-            this.MAX_PAGE = data['max-page'];
-            draw_page();
+            searcher.MAX_PAGE = data['max-page'];
+            searcher.drawSearchPage();
         });
     },
+    // 페이지네이션을 url로 하는 방법
+    draw: function (to_page_1=false){
+        console.log("call draw");
+        const boardValue = $("#board-title-bar").data("board-value");
+        if(boardValue === undefined) return;
+        const url = this.getUrl(boardValue);
+        console.log(url, "url");
+        if(to_page_1){
+            this.nowPage = 1;
+        }
+        let team_li = [];
+        $('#team-filter').children().each(function(){
+            if($(this).hasClass('bg-gray')){
+                team_li.push($(this).attr('value'));
+            }
+        });
+        console.log("js team_li", team_li);
+        $.ajax(
+            {
+                url: url,
+                data: {
+                    'page': this.nowPage,
+                    'team_li': JSON.stringify(team_li),
+                },
+                method: 'GET',
+                dataType: 'JSON',
+                beforeSend: function( xhr ) {
+                    if(boardValue.split("_")[0].toLowerCase() === "user")
+                        $('#article-card-body').html(`<div class="spinner-border m-auto mt-5" role="status"></div>`);
+                },
+            }
+        )
+        .done(function(data){
+            console.log("draw get data");
+            if(boardValue.split("_")[0].toLowerCase() === "user")
+                $('#article-card-body').html(data['html']);
+            else
+                $('#article-list-body').html(data['html']);
+            searcher.MAX_PAGE = data['max-page'];
+            console.log("searcher.MAX_PAGE", searcher.MAX_PAGE);
+            searcher.drawPage();
+            $('.page-link').click(function(){
+                var val = $(this).attr('value');
+                if(isNaN(val)){
+                    special_code = $(val).attr('class');
+                    if(special_code == 'bi-chevron-left'){
+                        searcher.nowPage -= 1;
+                    }
+                    if(special_code == 'bi-chevron-double-left'){
+                        searcher.nowPage = 1;
+                    }
+                    if(special_code == 'bi-chevron-right'){
+                        searcher.nowPage += 1
+                    }
+                    if(special_code == 'bi-chevron-double-right'){
+                        searcher.nowPage = searcher.MAX_PAGE;
+                    }
+                }
+                else{
+                    searcher.nowPage = Number(val);
+                }
+                searcher.draw();
+            });
+        });
+    }
 }
 searcher.init();
