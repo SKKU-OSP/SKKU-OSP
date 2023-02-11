@@ -192,24 +192,6 @@ class SearchView(TemplateView):
             context['is_write'] = 0
             context['is_open'] = 0
 
-        
-        # if board.board_type == 'Recruit':
-
-        #     active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        #     for article in active_article:
-        #         article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-        #         teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
-        #         if teamrecruitarticle:
-        #             article.team = teamrecruitarticle.team
-        #         else:
-        #             article.team = None
-
-        #     team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
-        #     context['team_cnt'] = team_cnt
-        #     context['active_article'] = active_article
-        #     context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-
-
         result = search_article(request, board_name, board_id)
         context['html'] = result['html']
         context['max_page'] = result['max-page']
@@ -235,13 +217,13 @@ def search_article(request, board_name, board_id):
     keyword = request.GET.get('keyword', '')
     tags = request.GET.get('tag', False)
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
-    page = int(request.GET.get('page', 1))
+    page = request.GET.get('page', 1)
+    page = int(page) if page.isdigit() else 1
     print("keyword", keyword, " tags", tags)
     try:
         if board_id == 0:
             #전체 검색
             boardList = []
-
             boards = Board.objects.filter(team_id=None).exclude(board_type='User')
             for board in boards:
                 boardList.append(board)
@@ -274,63 +256,32 @@ def search_article(request, board_name, board_id):
 
     context = {}
     context['board'] = board_data
-    context['bartype'] = 'normal'
     context['type'] = "mix"
 
-    # if 
-    total_article_list = []
+    total_article_list = Article.objects.none()
     for board in boardList:
         # Filter Board
-        print("board", board)
         article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
-        print("article_list", article_list)
+        article_list = filter_keyword_tag(article_list, keyword, tags)
+        total_article_list = total_article_list.union(article_list)
+    
+    total_len = len(total_article_list)
+    # Order
+    total_article_list = total_article_list.order_by(*sort_field)
+    # Slice to Page
+    total_article_list = list(total_article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
 
-        # Filter Keyword
-        
-        if keyword != '':
-            article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-            print(keyword, type(keyword),article_list)
-        # Filter Tag
-        if tags:
-            print("tags", tags)
-            tag_list = tags.split(',')
-
-            print("tag_list2", tag_list)
-
-            tag_query = Q()
-            for tag in tag_list:
-                tag_query = tag_query | Q(tag=tag)
-            article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
-            article_list = article_list.filter(id__in=article_with_tag)
-        
-        total_len = len(article_list)
-        # Order
-        article_list = article_list.order_by(*sort_field)
-        # Slice to Page
-        article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-        
-        # Get Article Metadata
-        article_list = get_article_metas(article_list)
-
-        
-        if board.board_type == 'Recruit':
-            for article in article_list:
+    total_article_list = get_article_board_data(total_article_list)
+    if board_type == 'Recruit' or board_type == "Total":
+        for article in total_article_list:
+            if article.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
                 if tr:
                     article.team = tr.team
                 else:
                     article.team = None
-        total_article_list += article_list
-    
-    article_board = {}
-    for idx, article in enumerate(total_article_list):
-        if article.board_id_id not in article_board:
-            board_q = Board.objects.get(id=article.board_id_id)
-            print("board_name", board_q.name)
-            article_board[article.board_id_id] = board_q.name
-
-    for article in total_article_list:
-        article.board_name = article_board[article.board_id_id]
+    # Get Article Metadata
+    total_article_list = get_article_metas(total_article_list)
 
     context['article_list'] = total_article_list
     result = {}
@@ -396,7 +347,6 @@ def account_cards(request):
 
     if keyword != '':
         account_list = account_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
-        print(keyword, type(keyword), account_list)
     # Filter Tag
     tag_list = request.GET.get('tag', False)
     if tag_list:
@@ -468,7 +418,6 @@ def article_list(request, board_name, board_id):
     keyword = request.GET.get('keyword', '')
     if keyword != '':
         article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-        print(keyword, type(keyword),article_list)
     # Filter Tag
     tag_list = request.GET.get('tag', False)
     if tag_list:
@@ -603,7 +552,6 @@ def my_activity(request):
     comment_list = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
     if keyword != '':
         article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-        print(keyword, type(keyword), article_list)
         scrap_list = scrap_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
         comment_list = comment_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
     if tags:
@@ -617,8 +565,8 @@ def my_activity(request):
     article_list = get_article_metas(article_list)
     scrap_list = get_article_metas(scrap_list)
 
-    article_list = get_board_name(article_list)
-    scrap_list = get_board_name(scrap_list)
+    article_list = get_article_board_data(article_list)
+    scrap_list = get_article_board_data(scrap_list)
 
     comment_board = {}
     for comment in comment_list:
@@ -638,15 +586,15 @@ def my_activity(request):
     return render(request, 'community/activity.html', context)
 
 # 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
-def get_board_name(article_list):
+def get_article_board_data(article_list):
     article_board = {}
     for article in article_list:
         if article.board_id_id not in article_board:
             board_q = Board.objects.get(id=article.board_id_id)
-            article_board[article.board_id_id] = board_q.name
+            article_board[article.board_id_id] = (board_q.name, board_q.board_type)
 
     for article in article_list:
-        article.board_name = article_board[article.board_id_id]
+        article.board_name, article.board_type = article_board[article.board_id_id]
 
     return article_list
 
@@ -696,6 +644,21 @@ def get_article_metas(article_list):
         article.comment_cnt = article_comments_dict.get(article.id, 0)
         article.scrap_cnt = article_scraps_dict.get(article.id, 0)
         
+    return article_list
+
+def filter_keyword_tag(article_list, keyword, tags):
+    # Filter Keyword
+    if keyword != '':
+        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+    # Filter Tag
+    if tags:
+        tag_list = tags.split(',')
+        tag_query = Q()
+        for tag in tag_list:
+            tag_query = tag_query | Q(tag=tag)
+        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
+        article_list = article_list.filter(id__in=article_with_tag)
+
     return article_list
 
 class redirectView(TemplateView):
