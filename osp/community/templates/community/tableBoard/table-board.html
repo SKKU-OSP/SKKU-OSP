@@ -7,7 +7,7 @@
     <div id="community-container" class="row">
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
-            <div id="board-title-bar" class="d-flex justify-content-between">
+            <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board_name}}_{{board.id}}">
                 <span id="board-title">{{ board_name }}</span>
                 <a href="{% url 'community:article-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
             </div>
@@ -49,8 +49,13 @@
                     </div>
                 </div>
                 {% else %}
-                <div id="article-list-body"></div>
-                {% include "community/board/board-footer.html" with board=board %}
+                <div id="article-list-body" class="text-center"></div>
+                <div id="article-list-footer" class="d-flex justify-content-end mt-3">
+                    <div id="article-list-pagination">
+                        <div id="pagination-body" data-board-name="{{board.name}}" data-max-page="{{max_page}}">
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
             {% endif %}
         </div>

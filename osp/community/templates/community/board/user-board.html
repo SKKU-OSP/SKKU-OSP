@@ -10,7 +10,7 @@
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-      <div id="board-title-bar" class="d-flex justify-content-between">
+      <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board.name}}_{{board.id}}">
         <div id="board-title">
           <a href="/community/recommender/user/">
             맞춤 유저 추천
@@ -34,7 +34,12 @@
       <div id="article-card-body" class="d-flex flex-wrap">
         <div class="spinner-border m-auto mt-5" role="status"></div>
       </div>
-      {% include "community/board/board-footer.html" with board=board %}
+      <div id="article-list-footer" class="d-flex justify-content-end mt-3">
+        <div id="article-list-pagination">
+            <div id="pagination-body" data-board-name="{{board.name}}" data-max-page="{{max_page}}">
+            </div>
+        </div>
+      </div>
       {% else %}
       <div class="m-2">
         로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
