@@ -40,7 +40,7 @@
                 {#제목#}
                 <td>
                     <div class="d-flex">
-                    {% if board.board_type == 'Recruit' %}
+                    {% if article.board_type == 'Recruit' %}
                         {% is_period_end article.period_start as is_start %}
                         {% is_period_end article.period_end as is_end %}
                         {% if article.team %}
@@ -60,7 +60,7 @@
                         {% endif %}
                     {% endif %}
                         <a href="{% url 'community:article-view' article.id %}">
-                            {% if board.board_type == 'Recruit' %}
+                            {% if article.board_type == 'Recruit' %}
                                 {% if article.team %}
                                 [{{ article.team.name }}]
                                 {% else %}

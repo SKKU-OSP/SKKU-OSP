@@ -48,20 +48,56 @@ const searcher = {
             if(e.keyCode==13 && $(targetSearch).val() !== "") 
                 _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
+        _this.drawPage();
     },
     pageItem: function (page) {
+        const pathname = location.pathname;
+        const qeuryString = new URLSearchParams(location.search);
+        if(isNaN(page)){
+            console.log('Special: value is NaN', page);
+            special_code = $(page).attr('class');
+            console.log(special_code);
+            if(special_code == 'bi-chevron-left'){
+                qeuryString.set('page', String(this.nowPage-1));
+            }
+            else if(special_code == 'bi-chevron-double-left'){
+                qeuryString.set('page', '1');
+            }
+            else if(special_code == 'bi-chevron-right'){
+                qeuryString.set('page', String(this.nowPage+1));
+            }
+            else if(special_code == 'bi-chevron-double-right'){
+                qeuryString.set('page', String(this.MAX_PAGE));
+            }
+        }
+        else{
+            qeuryString.set('page', String(page));
+        }
+
+        let hrefLink = pathname + '?' + qeuryString;
         if(page == this.nowPage){
             return $('<div></div>').addClass('page-item').addClass('active').append(
-                $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
+                $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', hrefLink).attr('value', page).html(page)
             )
         }
         return $('<div></div>').addClass('page-item').append(
-            $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
+            $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', hrefLink).attr('value', page).html(page)
         )
     },
     drawPage: function () {
+        const qeuryString = new URLSearchParams(location.search);
+        this.nowPage = qeuryString.get("page");
+        if (!isNaN(parseInt(this.nowPage))){
+            this.nowPage=parseInt(this.nowPage);
+        }
+        else this.nowPage = 1;
         console.log("nowPage", this.nowPage);
         let pageBody = $('#pagination-body');
+        this.MAX_PAGE = pageBody.data("max-page");
+        if (!isNaN( this.MAX_PAGE)){
+            this.MAX_PAGE = parseInt(this.MAX_PAGE);
+        }
+        else this.MAX_PAGE = 1;
         pageBody.empty();
         if(this.nowPage != 1) {
             pageBody.append(this.pageItem('<i class="bi-chevron-double-left">'));
@@ -92,30 +128,6 @@ const searcher = {
             pageBody.append(this.pageItem('<i class="bi-chevron-right">').addClass('disabled'));
             pageBody.append(this.pageItem('<i class="bi-chevron-double-right">').addClass('disabled'));
         }
-        $('.page-link').click(function(){
-            var val = $(this).attr('value');
-            if(isNaN(val)){
-                console.log('Special: value is NaN');
-                special_code = $(val).attr('class');
-                if(special_code == 'bi-chevron-left'){
-                    this.nowPage -= 1;
-                }
-                if(special_code == 'bi-chevron-double-left'){
-                    this.nowPage = 1;
-                }
-                if(special_code == 'bi-chevron-right'){
-                    this.nowPage += 1
-                }
-                if(special_code == 'bi-chevron-double-right'){
-                    this.nowPage = this.MAX_PAGE;
-                }
-            }
-            else{
-                this.nowPage = Number(val);
-            }
-            redraw();
-        })
-        
     },
     getUrl: function (board) {
         const url ={
