@@ -9,7 +9,16 @@ from data.api import GitHub_API
 from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
 import re
 
+class LoginView(auth_views.LoginView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"type": 'sign'})
+        return context
 class PasswordResetView(auth_views.PasswordResetView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"type": 'sign'})
+        return context
 
     def form_valid(self, form):
         try:
@@ -30,15 +39,16 @@ class PasswordResetView(auth_views.PasswordResetView):
                 form.save(**opts)
                 return super().form_valid(form)
             else:
-                return render(self.request, 'common/password_reset_done_fail.html')
+                return render(self.request, 'common/password_reset_done_fail.html', context={"type": 'sign'})
         except Exception as e:
             print("form_valid fail", e)
-            return render(self.request, 'common/password_reset_done_fail.html')
+            return render(self.request, 'common/password_reset_done_fail.html', context={"type": 'sign'})
         
 
 def register_page(request):
     if request.method == 'GET':
-        return render(request, 'common/register.html')
+        context = {'type': 'sign'}
+        return render(request, 'common/register.html', context)
     if request.method == 'POST':
         fail_reason = []
         if len(request.POST.get('username')) < 5:
