@@ -1,12 +1,40 @@
 from django.db import DatabaseError, transaction
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.models import User
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
 from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
 import re
+
+class PasswordResetView(auth_views.PasswordResetView):
+
+    def form_valid(self, form):
+        try:
+            username = self.request.POST.get("username")
+            email = self.request.POST.get("email")
+
+            if Account.objects.filter(user__username=username, student_data__personal_email=email).exists():
+                opts = {
+                    'use_https': self.request.is_secure(),
+                    'token_generator': self.token_generator,
+                    'from_email': self.from_email,
+                    'email_template_name': self.email_template_name,
+                    'subject_template_name': self.subject_template_name,
+                    'request': self.request,
+                    'html_email_template_name': self.html_email_template_name,
+                    'extra_email_context': self.extra_email_context,
+                }
+                form.save(**opts)
+                return super().form_valid(form)
+            else:
+                return render(self.request, 'common/password_reset_done_fail.html')
+        except Exception as e:
+            print("form_valid fail", e)
+            return render(self.request, 'common/password_reset_done_fail.html')
+        
 
 def register_page(request):
     if request.method == 'GET':
