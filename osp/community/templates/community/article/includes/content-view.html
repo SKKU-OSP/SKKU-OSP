@@ -11,21 +11,10 @@
             {% if board.board_type == 'Recruit' %}
                 [{{ article.team.name |default:"팀이 더이상 존재하지 않습니다." }}]
             {% endif %}
-            {{ article.title }}
+            <h4>{{ article.title }}</h4>
         </div>
         <div id="article-metadata" >
-            <div id="article-datetime">
-                <div>
-                    {{ article.pub_date|date:"Y-m-d" }}
-                </div>
-                <div>
-                    {{ article.pub_date|time:"h:i a" }}
-                </div>
-            </div>
-            <div id="article-viewcnt">
-                <div class="material-icons">visibility</div>
-                <div>{{ article.view_cnt }}</div>
-            </div>
+
             <div class="d-flex flex-column justify-content-center">
                 {% if user == article.writer.user %}
                 <span class="hover-opacity" onclick="edit();">수정</span>
@@ -46,9 +35,23 @@
                     탈퇴한 이용자
                 {% endif %}
             </div>
+            <div id="article-datetime">
+                <div>
+                    {{ article.pub_date|date:"Y-m-d" }}
+                </div>
+                <div>
+                    {{ article.pub_date|time:"h:i a" }}
+                </div>
+            </div>
         </div>
     </div>
     <div id="article-title-border"></div>
+
+    <div>
+        <div id="article-body">
+            {{ article.body|mark }}
+        </div>
+    </div>
     <div id="article-taglist">
         {% for tag in tags %}
         <div class="badge bg-tag-{{tag.tag.type}}">
@@ -58,12 +61,13 @@
         <span class="ps-1">태그 없음</span>
         {% endfor %}
     </div>
-    <div>
-        <div id="article-body">
-            {{ article.body|mark }}
+    <div class="d-flex justify-content-between">
+        <div id="article-view-reply">
+            <span>조회수</span>
+            <span>{{ article.view_cnt }}</span>
+            <span>댓글</span>
+            <span>{{comments|length}}</span>
         </div>
-    </div>
-    <div>
         <div id="article-like-scrap">
             <div id="article-like-btn" class="h-100 hover-opacity" onclick="ArticleThumbUp({{ article.id }},{{ request.user.id | default_if_none:-1 }})">
                 {% is_article_thumb_up article request.user as is_thumb_up %}
