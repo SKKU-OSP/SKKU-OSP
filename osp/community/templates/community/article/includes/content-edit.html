@@ -6,7 +6,7 @@
     {% csrf_token %}
     <div class="d-flex flex-column border border-2 p-2">
         <div class="d-flex justify-content-between mb-1">
-            <input type="text" id="article-title" class="form-control" value="{{ article.title }}" placeholder="제목"  required autofocus>
+            <input type="text" id="article-title" class="form-control" value="{{ article.title }}" placeholder="제목을 입력해 주세요"  required autofocus>
             {% if board.board_type == 'Recruit' %}
             {% if team %}
             <select id="team-option" name="team-option" class="form-control pointer" disabled>
@@ -24,7 +24,7 @@
             {% endif %}
         </div>
         <div class="mt-2">
-            <textarea id="article-body" name="article-body" class="form-control" placeholder="게시글 내용" required>{{ article.body }}</textarea>
+            <textarea id="article-body" name="article-body" class="form-control" placeholder="본문을 입력해 주세요" required>{{ article.body }}</textarea>
         </div>
         <div class="w-100 mt-2">
             <select name="category" id="content-category" multiple>
@@ -35,11 +35,11 @@
         <div id="period-setting" class="mt-3">
             <div class="d-flex justify-content-between">
                 <div>모집 기간</div>
-                <button type="button" class="btn btn-danger" onclick="setToDateEnd();">마감</button>
+                <button id="end-button"type="button" class="btn btn-primary" onclick="setToDateEnd();">마감</button>
             </div>
             <div class="row">
-                <div class="col-sm-6">
-                    <label class="form-label" for="PeriodPickerStartInput">From</label>
+                <div class="col-sm-6 d-flex">
+                    <label class="form-label period-label" for="PeriodPickerStartInput">From</label>
                     <div id="PeriodPickerStart" class="input-group log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
                         <input type="text" id="PeriodPickerStartInput" class="form-control" data-td-target="#PeriodPickerStart" required/>
                         <span class="input-group-text" data-td-target="#PeriodPickerStart" data-td-toggle="datetimepicker">
@@ -49,13 +49,13 @@
                         </span>
                     </div>
                 </div>
-                <div class="col-sm-6">
-                    <label class="form-label" for="PeriodPickerEndInput">To</label>
+                <div class="col-sm-6 d-flex">
+                    <label class="form-label period-label" for="PeriodPickerEndInput">To</label>
                     <div id="PeriodPickerEnd" class="input-group log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
                         <input type="text" id="PeriodPickerEndInput" class="form-control" data-td-target="#PeriodPickerEnd" required />
                         <span class="input-group-text" data-td-target="#PeriodPickerEnd" data-td-toggle="datetimepicker">
                             <span class="material-icons-outlined">
-                                event
+                                eventr
                             </span>
                         </span>
                     </div>
