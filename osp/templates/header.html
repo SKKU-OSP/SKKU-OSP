@@ -27,7 +27,9 @@
     {% endif %}
     {#검색창#}
     <div id="searcher-box">
+    {% if type != 'sign' %}
     {% include "community/board/searcher.html" with board=board %}
+    {% endif %}
     </div>
     {#헤더 아이콘 모음#}
     <div class="d-flex flex-row p-2">
