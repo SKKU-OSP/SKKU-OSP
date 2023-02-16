@@ -5,13 +5,13 @@
 {% load common_tags %}
 {% block content %}
 <div class="d-flex justify-content-center container my-5">
-    <div class="col-6">
+    <div class="col-lg-6 col-12">
         <div class="d-flex justify-content-center mb-3">
             <img src="/static/images/logo.svg" alt="Logo" class="w-25" />
         </div>
         <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="github-id">GitHub Username <span class="required-star">*</span></label>
                 <div class="weak-text form-label">GitHub 계정명으로 데이터 수집에 사용됩니다.</div>
                 <div class="input-group">
@@ -20,7 +20,7 @@
                     <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="username">Username <span class="required-star">*</span></label>
                 <div class="weak-text form-label">로그인에 사용할 아이디입니다.</div>
                 <div class="input-group">
@@ -28,26 +28,26 @@
                     <button class="btn btn-outline-secondary" type="button" id="duplicate-check">Check</button>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="password">Password <span class="required-star">*</span></label>
                 <div class="weak-text form-label">비밀번호는 4자 이상이어야 합니다.</div>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="password-check">Password Check <span class="required-star">*</span></label>
                 <div id="password-check-sign" class="weak-text form-label">비밀번호를 다시 입력해주세요.</div>
                 <input type="password" class="form-control" id="password-check" name="password-check" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="student-id" class="form-label">학번 <span class="required-star">*</span></label>
                 <input type="text" class="form-control" id="student-id" name="student-id" placeholder="ex) 20XXXXXXXX"
                     required>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="name" class="form-label">이름 <span class="required-star">*</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="ex) 홍길동" required>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="college" class="form-label">소속 대학 <span class="required-star">*</span></label>
                 <select class="form-select" name="college" id="college">
                     <option value="경영대학">경영대학</option>
@@ -69,11 +69,11 @@
                     <option value="학부대학">학부대학</option>
                 </select>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <label for="dept" class="form-label">소속 학과 <span class="required-star">*</span></label>
                 <input type="text" class="form-control" id="dept" name="dept" placeholder="ex) 소프트웨어학과" required>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <div class="form-label">
                     <label for="absenceRadioOptions">재학 여부 <span class="required-star">*</span></label>
                 </div>
@@ -92,7 +92,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-lg-6 mb-3">
                 <div class="form-label">
                     <label for="absenceRadioOptions">복수전공 여부 <span class="required-star">*</span></label>
                 </div>
@@ -108,7 +108,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-lg-12 mb-3">
                 <label for="personal-email">Email <span class="required-star">*</span></label>
                 <div class="weak-text form-label">계정정보를 찾을 때 사용합니다.</div>
                 <div class="d-flex">
@@ -120,7 +120,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-lg-12 mb-3">
                 <label for="primary-email">GitHub Email <span class="required-star">*</span></label>
                 <div class="weak-text form-label">GitHub Commit 기록을 추적하는데 사용합니다.</div>
                 <div class="d-flex">
@@ -132,7 +132,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-lg-12 mb-3">
                 <label for="secondary-email">기타 연동 Email</label>
                 <div class="weak-text form-label">로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.</div>
                 <div class="d-flex">
@@ -144,7 +144,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-lg-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
                 <select id="preferLanguage" name="preferLanguage" multiple>
                     {% category_tag request %}
