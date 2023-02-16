@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.models import User
+from django.urls import reverse_lazy
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
@@ -10,11 +11,14 @@ from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
 import re
 
 class LoginView(auth_views.LoginView):
+    template_name='common/login.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"type": 'sign'})
         return context
+
 class PasswordResetView(auth_views.PasswordResetView):
+    template_name='common/password_reset.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"type": 'sign'})
@@ -43,7 +47,33 @@ class PasswordResetView(auth_views.PasswordResetView):
         except Exception as e:
             print("form_valid fail", e)
             return render(self.request, 'common/password_reset_done_fail.html', context={"type": 'sign'})
-        
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    # 비밀번호 초기화 메일 전송 완료창
+    template_name = 'common/password_reset_done.html'
+    success_url = reverse_lazy('common:password_reset_done')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"type": 'sign'})
+        return context
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    # 비밀번호 재설정창
+    template_name='common/password_reset_confirm.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"type": 'sign'})
+        return context
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    # 비밀번호 변경 완료
+    template_name = 'common/password_reset_complete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"type": 'sign'})
+        return context
+
 
 def register_page(request):
     if request.method == 'GET':
