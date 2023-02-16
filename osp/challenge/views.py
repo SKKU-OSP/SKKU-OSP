@@ -11,7 +11,7 @@ from .models import Challenge, ChallengeAchieve
 def challenge_list_view(request):
     try:
         achieve_list = ChallengeAchieve.objects.filter(account__user=request.user).select_related('challenge')
-        my_acc = Account.objects.get(user=request.user)
+        my_acc = Account.objects.get(user=request.user.id)
         new_challenge = achieve_list.values_list('challenge', flat=True)
         for challenge in Challenge.objects.exclude(id__in=new_challenge):
             achievement_check(my_acc, challenge)
@@ -49,7 +49,7 @@ def challenge_list_view(request):
 @login_required
 def challenge_acheive_update(request):
     challenge_list = Challenge.objects.all()
-    my_acc = Account.objects.get(user=request.user)
+    my_acc = Account.objects.get(user=request.user.id)
     acheive_list = ChallengeAchieve.objects.filter(account=my_acc)
     acheive_id_list = acheive_list.values_list('challenge__id', flat=True)
     print(acheive_id_list)
