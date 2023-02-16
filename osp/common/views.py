@@ -3,7 +3,13 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.models import User
+from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse_lazy
+from django.views.generic.base import TemplateView
+from django.template import loader
+from django.core.mail import EmailMultiAlternatives
+
+from osp.settings import EMAIL_HOST_USER
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
@@ -73,6 +79,62 @@ class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
         context = super().get_context_data(**kwargs)
         context.update({"type": 'sign'})
         return context
+
+def send_mail(
+    subject_template_name,
+    email_template_name,
+    context,
+    from_email,
+    to_email,
+):
+    """
+    Send a django.core.mail.EmailMultiAlternatives to `to_email`.
+    """
+
+    # subject는 이메일 제목
+    subject = loader.render_to_string(subject_template_name, context)
+    # Email subject *must not* contain newlines
+    subject = "".join(subject.splitlines())
+    body = loader.render_to_string(email_template_name, context)
+    email_message = EmailMultiAlternatives(subject, body, from_email, [to_email])
+    email_message.send()
+
+class AccountFindView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        template_name = 'common/account_find.html'
+        return render(request, template_name, {'type': 'sign'})
+
+class AccountFindDoneView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        template_name = 'common/account_find_done.html'
+        return render(request, template_name, {'type': 'sign'})
+
+def valid_check(request):
+    if request.method == 'POST':
+        print("valid_check")
+        # 폼을 이용해서 계정정보에 이메일이 포함되어있다면 이메일을 보내도록 한다.
+        if request.POST['email']:
+            try:
+                print(request.POST['email'])
+
+                user = User.objects.get(email=request.POST['email'])
+                print(user)
+                current_site = get_current_site(request=request)
+                print("current_site", current_site.name, " domain: ", current_site.domain)
+                context = {'user':user, 'site_name':current_site.name, 'domain': current_site.domain}
+                send_mail(subject_template_name="registration/subject_find_username.txt",
+                        email_template_name="registration/email_find_username.txt",
+                        context = context,
+                        from_email=EMAIL_HOST_USER,
+                        to_email=user.email)
+                return JsonResponse({'status':'success'})
+            except User.DoesNotExist as de:
+                print("valid_check DoesNotExist: ", de)
+                return JsonResponse({'status':'fail', 'message':'이메일을 찾을 수 없습니다. 이메일을 확인해주세요.'})
+            except Exception as e:
+                print("valid_check error: ", e)
+                return JsonResponse({'status':'fail', 'message':'이메일 발송에 실패했습니다.'})
+    return JsonResponse({'status':'fail', 'message':'이메일을 찾을 수 없습니다.'})
 
 
 def register_page(request):
