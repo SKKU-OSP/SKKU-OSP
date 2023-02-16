@@ -1,3 +1,4 @@
+{% load static %}
 {% load tag_templatetag %}
 {% load message_tag %}
 <header id="main-navbar" class="container d-flex flex-row gap-3 py-3">
@@ -27,7 +28,9 @@
     {% endif %}
     {#검색창#}
     <div id="searcher-box">
+    {% if type != 'sign' %}
     {% include "community/board/searcher.html" with board=board %}
+    {% endif %}
     </div>
     {#헤더 아이콘 모음#}
     <div class="d-flex flex-row p-2">
@@ -134,3 +137,5 @@
 <div id="consent-open" class="modal modal-lg fade">
 </div>
 {% endif %}
+{% block script %}
+{% endblock script %}

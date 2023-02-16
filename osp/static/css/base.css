@@ -647,3 +647,6 @@ img.opponent-profile {
 .text-white {
   color: var(--main-white);
 }
+.required-star {
+  color: var(--danger-color);
+}

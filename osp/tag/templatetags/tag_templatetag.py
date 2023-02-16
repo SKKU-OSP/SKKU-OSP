@@ -69,7 +69,7 @@ def category_tag_language(request):
 def email_domain_tag(request):
     result = ''
     result += '<option value="" selected>직접입력</option>'
-    domain_list  = ["g.skku.edu", "skku.edu", "naver.com", "gmail.com", "kakao.com", "nate.com", "yahoo.com"]
+    domain_list  = ["g.skku.edu", "skku.edu", "gmail.com", "naver.com", "kakao.com", "nate.com", "yahoo.com"]
     for d in domain_list:
         result += f'<option value="{d}">{d}</option>'
     result += '<span>V</span>'

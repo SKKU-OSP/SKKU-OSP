@@ -364,3 +364,24 @@ const searcher = {
     }
 }
 searcher.init();
+$().ready(function () {
+    if($("#tag-searcher").length > 0 ){
+        let tagSeacher = new SlimSelect({
+            select: '#tag-searcher',
+            onChange: (selected_list) => {
+                for (let selected of selected_list) {
+                    $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class);
+                }
+                if(selected_list.length > 0){
+                    $("#tag-btn").addClass("btn-primary");
+                    $("#tag-btn").removeClass("btn-light");
+                }else{
+                    $("#tag-btn").removeClass("btn-primary");
+                    $("#tag-btn").addClass("btn-light");
+                }
+            },
+            placeholder: 'Tag',
+        });
+    }
+    $('#searcher').addClass('show');
+});
