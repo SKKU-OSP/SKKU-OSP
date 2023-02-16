@@ -31,7 +31,7 @@ urlpatterns = [
     path('message/', include('message.urls')),
     path('challenge/', include('challenge.urls')),
     path('', lambda req: redirect('/community/')),
-    path('', include('django.contrib.auth.urls'))
+    path('accounts/', include('django.contrib.auth.urls'))
 ]
 
 from django.conf import settings
