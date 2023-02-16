@@ -170,17 +170,18 @@ def register_page(request):
                 fail_reason.append('연락용 이메일이 형식에 맞지 않습니다. ' + personal_email)
             if check_email(primary_email):
                 fail_reason.append('GitHub 이메일이 형식에 맞지 않습니다. ' + primary_email)
-            if check_email(secondary_email):
-                fail_reason.append('기타 연동 이메일이 형식에 맞지 않습니다. ' + secondary_email)
+            if secondary_email.strip() == "@":
+                secondary_email = None
         except:
             fail_reason.append('이메일이 형식에 맞지 않습니다.')
-
 
         if len(fail_reason) > 0:
             return JsonResponse({'status': 'fail', 'message': fail_reason})
         try:
             with transaction.atomic():
-                user = User.objects.create_user(username=request.POST.get('username'), password=request.POST['password'])
+                user = User.objects.create_user(username=request.POST.get('username'), 
+                                                password=request.POST.get('password'), 
+                                                email=personal_email)
                 user.save()
                 student_data = StudentTab.objects.create(
                     id=request.POST['student-id'],
@@ -190,9 +191,9 @@ def register_page(request):
                     github_id=request.POST['github-id'],
                     absence=request.POST['absence'],
                     plural_major=request.POST['plural-major'],
-                    personal_email=request.POST['personal-email'],
-                    primary_email=request.POST['primary-email'],
-                    secondary_email=request.POST['secondary-email']
+                    personal_email=personal_email,
+                    primary_email=primary_email,
+                    secondary_email=secondary_email
                 )
                 student_data.save()
                 new_account = Account.objects.create(user=user, student_data=student_data)

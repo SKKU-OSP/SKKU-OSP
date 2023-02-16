@@ -12,41 +12,43 @@
         <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
             <div class="col-md-6 mb-3">
-                <label for="github-id" class="form-label">GitHub ID</label>
+                <label for="github-id">GitHub Username <span class="required-star">*</span></label>
+                <div class="weak-text form-label">GitHub 계정명으로 데이터 수집에 사용됩니다.</div>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="github-id" name="github-id" placeholder="GitHub ID"
+                    <input type="text" class="form-control" id="github-id" name="github-id" placeholder="GitHub Username"
                     required>
                     <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
                 </div>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="username" class="form-label">Username</label>
+                <label for="username">Username <span class="required-star">*</span></label>
+                <div class="weak-text form-label">로그인에 사용할 아이디입니다.</div>
                 <div class="input-group">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                     <button class="btn btn-outline-secondary" type="button" id="duplicate-check">Check</button>
                 </div>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="password">Password</label>
+                <label for="password">Password <span class="required-star">*</span></label>
                 <div class="weak-text form-label">비밀번호는 4자 이상이어야 합니다.</div>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
-                <label for="password-check">Password Check</label>
+                <label for="password-check">Password Check <span class="required-star">*</span></label>
                 <div id="password-check-sign" class="weak-text form-label">비밀번호를 다시 입력해주세요.</div>
                 <input type="password" class="form-control" id="password-check" name="password-check" placeholder="Password" minlength="4" required onChange="checkPassword();">
             </div>
             <div class="col-md-6 mb-3">
-                <label for="student-id" class="form-label">학번</label>
+                <label for="student-id" class="form-label">학번 <span class="required-star">*</span></label>
                 <input type="text" class="form-control" id="student-id" name="student-id" placeholder="ex) 20XXXXXXXX"
                     required>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="name" class="form-label">이름</label>
+                <label for="name" class="form-label">이름 <span class="required-star">*</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="ex) 홍길동" required>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="college" class="form-label">소속 대학</label>
+                <label for="college" class="form-label">소속 대학 <span class="required-star">*</span></label>
                 <select class="form-select" name="college" id="college">
                     <option value="경영대학">경영대학</option>
                     <option value="경제대학">경제대학</option>
@@ -68,12 +70,12 @@
                 </select>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="dept" class="form-label">소속 학과</label>
+                <label for="dept" class="form-label">소속 학과 <span class="required-star">*</span></label>
                 <input type="text" class="form-control" id="dept" name="dept" placeholder="ex) 소프트웨어학과" required>
             </div>
             <div class="col-md-6 mb-3">
                 <div class="form-label">
-                    <label for="absenceRadioOptions">재학 여부</label>
+                    <label for="absenceRadioOptions">재학 여부 <span class="required-star">*</span></label>
                 </div>
                 <div>
                     <div class="form-check form-check-inline">
@@ -92,7 +94,7 @@
             </div>
             <div class="col-md-6 mb-3">
                 <div class="form-label">
-                    <label for="absenceRadioOptions">복수 전공</label>
+                    <label for="absenceRadioOptions">복수전공 여부 <span class="required-star">*</span></label>
                 </div>
                 <div>
                     <div class="form-check form-check-inline">
@@ -107,10 +109,10 @@
                 </div>
             </div>
             <div class="col-md-12 mb-3">
-                <label for="personal-email" class="form-label">Email</label>
+                <label for="personal-email">Email <span class="required-star">*</span></label>
+                <div class="weak-text form-label">계정정보를 찾을 때 사용합니다.</div>
                 <div class="d-flex">
-                    <input type="text" class="form-control email-input" id="personal-email" name="personal-email" placeholder="연락용 Email"
-                    required>
+                    <input type="text" class="form-control email-input" id="personal-email" name="personal-email" placeholder="연락용 Email" required>
                     <span style="line-height: 38px;">@</span>
                     <input type="text" id="email-domain" name="personal-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
                     <select id="email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
@@ -119,7 +121,8 @@
                 </div>
             </div>
             <div class="col-md-12 mb-3">
-                <label for="primary-email" class="form-label">GitHub Email</label>
+                <label for="primary-email">GitHub Email <span class="required-star">*</span></label>
+                <div class="weak-text form-label">GitHub Commit 기록을 추적하는데 사용합니다.</div>
                 <div class="d-flex">
                     <input type="text" class="form-control email-input" id="primary-email" name="primary-email" placeholder="GitHub 계정 연동 Email" required>
                     <span style="line-height: 38px;">@</span>
@@ -130,7 +133,8 @@
                 </div>
             </div>
             <div class="col-md-12 mb-3">
-                <label for="secondary-email" class="form-label">기타 연동 Email (선택)</label>
+                <label for="secondary-email">기타 연동 Email</label>
+                <div class="weak-text form-label">로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.</div>
                 <div class="d-flex">
                     <input type="text" id="secondary-email" name="secondary-email" class="form-control email-input" placeholder="기타 연동 Email">
                     <span style="line-height: 38px;">@</span>
@@ -148,7 +152,7 @@
             </div>
             <div>
                 <button id="consentSignUp" type="button" class="btn btn-secondary ms-auto mb-1" onclick="consentSignInOpen();">
-                    개인정보 이용내역 동의
+                    개인정보 이용내역 동의 <span class="required-star">*</span>
                 </button>
             </div>
             <div class="modal modal-lg fade" id="consent-signin">
