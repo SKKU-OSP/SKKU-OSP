@@ -1,0 +1,28 @@
+{% extends 'main.html' %}
+
+{% load static %}
+{% block content %}
+<div class="d-flex justify-content-center container my-5">
+    <div class="col-3">
+        <div class="d-flex justify-content-center mb-3">
+            <img src="/static/images/logo.svg" alt="Logo" class="w-50"/>
+        </div>
+        <div>
+            <strong id="find-feedback">이메일을 입력하여 계정을 찾을 수 있습니다.</strong>
+        </div>
+        <form id="find-account-form" method="post">
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" name="email" id="email" placeholder="exampleemail" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="d-flex flex-column">
+                <button type="button" id="btn-find-account" class="btn btn-outline-primary mb-3">찾기</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script src="{% static 'js/account.js' %}"></script>
+{% endblock script %}
