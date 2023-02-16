@@ -16,7 +16,7 @@ def message_list_view(request, selected_oppo):
     data = {}
     data['notification'] = []
     data['msg'] = {}
-    my_acc = Account.objects.get(user=request.user)
+    my_acc = Account.objects.get(user=request.user.id)
 
     selected_opponent = None
     if selected_oppo!=0:
@@ -87,7 +87,7 @@ def message_list_view(request, selected_oppo):
 @login_required
 def message_chat_view(request, opponent):
     oppo_acc = Account.objects.get(user=opponent)
-    my_acc = Account.objects.get(user=request.user)
+    my_acc = Account.objects.get(user=request.user.id)
     if request.method == 'GET':
         last_date = request.GET.get('oldest', datetime.now())
         raw_msg_list = Message.objects.filter(
