@@ -1,3 +1,4 @@
+{% load static %}
 {% load tag_templatetag %}
 {% load message_tag %}
 <header id="main-navbar" class="container d-flex flex-row gap-3 py-3">
@@ -136,3 +137,8 @@
 <div id="consent-open" class="modal modal-lg fade">
 </div>
 {% endif %}
+{% block script %}
+{% if type != 'sign' %}
+<script src="{% static 'js/searcher.js' %}"></script>
+{% endif %}
+{% endblock script %}
