@@ -3,73 +3,68 @@
 {% load static %}
 {% block content %}
 <div class="container my-4">
-  <div style="height: 42px;"></div>
   <div id="community-container" class="row justify-content-end">
     {% include "community/sidebar.html" with board=board %}
-    <div id="community-main">
+    <div id="community-main" class="col-md-9 col-12">
       <div id="community-main-title" class="card">
         <div class="card-body">
           커뮤니티
         </div>
       </div>
       <div id="boards-card" class="card boardgroup">
-        <div class="card-body">
-          <div class="container text-center">
-            <div class="row row-cols-2">
-              <div class="col main-board">
-                <div class="main-board-head d-flex justify-content-between">
-                  <div class="main-board-title">
-                    질문 게시판
-                  </div>
-                  <div class="main-board-more">
-                    <a href="/community/board/{{boards.0.name}}/{{boards.0.id}}">더보기 ></a>
-                  </div>
-                </div>
-                <div class="article-list-section">
-                  {% include "community/article-bar.html" with article_list=boards.0.article_list bartype='compact' board=boards.0 %}
-                </div>
+        <div class="card-body text-center d-flex flex-wrap">
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                질문 게시판
               </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.0.name}}/{{boards.0.id}}">더보기 ></a>
+              </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.0.article_list bartype='compact' board=boards.0 %}
+            </div>
+          </div>
 
-              <div class="col main-board">
-                <div class="main-board-head d-flex justify-content-between">
-                  <div class="main-board-title">
-                    팀 모집 게시판
-                  </div>
-                  <div class="main-board-more">
-                    <a href="/community/board/{{boards.1.name}}/{{boards.1.id}}">더보기 ></a>
-                  </div>
-                </div>
-                <div class="article-list-section">
-                  {% include "community/article-bar.html" with article_list=boards.1.article_list bartype='compact' board=boards.1 %}
-                </div>
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                팀 모집 게시판
               </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.1.name}}/{{boards.1.id}}">더보기 ></a>
+              </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.1.article_list bartype='compact' board=boards.1 %}
+            </div>
+          </div>
 
-              <div class="col main-board">
-                <div class="main-board-head d-flex justify-content-between">
-                  <div class="main-board-title">
-                    정보 게시판
-                  </div>
-                  <div class="main-board-more">
-                    <a href="/community/board/{{boards.2.name}}/{{boards.2.id}}">더보기 ></a>
-                  </div>
-                </div>
-                <div class="article-list-section">
-                  {% include "community/article-bar.html" with article_list=boards.2.article_list bartype='compact' board=boards.2 %}
-                </div>
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                정보 게시판
               </div>
-              <div class="col main-board">
-                <div class="main-board-head d-flex justify-content-between">
-                  <div class="main-board-title">
-                    홍보 게시판
-                  </div>
-                  <div class="main-board-more">
-                    <a href="/community/board/{{boards.3.name}}/{{boards.3.id}}">더보기 ></a>
-                  </div>
-                </div>
-                <div class="article-list-section">
-                  {% include "community/article-bar.html" with article_list=boards.3.article_list bartype='compact' board=boards.3 %}
-                </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.2.name}}/{{boards.2.id}}">더보기 ></a>
               </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.2.article_list bartype='compact' board=boards.2 %}
+            </div>
+          </div>
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                홍보 게시판
+              </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.3.name}}/{{boards.3.id}}">더보기 ></a>
+              </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.3.article_list bartype='compact' board=boards.3 %}
             </div>
           </div>
         </div>
