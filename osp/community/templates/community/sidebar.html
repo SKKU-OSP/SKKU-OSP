@@ -2,12 +2,15 @@
 {% load user_templatetag %}
 {% load static %}
 <div class="col-md-3" id="community-sidebar">
-    <div id="profile-tab" class="w-100">
+    <div id="profile-tab" class="w-100 d-flex justify-content-between">
         {% if user.is_authenticated %}
         <div id="sidebar-user-info">
             <a href="/user/{{user.username}}/">
                 <img width="42px" height="42px" src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image">
                 <span id="profile-username">{{user.username}}</span>
+            </a>
+            <a href="/accounts/logout">
+                <i class="material-icons align-middle hover-opacity text-white fa-lg">logout</i>
             </a>
         </div>
         {% else %}
@@ -20,7 +23,8 @@
         {% endif %}
     </div>
     <div id="community-tab" class="w-100">
-        <!-- 내 활동 -->
+        {% if user.is_authenticated %}
+        {# 내 활동 #}
         <div class="boardgroup-title">
             <span>내 활동</span>
             <i class="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-activity"></i>
@@ -43,7 +47,8 @@
                 <span>맞춤 유저 추천</span>
             </a>
         </div>
-        <!-- 일반 게시판 -->
+        {% endif %}
+        {# 일반 게시판 #}
         <div id="normal-boardgroup" class="boardgroup-title">
             <a href="/community/">
                 게시판
@@ -51,7 +56,7 @@
             <i class="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-board"></i>
         </div>
         {% board_sidebar_normal_board request %}
-        <!-- 팀 게시판 -->
+        {# 팀 게시판 #}
         {% if user.is_authenticated %}
         <div id="team-boardgroup" class="boardgroup-title">
             <span>팀 게시판</span>
@@ -66,7 +71,11 @@
         </div>
         {% endif %}
     </div>
-    <!-- 모달 창 -->
+    <div id="advertise">
+        <div id="ad-date"></div>
+        <div id="ad-title"></div>
+    </div>
+    {# 모달 창 #}
     {% if user.is_authenticated %}
     <div id="AddTeamModal" class="modal modal-lg fade">
         <div class="modal-dialog">
