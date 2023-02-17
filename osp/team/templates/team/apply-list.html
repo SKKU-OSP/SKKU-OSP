@@ -1,3 +1,4 @@
+{% load static %}
 {% load tag_templatetag %}
 {% load community_tag %}
 {% load team_tag %}
@@ -10,23 +11,26 @@
         <div class="modal-body w-100" style="min-height:400px;overflow-y:auto;">
             <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="apply-recv-tab" data-bs-toggle="pill"
-                        data-bs-target="#apply-recv" type="button" role="tab" aria-controls="apply-recv"
-                        aria-selected="true">받은 지원서</button>
+                    <button type="button" class="nav-link active" id="apply-recv-tab" role="tab"
+                        data-bs-toggle="pill" data-bs-target="#apply-recv" aria-controls="apply-recv"
+                        aria-selected="true">
+                        받은 지원서
+                    </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="apply-send-tab" data-bs-toggle="pill" data-bs-target="#apply-send"
-                        type="button" role="tab" aria-controls="apply-send" aria-selected="false">보낸 지원서</button>
+                        type="button" role="tab" aria-controls="apply-send" aria-selected="false">
+                        보낸 지원서
+                    </button>
                 </li>
             </ul>
             <div class="tab-content" id="pills-tabContent">
-                <div class="tab-pane fade show active" id="apply-recv" role="tabpanel" aria-labelledby="apply-recv-tab"
-                    tabindex="0">
-                    {% get_admin_team request.user as admin_teams %}
-                    {% for admin_team in admin_teams %}
+                <div class="tab-pane fade show active" id="apply-recv" role="tabpanel" aria-labelledby="apply-recv-tab" tabindex="0">
+                {% get_admin_team request.user as admin_teams %}
+                {% for admin_team in admin_teams %}
                     {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
                     {% for applymsg in waitedapplymessages %}
-                    <div class="team-apply-item received " id="apply-user-{{ applymsg.account.user.username }}">
+                    <div class="team-apply-item received" id="apply-user-{{ applymsg.account.user.username }}">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
@@ -36,16 +40,19 @@
                                     aria-controls="msg-id-{{ applymsg.id }}"
                                     role="button"></i>
                             </div>
-                            <div onclick="location.href='/user/{{applymsg.account.user.username}}'" class="team-apply-user">
-                                {{ applymsg.account.user.username }}
+                            <div class="team-apply-user">
+                                <a href="/user/{{applymsg.account.user.username}}">
+                                    {{ applymsg.account.user.username }}
+                                </a>
                             </div>
                             <div class="team-apply-action">
-                                <button
-                                    onclick="apply_result({{ applymsg.team.id }},'{{ applymsg.account.user.username }}',false)"
-                                    class="btn-xs btn-refuse">거절</button>
-                                <button
-                                    onclick="apply_result({{ applymsg.team.id }},'{{ applymsg.account.user.username }}',true)"
-                                    class="btn-xs btn-accept">수락</button>
+                                <input type="hidden" id="msg-{{applymsg.id}}" data-team-id="{{applymsg.team.id}}" data-user="{{applymsg.account.user.username}}">
+                                <button class="btn-team-refuse btn-xs btn-refuse" data-id="{{applymsg.id}}">
+                                    거절
+                                </button>
+                                <button class="btn-team-accept btn-xs btn-accept" data-id="{{applymsg.id}}">
+                                    수락
+                                </button>
                             </div>
                         </div>
                         <div id="msg-id-{{ applymsg.id }}" class="collapse team-apply-detail">
@@ -56,7 +63,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                    {% endfor %}
+                {% endfor %}
                 </div>
                 <div class="tab-pane fade" id="apply-send" role="tabpanel" aria-labelledby="apply-send-tab"
                     tabindex="0">
@@ -90,11 +97,11 @@
                                 {% endif %}
                             </div>
                             {% if applymsg.status == 0 %}
-                            <button class="btn-xs btn-remove team-apply-delete" onclick="ApplyDelete({{applymsg.id}})">
+                            <button class="btn-xs btn-remove team-apply-delete" data-id="{{applymsg.id}}">
                                 취소
                             </button>
                             {% else %}
-                            <button class="btn-xs btn-remove team-apply-delete" onclick="ApplyDelete({{applymsg.id}})">
+                            <button class="btn-xs btn-remove team-apply-delete" data-id="{{applymsg.id}}">
                                 삭제
                             </button>
                             {% endif %}
@@ -112,59 +119,7 @@
         </div>
     </div>
 </div>
-<script>
-    function showEmptyApply(){
-        msg_received = $(".team-apply-item.received");
-        console.log(msg_received);
-        if (msg_received.length == 0){
-            $("#apply-recv").empty();
-            $("#apply-recv").append(`<div style="text-align:center; padding-top:40px;">받은 지원서가 없습니다. </div>`);
-        }
-        msg_sended = $(".team-apply-item.sended");
-        console.log("msg_sended",msg_sended);
-        if (msg_sended.length == 0){
-            $("#apply-send").empty();
-            $("#apply-send").append(`<div style="text-align:center; padding-top:40px;">보낸 지원서가 없습니다. </div>`);
-        }
-    }
-    function apply_result(team_id, username, is_okay) {
+{% block script %}
+<script src="{% static 'js/team_application.js' %}"></script>
+{% endblock script %}
 
-        var status = is_okay ? "수락" : "거절";
-        
-        if (!confirm(username + ": " + status + "하시겠습니까?")) {
-            return;
-        }
-        
-        ajax_form_data = new FormData();
-        ajax_form_data.append('team_id', team_id);
-        ajax_form_data.append('username', username);
-        ajax_form_data.append('is_okay', is_okay);
-        ajax_form_data.append('direction', 'TO_TEAM');
-        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-        
-        
-        $.ajax({
-            type: "POST",
-            url: "/team/api/team-invite-update/",
-            data: ajax_form_data,
-            dataType: 'json',
-            processData: false,
-            contentType: false,
-            
-            success: function (data) {
-                if (data['status'] == "success") {
-                    console.log(data)
-                    $('#apply-user-'+data['username']).remove()
-                    showEmptyApply();
-                } else {
-                    alert(data['message']);
-                }
-            },
-            error: function (data) {
-                alert('Error Occured');
-            }
-        });
-    }
-    showEmptyApply();
-    
-</script>
