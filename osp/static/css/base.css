@@ -171,7 +171,7 @@ li, a, button {
   background-color: var(--main-bg-color);
   color: var(--main-border-color);
 }
-#new-noti, #new-msg  {
+#new-noti, #new-msg, #new-app {
   height: 0.5rem;
   width: 0.5rem;
   position: absolute;
