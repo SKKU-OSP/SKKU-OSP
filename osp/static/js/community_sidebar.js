@@ -228,30 +228,6 @@ function invite_result(team_id, username, is_okay) {
   });
 }
 
-function ApplyDelete(msg_id){
-
-  ajax_form_data = new FormData();
-  ajax_form_data.append('msg_id', msg_id);
-  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-  $.ajax({
-    type: 'POST',
-    url: '/team/api/team-invite-delete/',
-    data: ajax_form_data,
-    dataType: 'JSON',
-    processData: false,
-    contentType: false,
-    success: function(data){
-      if (data['status'] == "success") {
-        console.log(data)
-        $('#apply-' + msg_id).remove();
-        showEmptyApply();
-      } else {
-        alert(data['message']);
-      }
-    }
-  })
-}
-
 function CommentLike(comment_id, user_id) {
   if (user_id == -1) {
     alert("로그인 후 이용해주세요.");
