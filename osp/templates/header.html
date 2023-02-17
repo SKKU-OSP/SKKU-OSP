@@ -18,9 +18,18 @@
     </div>
     {#헤더 아이콘 모음#}
     {% if user.is_authenticated %}
+    {# get_notifications 함수로 유저를 대상으로 한 메시지를 가져오면서 읽지 않은 메시지가 있는지 체크#}
+    {% get_notifications request.user as notifications %}
+    {# get_new_message 함수로 유저를 대상으로 한 DM이 있는지 확인 (boolean) #}
+    {% has_new_message request.user as has_new_msg %}
     <div class="d-flex flex-row p-2">
         {#1.지원서#}
         <div id="team-apply-list" class="position-relative pointer">
+            {% if notifications.has_new_app %}
+            <span id="new-app" class="badge">
+                <span class="visually-hidden">New Application</span>
+            </span>
+            {% endif %}
             <button class="default-btn p-0">
                 <span class="material-icons-outlined nav-icon fs-4">
                     assignment_ind
@@ -30,8 +39,7 @@
         
         {#2.메시지#}
         <div id="message" class="position-relative pointer">
-            {% get_new_message request.user as is_new_msg %}
-            {% if is_new_msg %}
+            {% if has_new_msg %}
             <span id="new-msg" class="badge">
                 <span class="visually-hidden">New Message</span>
             </span>
@@ -44,7 +52,6 @@
         </div>
         {#3.알림#}
         <div class="dropdown noti-dropdown-btn">
-            {% get_notifications request.user as notifications %}
             {% if notifications.new %}
             <span id="new-noti" class="badge">
                 <span class="visually-hidden">New alerts</span>
