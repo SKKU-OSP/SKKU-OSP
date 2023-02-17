@@ -1,7 +1,7 @@
 {% load static %}
 {% load tag_templatetag %}
 {% load message_tag %}
-<header id="main-navbar" class="container d-flex flex-row gap-3 py-3">
+<header id="main-navbar" class="container d-flex flex-row py-3">
     <div class="col-lg-3 col-1">
         <a href="/community">
             <img width="42px" height="42px" src="/static/images/logo-simple.svg" alt="로고">
@@ -10,22 +10,6 @@
             <span>SKKU SOSD</span>
         </a>
     </div>
-    {# TODO: admin용도 사이드바로 이동시켜야함. #}
-    {% if user.is_staff %}
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/community">Community</a>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rank</a>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/rank/user">User</a></li>
-                <li><a class="dropdown-item" href="/rank/repo">Repository</a></li>
-            </ul>
-        </li>
-        <li class="nav-item"><a class="nav-link" aria-current="page" href="/home/statistic">Statistic</a></li>
-    </ul>
-    {% endif %}
     {#검색창#}
     <div id="searcher-box">
     {% if type != 'sign' %}
@@ -33,8 +17,8 @@
     {% endif %}
     </div>
     {#헤더 아이콘 모음#}
+    {% if user.is_authenticated %}
     <div class="d-flex flex-row p-2">
-        {% if user.is_authenticated %}
         {#1.지원서#}
         <div id="team-apply-list" class="position-relative pointer">
             <button class="default-btn p-0">
@@ -97,7 +81,8 @@
                 {% endfor %}
             </ul>
         </div>
-        {#4.계정#}
+        {#4.계정: staff만 표시 #}
+        {% if user.is_staff %}
         <div class="dropdown">
             <div class="dropdown-toggle hover-opacity" data-bs-toggle="dropdown" aria-expanded="false" id="ProfileDropdown">
                 {{user.username}}
@@ -105,14 +90,17 @@
             <ul class="dropdown-menu" aria-labelledby="ProfileDropdown">
                 {% if user.is_superuser %}
                 <li><a class="dropdown-item" href="/admin">Admin</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="/user/{{user}}">Profile</a></li>
                 {% endif %}
+                <li><a class="dropdown-item" href="/home/statistic">Statistic</a></li>
+                <li><a class="dropdown-item" href="/community">Community</a></li>
+                <li><a class="dropdown-item" href="/rank/user">User Rank</a></li>
+                <li><a class="dropdown-item" href="/rank/repo">Repository Rank</a></li>
                 <li><a class="dropdown-item" href="/accounts/logout">Logout</a></li>
             </ul>
         </div>
         {% endif %}
     </div>
+    {% endif %}
 </header>
 {% if user.is_authenticated %}
 <div id="message-modal" class="modal modal-lg fade">
