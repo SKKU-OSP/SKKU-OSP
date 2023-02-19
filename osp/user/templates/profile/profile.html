@@ -431,7 +431,9 @@
                   {% for row in lang_lv4%}
                       <div class="d-flex justify-content-between">
                         <div class="stack-box"  style="background-color: {{ row.color }};">
+                          {% if row.logo != "default.svg"%}
                           <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                          {% endif %}
                           <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
                         </div>
                       </div>
@@ -449,7 +451,9 @@
                   {% for row in lang_lv3%}
                     <div class="d-flex justify-content-between flex-fill">
                       <div class="stack-box"  style="background-color: {{ row.color }};">
+                        {% if row.logo != "default.svg"%}
                         <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                        {% endif %}
                         <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
                       </div>
                     </div>
@@ -467,7 +471,9 @@
                   {% for row in lang_lv2 %}
                     <div class="d-flex justify-content-start flex-fill">
                       <div class="stack-box"  style="background-color: {{ row.color }};">
-                        <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                        {% if row.logo != "default.svg"%}
+                        <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt= {% static  "svg/default.svg" %}/>
+                        {% endif %}
                         <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
                       </div>
                     </div>
@@ -483,7 +489,9 @@
                   {% for row in lang_lv1%}
                     <div class="d-flex justify-content-between flex-fill">
                       <div class="stack-box"  style="background-color: {{ row.color }};">
-                        <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                        {% if row.logo != "default.svg"%}
+                        <img class="stack-icon" src="{{row.logo}}/{{row.fontcolor}}" onerror="{% static "svg/default.svg" %}"/>
+                        {% endif %}
                         <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
                       </div>
                     </div>
@@ -498,7 +506,9 @@
                     {% for row in lang_lv0%}
                       <div class="d-flex justify-content-between flex-fill">
                         <div class="stack-box"  style="background-color: {{ row.color }};">
+                          {% if row.logo != "default.svg"%}
                           <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                          {% endif %}
                           <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
                         </div>
                       </div>
