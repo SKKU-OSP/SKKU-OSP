@@ -14,6 +14,7 @@ def get_notifications(user):
     msgs = Message.objects.filter(sender__isnull=True, receiver__user=user).order_by('-send_date')
     new_msg = len(msgs.filter(receiver_read=False)) > 0
     has_new_app = False
+    has_new_app_result = False
     for msg in msgs:
         try:
             tmp = json.loads(msg.body)
@@ -23,11 +24,16 @@ def get_notifications(user):
             elif tmp['type'] == 'articlelike':
                 msg.icon = 'thumb_up'
                 msg.feedback = tmp["article_id"]
-            elif tmp['type'] == 'team_apply' or tmp['type'] == 'team_apply_result':
+            elif tmp['type'] == 'team_apply':
                 msg.icon = 'assignment_ind'
                 msg.feedback = ''
                 if not msg.receiver_read:
                     has_new_app = True
+            elif tmp['type'] == 'team_apply_result':
+                msg.icon = 'assignment_ind'
+                msg.feedback = ''
+                if not msg.receiver_read:
+                    has_new_app_result = True
             elif tmp['type'] == 'team_invite':
                 msg.icon = 'group_add'
                 msg.feedback = make_team_board_url(tmp["team_id"])
@@ -41,7 +47,8 @@ def get_notifications(user):
             tmp = msg.body
             msg.body={"body":tmp}
 
-    return {'new': new_msg, 'list': msgs, 'open_types': open_types, 'has_new_app': has_new_app}
+    return {'new': new_msg, 'list': msgs, 'open_types': open_types, 
+            'has_new_app': has_new_app, 'has_new_app_result': has_new_app_result}
 
 
 @register.simple_tag

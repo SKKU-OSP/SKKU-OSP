@@ -171,7 +171,7 @@ li, a, button {
   background-color: var(--main-bg-color);
   color: var(--main-border-color);
 }
-#new-noti, #new-msg, #new-app {
+.badge-new {
   height: 0.5rem;
   width: 0.5rem;
   position: absolute;
@@ -396,6 +396,12 @@ img.opponent-profile {
   color: #000000 !important;
   background-color: var(--tag-bg-ect) !important;
   font-weight: 700 !important;
+}
+
+.bg-tag-new {
+  color: var(--main-white) !important;
+  background-color: var(--alert-color) !important;
+  font-weight: 500 !important;
 }
 
 .bg-none {
@@ -650,4 +656,9 @@ img.opponent-profile {
 }
 .required-star {
   color: var(--danger-color);
+}
+
+.modal-dialog-started {
+    display: flex;
+    min-height: calc(100% - var(--bs-modal-margin) * 2);
 }
