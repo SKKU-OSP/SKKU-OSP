@@ -714,7 +714,7 @@ window.addEventListener('load', function () {
   for(let i=0; i<sideCol.children.length;i++){
     sideHeight += sideCol.children[i].getBoundingClientRect().height;
   }
-  const article = document.getElementById("body-content");
+  const article = document.getElementById("body-wrapper");
   window.addEventListener("scroll", function() {
     let bodyHeight = 0;
     let contents = document.getElementsByClassName("profile-content");
@@ -758,9 +758,31 @@ window.addEventListener('load', function () {
       $("#recent-repos").append(
         `<div class="card w-100 mb-2 recent_repos">
           <div class="card-body">
-            <h6 class="card-title">${repo["repo_name"]}</h6>
-            <div style="font-size: 13px">
+            <div class="card-title d-flex justify-content-between">
+              <div class="card-title-block" style="font-weight: bold;">
+                ${repo["repo_name"]}
+              </div>
+              <div class="card-title-block text-right">
+                <span class="weak-text text-right">
+                  최근 커밋일자
+                </span>
+                <span class="weak-text">
+                ${repo["committer_date"].slice(0, 10)}
+                </span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between">
+              <div style="font-size: 13px;" >
               ${repo["desc"]}
+              </div>
+              <div class="repo-info" style="font-size: 13px;">
+                <div><i class="bi bi-star"></i> Star ${repo["stargazers_count"]}</div>
+                <div><i class="bi bi-check-lg"></i> Commit ${repo["commits_count"]}</div>
+                <div><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" version="1.1" data-view-component="true" class="octicon octicon-git-pull-request UnderlineNav-octicon d-none d-sm-inline">
+                  <path fill-rule="evenodd" d="M7.177 3.073L9.573.677A.25.25 0 0110 .854v4.792a.25.25 0 01-.427.177L7.177 3.427a.25.25 0 010-.354zM3.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122v5.256a2.251 2.251 0 11-1.5 0V5.372A2.25 2.25 0 011.5 3.25zM11 2.5h-1V4h1a1 1 0 011 1v5.628a2.251 2.251 0 101.5 0V5A2.5 2.5 0 0011 2.5zm1 10.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM3.75 12a.75.75 0 100 1.5.75.75 0 000-1.5z"></path>
+                  </svg> Pull Request ${repo["prs_count"]}
+                </div>
+              </div>
             </div>
           </div>
         </div>`);
