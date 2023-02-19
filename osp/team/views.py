@@ -172,7 +172,7 @@ def TeamInvite(request):
 
                     board = Board.objects.get(team=team)
                     url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
-                    sender = Account.objects.get(user=request.user)
+                    sender = Account.objects.get(user=request.user.id)
 
                     # 메세지 객체 생성
                     Message.objects.create(
@@ -254,7 +254,7 @@ def TeamCreate(request):
                     new_team.save()
 
                     # 팀 생성한 유저 Account 객체 ( request.user 로 쿼리 )
-                    account = Account.objects.get(user=request.user)
+                    account = Account.objects.get(user=request.user.id)
 
                     # TeamMember 객체 생성, admin으로 설정
                     team_member = TeamMember.objects.create(
@@ -406,7 +406,7 @@ def TeamApply(request, team_id):
         return render(request, 'team/apply-form.html', context)
     if request.method == 'POST':
         team = Team.objects.get(id=team_id)
-        account = Account.objects.get(user=request.user)
+        account = Account.objects.get(user=request.user.id)
         teammember = TeamMember.objects.filter(team=team,member=account)
         if not teammember:
             try:

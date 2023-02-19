@@ -3,67 +3,70 @@
 {% load static %}
 {% block content %}
 <div class="container my-4">
-  <div style="height: 42px;"></div>
-  <div id="community-container" class="row">
+  <div id="community-container" class="row justify-content-end">
     {% include "community/sidebar.html" with board=board %}
-    <div class="col-md-9 col-12">
-      <div class="row">
-        <div class="col-6">
-          {% for board in boards %}
-          {% if forloop.counter|divisibleby:2 %}
-          {% else %}
-          <div class="mb-2 boardgroup">
-            <div class="accordion" id="accordion-{{board.id}}">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <div class="accordion-header-inner">
-                    <div>
-                      <a href="/community/home/{{board.name}}/{{board.id}}">{{board.name}} 게시판</a>
-                    </div>
-                    <div class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}"
-                      aria-expanded="true" aria-controls="collapse-{{board.id}}">
-                    </div>
-                  </div>
-                </h2>
-                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                  data-bs-parent="#accordionExample">
-                  <div>
-                    {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endif %}
-          {% endfor %}
+    <div id="community-main" class="col-md-9 col-12">
+      <div id="community-main-title" class="card">
+        <div class="card-body">
+          커뮤니티
         </div>
-        <div class="col-6">
-          {% for board in boards %}
-          {% if forloop.counter|divisibleby:2 %}
-          <div class="mb-2 boardgroup">
-            <div class="accordion" id="accordion-{{board.id}}">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <div class="accordion-header-inner">
-                    <div>
-                      <a href="/community/home/{{board.name}}/{{board.id}}">{{board.name}} 게시판</a>
-                    </div>
-                    <div class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{board.id}}"
-                      aria-expanded="true" aria-controls="collapse-{{board.id}}">
-                    </div>
-                  </div>
-                </h2>
-                <div id="collapse-{{board.id}}" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                  data-bs-parent="#accordionExample">
-                  <div>
-                    {% include "community/article-bar.html" with article_list=board.article_list bartype='compact' board=board %}
-                  </div>
-                </div>
+      </div>
+      <div id="boards-card" class="card boardgroup">
+        <div class="card-body text-center d-flex flex-wrap">
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                질문 게시판
+              </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.0.name}}/{{boards.0.id}}">더보기 ></a>
               </div>
             </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.0.article_list bartype='compact' board=boards.0 %}
+            </div>
           </div>
-          {% endif %}
-          {% endfor %}
+
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                팀 모집 게시판
+              </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.1.name}}/{{boards.1.id}}">더보기 ></a>
+              </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.1.article_list bartype='compact' board=boards.1 %}
+            </div>
+          </div>
+
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                정보 게시판
+              </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.2.name}}/{{boards.2.id}}">더보기 ></a>
+              </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.2.article_list bartype='compact' board=boards.2 %}
+            </div>
+          </div>
+          <div class="col-md-6 col-12 main-board">
+            <div class="main-board-head d-flex justify-content-between">
+              <div class="main-board-title">
+                홍보 게시판
+              </div>
+              <div class="main-board-more">
+                <a href="/community/board/{{boards.3.name}}/{{boards.3.id}}">더보기 ></a>
+              </div>
+            </div>
+            <div class="article-list-section">
+              {% include "community/article-bar.html" with article_list=boards.3.article_list bartype='compact' board=boards.3 %}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@
     padding: 2rem 3rem;
 
     background: #FFFFFF;
-    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
     border-radius: 0.625rem;
     margin-bottom: 1.5rem;
 }
@@ -43,7 +43,7 @@
     background-color: #FFFFFF;
     border-bottom-left-radius: 0.625rem;
     border-bottom-right-radius: 0.625rem;
-    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
 .acheive-item {
@@ -115,7 +115,7 @@
 #total-tab-pane {
     background-color: #FFFFFF;
     border-radius: 0.625rem;
-    box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
 @keyframes rotate {

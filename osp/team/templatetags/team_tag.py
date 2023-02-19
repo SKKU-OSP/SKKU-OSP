@@ -29,7 +29,6 @@ def var_add(var1, var2):
     return int(var1) + int(var2)
 
 
-
 @register.simple_tag
 def teammember_options_exclude_members(user, team):
     try:

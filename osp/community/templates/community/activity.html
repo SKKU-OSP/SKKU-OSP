@@ -3,54 +3,41 @@
 {% load community_tag %}
 {% block content %}
 <div class="container my-4">
-  <div style="height: 42px;"></div>
   <div id="community-container" class="row">
     {% include "community/sidebar.html" with board=board %}
     <div class="col-md-9 col-12">
       <div>
+        <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="activity">
+          <span id="board-title">내 활동 목록</span>
+          <div id="activity-filter">
+            {% include "community/board/activity-searcher.html" with board=board %}
+          </div>
+        </div>
         <ul class="nav nav-pills nav-fill mb-3" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="title-bar nav-link active" id="pills-article-tab" data-bs-toggle="pill" data-bs-target="#pills-article" type="button" role="tab" aria-controls="pills-article">내가 작성한 글</button>
+            <button class="title-bar nav-link active" id="pills-article-tab" data-bs-toggle="pill" data-bs-target="#pills-article" type="button" role="tab" aria-controls="pills-article">
+              내가 작성한 글
+            </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="title-bar nav-link" id="pills-scrap-tab" data-bs-toggle="pill" data-bs-target="#pills-scrap" type="button" role="tab" aria-controls="pills-scrap">내가 스크랩한 글</button>
+            <button class="title-bar nav-link" id="pills-scrap-tab" data-bs-toggle="pill" data-bs-target="#pills-scrap" type="button" role="tab" aria-controls="pills-scrap">
+              내가 스크랩한 글
+            </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="title-bar nav-link" id="pills-comment-tab" data-bs-toggle="pill" data-bs-target="#pills-comment" type="button" role="tab" aria-controls="pills-comment">내가 작성한 댓글</button>
+            <button class="title-bar nav-link" id="pills-comment-tab" data-bs-toggle="pill" data-bs-target="#pills-comment" type="button" role="tab" aria-controls="pills-comment">
+              내가 작성한 댓글
+            </button>
           </li>
         </ul>
       </div>
+      {# 컨텐츠가 표시될 위치 #}
       <div class="tab-content" id="pills-tabContent">
-        <div class="tab-pane fade background-shadow fw-semibold active show" id="pills-article" role="tabpanel" aria-labelledby="pills-article-tab" tabindex="0">
-          {% include "community/article-bar.html" with article_list=write_article bartype='compact' board=board %}
-        </div>
-        <div class="tab-pane fade background-shadow fw-semibold" id="pills-scrap" role="tabpanel" aria-labelledby="pills-scrap-tab" tabindex="0">
-          {% include "community/article-bar.html" with article_list=scrap_article bartype='compact' board=board %}
-        </div>
-        <div class="tab-pane fade background-shadow fw-semibold" id="pills-comment" role="tabpanel" aria-labelledby="pills-comment-tab" tabindex="0">
-          <div>
-            {% for comment in comment_list %}
-            <div class="article-bar">
-              <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' comment.article.id %}#comment-{{comment.id}}'">
-                <div class="article-bar-title my-1">
-                  {{comment.body}}
-                </div>
-              </div>
-              <div class="article-meta">
-                <div>
-                  <a href="{% url 'community:article-view' comment.article.id %}">
-                    {{comment.article.board_id.name}} - {{comment.article.title}}
-                  </a>
-                </div>
-                <div>{{comment.pub_date|time_before}}</div>
-                <div class="article-meta-stat d-flex">
-                  <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
-                  <div>{{comment|comment_like}}</div>
-                </div>
-              </div>
+      </div>
+      <div id="article-list-footer" class="d-flex justify-content-end mt-3">
+        <div id="article-list-pagination">
+            <div id="pagination-body" data-board-name="{{board.name}}" data-max-page="{{max_page}}">
             </div>
-            {% endfor %}
-          </div>
         </div>
       </div>
     </div>
@@ -58,5 +45,6 @@
 </div>
 {% endblock content %}
 {% block script %}
+<script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}

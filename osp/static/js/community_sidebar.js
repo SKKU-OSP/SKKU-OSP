@@ -11,7 +11,7 @@ $().ready(function () {
         new_team_tag = new SlimSelect({
           select: 'select[name=tag]',
           onChange: (selected_list) => {
-            for (selected of selected_list) {
+            for (let selected of selected_list) {
               $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
             }
           },
@@ -49,6 +49,26 @@ $().ready(function () {
       })
     } else {
       $('#AddTeamModal').modal('show');
+    }
+  });
+
+  // 현재 주소를 체크해서 사이드바의 아이템의 폰트 색을 변경
+  $('.sidebar-link').each(function() {
+      if($(this).attr('href') === window.location.pathname) {
+        $(this).parent().addClass('selected');
+      }
+  });
+  $('.folder').click(function () {
+    var target = $(this).data('fold-target');
+    if ($(target).hasClass("none")) {
+      $(this).addClass('bi-chevron-up');
+      $(this).removeClass('bi-chevron-down');
+      $(target).removeClass('none');
+    }
+    else {
+      $(this).addClass('bi-chevron-down');
+      $(this).removeClass('bi-chevron-up');
+      $(target).addClass('none');
     }
   });
 });
@@ -206,30 +226,6 @@ function invite_result(team_id, username, is_okay) {
       alert('Error Occured');
     }
   });
-}
-
-function ApplyDelete(msg_id){
-
-  ajax_form_data = new FormData();
-  ajax_form_data.append('msg_id', msg_id);
-  ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
-  $.ajax({
-    type: 'POST',
-    url: '/team/api/team-invite-delete/',
-    data: ajax_form_data,
-    dataType: 'JSON',
-    processData: false,
-    contentType: false,
-    success: function(data){
-      if (data['status'] == "success") {
-        console.log(data)
-        $('#apply-' + msg_id).remove();
-        showEmptyApply();
-      } else {
-        alert(data['message']);
-      }
-    }
-  })
 }
 
 function CommentLike(comment_id, user_id) {
