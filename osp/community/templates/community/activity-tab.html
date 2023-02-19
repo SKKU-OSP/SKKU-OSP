@@ -1,0 +1,15 @@
+
+{% load community_tag %}
+{% if activity_type == 'scrap'%}
+<div class="tab-pane fade background-shadow active show" id="pills-scrap" role="tabpanel" aria-labelledby="pills-scrap-tab" tabindex="0">
+    {% include "community/article-table.html" with article_list=target_list board=board %}
+</div>
+{% elif activity_type == 'comment' %}
+<div class="tab-pane fade background-shadow active show" id="pills-comment" role="tabpanel" aria-labelledby="pills-comment-tab" tabindex="0">
+    {% include "community/comment-table.html" with comment_list=target_list board=board %}
+</div>
+{% else %}
+<div class="tab-pane fade background-shadow active show" id="pills-article" role="tabpanel" aria-labelledby="pills-article-tab" tabindex="0">
+    {% include "community/article-table.html" with article_list=target_list board=board %}
+</div>
+{% endif %}

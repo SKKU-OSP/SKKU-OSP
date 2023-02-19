@@ -22,7 +22,7 @@
                             <i class="bi bi-person-plus-fill hover-opacity px-1" onclick="inviteTeamModalOpen(-1, {{ team.id }})"></i>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-light fs-8" 
-                        onclick="location.href='{% url "community:article-register" board_name="팀 모집" board_id=2 %}?team_id={{team.id}}'">모집글작성</button>
+                        onclick="location.href='{% url "community:article-save" board_name="팀 모집" board_id=2 %}?team_id={{team.id}}'">모집글작성</button>
                     </div>
                     <div id="teamMemberList">
                         {% for member in team_members %}
@@ -212,7 +212,7 @@
                 team_tag_select = new SlimSelect({
                     select: 'select#team-tag',
                     onChange: (selected_list) => {
-                        for (selected of selected_list) {
+                        for (let selected of selected_list) {
                             $(`.ss-value[data-id="${selected.id}"]`).addClass('bg-' + selected.class)
                         }
                     },

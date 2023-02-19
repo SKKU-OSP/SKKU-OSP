@@ -151,7 +151,7 @@ function send_msg(event) {
         } else {
             alert(data.message);
         }
-    }.bind(random_id))
+    }.bind(random_id));
     return false;
 }
 
@@ -176,47 +176,9 @@ function msgModalOpen(selected_oppo = 0) {
                 RefreshNewMessage();
             }
         });
-    })
-}
-
-function ApplyTeamModalOpen(isResult=false) {
-    if (!$('#ApplyTeamModal').hasClass('ready')) {
-        $.ajax({
-            url: "/team/api/team-apply-list",
-            type: "GET",
-            dataType: 'HTML'
-        }).done(function (data) {
-            $('#ApplyTeamModal').addClass('ready').html(data)
-            $('#ApplyTeamModal').modal('show');
-            $('.bi-caret-down-fill').click(function () {
-                if (this.style.transform == '') {
-                    this.style.transform = 'rotate(180deg)';
-                } else {
-                    this.style.transform = '';
-                }
-            });
-            if(isResult){
-                console.log("applyteammodal");
-                $("#apply-recv-tab").toggleClass("active");
-                $("#apply-send-tab").toggleClass("active");
-                $("#apply-recv").toggleClass("show active");
-                $("#apply-send").toggleClass("show active");
-            }
-        })
-    } else {
-        $('#ApplyTeamModal').modal('show');
-    }
-}
-
-
-$().ready(function () {
-    $('#message').click(function () {
-        msgModalOpen();
-    })
-    $('#team-apply-list').click(function (){
-        ApplyTeamModalOpen();
     });
-});
+}
+
 /**
  * 알림 메시지를 클릭하면 읽음과 피드백을 하는 함수
  * @param {string} type 알림 메시지의 타입
@@ -237,19 +199,114 @@ function ReadNotification(type, noti_id, target_id="") {
                 window.location = target_id;
             }
             if (type == 'team_apply') {
-                ApplyTeamModalOpen();
+                appListModalOpen();
             }
             if (type == 'team_apply_result') {
-                ApplyTeamModalOpen(isResult=true);
+                appListModalOpen(isResult=true);
             }
 
             $('#noti-' + noti_id).addClass('read');
         } else {
             alert(data['message']);
         }
-    })
+    });
 }
 
+function appListModalOpen(isResult=false) {
+    let teamModal = $('#ApplyTeamModal');
+    if (!teamModal.hasClass('ready')) {
+        $.ajax({
+            url: "/team/api/team-apply-list",
+            type: "GET",
+            dataType: 'HTML'
+        }).done(function (data) {
+            teamModal.addClass('ready').html(data)
+            teamModal.modal('show');
+            $('.bi-caret-down-fill').click(function () {
+                if (this.style.transform == '') {
+                    this.style.transform = 'rotate(180deg)';
+                } else {
+                    this.style.transform = '';
+                }
+            });
+            let new_recv = $("#new-app").data("new-recv");
+            let new_send = $("#new-app").data("new-send");
+            let recv_tab = $("#apply-recv-tab");
+            let send_tab = $("#apply-send-tab");
+            if(new_recv == "True"){
+                recv_tab.prepend(`<span id="recv-new" class="badge bg-tag-new">new</span>`);
+            }
+            if(new_send == "True"){
+                send_tab.prepend(`<span id="send-new" class="badge bg-tag-new">new</span>`);
+            }
+            // active 상태일 경우 지움
+            if(recv_tab.hasClass("active")){
+                if($("#recv-new").length > 0){
+                    readApp("recv");
+                }
+            }
+            if(send_tab.hasClass("active")){
+                if($("#send-new").length > 0){
+                    readApp("send");
+                }
+            }
+            // click 했을 때 다시 지움
+            recv_tab.on('click', () =>{
+                if($("#recv-new").length > 0){
+                    readApp("recv");
+                }
+            });
+            send_tab.on('click', () =>{
+                if($("#send-new").length > 0){
+                    readApp("send");
+                }
+            });
+
+            if(isResult){
+                console.log("applyteammodal");
+                recv_tab.toggleClass("active");
+                send_tab.toggleClass("active");
+                $("#apply-recv").toggleClass("show active");
+                $("#apply-send").toggleClass("show active");
+            }
+        });
+    } else {
+        teamModal.modal('show');
+    }
+}
+
+function readApp(type="recv") {
+    let data = {type: type}
+    $.ajax({
+        url: "/message/app-read/",
+        type: "POST",
+        data: data,
+        dataType: 'json'
+    }).done(function (data) {
+        console.log("data", data);
+    });
+}
+
+$().ready(function () {
+    $('#message').click(function () {
+        msgModalOpen();
+    })
+    $('#team-apply-list').click(function (){
+        appListModalOpen();
+    });
+});
+function toggleTag(){
+    $("#tag-filter").toggleClass("show");
+}
+function toggleUserTag(){
+    $("#user-tag-filter").toggleClass("show");
+}
+function toggleActivityTag(){
+    $("#activity-tag-filter").toggleClass("show");
+}
+/**
+ * 회원가입에 필요한 동의서
+ */
 function consentSignInOpen(){
     $('#consent-signin').modal('show');
     // set is_modal_open in register.html
@@ -258,86 +315,4 @@ function consentSignInOpen(){
         $("#consentSignUp").removeClass("btn-secondary");
         $("#consentSignUp").addClass("btn-primary");
     }
-}
-
-function consentWriteOpen(user){
-    console.log("open_consent_write");
-    $.ajax({
-        url: `/user/${user}/api/consent-write`,
-        type: "GET",
-        data: null,
-        dataType: 'HTML'
-    }).done(function (data) {
-        $('#consent-wirte').addClass('ready').html(data)
-        $('#consent-wirte').modal('show');
-    })
-}
-
-function submitWriteConsent(e, user){
-    e.preventDefault();
-    formHTML = $("#write-consent-form")[0]
-    
-    let form_data = new FormData(formHTML);
-    let opt1 = form_data.get('radio-1')
-    let opt2 = form_data.get('radio-2')
-
-    if(Number(opt1[0])&Number(opt2[0])){
-        $.ajax({
-            url: `/user/${user}/api/consent-write`,
-            method: 'POST',
-            data: form_data,
-            dataType: 'JSON',
-            processData: false,
-            contentType: false,
-        }).done(function (data) {
-            console.log(data);
-            alert(data.msg);
-            window.location.reload();
-        });
-    }else{
-        alert("정보 공개에 동의하지 않아 글쓰기 작업이 제한됩니다.");
-    }
-
-    return false;
-}
-
-function consentUserOpen(user){
-    console.log("open_consent_user");
-    $.ajax({
-        url: `/user/${user}/api/consent-open`,
-        type: "GET",
-        data: null,
-        dataType: 'HTML'
-    }).done(function (data) {
-        $('#consent-open').addClass('ready').html(data)
-        $('#consent-open').modal('show');
-    })
-}
-
-function submitUserConsent(e, user){
-    e.preventDefault();
-    formHTML = $("#open-consent-form")[0]
-    
-    let form_data = new FormData(formHTML);
-    let opt1 = form_data.get('radio-1')
-    let opt2 = form_data.get('radio-2')
-
-    if(Number(opt1[0])&Number(opt2[0])){
-        $.ajax({
-            url: `/user/${user}/api/consent-open`,
-            method: 'POST',
-            data: form_data,
-            dataType: 'JSON',
-            processData: false,
-            contentType: false,
-        }).done(function (data) {
-            console.log(data);
-            alert(data.msg);
-            window.location.reload();
-        });
-    }else{
-        alert("정보 공개에 동의하지 않아 유저 추천시스템에 대한 접근이 제한됩니다.");
-    }
-
-    return false;
 }
