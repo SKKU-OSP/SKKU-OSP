@@ -433,11 +433,6 @@ img.opponent-profile {
   display: none !important;
 }
 
-.default-btn {
-  border: none;
-  background: none;
-}
-
 #ApplyTeamModal .modal-body {
   padding: 0;
 }
@@ -518,6 +513,12 @@ img.opponent-profile {
 
 .team-apply-detail-body {
   text-align: center;
+}
+
+.btn-none {
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .btn-default {

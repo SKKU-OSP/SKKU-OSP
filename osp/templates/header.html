@@ -30,7 +30,7 @@
                 <span class="visually-hidden">New Application</span>
             </span>
             {% endif %}
-            <button class="default-btn p-0">
+            <button class="btn-none p-0">
                 <span class="material-icons-outlined nav-icon fs-4">
                     assignment_ind
                 </span>
@@ -44,7 +44,7 @@
                 <span class="visually-hidden">New Message</span>
             </span>
             {% endif %}
-            <button class="default-btn p-0">
+            <button class="btn-none p-0">
                 <span class="material-icons-outlined nav-icon fs-4">
                     email
                 </span>
@@ -57,7 +57,7 @@
                 <span class="visually-hidden">New alerts</span>
             </span>
             {% endif %}
-            <button class="noti-dropdown dropdown-toggle default-btn p-0" type="button" data-bs-toggle="dropdown"
+            <button class="noti-dropdown dropdown-toggle btn-none p-0" type="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 <div id="notification" class="notification material-icons-outlined nav-icon pointer">
                     notifications
@@ -102,7 +102,12 @@
                 <li><a class="dropdown-item" href="/community">Community</a></li>
                 <li><a class="dropdown-item" href="/rank/user">User Rank</a></li>
                 <li><a class="dropdown-item" href="/rank/repo">Repository Rank</a></li>
-                <li><a class="dropdown-item" href="/accounts/logout">Logout</a></li>
+                <li>
+                    <form method="post" action="{% url 'common:logout' %}" class="dropdown-item">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-none dropdown-item">Logout</button>
+                    </form>
+                </li>
             </ul>
         </div>
         {% endif %}
