@@ -1,15 +1,16 @@
 .recent_repos {
   min-height: 100px;
+  max-height: 130px;
 }
 
 /* Bootstrap Change */
 .card {
-  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  box-shadow: 0 4px 4px 0 var(--card-box-shadow);
   border-radius: 0.625rem;
 }
 
 .card-body>.card {
-  box-shadow: 0px 0px;
+  box-shadow: 0 0;
 }
 
 .nav-tabs {
@@ -133,7 +134,7 @@ a.nav-link {
 
 .grass {
   display: block;
-  border: 0px solid var(--profile-nav-border);
+  border: 0 solid var(--profile-nav-border);
   border-radius: 0.3rem;
 }
 
@@ -332,6 +333,7 @@ a.nav-link {
 
 /* User Profile */
 #profile-info {
+  width: 20%;
   font-size: 18px;
   transition: margin-top 0.5s ease-in-out 0s, right .5s;
   display: block;
@@ -357,7 +359,7 @@ a.nav-link {
 /* User Sidebar */
 .user-detail {
   background-color: white;
-  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  box-shadow: 0 4px 4px 0 var(--card-box-shadow);
   margin-bottom: 1rem;
   border-bottom-left-radius: 0.625rem;
   border-bottom-right-radius: 0.625rem;
@@ -481,7 +483,7 @@ span.row-raw {
 }
 
 .gbti-card {
-  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  box-shadow: 0 4px 4px 0 var(--card-box-shadow);
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
@@ -553,7 +555,7 @@ span.row-raw {
 .btn-gbti {
   padding: 10px 20px;
   text-align: center;
-  box-shadow: 0px 2px 4px var(--card-box-shadow);
+  box-shadow: 0 2px 4px var(--card-box-shadow);
   border-radius: 10px;
   border: 0;
 }
@@ -623,7 +625,7 @@ span.row-raw {
 }
 .modal-gbti-card {
   background-color: white;
-  box-shadow: 0px 4px 4px var(--card-box-shadow);
+  box-shadow: 0 4px 4px var(--card-box-shadow);
   border-radius: 15px;
 }
 .p-sm {
@@ -697,7 +699,7 @@ span.row-raw {
   }
   .modal-gbti-card {
     background-color: white;
-    box-shadow: 0px 4px 4px var(--card-box-shadow);
+    box-shadow: 0 4px 4px var(--card-box-shadow);
     border-radius: 15px;
   }
   .p-sm {
@@ -719,7 +721,7 @@ span.row-raw {
   }
   .modal-gbti-card {
     background-color: white;
-    box-shadow: 0px 4px 4px var(--card-box-shadow);
+    box-shadow: 0 4px 4px var(--card-box-shadow);
     border-radius: 15px;
   }
   .p-sm {
@@ -753,7 +755,7 @@ span.row-raw {
   }
   .modal-gbti-card {
     background-color: white;
-    box-shadow: 0px 4px 4px var(--card-box-shadow);
+    box-shadow: 0 4px 4px var(--card-box-shadow);
     border-radius: 15px;
   }
   .p-sm {
@@ -777,4 +779,112 @@ span.row-raw {
   #visualization {
     min-height: 514px;
   }
+}
+
+.stack-box {
+  height: 30px;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-right: 4px;
+  padding-top: 2px;
+
+  text-align: center;
+  /*box-shadow: 1px 1px 1px;*/
+  border-radius: 0.2rem;
+  white-space: nowrap;
+  transition: all 0.3s ease-in-out;
+
+}
+
+
+.stack-icon {
+  width: 18px;
+  margin-right: 3px;
+}
+
+.stack-name {
+  font-size: 13px;
+  font-weight: bold;
+  
+}
+
+#user-github{
+  width: 30px;
+  
+
+}
+#user-github:hover{
+  cursor: pointer;
+}
+
+#user-mail{
+  width: 20px;
+}
+
+#profile-grid-section{
+  width: 80%;
+}
+#personal-email{
+  font-size: 15px;
+}
+
+#user-github-link:link{
+ color: white;
+ text-decoration: underline;
+
+}
+#user-github-link:visited{
+  color: white; text-decoration: none;
+}
+#user-github-link:hover{
+  color:white; text-decoration: underline;
+}
+
+.tier-row{
+  margin: 0 0 0 0;
+  height: 38px;
+}
+
+.tier-name{
+  height: 24px;
+  width: 60px;
+  min-width: 60px;
+  
+  text-align: center;
+  margin-right: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+
+  border-width: 0 0 0 0;
+  border-style: solid;
+  border-color: #002743;
+  padding-bottom: 10px;
+
+}
+
+.langs-row{
+  overflow: hidden;
+}
+
+.tier-icon{
+  width: 40px;
+  margin-bottom: -10px;
+  transition: all 0.3s ease-in-out;
+  overflow:visible;
+
+}
+
+.tier-icon:hover{
+  transform: scale(1.4);
+}
+
+#tiers-box{
+  margin-top: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+
+}
+
+.bi-star-fill{
+ margin-left: -12px;
 }

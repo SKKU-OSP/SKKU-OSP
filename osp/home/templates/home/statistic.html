@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block content %}
-<div class="container mt-2 mb-5">
+<div class="container my-4">
   <div class="d-flex text-lg">
     <div class="form-check form-switch"> 
       <input class="form-check-input" id="absenceSwitch" type="checkbox" role="switch" checked="checked"/>
@@ -112,7 +112,6 @@
       <div class="col-md-4"> 
         <div class="card p-3">
           <h5 class="card-title factor">전체 Score 분포</h5>
-          <div class="text-flex" id="perScore"></div>
           <canvas id="totalScoreDist"> </canvas>
         </div>
       </div>
