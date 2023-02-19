@@ -2,16 +2,19 @@
 {% load user_templatetag %}
 {% load static %}
 <div class="col-md-3" id="community-sidebar">
-    <div id="profile-tab" class="w-100 d-flex justify-content-between">
+    <div id="profile-tab">
         {% if user.is_authenticated %}
         <div id="sidebar-user-info">
             <a href="/user/{{user.username}}/">
                 <img width="42px" height="42px" src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image">
                 <span id="profile-username">{{user.username}}</span>
             </a>
-            <a href="/accounts/logout">
+            <form id="logout-form" method="post" action="{% url 'common:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-none">
                 <i class="material-icons align-middle hover-opacity text-white fa-lg">logout</i>
-            </a>
+                </button>
+            </form>
         </div>
         {% else %}
         <div id="sidebar-user-info">

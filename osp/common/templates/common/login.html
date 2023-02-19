@@ -16,7 +16,7 @@
             {% endif %}
         </div>
         {% endfor %}
-        <form method="post" action=".">
+        <form method="post" action="{% url 'common:login' %}">
             {% csrf_token %}
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" name="username" id="username" placeholder="exampleusername" required>
@@ -29,17 +29,17 @@
             <div class="d-flex flex-column">
                 <button type="submit" class="btn btn-primary mb-2">Login</button>
             </div>
-            <div class="d-flex justify-content-between flex-wrap">
-                <div>
-                    <a href="/accounts/register" class="weak-text">회원가입</a>
-                </div>
-                <div>
-                    <a href="/accounts/find_account/" class="weak-text">계정 찾기</a>
-                    <span>|</span>
-                    <a href="/accounts/password_reset/" class="weak-text">비밀번호 재설정</a>
-                </div>
-            </div>
         </form>
+        <div class="d-flex justify-content-between flex-wrap">
+            <div>
+                <a href="/accounts/register" class="weak-text">회원가입</a>
+            </div>
+            <div>
+                <a href="/accounts/find_account/" class="weak-text">계정 찾기</a>
+                <span>|</span>
+                <a href="/accounts/password_reset/" class="weak-text">비밀번호 재설정</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock content %}
