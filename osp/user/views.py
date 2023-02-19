@@ -264,11 +264,40 @@ class ProfileView(TemplateView):
         level_list = [ al.level for al in account_lang ]
 
         lang = []
+        lang_lv0 = []
+        lang_lv1 = []
+        lang_lv2 = []
+        lang_lv3 = []
+        lang_lv4 = []
 
         for tag in lang_tags:
-            lang_tag_dict = {"name":tag.name, "type":tag.type}
+            lang_tag_dict = {"name":tag.name, "type":tag.type }
             lang_tag_dict["level"] = level_list[len(lang)]
+            lang_tag_dict["logo"] = tag.logo
+            lang_tag_dict["color"] = tag.color
+
+            hexcolor = tag.color[1:]
+            r = int(hexcolor[0:2], 16) & 0xff
+            g = int(hexcolor[2:4], 16) & 0xff
+            b = int(hexcolor[4:6], 16) & 0xff 
+            luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            if luma < 127.5:
+                lang_tag_dict["fontcolor"] = "white"
+            else:
+                lang_tag_dict["fontcolor"] = "black"
             lang.append(lang_tag_dict)
+            if lang_tag_dict["level"] == 0:
+                lang_lv0.append(lang_tag_dict)
+            if lang_tag_dict["level"] == 1:
+                lang_lv1.append(lang_tag_dict)
+            if lang_tag_dict["level"] == 2:
+                lang_lv2.append(lang_tag_dict)
+            if lang_tag_dict["level"] == 3:
+                lang_lv3.append(lang_tag_dict)
+            if lang_tag_dict["level"] == 4:
+                lang_lv4.append(lang_tag_dict)
+        lang.sort(key=lambda la: la['level'], reverse=True)
+        print(lang)
         ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values('tag')).values('parent_tag').order_by('parent_tag').distinct()
         ints_child_layer = domain_layer.filter(child_tag__in=ints.values('tag')).values('child_tag').order_by('child_tag').distinct()
         relation_origin = domain_layer.values('parent_tag', 'child_tag')
@@ -291,7 +320,14 @@ class ProfileView(TemplateView):
         context["account"] = Account.objects.get(user=user.id)
         context["info"] = StudentTab.objects.get(id=student_id)
         context["ints"] = ints
-        context["lang"] = lang
+        context['lang'] = lang
+        context["lang_lv0"] = lang_lv0
+        context["lang_lv1"] = lang_lv1
+        context["lang_lv2"] = lang_lv2
+        context["lang_lv3"] = lang_lv3
+        context["lang_lv4"] = lang_lv4
+
+
         
         return context
 
@@ -537,6 +573,10 @@ def load_repo_data(request, username):
             contr_repo_queryset = GithubRepoStats.objects.extra(where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
             for contr_repo in contr_repo_queryset:
                 recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
+                recent_repos[contr_repo.repo_name]["stargazers_count"] = contr_repo.stargazers_count
+                recent_repos[contr_repo.repo_name]["commits_count"] = contr_repo.commits_count
+                recent_repos[contr_repo.repo_name]["prs_count"] = contr_repo.prs_count
+
             recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
             context = {"status": 200, "repo":recent_repos}
         except Exception as e:
@@ -718,6 +758,18 @@ class ProfilePasswdView(UpdateView):
         user.save()
         print("비밀번호가 변경되었습니다. ")
         return 1
+
+def InitAllPassword():
+    users = User.objects.all()
+    accounts = Account.objects.filter(user__is_superuser = False)
+    for account in accounts:
+        user = users.get(id=account.user.id)
+        user.set_password(str(account.student_data.id))
+        user.save()
+
+    return
+
+
 
 
 class ProfileType(TemplateView):
