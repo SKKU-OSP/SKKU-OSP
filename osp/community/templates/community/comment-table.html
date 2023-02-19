@@ -1,10 +1,10 @@
 {% load community_tag %}
 {# 내 활동 목록의 내가 쓴 댓글에 표시될 내용#}
-<div class="shadow-box white-box rounded-3">
+<div class="shadow-box white-box rounded-3 text-center">
     <table class="table" style="table-layout:fixed">
         <colgroup>
             {% if type == 'mix' %}
-            <col width="18%">
+            <col width="15%">
             {% endif %}
             <col width="46%">
             <col width="18%">
@@ -30,7 +30,11 @@
                 <td>{{comment.board_name}}</td>
                 {% endif %}
                 {#내용#}
-                <td>{{comment.body}}</td>
+                <td>
+                    <div class="d-flex text-start">
+                        {{comment.body}}
+                    </div>
+                </td>
                 {#작성자#}
                 {% if comment.anonymous_writer %}
                 <td>익명</td>

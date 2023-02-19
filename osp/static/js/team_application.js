@@ -38,9 +38,9 @@ teamApplication = {
             $("#apply-recv").empty();
             $("#apply-recv").append(`<div style="text-align:center; padding-top:40px;">받은 지원서가 없습니다. </div>`);
         }
-        msg_sended = $(".team-apply-item.sended");
-        console.log("msg_sended",msg_sended);
-        if (msg_sended.length == 0){
+        msg_sent = $(".team-apply-item.sent");
+        console.log("msg_sent",msg_sent);
+        if (msg_sent.length == 0){
             $("#apply-send").empty();
             $("#apply-send").append(`<div style="text-align:center; padding-top:40px;">보낸 지원서가 없습니다. </div>`);
         }

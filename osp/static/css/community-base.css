@@ -31,6 +31,7 @@
 }
 
 #profile-tab {
+    width: 100%;
     background: var(--main-point-color);
     box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
     border-top-left-radius: 0.625rem;
@@ -39,6 +40,11 @@
 #sidebar-user-info {
     width: 100%;
     padding: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 #sidebar-user-info .profile-img {

@@ -4,11 +4,13 @@ from django.shortcuts import render
 from django.db.models import Q, Max
 from django.contrib.auth.decorators import login_required
 
+from message.models import Message
+from user.models import Account
+
 from datetime import datetime
 import time
+import json
 
-from .models import Message
-from user.models import Account
 
 # Create your views here.
 @login_required
@@ -160,3 +162,25 @@ def read_notification(request, noti_id):
             return JsonResponse({'status': 'fail', 'message': 'No such notification'})
     except DatabaseError:
         return JsonResponse({'status': 'fail', 'message': 'DB Failed'})
+
+def read_app(request):
+    print("read_app")
+    if request.method == 'POST':
+        if request.user.is_anonymous:
+            return None
+        try:
+            user_id = request.user.id
+            type_app = request.POST.get('type', 'recv')
+            new_msgs = Message.objects.filter(sender__isnull=True, receiver=user_id, receiver_read=False).order_by('-send_date')
+            type_target = 'team_apply' if type_app == 'recv' else 'team_apply_result'
+            for msg in new_msgs:
+                try:
+                    tmp = json.loads(msg.body)
+                    if tmp['type'] == type_target:
+                        msg.receiver_read = True
+                        msg.save()
+                except Exception as e:
+                    print("Exception get_notifications", e)
+            return JsonResponse({'status': 'success'})
+        except DatabaseError:
+            return JsonResponse({'status': 'fail', 'message': 'DB Failed'})
