@@ -213,14 +213,15 @@ function ReadNotification(type, noti_id, target_id="") {
 }
 
 function appListModalOpen(isResult=false) {
-    if (!$('#ApplyTeamModal').hasClass('ready')) {
+    let teamModal = $('#ApplyTeamModal');
+    if (!teamModal.hasClass('ready')) {
         $.ajax({
             url: "/team/api/team-apply-list",
             type: "GET",
             dataType: 'HTML'
         }).done(function (data) {
-            $('#ApplyTeamModal').addClass('ready').html(data)
-            $('#ApplyTeamModal').modal('show');
+            teamModal.addClass('ready').html(data)
+            teamModal.modal('show');
             $('.bi-caret-down-fill').click(function () {
                 if (this.style.transform == '') {
                     this.style.transform = 'rotate(180deg)';
@@ -228,17 +229,62 @@ function appListModalOpen(isResult=false) {
                     this.style.transform = '';
                 }
             });
+            let new_recv = $("#new-app").data("new-recv");
+            let new_send = $("#new-app").data("new-send");
+            let recv_tab = $("#apply-recv-tab");
+            let send_tab = $("#apply-send-tab");
+            if(new_recv == "True"){
+                recv_tab.prepend(`<span id="recv-new" class="badge bg-tag-new">new</span>`);
+            }
+            if(new_send == "True"){
+                send_tab.prepend(`<span id="send-new" class="badge bg-tag-new">new</span>`);
+            }
+            // active 상태일 경우 지움
+            if(recv_tab.hasClass("active")){
+                if($("#recv-new").length > 0){
+                    readApp("recv");
+                }
+            }
+            if(send_tab.hasClass("active")){
+                if($("#send-new").length > 0){
+                    readApp("send");
+                }
+            }
+            // click 했을 때 다시 지움
+            recv_tab.on('click', () =>{
+                if($("#recv-new").length > 0){
+                    readApp("recv");
+                }
+            });
+            send_tab.on('click', () =>{
+                if($("#send-new").length > 0){
+                    readApp("send");
+                }
+            });
+
             if(isResult){
                 console.log("applyteammodal");
-                $("#apply-recv-tab").toggleClass("active");
-                $("#apply-send-tab").toggleClass("active");
+                recv_tab.toggleClass("active");
+                send_tab.toggleClass("active");
                 $("#apply-recv").toggleClass("show active");
                 $("#apply-send").toggleClass("show active");
             }
         });
     } else {
-        $('#ApplyTeamModal').modal('show');
+        teamModal.modal('show');
     }
+}
+
+function readApp(type="recv") {
+    let data = {type: type}
+    $.ajax({
+        url: "/message/app-read/",
+        type: "POST",
+        data: data,
+        dataType: 'json'
+    }).done(function (data) {
+        console.log("data", data);
+    });
 }
 
 $().ready(function () {

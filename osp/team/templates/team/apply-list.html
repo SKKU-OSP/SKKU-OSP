@@ -69,7 +69,7 @@
                     tabindex="0">
                     {% get_sent_teamapply request.user as sent_teamapply %}
                     {% for applymsg in sent_teamapply %}
-                    <div id="apply-{{applymsg.id}}" class="team-apply-item sended">
+                    <div id="apply-{{applymsg.id}}" class="team-apply-item sent">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
