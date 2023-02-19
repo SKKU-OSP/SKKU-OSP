@@ -20,21 +20,29 @@
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
       {% endif %}
       >
-        <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
+        <img src= {{account.photo.url}} alt="No Image now" class="profile-img" href="www.naver.com">
+        
         <div class="info-body">
         {% if is_own %}
           <p class="font-focus">{{info.name}}</p>
-          <p>{{info.github_id}}</p>
+
+          <p style="margin-right:10px">
+            <a href="https://github.com/{{info.github_id}}" target="_blank">
+              <img id="user-github" src="/static/images/github-white.svg" alt="github" class="github">
+            </a>
+            <a id="user-github-link" class="row-txt" href="https://github.com/{{info.github_id}}" target="_blank">
+              {{info.github_id}}
+            </a>
+          </p>
         {% else %}
-          <div class="d-flex flex-row justify-content-between w-100" style="padding: 5px 0px;">
-            <div style="margin:auto;">
-                Github:
-              <a class="row-txt" href="https://github.com/{{info.github_id}}">
-                {{info.github_id}}
-                <i class="bi bi-box-arrow-up-right pointer"></i>
-              </a>
-            </div>
-          </div>
+          <p style="margin-right:10px">
+            <a href="https://github.com/{{info.github_id}}" target="_blank">
+              <img id="user-github" src="/static/images/github-white.svg" alt="github" class="github">
+            </a>
+            <a id="user-github-link" class="row-txt" href="https://github.com/{{info.github_id}}" target="_blank">
+              {{info.github_id}}
+            </a>
+          </p>
         {% endif %}
         </div>
       </div>
@@ -44,15 +52,15 @@
           <span class="row-title text-center">학번</span>
           <span class="row-txt">{{info.id}}</span>
         </div>
-        <div class="d-flex row-userdata">
+        <!--div class="d-flex row-userdata">
           <span class="row-title text-center">대학</span>
           <span class="row-txt">{{info.college}}</span>
-        </div>
+        </div-->
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학과</span>
           <span class="row-txt">{{info.dept}}</span>
         </div>
-        <div class="d-flex row-userdata">
+        <!--div class="d-flex row-userdata">
           <span class="row-title text-center">전공</span>
           <span class="row-txt">
             {% if info.plural_major %}
@@ -61,23 +69,39 @@
             원전공
             {% endif %}
           </span>
-        </div>
-        <div class="d-flex row-userdata">
+        </div-->
+        <!--div class="d-flex row-userdata">
           <span class="row-title text-center">GitHub</span>
           <a class="row-txt" href="https://github.com/{{info.github_id}}">{{info.github_id}}</a>
-        </div>
+        </div-->
         <div class="d-flex row-userdata">
-          <span class="row-title text-center">개인 Email</span>
-          <span class="row-txt">{{info.personal_email}}</span>
+          <span class="row-title text-center">e-mail</span>
+          <span id="personal-email" class="row-txt">{{info.personal_email}}</span>
         </div>
-        <div class="d-flex row-userdata">
+        <!--div class="d-flex row-userdata">
           <span class="row-title text-center">Github Email</span>
           <span class="row-txt">{{info.primary_email}}</span>
+        </div-->
+
+
+      </div>
+      <div class="card mb-3" id="portfolio-nav">
+        <div class="card-body">
+          <h5 class="card-title d-flex justify-content-between">
+            자기소개
+            <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
+          </h5>
+          {% if account.introduction == '' %}
+            <span class="weak-text">자기소개를 설정해주세요</span>
+          {% endif %}
+          <div style="font-size: 12px;">
+            {{account.introduction}}
+          </div>
         </div>
       </div>
     {% endif %}
     </div>
-    <div class="col-md-9 col-12">
+    <div id="profile-grid-section" class="col-md-9 col-12">
       {% if success %}
       <div class="row mb-3 profile-content">
         <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
@@ -329,24 +353,25 @@
         </div>
       </div>
       {% endif %}
-      <div class="row profile-content">
-        <div class="col-4 expandable">
-          <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfolioModal" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-              <div class="modal-content">
-                <div class="modal-light-header">
-                  <h5 id="portfolioModal" class="modal-title">포트폴리오</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body-markdown">
-                  {% if account.portfolio == '' %}
-                    <span class="weak-text">포트폴리오를 설정해주세요</span>
-                  {% endif %}
-                  {{ account.portfolio|mark }}
-                </div>
-              </div>
+      <div id="modalPortfolioBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="portfolioModal" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-light-header">
+              <h5 id="portfolioModal" class="modal-title">포트폴리오</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body-markdown">
+              {% if account.portfolio == '' %}
+                <span class="weak-text">포트폴리오를 설정해주세요</span>
+              {% endif %}
+              {{ account.portfolio|mark }}
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row profile-content">
+        <!--div class="col-4 expandable">
+
           <div class="card mb-3" id="portfolio">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">
@@ -359,7 +384,7 @@
               {{account.introduction}}
             </div>
           </div>
-        </div>
+        </div-->
         <div class="col-4 expandable">
           <div class="card mb-3" id="interests">
             <div class="card-body">
@@ -369,6 +394,7 @@
               {% if relations|length == 0 and remains|length == 0 %}
                 <span class="weak-text">관심분야를 설정해주세요</span>
               {% endif %}
+              
               {% for row in relations %}
                 <span class="badge bg-tag-domain me-1" style="height:20px">{{row.parent}}</span>
                 {% for child in row.children %}
@@ -382,25 +408,113 @@
             </div>
           </div>
         </div>
-        <div class="col-4 expandable">
+        <div class="col-8 expandable">
           <div class="card mb-3" id="languages">
             <div class="card-body">
-              <h5 class="card-title d-flex justify-content-between">사용언어/기술스택
+              <h5 id="stack-card-title" class="card-title d-flex justify-content-between">사용언어/기술스택
                 <i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i>
               </h5>
-              <div class="d-flex flex-wrap" style="margin:auto;">
+              <div id="tiers-box" class="">
                 {% if lang|length == 0%}
                   <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
                 {% endif %}
-                {% for row in lang %}
-                <div>
-                  <div class="d-flex justify-content-between flex-fill">
-                    <span class="badge bg-tag-{{row.type}} mx-2" style="height:20px; min-width: 80px;">{{row.name}}</span>
-                    <span class="span_language d-flex justify-content-between flex-nowrap mx-2" level={{row.level}}></span>
+                <div class="tier-row d-flex justify-content-start align-items-center">
+                  <div class="tier-name">
+                    <!--img class="tier-icon" src="/static/svg/diamond.svg" alt="diamond"/-->
+                    <i class="bi bi-star-fill" style="color:#002743;"></i>
+                    <i class="bi bi-star-fill" style="color:#002743;"></i>
+                    <i class="bi bi-star-fill" style="color:#002743;"></i>
+                    <i class="bi bi-star-fill" style="color:#002743;"></i>
+                    <i class="bi bi-star-fill" style="color:#002743;"></i>
                   </div>
-                  <hr>
-                </div> 
-                {% endfor %}
+                  <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">  
+                  {% for row in lang_lv4%}
+                      <div class="d-flex justify-content-between">
+                        <div class="stack-box"  style="background-color: {{ row.color }};">
+                          {% if row.logo != "default.svg"%}
+                          <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                          {% endif %}
+                          <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
+                        </div>
+                      </div>
+                  {% endfor %}     
+                  </div>    
+                </div>
+                <div class="tier-row d-flex justify-content-start align-items-center">
+                  <div class="tier-name">
+                    <i class="bi bi-star-fill" style="color:#00518C;"></i>
+                    <i class="bi bi-star-fill" style="color:#00518C;"></i>
+                    <i class="bi bi-star-fill" style="color:#00518C;"></i>
+                    <i class="bi bi-star-fill" style="color:#00518C;"></i>
+                  </div>
+                  <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">
+                  {% for row in lang_lv3%}
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="stack-box"  style="background-color: {{ row.color }};">
+                        {% if row.logo != "default.svg"%}
+                        <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                        {% endif %}
+                        <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                  </div>
+                </div>
+
+                <div class="tier-row d-flex justify-content-start align-items-center">
+                  <div class="tier-name">          
+                    <i class="bi bi-star-fill" style="color:#0081DF;"></i>
+                    <i class="bi bi-star-fill" style="color:#0081DF;"></i>
+                    <i class="bi bi-star-fill" style="color:#0081DF;"></i>
+                  </div>
+                  <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">
+                  {% for row in lang_lv2 %}
+                    <div class="d-flex justify-content-start flex-fill">
+                      <div class="stack-box"  style="background-color: {{ row.color }};">
+                        {% if row.logo != "default.svg"%}
+                        <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt= {% static  "svg/default.svg" %}/>
+                        {% endif %}
+                        <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                  </div>
+                </div>
+                <div class="tier-row d-flex justify-content-start align-items-center">
+                  <div class="tier-name">
+                    <i class="bi bi-star-fill" style="color:#51B5FF;"></i>            
+                    <i class="bi bi-star-fill" style="color:#51B5FF;"></i>
+                  </div>
+                  <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">
+                  {% for row in lang_lv1%}
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="stack-box"  style="background-color: {{ row.color }};">
+                        {% if row.logo != "default.svg"%}
+                        <img class="stack-icon" src="{{row.logo}}/{{row.fontcolor}}" onerror="{% static "svg/default.svg" %}"/>
+                        {% endif %}
+                        <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                  </div>
+                </div>
+                <div class="tier-row d-flex justify-content-start align-items-center">
+                  <div class="tier-name">
+                    <i class="bi bi-star-fill" style="color:#B5DFFF;"></i>          
+                  </div>
+                  <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">
+                    {% for row in lang_lv0%}
+                      <div class="d-flex justify-content-between flex-fill">
+                        <div class="stack-box"  style="background-color: {{ row.color }};">
+                          {% if row.logo != "default.svg"%}
+                          <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>
+                          {% endif %}
+                          <span class="stack-name" style="color:{{ row.fontcolor }}">{{ row.name }}</span>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -620,10 +734,10 @@
       </div>
       {% else %}
       <div>
-        아직 데이터가 수집되지 않았습니다. 데이터 수집은 하루에 한 번 이루어 집니다. 내일 다시 방문해주세요.
+        아직 데이터가 수집되지 않았습니다. 데이터 수집은 하루에 한 번 이루어집니다. 내일 다시 방문해주세요.
       </div>
       <div>
-        GitHub ID가 올바르지 않은면 데이터 수집이 불가능합니다. GitHub ID를 확인해주세요
+        GitHub ID가 올바르지 않으면 데이터 수집이 불가능합니다. GitHub ID를 확인해주세요
       </div>
       {% endif %}
     </div>

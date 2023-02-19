@@ -51,7 +51,25 @@ div> ::-webkit-scrollbar-thumb {
 div> ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
 }
-
+body::-webkit-scrollbar {
+  display: none;
+}
+/* table 내부 스크롤바 스타일 */
+td> ::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 0.25rem;
+}
+td> ::-webkit-scrollbar-track {
+  background: var(--main-border-color);
+  border-radius: 0.625rem;
+}
+td> ::-webkit-scrollbar-thumb {
+  background: var(--profile-btn-inactive);
+  border-radius: 0.625rem;
+}
+td> ::-webkit-scrollbar-thumb:hover {
+  background: var(--profile-btn-inactive);
+}
 li, a, button {
   font-weight: 500;
   text-decoration: none;
@@ -61,7 +79,9 @@ li, a, button {
   --bs-gutter-x: 0.8rem !important;
 }
 
-
+.material-icons {
+  vertical-align: middle;
+}
 
 .bold {
   font-weight: bold;
@@ -69,7 +89,7 @@ li, a, button {
 }
 
 .none {
-  display: none;
+  display: none !important; 
 }
 
 .nav-icon {
@@ -82,14 +102,59 @@ li, a, button {
   visibility: hidden;
   opacity: 0;
 }
-@media (min-width: 991px) {
+@media (min-width: 992px) {
   .noti-dropdown {
     padding: 0;
     left:auto !important;
     right: 0 !important;
   }
 }
-
+@media (max-width: 991px) {
+  #text-logo{
+    display: none!important;
+  }
+}
+/*검색창*/
+#search-btn {
+  margin: 1px;
+  background-color: var(--main-point-color);
+  padding: 0.5rem;
+  --bs-btn-color: var(--main-white);
+  --bs-btn-hover-color: var(--main-white);
+  --bs-btn-active-color: var(--main-white);
+  --bs-btn-active-border-color: var(--main-point-color);
+}
+#tag-btn {
+  margin: 1px 0;
+  padding: 0.2rem;
+  font-size: 24px;
+  border: 2px 0 var(--main-border-color);
+}
+#searcher-box {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+#searcher{
+  position:relative;
+  flex: 0 0 auto;
+}
+#tag-filter{
+  transition-duration: 0.15s;
+}
+#tag-filter:not(.show){
+  opacity: 0;
+  visibility: hidden;
+  cursor: default;
+}
+#board-searcher {
+  flex-grow: 2;
+}
+#search-word {
+  flex-grow:7;
+}
+#search-field {
+  flex-wrap: nowrap;
+}
 /*알림 스타일*/
 .noti-item {
   width: 20em;
@@ -106,7 +171,7 @@ li, a, button {
   background-color: var(--main-bg-color);
   color: var(--main-border-color);
 }
-#new-noti, #new-msg  {
+.badge-new {
   height: 0.5rem;
   width: 0.5rem;
   position: absolute;
@@ -114,7 +179,12 @@ li, a, button {
   border-radius: 50%;
   padding: 0.25rem;
 }
-
+#noti-list {
+  position:absolute;
+  max-height:185px;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
 /* 메시지 모달 스타일 */
 #message-modal .modal-header {
   border-bottom: 1px solid var(--main-border-color);
@@ -123,6 +193,9 @@ li, a, button {
 #message-modal .modal-content {
   height: 60%;
   min-width: 700px;
+}
+#message-modal-body {
+  height: inherit;
 }
 #oppo-list {
   width: 40%;
@@ -144,11 +217,14 @@ li, a, button {
 }
 #chat-view-tab {
   width: 60%;
+  height: 100%;
   padding: 1rem;
   border-bottom-right-radius: 0.625rem;
   background-color: var(--main-bg-color);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 img.opponent-profile {
   height: 2rem;
@@ -213,7 +289,7 @@ img.opponent-profile {
 .chat-text-body {
   max-width: 80%;
   padding: 0.5rem;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0.125rem 0.25rem var(--card-box-shadow);
   border-radius: 10px;
   overflow: hidden;
   white-space: normal;
@@ -239,7 +315,7 @@ img.opponent-profile {
   flex: 2;
   margin-right: 0.25rem;
   background: #FFFFFF;
-  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
   padding: 0.5em;
   border-radius: 0.5rem;
   border: none;
@@ -269,20 +345,20 @@ img.opponent-profile {
   border: none;
 }
 .modal-body .form-control {
-  box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0.125rem 0.25rem var(--card-box-shadow);
 }
 
 .email-input {
   flex: 2 1 60%;
 }
-.email-input.email-select{
+.email-domain{
   flex: 0 1 40%;
 }
 
 /* SlimSelect Override */
 .ss-multi-selected {
   border: none !important;
-  box-shadow: inset 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0.125rem 0.25rem var(--card-box-shadow);
 }
 .ss-single-selected>.placeholder {
   background: none;
@@ -322,6 +398,12 @@ img.opponent-profile {
   font-weight: 700 !important;
 }
 
+.bg-tag-new {
+  color: var(--main-white) !important;
+  background-color: var(--alert-color) !important;
+  font-weight: 500 !important;
+}
+
 .bg-none {
   background: none;
 }
@@ -357,11 +439,6 @@ img.opponent-profile {
   display: none !important;
 }
 
-.default-btn {
-  border: none;
-  background: none;
-}
-
 #ApplyTeamModal .modal-body {
   padding: 0;
 }
@@ -380,7 +457,7 @@ img.opponent-profile {
   color: #000000;
   border-top-color: transparent;
   border-bottom-color: #000000;
-  border-radius: 0px
+  border-radius: 0;
 }
 
 #ApplyTeamModal .nav-pills .nav-link.active,
@@ -389,7 +466,7 @@ img.opponent-profile {
   color: var(--sub-point-color);
   border-color: #000000;
   border-bottom-color: transparent;
-  border-radius: 10px 10px 0px 0px;
+  border-radius: 10px 10px 0 0;
 }
 
 #apply-recv-tab{
@@ -442,6 +519,12 @@ img.opponent-profile {
 
 .team-apply-detail-body {
   text-align: center;
+}
+
+.btn-none {
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .btn-default {
@@ -528,7 +611,7 @@ img.opponent-profile {
 .user-info {
   margin: auto;
   background-color: var(--main-point-color);
-  box-shadow: 0px 4px 4px 0px var(--card-box-shadow);
+  box-shadow: 0 4px 4px var(--card-box-shadow);
   border-top-left-radius: 0.625rem;
   border-top-right-radius: 0.625rem;
   width: 100%;
@@ -540,7 +623,7 @@ img.opponent-profile {
   height: 160px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: var(--profile-btn-inactive);
+  background-color: var(--main-white);
   border: 2px solid var(--main-point-color);
   z-index: 5;
   position: relative;
@@ -566,4 +649,16 @@ img.opponent-profile {
 
 .fs-8 {
   font-size: 12px;
+}
+
+.text-white {
+  color: var(--main-white);
+}
+.required-star {
+  color: var(--danger-color);
+}
+
+.modal-dialog-started {
+    display: flex;
+    min-height: calc(100% - var(--bs-modal-margin) * 2);
 }

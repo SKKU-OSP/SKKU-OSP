@@ -1,0 +1,56 @@
+{% load community_tag %}
+{# 내 활동 목록의 내가 쓴 댓글에 표시될 내용#}
+<div class="shadow-box white-box rounded-3 text-center">
+    <table class="table" style="table-layout:fixed">
+        <colgroup>
+            {% if type == 'mix' %}
+            <col width="15%">
+            {% endif %}
+            <col width="46%">
+            <col width="18%">
+            <col width="18%">
+            <col width="8%">
+        </colgroup>
+        <thead class="thead-strong thead-board">
+        <tr>
+            {% if type == 'mix' %}
+            <th>게시판</th>
+            {% endif %}
+            <th>내용</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>공감</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        {% for comment in comment_list %}
+            <tr>
+                {% if type == 'mix' %}
+                {#게시판#}
+                <td>{{comment.board_name}}</td>
+                {% endif %}
+                {#내용#}
+                <td>
+                    <div class="d-flex text-start">
+                        {{comment.body}}
+                    </div>
+                </td>
+                {#작성자#}
+                {% if comment.anonymous_writer %}
+                <td>익명</td>
+                {% else %}
+                <td>{{comment.writer}}</td>
+                {% endif %}
+                {#작성일#}
+                <td>{{comment.pub_date|time_before}}</td>
+                {#공감#}
+                <td>{{comment|comment_like}}</td>
+            </tr>
+            {%empty%}
+            <td class="empty">
+                등록된 댓글이 없습니다.
+            </td>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
