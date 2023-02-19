@@ -11,7 +11,7 @@ import json, time
 def statistic(request):
     start_year = 2019
     if not request.user.is_superuser:
-        return redirect(f'/user/{request.user.username}')
+        return redirect(f'/user/{request.user.username}/')
     context = {}
     start = time.time()  # 시작 시간 저장
     dept_set = GitHubScoreTable.objects.values("dept").annotate(Count("dept"))
