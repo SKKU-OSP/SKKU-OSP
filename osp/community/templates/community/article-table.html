@@ -1,10 +1,10 @@
 {% load community_tag %}
 {# board의 article-list-body 에 출력되는 내용 #}
-<div class="shadow-box white-box rounded-3">
+<div class="shadow-box white-box rounded-3 text-center">
     <table class="table" style="table-layout:fixed">
         <colgroup>
             {% if type == 'mix' %}
-            <col width="20%">
+            <col width="15%">
             {% endif %}
             <col width="36%">
             <col width="12%">
@@ -39,7 +39,7 @@
                 {% endif %}
                 {#제목#}
                 <td>
-                    <div class="d-flex">
+                    <div class="d-flex text-start">
                     {% if article.board_type == 'Recruit' %}
                         {% is_period_end article.period_start as is_start %}
                         {% is_period_end article.period_end as is_end %}
@@ -89,7 +89,7 @@
                     {% if article.writer_name is null %}
                         탈퇴한 이용자
                     {% else %}
-                    <div class="d-flex">
+                    <div class="d-flex justify-content-center">
                         <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{article.writer_name}}
                         </button>

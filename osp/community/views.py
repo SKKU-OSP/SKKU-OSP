@@ -189,6 +189,7 @@ class TableBoardView(TemplateView):
         if board.board_type == 'Recruit':
 
             active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            active_article = get_article_board_data(active_article)
             for article in active_article:
                 article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
                 teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
@@ -488,6 +489,7 @@ def article_list(request, board_name, board_id):
     # print(article_list)
     
     # Get Article Metadata
+    article_list = get_article_board_data(article_list)
     article_list = get_article_metas(article_list)
     
     if board.board_type == 'Recruit':
