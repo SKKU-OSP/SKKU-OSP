@@ -31,6 +31,8 @@
                         <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
                 </div>
+                {% elif article.anonymous_writer %}
+                    익명
                 {% else %}
                     탈퇴한 이용자
                 {% endif %}
