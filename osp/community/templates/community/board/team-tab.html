@@ -183,7 +183,7 @@
             success: function(data) {
                 if(data['status']=="success"){
                     alert('탈퇴가 완료되었습니다.');
-                    window.location.href = "{% url 'community:Community-Main' %}";
+                    window.location.href = "{% url 'community:main' %}";
                 }
                 else{
                     alert( data['message'] );

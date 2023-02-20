@@ -5,7 +5,7 @@ from community import views, views_api, views_legacy
 app_name = 'community'
 
 urlpatterns = [
-    path('', views.CommunityMainView.as_view(), name='Community-Main'),
+    path('', views.CommunityMainView.as_view(), name='main'),
     path('redirect/', views.redirectView.as_view(), name='RedirectView'),
     path('board/<board_name>/<board_id>/', views.TableBoardView.as_view(), name='Board'),
     path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
@@ -17,14 +17,10 @@ urlpatterns = [
     path('article-list/<board_name>/<board_id>/', views.article_list ,name='Article_List'),
     path('account-cards/', views.account_cards ,name='Account_Cards'),
 
-
     path('article/<article_id>/', views.ArticleView.as_view(), name='article-view'),
-
-
     path('api/article/create/', views_api.article_create, name='article-c'),
     path('api/article/update/', views_api.article_update, name='article-u'),
     path('api/article/delete/', views_api.article_delete, name='article-d'),
-
 
     path('api/article/like/', views_api.article_like, name='article-like'),
     path('api/article/scrap/', views_api.article_scrap, name='article-scrap'),
