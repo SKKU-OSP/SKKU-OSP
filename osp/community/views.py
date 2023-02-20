@@ -11,7 +11,6 @@ from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
 from team.recommend import get_team_recommendation_list
 
-import hashlib
 import math, json, time
 from django.views.generic import TemplateView
 from datetime import datetime
@@ -21,33 +20,13 @@ from datetime import datetime
 class CommunityMainView(TemplateView):
     def get(self, request, *args, **kwargs):
         board_list = []
-        team_board_query = Q()
-        if request.user.is_authenticated:
-            account = Account.objects.get(user=request.user)
-            team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
-            team_board_query = Q(name__in=team_list)
         boards = Board.objects.exclude(board_type='User').exclude(board_type='Team')
 
         for board in boards:
-        # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
-            # 주간 Hot 게시물
-            # week_ago = datetime.now() - timedelta(days=7)
-            # article_list = Article.objects.filter(board_id=board,
-            #                                       pub_date__range=[
-            #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
-            #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
-            #                                       ]
-            #                                       )
-            # if len(article_list) > 0:
-            #     article_list = article_list.order_by('-view_cnt')
-            #     board.article_list = article_list[:min(3, len(article_list))]
-            # else:
-            #     board.article_list = []
 
             # 최신 게시물
             article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
             board.article_list = article_list[:min(8, len(article_list))]
-            
             board.article_list = get_article_metas(board.article_list)
             
             if board.board_type == 'Recruit':
@@ -58,58 +37,9 @@ class CommunityMainView(TemplateView):
                     else:
                         article.team = None
 
-
-            board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
             board_list.append(board)
 
         return render(request, 'community/main.html', {'boards': board_list})
-
-
-
-
-def main(request):
-    board_list = []
-    team_board_query = Q()
-    if request.user.is_authenticated:
-        account = Account.objects.get(user=request.user.id)
-        team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
-        team_board_query = Q(name__in=team_list)
-    boards = Board.objects.filter(team_board_query | Q(team_id=None)).exclude(board_type='User')
-
-    for board in boards:
-    # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
-        # 주간 Hot 게시물
-        # week_ago = datetime.now() - timedelta(days=7)
-        # article_list = Article.objects.filter(board_id=board,
-        #                                       pub_date__range=[
-        #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
-        #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
-        #                                       ]
-        #                                       )
-        # if len(article_list) > 0:
-        #     article_list = article_list.order_by('-view_cnt')
-        #     board.article_list = article_list[:min(3, len(article_list))]
-        # else:
-        #     board.article_list = []
-
-        # 최신 게시물
-        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-        board.article_list = article_list[:min(3, len(article_list))]
-        
-        board.article_list = get_article_metas(board.article_list)
-        
-        if board.board_type == 'Recruit':
-            for article in board.article_list:
-                tr = TeamRecruitArticle.objects.filter(article=article).first()
-                if tr:
-                    article.team = tr.team
-                else:
-                    article.team = None
-
-
-        board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
-        board_list.append(board)
-    return render(request, 'community/main.html', {'boards': board_list})
 
 
 class TableBoardView(TemplateView):
@@ -456,10 +386,7 @@ def article_list(request, board_name, board_id):
         PAGE_SIZE = 5
     else:
         PAGE_SIZE = 10
-    context = {}
-    context['board'] = board
-    context['bartype'] = 'normal'
-    context['type'] = "board"
+    context = {'board': board, 'type': "board"}
     
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     
@@ -485,8 +412,6 @@ def article_list(request, board_name, board_id):
     article_list = article_list.order_by(*sort_field)
     # Slice to Page
     article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-
-    # print(article_list)
     
     # Get Article Metadata
     article_list = get_article_board_data(article_list)
@@ -539,7 +464,6 @@ class ArticleSaveView(TemplateView):
     def get_context_data(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
 
 
 class ArticleView(TemplateView):
@@ -605,10 +529,8 @@ def my_activity(request):
     tags = request.GET.get('tag', False)
     page = int(request.GET.get('page', 1))
     activity_type = request.GET.get('type', 'article')
-    print("activity_type", activity_type)
-
     account = Account.objects.get(user=request.user.id)
-
+    print("activity_type", activity_type)
 
     if activity_type == "scrap":
         target_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
@@ -653,16 +575,10 @@ def my_activity(request):
     context['type'] = 'mix'
 
     result = {}
-    # result['html'] = render_to_string('community/activity-tab.html', context, request=request)
     result['html'] = render_to_string('community/activity-tab.html', context, request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
 
     return JsonResponse(result)
-
-
-    #  JsonResponse(result)
-
-    # return render(request, 'community/activity.html', context)
 
 # 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
 def get_article_board_data(article_list):
