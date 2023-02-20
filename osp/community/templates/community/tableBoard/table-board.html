@@ -7,10 +7,6 @@
     <div id="community-container" class="row">
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
-            <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board_name}}_{{board.id}}">
-                <span id="board-title">{{ board_name }}</span>
-                <a href="{% url 'community:article-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
-            </div>
             {% if need_login %}
             <div class="m-2">
                 로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
@@ -20,6 +16,17 @@
                 팀 멤버만 열람할 수 있습니다. <a href="/accounts/login/">팀 모집 게시판 확인하기</a>
             </div>
             {% else %}
+            <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board_name}}_{{board.id}}">
+                <span id="board-title">{{ board_name }}</span>
+                <div>
+                    {% if board.board_type == 'Team' and team_admin %}
+                    <a href="{% url 'community:article-notice-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">공지쓰기<i class="bi-pencil"></i></a>
+                    {% elif board.board_type != 'Team' and request.user.is_superuser %}
+                    <a href="{% url 'community:article-notice-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">공지쓰기<i class="bi-pencil"></i></a>
+                    {% endif %}
+                    <a href="{% url 'community:article-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
+                </div>
+            </div>
                 {# 게시판 헤더 #}
                 {% if board.board_type == 'Recruit' %}
                     {% include "community/board/article-carousel.html" %}
