@@ -1029,12 +1029,10 @@
 
 #article-view-reply{
     display: inline-block;
-
-
 }
 
 .notice-line {
-    background-color: var(--bootstrap-light);
+    background-color: var(--notice-row);
     border-color: var(--main-border-color);
 }
 
@@ -1044,11 +1042,8 @@
 }
 
 #period-setting{
-
     padding: 10px 20px 10px 20px;
-
     color: white;
-
     border-radius: 0.625rem;
     background-color: #002743;
 }

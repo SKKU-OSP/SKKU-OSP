@@ -40,9 +40,15 @@
             {#제목#}
             <td>
                 <div class="d-flex text-start">
+                    {% if article.board_type == 'Notice' %}
                     <a href="{% url 'community:article-view' article.id %}">
-                        <strong>&lt;공지사항&gt;</strong> {{article.title}}
+                        <strong>&lt;전체공지&gt;</strong> {{article.title}}
                     </a>
+                    {% else %}
+                    <a href="{% url 'community:article-view' article.id %}">
+                        <strong>&lt;공지&gt;</strong> {{article.title}}
+                    </a>
+                    {% endif %}
                 </div>
             </td>
             {#태그#}

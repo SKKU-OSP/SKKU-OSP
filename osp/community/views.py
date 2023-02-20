@@ -41,7 +41,6 @@ class CommunityMainView(TemplateView):
 
         return render(request, 'community/main.html', {'boards': board_list})
 
-
 class TableBoardView(TemplateView):
 
     def get(self, request, *args, **kwargs):
@@ -115,7 +114,6 @@ class TableBoardView(TemplateView):
             context['team_tags'] = team_tags_list
             context['team_members'] = team_members
 
-        
         if board.board_type == 'Recruit':
 
             active_article = Article.objects.filter(board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -434,7 +432,6 @@ def article_list(request, board_name, board_id):
 
 def get_notices(board_id = None):
     notice_board = Board.objects.get(board_type="Notice")
-    # OR condition
     global_notices = Article.objects.filter(board=notice_board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
     local_notices = Article.objects.filter(board_id=board_id, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
     notices = global_notices | local_notices
@@ -450,9 +447,56 @@ class ArticleSaveView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         board_name = context["board_name"]
         board_id = context["board_id"]
+        context["url"] = f"/community/board/{board_name}/{board_id}/"
+
         if request.user.is_anonymous:
             context["alert"] = "로그인이 필요한 서비스입니다."
-            context["url"] = f"/community/board/{board_name}/{board_id}/"
+            return render(request, "community/redirect.html", context)
+        # 쿼리스트링의 값을 가져온다.
+        if 'team_id' in request.GET:
+            team_id = request.GET['team_id']
+            members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
+            
+            if request.user.id in members:
+                context['team'] = Team.objects.get(id=team_id)
+        context['type'] = 'register'
+        context['type_kr'] = '등록'
+        context['anonymous_check'] = 'checked'
+        board_name = kwargs.get('board_name')
+        board_id = kwargs.get('board_id')
+        try:
+            print("board_id", board_id)
+
+            context['board'] = Board.objects.get(id=board_id)
+            team_id = context['board'].team_id
+            print("team", team_id)
+            if team_id is not None:
+                members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
+                print("len m", len(members))
+                if request.user.id in members:
+                    context['team'] = Team.objects.get(id=team_id)
+                else:
+                    context["alert"] = "팀에 가입해야 이용가능한 서비스입니다."
+                    return render(request, "community/redirect.html", context)
+        except:
+            print("Exception")
+            return redirect('community:main')
+
+        return render(request, 'community/article/article.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class ArticleNoticeSaveView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+        board_name = context["board_name"]
+        board_id = context["board_id"]
+        context["url"] = f"/community/board/{board_name}/{board_id}/"
+        if request.user.is_anonymous:
+            context["alert"] = "로그인이 필요한 서비스입니다."
             return render(request, "community/redirect.html", context)
         # 쿼리스트링의 값을 가져온다.
         if 'team_id' in request.GET:
@@ -468,6 +512,21 @@ class ArticleSaveView(TemplateView):
         board_id = kwargs.get('board_id')
         try:
             context['board'] = Board.objects.get(id=board_id)
+            team_id = context['board'].team_id
+            if team_id is not None:
+                admin_members = TeamMember.objects.filter(team_id=team_id, is_admin=True).values_list("member_id", flat=True)
+                # 팀게시판이면서 팀의 관리자인 경우만 글쓰기 가능
+                if request.user.id in admin_members:
+                    context['team'] = Team.objects.get(id=team_id)
+                else:
+                    # 팀 관리자가 아닌 경우
+                    context["alert"] = "팀 관리자만 이용가능한 서비스입니다."
+                    return render(request, "community/redirect.html", context)
+            else:
+                # 일반 게시판의 공지쓰기에 접근하는 경우
+                if not request.user.is_superuser:
+                    context["alert"] = "관리자만 이용가능한 서비스입니다."
+                    return render(request, "community/redirect.html", context)
         except:
             return redirect('community:main')
 
