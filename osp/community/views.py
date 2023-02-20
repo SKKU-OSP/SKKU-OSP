@@ -532,7 +532,7 @@ class ArticleSaveView(TemplateView):
         try:
             context['board'] = Board.objects.get(id=board_id)
         except:
-            return redirect('community:Community-Main')
+            return redirect('community:main')
 
         return render(request, 'community/article/article.html', context)
 
@@ -552,7 +552,7 @@ class ArticleView(TemplateView):
         try:
             context['article'] = Article.objects.get(id=article_id)
             context['tags'] = ArticleTag.objects.filter(article__id=article_id)
-            context['board'] = Board.objects.get(id=context['article'].board_id_id)
+            context['board'] = Board.objects.get(id=context['article'].board_id)
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
             if context['board'].board_type == 'Recruit':
                 teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
@@ -633,12 +633,12 @@ def my_activity(request):
             target_list = target_list.filter(Q(body__icontains=keyword))
         comment_board = {}
         for comment in target_list:
-            if comment.article.board_id_id not in comment_board:
-                board_id = comment.article.board_id_id
+            if comment.article.board_id not in comment_board:
+                board_id = comment.article.board_id
                 board_q = Board.objects.get(id=board_id)
                 comment_board[board_id] = board_q.name
         for comment in target_list:
-            comment.board_name = comment_board[comment.article.board_id_id]
+            comment.board_name = comment_board[comment.article.board_id]
 
     PAGE_SIZE = 10
     total_len = len(target_list)
@@ -668,12 +668,12 @@ def my_activity(request):
 def get_article_board_data(article_list):
     article_board = {}
     for article in article_list:
-        if article.board_id_id not in article_board:
-            board_q = Board.objects.get(id=article.board_id_id)
-            article_board[article.board_id_id] = (board_q.name, board_q.board_type)
+        if article.board_id not in article_board:
+            board_q = Board.objects.get(id=article.board_id)
+            article_board[article.board_id] = (board_q.name, board_q.board_type)
 
     for article in article_list:
-        article.board_name, article.board_type = article_board[article.board_id_id]
+        article.board_name, article.board_type = article_board[article.board_id]
 
     return article_list
 
