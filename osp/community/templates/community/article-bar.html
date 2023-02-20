@@ -1,7 +1,7 @@
 {% load community_tag %}
 
 {% for article in article_list %}
-{% if comment_visible or bartype == 'compact' %}
+{% if comment_visible %}
 <div class="article-bar">
 {% else %}
 <div class="article-bar background-shadow">

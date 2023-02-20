@@ -16,7 +16,6 @@ def article_create(request):
     message = ''
 
     status = 'success'
-    board_name = request.POST.get('board_name')
     board_id = request.POST.get('board_id')
     board = Board.objects.get(id=board_id)
 
@@ -27,7 +26,7 @@ def article_create(request):
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
                 pub_date=datetime.now(), mod_date=datetime.now(),
                 anonymous_writer=request.POST.get('is_anonymous') == 'true',
-                board_id_id=board.id,
+                board_id=board.id,
                 writer=account)
             if request.POST.get('period_start', False):
                 article.period_start = request.POST.get('period_start')[:-1]
