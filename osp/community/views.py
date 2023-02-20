@@ -499,7 +499,7 @@ class ArticleView(TemplateView):
         context['article'] = Article.objects.get(id=article_id)
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
 
-        context['board'] = Board.objects.get(id=context['article'].board_id.id)
+        context['board'] = Board.objects.get(id=context['article'].board.id)
         if context['board'].board_type == 'Recruit':
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
