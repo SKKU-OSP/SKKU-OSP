@@ -25,7 +25,7 @@ class CommunityMainView(TemplateView):
         for board in boards:
 
             # 최신 게시물
-            article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
             board.article_list = article_list[:min(8, len(article_list))]
             board.article_list = get_article_metas(board.article_list)
             
@@ -118,7 +118,7 @@ class TableBoardView(TemplateView):
         
         if board.board_type == 'Recruit':
 
-            active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            active_article = Article.objects.filter(board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             active_article = get_article_board_data(active_article)
             for article in active_article:
                 article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
@@ -243,7 +243,7 @@ def search_article(request, board_name, board_id):
     total_article_list = Article.objects.none()
     for board in boardList:
         # Filter Board
-        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         article_list = filter_keyword_tag(article_list, keyword, tags)
         total_article_list = total_article_list.union(article_list)
     
@@ -387,12 +387,12 @@ def article_list(request, board_name, board_id):
     else:
         PAGE_SIZE = 10
     context = {'board': board, 'type': "board"}
-    
+
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    article_list = Article.objects.filter(board=board, is_notice=False).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
     if keyword != '':
@@ -412,7 +412,7 @@ def article_list(request, board_name, board_id):
     article_list = article_list.order_by(*sort_field)
     # Slice to Page
     article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-    
+
     # Get Article Metadata
     article_list = get_article_board_data(article_list)
     article_list = get_article_metas(article_list)
@@ -424,13 +424,25 @@ def article_list(request, board_name, board_id):
                 article.team = tr.team
             else:
                 article.team = None
-
+    context['notices'] = get_notices(board_id=board_id)
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-table.html', context,request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
 
     return JsonResponse(result)
+
+def get_notices(board_id = None):
+    notice_board = Board.objects.get(board_type="Notice")
+    # OR condition
+    global_notices = Article.objects.filter(board=notice_board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    local_notices = Article.objects.filter(board_id=board_id, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    notices = global_notices | local_notices
+
+    notices = get_article_board_data(notices)
+    notices = get_article_metas(notices)
+    # 쿼리셋 합쳐서 리턴
+    return notices
 
 
 class ArticleSaveView(TemplateView):

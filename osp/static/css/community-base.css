@@ -156,6 +156,10 @@
     box-shadow: 0 0.125rem 0.125rem rgba(0, 0, 0, 0.25);
 }
 
+.empty {
+    white-space: nowrap;
+}
+
 .article-bar.empty {
     display: flex;
     background-color: var(--main-white);
@@ -1027,6 +1031,11 @@
     display: inline-block;
 
 
+}
+
+.notice-line {
+    background-color: var(--bootstrap-light);
+    border-color: var(--main-border-color);
 }
 
 #comment-none{
