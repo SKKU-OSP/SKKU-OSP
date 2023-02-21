@@ -72,10 +72,8 @@
     </div>
     {% empty %}
     {% if request.user.is_authenticated %}
-    <div id="comment-none">
-        <p>
-            댓글을 등록해주세요.
-        </p>
+    <div class="comment-none">
+        등록된 댓글이 없습니다.
     </div>
     {% endif %}
     {% endfor %}
@@ -86,7 +84,7 @@
     {% csrf_token %}
     <div id="comment-input">
         <div id="comment-annonymous">
-            <div id="comment-writer-display" class="annonymous" value="{{user.username}}">익명</div>
+            <label for="comment-is-anonymous">익명</label>
             <input type="checkbox" id="comment-is-anonymous" checked>
         </div>
         <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>

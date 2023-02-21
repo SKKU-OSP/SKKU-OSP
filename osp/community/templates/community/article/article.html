@@ -99,16 +99,6 @@
                 });
             });
         }
-        $('#comment-is-anonymous').click(function() {
-            if($(this).is(":checked")){
-                $('#comment-writer-display').html('익명');
-                $('#comment-writer-display').addClass('annonymous');
-            }
-            else{
-                $('#comment-writer-display').html($('#comment-writer-display').attr('value'));
-                $('#comment-writer-display').removeClass('annonymous');
-            }
-        });
     });
     function setToDateEnd(){
         $('#PeriodPickerEndInput').val(new Date().toLocaleString("en-US"));
