@@ -14,7 +14,6 @@ from datetime import datetime
 @csrf_exempt
 def article_create(request):
     message = ''
-
     status = 'success'
     board_id = request.POST.get('board_id')
     board_id = int(board_id) if board_id.isdigit() else 0
@@ -27,6 +26,7 @@ def article_create(request):
             article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
                 pub_date=datetime.now(), mod_date=datetime.now(),
                 anonymous_writer=request.POST.get('is_anonymous') == 'true',
+                is_notice=request.POST.get('is_notice') == 'true',
                 board_id=board.id,
                 writer=account)
             if request.POST.get('period_start', False):
@@ -67,7 +67,8 @@ def article_update(request):
                     title=request.POST.get('title'), 
                     body=request.POST.get('body'), 
                     mod_date=datetime.now(), 
-                    anonymous_writer=request.POST.get('is_anonymous') == 'true'
+                    anonymous_writer=request.POST.get('is_anonymous') == 'true',
+                    is_notice=request.POST.get('is_notice') == 'true'
                 )
                 if request.POST.get('period_start', False):
                     target_article.update(
