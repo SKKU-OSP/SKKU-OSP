@@ -31,99 +31,172 @@
         </tr>
         </thead>
         <tbody id="tbody">
-        {% for article in article_list %}
-            <tr>
-                {% if type == 'mix' %}
-                {#게시판#}
-                <td>{{article.board_name}}</td>
+        {% for article in notices %}
+        <tr class="notice-line">
+            {% if type == 'mix' %}
+            {#게시판#}
+            <td>{{article.board_name}}</td>
+            {% endif %}
+            {#제목#}
+            <td>
+                <div class="d-flex text-start">
+                    {% if article.board_type == 'Notice' %}
+                    <a href="{% url 'community:article-view' article.id %}">
+                        <strong>&lt;전체공지&gt;</strong> {{article.title}}
+                    </a>
+                    {% else %}
+                    <a href="{% url 'community:article-view' article.id %}">
+                        <strong>&lt;공지&gt;</strong> {{article.title}}
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+            {#태그#}
+            <td>
+                <div class="article-tag">
+                    {% for tag in article.tags %}
+                    <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
+                    {% endfor %}
+                </div>
+            </td>
+            {#작성자#}
+            {% if request.user.is_anonymous %}
+            <td>사용자</td>
+            {% elif article.anonymous_writer %}
+            <td>익명</td>
+            {% else %}
+            <td class="dropdown writer-dropdown">
+                {% if article.writer_name is null %}
+                    탈퇴한 이용자
+                {% else %}
+                <div class="d-flex justify-content-center">
+                    <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{article.writer_name}}
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% if not article.is_superuser %}
+                        <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
+                    </ul>
+                </div>
                 {% endif %}
-                {#제목#}
-                <td>
-                    <div class="d-flex text-start">
-                    {% if article.board_type == 'Recruit' %}
-                        {% is_period_end article.period_start as is_start %}
-                        {% is_period_end article.period_end as is_end %}
-                        {% if article.team %}
-                            {% if not is_start %}
-                            <span class="badge tag-recruit tag-recruit-end">
-                                <span class="tag-text">모집 전</span>
-                            </span>
-                            {% elif not is_end %}
-                            <span class="badge tag-recruit tag-recruit-ing">
-                                <span class="tag-text">모집 중</span>
-                            </span>
-                            {% else %}
-                            <span class="badge tag-recruit tag-recruit-end">
-                                <span class="tag-text">모집 마감</span>
-                            </span>
-                            {% endif %}
+            </td>
+            {% endif %}
+            {#작성일#}
+            <td>
+                {{article.pub_date|time_before}}
+            </td>
+            {% if type != 'mix' %}
+            {#스크랩#}
+            <td class="article-meta-stat">
+                <span>{{article.scrap_cnt}}</span>
+            </td>
+            {#댓글#}
+            <td class="article-meta-stat">
+                <a href="{% url 'community:article-view' article.id %}#comment-content">
+                    <span>{{article.comment_cnt}}</span>
+                </a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+        {% for article in article_list %}
+        <tr>
+            {% if type == 'mix' %}
+            {#게시판#}
+            <td>{{article.board_name}}</td>
+            {% endif %}
+            {#제목#}
+            <td>
+                <div class="d-flex text-start">
+                {% if article.board_type == 'Recruit' %}
+                    {% is_period_end article.period_start as is_start %}
+                    {% is_period_end article.period_end as is_end %}
+                    {% if article.team %}
+                        {% if not is_start %}
+                        <span class="badge tag-recruit tag-recruit-end">
+                            <span class="tag-text">모집 전</span>
+                        </span>
+                        {% elif not is_end %}
+                        <span class="badge tag-recruit tag-recruit-ing">
+                            <span class="tag-text">모집 중</span>
+                        </span>
+                        {% else %}
+                        <span class="badge tag-recruit tag-recruit-end">
+                            <span class="tag-text">모집 마감</span>
+                        </span>
                         {% endif %}
                     {% endif %}
-                        <a href="{% url 'community:article-view' article.id %}">
-                            {% if article.board_type == 'Recruit' %}
-                                {% if article.team %}
-                                [{{ article.team.name }}]
-                                {% else %}
-                                [삭제된 팀]
-                                {% endif %}
-                            {% endif %}
-                            {{article.title}}
-                        </a>
-                    </div>
-                </td>
-                {#태그#}
-                <td>
-                    <div class="article-tag">
-                        {% for tag in article.tags %}
-                        <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
-                        {% endfor %}
-                    </div>
-                </td>
-                {#작성자#}
-                {% if request.user.is_anonymous %}
-                <td>사용자</td>
-                {% elif article.anonymous_writer %}
-                <td>익명</td>
-                {% else %}
-                <td class="dropdown writer-dropdown">
-                    {% if article.writer_name is null %}
-                        탈퇴한 이용자
-                    {% else %}
-                    <div class="d-flex justify-content-center">
-                        <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{article.writer_name}}
-                        </button>
-                        <ul class="dropdown-menu">
-                            {% if not article.is_superuser %}
-                            <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
-                        </ul>
-                    </div>
-                    {% endif %}
-                </td>
                 {% endif %}
-                {#작성일#}
-                <td>
-                    {{article.pub_date|time_before}}
-                </td>
-                {% if type != 'mix' %}
-                {#스크랩#}
-                <td class="article-meta-stat">
-                    <span>{{article.scrap_cnt}}</span>
-                </td>
-                {#댓글#}
-                <td class="article-meta-stat">
-                    <a href="{% url 'community:article-view' article.id %}#comment-content">
-                        <span>{{article.comment_cnt}}</span>
+                    <a href="{% url 'community:article-view' article.id %}">
+                        {% if article.board_type == 'Recruit' %}
+                            {% if article.team %}
+                            [{{ article.team.name }}]
+                            {% else %}
+                            [삭제된 팀]
+                            {% endif %}
+                        {% endif %}
+                        {{article.title}}
                     </a>
-                </td>
-                {% endif %}
-            </tr>
-            {%empty%}
-            <td class="empty">
-                등록된 글이 없습니다.
+                </div>
             </td>
+            {#태그#}
+            <td>
+                <div class="article-tag">
+                    {% for tag in article.tags %}
+                    <span class="badge bg-tag-{{tag.type}} me-1">{{tag.name}}</span>
+                    {% endfor %}
+                </div>
+            </td>
+            {#작성자#}
+            {% if request.user.is_anonymous %}
+            <td>사용자</td>
+            {% elif article.anonymous_writer %}
+            <td>익명</td>
+            {% else %}
+            <td class="dropdown writer-dropdown">
+                {% if article.writer_name is null %}
+                    탈퇴한 이용자
+                {% else %}
+                <div class="d-flex justify-content-center">
+                    <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{article.writer_name}}
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% if not article.is_superuser %}
+                        <li><a class="dropdown-item" href="/user/{{article.writer_name}}">프로필</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </td>
+            {% endif %}
+            {#작성일#}
+            <td>
+                {{article.pub_date|time_before}}
+            </td>
+            {% if type != 'mix' %}
+            {#스크랩#}
+            <td class="article-meta-stat">
+                <span>{{article.scrap_cnt}}</span>
+            </td>
+            {#댓글#}
+            <td class="article-meta-stat">
+                <a href="{% url 'community:article-view' article.id %}#comment-content">
+                    <span>{{article.comment_cnt}}</span>
+                </a>
+            </td>
+            {% endif %}
+        </tr>
+        {%empty%}
+        <td class="empty">
+            <div class="d-flex text-start">
+                등록된 글이 없습니다.
+            </div>
+        </td>
         {% endfor %}
         </tbody>
     </table>
