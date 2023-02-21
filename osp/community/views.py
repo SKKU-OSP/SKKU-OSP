@@ -1,5 +1,6 @@
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q, Count
@@ -72,8 +73,10 @@ class TableBoardView(TemplateView):
             context['is_open'] = 0
         
         # 게시판 별로 다른 데이터를 전달한다.
+        if board.board_type == 'Notice':
+            return redirect(reverse("community:notice-board"))
         if board.board_type == 'User':
-            return redirect("/community/recommender/user/")
+            return redirect(reverse("community:user-board"))
 
         if board.board_type == 'Team':
             if not request.user.is_authenticated:
@@ -154,7 +157,14 @@ class NoticeView(TemplateView):
         except Board.DoesNotExist:
             raise Http404("게시판을 찾을 수 없습니다.")
         
-        print("context", context)
+        context.update(get_auth(board.id, request.user))
+
+        if 'alert' in context:
+            return render(request, "community/redirect.html", context)
+        if not context['is_auth_notice']:
+            context['alert'] ="접근권한이 없습니다."
+            context['url'] = reverse("community:main")
+            return render(request, "community/redirect.html", context)
         
         return render(request, 'community/tableBoard/table-board.html', context)
 
@@ -530,6 +540,11 @@ class ArticleNoticeSaveView(TemplateView):
         context.update(get_auth(board.id, request.user))
         if 'alert' in context:
             return render(request, "community/redirect.html", context)
+        if not context['is_auth_notice']:
+            context['alert'] ="접근권한이 없습니다."
+            context['url'] = reverse("community:main")
+            return render(request, "community/redirect.html", context)
+
 
         return render(request, 'community/article/article.html', context)
 
@@ -730,7 +745,7 @@ def filter_keyword_tag(article_list, keyword, tags):
     return article_list
 
 def get_auth(board_id, user):
-    context = {}
+    context = {"is_auth_notice": False}
     try:
         print("board_id", board_id)
         context['board'] = Board.objects.get(id=board_id)
