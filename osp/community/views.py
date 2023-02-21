@@ -1,5 +1,6 @@
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q, Count
@@ -11,7 +12,6 @@ from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
 from team.recommend import get_team_recommendation_list
 
-import hashlib
 import math, json, time
 from django.views.generic import TemplateView
 from datetime import datetime
@@ -21,33 +21,13 @@ from datetime import datetime
 class CommunityMainView(TemplateView):
     def get(self, request, *args, **kwargs):
         board_list = []
-        team_board_query = Q()
-        if request.user.is_authenticated:
-            account = Account.objects.get(user=request.user)
-            team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
-            team_board_query = Q(name__in=team_list)
         boards = Board.objects.exclude(board_type='User').exclude(board_type='Team')
 
         for board in boards:
-        # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
-            # 주간 Hot 게시물
-            # week_ago = datetime.now() - timedelta(days=7)
-            # article_list = Article.objects.filter(board_id=board,
-            #                                       pub_date__range=[
-            #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
-            #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
-            #                                       ]
-            #                                       )
-            # if len(article_list) > 0:
-            #     article_list = article_list.order_by('-view_cnt')
-            #     board.article_list = article_list[:min(3, len(article_list))]
-            # else:
-            #     board.article_list = []
 
             # 최신 게시물
-            article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
             board.article_list = article_list[:min(8, len(article_list))]
-            
             board.article_list = get_article_metas(board.article_list)
             
             if board.board_type == 'Recruit':
@@ -58,59 +38,9 @@ class CommunityMainView(TemplateView):
                     else:
                         article.team = None
 
-
-            board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
             board_list.append(board)
 
         return render(request, 'community/main.html', {'boards': board_list})
-
-
-
-
-def main(request):
-    board_list = []
-    team_board_query = Q()
-    if request.user.is_authenticated:
-        account = Account.objects.get(user=request.user.id)
-        team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
-        team_board_query = Q(name__in=team_list)
-    boards = Board.objects.filter(team_board_query | Q(team_id=None)).exclude(board_type='User')
-
-    for board in boards:
-    # for board in Board.objects.filter(team_board_query | ~Q(board_type='Team')):
-        # 주간 Hot 게시물
-        # week_ago = datetime.now() - timedelta(days=7)
-        # article_list = Article.objects.filter(board_id=board,
-        #                                       pub_date__range=[
-        #                                           week_ago.strftime('%Y-%m-%d %H:%M:%S-09:00'),
-        #                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S-09:00')
-        #                                       ]
-        #                                       )
-        # if len(article_list) > 0:
-        #     article_list = article_list.order_by('-view_cnt')
-        #     board.article_list = article_list[:min(3, len(article_list))]
-        # else:
-        #     board.article_list = []
-
-        # 최신 게시물
-        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-        board.article_list = article_list[:min(3, len(article_list))]
-        
-        board.article_list = get_article_metas(board.article_list)
-        
-        if board.board_type == 'Recruit':
-            for article in board.article_list:
-                tr = TeamRecruitArticle.objects.filter(article=article).first()
-                if tr:
-                    article.team = tr.team
-                else:
-                    article.team = None
-
-
-        board.board_color = hashlib.md5(board.name.encode()).hexdigest()[:6]
-        board_list.append(board)
-    return render(request, 'community/main.html', {'boards': board_list})
-
 
 class TableBoardView(TemplateView):
 
@@ -143,8 +73,10 @@ class TableBoardView(TemplateView):
             context['is_open'] = 0
         
         # 게시판 별로 다른 데이터를 전달한다.
+        if board.board_type == 'Notice':
+            return redirect(reverse("community:notice-board"))
         if board.board_type == 'User':
-            return redirect("/community/recommender/user/")
+            return redirect(reverse("community:user-board"))
 
         if board.board_type == 'Team':
             if not request.user.is_authenticated:
@@ -185,10 +117,9 @@ class TableBoardView(TemplateView):
             context['team_tags'] = team_tags_list
             context['team_members'] = team_members
 
-        
         if board.board_type == 'Recruit':
 
-            active_article = Article.objects.filter(board_id=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            active_article = Article.objects.filter(board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             active_article = get_article_board_data(active_article)
             for article in active_article:
                 article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
@@ -208,7 +139,40 @@ class TableBoardView(TemplateView):
     def get_context_data(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class NoticeView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+
+        context["need_login"] = False
+        context["need_member"] = False
+        try:
+            board = Board.objects.get(board_type="Notice")
+            context["board"] = board
+            context["board_id"] = board.id
+            context["board_name"] = board.name
+
+        except Board.DoesNotExist:
+            raise Http404("게시판을 찾을 수 없습니다.")
         
+        context.update(get_auth(board.id, request.user))
+
+        if 'alert' in context:
+            return render(request, "community/redirect.html", context)
+        if not context['is_auth_notice']:
+            context['alert'] ="접근권한이 없습니다."
+            context['url'] = reverse("community:main")
+            return render(request, "community/redirect.html", context)
+        
+        return render(request, 'community/tableBoard/table-board.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
 class SearchView(TemplateView):
     # page, keyword, tag, team_li
     def get(self, request, *args, **kwargs):
@@ -313,7 +277,7 @@ def search_article(request, board_name, board_id):
     total_article_list = Article.objects.none()
     for board in boardList:
         # Filter Board
-        article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         article_list = filter_keyword_tag(article_list, keyword, tags)
         total_article_list = total_article_list.union(article_list)
     
@@ -417,7 +381,10 @@ def account_cards(request):
     print(team_list)
 
     # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
-    team_member_dict = get_team_recommendation_list(team_list)
+    try:
+        team_member_dict = get_team_recommendation_list(team_list)
+    except:
+        team_member_dict = {}
     for team_obj in team_list:
         if team_obj.id in team_member_dict:
             member_li = team_member_dict[team_obj.id]
@@ -456,16 +423,13 @@ def article_list(request, board_name, board_id):
         PAGE_SIZE = 5
     else:
         PAGE_SIZE = 10
-    context = {}
-    context['board'] = board
-    context['bartype'] = 'normal'
-    context['type'] = "board"
-    
+    context = {'board': board, 'type': "board"}
+
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     
     page = int(request.GET.get('page', 1))
     # Filter Board
-    article_list = Article.objects.filter(board_id=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    article_list = Article.objects.filter(board=board, is_notice=False).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
     if keyword != '':
@@ -486,8 +450,6 @@ def article_list(request, board_name, board_id):
     # Slice to Page
     article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
 
-    # print(article_list)
-    
     # Get Article Metadata
     article_list = get_article_board_data(article_list)
     article_list = get_article_metas(article_list)
@@ -499,7 +461,7 @@ def article_list(request, board_name, board_id):
                 article.team = tr.team
             else:
                 article.team = None
-
+    context['notices'] = get_notices(board_id=board_id)
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string('community/article-table.html', context,request=request)
@@ -507,15 +469,63 @@ def article_list(request, board_name, board_id):
 
     return JsonResponse(result)
 
+def get_notices(board_id = None):
+    notice_board = Board.objects.get(board_type="Notice")
+    global_notices = Article.objects.filter(board=notice_board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    local_notices = Article.objects.filter(board_id=board_id, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    notices = global_notices | local_notices
+
+    notices = get_article_board_data(notices)
+    notices = get_article_metas(notices)
+    # 쿼리셋 합쳐서 리턴
+    return notices
+
 
 class ArticleSaveView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         board_name = context["board_name"]
         board_id = context["board_id"]
+        context["url"] = f"/community/board/{board_name}/{board_id}/"
+
         if request.user.is_anonymous:
             context["alert"] = "로그인이 필요한 서비스입니다."
-            context["url"] = f"/community/board/{board_name}/{board_id}/"
+            return render(request, "community/redirect.html", context)
+        # 쿼리스트링의 값을 가져온다.
+        if 'team_id' in request.GET:
+            team_id = request.GET['team_id']
+            members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
+            
+            if request.user.id in members:
+                context['team'] = Team.objects.get(id=team_id)
+        context['type'] = 'register'
+        context['type_kr'] = '등록'
+        context['anonymous_check'] = 'checked'
+        context['notice_check'] = ''
+        context['is_auth_notice'] = False
+        board_id = kwargs.get('board_id')
+
+        context.update(get_auth(board_id, request.user))
+        if 'alert' in context:
+            return render(request, "community/redirect.html", context)
+        
+        return render(request, 'community/article/article.html', context)
+
+    def get_context_data(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class ArticleNoticeSaveView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request, *args, **kwargs)
+        board = Board.objects.get(board_type="Notice")
+        context['board'] = board
+        context["board_name"] = board.name
+        context["board_id"] = board.id
+        context["url"] = "/community/board/notice/"
+        if request.user.is_anonymous:
+            context["alert"] = "로그인이 필요한 서비스입니다."
             return render(request, "community/redirect.html", context)
         # 쿼리스트링의 값을 가져온다.
         if 'team_id' in request.GET:
@@ -523,23 +533,24 @@ class ArticleSaveView(TemplateView):
             members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
             if request.user.id in members:
                 context['team'] = Team.objects.get(id=team_id)
-
         context['type'] = 'register'
         context['type_kr'] = '등록'
-        context['anonymous_check'] = 'checked'
-        board_name = kwargs.get('board_name')
-        board_id = kwargs.get('board_id')
-        try:
-            context['board'] = Board.objects.get(id=board_id)
-        except:
-            return redirect('community:main')
+        context['notice_check'] = 'checked'
+        context['is_auth_notice'] = False
+        context.update(get_auth(board.id, request.user))
+        if 'alert' in context:
+            return render(request, "community/redirect.html", context)
+        if not context['is_auth_notice']:
+            context['alert'] ="접근권한이 없습니다."
+            context['url'] = reverse("community:main")
+            return render(request, "community/redirect.html", context)
+
 
         return render(request, 'community/article/article.html', context)
 
     def get_context_data(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
 
 
 class ArticleView(TemplateView):
@@ -575,13 +586,14 @@ class ArticleView(TemplateView):
         context['article'] = Article.objects.get(id=article_id)
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
 
-        context['board'] = Board.objects.get(id=context['article'].board_id.id)
+        context['board'] = Board.objects.get(id=context['article'].board.id)
         if context['board'].board_type == 'Recruit':
             teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
             if teamrecruit:
                 context['article'].team = teamrecruit.team
         context['anonymous_check'] = "checked" if context['article'].anonymous_writer else ""
-
+        context['notice_check'] = "checked" if context['article'].is_notice else ""
+        context.update(get_auth(context['board'].id, request.user))
         result = {}
         result['html'] = render_to_string('community/article/includes/content-edit.html', context, request=request)
         result['tags'] = list(context['tags'].values_list('tag__name', flat=True))
@@ -605,10 +617,8 @@ def my_activity(request):
     tags = request.GET.get('tag', False)
     page = int(request.GET.get('page', 1))
     activity_type = request.GET.get('type', 'article')
-    print("activity_type", activity_type)
-
     account = Account.objects.get(user=request.user.id)
-
+    print("activity_type", activity_type)
 
     if activity_type == "scrap":
         target_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
@@ -653,16 +663,10 @@ def my_activity(request):
     context['type'] = 'mix'
 
     result = {}
-    # result['html'] = render_to_string('community/activity-tab.html', context, request=request)
     result['html'] = render_to_string('community/activity-tab.html', context, request=request)
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
 
     return JsonResponse(result)
-
-
-    #  JsonResponse(result)
-
-    # return render(request, 'community/activity.html', context)
 
 # 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
 def get_article_board_data(article_list):
@@ -739,6 +743,34 @@ def filter_keyword_tag(article_list, keyword, tags):
         article_list = article_list.filter(id__in=article_with_tag)
 
     return article_list
+
+def get_auth(board_id, user):
+    context = {"is_auth_notice": False}
+    try:
+        print("board_id", board_id)
+        context['board'] = Board.objects.get(id=board_id)
+        team_id = context['board'].team_id
+        print("team", team_id)
+        if team_id is not None:
+            members = TeamMember.objects.filter(team_id=team_id)
+            admin_members = members.filter(is_admin=True).values_list("member_id", flat=True)
+            members = members.values_list("member_id", flat=True)
+            print("len m", len(members))
+            if user.id in admin_members:
+                context['team'] = Team.objects.get(id=team_id)
+                context['is_auth_notice'] = True
+            elif user.id in members:
+                context['team'] = Team.objects.get(id=team_id)
+            else:
+                context["alert"] = "팀에 가입해야 이용가능한 서비스입니다."
+        else:
+            if user.is_superuser:
+                context['is_auth_notice'] = True
+    except:
+        print("Exception")
+        context["alert"] = "오류가 발생했습니다."
+    
+    return context
 
 class redirectView(TemplateView):
     def get(self, request, *args, **kwargs):

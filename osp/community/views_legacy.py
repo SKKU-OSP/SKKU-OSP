@@ -51,7 +51,7 @@ def board(request, board_name, board_id):
 
     if board.board_type == 'Recruit':
 
-        active_article = Article.objects.filter(board_id=board)
+        active_article = Article.objects.filter(board=board)
         active_article = active_article.filter(period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         for article in active_article:
             article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
