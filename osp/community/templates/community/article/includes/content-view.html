@@ -4,21 +4,25 @@
 {% load markdown_filter %}
 {% load static %}
 
-<!--article content-->
+{# article의 내용 영역 #}
 <div id="article-wrapper">
     <div id="article-title-wrapper" class="d-flex flex-row justify-content-between">
         <div id="article-title">
             {% if board.board_type == 'Recruit' %}
-                [{{ article.team.name |default:"팀이 더이상 존재하지 않습니다." }}]
+                [{{ article.team.name |default:"팀이 더이상 존재하지 않습니다." }}] 
             {% endif %}
-            <h4>{{ article.title }}</h4>
+            {{ article.title }}
         </div>
         <div id="article-metadata" >
-
             <div class="d-flex flex-column justify-content-center">
                 {% if user == article.writer.user %}
                 <span class="hover-opacity" onclick="edit();">수정</span>
-                <span class="hover-opacity" onclick="deleteArticle();">삭제</span>
+                <form>
+                    <input type="hidden" id="board-name" value="{{board.name}}">
+                    <input type="hidden" id="board-id" value="{{board.id}}">
+                    <input type="hidden" id="article-id" value="{{article.id}}">
+                    <span id="btn-article-delete" class="hover-opacity">삭제</span>
+                </form>
                 {% elif request.user.is_anonymous %}
                     사용자
                 {% elif not article.anonymous_writer and article.writer.user.username is not null%}
