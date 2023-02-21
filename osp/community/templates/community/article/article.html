@@ -12,26 +12,19 @@
     <div id="community-container" class="row">
         {% include "community/sidebar.html" %}
         <div class="col-md-9">
-            <div id="board-title-bar" class="d-flex justify-content-start">
-                <div id="board-title">
-                    <a href="/community/board/{{board.name}}/{{board.id}}">
-                        {{ board.name }} 게시판
-                    </a>
-                </div>
-            </div>
-            <!-- type은 세가지 값이 가능: view / register / edit -->
             <div id="article-content">
-                {% if type == 'view' %}
-                <!-- article view -->
+            {# type은 세가지 값이 가능: view / register / edit #}
+            {% if type == 'view' %}
+                {# article view #}
                 {% include 'community/article/includes/content-view.html' %}
-                {% else %}
-                <!-- article add or edit -->
+            {% else %}
+                {#  article add or edit #}
                 {% include 'community/article/includes/content-edit.html' %}
-                {% endif %}
+            {% endif %}
             </div>
             <div id="comment-content">
                 {% if type != 'register' %}
-                <!-- comment -->
+                {# comment #}
                 {% include 'community/article/includes/comments.html' %}
                 {% endif %}
             </div>

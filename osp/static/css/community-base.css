@@ -388,7 +388,10 @@
 
 #board-title {
     font-size: 18px;
+}
+.p-board-title {
     padding: 6px 12px;
+    vertical-align: middle;
 }
 
 .board-content-bar {
@@ -714,7 +717,7 @@
     background: var(--main-white);
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
     border-radius: 0.625rem;
-    padding: 2rem 2rem 1rem 2rem;
+    padding: 1.5rem 2rem 1rem 2rem;
     z-index: 1;
     position: relative;
     gap: 0.5rem;
@@ -728,9 +731,6 @@
     align-items: center;
     padding: 0.625rem;
     width:100%;
-    height:48px;
-    margin-right: 10px;
-    font-size: 24px;
 }
 
 #article-metadata {
