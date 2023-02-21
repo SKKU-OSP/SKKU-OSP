@@ -31,6 +31,7 @@ const article = {
         ajax_form_data.append('title', $('#article-title').val());
         ajax_form_data.append('body', $('#article-body').val());
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
+        ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         let board_id = $("#board-id").val();
         let board_name = $("#board-name").val();
@@ -82,10 +83,12 @@ const article = {
     },
     updateArticle: function () {
         console.log("updateArticle");
+        console.log("no chekc", $('#is-notice').prop('checked'));
         let ajax_form_data = new FormData();
         ajax_form_data.append('title', $('#article-title').val());
         ajax_form_data.append('body', $('#article-body').val());
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
+        ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         let board_id = $("#board-id").val();
         let board_name = $("#board-name").val();
