@@ -17,6 +17,7 @@ def article_create(request):
 
     status = 'success'
     board_id = request.POST.get('board_id')
+    board_id = int(board_id) if board_id.isdigit() else 0
     board = Board.objects.get(id=board_id)
 
     try:
@@ -55,6 +56,7 @@ def article_update(request):
     message = ''
     status = 'success'
     article_id = request.POST.get('article_id')
+    article_id = int(article_id) if article_id.isdigit() else 0
     try:
         with transaction.atomic():
             article = Article.objects.get(id=article_id)
@@ -100,6 +102,7 @@ def article_delete(request):
 
     status = 'success'
     article_id = request.POST.get('article_id')
+    article_id = int(article_id) if article_id.isdigit() else 0
 
     try:
         with transaction.atomic():
@@ -113,7 +116,6 @@ def article_delete(request):
             else:
                 status = 'fail'
                 message = '작성자만 삭제할 수 있습니다.'
-
 
     except Exception as e:
         status = 'fail'

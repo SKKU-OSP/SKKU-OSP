@@ -2,25 +2,32 @@
 {% load community_tag %}
 {% load team_tag %}
 
-<form id="article-form" method="post" edit-type="{{ type }}" action=".." onsubmit="edit_submit(event);">
+<form id="article-form" method="post" data-edit-type="{{ type }}">
     {% csrf_token %}
-    <div class="d-flex flex-column border border-2 p-2">
+    <input type="hidden" id="board-type" value="{{board.board_type}}">
+    <input type="hidden" id="board-name" value="{{board.name}}">
+    <input type="hidden" id="board-id" value="{{board.id}}">
+    <input type="hidden" id="article-id" value="{{article.id}}">
+    {% if board.board_type == 'Team' %}
+    <input type="hidden" id="team-id" value="{{board.team.id}}">
+    {% endif %}
+    <div class="d-flex flex-column border border-2">
         <div class="d-flex justify-content-between mb-1">
             <input type="text" id="article-title" class="form-control" value="{{ article.title }}" placeholder="제목을 입력해 주세요"  required autofocus>
             {% if board.board_type == 'Recruit' %}
-            {% if team %}
-            <select id="team-option" name="team-option" class="form-control pointer" disabled>
-                <option value="{{ team.id }}" selected>{{ team.name }}</option>
-            </select>
-            {% elif type == 'register' %}
-            <select id="team-option" name="team-option" class="form-control pointer" required>
-                {% team_options request.user %}
-            </select>
-            {% elif type == 'edit' %}
-            <select id="team-option" name="team-option" class="form-control pointer" disabled>
-                <option value="{{ article.team.id }}" selected>{{ article.team.name }}</option>
-            </select>
-            {% endif %}
+                {% if team %}
+                <select id="team-option" name="team-option" class="form-select pointer" disabled>
+                    <option value="{{ team.id }}" selected>{{ team.name }}</option>
+                </select>
+                {% elif type == 'register' %}
+                <select id="team-option" name="team-option" class="form-select pointer" required>
+                    {% team_options request.user %}
+                </select>
+                {% elif type == 'edit' %}
+                <select id="team-option" name="team-option" class="form-select pointer" disabled>
+                    <option value="{{ article.team.id }}" selected>{{ article.team.name }}</option>
+                </select>
+                {% endif %}
             {% endif %}
         </div>
         <div class="mt-2">
@@ -70,7 +77,7 @@
                 <span class="lh-xl ps-1">익명</span>
             </div>
             {% endif %}
-            <button type="submit" class="btn btn-outline-primary ms-3">
+            <button type="button" id="btn-content-edit" class="btn btn-outline-primary ms-3">
                 <i class="bi-pencil-square"></i> {{ type_kr }}
             </button>
         </div>
