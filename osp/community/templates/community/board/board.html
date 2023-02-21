@@ -30,7 +30,7 @@
             {% endif %}
             {% if board.board_type == 'Team' and invited_user %}
             <div id="board-title-bar" class="d-flex justify-content-between">
-                <div id="board-title">
+                <div id="board-title" class="p-board-title">
                     <a href="/community/board/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
                     </a>
@@ -58,7 +58,7 @@
             </div>
             {% else %}
             <div id="board-title-bar" class="d-flex justify-content-between">
-                <div id="board-title">
+                <div id="board-title" class="p-board-title">
                     <a href="/community/board/{{board.name}}/{{board.id}}">
                         {{ board.name }} 게시판
                     </a>

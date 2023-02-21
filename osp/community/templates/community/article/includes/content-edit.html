@@ -1,7 +1,31 @@
 {% load tag_templatetag %}
 {% load community_tag %}
 {% load team_tag %}
-
+<div id="board-title-bar" class="d-flex justify-content-between">
+    <div id="board-title" class="p-board-title">
+        <a href="/community/board/{{board.name}}/{{board.id}}">
+            {{ board.name }} 게시판
+        </a>
+    </div>
+    <div class="d-flex justify-content-end gap-2">
+        {% if is_auth_notice %}
+        <div class="p-board-title">
+            <input type="checkbox" id="is-notice" class="align-middle" {{ notice_check }}>
+            <span>공지</span>
+        </div>
+        {% endif %}
+        {% if board.anonymous_writer %}
+        <div class="p-board-title">
+            <input type="checkbox" id="is-anonymous" class="align-middle" {{ anonymous_check }}>
+            <span>익명</span>
+        </div>
+        {% endif %}
+        <button type="button" id="btn-content-edit" class="btn btn-outline-light">
+            <i class="bi-pencil-square"></i> {{ type_kr }}
+        </button>
+    </div>
+</div>
+<!-- type은 세가지 값이 가능: view / register / edit -->
 <form id="article-form" method="post" data-edit-type="{{ type }}">
     {% csrf_token %}
     <input type="hidden" id="board-type" value="{{board.board_type}}">
@@ -70,16 +94,5 @@
             </div>
         </div>
         {% endif %}
-        <div class="d-flex justify-content-end mt-3">
-            {% if board.anonymous_writer %}
-            <div>
-                <input type="checkbox" id="is-anonymous" class="lh-xl" {{ anonymous_check }}>
-                <span class="lh-xl ps-1">익명</span>
-            </div>
-            {% endif %}
-            <button type="button" id="btn-content-edit" class="btn btn-outline-primary ms-3">
-                <i class="bi-pencil-square"></i> {{ type_kr }}
-            </button>
-        </div>
     </div>
 </form>

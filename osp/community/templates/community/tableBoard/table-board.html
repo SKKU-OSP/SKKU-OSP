@@ -17,14 +17,13 @@
             </div>
             {% else %}
             <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board_name}}_{{board.id}}">
-                <span id="board-title">{{ board_name }}</span>
+                <span id="board-title" class="p-board-title">{{ board_name }}</span>
                 <div>
-                    {% if board.board_type == 'Team' and team_admin %}
-                    <a href="{% url 'community:article-notice-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">공지쓰기<i class="bi-pencil"></i></a>
-                    {% elif board.board_type != 'Team' and request.user.is_superuser %}
-                    <a href="{% url 'community:article-notice-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">공지쓰기<i class="bi-pencil"></i></a>
-                    {% endif %}
+                    {% if board.board_type == 'Notice' %}
+                    <a href="{% url 'community:notice-save' %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
+                    {% else %}
                     <a href="{% url 'community:article-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
+                    {% endif %}
                 </div>
             </div>
                 {# 게시판 헤더 #}
