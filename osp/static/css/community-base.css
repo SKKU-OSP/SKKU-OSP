@@ -504,11 +504,6 @@
     gap: 0.5rem;
 }
 
-#comment-writer-display:not(.annonymous){
-    color: var(--sub-point-color);
-    text-decoration: underline;
-}
-
 #comment-annonymous > input {
     line-height: 2rem;
 }
@@ -733,7 +728,7 @@
     align-items: center;
     padding: 0.625rem;
     width:100%;
-    height:42px;
+    height:48px;
     margin-right: 10px;
     font-size: 24px;
 }
@@ -1036,9 +1031,9 @@
     border-color: var(--main-border-color);
 }
 
-#comment-none{
+.comment-none{
     color:#9d9d9d;
-    padding : 10px 20px 10px 20px;
+    padding : 0.5rem 2rem 1rem 2rem;
 }
 
 #period-setting{
