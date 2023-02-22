@@ -327,8 +327,6 @@ class ProfileView(TemplateView):
         context["lang_lv3"] = lang_lv3
         context["lang_lv4"] = lang_lv4
 
-
-        
         return context
 
     def get(self, request, *args, **kwargs):
@@ -342,7 +340,7 @@ class ProfileView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         if not context:
             return redirect('/community')
-
+        student_account = context['account']
         student_info = context['account'].student_data
 
         # student repository info
@@ -350,9 +348,6 @@ class ProfileView(TemplateView):
         ## owned repository
         student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
 
-       
-
-        student_account = context['account']
         acc_pp = AccountPrivacy.objects.get(account=student_account)
         print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
         
@@ -377,9 +372,7 @@ class ProfileView(TemplateView):
                 request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
                 request.session['alert'] = True
                 return redirect('../'+request.user.username+'/')
-        data = {
-
-        }
+        data = {}
 
         context['score'] = student_score
         context['is_own'] = is_own
@@ -396,50 +389,8 @@ class ProfileView(TemplateView):
 
         return render(request=request, template_name=self.template_name, context=context)
 
-    
 
 
-class ProfileEditView(TemplateView):
-    '''
-    유저 프로필 수정 페이지
-    url        : /user/<username>
-    template   : profile/profile.html 
-
-    Returns :
-        GET     : render, redirect
-    '''
-
-    def get_context_data(self, request, *args, **kwargs):
-        # context 는 username과 view 인스턴스를 가진 딕셔너리
-        context = super().get_context_data(**kwargs)
-        if str(request.user) != context["username"] : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
-            print("허용되지 않는 접근 입니다.")
-            context['valid'] = 0
-            return context
-        context['valid'] = 1
-        username = context['username']
-        user = User.objects.get(username=username)
-
-        student_account = Account.objects.get(user=user.id)
-        student_id = student_account.student_data.id
-
-        tags_domain = Tag.objects.filter(type='domain')
-
-        
-        context["account"] = Account.objects.get(user=user.id)
-        context["info"] = StudentTab.objects.get(id=student_id)
-        context["ints"] = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        context["lang"] = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
-        context["privacy"] = AccountPrivacy.objects.get(account=student_account)
-        return context
-
-    def get(self, request, *args, **kwargs):
-
-        context = self.get_context_data(request, *args, **kwargs)
-        if(context['valid'] == 0):
-            return redirect(f'/user/{context["username"]}/')
-
-        return render(request, 'profile/profile-edit.html', context)
 
 
 def student_id_to_username(request, student_id):
@@ -492,10 +443,11 @@ class ProfileRepoView(TemplateView):
         student_data = account.student_data
         github_id = student_data.github_id
         context['account'] = github_id
-        repo_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+        commit_repos = get_commit_repos(github_id)
+
         repos = {}
         id_reponame_pair_list = []
-        for commit in repo_commits:
+        for commit in commit_repos:
             commit_repo_name = commit['repo_name']
             if commit_repo_name not in repos:
                 repos[commit_repo_name] = {'repo_name': commit_repo_name}
@@ -545,6 +497,12 @@ def save_test_result(request, username):
         
         return JsonResponse(context)
 
+def get_commit_repos(github_id, primary_email="", secondary_email=""):
+    repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_commits = repo_commiter_commits | repo_author_commits
+    return repo_commits
+
 @csrf_exempt
 def load_repo_data(request, username):
     if request.method == 'POST':
@@ -557,7 +515,8 @@ def load_repo_data(request, username):
                 print("account error", e)
             # 리포지토리 목록
             github_id = account.student_data.github_id
-            commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+            commit_repos = get_commit_repos(github_id)
+            print("commit_repos len", len(commit_repos))
             recent_repos = {}
             id_reponame_pair_list = []
             # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
@@ -580,194 +539,13 @@ def load_repo_data(request, username):
             recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
             context = {"status": 200, "repo":recent_repos}
         except Exception as e:
-            print("error save", e)
+            print("load_repo_data error save", e)
             context = {"status": 400}
         print("ajax repo", time.time() - start)
         return JsonResponse(context)
 
 
 
-
-class ProfileInterestsView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        print(request.POST)
-        print(request.POST['act'])
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
-        if request.POST['act'] == 'append':
-            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-                already_ints.delete()
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-
-        else:
-            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-            print("Selected tag is successfully deleted")
-
-        return JsonResponse({'data':'asdfas'})
-
-class ProfileLanguagesView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        print(request.POST)
-        print(request.POST['act'])
-        print(request.POST['target'])
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-
-        if request.POST['act'] == 'append':
-            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
-
-
-            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-            for l in lang:
-                if "tag_" + l.tag.name in request.POST:
-                    added_tag = Tag.objects.get(name=l.tag.name)
-                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-            return JsonResponse({'data':'asdfas'})
-        else:
-            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-            print("Selected tag is successfully deleted")
-            return JsonResponse({'data':'asdfas'})
-
-class ProfileImageView(UpdateView):
-
-    def post(self, request, username, *args, **kwargs):
-        print("asdfds")
-        print('img 상태dffffffffffffffffffffffffff')
-        user = User.objects.get(username=username)
-        
-        user_account = Account.objects.get(user=user.id)
-
-        pre_img = user_account.photo.path
-        field_check_list = {}
-        profile_img = request.FILES.get('photo', False)
-        
-        print(profile_img)
-        is_valid = True
-        print(request.POST.get('is_default'))
-        if request.POST.get('is_default') == 'true':
-            print("is true!!")
-
-
-        if profile_img:
-            img_width, img_height = get_image_dimensions(profile_img)
-            print(img_width, img_height)
-            if img_width > 500 or img_height > 500:
-                is_valid = False
-                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
-
-        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-        print(img_form)
-        print(pre_img)
-        if bool(img_form.is_valid()) and is_valid:
-            if 'photo' in request.FILES: # 폼에 이미지가 있으면
-                print('form에 이미지 존재')
-                try:
-                    print(" path of pre_image is "+ pre_img)
-                    if(pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
-                        pass
-                    else:
-                        print(pre_img.split("/")[-1])
-                        os.remove(pre_img) # 기존 이미지 삭제
-                
-                except:                # 기존 이미지가 없을 경우에 pass
-                    pass    
-
-            print('Image is valid form')
-            img_form.save()
-
-        else:
-            print(field_check_list['photo'])
-        return redirect(f'/user/{username}/')
-
-class ProfileImageDefaultView(DeleteView):
-    def post(self, request, username, *args, **kwargs):
-        user = User.objects.get(username=username)
-        
-        user_account = Account.objects.get(user=user.id)
-        user_account.photo = "img/profile_img/default.jpg"
-        user_account.save()
-        return redirect(f'/user/{username}/')
-
-
-
-class ProfileEditSaveView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        user_tab = StudentTab.objects.get(id=student_id)
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-
-        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-        user_privacy = AccountPrivacy.objects.get(account=user_account)
-        print(user_privacy)
-        for l in lang:
-            if "tag_" + l.tag.name in request.POST:
-                added_tag = Tag.objects.get(name=l.tag.name)
-                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-
-        user_tab.plural_major = request.POST['plural_major']
-        user_tab.personal_email = request.POST['personal_email']
-        user_tab.primary_email = request.POST['primary_email']
-        user_tab.secondary_email = request.POST['secondary_email']
-        user_tab.save()
-
-        user_account.introduction = request.POST['introduction']
-        user_account.portfolio = request.POST['portfolio']
-        user_account.save()
-
-
-        user_privacy.open_lvl = request.POST['profileprivacy']
-        user_privacy.is_write = request.POST['articleprivacy']
-        user_privacy.is_open = request.POST['teamprivacy']
-        user_privacy.save()
-
-
-        return redirect(f'/user/{username}/')
-
-class ProfilePasswdView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        user = User.objects.get(username=username)
-
-        if(user.check_password(request.POST['inputOldPassword']) == False):
-            return JsonResponse({"status" : "error"})
-
-        if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
-            return JsonResponse({"status" : "error"})
-
-        user.set_password(request.POST['inputNewPassword'])
-        user.save()
-        print("비밀번호가 변경되었습니다. ")
-        return 1
-
-def InitAllPassword():
-    users = User.objects.all()
-    accounts = Account.objects.filter(user__is_superuser = False)
-    for account in accounts:
-        user = users.get(id=account.user.id)
-        user.set_password(str(account.student_data.id))
-        user.save()
-
-    return
 
 
 
