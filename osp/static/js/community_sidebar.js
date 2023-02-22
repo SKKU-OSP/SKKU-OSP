@@ -157,6 +157,9 @@ function ArticleThumbUp(article_id, user_id) {
         $('#article-like-btn > span').toggleClass('material-icons');
         $('#article-like-cnt').html(data['result']);
       }
+      else {
+        alert(data["message"]);
+      }
     },
   });
 }
@@ -249,6 +252,9 @@ function CommentLike(comment_id, user_id) {
         $(`#comment-${comment_id} .comment-item-like > span`).toggleClass('material-icons-outlined');
         $(`#comment-${comment_id} .comment-item-like > span`).toggleClass('material-icons');
         $(`#comment-${comment_id} .comment-item-like-cnt`).html(data['result']);
+      }
+      else {
+        alert(data["message"]);
       }
     },
   });
