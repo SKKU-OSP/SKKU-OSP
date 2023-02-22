@@ -327,8 +327,6 @@ class ProfileView(TemplateView):
         context["lang_lv3"] = lang_lv3
         context["lang_lv4"] = lang_lv4
 
-
-        
         return context
 
     def get(self, request, *args, **kwargs):
@@ -342,7 +340,7 @@ class ProfileView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         if not context:
             return redirect('/community')
-
+        student_account = context['account']
         student_info = context['account'].student_data
 
         # student repository info
@@ -350,9 +348,6 @@ class ProfileView(TemplateView):
         ## owned repository
         student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
 
-       
-
-        student_account = context['account']
         acc_pp = AccountPrivacy.objects.get(account=student_account)
         print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
         
@@ -377,9 +372,7 @@ class ProfileView(TemplateView):
                 request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
                 request.session['alert'] = True
                 return redirect('../'+request.user.username+'/')
-        data = {
-
-        }
+        data = {}
 
         context['score'] = student_score
         context['is_own'] = is_own
@@ -395,8 +388,6 @@ class ProfileView(TemplateView):
         print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
-
-    
 
 
 class ProfileEditView(TemplateView):
@@ -492,10 +483,11 @@ class ProfileRepoView(TemplateView):
         student_data = account.student_data
         github_id = student_data.github_id
         context['account'] = github_id
-        repo_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+        commit_repos = get_commit_repos(github_id)
+
         repos = {}
         id_reponame_pair_list = []
-        for commit in repo_commits:
+        for commit in commit_repos:
             commit_repo_name = commit['repo_name']
             if commit_repo_name not in repos:
                 repos[commit_repo_name] = {'repo_name': commit_repo_name}
@@ -545,6 +537,12 @@ def save_test_result(request, username):
         
         return JsonResponse(context)
 
+def get_commit_repos(github_id, primary_email="", secondary_email=""):
+    repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_commits = repo_commiter_commits | repo_author_commits
+    return repo_commits
+
 @csrf_exempt
 def load_repo_data(request, username):
     if request.method == 'POST':
@@ -557,7 +555,8 @@ def load_repo_data(request, username):
                 print("account error", e)
             # 리포지토리 목록
             github_id = account.student_data.github_id
-            commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+            commit_repos = get_commit_repos(github_id)
+            print("commit_repos len", len(commit_repos))
             recent_repos = {}
             id_reponame_pair_list = []
             # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
@@ -580,12 +579,10 @@ def load_repo_data(request, username):
             recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
             context = {"status": 200, "repo":recent_repos}
         except Exception as e:
-            print("error save", e)
+            print("load_repo_data error save", e)
             context = {"status": 400}
         print("ajax repo", time.time() - start)
         return JsonResponse(context)
-
-
 
 
 class ProfileInterestsView(UpdateView):
