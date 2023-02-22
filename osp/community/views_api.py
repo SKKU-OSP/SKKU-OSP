@@ -134,14 +134,19 @@ def article_like(request):
         article = Article.objects.get(id=article_id)
         account = Account.objects.get(user=user)
 
+        if article.writer.user_id == user.id:
+            # 작성자가 추천한 경우
+            return JsonResponse({'status': 'fail', 'message': "내가 작성한 글은 추천하실 수 없습니다."})
+        
         obj, created = ArticleLike.objects.get_or_create(article=article,account=account)
 
         if not created:
             obj.delete()
         like_cnt = len(ArticleLike.objects.filter(article=article))
-        return JsonResponse({'status': 'success', 'created': created, 'result': like_cnt})
-    except:
-        return JsonResponse({'status':'false'})
+        return JsonResponse({'status': 'success', 'created': created, 'result': like_cnt, 'message':''})
+    except Exception as e:
+        print("article like error" , e)
+        return JsonResponse({'status':'fail', 'message':'문제가 생겼습니다. 게시글에 추천할 수 없습니다.'})
 
 def article_scrap(request):
     try:
@@ -217,10 +222,16 @@ def comment_like(request):
         comment_id = request.POST.get('comment_id')
         comment = ArticleComment.objects.get(id=comment_id)
         account = Account.objects.get(user=request.user.id)
+
+        if comment.writer.user_id == request.user.id:
+            # 작성자가 추천한 경우
+            return JsonResponse({'status': 'fail', 'message': '내가 작성한 댓글은 추천하실 수 없습니다.'})
+
         obj, created = ArticleCommentLike.objects.get_or_create(comment=comment,account=account)
         if not created:
             obj.delete()
         like_cnt = len(ArticleCommentLike.objects.filter(comment=comment))
-        return JsonResponse({'status': 'success', 'result': like_cnt})
+        return JsonResponse({'status': 'success', 'result': like_cnt, 'message':''})
     except DatabaseError as e:
-        return JsonResponse({'status':'fail', 'message': str(e)})
+        print("comment_like error", e)
+        return JsonResponse({'status':'fail', 'message': '문제가 생겼습니다. 댓글에 추천하실 수 없습니다.'})
