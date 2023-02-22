@@ -561,16 +561,18 @@ class ArticleView(TemplateView):
         context['type'] = 'view'
         article_id = kwargs.get('article_id')
         try:
-            context['article'] = Article.objects.get(id=article_id)
+            article = Article.objects.get(id=article_id)
             context['tags'] = ArticleTag.objects.filter(article__id=article_id)
-            context['board'] = Board.objects.get(id=context['article'].board_id)
+            context['board'] = Board.objects.get(id=article.board_id)
             context['comments'] = ArticleComment.objects.filter(article_id=article_id)
             if context['board'].board_type == 'Recruit':
-                teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
+                teamrecruit = TeamRecruitArticle.objects.filter(article=article).first()
                 if teamrecruit:
-                    context['article'].team = teamrecruit.team
-            context['article'].view_cnt += 1
-            context['article'].save()
+                    article.team = teamrecruit.team
+            if article.writer.user_id != request.user.id:
+                article.view_cnt += 1
+            article.save()
+            context['article'] = article
         except:
             context['error_occur'] = True
 
