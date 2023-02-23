@@ -64,33 +64,33 @@
         </div>
         {% if board.board_type == 'Recruit' %}
         <div id="period-setting" class="mt-3">
-            <div class="d-flex justify-content-between">
-                <div>모집 기간</div>
-                <button id="end-button"type="button" class="btn btn-primary" onclick="setToDateEnd();">마감</button>
-            </div>
-            <div class="row">
-                <div class="col-sm-6 d-flex">
-                    <label class="form-label period-label" for="PeriodPickerStartInput">From</label>
-                    <div id="PeriodPickerStart" class="input-group log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
-                        <input type="text" id="PeriodPickerStartInput" class="form-control" data-td-target="#PeriodPickerStart" required/>
-                        <span class="input-group-text" data-td-target="#PeriodPickerStart" data-td-toggle="datetimepicker">
-                            <span class="material-icons-outlined">
-                                today
+            <div class="d-flex">
+                <div id="date-label" class="p-date-label">모집 기간</div>
+                <div class="row flex-fill">
+                    <div class="col-sm-6 d-flex">
+                        <div id="date-label" class="p-date-label d-flex"><a>From</a></div>
+                        <div id="PeriodPickerStart" class="input-group log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                            <input type="text" id="PeriodPickerStartInput" class="form-control" data-td-target="#PeriodPickerStart" required/>
+                            <span class="input-group-text" data-td-target="#PeriodPickerStart" data-td-toggle="datetimepicker">
+                                <span class="material-icons-outlined">
+                                    today
+                                </span>
                             </span>
-                        </span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 d-flex">
+                        <div id="date-label" class="p-date-label d-flex"><a>To</a></div>
+                        <div id="PeriodPickerEnd" class="input-group log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                            <input type="text" id="PeriodPickerEndInput" class="form-control" data-td-target="#PeriodPickerEnd" required/>
+                            <span class="input-group-text" data-td-target="#PeriodPickerEnd" data-td-toggle="datetimepicker">
+                                <span class="material-icons-outlined">
+                                    event
+                                </span>
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="col-sm-6 d-flex">
-                    <label class="form-label period-label" for="PeriodPickerEndInput">To</label>
-                    <div id="PeriodPickerEnd" class="input-group log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
-                        <input type="text" id="PeriodPickerEndInput" class="form-control" data-td-target="#PeriodPickerEnd" required />
-                        <span class="input-group-text" data-td-target="#PeriodPickerEnd" data-td-toggle="datetimepicker">
-                            <span class="material-icons-outlined">
-                                eventr
-                            </span>
-                        </span>
-                    </div>
-                </div>
+                <button id="end-button" type="button" class="btn btn-outline-light" onclick="setToDateEnd();">마감</button>
             </div>
         </div>
         {% endif %}

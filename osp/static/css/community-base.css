@@ -394,6 +394,15 @@
     vertical-align: middle;
 }
 
+#date-label {
+    font-size: 20px;
+    color: var(--main-white);
+}
+.p-date-label {
+    padding: 6px;
+    vertical-align: middle;
+}
+
 .board-content-bar {
     background: var(--main-white) !important;
     padding: 1rem;
@@ -1049,12 +1058,8 @@
 }
 
 #end-button{
-    display: flex;
-    margin-bottom: 10px;
+    margin-left: 20px;
     font-size: 16px;
 
     align-items: center;
-    height: 30px;
-    background-color: #002743;
-    border-color: white;
 }
