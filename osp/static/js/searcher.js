@@ -382,6 +382,13 @@ $().ready(function () {
             },
             placeholder: 'Tag',
         });
+        // 이미 선택된 태그의 색도 변경하도록 한다.
+        let selected_list = Array(0);
+        for (let optionGroup of tagSeacher.data.data){
+            let selectedOptions = optionGroup.options.filter(obj => obj.selected);
+            selected_list = selected_list.concat(selectedOptions);
+        }
+        tagSeacher.onChange(selected_list);
     }
     $('#searcher').addClass('show');
 });

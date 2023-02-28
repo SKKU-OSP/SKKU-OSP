@@ -9,6 +9,8 @@ register = template.Library()
 
 @register.simple_tag
 def category_tag(request):
+    pre_tags = request.GET.get('tag', "")
+    pre_tags=pre_tags.split(",")
     result = ''
     tags = Tag.objects.all()
     
@@ -20,7 +22,10 @@ def category_tag(request):
         name_list = list(objects.values_list("name", flat=True).distinct())
         name_list.sort()
         for n in name_list:
-            result += f'<option class="tag-{t}" value="{n}">{n}</option>'
+            if n in  pre_tags:
+                result += f'<option class="tag-{t}" value="{n}" selected>{n}</option>'
+            else:
+                result += f'<option class="tag-{t}" value="{n}">{n}</option>'
         result += '</optgroup>'
 
     return mark_safe(result)
