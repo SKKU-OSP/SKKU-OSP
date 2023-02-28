@@ -187,7 +187,7 @@ class SearchView(TemplateView):
                 board_name = board.name
                 context["board"] = board
             else:
-                board_name = "전체 게시판"
+                board_name = "전체"
                 board = {"name":board_name, "id":0, "board_type":"Total"}
                 context["board"] = board
         except Board.DoesNotExist:
@@ -214,13 +214,8 @@ class SearchView(TemplateView):
 
         keyword = request.GET.get('keyword', '')
         tags = request.GET.get('tag', False)
-        context['title'] = board_name 
-        if keyword:
-            context['title'] += f" 검색어 '{keyword}'" 
-        if tags:
-            context['title'] += f" 태그 '{tags}'" 
-        context['title'] += " 검색 결과"
-
+        context['title'] = board_name + " 게시판 검색 결과"
+        context['keyword'] = keyword
 
         return render(request, 'community/tableBoard/searched.html', context)
 
@@ -236,6 +231,8 @@ def search_article(request, board_name, board_id):
     page = request.GET.get('page', 1)
     page = int(page) if page.isdigit() else 1
     print("keyword", keyword, " tags", tags)
+
+    # 타겟 게시판 설정
     try:
         if board_id == 0:
             #전체 검색
@@ -254,7 +251,7 @@ def search_article(request, board_name, board_id):
 
             print("total 검색", boardList)
             board_type = "Total"
-            board_name = "전체 게시판"
+            board_name = "전체"
             board_data = {"name":board_name, "id":0, "board_type":board_type}
         else:
             board_data = Board.objects.get(id=board_id)
@@ -277,7 +274,11 @@ def search_article(request, board_name, board_id):
     total_article_list = Article.objects.none()
     for board in boardList:
         # Filter Board
-        article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        if board.board_type == "Notice" and not request.user.is_superuser:
+            # 일반유저가 검색할 때는 공지게시판에서 공지 설정된 게시글만 가져옴
+            article_list = Article.objects.filter(board=board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        else :
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         article_list = filter_keyword_tag(article_list, keyword, tags)
         total_article_list = total_article_list.union(article_list)
     
