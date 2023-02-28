@@ -11,13 +11,13 @@
         {% if is_auth_notice %}
         <div class="p-board-title">
             <input type="checkbox" id="is-notice" class="align-middle" {{ notice_check }}>
-            <span>공지</span>
+            <label for="is-notice">공지</label>
         </div>
         {% endif %}
         {% if board.anonymous_writer %}
         <div class="p-board-title">
             <input type="checkbox" id="is-anonymous" class="align-middle" {{ anonymous_check }}>
-            <span>익명</span>
+            <label for="is-anonymous">익명</label>
         </div>
         {% endif %}
         <button type="button" id="btn-content-edit" class="btn btn-outline-light">
