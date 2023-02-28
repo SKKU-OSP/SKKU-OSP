@@ -376,28 +376,30 @@ def account_cards(request):
 
     user_list = []
     member_id = []
-    print(team_li)
+    print("team_li", team_li)
 
     team_list = Team.objects.filter(id__in=team_li)
-    print(team_list)
+    print("team_list", team_list)
 
-    # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
-    try:
-        team_member_dict = get_team_recommendation_list(team_list)
-    except:
-        team_member_dict = {}
-    for team_obj in team_list:
-        if team_obj.id in team_member_dict:
-            member_li = team_member_dict[team_obj.id]
-            member_id += member_li
-            tmps = account_list.filter(user__in=member_li)
-            for tmp in tmps:
-                tmp.recommend_team = team_obj
-            user_list += list(tmps)
+    if len(team_list) == 0:
+        user_list = list(account_list)
+    else:
+        # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
+        try:
+            team_member_dict = get_team_recommendation_list(team_list)
+        except:
+            team_member_dict = {}
+        print("team_member_dict", team_member_dict)
+        for team_obj in team_list:
+            if team_obj.id in team_member_dict:
+                member_li = team_member_dict[team_obj.id]
+                member_id += member_li
+                tmps = account_list.filter(user__in=member_li)
+                for tmp in tmps:
+                    tmp.recommend_team = team_obj
+                user_list += list(tmps)
 
-    user_list += list(account_list.exclude(user__in=member_id))
-
-    account_list = user_list
+    account_list = user_list    
     total_len = len(account_list)
     # Order
     # article_list = article_list.order_by(*sort_field)
