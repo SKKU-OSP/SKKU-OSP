@@ -864,9 +864,11 @@
 }
 
 .btn-filter {
-    border: 1px solid var(--main-black);
-    padding: 8px 12px;
-    border-radius: 10px;
+    color: var(--main-icon-color);
+}
+
+.btn-filter:hover, .btn-check:checked+.btn {
+    border: 1px solid var(--main-black)!important;
 }
 
 .team-apply-delete {
