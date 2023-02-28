@@ -64,6 +64,10 @@ const searcher = {
             if(e.keyCode==13 && $(targetSearch).val() !== "") 
                 _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
+        // 맞춤 유저 추천 팀 적용
+        $('#btn-team-filter').click(function(e) {
+            _this.draw(true);
+        });
         // 검색결과는 페이지 번호만 렌더링, 게시판은 전체 렌더링
         const boardValue = $("#board-title-bar").data("board-value");
         if(boardValue === "search") _this.drawSearchPage();
@@ -113,6 +117,7 @@ const searcher = {
         )
     },
     drawSearchPage: function () {
+        console.log("searcher.drawSearchPage");
         const qeuryString = new URLSearchParams(location.search);
         this.nowPage = qeuryString.get("page");
         if (!isNaN(parseInt(this.nowPage))){
@@ -159,13 +164,13 @@ const searcher = {
         }
     },
     drawPage: function() {
-        console.log("footer this.nowPage", this.nowPage);
+        console.log("searcher.drawPage this.nowPage", this.nowPage);
         var page_body = $('#pagination-body');
         page_body.empty();
         if(this.nowPage != 1) {
             page_body.append(this.pageItem('<i class="bi-chevron-double-left">'));
             page_body.append(this.pageItem('<i class="bi-chevron-left">'));
-            console.log("footer if(this.nowPage != 1) {");
+            console.log("searcher if(this.nowPage != 1) {");
         }
         else{
             page_body.append(this.pageItem('<i class="bi-chevron-double-left">').addClass('disabled'));
@@ -249,13 +254,9 @@ const searcher = {
             return;
         }
         // 유저 추천에 사용하는 팀 필터 
-        const team_li = [];
-        $('#team-filter').children().each(function(){
-            if($(this).hasClass('bg-gray')){
-                console.log("team li", $(this).val());
-                team_li.push($(this).attr('value'));
-            }
-        });
+        const teamFilter = document.getElementById("team-filter");
+        const teamFilterForm = new FormData(teamFilter);
+        const team_li = teamFilterForm.getAll('teams');
         console.log(team_li);
         
         // 페이지네이션 설정
@@ -303,12 +304,10 @@ const searcher = {
         if(to_page_1){
             this.nowPage = 1;
         }
-        let team_li = [];
-        $('#team-filter').children().each(function(){
-            if($(this).hasClass('bg-gray')){
-                team_li.push($(this).attr('value'));
-            }
-        });
+
+        const teamFilter = document.getElementById("team-filter");
+        const teamFilterForm = new FormData(teamFilter);
+        const team_li = teamFilterForm.getAll('teams');
         console.log("js team_li", team_li);
         console.log("this.activityType", this.activityType);
         $.ajax(
