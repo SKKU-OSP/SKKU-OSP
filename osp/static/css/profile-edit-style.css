@@ -202,3 +202,33 @@ flex-grow: 0;
 
 
 }
+
+.stack-box.dragging{
+  opacity: 0.5;
+   
+}
+
+
+
+.tier-container{
+  display: block;
+  gap: 3px;
+  min-width: 500px;
+  min-height: 30px;
+  
+}
+
+.tier-row{
+  height: auto;
+  min-width: 600px;
+}
+
+#lang-trash-can{
+  display: block;
+  gap: 3px;
+  min-height: 30px;
+  border: 1px solid black;
+  border-radius: 0.3rem;
+  padding: 3px;
+}
+

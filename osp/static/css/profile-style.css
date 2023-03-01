@@ -888,3 +888,8 @@ span.row-raw {
 .bi-star-fill{
  margin-left: -12px;
 }
+
+#portfolio-nav{
+  max-height: 250px;
+  overflow:auto;
+}
