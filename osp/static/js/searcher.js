@@ -2,6 +2,8 @@ const searcher = {
     nowPage: 1,
     MAX_PAGE: 1,
     activityType: 'article',
+    item: null,
+    offset: 1,
     init: function () {
         let _this = this;
         let targetBoard = "#board-searcher";
@@ -44,7 +46,7 @@ const searcher = {
             _this.nowPage = 1;
             _this.draw();
         });
-        // 엔터키 검색 이벤트
+        // 엔터키 검색 이벤트 - 검색어를 입력했을 때만 이벤트 실행
         $(document).keypress(function(e) {
             if ($("#search-username").val() !== "" && $("#search-username").val() !== undefined){
                 targetBoard = "#user-board";
@@ -63,6 +65,10 @@ const searcher = {
             }
             if(e.keyCode==13 && $(targetSearch).val() !== "") 
                 _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
+        });
+        // 맞춤 유저 추천 팀 적용
+        $('#btn-team-filter').click(function(e) {
+            _this.draw(true);
         });
         // 검색결과는 페이지 번호만 렌더링, 게시판은 전체 렌더링
         const boardValue = $("#board-title-bar").data("board-value");
@@ -93,26 +99,17 @@ const searcher = {
         }
 
         let hrefLink = pathname + '?' + qeuryString;
-        if(page == this.nowPage){
-            return $('<div></div>').addClass('page-item').addClass('active').append(
-                $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', hrefLink).attr('value', page).html(page)
-            )
-        }
-        return $('<div></div>').addClass('page-item').append(
-            $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', hrefLink).attr('value', page).html(page)
-        )
+        return searcher.pageItem(page, hrefLink);
     },
-    pageItem: function (page) {
-        if(page == this.nowPage){
-            return $('<div></div>').addClass('page-item').addClass('active').append(
-                $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
-            )
-        }
-        return $('<div></div>').addClass('page-item').append(
-            $('<a></a>').addClass('page-link').addClass('m-auto').attr('href', '#').attr('value', page).html(page)
-        )
+    pageItem: function (page, hrefLink='#') {
+        let pageEle = $('<a></a>').addClass('page-item').attr('href', hrefLink).attr('data-page', page);
+        let pageNum = $('<span></span>').addClass('page-link').addClass('m-auto').html(page);
+        if(page == this.nowPage)
+            pageEle.addClass('active');
+        return pageEle.append(pageNum);
     },
     drawSearchPage: function () {
+        console.log("searcher.drawSearchPage");
         const qeuryString = new URLSearchParams(location.search);
         this.nowPage = qeuryString.get("page");
         if (!isNaN(parseInt(this.nowPage))){
@@ -159,20 +156,19 @@ const searcher = {
         }
     },
     drawPage: function() {
-        console.log("footer this.nowPage", this.nowPage);
-        var page_body = $('#pagination-body');
+        console.log("searcher.drawPage this.nowPage", this.nowPage);
+        const page_body = $('#pagination-body');
         page_body.empty();
         if(this.nowPage != 1) {
             page_body.append(this.pageItem('<i class="bi-chevron-double-left">'));
             page_body.append(this.pageItem('<i class="bi-chevron-left">'));
-            console.log("footer if(this.nowPage != 1) {");
         }
         else{
             page_body.append(this.pageItem('<i class="bi-chevron-double-left">').addClass('disabled'));
             page_body.append(this.pageItem('<i class="bi-chevron-left">').addClass('disabled'));
         }
-        var left_limit = Math.max(1, this.nowPage - 2);
-        var right_limit = Math.min(this.MAX_PAGE, this.nowPage + 2);
+        let left_limit = Math.max(1, this.nowPage - 2);
+        let right_limit = Math.min(this.MAX_PAGE, this.nowPage + 2);
 
         if(right_limit - left_limit < 5){
             if(this.nowPage - left_limit < 2){
@@ -193,6 +189,36 @@ const searcher = {
             page_body.append(this.pageItem('<i class="bi-chevron-right">').addClass('disabled'));
             page_body.append(this.pageItem('<i class="bi-chevron-double-right">').addClass('disabled'));
         }
+
+        $('.page-item:not(.disabled)').click(function(){
+            const page = $(this).data('page');
+            // 클릭한 페이지번호로 설정
+            if(isNaN(page)){
+                special_code = $(page).attr('class');
+                if(special_code == 'bi-chevron-left'){
+                    searcher.nowPage -= 1;
+                }
+                if(special_code == 'bi-chevron-double-left'){
+                    searcher.nowPage = 1;
+                }
+                if(special_code == 'bi-chevron-right'){
+                    searcher.nowPage += 1
+                }
+                if(special_code == 'bi-chevron-double-right'){
+                    searcher.nowPage = searcher.MAX_PAGE;
+                }
+            }
+            else{
+                searcher.nowPage = Number(page);
+            }
+            // 페이지번호를 클릭하고 페이지와 페이지네이션을 다시 렌더링
+            if(searcher.item !== null) {
+                searcher.movePage(searcher.offset);
+                searcher.drawPage();
+            }
+            else
+                searcher.draw();
+        });
     },
     getUrl: function (board) {
         const url ={
@@ -209,18 +235,6 @@ const searcher = {
             let boardName = board.substring(0, lastIdx);
             let boardId = board.substring(lastIdx+1);
             return `/community/article-list/${boardName}/${boardId}/`; 
-        }
-    },
-    getContainerId: function(board) {
-        const container ={
-            user: "#article-card-body",
-            activity: "#pills-tabContent",
-        }
-        if (Object.keys(container).includes(board)){
-            return container[board];
-        }
-        else{
-            return "#article-list-body";
         }
     },
     redraw: function (wordFilter, tagFilter, boardFilter, to_page_1=false) {
@@ -249,14 +263,7 @@ const searcher = {
             return;
         }
         // 유저 추천에 사용하는 팀 필터 
-        const team_li = [];
-        $('#team-filter').children().each(function(){
-            if($(this).hasClass('bg-gray')){
-                console.log("team li", $(this).val());
-                team_li.push($(this).attr('value'));
-            }
-        });
-        console.log(team_li);
+        const team_li = searcher.getTeamList();
         
         // 페이지네이션 설정
         if(to_page_1){
@@ -278,7 +285,7 @@ const searcher = {
 
         let url = this.getUrl(board);
         console.log("url", url);
-        let containerId = this.getContainerId(board);
+        let containerId = "#body-content";
 
         data["team_li"] = JSON.stringify(team_li);
         data["type"] = this.activityType;
@@ -303,13 +310,10 @@ const searcher = {
         if(to_page_1){
             this.nowPage = 1;
         }
-        let team_li = [];
-        $('#team-filter').children().each(function(){
-            if($(this).hasClass('bg-gray')){
-                team_li.push($(this).attr('value'));
-            }
-        });
-        console.log("js team_li", team_li);
+
+        // 유저 추천에 사용하는 팀 필터 
+        const team_li = searcher.getTeamList();
+
         console.log("this.activityType", this.activityType);
         $.ajax(
             {
@@ -323,44 +327,41 @@ const searcher = {
                 dataType: 'JSON',
                 beforeSend: function( xhr ) {
                     if(boardValue.split("_")[0].toLowerCase() === "user")
-                        $('#article-card-body').html(`<div class="spinner-border m-auto mt-5" role="status"></div>`);
+                        $('#body-content').html(`<div class="spinner-border m-auto mt-5" role="status"></div>`);
                 },
             }
         )
         .done(function(data){
             console.log("draw get data");
-            if(boardValue.split("_")[0].toLowerCase() === "user")
-                $('#article-card-body').html(data['html']);
-            if(boardValue.split("_")[0].toLowerCase() === "activity")
-                $('#pills-tabContent').html(data['html']);
-            else
-                $('#article-list-body').html(data['html']);
+
+            if(typeof(data['html']) !== "string") {
+                searcher.item = data['html'];
+                searcher.offset = data['offset'];
+                searcher.movePage(searcher.offset);
+            }
+            else{
+                $('#body-content').html(data['html']);
+            }
+
             searcher.MAX_PAGE = data['max-page'];
             console.log("searcher.MAX_PAGE", searcher.MAX_PAGE);
             searcher.drawPage();
-            $('.page-link').click(function(){
-                var val = $(this).attr('value');
-                if(isNaN(val)){
-                    special_code = $(val).attr('class');
-                    if(special_code == 'bi-chevron-left'){
-                        searcher.nowPage -= 1;
-                    }
-                    if(special_code == 'bi-chevron-double-left'){
-                        searcher.nowPage = 1;
-                    }
-                    if(special_code == 'bi-chevron-right'){
-                        searcher.nowPage += 1
-                    }
-                    if(special_code == 'bi-chevron-double-right'){
-                        searcher.nowPage = searcher.MAX_PAGE;
-                    }
-                }
-                else{
-                    searcher.nowPage = Number(val);
-                }
-                searcher.draw();
-            });
         });
+    },
+    getTeamList: function () {
+        // 유저 추천에 사용하는 팀 필터 
+        const teamFilter = document.getElementById("team-filter");
+        console.log("teamFilter", teamFilter);
+        if (teamFilter === null) return [];
+        const teamFilterForm = new FormData(teamFilter);
+        const team_li = teamFilterForm.getAll('teams');
+        console.log(team_li);
+        return team_li;
+    },
+    movePage: function (offset) {
+        let pageIdx = offset*searcher.nowPage;
+        let itemList = searcher.item.slice(pageIdx-offset, pageIdx);
+        $('#body-content').html(itemList);
     }
 }
 searcher.init();
