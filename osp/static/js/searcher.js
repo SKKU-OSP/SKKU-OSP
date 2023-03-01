@@ -254,10 +254,7 @@ const searcher = {
             return;
         }
         // 유저 추천에 사용하는 팀 필터 
-        const teamFilter = document.getElementById("team-filter");
-        const teamFilterForm = new FormData(teamFilter);
-        const team_li = teamFilterForm.getAll('teams');
-        console.log(team_li);
+        const team_li = searcher.getTeamList();
         
         // 페이지네이션 설정
         if(to_page_1){
@@ -305,10 +302,9 @@ const searcher = {
             this.nowPage = 1;
         }
 
-        const teamFilter = document.getElementById("team-filter");
-        const teamFilterForm = new FormData(teamFilter);
-        const team_li = teamFilterForm.getAll('teams');
-        console.log("js team_li", team_li);
+        // 유저 추천에 사용하는 팀 필터 
+        const team_li = searcher.getTeamList();
+
         console.log("this.activityType", this.activityType);
         $.ajax(
             {
@@ -360,6 +356,16 @@ const searcher = {
                 searcher.draw();
             });
         });
+    },
+    getTeamList: function () {
+        // 유저 추천에 사용하는 팀 필터 
+        const teamFilter = document.getElementById("team-filter");
+        console.log("teamFilter", teamFilter);
+        if (teamFilter === null) return [];
+        const teamFilterForm = new FormData(teamFilter);
+        const team_li = teamFilterForm.getAll('teams');
+        console.log(team_li);
+        return team_li;
     }
 }
 searcher.init();
