@@ -15,7 +15,7 @@ from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 import os
 import json
-
+import time
 
 class ProfileEditView(TemplateView):
     '''
@@ -250,6 +250,8 @@ class ProfileImageDefaultView(DeleteView):
 
 class ProfileEditSaveView(UpdateView):
     def post(self, request, username, *args, **kwargs):
+        start = time.time()
+
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
@@ -269,18 +271,24 @@ class ProfileEditSaveView(UpdateView):
 
         # 기존에 있던 사용언어/기술스택을 모두 삭제하고 다시 삽입한다.
         AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain).delete()
+        
+        query_bulk = []
         def langupdater(tier, level):
             for lang, val in tier.items() :
                 lang_tag = Tag.objects.get(name=val.replace("_", " "))
                 new_interest_obj = AccountInterest(account=user_account, tag=lang_tag, level=level)
-                new_interest_obj.save()
+                query_bulk.append(new_interest_obj)
 
         langupdater(tier0langs, 0)
         langupdater(tier1langs, 1)
         langupdater(tier2langs, 2)
         langupdater(tier3langs, 3)
         langupdater(tier4langs, 4)
+        AccountInterest.objects.bulk_create(query_bulk)
 
+        end = time.time()
+        print("걸린시간은")
+        print(end-start)
         user_tab.plural_major = req['plural_major']
         user_tab.personal_email = req['personal_email']
         user_tab.primary_email = req['primary_email']
