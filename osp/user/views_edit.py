@@ -14,6 +14,7 @@ from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 import os
+import json
 
 
 class ProfileEditView(TemplateView):
@@ -128,6 +129,29 @@ class ProfileInterestsView(UpdateView):
         return JsonResponse({'data':'asdfas'})
 
 class ProfileLanguagesView(UpdateView):
+
+    def post(self, request, username, *args, **kwargs):
+
+        added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
+        added_tag = Tag.objects.get(name=added_preferLanguage)
+        name = added_tag.name
+        logo = added_tag.logo
+        color = added_tag.color
+        hexcolor = color[1:]
+        print(logo)
+        print(color)
+
+        r = int(hexcolor[0:2], 16) & 0xff
+        g = int(hexcolor[2:4], 16) & 0xff
+        b = int(hexcolor[4:6], 16) & 0xff 
+        luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        if luma < 127.5:
+            fontcolor = "white"
+        else:
+            fontcolor = "black"
+
+        return JsonResponse({'name': name, 'logo' : logo, 'color': color, 'fontcolor' : fontcolor})
+    '''
     def post(self, request, username, *args, **kwargs):
         print(request.POST)
         print(request.POST['act'])
@@ -152,12 +176,14 @@ class ProfileLanguagesView(UpdateView):
                 if "tag_" + l.tag.name in request.POST:
                     added_tag = Tag.objects.get(name=l.tag.name)
                     AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-            return JsonResponse({'data':'asdfas'})
+            return JsonResponse({'color':'asdfas', })
         else:
             delete_requested_tag = Tag.objects.get(name=request.POST['target'])
             tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
             print("Selected tag is successfully deleted")
             return JsonResponse({'data':'asdfas'})
+    '''
+
 
 class ProfileImageView(UpdateView):
 
@@ -230,29 +256,45 @@ class ProfileEditSaveView(UpdateView):
         user_tab = StudentTab.objects.get(id=student_id)
         tags_all = Tag.objects
         tags_domain = tags_all.filter(type='domain')
-
-        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
         user_privacy = AccountPrivacy.objects.get(account=user_account)
-        print(user_privacy)
-        for l in lang:
-            if "tag_" + l.tag.name in request.POST:
-                added_tag = Tag.objects.get(name=l.tag.name)
-                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
 
-        user_tab.plural_major = request.POST['plural_major']
-        user_tab.personal_email = request.POST['personal_email']
-        user_tab.primary_email = request.POST['primary_email']
-        user_tab.secondary_email = request.POST['secondary_email']
+        print(request.POST)
+        req = json.loads(request.body.decode('utf-8'))
+
+        tier0langs = req["tier0langs"]
+        tier1langs = req["tier1langs"]
+        tier2langs = req["tier2langs"]
+        tier3langs = req["tier3langs"]
+        tier4langs = req["tier4langs"]
+
+        # 기존에 있던 사용언어/기술스택을 모두 삭제하고 다시 삽입한다.
+        AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain).delete()
+        def langupdater(tier, level):
+            for lang, val in tier.items() :
+                lang_tag = Tag.objects.get(name=val.replace("_", " "))
+                new_interest_obj = AccountInterest(account=user_account, tag=lang_tag, level=level)
+                new_interest_obj.save()
+
+        langupdater(tier0langs, 0)
+        langupdater(tier1langs, 1)
+        langupdater(tier2langs, 2)
+        langupdater(tier3langs, 3)
+        langupdater(tier4langs, 4)
+
+        user_tab.plural_major = req['plural_major']
+        user_tab.personal_email = req['personal_email']
+        user_tab.primary_email = req['primary_email']
+        user_tab.secondary_email = req['secondary_email']
         user_tab.save()
 
-        user_account.introduction = request.POST['introduction']
-        user_account.portfolio = request.POST['portfolio']
+        user_account.introduction = req['introduction']
+        user_account.portfolio = req['portfolio']
         user_account.save()
 
 
-        user_privacy.open_lvl = request.POST['profileprivacy']
-        user_privacy.is_write = request.POST['articleprivacy']
-        user_privacy.is_open = request.POST['teamprivacy']
+        user_privacy.open_lvl = req['profileprivacy']
+        user_privacy.is_write = req['articleprivacy']
+        user_privacy.is_open = req['teamprivacy']
         user_privacy.save()
 
 
