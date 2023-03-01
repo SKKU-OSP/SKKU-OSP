@@ -20,7 +20,7 @@
             </div>
             {% else %}
                 {% if html %}
-                <div id="article-list-body" class="text-center"> 
+                <div id="body-content" class="text-center"> 
                     {{html}}
                 </div>
                 <div id="article-list-footer" class="d-flex justify-content-end mt-3">
@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 {% else %}
-                <div id="article-list-body" class="text-center"></div>
+                <div id="body-content" class="text-center"></div>
                 <div id="article-list-footer" class="d-flex justify-content-end mt-3">
                     <div id="article-list-pagination">
                         <div id="pagination-body" data-board-name="{{board.name}}" data-max-page="{{max_page}}">

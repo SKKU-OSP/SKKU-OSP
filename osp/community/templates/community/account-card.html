@@ -1,52 +1,39 @@
 {% load community_tag %}
 {% load tag_templatetag %}
 
-{% if not is_open %}
-<div>
-    <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
-    <button class="btn btn-primary" onclick="consentUserOpen('{{request.user.username}}');">
-        정보공개하기
-    </button>
-</div>
-{% else %}
-    {% for account in account_list %}
-    <div class="card user-card d-flex flex-column gap-1">
-        {% if account.recommend_team %}
-        <div class="d-flex rec-team">
-            <div class="material-icons fs-5">recommend</div>
-            <div class="lh-sm fs-7"> {{ account.recommend_team.name }} 팀원 추천</div>
-        </div>
-        {% endif %}
-        <div class="account-data">
-            <img class="account-img" src="{{account.photo.url}}" alt="account image">
-            <div class="dropdown writer-dropdown">
-                <button type="button" class="dropdown-toggle writer-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
-                    {{ account.user.username }}
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
-                    {% if account.recommend_team %}
-                    <li><a class="dropdown-item" href="#" onclick="inviteTeamModalOpen({{ account.user.id }},-1, {{ account.recommend_team.id }} )">팀 초대하기</a></li>
-                    {% else %}
-                    <li><a class="dropdown-item" href="#" onclick="inviteTeamModalOpen({{ account.user.id }})">팀 초대하기</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-        <div class="account-intro">
-            {{ account.introduction }}
-        </div>
-        <div class="account-tag gap-1">
-            {% get_account_tags account as tags %}
-            {% for tag in tags %}
-            <span class="badge bg-tag-{{tag.tag.type}}">{{tag.tag.name}}</span>
-            {% empty %}
-            <span>태그 없음</span>
-            {% endfor %}
+<div class="card user-card d-flex flex-column gap-1">
+    {% if account.recommend_team %}
+    <div class="d-flex rec-team">
+        <div class="material-icons fs-5">recommend</div>
+        <div class="lh-sm fs-7"> {{ account.recommend_team.name }} 팀원 추천</div>
+    </div>
+    {% endif %}
+    <div class="account-data">
+        <img class="account-img" src="{{account.photo.url}}" alt="account image">
+        <div class="dropdown writer-dropdown">
+            <button type="button" class="dropdown-toggle writer-dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ account.user.username }}
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/user/{{account.user.username}}">프로필</a></li>
+                <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ account.user.id }})">메시지</a></li>
+                {% if account.recommend_team %}
+                <li><a class="dropdown-item" href="#" onclick="inviteTeamModalOpen({{ account.user.id }},-1, {{ account.recommend_team.id }} )">팀 초대하기</a></li>
+                {% else %}
+                <li><a class="dropdown-item" href="#" onclick="inviteTeamModalOpen({{ account.user.id }})">팀 초대하기</a></li>
+                {% endif %}
+            </ul>
         </div>
     </div>
-    {% empty %}
-    추천할 사용자가 없습니다.
-    {% endfor %}
-{% endif %}
+    <div class="account-intro">
+        {{ account.introduction }}
+    </div>
+    <div class="account-tag gap-1">
+        {% get_account_tags account as tags %}
+        {% for tag in tags %}
+        <span class="badge bg-tag-{{tag.tag.type}}">{{tag.tag.name}}</span>
+        {% empty %}
+        <span>태그 없음</span>
+        {% endfor %}
+    </div>
+</div>
