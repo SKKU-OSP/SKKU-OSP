@@ -76,7 +76,11 @@ def teamInfoValidation(team_name, team_desc, team_img):
         is_valid = False
         field_check_list['name'] = '필수 입력값입니다.'
     else:
-        pass
+        # 팀 이름 중복 확인
+        team_obj = Team.objects.filter(name=team_name)
+        if len(team_obj) > 0:
+            is_valid = False
+            field_check_list['name'] = '팀 이름이 이미 있습니다.'
 
     if not team_desc:
         is_valid = False
