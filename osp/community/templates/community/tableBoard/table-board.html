@@ -16,7 +16,7 @@
                 팀 멤버만 열람할 수 있습니다. <a href="/accounts/login/">팀 모집 게시판 확인하기</a>
             </div>
             {% else %}
-            <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board_name}}_{{board.id}}">
+            <div id="board-title-bar" class="flex-between" data-board-value="{{board_name}}_{{board.id}}">
                 <span id="board-title" class="p-board-title">{{ board_name }} 게시판</span>
                 <div>
                     {% if board.board_type == 'Notice' %}
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 {% else %}
-                <div id="article-list-body" class="text-center"></div>
+                <div id="body-content" class="text-center"></div>
                 <div id="article-list-footer" class="d-flex justify-content-end mt-3">
                     <div id="article-list-pagination">
                         <div id="pagination-body" data-board-name="{{board.name}}" data-max-page="{{max_page}}">
