@@ -10,7 +10,7 @@
 </div>
 {% else %}
     {% for account in account_list %}
-    <div class="card user-card d-flex flex-column">
+    <div class="card user-card d-flex flex-column gap-1">
         {% if account.recommend_team %}
         <div class="d-flex rec-team">
             <div class="material-icons fs-5">recommend</div>
@@ -34,7 +34,7 @@
                 </ul>
             </div>
         </div>
-        <div class="flex-grow-1">
+        <div class="account-intro">
             {{ account.introduction }}
         </div>
         <div class="account-tag gap-1">
