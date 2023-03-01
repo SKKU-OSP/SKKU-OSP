@@ -9,7 +9,7 @@
   <div id="community-container" class="row">
     {% include "community/sidebar.html" %}
     <div class="col-md-9">
-      <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="{{board.name}}_{{board.id}}">
+      <div id="board-title-bar" class="flex-between" data-board-value="{{board.name}}_{{board.id}}">
         <div id="board-title" class="p-board-title">
           <a href="/community/recommender/user/">
             맞춤 유저 추천
@@ -30,7 +30,7 @@
         <button type="button" id="btn-team-filter" class="btn btn-primary">적용</button>
       </form>
       {# 팀원 추천 목록이 표시되는 영역 #}
-      <div id="article-card-body" class="d-flex flex-wrap">
+      <div id="article-card-body" class="flex-between">
         <div class="spinner-border m-auto mt-5" role="status"></div>
       </div>
       <div id="article-list-footer" class="d-flex justify-content-end mt-3">
