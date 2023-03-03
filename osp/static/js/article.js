@@ -55,8 +55,14 @@ const article = {
             let team_id = $("#team-id").val();
             ajax_form_data.append('team_id', team_id);
         }
-
-        if (confirm("글을 등록하시겠습니까?")) {
+        
+        if ($('#article-title').val() == 0) {
+            alert('제목을 입력해 주세요')
+        }
+        else if ($('#article-body').val() == 0) {
+            alert('본문을 입력해 주세요')
+        }
+        else if (confirm("글을 등록하시겠습니까?")) {
             $.ajax({
                 type: "POST",
                 url: "/community/api/article/create/",
