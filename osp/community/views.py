@@ -174,7 +174,17 @@ class NoticeView(TemplateView):
 
 
 class SearchView(TemplateView):
-    # page, keyword, tag, team_li
+    '''
+    검색 
+    url        : community/search/
+    template   : community/tableBoard/searched.html
+    query      : page, keyword, tag, team_li
+
+    Returns :
+        GET     : render
+    '''
+    template_name = "community/tableBoard/searched.html"
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         board_id = request.GET.get('board', 0)
@@ -187,7 +197,7 @@ class SearchView(TemplateView):
                 board_name = board.name
                 context["board"] = board
             else:
-                board_name = "전체 게시판"
+                board_name = "전체"
                 board = {"name":board_name, "id":0, "board_type":"Total"}
                 context["board"] = board
         except Board.DoesNotExist:
@@ -214,15 +224,10 @@ class SearchView(TemplateView):
 
         keyword = request.GET.get('keyword', '')
         tags = request.GET.get('tag', False)
-        context['title'] = board_name 
-        if keyword:
-            context['title'] += f" 검색어 '{keyword}'" 
-        if tags:
-            context['title'] += f" 태그 '{tags}'" 
-        context['title'] += " 검색 결과"
+        context['title'] = board_name + " 게시판 검색 결과"
+        context['keyword'] = keyword
 
-
-        return render(request, 'community/tableBoard/searched.html', context)
+        return render(request, self.template_name , context)
 
     def get_context_data(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -236,6 +241,8 @@ def search_article(request, board_name, board_id):
     page = request.GET.get('page', 1)
     page = int(page) if page.isdigit() else 1
     print("keyword", keyword, " tags", tags)
+
+    # 타겟 게시판 설정
     try:
         if board_id == 0:
             #전체 검색
@@ -254,7 +261,7 @@ def search_article(request, board_name, board_id):
 
             print("total 검색", boardList)
             board_type = "Total"
-            board_name = "전체 게시판"
+            board_name = "전체"
             board_data = {"name":board_name, "id":0, "board_type":board_type}
         else:
             board_data = Board.objects.get(id=board_id)
@@ -277,7 +284,11 @@ def search_article(request, board_name, board_id):
     total_article_list = Article.objects.none()
     for board in boardList:
         # Filter Board
-        article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        if board.board_type == "Notice" and not request.user.is_superuser:
+            # 일반유저가 검색할 때는 공지게시판에서 공지 설정된 게시글만 가져옴
+            article_list = Article.objects.filter(board=board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        else :
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         article_list = filter_keyword_tag(article_list, keyword, tags)
         total_article_list = total_article_list.union(article_list)
     
@@ -306,46 +317,51 @@ def search_article(request, board_name, board_id):
 
     return result
 
+class UserBoardView(TemplateView):
+    '''
+    맞춤 유저 추천
+    url        : community/recommender/user/
+    template   : community/board/user-board.html
 
-def user_board(request):
-    try:
-        board = Board.objects.get(name="User")
-    except Board.DoesNotExist:
-        return Http404("유저 추천 게시판이 없습니다.")
-    context = {'board': board}
+    Returns :
+        GET     : render
+    '''
+    template_name = 'community/board/user-board.html'
 
-    return render(request, 'community/board/user-board.html', context)
+    def get(self, request, *args, **kwargs):
+        try:
+            board = Board.objects.get(name="User")
+        except Board.DoesNotExist:
+            return Http404("유저 추천 게시판이 없습니다.")
+
+        context = {'board': board, 'type': 'user'}
+        context['is_open'] = 0
+        try:
+            acc_pp = AccountPrivacy.objects.get(account=request.user.id)
+            context['is_open'] = acc_pp.is_open
+        except Exception as e:
+            print("community view account_cards error: ", e)
+
+        return render(request, self.template_name, context)
 
 def account_cards(request):
+    '''
+    유저 카드 목록
+    url        : community/account-cards/
+    template   : community/account-card.html
+    query      : page=1&team_li=%5B%5D&type=article HTTP/1.1" 200 10635
+
+    Returns :
+        GET     : JsonResponse
+    '''
 
     start = time.time()
     PAGE_SIZE = 9
-    
-    result = {}
-    result['max-page'] = 1
+
     context = {}
     context['board'] = Board.objects.get(board_type="User")
     context['account_list'] = []
-    context['is_open'] = 0
-    context['type'] = "user"
 
-    is_show = True
-    try:
-        acc_pp = AccountPrivacy.objects.get(account=request.user.id)
-        context['is_open'] = acc_pp.is_open
-        if not acc_pp.is_open:
-            is_show = False
-    except Exception as e:
-        print("community view account_cards error: ", e)
-        is_show = False
-    
-    if not is_show:
-        result['html'] = render_to_string('community/account-card.html', context, request=request)
-        return JsonResponse(result)
-
-    # sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
-
-    page = int(request.GET.get('page', 1))
     # Filter Board
     open_acc = AccountPrivacy.objects.filter(is_open=True).exclude(account=request.user.id).values('account_id')
     print("open_acc", len(open_acc))
@@ -353,13 +369,13 @@ def account_cards(request):
     account_list = Account.objects.filter(user__is_superuser=False, user__id__in=open_acc)
     # Filter Keyword
     keyword = request.GET.get('keyword', '')
+    team_li = json.loads(request.GET.get('team_li', "[]"))
+    print("team_li",team_li)
 
-    team_li = json.loads(request.GET.get('team_li'))
     if request.user.is_anonymous:
         team_li = []
     elif team_li==['first']:
         team_li = list(TeamMember.objects.filter(member__user=request.user).values_list("team_id", flat=True))
-
 
     if keyword != '':
         account_list = account_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
@@ -375,39 +391,41 @@ def account_cards(request):
 
     user_list = []
     member_id = []
-    print(team_li)
 
     team_list = Team.objects.filter(id__in=team_li)
-    print(team_list)
+    print("team_list", team_list)
 
-    # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
-    try:
-        team_member_dict = get_team_recommendation_list(team_list)
-    except:
-        team_member_dict = {}
-    for team_obj in team_list:
-        if team_obj.id in team_member_dict:
-            member_li = team_member_dict[team_obj.id]
-            member_id += member_li
-            tmps = account_list.filter(user__in=member_li)
-            for tmp in tmps:
-                tmp.recommend_team = team_obj
-            user_list += list(tmps)
+    if len(team_list) == 0:
+        user_list = list(account_list)
+    else:
+        # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
+        try:
+            team_member_dict = get_team_recommendation_list(team_list)
+        except:
+            team_member_dict = {}
 
-    user_list += list(account_list.exclude(user__in=member_id))
+        for team_obj in team_list:
+            if team_obj.id in team_member_dict:
+                member_li = team_member_dict[team_obj.id]
+                member_id += member_li
+                tmps = account_list.filter(user__in=member_li)
+                for tmp in tmps:
+                    tmp.recommend_team = team_obj
+                user_list += list(tmps)
 
-    account_list = user_list
+    account_list = user_list    
     total_len = len(account_list)
-    # Order
-    # article_list = article_list.order_by(*sort_field)
-    # Slice to Page
-    account_list = account_list[PAGE_SIZE * (page - 1):]
-    account_list = account_list[:PAGE_SIZE]
-    context['account_list'] = account_list
 
-    result = {}
-    result['html'] = render_to_string('community/account-card.html', context, request=request)
+    result = {'html': []}
+    for account in account_list:
+        context['account'] = account
+        result['html'].append(render_to_string('community/account-card.html', context, request=request))
+    print("html len",len(result['html']))
+    
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+    if result['max-page'] == 0:
+        result['html'] = "추천할 사용자가 없습니다."
+    result['offset'] = PAGE_SIZE
     print("elapsed time account_cards", time.time() - start)
 
     return JsonResponse(result)

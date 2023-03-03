@@ -7,7 +7,7 @@
     {% include "community/sidebar.html" with board=board %}
     <div id="community-main" class="col-md-9 col-12">
       <div id="community-main-title" class="card">
-        <div class="card-body">
+        <div class="p-community-main">
           커뮤니티
         </div>
       </div>
@@ -73,6 +73,3 @@
   </div>
 </div>
 {% endblock content %}
-{% block script %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
-{% endblock script %}

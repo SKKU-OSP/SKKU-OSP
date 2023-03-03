@@ -4,11 +4,15 @@
 {% load markdown_filter %}
 {% load static %}
 
-<div id="board-title-bar" class="d-flex justify-content-between">
+<div id="board-title-bar" class="flex-between">
     <div id="board-title" class="p-board-title">
+        {% if board.board_type != 'Notice' %}
         <a href="/community/board/{{board.name}}/{{board.id}}">
             {{ board.name }} 게시판
         </a>
+        {% else %}
+        {{ board.name }} 게시판
+        {% endif %}
     </div>
     {% if user == article.writer.user %}
     <div class="d-flex justify-content-end gap-2">

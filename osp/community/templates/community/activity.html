@@ -7,7 +7,7 @@
     {% include "community/sidebar.html" with board=board %}
     <div class="col-md-9 col-12">
       <div>
-        <div id="board-title-bar" class="d-flex justify-content-between" data-board-value="activity">
+        <div id="board-title-bar" class="flex-between" data-board-value="activity">
           <span id="board-title" class="p-board-title">내 활동 목록</span>
           <div id="activity-filter">
             {% include "community/board/activity-searcher.html" with board=board %}
@@ -32,7 +32,7 @@
         </ul>
       </div>
       {# 컨텐츠가 표시될 위치 #}
-      <div class="tab-content" id="pills-tabContent">
+      <div id="body-content" class="tab-content">
       </div>
       <div id="article-list-footer" class="d-flex justify-content-end mt-3">
         <div id="article-list-pagination">
@@ -46,5 +46,4 @@
 {% endblock content %}
 {% block script %}
 <script type="text/javascript" src="{% static 'js/community_base.js' %}"></script>
-<link rel="stylesheet" type="text/css" href="{% static 'css/community-base.css' %}">
 {% endblock script %}
