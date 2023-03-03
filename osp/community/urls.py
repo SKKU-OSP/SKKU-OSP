@@ -1,6 +1,6 @@
-from django.urls import path, include
+from django.urls import path
 
-from community import views, views_api, views_legacy
+from community import views, views_api
 
 app_name = 'community'
 
@@ -31,9 +31,6 @@ urlpatterns = [
     path('api/comment/create/', views_api.comment_create, name='comment-c'),
     path('api/comment/delete/', views_api.comment_delete, name='comment-d'),
     path('api/comment/like/', views_api.comment_like, name='comment-like'),
-
-    path('legacy-board/<board_name>/<board_id>/', views_legacy.board, name='LegacyBoard'),
-    path('legacy-board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='legacy-article-save'),
 
     # path('add/', views.TeamView.as_view(), name='Team'),
 ]
