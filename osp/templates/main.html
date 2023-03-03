@@ -2,12 +2,9 @@
 <html lang="ko">
     {% include 'head.html' %}
     <body>
-        <div id="body-wrapper">
         {% include 'header.html' %}
 
-        {% block additional_header %}
-        {% endblock %}
-
+        <div id="body-wrapper" class="fouc">
         {% block content %}
         {% endblock %}
 
