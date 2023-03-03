@@ -40,6 +40,10 @@ const article = {
         ajax_form_data.append('board_name', board_name);
 
         if (board_type == 'Recruit') {
+            if ($('#PeriodPickerStartInput').val() == 0 || $('#PeriodPickerEndInput').val() == 0) {
+                alert('모집 기간을 입력해 주세요')
+                return 0
+            }
             ajax_form_data.append('team_id', $('#team-option').val());
             const offset = new Date().getTimezoneOffset() * 60000;
             let period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
