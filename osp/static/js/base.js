@@ -287,7 +287,8 @@ function readApp(type="recv") {
     });
 }
 
-$().ready(function () {
+$(function () {
+    $('html').addClass("render");
     $('#message').click(function () {
         msgModalOpen();
     })
