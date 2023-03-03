@@ -3,10 +3,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView, DeleteView
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.core.files.images import get_image_dimensions
 
 from home.models import DistFactor, DistScore
 from tag.models import Tag, DomainLayer
@@ -14,13 +11,12 @@ from team.models import TeamMember
 from repository.models import GithubRepoStats, GithubRepoCommits
 
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
-from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
-import time, datetime
+import time
+import datetime
 import json
-import os
 import math
 
 
@@ -77,8 +73,11 @@ class ProfileView(TemplateView):
             context["success"] = False
             return context
         
-        student = StudentTab.objects.all()
-        star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
+        star_subquery = Subquery(StudentTab.objects.values('github_id'))
+        where_stmt = ["github_repo_contributor.repo_name=github_repo_stats.repo_name", 
+                    "github_repo_contributor.owner_id=github_repo_stats.github_id", 
+                    "github_repo_stats.github_id = github_repo_contributor.github_id"]
+        star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
         
         own_star = {"star" : 0}
         star_temp_dist = []
@@ -202,58 +201,8 @@ class ProfileView(TemplateView):
         context["star"] = own_star["star"]
         context["chart_data"] = json.dumps(chartdata)
         
-        #GBTI test
-        hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(context['username'])
-        
-        major_act, indi_num, group_num = update_act.read_major_act(context['username'])
-        
-        commit_freq, commit_freq_dist = update_act.read_frequency(context['username'])
-        try:
-            type_data = {}
-            type_data["typeE_data"] = hour_dist
-            type_data["typeE_sector"] = [int(daytime_min/3600), int(daytime_max/3600)]
-            type_data["typeF_data"] = commit_freq_dist
-            type_data["typeG_data"] = [indi_num, group_num]
-            context["type_data"] = json.dumps(type_data)
-        except Exception as e:
-            print("Get Type data error", e)
-
-        try:
-            devtype_data = DevType.objects.get(account=account)
-            try:
-                devtype_data.typeE = -1 if daytime > night else 1
-                devtype_data.typeF = commit_freq
-                devtype_data.typeG = 1 if major_act == 'individual' else -1
-                devtype_data.save()
-                gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
-
-                gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
-                gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
-                context["gbti"] = gbti_data
-            except Exception as e:
-                print("Calculate dev type error", e)
-                context["gbti"] = None
-            test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
-            def get_type_len(type_val):
-                return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val)%2 - 3)
-
-            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
-            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
-            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
-            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
-        except Exception as e:
-            print("Get DevType object error", e)
-            test_data = None
-            typeE = -1 if daytime > night else 1
-            typeF = commit_freq
-            typeG = 1 if major_act == 'individual' else -1
-            gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
-            gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
-            gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
-            context["gbti"] = gbti_data
-        context["test"] = test_data
-        context["success"] = True
+        developer_context = self.get_developer_type(account=account, username=context['username'])
+        context.update(developer_context)
 
         tags_domain = Tag.objects.filter(type='domain') # 분야 태그
         ints = AccountInterest.objects.filter(account=account).filter(tag__in=tags_domain)
@@ -388,9 +337,61 @@ class ProfileView(TemplateView):
         print("ProfileView get time :", time.time() - start)
 
         return render(request=request, template_name=self.template_name, context=context)
+    
+    def get_developer_type(self, account, username):
+        context = {}
+        #GBTI test
+        hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(username)
+        major_act, indi_num, group_num = update_act.read_major_act(username)
+        commit_freq, commit_freq_dist = update_act.read_frequency(username)
+        try:
+            type_data = {}
+            type_data["typeE_data"] = hour_dist
+            type_data["typeE_sector"] = [int(daytime_min/3600), int(daytime_max/3600)]
+            type_data["typeF_data"] = commit_freq_dist
+            type_data["typeG_data"] = [indi_num, group_num]
+            context["type_data"] = json.dumps(type_data)
+        except Exception as e:
+            print("Get Type data error", e)
 
+        try:
+            devtype_data = DevType.objects.get(account=account)
+            try:
+                devtype_data.typeE = -1 if daytime > night else 1
+                devtype_data.typeF = commit_freq
+                devtype_data.typeG = 1 if major_act == 'individual' else -1
+                devtype_data.save()
+                gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
 
+                gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
+                gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
+                context["gbti"] = gbti_data
+            except Exception as e:
+                print("Calculate dev type error", e)
+                context["gbti"] = None
+            test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
+            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+            def get_type_len(type_val):
+                return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val)%2 - 3)
 
+            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
+            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
+            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
+            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
+        except Exception as e:
+            print("Get DevType object error", e)
+            test_data = None
+            typeE = -1 if daytime > night else 1
+            typeF = commit_freq
+            typeG = 1 if major_act == 'individual' else -1
+            gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
+            gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
+            gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
+            context["gbti"] = gbti_data
+        context["test"] = test_data
+        context["success"] = True
+
+        return context
 
 
 def student_id_to_username(request, student_id):
@@ -463,7 +464,7 @@ class ProfileRepoView(TemplateView):
         ctx_repo_stats = sorted(ctx_repo_stats, key=lambda x:x['committer_date'], reverse=True)
         context["guideline"] = ctx_repo_stats
         print("ProfileRepoView time :", time.time() - start)
-        
+
         return context
 
 
@@ -545,11 +546,6 @@ def load_repo_data(request, username):
         return JsonResponse(context)
 
 
-
-
-
-
-
 class ProfileType(TemplateView):
     template_name = 'profile/profile-type.html'
     
@@ -593,7 +589,7 @@ def consent_write(request, username=""):
         except Exception as e:
             print(e)
             return JsonResponse({'status': 'fail', 'msg':'저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
-            
+
 
 def consent_open(request, username=""):
 
@@ -614,7 +610,7 @@ def consent_open(request, username=""):
         }
 
         return render(request, 'consent/consent_open.html',context)
-    
+
     if request.method == 'POST':
         try:
             account = Account.objects.get(user=request.user.id)

@@ -175,3 +175,16 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
 SCHEDULER_DEFAULT = True
 
 CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
+
+# 발신할 이메일
+EMAIL_HOST_USER = EMAIL_HOST_USER if 'EMAIL_HOST_USER' in vars() else ''
+# 발신할 메일의 비밀번호
+EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD if 'EMAIL_HOST_PASSWORD' in vars() else ''
+
+EMAIL_HOST = EMAIL_HOST if 'EMAIL_HOST' in vars() else ''
+EMAIL_PORT = EMAIL_PORT if 'EMAIL_PORT' in vars() else ''
+EMAIL_HOST_SSL = True
+EMAIL_USE_TLS = True
+
+# 사이트와 관련한 자동응답을 받을 이메일 주소
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

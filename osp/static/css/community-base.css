@@ -127,19 +127,6 @@
     font-weight: 600;
 }
 
-#article-list-body {
-    gap: 1rem;
-}
-
-#article-list-body>.article-bar {
-    margin-bottom: 1rem;
-    border-radius: 0.625rem;
-}
-
-#article-list-body>.article-bar:last-child {
-    margin-bottom: 0;
-}
-
 .article-bar-comment {
     position: relative;
     top: -1rem;
@@ -165,10 +152,6 @@
     background-color: var(--main-white);
     text-align: center;
     border-radius: 0.625rem;
-}
-
-#article-list-body>.article-bar.empty {
-    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
 }
 
 .accordion-collapse {
@@ -382,15 +365,30 @@
     color: var(--main-white);
     box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
     margin-bottom: 1rem;
-    border-radius: 0.75rem;
+    border-radius: 0.65rem;
     position: relative;
 }
 
 #board-title {
-    font-size: 18px;
+    font-size: 20px;
 }
+
+#board-title > a {
+    font-size: 20px;
+    color: var(--main-white);
+}
+
 .p-board-title {
     padding: 6px 12px;
+    vertical-align: middle;
+}
+
+#date-label {
+    font-size: 20px;
+    color: var(--main-white);
+}
+.p-date-label {
+    padding: 6px;
     vertical-align: middle;
 }
 
@@ -403,13 +401,14 @@
     border-radius: 0.75rem;
 }
 #user-filter, #activity-filter{
-    position:absolute;
     right:5px;
     top:10px;
     flex: 0 0 auto;
     width: 33.33333333%;
 }
 #user-tag-filter, #activity-tag-filter{
+    position:absolute;
+    width: inherit;
     transition-duration: 0.15s;
 }
 #user-tag-filter:not(.show), #activity-tag-filter:not(.show){
@@ -417,21 +416,15 @@
     visibility: hidden;
 }
 @media (max-width: 992px) {
-    #board-title {
-        margin-left: 1rem;
-    }
-    #user-filter{
+    #user-filter, #activity-filter{
         width: 41.6%;
     }
 }
-
-
-#board-title > a {
-    font-size: 20px;
-    color: var(--main-white);
+@media (max-width: 576px) {
+    #user-filter, #activity-filter{
+        width: 100%;
+    }
 }
-
-
 .color-b {
     color: #2F2F2F;
 }
@@ -469,7 +462,7 @@
     padding: 0.8rem;
     width:92%;
     min-width:480px;
-    height:160px;
+    height:200px;
     margin:auto;
 }
 
@@ -856,9 +849,11 @@
 }
 
 .btn-filter {
-    border: 1px solid var(--main-black);
-    padding: 8px 12px;
-    border-radius: 10px;
+    color: var(--main-icon-color);
+}
+
+.btn-filter:hover, .btn-check:checked+.btn {
+    border: 1px solid var(--main-black)!important;
 }
 
 .team-apply-delete {
@@ -887,12 +882,29 @@
     width: 3rem;
 }
 
+.account-intro{
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
 .user-card{
-    width:33%;
-    min-width:253px;
-    padding:15px 10px;
-    margin:5px 1px;
-    position:relative;
+    width: calc(33.3% - 4px);
+    min-width: 253px;
+    height: 240px;
+    padding: 15px 10px;
+    margin: 4px 2px;
+    position: relative;
+}
+@media screen and (max-width: 1200px) {
+    .user-card{
+        width: calc(50% - 4px);
+    }
+}
+@media screen and (max-width: 768px) {
+    .user-card{
+        width: 100%;
+        height: 280px;
+    }
 }
 
 .rec-team{
@@ -909,6 +921,7 @@
     overflow: hidden;
     overflow-x: auto;
     padding: 0.25rem 0;
+    flex-shrink: 0;
 }
 
 .desc-break{
@@ -940,9 +953,6 @@
 }
 .white-box {
     background-color: var(--main-white);
-}
-.shadow-box {
-    box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
 }
 #tbody > tr:last-child > td {
     border-width: 0;
@@ -995,6 +1005,7 @@
     height: 60px;
 
     box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+    border-radius: 0.625rem;
 
     font-size: 24px;
     font-weight: bold;
@@ -1004,7 +1015,15 @@
 
     justify-content: center;
     margin-bottom: 10px;
+    padding: 0.55rem;
 }
+
+.p-community-main {
+    padding: 6px 12px;
+    vertical-align: middle;
+    font-size: 20px;
+}
+
 .main-board-head{
     width: 95%;
     border-width: 0 0 3px 0;
@@ -1049,12 +1068,8 @@
 }
 
 #end-button{
-    display: flex;
-    margin-bottom: 10px;
+    margin-left: 20px;
     font-size: 16px;
 
     align-items: center;
-    height: 30px;
-    background-color: #002743;
-    border-color: white;
 }
