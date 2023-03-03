@@ -27,6 +27,9 @@ class LoginView(auth_views.LoginView):
 
 class PasswordResetView(auth_views.PasswordResetView):
     template_name='common/password_reset.html'
+    email_template_name = "registration/email_reset_password.html"
+    subject_template_name = "registration/subject_reset_password.txt"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"type": 'sign'})
@@ -38,17 +41,6 @@ class PasswordResetView(auth_views.PasswordResetView):
             email = self.request.POST.get("email")
 
             if Account.objects.filter(user__username=username, student_data__personal_email=email).exists():
-                opts = {
-                    'use_https': self.request.is_secure(),
-                    'token_generator': self.token_generator,
-                    'from_email': self.from_email,
-                    'email_template_name': self.email_template_name,
-                    'subject_template_name': self.subject_template_name,
-                    'request': self.request,
-                    'html_email_template_name': self.html_email_template_name,
-                    'extra_email_context': self.extra_email_context,
-                }
-                form.save(**opts)
                 return super().form_valid(form)
             else:
                 return render(self.request, 'common/password_reset_done_fail.html', context={"type": 'sign'})
