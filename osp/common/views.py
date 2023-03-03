@@ -14,7 +14,9 @@ from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
 from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
+
 import re
+import smtplib
 
 class LoginView(auth_views.LoginView):
     template_name='common/login.html'
@@ -131,8 +133,11 @@ def valid_check(request):
             except User.DoesNotExist as de:
                 print("valid_check DoesNotExist: ", de)
                 return JsonResponse({'status':'fail', 'message':'이메일을 찾을 수 없습니다. 이메일을 확인해주세요.'})
+            except smtplib.SMTPServerDisconnected as disconn:
+                print("valid_check SMTPServerDisconnected: ", disconn)
+                return JsonResponse({'status':'fail', 'message':'죄송합니다. 서비스에 문제가 있어 이메일을 발송할 수 없습니다.'})
             except Exception as e:
-                print("valid_check error: ", e)
+                print("valid_check error: ", e, type(e).__name__, e.args)
                 return JsonResponse({'status':'fail', 'message':'이메일 발송에 실패했습니다.'})
     return JsonResponse({'status':'fail', 'message':'이메일을 찾을 수 없습니다.'})
 
