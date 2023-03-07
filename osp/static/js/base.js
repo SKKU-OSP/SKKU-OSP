@@ -323,20 +323,21 @@ function consentSignInOpen(){
  * 이미지 업로드를 취소하면 data-src의 값을 preview에 렌더링
  */
 function previewSingleImage() {
-    let inputFile = $('input[type="file"]');
-    if (inputFile.length === 1){
-        let file = inputFile[0].files[0];
-        const preview = $('#preview');
-        if(file !== undefined){
-            const fileReader = new FileReader();
-            fileReader.onload = (e) => {
-                console.log("e.target", e.target);
-                preview.attr('src', e.target.result);
-            };
-            fileReader.readAsDataURL(file);
-        }
-        else {
-            preview.attr('src', preview.data('src'));
-        }
+    let inputFiles = $('input[type="file"]');
+    if (inputFiles.length > 0){
+        for(inputFile of inputFiles) {
+            let file = inputFile.files[0];
+            const preview = $(`#${inputFile.id}-preview`);
+            if(file !== undefined){
+                const fileReader = new FileReader();
+                fileReader.onload = (e) => {
+                    preview.attr('src', e.target.result);
+                };
+                fileReader.readAsDataURL(file);
+            }
+            else {
+                preview.attr('src', preview.data('src'));
+            }
+        };
     }
 }
