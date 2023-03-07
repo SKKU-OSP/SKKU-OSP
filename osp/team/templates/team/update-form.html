@@ -13,7 +13,13 @@
     </div>
     <div class="mb-4">
         <label for="team-image-submit" class="form-label">팀 대표 이미지</span>
-        <input type="file" id="team-image-submit" name="team-image" class="form-control">
+        <input type="file" id="team-image-submit" name="team-image" class="form-control" onchange="previewSingleImage()">
+    </div>
+    <div class="mb-4">
+        <span>이미지 미리보기</span>
+        <div class="rounded-3 my-2 p-2">
+            <img id="preview" class="w-50 h-50 rounded-3" src="{{ team.image.url }}" data-src="{{ team.image.url }}">
+        </div>
     </div>
     <div class="form-label">
         팀 멤버 

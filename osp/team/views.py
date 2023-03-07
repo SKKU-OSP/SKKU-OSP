@@ -57,7 +57,7 @@ def teamInviteValidation(user, username, team_id, invite_msg):
     return field_check_list, is_valid
 
 
-def teamInfoValidation(team_name, team_desc, team_img):
+def teamInfoValidation(team_name, team_desc, team_img, is_create):
     '''
     팀 정보 생성/수정 시 가져온 사용자의 입력 값에 대하여 validation을 수행
     validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
@@ -75,7 +75,7 @@ def teamInfoValidation(team_name, team_desc, team_img):
     if not team_name:
         is_valid = False
         field_check_list['name'] = '필수 입력값입니다.'
-    else:
+    elif is_create:
         # 팀 이름 중복 확인
         team_obj = Team.objects.filter(name=team_name)
         if len(team_obj) > 0:
@@ -97,8 +97,6 @@ def teamInfoValidation(team_name, team_desc, team_img):
             field_check_list['image'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}'
 
     return field_check_list, is_valid
-
-
 
 
 def TeamInvite(request):
@@ -231,7 +229,7 @@ def TeamCreate(request):
         team_img = request.FILES.get('image', False)
 
         # Invite의 Validation 체크
-        field_check_list, is_valid = teamInfoValidation(team_name,team_desc,team_img)
+        field_check_list, is_valid = teamInfoValidation(team_name,team_desc,team_img, True)
 
         if is_valid:
             try:
@@ -326,7 +324,7 @@ def TeamUpdate(request):
         team_desc = request.POST.get('team-desc', False)
         team_img = request.FILES.get('team-image', False)
 
-        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img)
+        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img, False)
 
         if not is_valid:
             for msg in field_check_list.values():

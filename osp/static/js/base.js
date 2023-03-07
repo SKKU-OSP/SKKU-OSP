@@ -317,3 +317,26 @@ function consentSignInOpen(){
         $("#consentSignUp").addClass("btn-primary");
     }
 }
+
+/**
+ * 이미지 파일을 올리면 preview 영역에 이미지 렌더링
+ * 이미지 업로드를 취소하면 data-src의 값을 preview에 렌더링
+ */
+function previewSingleImage() {
+    let inputFile = $('input[type="file"]');
+    if (inputFile.length === 1){
+        let file = inputFile[0].files[0];
+        const preview = $('#preview');
+        if(file !== undefined){
+            const fileReader = new FileReader();
+            fileReader.onload = (e) => {
+                console.log("e.target", e.target);
+                preview.attr('src', e.target.result);
+            };
+            fileReader.readAsDataURL(file);
+        }
+        else {
+            preview.attr('src', preview.data('src'));
+        }
+    }
+}
