@@ -1,4 +1,5 @@
 {% load tag_templatetag %}
+{% load team_tag %}
 <form class="needs-validation row" id="team-create-form" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="mb-4">
@@ -15,9 +16,15 @@
     </div>
     <div class="mb-4">
         <label for="team-image-input" class="form-label">팀 대표 이미지</label>
-        <input type="file" id="team-image-input" name="image" class="form-control" required>
+        <input type="file" id="team-image-input" name="image" class="form-control" onchange="previewSingleImage()">
         <div class="valid-feedback" data-feedback-type="team-image"></div>
         <div class="invalid-feedback" data-feedback-type="team-image"></div>
+    </div>
+    <div class="mb-4">
+        <span>이미지 미리보기</span>
+        <div class="rounded-3 my-2 p-2">
+            <img id="preview" class="w-50 h-50 rounded-3" src="{% get_default_team_image %}" data-src="{% get_default_team_image %}">
+        </div>
     </div>
     <div class="mb-4">
         <label for="team-tag" class="form-label">팀 분야</label>
