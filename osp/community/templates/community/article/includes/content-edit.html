@@ -55,12 +55,15 @@
             {% endif %}
         </div>
         <div class="mt-2">
-            <textarea id="article-body" name="article-body" class="form-control" placeholder="본문을 입력해 주세요" required>{{ article.body }}</textarea>
+            <div id="article-body" class="form-control block-article" contenteditable="true">{{ article.body|safe }}</div>
         </div>
         <div class="w-100 mt-2">
             <select name="category" id="content-category" multiple>
                 {% category_tag request %}
             </select>
+        </div>
+        <div id="article-helper" class="mt-2">
+            <button type="button" id="add-image" class="btn btn-secondary">이미지 추가</button>
         </div>
         {% if board.board_type == 'Recruit' %}
         <div id="period-setting" class="mt-3">

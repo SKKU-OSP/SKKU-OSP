@@ -3,13 +3,14 @@ from django.template.loader import render_to_string
 from django.db import DatabaseError, transaction
 from django.views.decorators.csrf import csrf_exempt
 
+from osp.settings import MEDIA_URL
 from .models import *
 from tag.models import Tag
 from user.models import Account
 from community.models import TeamRecruitArticle
 
 from datetime import datetime
-
+import os
 
 @csrf_exempt
 def article_create(request):
@@ -235,3 +236,27 @@ def comment_like(request):
     except DatabaseError as e:
         print("comment_like error", e)
         return JsonResponse({'status':'fail', 'message': '문제가 생겼습니다. 댓글에 추천하실 수 없습니다.'})
+
+def upload_article_image(request):
+
+    message = ''
+    status = 'success'
+    req_img = request.FILES.get('image', False)
+
+    if req_img == False:
+        return JsonResponse({'status': 'fail', 'message': '이미지에 문제가 있습니다.'})
+
+    try:
+        with transaction.atomic():
+            article_img = ArticleImage.objects.create(image=req_img,
+                                        created_user=str(request.user.username) + "_" + str(request.user.id),
+                                        created_date=datetime.now(),
+                                        status="UPLOAD",
+                                        article_id=0)
+    except Exception as e:
+        status = 'fail'
+        message = str(e)
+        if request.user.is_anonymous:
+            message = "로그인 후 이용해주세요."
+
+    return JsonResponse({'status': status, 'message': message, 'src': os.path.join(MEDIA_URL, article_img.image.name)})
