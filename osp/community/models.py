@@ -98,3 +98,14 @@ class TeamRecruitArticle(models.Model):
                 name='unique_team_article'
             )
         ]
+
+class ArticleImage(models.Model):
+    id = models.AutoField(primary_key=True)
+    image = models.ImageField(default='', upload_to='img/article/')
+    created_user = models.CharField(max_length=150)
+    created_date = models.DateTimeField()
+    status = models.CharField(max_length=20)
+    article_id = models.BigIntegerField()
+
+    def __str__(self) -> str:
+        return str(self.image.name)
