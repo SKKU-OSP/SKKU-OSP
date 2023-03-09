@@ -27,6 +27,7 @@ urlpatterns = [
 
     path('api/article/like/', views_api.article_like, name='article-like'),
     path('api/article/scrap/', views_api.article_scrap, name='article-scrap'),
+    path('api/article/image/', views_api.upload_article_image, name='article-image'),
 
     path('api/comment/create/', views_api.comment_create, name='comment-c'),
     path('api/comment/delete/', views_api.comment_delete, name='comment-d'),

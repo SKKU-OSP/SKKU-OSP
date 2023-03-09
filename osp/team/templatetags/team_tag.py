@@ -1,9 +1,12 @@
 from django import template
 from django.utils.safestring import mark_safe
 
+from osp.settings import MEDIA_URL
 from user.models import Account
 from team.models import TeamMember,TeamInviteMessage, Team
 from community.models import Board
+
+import os
 
 register = template.Library()
 @register.simple_tag
@@ -132,3 +135,8 @@ def get_sent_teamapply(user):
         direction=False,
     )
     return apply_messages
+
+# 팀의 디폴트 이미지의 경로를 리턴
+@register.simple_tag
+def get_default_team_image():
+    return os.path.join(MEDIA_URL, Team.image.field.default)
