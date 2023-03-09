@@ -9,6 +9,7 @@ from tag.models import Tag
 from user.models import Account
 from community.models import TeamRecruitArticle
 
+from bs4 import BeautifulSoup
 from datetime import datetime
 import os
 
@@ -23,8 +24,11 @@ def article_create(request):
     try:
         with transaction.atomic():
 
+            req_body = request.POST.get('body')
+            soup, parse_message = parse_req_body(req_body)
+
             account = Account.objects.get(user=request.user.id)
-            article = Article.objects.create(title=request.POST.get('title'), body=request.POST.get('body'),
+            article = Article.objects.create(title=request.POST.get('title'), body=str(soup),
                 pub_date=datetime.now(), mod_date=datetime.now(),
                 anonymous_writer=request.POST.get('is_anonymous') == 'true',
                 is_notice=request.POST.get('is_notice') == 'true',
@@ -48,8 +52,8 @@ def article_create(request):
             message = str(e)
             if request.user.is_anonymous:
                 message = "로그인 후 이용해주세요."
-            # message = str(e) + "\n" + str(trace_back)
-
+    if parse_message != '':
+        message = parse_message + "\n" + message
     return JsonResponse({'status': status, 'message': message})
 
 @csrf_exempt
@@ -61,12 +65,14 @@ def article_update(request):
     try:
         with transaction.atomic():
             article = Article.objects.get(id=article_id)
+            req_body = request.POST.get('body')
+            soup, parse_message = parse_req_body(req_body)
 
             if article.writer.user == request.user:
                 target_article = Article.objects.filter(id=article_id)
                 target_article.update(
                     title=request.POST.get('title'), 
-                    body=request.POST.get('body'), 
+                    body=str(soup), 
                     mod_date=datetime.now(), 
                     anonymous_writer=request.POST.get('is_anonymous') == 'true',
                     is_notice=request.POST.get('is_notice') == 'true'
@@ -95,7 +101,8 @@ def article_update(request):
     except DatabaseError:
         status = 'fail'
         message = 'Internal Database Error'
-
+    if parse_message != '':
+            message = parse_message + "\n" + message
     return JsonResponse({'status': status, 'message': message})
 
 @csrf_exempt
@@ -260,3 +267,32 @@ def upload_article_image(request):
             message = "로그인 후 이용해주세요."
 
     return JsonResponse({'status': status, 'message': message, 'src': os.path.join(MEDIA_URL, article_img.image.name)})
+
+def parse_req_body(req_body):
+    print("req_body", type(req_body), req_body)
+    message = ''
+    soup = BeautifulSoup(req_body, "lxml")
+    # 위험할 수 있는 태그 지우기
+    remove_tag_list = ['label', 'input', 'textarea', 'script', 'form', 'style', 'source']
+    for remove_tag in remove_tag_list:
+        target_tags = soup.find_all(remove_tag)
+        for target in target_tags:
+            target.decompose()
+
+    img_tags = soup.find_all('img')
+    for img in img_tags:
+        print(img.attrs)
+        if 'src' in img.attrs:
+            for attr_key in img.attrs:
+                if attr_key not in ['class', 'src']:
+                    del img.attrs[attr_key]
+        else:
+            img.decompose()
+
+    all_tags = soup.find_all()
+    for tag in all_tags:
+        if 'src' in tag.attrs and 'javascript:' in tag.attrs['src']:
+            message = "경고: 이상 코드가 감지되었습니다."
+            tag.decompose()
+
+    return soup, message
