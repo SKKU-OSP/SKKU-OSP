@@ -1,3 +1,9 @@
+/* base의 fouc를 오버라이딩 해서 테이블 로딩 전에 로딩바가 보이도록 구현 */
+.fouc{
+    opacity: 1 !important;
+    transition: opacity .01s linear;
+}
+
 thead{
     background-color: var(--main-point-color);
     color: #FFFFFF;
