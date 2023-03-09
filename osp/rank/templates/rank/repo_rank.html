@@ -69,6 +69,7 @@
 {% endif %}
 {% endblock content %}
 {% block script %}
+<link rel="stylesheet" href="{% static 'css/rank.css' %}"/> 
 <script src="{% static 'js/repo_rank.js' %}" defer></script>
 <!-- Datatables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css"/> 
@@ -88,5 +89,4 @@
 <!-- CSV, Excel 버튼 -->
 <script src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.html5.min.js" defer></script>
 
-<link rel="stylesheet" href="{% static 'css/rank.css' %}"/> 
 {% endblock script %}
