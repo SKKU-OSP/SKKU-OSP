@@ -678,20 +678,20 @@
     display: flex;
 }
 
-.page-item {
+#pagination-body > .page-item {
     height: 2.5rem;
     width: 2.5rem;
     border-radius: 50%;
     display: flex;
 }
-.page-item.disabled {
+#pagination-body > .page-item.disabled {
     opacity: 50%;
 }
-.page-item>.page-link:nth-child(1) {
+#pagination-body > .page-item > .page-link:nth-child(1) {
     background-color: transparent;
 }
 
-.page-item>.page-link {
+#pagination-body > .page-item > .page-link {
     text-align: center;
     color: var(--main-black);
     border: none;
