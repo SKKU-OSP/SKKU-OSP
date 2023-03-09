@@ -226,6 +226,7 @@ def TeamCreate(request):
 
         team_name = request.POST.get('name', False)
         team_desc = request.POST.get('desc', False)
+        team_desc = ' '.join(team_desc.split())
         team_img = request.FILES.get('image', False)
 
         # Invite의 Validation 체크
@@ -322,6 +323,7 @@ def TeamUpdate(request):
         # validation
         team_name = request.POST.get('team-name', False)
         team_desc = request.POST.get('team-desc', False)
+        team_desc = ' '.join(team_desc.split())
         team_img = request.FILES.get('team-image', False)
 
         field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img, False)

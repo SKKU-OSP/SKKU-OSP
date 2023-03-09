@@ -110,7 +110,7 @@ def board_sidebar_team_board(context, request):
             result += f'''
                 <a href="{url}">
                     <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
-                    <span>{board.name.capitalize()}</span>
+                    <span>{board.name}</span>
                 </a>
             </div>
             '''
