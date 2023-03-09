@@ -45,6 +45,10 @@ const article = {
         ajax_form_data.append('board_name', board_name);
 
         if (board_type == 'Recruit') {
+            if ($('#PeriodPickerStartInput').val() == 0 || $('#PeriodPickerEndInput').val() == 0) {
+                alert('모집 기간을 입력해 주세요')
+                return 0
+            }
             ajax_form_data.append('team_id', $('#team-option').val());
             const offset = new Date().getTimezoneOffset() * 60000;
             let period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
@@ -60,8 +64,14 @@ const article = {
             let team_id = $("#team-id").val();
             ajax_form_data.append('team_id', team_id);
         }
-
-        if (confirm("글을 등록하시겠습니까?")) {
+        
+        if ($('#article-title').val() == 0) {
+            alert('제목을 입력해 주세요')
+        }
+        else if ($('#article-body').val() == 0) {
+            alert('본문을 입력해 주세요')
+        }
+        else if (confirm("글을 등록하시겠습니까?")) {
             $.ajax({
                 type: "POST",
                 url: "/community/api/article/create/",

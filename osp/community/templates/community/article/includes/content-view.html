@@ -14,6 +14,22 @@
         {{ board.name }} 게시판
         {% endif %}
     </div>
+    {% if user == article.writer.user %}
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" id="btn-content-edit" class="btn btn-outline-light" onClick="edit();">
+            <i class="bi-pencil-square"></i> 수정
+        </button>
+        <button type="button" id="btn-content-delete" class="btn btn-outline-light">
+            <form>
+                <i class="bi bi-trash"></i>
+                <input type="hidden" id="board-name" value="{{board.name}}">
+                <input type="hidden" id="board-id" value="{{board.id}}">
+                <input type="hidden" id="article-id" value="{{article.id}}">
+                <span id="btn-article-delete" class="hover-opacity">삭제</span>
+            </form>
+        </button>
+    </div>
+    {% endif %}
 </div>
 {# article의 내용 영역 #}
 <div id="article-wrapper">
@@ -26,17 +42,7 @@
         </div>
         <div id="article-metadata" >
             <div class="d-flex flex-column justify-content-center">
-                {% if user == article.writer.user %}
-                <span class="hover-opacity" onclick="edit();">수정</span>
-                <form>
-                    <input type="hidden" id="board-name" value="{{board.name}}">
-                    <input type="hidden" id="board-id" value="{{board.id}}">
-                    <input type="hidden" id="article-id" value="{{article.id}}">
-                    <span id="btn-article-delete" class="hover-opacity">삭제</span>
-                </form>
-                {% elif request.user.is_anonymous %}
-                    사용자
-                {% elif not article.anonymous_writer and article.writer.user.username is not null%}
+                {% if not article.anonymous_writer and article.writer.user.username is not null%}
                 <div class="dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{article.writer.user.username}}
