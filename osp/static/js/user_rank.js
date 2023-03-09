@@ -35,7 +35,7 @@ $(document).ready(function () {
         },
         lengthChange: false,
         select: {
-            style: 'multi'
+            style: 'os'
         },
         buttons: {
             dom: {
