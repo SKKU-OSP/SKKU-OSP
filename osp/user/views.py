@@ -301,26 +301,24 @@ class ProfileView(TemplateView):
         print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
         
         is_own = request.user.username == context['username']
-        # initialize
-        is_redirect = True
-        if 'privacy' in request.session:
-            del request.session['privacy']
-        if 'alert' in request.session:
-            del request.session['alert']
-        if not is_own and acc_pp.open_lvl == 0:
-            target_team = TeamMember.objects.filter(member=context['account']).values('team')
-            if target_team:
-                # team check
-                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
-                if cowork:
-                    is_redirect = False
-                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
-                    request.session['alert'] = True
-                    acc_pp.open_lvl = 1
-            if is_redirect:
-                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
-                request.session['alert'] = True
-                return redirect('../'+request.user.username+'/')
+        
+        # 접근권한 체크, 권한 없을 시 리다이렉트
+        if not request.user.is_superuser:
+
+            is_redirect = True
+            if not is_own and acc_pp.open_lvl == 0:
+                target_team = TeamMember.objects.filter(member=context['account']).values('team')
+                if target_team:
+                    # team check
+                    cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                    if cowork:
+                        is_redirect = False
+                        acc_pp.open_lvl = 1
+                if is_redirect:
+                    context['alert'] = "해당 사용자는 정보 비공개 상태입니다."
+                    context['url'] = 'history'
+                    return render(request, "community/redirect.html", context)
+
         data = {}
 
         context['score'] = student_score
