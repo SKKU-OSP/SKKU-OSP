@@ -57,7 +57,7 @@ def teamInviteValidation(user, username, team_id, invite_msg):
     return field_check_list, is_valid
 
 
-def teamInfoValidation(team_name, team_desc, team_img, is_create):
+def teamInfoValidation(team_name, team_desc, team_img, pre_team_name=""):
     '''
     팀 정보 생성/수정 시 가져온 사용자의 입력 값에 대하여 validation을 수행
     validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
@@ -75,12 +75,14 @@ def teamInfoValidation(team_name, team_desc, team_img, is_create):
     if not team_name:
         is_valid = False
         field_check_list['name'] = '필수 입력값입니다.'
-    elif is_create:
-        # 팀 이름 중복 확인
+    elif pre_team_name != team_name:
+        # 생성 및 팀이름 포함 업데이트 시 팀 이름 중복 확인
         team_obj = Team.objects.filter(name=team_name)
         if len(team_obj) > 0:
             is_valid = False
             field_check_list['name'] = '팀 이름이 이미 있습니다.'
+    else :
+        print("이전 이름과 동일합니다.")
 
     if not team_desc:
         is_valid = False
@@ -230,7 +232,7 @@ def TeamCreate(request):
         team_img = request.FILES.get('image', False)
 
         # Invite의 Validation 체크
-        field_check_list, is_valid = teamInfoValidation(team_name,team_desc,team_img, True)
+        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img)
 
         if is_valid:
             try:
@@ -326,7 +328,7 @@ def TeamUpdate(request):
         team_desc = ' '.join(team_desc.split())
         team_img = request.FILES.get('team-image', False)
 
-        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img, False)
+        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img, team.name)
 
         if not is_valid:
             for msg in field_check_list.values():

@@ -504,18 +504,14 @@
     line-height: 2rem;
 }
 
-#comment-submit {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+#btn-comment-save {
     padding: 0.5rem 1rem;
     background-color: transparent;
     border: 1px solid var(--main-border-color);
     border-radius: 0.625rem;
 }
+
 #comment-group {
-    
     width: 100%;
     margin-top: 10px;
     padding-top: 10px;

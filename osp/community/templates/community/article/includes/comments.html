@@ -8,21 +8,21 @@
         {% else %}
         <div class="comment-item-left">
             <div class="comment-item-writer-wrapper">
-                {% if request.user.is_anonymous %}
-                <div class="comment-item-writer annonymous">사용자</div>
-                {% elif comment.anonymous_writer %}
+                {% if comment.anonymous_writer %}
                 <div class="comment-item-writer annonymous">익명</div>
-                {% else %}
+                {% elif request.user.is_authenticated %}
                 <div class="comment-item-writer dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{comment.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
+                        {% if not comment.writer.user.is_superuser %}
                         <li>
                             <a class="dropdown-item" href="/user/{{comment.writer.user.username}}">
                                 프로필
                             </a>
                         </li>
+                        {% endif %}
                         <li>
                             <a class="dropdown-item" onclick="msgModalOpen({{ comment.writer.user.id }})">
                                 메시지
@@ -30,10 +30,12 @@
                         </li>
                     </ul>
                 </div>
+                {% else %}
+                <div class="comment-item-writer">{{comment.writer.user.username}}</div>
                 {% endif %}
                 {% if request.user == comment.writer.user %}
                 <div class="comment-item-delete">
-                    <span onclick="deleteComment({{comment.id}});">삭제</span>
+                    <span onclick="comment.delete({{comment.id}});">삭제</span>
                 </div>
                 {% endif %}
             </div>
@@ -80,15 +82,16 @@
 
 </div>
 {% if request.user.is_authenticated %}
-<form id="comment-form" method="post" action="." onsubmit="registerComment();return false;">
+<form id="comment-form" method="post">
     {% csrf_token %}
+    <input type="hidden" id="comment-article-id" name="article-id" value="{{article_id}}">
     <div id="comment-input">
         <div id="comment-annonymous">
             <label for="comment-is-anonymous">익명</label>
             <input type="checkbox" id="comment-is-anonymous" checked>
         </div>
         <textarea id="comment-body" class="form-control" placeholder="댓글을 입력해주세요." required></textarea>
-        <button type="submit" id="comment-submit" class="hover-opacity">
+        <button type="button" id="btn-comment-save" class="hover-opacity">
             댓글 쓰기
         </button>
     </div>
