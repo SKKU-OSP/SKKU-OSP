@@ -224,10 +224,12 @@ flex-grow: 0;
 }
 
 #lang-trash-can{
+  max-width: 200px;
+  background-color: antiquewhite;
+  width: 20px;
   display: block;
   gap: 3px;
   min-height: 30px;
-  border: 1px solid black;
   border-radius: 0.3rem;
   padding: 3px;
 }
