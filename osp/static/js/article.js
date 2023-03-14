@@ -10,7 +10,7 @@ const article = {
         }else{
             console.log("content edit null");
         }
-        $("#btn-article-delete").on('click', () => {
+        $("#btn-content-delete").on('click', () => {
             console.log("article delete");
             _this.deleteArticle();
         });
@@ -33,8 +33,10 @@ const article = {
     registerArticle: function () {
         console.log("registerArticle");
         let ajax_form_data = new FormData();
-        ajax_form_data.append('title', $('#article-title').val());
-        ajax_form_data.append('body', $('#article-body').html());
+        let articleTitle = $('#article-title').val();
+        let articleBody = $('#article-body').html();
+        ajax_form_data.append('title', articleTitle);
+        ajax_form_data.append('body', articleBody);
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
         ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
@@ -65,13 +67,14 @@ const article = {
             ajax_form_data.append('team_id', team_id);
         }
         
-        if ($('#article-title').val() == 0) {
-            alert('제목을 입력해 주세요')
+        if (articleTitle.trim() === "") {
+            alert('제목을 입력해 주세요');
         }
-        else if ($('#article-body').val() == 0) {
-            alert('본문을 입력해 주세요')
+        else if (articleBody.trim() === "") {
+            alert('본문을 입력해 주세요');
         }
         else if (confirm("글을 등록하시겠습니까?")) {
+            $("#btn-content-edit").unbind('click');
             $.ajax({
                 type: "POST",
                 url: "/community/api/article/create/",
@@ -79,19 +82,26 @@ const article = {
                 dataType: 'json',
                 processData: false,
                 contentType: false,
-
+                async: false,
                 success: function (data) {
                     console.log(data);
                     if (data['status'] == "success") {
                         alert('등록이 완료되었습니다!');
+                        // 게시글쓰기 요청 성공시 다시 bind하지 않음
                         window.location.href = `/community/board/${board_name}/${board_id}/`;
                     } else {
                         alert(data['message']);
+                        $("#btn-content-edit").bind('click', () => {
+                            article.editSubmit();
+                        });
                     }
                 },
                 error: function (data) {
                     console.log("res", data);
                     alert('Error Occured');
+                    $("#btn-content-edit").bind('click', () => {
+                        article.editSubmit();
+                    });
                 }
             });
         }
@@ -100,8 +110,10 @@ const article = {
         console.log("updateArticle");
         console.log("no chekc", $('#is-notice').prop('checked'));
         let ajax_form_data = new FormData();
-        ajax_form_data.append('title', $('#article-title').val());
-        ajax_form_data.append('body', $('#article-body').html());
+        let articleTitle = $('#article-title').val();
+        let articleBody = $('#article-body').html();
+        ajax_form_data.append('title', articleTitle);
+        ajax_form_data.append('body', articleBody);
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
         ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
@@ -120,8 +132,14 @@ const article = {
             ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
             ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         }
-
-        if (confirm("수정을 완료하시겠습니까?")) {
+        if (articleTitle.trim() === "") {
+            alert('제목을 입력해 주세요');
+        }
+        else if (articleBody.trim() === "") {
+            alert('본문을 입력해 주세요');
+        }
+        else if (confirm("글을 수정하시겠습니까?")) {
+            $("#btn-content-edit").unbind('click');
             $.ajax({
                 type: "POST",
                 url: "/community/api/article/update/",
@@ -129,18 +147,24 @@ const article = {
                 dataType: 'json',
                 processData: false,
                 contentType: false,
-
+                async: false,
                 success: function (data) {
                     if (data['status'] == "success") {
                         alert('수정이 완료되었습니다!');
                         window.location.href = `/community/article/${article_id}/`; 
                     } else {
                         alert(data['message']);
+                        $("#btn-content-edit").bind('click', () => {
+                            article.editSubmit();
+                        });
                     }
                 },
                 error: function (data) {
                     console.log("error", data);
                     alert('Error Occured');
+                    $("#btn-content-edit").bind('click', () => {
+                        article.editSubmit();
+                    });
                 }
             });
         }
@@ -155,6 +179,7 @@ const article = {
         $('#article-form').submit();
 
         if (confirm("글을 삭제하시겠습니까?")) {
+            $("#btn-content-delete").unbind('click');
             $.ajax({
                 type: "POST",
                 url: "/community/api/article/delete/",
@@ -168,15 +193,24 @@ const article = {
                         window.location.href = `/community/board/${board_name}/${board_id}/`;
                     } else {
                         alert(data['message']);
+                        $("#btn-content-delete").bind('click', () => {
+                            article.deleteArticle();
+                        });
                     }
                 },
                 error: function (data) {
                     console.log("res", data);
                     alert('Error Occured');
+                    $("#btn-content-delete").bind('click', () => {
+                        article.deleteArticle();
+                    });
                 }
             });
         }
     },
+    /**
+     * 게시글 쓰기에서 파일업로드를 활성화하는 함수
+     */
     addImage: function () {
         const articleBody = $('#article-body');
         const articleHelper = $('#article-helper');
@@ -214,7 +248,7 @@ const article = {
         articleHelper.append(child);
     },
     /**
-     * 게시글 쓰기에서 파일업로드를 활성화하는 함수
+     * 게시글 쓰기에서 이미지를 업로드하면 파일을 저장하고 미리보기를 렌더링하는 함수
      */
     previewSingleImage: function (num) {
         let targetInput = '#article-image-' + String(num);
