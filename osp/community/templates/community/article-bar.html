@@ -56,12 +56,12 @@
         {{article.comment.body}}
     </div>
     <div class="ms-auto">
-        {% if request.user.is_anonymous %}
-        <span>사용자</span>
-        {% elif article.comment.anonymous_writer %}
+        {% if article.comment.anonymous_writer %}
         <span>익명</span>
-        {% else %}
+        {% elif request.user.is_authenticated and not article.comment.writer.user.is_superuser %}
         <a href="/user/{{article.comment.writer.user.username}}">{{article.comment.writer.user.username}}</a>
+        {% else %}
+        {{article.comment.writer.user.username}}
         {% endif %}
     </div>
     <div class="d-flex">
