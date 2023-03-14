@@ -175,35 +175,38 @@ def article_scrap(request):
 def comment_create(request):
 
     message = ''
-
     status = 'success'
-    article_id = request.POST.get('article_id')
+    article_id = request.POST.get('article-id')
     try:
         with transaction.atomic():
             writer = Account.objects.get(user=request.user.id)
             article = Article.objects.get(id=article_id)
-            comment = ArticleComment.objects.create(article=article,body=request.POST.get('body'),pub_date=datetime.now(),del_date=datetime.now(),anonymous_writer=request.POST.get('is_anonymous') == 'true',writer=writer)
+            comment_body = request.POST.get('body').strip()
+            now_date = datetime.now()
+            anonymous_writer = request.POST.get('is_anonymous') == 'true'
+            ArticleComment.objects.create(article=article,body=comment_body,pub_date=now_date,del_date=now_date,anonymous_writer=anonymous_writer,writer=writer)
+            message = "등록이 완료되었습니다!"
     except Exception as e:
             status = 'fail'
-            message = str(e)
+            message = "댓글 등록에 문제가 생겼습니다. 작업을 수행할 수 없습니다."
+            print("comment_create error", e)
             if request.user.is_anonymous:
                 message = "로그인 후 이용해주세요."
 
     html = ''
     if status == 'success':
         comments = ArticleComment.objects.filter(article=article)
-        context = {'article':article, 'comments':comments}
+        context = {'article':article, 'comments':comments, 'article_id':article.id}
         html = render_to_string('community/article/includes/comments.html',context, request=request)
 
     return JsonResponse({'status': status, 'message': message, 'html':html})
 
 @csrf_exempt
 def comment_delete(request):
-    message = ''
 
+    message = ''
     status = 'success'
     comment_id = request.POST.get('comment_id')
-
     try:
         with transaction.atomic():
             comment_f = ArticleComment.objects.filter(id=comment_id)
@@ -212,16 +215,21 @@ def comment_delete(request):
             article = Article.objects.get(id=comment.article.id)
             if comment.writer.user == request.user:
                 comment.delete()
+                message="삭제가 완료되었습니다!"
             else:
                 status = 'fail'
                 message = '작성자만 삭제할 수 있습니다.'
-    except:
+    except Exception as e:
         status = 'fail'
+        message = "댓글 삭제에 문제가 생겼습니다. 작업을 수행할 수 없습니다."
+        print("comment_delete error", e)
+        if request.user.is_anonymous:
+            message = "로그인 후 이용해주세요."
 
     html = ''
     if status == 'success':
         comments = ArticleComment.objects.filter(article=article)
-        context = {'article':article, 'comments':comments}
+        context = {'article':article, 'comments':comments, 'article_id':article.id}
         html = render_to_string('community/article/includes/comments.html',context,request=request)
     return JsonResponse({'status': status, 'message': message, 'html':html})
 
