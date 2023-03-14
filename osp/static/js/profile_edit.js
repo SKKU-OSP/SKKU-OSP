@@ -108,16 +108,36 @@ function intsDelete(target){
         e.preventDefault();
         const afterElement = getDragAfterElement(lang_trashcan, e.clientX);
         const draggable = document.querySelector(".dragging");
+        
         if (draggable == null){
           console.log("undefined");
+          
         }
-        if (afterElement === undefined) {
+        if (afterElement === undefined) {          
             lang_trashcan.appendChild(draggable);
           } else {
             lang_trashcan.insertBefore(draggable, afterElement);
+            
         }
 
     })
+    lang_trashcan.addEventListener("drop", e => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(lang_trashcan, e.clientX);
+      const draggable = document.querySelector(".dragging");
+      
+      if (draggable == null){
+        console.log("undefined");
+        
+      }
+      if (afterElement === undefined) {          
+          lang_trashcan.removeChild(draggable);   
+        } else {
+          lang_trashcan.insertBefore(draggable, afterElement);
+          
+      }
+
+  })
 
     function dragEnter(ev) {
         ev.preventDefault();
