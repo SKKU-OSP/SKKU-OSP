@@ -1,5 +1,6 @@
 from django.db import transaction, DatabaseError
 from django.shortcuts import render, resolve_url
+from django.urls import reverse
 from django.http import JsonResponse
 from django.core.files.images import get_image_dimensions
 from django.template.loader import render_to_string
@@ -96,7 +97,8 @@ def teamInfoValidation(team_name, team_desc, team_img, pre_team_name=""):
         img_width, img_height = get_image_dimensions(team_img)
         if img_width > 500 or img_height > 500:
             is_valid = False
-            field_check_list['image'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}'
+            # \u00d7 는 곱셈기호
+            field_check_list['image'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
 
     return field_check_list, is_valid
 
@@ -227,6 +229,7 @@ def TeamCreate(request):
         # team_img  : 생성할 팀의 이미지
 
         team_name = request.POST.get('name', False)
+        team_name = team_name.strip() if isinstance(team_name, str) else team_name
         team_desc = request.POST.get('desc', False)
         team_desc = ' '.join(team_desc.split())
         team_img = request.FILES.get('image', False)
@@ -280,17 +283,19 @@ def TeamCreate(request):
                     )
 
                     # 요청 성공 / status : success 리턴
-                    return JsonResponse({'status': 'success'})
+                    return JsonResponse({'status': 'success', 'message': "팀을 만들었습니다. 팀 게시판에 방문해보세요!"})
 
             except DatabaseError:
                 field_check_list['DB'] = 'DB Error'
                 # 요청 실패 / status : fail, error list 리턴
-                return JsonResponse({'status': 'fail', 'errors': field_check_list})
+                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '데이터 저장 중 오류가 발생했습니다.'})
+            except Exception as e:
+                field_check_list['Error'] = str(e)
+                # 요청 실패 / status : fail, error list 리턴
+                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '팀 생성 중에 오류가 발생했습니다.'})
         else:
             # 요청 실패 / status : fail, error list 리턴
-            return JsonResponse({'status': 'fail', 'errors': field_check_list})
-
-
+            return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '입력 값에 문제가 있습니다.'})
 
 
 def TeamUpdate(request):
@@ -323,75 +328,78 @@ def TeamUpdate(request):
         team = Team.objects.get(id=team_id)
 
         # validation
-        team_name = request.POST.get('team-name', False)
-        team_desc = request.POST.get('team-desc', False)
+        team_name = request.POST.get('name', False)
+        team_name = team_name.strip() if isinstance(team_name, str) else team_name
+        team_desc = request.POST.get('desc', False)
         team_desc = ' '.join(team_desc.split())
-        team_img = request.FILES.get('team-image', False)
+        team_img = request.FILES.get('image', False)
 
         field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img, team.name)
 
-        if not is_valid:
-            for msg in field_check_list.values():
-                return JsonResponse({'status':'fail', 'message':msg})
+        if is_valid:
+            try:
+                with transaction.atomic():
+                    # team update 후 저장
+                    team.name = team_name
+                    team.description = team_desc
+                    if team_img: 
+                        team.image = team_img
+                    team.save()
 
-        try:
-            with transaction.atomic():
+                    # 팀 게시판 이름 수정
+                    team_board = Board.objects.get(team_id = team.id)
+                    team_board.name = team_name
+                    team_board.save()
 
-                # team update
-                team.name = team_name
-                team.description = team_desc
-                if team_img: 
-                    team.image = team_img
-                team.save()
+                    # teamMember create and update
+                    admin_list = request.POST.get('admin_list').split(',')
+                    for x in admin_list:
+                        if not x:
+                            admin_list = []
+                            break
+                    member_list = request.POST.get('member_list').split(',')
+                    for x in member_list:
+                        if not x:
+                            member_list = []
+                            break
+                    member_list_old = list(TeamMember.objects.filter(team=team).values_list('member__user__username', flat=True))
 
-                # teamMember create and update
-                admin_list = request.POST.get('admin_list').split(',')
-                for x in admin_list:
-                    if not x:
-                        admin_list = []
-                        break
-                member_list = request.POST.get('member_list').split(',')
-                for x in member_list:
-                    if not x:
-                        member_list = []
-                        break
-                member_list_old = list(TeamMember.objects.filter(team=team).values_list('member__user__username', flat=True))
+                    for member_name in list(set(member_list_old) - set(member_list)):
+                        account = Account.objects.get(user__username=member_name)
+                        TeamMember.objects.get(member=account, team=team).delete()
 
-                for member_name in list(set(member_list_old) - set(member_list)):
-                    account = Account.objects.get(user__username=member_name)
-                    TeamMember.objects.get(member=account, team=team).delete()
-                # for member_name in list(set(member_list) - set(member_list_old)):
-                #     account = Account.objects.get(user__username=member_name)
-                #     is_admin = member_name in admin_list
-                #     TeamMember.objects.create(team=team, account=account, is_admin=is_admin)
-                for member_name in member_list:
-                    teammember = TeamMember.objects.get(team=team, member__user__username=member_name)
-                    teammember.is_admin = member_name in admin_list
-                    teammember.save()
+                    for member_name in member_list:
+                        teammember = TeamMember.objects.get(team=team, member__user__username=member_name)
+                        teammember.is_admin = member_name in admin_list
+                        teammember.save()
 
-                # teamTag create and delete
-                tag_list = request.POST.get('category_tag_list').split(',')
-                tag_list_old = list(TeamTag.objects.filter(team=team).values_list('tag__name', flat=True))
+                    # teamTag create and delete
+                    tag_list = request.POST.get('category_tag_list').split(',')
+                    tag_list_old = list(TeamTag.objects.filter(team=team).values_list('tag__name', flat=True))
 
-                for tag in tag_list:
-                    if not tag:
-                        tag_list = []
-                        break
-                for tag_name in list(set(tag_list_old) - set(tag_list)):
-                    TeamTag.objects.get(team=team, tag__name=tag_name).delete()
-                for tag_name in list(set(tag_list) - set(tag_list_old)):
-                    tag = Tag.objects.get(name=tag_name)
-                    TeamTag.objects.create(team=team, tag=tag)
+                    for tag in tag_list:
+                        if not tag:
+                            tag_list = []
+                            break
+                    for tag_name in list(set(tag_list_old) - set(tag_list)):
+                        TeamTag.objects.get(team=team, tag__name=tag_name).delete()
+                    for tag_name in list(set(tag_list) - set(tag_list_old)):
+                        tag = Tag.objects.get(name=tag_name)
+                        TeamTag.objects.create(team=team, tag=tag)
 
+                    if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
+                        raise Exception('팀 관리자는 0명이 될 수 없습니다.')
+                    team.save()
 
-                if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
-                    raise DatabaseError('팀 관리자는 0명이 될 수 없습니다.')
-                team.save()
-                return JsonResponse({'status': 'success'})
-        except DatabaseError as e:
-            return JsonResponse({'status': 'fail', 'message': str(e)})
-
-
+                    return JsonResponse({'status': 'success', 'message': '팀 설정을 업데이트했습니다.', 'redirect': reverse('community:Board', args=[team_board.name, team_board.id])})
+            except DatabaseError:
+                field_check_list['DB'] = 'DB Error'
+                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '데이터 저장 중 오류가 발생했습니다.'})
+            except Exception as e:
+                field_check_list['Error'] = str(e)
+                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '팀 업데이트 중에 오류가 발생했습니다.'})
+        else:
+            return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '입력 값에 문제가 있습니다.'})
 
 
 def TeamApply(request, team_id):
