@@ -67,12 +67,13 @@ const createTeam = function () {
       console.log(data);
       if (data.status == 'fail') {
         $('input').removeClass('is-invalid');
-        $('.invalid-feedback').html("");
+        const createForm = $('#team-create-form');
+        createForm.find('.invalid-feedback').html("");
         for (const [field, errors] of Object.entries(data.errors)) {
           console.log(field, errors);
-          if($(`[name=${field}`).length > 0){
-            $(`[name=${field}`).addClass('is-invalid');
-            $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
+          if(createForm.find(`[name=${field}`).length > 0){
+            createForm.find(`[name=${field}`).addClass('is-invalid');
+            createForm.find(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
           }else{
             alert(data['message']);
           }
