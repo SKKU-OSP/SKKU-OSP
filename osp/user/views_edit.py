@@ -210,8 +210,8 @@ class ProfileImageView(UpdateView):
             print(img_width, img_height)
             if img_width > 500 or img_height > 500:
                 is_valid = False
-                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
+                field_check_list['photo'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
+                print(f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px')
 
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
         print(img_form)

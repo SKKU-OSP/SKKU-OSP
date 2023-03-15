@@ -55,8 +55,13 @@ class TableBoardView(TemplateView):
             context["board"] = board
 
         except Board.DoesNotExist:
-            raise Http404("게시판을 찾을 수 없습니다.")
-        
+            board = Board.objects.filter(id=board_id)
+            if len(board) > 0:
+                board = board[0]
+                return redirect(reverse('community:Board', args=[board.name, board.id]))
+            else:
+                raise Http404("게시판을 찾을 수 없습니다.")
+
         # 로그인된 정보공개 설정을 확인한다.
         if request.user.is_authenticated:
             account = Account.objects.get(user_id=request.user.id)
