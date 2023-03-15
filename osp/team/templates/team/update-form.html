@@ -1,19 +1,25 @@
 {% load tag_templatetag %}
-<form id="team-update-form" onsubmit="submit_update_form(event);">
+<form id="team-update-form" onsubmit="submit_update_form(event);" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" name="team-id" value="{{ team.id }}">
     <input type="hidden" id="username" value="{{ request.user.username }}">
     <div class="mb-4">
         <label for="team-name" class="form-label">팀 이름</label>
-    <input type="text" id="team-name" name="team-name" class="form-control" value="{{ team.name }}" required>
+        <input type="text" id="team-name" name="name" class="form-control" value="{{ team.name }}" required>
+        <div class="valid-feedback" data-feedback-type="team-name" ></div>
+        <div class="invalid-feedback" data-feedback-type="team-name"></div>
     </div>
     <div class="mb-4">
         <label for="team-desc" class="form-label">팀 설명</label>
-        <textarea type="text" id="team-desc" name="team-desc" class="form-control text-break" rows="3" required>{{ team.description }}</textarea>
+        <textarea type="text" id="team-desc" name="desc" class="form-control text-break" rows="3" required>{{ team.description }}</textarea>
+        <div class="valid-feedback" data-feedback-type="team-desc"></div>
+        <div class="invalid-feedback" data-feedback-type="team-desc"></div>
     </div>
     <div class="mb-4">
         <label for="team-image-submit" class="form-label">팀 대표 이미지</span>
-        <input type="file" id="team-image-submit" name="team-image" class="form-control" onchange="previewSingleImage()">
+        <input type="file" id="team-image-submit" name="image" class="form-control" onchange="previewSingleImage()">
+        <div class="valid-feedback" data-feedback-type="team-image"></div>
+        <div class="invalid-feedback" data-feedback-type="team-image"></div>
     </div>
     <div class="mb-4">
         <span>이미지 미리보기</span>
@@ -21,10 +27,12 @@
             <img id="team-image-submit-preview" class="w-50 h-50 rounded-3" src="{{ team.image.url }}" data-src="{{ team.image.url }}">
         </div>
     </div>
-    <div class="form-label">
+    <div class="form-label" data-name="member">
         팀 멤버 
         <i id="refreshMembers" class="fade bi bi-arrow-counterclockwise hover-opacity align-middle"></i>
     </div>
+    <div class="valid-feedback" data-feedback-type="team-member"></div>
+    <div class="invalid-feedback" data-feedback-type="team-member"></div>
     <div id="membersList" class="w-100 mb-2">
     <table class="w-100">
         <colgroup>
@@ -64,5 +72,7 @@
         <select id="team-tag" name="tag" multiple>
             {% category_tag request %}
         </select>
+        <div class="valid-feedback" data-feedback-type="team-tag"></div>
+        <div class="invalid-feedback" data-feedback-type="team-tag"></div>
     </div>
 </form>
