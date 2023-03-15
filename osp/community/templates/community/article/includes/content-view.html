@@ -40,22 +40,26 @@
             {% endif %}
             {{ article.title }}
         </div>
-        <div id="article-metadata" >
+        <div id="article-metadata">
             <div class="d-flex flex-column justify-content-center">
-                {% if not article.anonymous_writer and article.writer.user.username is not null%}
+                {% if article.anonymous_writer %}
+                    익명
+                {% elif article.writer.user.username is null %}
+                    탈퇴한 이용자
+                {% elif request.user.is_authenticated %}
                 <div class="dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
+                        {% if not article.writer.user.is_superuser %}
                         <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
                 </div>
-                {% elif article.anonymous_writer %}
-                    익명
                 {% else %}
-                    탈퇴한 이용자
+                    {{article.writer.user.username}}
                 {% endif %}
             </div>
             <div id="article-datetime">
