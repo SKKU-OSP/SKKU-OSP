@@ -49,41 +49,48 @@ $().ready(function () {
 });
 
 const createTeam = function () {
-  $('#team-submit').unbind('click');
-  console.log('Submit');
-  const form = $('#team-create-form')[0];
-  const formData = new FormData(form);
-  $.ajax({
-    url: "/team/api/team-create",
-    type: "POST",
-    data: formData,
-    dataType: 'JSON',
-    cache: false,
-    contentType: false,
-    processData: false,
-    async: false,
-  }).done(function (data) {
-    console.log(data);
-    if (data.status == 'fail') {
-      $('input').removeClass('is-invalid');
-      $('.invalid-feedback').html("");
-      for (const [field, errors] of Object.entries(data.errors)) {
-        console.log(field, errors);
-        $(`[name=${field}`).addClass('is-invalid');
-        $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
+  if(confirm("팀을 만드시겠습니까?")) {
+    $('#team-submit').unbind('click');
+    console.log('Submit');
+    const form = $('#team-create-form')[0];
+    const formData = new FormData(form);
+    $.ajax({
+      url: "/team/api/team-create",
+      type: "POST",
+      data: formData,
+      dataType: 'JSON',
+      cache: false,
+      contentType: false,
+      processData: false,
+      async: false,
+    }).done(function (data) {
+      console.log(data);
+      if (data.status == 'fail') {
+        $('input').removeClass('is-invalid');
+        $('.invalid-feedback').html("");
+        for (const [field, errors] of Object.entries(data.errors)) {
+          console.log(field, errors);
+          if($(`[name=${field}`).length > 0){
+            $(`[name=${field}`).addClass('is-invalid');
+            $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
+          }else{
+            alert(data['message']);
+          }
+        }
+      } else {
+        alert(data["message"]);
+        window.location.reload();
       }
-    } else {
-      window.location.reload();
-    }
-    $('#team-submit').bind('click', function() {
-      createTeam();
+      $('#team-submit').bind('click', function() {
+        createTeam();
+      });
+    }).fail(function (data) {
+      alert(data['message']);
+      $('#team-submit').bind('click', function() {
+        createTeam();
+      });
     });
-  }).fail(function (data) {
-    alert('Server Error!');
-    $('#team-submit').bind('click', function() {
-      createTeam();
-    });
-  });
+  }
 }
 
 function inviteTeamModalOpen (user_id=-1, team_id=-1, rec_team_id=-1) {

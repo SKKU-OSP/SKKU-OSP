@@ -280,15 +280,19 @@ def TeamCreate(request):
                     )
 
                     # 요청 성공 / status : success 리턴
-                    return JsonResponse({'status': 'success'})
+                    return JsonResponse({'status': 'success', 'message': "팀을 만들었습니다. 팀 게시판에 방문해보세요!"})
 
             except DatabaseError:
                 field_check_list['DB'] = 'DB Error'
                 # 요청 실패 / status : fail, error list 리턴
-                return JsonResponse({'status': 'fail', 'errors': field_check_list})
+                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '데이터 저장 중 오류가 발생했습니다.'})
+            except Exception as e:
+                field_check_list['Error'] = str(e)
+                # 요청 실패 / status : fail, error list 리턴
+                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '팀 생성 중에 오류가 발생했습니다.'})
         else:
             # 요청 실패 / status : fail, error list 리턴
-            return JsonResponse({'status': 'fail', 'errors': field_check_list})
+            return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '입력 값에 문제가 있습니다.'})
 
 
 
