@@ -60,9 +60,7 @@
                 </div>
             </td>
             {#작성자#}
-            {% if request.user.is_anonymous %}
-            <td>사용자</td>
-            {% elif article.anonymous_writer %}
+            {% if article.anonymous_writer %}
             <td>익명</td>
             {% else %}
             <td class="dropdown writer-dropdown">
@@ -70,6 +68,7 @@
                     탈퇴한 이용자
                 {% else %}
                 <div class="d-flex justify-content-center">
+                    {% if request.user.is_authenticated %}
                     <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{article.writer_name}}
                     </button>
@@ -79,6 +78,9 @@
                         {% endif %}
                         <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
                     </ul>
+                    {% else %}
+                        {{article.writer_name}}
+                    {% endif %}
                 </div>
                 {% endif %}
             </td>
@@ -151,9 +153,7 @@
                 </div>
             </td>
             {#작성자#}
-            {% if request.user.is_anonymous %}
-            <td>사용자</td>
-            {% elif article.anonymous_writer %}
+            {% if article.anonymous_writer %}
             <td>익명</td>
             {% else %}
             <td class="dropdown writer-dropdown">
@@ -161,6 +161,7 @@
                     탈퇴한 이용자
                 {% else %}
                 <div class="d-flex justify-content-center">
+                    {% if request.user.is_authenticated %}
                     <button class="writer-dropdown-btn d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{article.writer_name}}
                     </button>
@@ -170,6 +171,9 @@
                         {% endif %}
                         <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer_id }})">메시지</a></li>
                     </ul>
+                    {% else %}
+                        {{article.writer_name}}
+                    {% endif %}
                 </div>
                 {% endif %}
             </td>
