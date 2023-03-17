@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from tag.models import Tag
+from tag.models import Tag, TagIndependent
 
 # Create your models here.
 
@@ -85,7 +85,7 @@ class Account(models.Model):
 class AccountInterest(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Account, models.CASCADE)
-    tag = models.ForeignKey(Tag, models.CASCADE)
+    tag = models.ForeignKey(TagIndependent, models.CASCADE)
     level = models.IntegerField(default=0)
 
     class Meta:
