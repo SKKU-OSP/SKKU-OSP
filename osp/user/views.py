@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 
 from home.models import DistFactor, DistScore
-from tag.models import Tag, DomainLayer
+from tag.models import Tag, TagIndependent, DomainLayer
 from team.models import TeamMember
 from repository.models import GithubRepoStats, GithubRepoCommits
 
@@ -204,11 +204,11 @@ class ProfileView(TemplateView):
         developer_context = self.get_developer_type(account=account, username=context['username'])
         context.update(developer_context)
 
-        tags_domain = Tag.objects.filter(type='domain') # 분야 태그
+        tags_domain = TagIndependent.objects.filter(type='domain') # 분야 태그
         ints = AccountInterest.objects.filter(account=account).filter(tag__in=tags_domain)
         student_id = account.student_data.id
         domain_layer = DomainLayer.objects
-        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=account).exclude(tag__type="domain").values("tag")).order_by("name")
+        lang_tags = TagIndependent.objects.filter(name__in = AccountInterest.objects.filter(account=account).exclude(tag__type="domain").values("tag")).order_by("name")
         account_lang = AccountInterest.objects.filter(account=account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
         level_list = [ al.level for al in account_lang ]
 
