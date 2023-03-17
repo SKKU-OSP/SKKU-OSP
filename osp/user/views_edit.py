@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from tag.models import Tag
+from tag.models import TagIndependent
 
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from user.forms import ProfileImgUploadForm
@@ -41,7 +41,7 @@ class ProfileEditView(TemplateView):
         student_account = Account.objects.get(user=user.id)
         student_id = student_account.student_data.id
 
-        tags_domain = Tag.objects.filter(type='domain')
+        tags_domain = TagIndependent.objects.filter(type='domain')
 
         lang = []
         lang_lv0 = []
@@ -50,7 +50,7 @@ class ProfileEditView(TemplateView):
         lang_lv3 = []
         lang_lv4 = []
 
-        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
+        lang_tags = TagIndependent.objects.filter(name__in = AccountInterest.objects.filter(account=student_account).exclude(tag__type="domain").values("tag")).order_by("name")
         account_lang = AccountInterest.objects.filter(account=student_account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
         level_list = [ al.level for al in account_lang ]
         for tag in lang_tags:
@@ -110,10 +110,10 @@ class ProfileInterestsView(UpdateView):
         user = User.objects.get(username=username)
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
-        tags_all = Tag.objects
+        tags_all = TagIndependent.objects
         if request.POST['act'] == 'append':
             added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
+            added_tag = TagIndependent.objects.get(name=added_preferLanguage)
             try:
                 already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
                 already_ints.delete()
@@ -122,7 +122,7 @@ class ProfileInterestsView(UpdateView):
                 AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
 
         else:
-            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
+            delete_requested_tag = TagIndependent.objects.get(name=request.POST['target'])
             tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
             print("Selected tag is successfully deleted")
 
@@ -133,7 +133,7 @@ class ProfileLanguagesView(UpdateView):
     def post(self, request, username, *args, **kwargs):
 
         added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-        added_tag = Tag.objects.get(name=added_preferLanguage)
+        added_tag = TagIndependent.objects.get(name=added_preferLanguage)
         name = added_tag.name
         logo = added_tag.logo
         color = added_tag.color
@@ -256,7 +256,7 @@ class ProfileEditSaveView(UpdateView):
         user_account = Account.objects.get(user=user.id)
         student_id = user_account.student_data.id
         user_tab = StudentTab.objects.get(id=student_id)
-        tags_all = Tag.objects
+        tags_all = TagIndependent.objects
         tags_domain = tags_all.filter(type='domain')
         user_privacy = AccountPrivacy.objects.get(account=user_account)
 
@@ -275,7 +275,7 @@ class ProfileEditSaveView(UpdateView):
         query_bulk = []
         def langupdater(tier, level):
             for lang, val in tier.items() :
-                lang_tag = Tag.objects.get(name=val.replace("_", " "))
+                lang_tag = TagIndependent.objects.get(name=val.replace("_", " "))
                 new_interest_obj = AccountInterest(account=user_account, tag=lang_tag, level=level)
                 query_bulk.append(new_interest_obj)
 
