@@ -55,9 +55,6 @@
         alert("새 비밀번호와 확인 란의 값이 서로 다릅니다.");
         return;
       }
-
-
-
       $.ajax({
         cache : false,
         url : "passwd",
@@ -67,16 +64,20 @@
           data : formData,
           headers: {'X-CSRFToken': csrftoken},
           mode: 'same-origin',
-          success : function(data) {
+          success : function(result) {
             //var jsonObj = JSON.parse(data);
             console.log('success');
+            console.log(result)
+            alert("비밀번호가 변경되었습니다. 다시로그인해 주세요.");
           }, // success 
-          error : function(xhr, status) {
+          error : function(result) {
             console.log('error');
+            console.log(result)
+            alert("입력된 기존 비밀번호가 올바르지 않습니다.");
           }
         });
-        alert("비밀번호가 변경되었습니다. 다시로그인해 주세요.");
-        window.location.reload();
+        
+        //window.location.reload();
 
     }
   </script>
