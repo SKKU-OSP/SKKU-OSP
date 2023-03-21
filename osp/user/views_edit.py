@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
@@ -313,15 +313,13 @@ class ProfilePasswdView(UpdateView):
         user = User.objects.get(username=username)
 
         if(user.check_password(request.POST['inputOldPassword']) == False):
-            return JsonResponse({"status" : "error"})
-
-        if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
-            return JsonResponse({"status" : "error"})
+            print("기존 비밀번호가 틀렸습니다.")
+            return HttpResponse("{'result' : 'error'}", content_type="application/json")
 
         user.set_password(request.POST['inputNewPassword'])
         user.save()
         print("비밀번호가 변경되었습니다. ")
-        return 1
+        return HttpResponse("{'result' : 'success'}", content_type="application/json")
 
 def InitAllPassword():
     users = User.objects.all()
