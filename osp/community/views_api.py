@@ -51,7 +51,7 @@ def article_create(request):
                 TeamRecruitArticle.objects.create(team=team,article=article)
 
             # 업로드된 이미지를 article과 연결하고 상태를 'POST'로 변경
-            ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST')
+            ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST', updated_date=datetime.now())
 
     except Exception as e:
             status = 'fail'
@@ -103,7 +103,7 @@ def article_update(request):
                     ArticleTag.objects.create(article=article, tag=tag)
                 
                 # 기존이미지는 삭제처리, 업로드된 이미지를 article과 연결하고 상태를 'POST'로 변경
-                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE')
+                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE', updated_date=datetime.now())
                 ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST')
             else:
                 status = 'fail'
@@ -130,7 +130,7 @@ def article_delete(request):
 
             if article.writer.user == request.user:
                 #이미지 삭제처리
-                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE')
+                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE', updated_date=datetime.now())
                 article.delete()
 
             else:
@@ -276,7 +276,6 @@ def upload_article_image(request):
         with transaction.atomic():
             article_img = ArticleImage.objects.create(image=req_img,
                                         created_user=str(request.user.username) + "_" + str(request.user.id),
-                                        created_date=datetime.now(),
                                         status="UPLOAD",
                                         article_id=0)
     except Exception as e:
