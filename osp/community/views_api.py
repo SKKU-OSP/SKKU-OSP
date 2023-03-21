@@ -25,7 +25,10 @@ def article_create(request):
         with transaction.atomic():
 
             req_body = request.POST.get('body')
-            soup, parse_message = parse_req_body(req_body)
+            soup, parse_message, img_src_list = parse_req_body(req_body)
+            
+            # 게시글 파싱 메시지가 있으면 message에 추가
+            message = parse_message + "\n" + message if parse_message != '' else message
 
             account = Account.objects.get(user=request.user.id)
             article = Article.objects.create(title=request.POST.get('title'), body=str(soup),
@@ -47,13 +50,15 @@ def article_create(request):
                 team = Team.objects.get(id=request.POST.get('team_id'))
                 TeamRecruitArticle.objects.create(team=team,article=article)
 
+            # 업로드된 이미지를 article과 연결하고 상태를 'POST'로 변경
+            ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST')
+
     except Exception as e:
             status = 'fail'
             message = str(e)
             if request.user.is_anonymous:
                 message = "로그인 후 이용해주세요."
-    if parse_message != '':
-        message = parse_message + "\n" + message
+    
     return JsonResponse({'status': status, 'message': message})
 
 @csrf_exempt
@@ -66,7 +71,9 @@ def article_update(request):
         with transaction.atomic():
             article = Article.objects.get(id=article_id)
             req_body = request.POST.get('body')
-            soup, parse_message = parse_req_body(req_body)
+            soup, parse_message, img_src_list = parse_req_body(req_body)
+            # 게시글 파싱 메시지가 있으면 message에 추가
+            message = parse_message + "\n" + message if parse_message != '' else message
 
             if article.writer.user == request.user:
                 target_article = Article.objects.filter(id=article_id)
@@ -94,6 +101,10 @@ def article_update(request):
                 for tag_name in list(set(tag_list)-set(tag_list_old)):
                     tag = Tag.objects.get(name=tag_name)
                     ArticleTag.objects.create(article=article, tag=tag)
+                
+                # 기존이미지는 삭제처리, 업로드된 이미지를 article과 연결하고 상태를 'POST'로 변경
+                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE')
+                ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST')
             else:
                 status = 'fail'
                 message = '작성자만 수정할 수 있습니다.'
@@ -101,8 +112,6 @@ def article_update(request):
     except DatabaseError:
         status = 'fail'
         message = 'Internal Database Error'
-    if parse_message != '':
-            message = parse_message + "\n" + message
     return JsonResponse({'status': status, 'message': message})
 
 @csrf_exempt
@@ -120,6 +129,8 @@ def article_delete(request):
             #cascade 달려있음.
 
             if article.writer.user == request.user:
+                #이미지 삭제처리
+                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE')
                 article.delete()
 
             else:
@@ -279,6 +290,7 @@ def upload_article_image(request):
 def parse_req_body(req_body):
     print("req_body", type(req_body), req_body)
     message = ''
+    img_src_list = []
     soup = BeautifulSoup(req_body, "lxml")
     # 위험할 수 있는 태그 지우기
     remove_tag_list = ['label', 'input', 'textarea', 'script', 'form', 'style', 'source']
@@ -289,11 +301,16 @@ def parse_req_body(req_body):
 
     img_tags = soup.find_all('img')
     for img in img_tags:
-        print(img.attrs)
-        if 'src' in img.attrs:
-            for attr_key in img.attrs:
+
+        img_attrs = list(img.attrs.keys())
+        if 'src' in img_attrs:
+            for attr_key in img_attrs:
                 if attr_key not in ['class', 'src']:
                     del img.attrs[attr_key]
+                elif attr_key == 'src':
+                    root_len = len(MEDIA_URL)
+                    img_src_list.append(img.attrs['src'][root_len:])
+
         else:
             img.decompose()
 
@@ -303,4 +320,4 @@ def parse_req_body(req_body):
             message = "경고: 이상 코드가 감지되었습니다."
             tag.decompose()
 
-    return soup, message
+    return soup, message, img_src_list
