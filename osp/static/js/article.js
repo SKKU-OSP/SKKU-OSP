@@ -1,4 +1,5 @@
 const article = {
+    nInputFile: 0,
     init: function () {
         console.log("article init");
         let _this = this;
@@ -14,11 +15,16 @@ const article = {
             console.log("article delete");
             _this.deleteArticle();
         });
-
+        // 이미지 추가 버튼
         const btnAddImage = $('#add-image');
         btnAddImage.on('click', () => {
             article.addImage();
         });
+        // 파일 추가 버튼
+        const btnAddFile = $('#add-file');
+        btnAddFile.on('click', () => {
+            article.addFile();
+        })
     },
     editSubmit: function () {
         console.log("editSubmit");
@@ -32,10 +38,10 @@ const article = {
     },
     registerArticle: function () {
         console.log("registerArticle");
-        let ajax_form_data = new FormData();
+        const articleForm = $('#article-form')[0];
+        const ajax_form_data = new FormData(articleForm);
         let articleTitle = $('#article-title').val();
         let articleBody = $('#article-body').html();
-        ajax_form_data.append('title', articleTitle);
         ajax_form_data.append('body', articleBody);
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
         ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
@@ -43,13 +49,11 @@ const article = {
         let board_id = $("#board-id").val();
         let board_name = $("#board-name").val();
         let board_type = $("#board-type").val();
-        ajax_form_data.append('board_id', board_id);
-        ajax_form_data.append('board_name', board_name);
 
         if (board_type == 'Recruit') {
             if ($('#PeriodPickerStartInput').val() == 0 || $('#PeriodPickerEndInput').val() == 0) {
                 alert('모집 기간을 입력해 주세요')
-                return 0
+                return 0;
             }
             ajax_form_data.append('team_id', $('#team-option').val());
             const offset = new Date().getTimezoneOffset() * 60000;
@@ -62,11 +66,6 @@ const article = {
             ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
             ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         }
-        else if (board_type == 'Team') {
-            let team_id = $("#team-id").val();
-            ajax_form_data.append('team_id', team_id);
-        }
-        
         if (articleTitle.trim() === "") {
             alert('제목을 입력해 주세요');
         }
@@ -108,22 +107,16 @@ const article = {
     },
     updateArticle: function () {
         console.log("updateArticle");
-        console.log("no chekc", $('#is-notice').prop('checked'));
-        let ajax_form_data = new FormData();
+        const articleForm = $('#article-form')[0];
+        const ajax_form_data = new FormData(articleForm);
         let articleTitle = $('#article-title').val();
         let articleBody = $('#article-body').html();
-        ajax_form_data.append('title', articleTitle);
         ajax_form_data.append('body', articleBody);
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
         ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
-        let board_id = $("#board-id").val();
-        let board_name = $("#board-name").val();
         let board_type = $("#board-type").val();
         let article_id = $("#article-id").val();
-        ajax_form_data.append('board_name', board_name);
-        ajax_form_data.append('board_id', board_id);
-        ajax_form_data.append('article_id', article_id);
 
         if (board_type == 'Recruit'){
             const offset = new Date().getTimezoneOffset() * 60000;
@@ -289,6 +282,22 @@ const article = {
                 }
             });
         }
+    },
+    addFile: function () {
+        // 업로드 파일의 구분을 위해 아이디 부여
+        const fileContainer = $('#article-file-container');
+        let nChild = article.nInputFile;
+        article.nInputFile += 1;
+
+        // 파일 입력 추가
+        fileContainer.append(`<div id="input-group-${nChild}" class="input-group my-1">
+        <input type="file" id="article-file-${nChild}" name="article_file_${nChild}" class="form-control article-file">
+        <button type="button" class="input-group-text default-btn" onclick="article.deleteInput(${nChild})"><i class="bi bi-x-lg"></i></button>
+        </div>`);
+    },
+    deleteInput: function (id) {
+        // 입력 삭제 버튼 클릭시 파일 입력 삭제
+        $(`#input-group-${id}`).remove();
     }
 };
 article.init();
