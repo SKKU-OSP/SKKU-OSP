@@ -103,7 +103,21 @@ class ArticleImage(models.Model):
     id = models.AutoField(primary_key=True)
     image = models.ImageField(default='', upload_to='img/article/')
     created_user = models.CharField(max_length=150)
-    created_date = models.DateTimeField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20)
+    article_id = models.BigIntegerField()
+
+    def __str__(self) -> str:
+        return str(self.image.name)
+
+class ArticleFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    file = models.FileField(default='', upload_to='file/article/')
+    filename = models.CharField(max_length=300, default='undefined')
+    created_user = models.CharField(max_length=150)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20)
     article_id = models.BigIntegerField()
 

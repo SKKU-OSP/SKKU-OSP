@@ -26,18 +26,18 @@
     </div>
 </div>
 <!-- type은 세가지 값이 가능: view / register / edit -->
-<form id="article-form" method="post" data-edit-type="{{ type }}">
+<form id="article-form" method="post" data-edit-type="{{ type }}" entype="multipart/form-data">
     {% csrf_token %}
-    <input type="hidden" id="board-type" value="{{board.board_type}}">
-    <input type="hidden" id="board-name" value="{{board.name}}">
-    <input type="hidden" id="board-id" value="{{board.id}}">
-    <input type="hidden" id="article-id" value="{{article.id}}">
+    <input type="hidden" id="board-type" name="board_type" value="{{board.board_type}}">
+    <input type="hidden" id="board-name" name="board_name" value="{{board.name}}">
+    <input type="hidden" id="board-id" name="board_id" value="{{board.id}}">
+    <input type="hidden" id="article-id" name="article_id" value="{{article.id}}">
     {% if board.board_type == 'Team' %}
-    <input type="hidden" id="team-id" value="{{board.team.id}}">
+    <input type="hidden" id="team-id" name="team_id" value="{{board.team.id}}">
     {% endif %}
     <div class="d-flex flex-column border border-2">
         <div class="d-flex justify-content-between mb-1">
-            <input type="text" id="article-title" class="form-control" value="{{ article.title }}" placeholder="제목을 입력해 주세요"  required autofocus>
+            <input type="text" id="article-title" name="title" class="form-control" value="{{ article.title }}" placeholder="제목을 입력해 주세요" required autofocus>
             {% if board.board_type == 'Recruit' %}
                 {% if team %}
                 <select id="team-option" name="team-option" class="form-select pointer" disabled>
@@ -64,6 +64,15 @@
         </div>
         <div id="article-helper" class="mt-2">
             <button type="button" id="add-image" class="btn btn-secondary">이미지 추가</button>
+            <button type="button" id="add-file" class="btn btn-secondary">파일 추가</button>
+        </div>
+        <div id="article-file-container">
+            {% for obj in article_file %}
+            <div id="input-group-saved{{forloop.counter}}" class="input-group my-1">
+                <input type="text" name="{{obj.id}}" class="form-control article-file" value="{{obj.name}}" readonly>
+                <button type="button" class="input-group-text default-btn" onclick="article.deleteInput('saved{{forloop.counter}}')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            {% endfor %}
         </div>
         {% if board.board_type == 'Recruit' %}
         <div id="period-setting" class="mt-3">

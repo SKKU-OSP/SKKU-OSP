@@ -21,6 +21,7 @@ urlpatterns = [
     path('account-cards/', views.account_cards ,name='Account_Cards'),
 
     path('article/<article_id>/', views.ArticleView.as_view(), name='article-view'),
+    path('article/<article_id>/download/file/<file_id>', views_api.file_download, name='file-download'),
     path('api/article/create/', views_api.article_create, name='article-c'),
     path('api/article/update/', views_api.article_update, name='article-u'),
     path('api/article/delete/', views_api.article_delete, name='article-d'),
@@ -32,6 +33,4 @@ urlpatterns = [
     path('api/comment/create/', views_api.comment_create, name='comment-c'),
     path('api/comment/delete/', views_api.comment_delete, name='comment-d'),
     path('api/comment/like/', views_api.comment_like, name='comment-like'),
-
-    # path('add/', views.TeamView.as_view(), name='Team'),
 ]
