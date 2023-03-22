@@ -1091,3 +1091,8 @@
     margin: 0.25rem 0;
     padding: 0.25rem 0.5rem;
 }
+
+.file-block{
+    display: block;
+    max-width:200px;
+}

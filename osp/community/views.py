@@ -595,10 +595,17 @@ class ArticleView(TemplateView):
             if article.writer.user_id != request.user.id:
                 article.view_cnt += 1
             article.save()
+            article_file_objs = ArticleFile.objects.filter(article_id=article.id, status="POST")
+            article_files = []
+            for obj in article_file_objs:
+                article_files.append({'id':obj.id,
+                                    'name':obj.filename,
+                                    'file':obj.file.name,
+                                    'size':convert_size(obj.file.size)})
             context['article'] = article
+            context['article_file'] = article_files
         except:
             context['error_occur'] = True
-
 
         return render(request, 'community/article/article.html', context)
 
@@ -609,6 +616,14 @@ class ArticleView(TemplateView):
         
         article_id = kwargs.get('article_id')
         context['article'] = Article.objects.get(id=article_id)
+        article_file_objs = ArticleFile.objects.filter(article_id=article_id, status="POST")
+        article_files = []
+        for obj in article_file_objs:
+            article_files.append({'id':obj.id,
+                                'name':obj.filename,
+                                'file':obj.file.name,
+                                'size':convert_size(obj.file.size)})
+        context['article_file'] = article_files
         context['tags'] = ArticleTag.objects.filter(article__id=article_id)
 
         context['board'] = Board.objects.get(id=context['article'].board.id)
@@ -801,3 +816,12 @@ class redirectView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return render(request, 'community/redirect.html', context)
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0 B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return f"{s} {size_name[i]}"

@@ -2,8 +2,10 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.db import DatabaseError, transaction
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from django.http import HttpResponse
 
-from osp.settings import MEDIA_URL
+from osp.settings import MEDIA_URL, MEDIA_ROOT
 from .models import *
 from tag.models import Tag
 from user.models import Account
@@ -12,6 +14,7 @@ from community.models import TeamRecruitArticle
 from bs4 import BeautifulSoup
 from datetime import datetime
 import os
+import urllib
 
 @csrf_exempt
 def article_create(request):
@@ -52,6 +55,16 @@ def article_create(request):
 
             # 업로드된 이미지를 article과 연결하고 상태를 'POST'로 변경
             ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST', updated_date=datetime.now())
+            
+            file_names = request.FILES
+            created_user = str(request.user.username) + "_" + str(request.user.id)
+            for key in file_names:
+                print("file", key, file_names[key])
+                ArticleFile.objects.create(file=file_names[key],
+                                            filename=file_names[key],
+                                            created_user=created_user,
+                                            status="POST",
+                                            article_id=article.id)
 
     except Exception as e:
             status = 'fail'
@@ -103,8 +116,25 @@ def article_update(request):
                     ArticleTag.objects.create(article=article, tag=tag)
                 
                 # 기존이미지는 삭제처리, 업로드된 이미지를 article과 연결하고 상태를 'POST'로 변경
-                ArticleImage.objects.filter(article_id=article.id).update(status='DELETE', updated_date=datetime.now())
+                ArticleImage.objects.filter(article_id=article.id, status="POST").update(status='DELETE', updated_date=datetime.now())
                 ArticleImage.objects.filter(image__in = img_src_list).update(article_id=article.id, status='POST')
+                
+                # 제거한 파일을 DELETE 상태로 변경
+                article_files = ArticleFile.objects.filter(article_id=article.id, status="POST")
+                for obj in article_files:
+                    if str(obj.id) not in request.POST:
+                        ArticleFile.objects.filter(id=obj.id).update(status='DELETE', updated_date=datetime.now())
+                # 새로 업로드한 파일을 POST상태로 create
+                file_names = request.FILES
+                created_user = str(request.user.username) + "_" + str(request.user.id)
+                for key in file_names:
+                    print("file", key, file_names[key])
+                    ArticleFile.objects.create(file=file_names[key],
+                                                filename=file_names[key],
+                                                created_user=created_user,
+                                                status="POST",
+                                                article_id=article.id)
+
             else:
                 status = 'fail'
                 message = '작성자만 수정할 수 있습니다.'
@@ -131,6 +161,8 @@ def article_delete(request):
             if article.writer.user == request.user:
                 #이미지 삭제처리
                 ArticleImage.objects.filter(article_id=article.id).update(status='DELETE', updated_date=datetime.now())
+                #파일 삭제처리
+                ArticleFile.objects.filter(article_id=article.id).update(status="DELETE", updated_date=datetime.now())
                 article.delete()
 
             else:
@@ -320,3 +352,26 @@ def parse_req_body(req_body):
             tag.decompose()
 
     return soup, message, img_src_list
+
+def file_download(request, *args, **kwargs):
+    article_id = kwargs.get('article_id')
+    file_id = kwargs.get('file_id')
+    try:
+        target_file = ArticleFile.objects.get(id=file_id, article_id=article_id)
+        file_path = os.path.join(MEDIA_ROOT, target_file.file.name)
+
+        if os.path.exists(file_path):
+            binary_file = open(file_path, 'rb')
+
+            file_name = urllib.parse.quote(os.path.basename(file_path).encode('utf-8'))
+            response = HttpResponse(binary_file.read(), content_type="application/octet-stream; charset=utf-8")
+            response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{file_name}'
+
+            return response
+        else :
+            context = {'alert':"경로에서 파일을 찾을 수 없습니다.", 'url':'history'}
+            return render(request, "community/redirect.html", context=context)
+    except Exception as e:
+        print("file_download error", e)
+        context = {'alert':"파일 다운로드 기능에 오류가 발생했습니다.", 'url':'history'}
+        return render(request, "community/redirect.html", context=context)
