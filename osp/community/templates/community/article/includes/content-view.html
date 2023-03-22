@@ -129,7 +129,15 @@
         </div>
     </div>
 </div>
-
+{% if article_file %}
+<div id="article-file-container" class="d-flex flex-wrap shadow-box p-3 mt-2 bg-white rounded-3">
+    <span class="d-inline px-2">첨부파일</span>
+    {% for obj in article_file %}
+    <span class="d-flex flex-nowrap px-2 text-nowrap">
+    <a href="download/file/{{obj.id}}" class="text-truncate file-block">{{obj.name}}</a>({{obj.size}})</span>
+    {% endfor %}
+</div>
+{% endif %}
 {% if board.board_type == 'Recruit' %}
 <div id="article-teamcard">
     {% if article.team %}
