@@ -48,18 +48,22 @@ window.addEventListener('load', function () {
       if(pane_id == "pills-overview"){
         $("#btnGroupDropMonth").attr("disabled", false);
         $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", false);
       }
       else if(pane_id == "pills-radar"){
         $("#btnGroupDropMonth").attr("disabled", false);
         $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", false);
       }
       else if(pane_id == "pills-dist"){
         $("#btnGroupDropMonth").attr("disabled", true);
         $("#btnGroupDropFactor").attr("disabled", false);
+        $("#btnGroupDropYear").attr("disabled", false);
       }
       else if(pane_id == "pills-detail"){
         $("#btnGroupDropMonth").attr("disabled", true);
         $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", true);
       }
     });
   }
