@@ -12,7 +12,7 @@
     </div>
     {#검색창#}
     <div id="searcher-box">
-    {% if type != 'sign' %}
+    {% if is_community %}
     {% include "community/board/searcher.html" with board=board %}
     {% endif %}
     </div>
