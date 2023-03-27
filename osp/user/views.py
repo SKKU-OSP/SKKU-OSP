@@ -281,59 +281,56 @@ class ProfileView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         start = time.time()
-
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
-            return redirect('/community')
+            context = {"alert": "로그인이 필요합니다.", "url":"history"}
+            return render(request, "community/redirect.html", context)
 
+        # 유저 프로필의 접근 권한 체크
+        try:
+            target_username = kwargs.get('username')
+            target_user = User.objects.get(username=target_username)
+            target_account = Account.objects.get(user=target_user)
+            acc_pp = AccountPrivacy.objects.get(account=target_account)
+            print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+
+            # 권한 없을 시 리다이렉트
+            is_own = request.user.username == target_username
+            if not request.user.is_superuser:
+                is_redirect = True
+                if not is_own and acc_pp.open_lvl == 0:
+                    target_team = TeamMember.objects.filter(member=target_account).values('team')
+                    if target_team:
+                        # team check
+                        cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                        if cowork:
+                            is_redirect = False
+                            acc_pp.open_lvl = 1
+                    if is_redirect:
+                        context = {"alert": "해당 사용자는 정보 비공개 상태입니다.", "url":"history"}
+                        return render(request, "community/redirect.html", context)
+        except Exception as e:
+            print("permission check error", e)
+            context = {"alert": "프로필 페이지 로드 중 오류가 발생했습니다.", "url":"history"}
+            return render(request, "community/redirect.html", context)
+
+        # 접근 권한 있다면 유저 데이터 로드 후 분석
         context = self.get_context_data(request, *args, **kwargs)
         if not context:
-            return redirect('/community')
-        student_account = context['account']
-        student_info = context['account'].student_data
+            context = {"alert": "유저 데이터를 가져올 수 없습니다.", "url":"history"}
+            return render(request, "community/redirect.html", context)
 
         # student repository info
         context['cur_repo_type'] = 'owned'
         ## owned repository
-        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
-
-        acc_pp = AccountPrivacy.objects.get(account=student_account)
-        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
-        
-        is_own = request.user.username == context['username']
-        
-        # 접근권한 체크, 권한 없을 시 리다이렉트
-        if not request.user.is_superuser:
-
-            is_redirect = True
-            if not is_own and acc_pp.open_lvl == 0:
-                target_team = TeamMember.objects.filter(member=context['account']).values('team')
-                if target_team:
-                    # team check
-                    cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
-                    if cowork:
-                        is_redirect = False
-                        acc_pp.open_lvl = 1
-                if is_redirect:
-                    context['alert'] = "해당 사용자는 정보 비공개 상태입니다."
-                    context['url'] = 'history'
-                    return render(request, "community/redirect.html", context)
-
-        data = {}
-
-        context['score'] = student_score
+        student_info = context['account'].student_data
+        context['score'] = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
         context['is_own'] = is_own
         context['open_lvl'] = acc_pp.open_lvl
         context['is_write'] = acc_pp.is_write
         context['is_open'] = acc_pp.is_open
 
-        if 'alert' in request.session and request.session['alert']:
-            print(request.session['privacy'])
-            if 'privacy' in request.session and request.session['privacy']:
-                data['privacy'] = request.session['privacy']
-        context['data'] = data
         print("ProfileView get time :", time.time() - start)
-
         return render(request=request, template_name=self.template_name, context=context)
     
     def get_developer_type(self, account, username):
