@@ -40,7 +40,7 @@ class CommunityMainView(TemplateView):
 
             board_list.append(board)
 
-        return render(request, 'community/main.html', {'boards': board_list})
+        return render(request, 'community/main.html', {'boards': board_list, 'is_community': True})
 
 class TableBoardView(TemplateView):
 
@@ -48,6 +48,7 @@ class TableBoardView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         board_name = context["board_name"]
         board_id = context["board_id"]
+        context['is_community'] = True
         context["need_login"] = False
         context["need_member"] = False
         try:
@@ -153,6 +154,7 @@ class NoticeView(TemplateView):
 
         context["need_login"] = False
         context["need_member"] = False
+        context['is_community'] = True
         try:
             board = Board.objects.get(board_type="Notice")
             context["board"] = board
@@ -196,6 +198,7 @@ class SearchView(TemplateView):
         board_id = int(board_id) if board_id.isdigit() else 0
         context["need_login"] = False
         context["need_member"] = False
+        context['is_community'] = True
         try:
             if(board_id):
                 board = Board.objects.get(id=board_id)
@@ -582,6 +585,7 @@ class ArticleView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request, *args, **kwargs)
         context['type'] = 'view'
+        context['is_community'] = True
         article_id = kwargs.get('article_id')
         try:
             article = Article.objects.get(id=article_id)
