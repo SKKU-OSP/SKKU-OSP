@@ -834,11 +834,6 @@
     const end_year = {{end_year}};
     const github_id = '{{username}}';
   </script>
-  {% if data.privacy %}
-  <script>
-    window.alert("{{data.privacy}}");
-  </script>
-  {% endif %}
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
