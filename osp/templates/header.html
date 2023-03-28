@@ -57,7 +57,7 @@
                 <span class="visually-hidden">New alerts</span>
             </span>
             {% endif %}
-            <button class="noti-dropdown dropdown-toggle btn-none p-0" type="button" data-bs-toggle="dropdown"
+            <button class="noti-dropdown dropdown-toggle btn-none p-0" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
                 aria-expanded="false">
                 <div id="notification" class="notification material-icons-outlined nav-icon pointer">
                     notifications
@@ -65,7 +65,7 @@
             </button>
             <ul id="noti-list" class="dropdown-menu noti-dropdown">
                 {% for noti in notifications.list %}
-                <li class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
+                <li id="noti-{{noti.id}}" class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
                     <div class="d-flex">
                         <div class="material-icons-outlined">
