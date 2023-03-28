@@ -1,10 +1,10 @@
 from django.db import DatabaseError, transaction
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic.base import TemplateView
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
@@ -271,3 +271,6 @@ def check_email(email):
     p = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
     print(email, p.match(email) != None)
     return p.match(email) == None
+
+def csrf_failure(request, reason=""):
+    return redirect(reverse('common:login'))
