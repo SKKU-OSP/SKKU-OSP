@@ -3,12 +3,12 @@ const article = {
     init: function () {
         console.log("article init");
         let _this = this;
-        if($("#btn-content-edit").length > 0){
+        if ($("#btn-content-edit").length > 0) {
             $("#btn-content-edit").on('click', () => {
                 console.log("article edit");
                 _this.editSubmit();
             });
-        }else{
+        } else {
             console.log("content edit null");
         }
         $("#btn-content-delete").on('click', () => {
@@ -57,9 +57,9 @@ const article = {
             }
             ajax_form_data.append('team_id', $('#team-option').val());
             const offset = new Date().getTimezoneOffset() * 60000;
-            let period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
-            let period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
-            if(period_start_date > period_end_date){
+            let period_start_date = new Date($('#PeriodPickerStartInput').val()) - offset;
+            let period_end_date = new Date($('#PeriodPickerEndInput').val()) - offset;
+            if (period_start_date > period_end_date) {
                 alert('날짜입력에 오류가 있습니다.');
                 return 0;
             }
@@ -110,25 +110,25 @@ const article = {
         const articleForm = $('#article-form')[0];
         const ajax_form_data = new FormData(articleForm);
         let articleTitle = $('#article-title').val();
-        let articleBody = $('#article-body').html();
-        ajax_form_data.append('body', articleBody);
+        let articleBody = $('#article-body');
+        ajax_form_data.append('body', articleBody.html());
         ajax_form_data.append('is_anonymous', $('#is-anonymous').prop('checked'));
         ajax_form_data.append('is_notice', $('#is-notice').prop('checked'));
         ajax_form_data.append('tags', category_select.selected().toString());
         let board_type = $("#board-type").val();
         let article_id = $("#article-id").val();
 
-        if (board_type == 'Recruit'){
+        if (board_type == 'Recruit') {
             const offset = new Date().getTimezoneOffset() * 60000;
-            const period_start_date = new Date($('#PeriodPickerStartInput').val())-offset;
-            const period_end_date = new Date($('#PeriodPickerEndInput').val())-offset;
+            const period_start_date = new Date($('#PeriodPickerStartInput').val()) - offset;
+            const period_end_date = new Date($('#PeriodPickerEndInput').val()) - offset;
             ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
             ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         }
         if (articleTitle.trim() === "") {
             alert('제목을 입력해 주세요');
         }
-        else if (articleBody.trim() === "") {
+        else if (articleBody.text().trim().length === 0) {
             alert('본문을 입력해 주세요');
         }
         else if (confirm("글을 수정하시겠습니까?")) {
@@ -144,7 +144,7 @@ const article = {
                 success: function (data) {
                     if (data['status'] == "success") {
                         alert('수정이 완료되었습니다!');
-                        window.location.href = `/community/article/${article_id}/`; 
+                        window.location.href = `/community/article/${article_id}/`;
                     } else {
                         alert(data['message']);
                         $("#btn-content-edit").bind('click', () => {
@@ -182,7 +182,7 @@ const article = {
                 contentType: false,
                 success: function (data) {
                     if (data['status'] == "success") {
-                        alert('삭제가 완료되었습니다!') 
+                        alert('삭제가 완료되었습니다!');
                         window.location.href = `/community/board/${board_name}/${board_id}/`;
                     } else {
                         alert(data['message']);
@@ -215,7 +215,7 @@ const article = {
 
         articleBody.blur();
 
-        articleBody.html(articleBody.html() +`<div>
+        articleBody.html(articleBody.html() + `<div>
         <img id="article-image-${nChild}-preview" class="rounded-3" style="display:none;">
         <label class="d-flex hover-opacity article-input" for="article-image-${nChild}" contenteditable="false">
             <i class="bi bi-card-image"></i>
@@ -247,7 +247,7 @@ const article = {
         let targetInput = '#article-image-' + String(num);
         let inputFiles = $(targetInput);
 
-        if (inputFiles.length > 0){
+        if (inputFiles.length > 0) {
             let inputFile = inputFiles[0];
 
             const uploadForm = $(`#${inputFile.id}-form`)[0];
@@ -265,7 +265,7 @@ const article = {
                 if (data['status'] == 'success') {
                     let file = inputFile.files[0];
                     const preview = $(`#${inputFile.id}-preview`);
-                    if(file !== undefined) {
+                    if (file !== undefined) {
                         const fileReader = new FileReader();
                         fileReader.onload = () => {
                             preview.attr('src', data['src']);
@@ -300,4 +300,3 @@ const article = {
         $(`#input-group-${id}`).remove();
     }
 };
-article.init();
