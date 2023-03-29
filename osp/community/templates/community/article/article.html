@@ -39,7 +39,7 @@
     let board_type = "{{ board.board_type }}" ;
     $(document).ready(function () {
         var view_type = "{{type}}";
-        if (view_type != 'view') {
+        if (view_type !== 'view') {
             category_select = new SlimSelect({
                 select: '#content-category',
                 placeholder: 'Tag',
@@ -101,6 +101,7 @@
 <script>
     function edit(){
         ajax_form_data=new FormData();
+        // csrf 토큰만 전송
         ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
         if (confirm("글을 수정하시겠습니까?")) {
             $.ajax({
