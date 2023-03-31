@@ -314,12 +314,12 @@ class ProfilePasswdView(UpdateView):
 
         if(user.check_password(request.POST['inputOldPassword']) == False):
             print("기존 비밀번호가 틀렸습니다.")
-            return HttpResponse("{'result' : 'error'}", content_type="application/json")
+            return HttpResponse(json.dumps({'result' : 'error'}), content_type="application/json")
 
         user.set_password(request.POST['inputNewPassword'])
         user.save()
         print("비밀번호가 변경되었습니다. ")
-        return HttpResponse("{'result' : 'success'}", content_type="application/json")
+        return HttpResponse(json.dumps({'result' : 'success'}), content_type="application/json")
 
 def InitAllPassword():
     users = User.objects.all()
