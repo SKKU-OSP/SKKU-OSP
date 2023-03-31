@@ -5,14 +5,8 @@
 {% block content %}
 
 <div class="container my-4">
-  {% if is_own %}
-  <div class="d-flex justify-content-end" style="margin-bottom:11px;">
-    <a href="./profile-edit" class="btn btn-primary btn-sm" role="button" aria-disabled="true">프로필 수정</a>
-  </div>
-  {% else %}
   <div class="d-flex justify-content-end mb-1" style="height:31px;">
   </div>
-  {% endif %}
   <div class="row">
     <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info"
@@ -21,7 +15,14 @@
       {% endif %}
       >
         <img src= {{account.photo.url}} alt="No Image now" class="profile-img" href="www.naver.com">
-        
+        {% if is_own %}
+        <div class="d-flex justify-content-end" style="margin-bottom:11px;">
+          <a href="./profile-edit" id="edit-button" class="btn btn-bd-primary" role="button" aria-disabled="true"><i class="bi bi-gear-fill"></i></a>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-end mb-1" style="height:31px;">
+        </div>
+        {% endif %}
         <div class="info-body">
         {% if is_own %}
           <p class="font-focus">{{info.name}}</p>
@@ -226,7 +227,7 @@
                 <li class="nav-item"><a class="nav-link" id="pills-detail-tab">세부 점수</a></li>
               </ul>
               <div class="tab-content">
-                <div class="btn-group-filter" role="group" aria-label="Button group with nested dropdown">
+                <div class="btn-group-filter flex-wrap" role="group" aria-label="Button group with nested dropdown">
                   <div class="btn-group" role="group">
                     <button id="btnGroupDropYear" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       {{end_year}}
@@ -833,11 +834,6 @@
     const end_year = {{end_year}};
     const github_id = '{{username}}';
   </script>
-  {% if data.privacy %}
-  <script>
-    window.alert("{{data.privacy}}");
-  </script>
-  {% endif %}
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>

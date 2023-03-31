@@ -3,16 +3,16 @@
 {% load message_tag %}
 <header id="main-navbar" class="container d-flex flex-row py-3">
     <div id="header-logo" class="col-lg-3 col-1">
-        <a href="/community">
+        <a href="/community/">
             <img width="42px" height="42px" src="/static/images/logo-simple.svg" alt="로고">
         </a>
-        <a id="text-logo" class="fs-3 bold text-nowrap align-middle" href="/community">
+        <a id="text-logo" class="fs-3 bold text-nowrap align-middle" href="/community/">
             <span>SKKU SOSD</span>
         </a>
     </div>
     {#검색창#}
     <div id="searcher-box">
-    {% if type != 'sign' %}
+    {% if is_community %}
     {% include "community/board/searcher.html" with board=board %}
     {% endif %}
     </div>
@@ -57,7 +57,7 @@
                 <span class="visually-hidden">New alerts</span>
             </span>
             {% endif %}
-            <button class="noti-dropdown dropdown-toggle btn-none p-0" type="button" data-bs-toggle="dropdown"
+            <button class="noti-dropdown dropdown-toggle btn-none p-0" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
                 aria-expanded="false">
                 <div id="notification" class="notification material-icons-outlined nav-icon pointer">
                     notifications
@@ -65,7 +65,7 @@
             </button>
             <ul id="noti-list" class="dropdown-menu noti-dropdown">
                 {% for noti in notifications.list %}
-                <li class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
+                <li id="noti-{{noti.id}}" class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
                 onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
                     <div class="d-flex">
                         <div class="material-icons-outlined">
@@ -96,16 +96,17 @@
             </div>
             <ul class="dropdown-menu" aria-labelledby="ProfileDropdown">
                 {% if user.is_superuser %}
-                <li><a class="dropdown-item" href="/admin">Admin</a></li>
+                <li><a class="dropdown-item" href="/admin">Admin 관리</a></li>
+                <li><a class="dropdown-item" href="{% url 'home:statistic' %}">GitHub 통계</a></li>                
+                <li><a class="dropdown-item" href="{% url 'rank:user_rank' %}">유저 랭킹</a></li>
+                <li><a class="dropdown-item" href="{% url 'rank:repo_rank' %}">리포지토리 랭킹</a></li>
                 {% endif %}
-                <li><a class="dropdown-item" href="/home/statistic">Statistic</a></li>
-                <li><a class="dropdown-item" href="/community">Community</a></li>
-                <li><a class="dropdown-item" href="/rank/user">User Rank</a></li>
-                <li><a class="dropdown-item" href="/rank/repo">Repository Rank</a></li>
+                <li><a class="dropdown-item" href="{% url 'community:main' %}">커뮤니티</a></li>
+                <li><a class="dropdown-item" href="{% url 'community:notice-board' %}">공지사항</a></li>
                 <li>
                     <form method="post" action="{% url 'common:logout' %}" class="dropdown-item">
                         {% csrf_token %}
-                        <button type="submit" class="btn-none dropdown-item">Logout</button>
+                        <button type="submit" class="btn-none dropdown-item">로그아웃</button>
                     </form>
                 </li>
             </ul>

@@ -4,35 +4,62 @@
 {% load markdown_filter %}
 {% load static %}
 
-<!--article content-->
+<div id="board-title-bar" class="flex-between">
+    <div id="board-title" class="p-board-title">
+        {% if board.board_type != 'Notice' %}
+        <a href="/community/board/{{board.name}}/{{board.id}}">
+            {{ board.name }} 게시판
+        </a>
+        {% else %}
+        {{ board.name }} 게시판
+        {% endif %}
+    </div>
+    {% if user == article.writer.user %}
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" id="btn-content-edit" class="btn btn-outline-light" onClick="edit();">
+            <i class="bi-pencil-square"></i> 수정
+        </button>
+        <button type="button" id="btn-content-delete" class="btn btn-outline-light">
+            <form>
+                <i class="bi bi-trash"></i>
+                <input type="hidden" id="board-name" value="{{board.name}}">
+                <input type="hidden" id="board-id" value="{{board.id}}">
+                <input type="hidden" id="article-id" value="{{article.id}}">
+                <span class="hover-opacity">삭제</span>
+            </form>
+        </button>
+    </div>
+    {% endif %}
+</div>
+{# article의 내용 영역 #}
 <div id="article-wrapper">
-    <div id="article-title-wrapper" class="d-flex flex-row justify-content-between">
-        <div id="article-title">
+    <div id="article-title-wrapper" class="d-flex flex-row justify-content-between gap-2">
+        <div id="article-title" class="fs-5">
             {% if board.board_type == 'Recruit' %}
-                [{{ article.team.name |default:"팀이 더이상 존재하지 않습니다." }}]
+                [{{ article.team.name |default:"팀이 더이상 존재하지 않습니다." }}] 
             {% endif %}
-            <h4>{{ article.title }}</h4>
+            {{ article.title }}
         </div>
-        <div id="article-metadata" >
-
+        <div id="article-metadata">
             <div class="d-flex flex-column justify-content-center">
-                {% if user == article.writer.user %}
-                <span class="hover-opacity" onclick="edit();">수정</span>
-                <span class="hover-opacity" onclick="deleteArticle();">삭제</span>
-                {% elif request.user.is_anonymous %}
-                    사용자
-                {% elif not article.anonymous_writer and article.writer.user.username is not null%}
+                {% if article.anonymous_writer %}
+                    익명
+                {% elif article.writer.user.username is null %}
+                    탈퇴한 이용자
+                {% elif request.user.is_authenticated %}
                 <div class="dropdown writer-dropdown">
                     <button class="dropdown-toggle writer-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{article.writer.user.username}}
                     </button>
                     <ul class="dropdown-menu">
+                        {% if not article.writer.user.is_superuser %}
                         <li><a class="dropdown-item" href="/user/{{article.writer.user.username}}">프로필</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href="#" onclick="msgModalOpen({{ article.writer.user.id }})">메시지</a></li>
                     </ul>
                 </div>
                 {% else %}
-                    탈퇴한 이용자
+                    {{article.writer.user.username}}
                 {% endif %}
             </div>
             <div id="article-datetime">
@@ -49,7 +76,7 @@
 
     <div>
         <div id="article-body">
-            {{ article.body|mark }}
+            {{ article.body|safe|mark }}
         </div>
     </div>
     <div id="article-taglist">
@@ -102,7 +129,15 @@
         </div>
     </div>
 </div>
-
+{% if article_file %}
+<div id="article-file-container" class="d-flex flex-wrap shadow-box p-3 mt-2 bg-white rounded-3">
+    <span class="d-inline px-2">첨부파일</span>
+    {% for obj in article_file %}
+    <span class="d-flex flex-nowrap px-2 text-nowrap">
+    <a href="download/file/{{obj.id}}" class="text-truncate file-block">{{obj.name}}</a>({{obj.size}})</span>
+    {% endfor %}
+</div>
+{% endif %}
 {% if board.board_type == 'Recruit' %}
 <div id="article-teamcard">
     {% if article.team %}

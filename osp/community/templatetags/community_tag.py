@@ -55,7 +55,7 @@ def article_scrap(article):
 def comment_like(comment):
     return len(ArticleCommentLike.objects.filter(comment=comment))
 
-#todo: 사용안되는 함수, 명세서에 작성안함.
+#TODO: 사용안되는 함수, 명세서에 작성안함.
 @register.filter
 def anonymous_checked(a_writer):
     if a_writer:
@@ -67,12 +67,12 @@ def anonymous_checked(a_writer):
 @register.simple_tag(takes_context=True)
 def board_sidebar_normal_board(context, request):
     result = ''
-    boards = Board.objects.filter(team_id=None).exclude(board_type='User')
+    boards = Board.objects.filter(team_id=None).exclude(board_type__in=['User', 'Notice'])
     # 일반 게시판이 팀 게시판과 분리되어있지 않아 DB에 넣기 애매함 
     icons = {"QnA": "bi-question-circle-fill",
     "Recruit": "bi-person-fill-add",
     "Normal": "bi-info-circle-fill",
-    "Notice": "bi-megaphone-fill"}
+    "Promotion": "bi-megaphone-fill"}
     for board in boards:
         url = resolve_url('community:Board',board_name=board.name,board_id=board.id)
         if board == context['board']:
@@ -110,7 +110,7 @@ def board_sidebar_team_board(context, request):
             result += f'''
                 <a href="{url}">
                     <img width="20px" height="20px" src="{board_team.image.url}" alt="{board.name} image" class="rounded-1">
-                    <span>{board.name.capitalize()}</span>
+                    <span>{board.name}</span>
                 </a>
             </div>
             '''
