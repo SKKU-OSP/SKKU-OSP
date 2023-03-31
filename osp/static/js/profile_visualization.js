@@ -48,18 +48,22 @@ window.addEventListener('load', function () {
       if(pane_id == "pills-overview"){
         $("#btnGroupDropMonth").attr("disabled", false);
         $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", false);
       }
       else if(pane_id == "pills-radar"){
         $("#btnGroupDropMonth").attr("disabled", false);
         $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", false);
       }
       else if(pane_id == "pills-dist"){
         $("#btnGroupDropMonth").attr("disabled", true);
         $("#btnGroupDropFactor").attr("disabled", false);
+        $("#btnGroupDropYear").attr("disabled", false);
       }
       else if(pane_id == "pills-detail"){
         $("#btnGroupDropMonth").attr("disabled", true);
         $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", true);
       }
     });
   }
@@ -135,7 +139,7 @@ window.addEventListener('load', function () {
     let month = cur_date.getMonth(); // month - 1
     dirty_month.forEach((dirty, idx) =>{
       if(!dirty) {
-        if (idx<=month) monthly_contribution_level[idx] = 0;
+        if (select_year == cur_date.getFullYear() && idx < month) monthly_contribution_level[idx] = 0;
         else monthly_contribution_level[idx] = 5;
       }
     });
@@ -283,7 +287,7 @@ window.addEventListener('load', function () {
       else pie_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
     }
     pie_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
-    const pie_dataset = Array(5).fill(0);
+    const pie_dataset = Array(6).fill(0);
     let active_grass = 0;
     console.log("monthly_contribution_level", monthly_contribution_level);
     monthly_contribution_level.forEach((val)=>{
@@ -292,6 +296,12 @@ window.addEventListener('load', function () {
         active_grass++;
       }
     });
+    if(active_grass === 0) {
+      monthly_contribution_level.forEach((val)=>{
+          pie_dataset[val]++;
+          active_grass++;
+      });
+    }
     console.log("pie_dataset", pie_dataset);
     const pie_data = {
       labels: pie_label,
@@ -301,7 +311,6 @@ window.addEventListener('load', function () {
         hoverOffset: 4
       }]
     };
-    
     pie_chart = new Chart(visual_ctx[0], {
       type: 'pie', data: pie_data, 
       options:{

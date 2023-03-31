@@ -103,7 +103,7 @@ function setVisualModal(){
     let month = cur_date.getMonth(); // month - 1
     dirty_month.forEach((dirty, idx) =>{
       if(!dirty) {
-        if (idx<=month) monthly_contribution_level[idx] = 0;
+        if (select_year == cur_date.getFullYear() && idx < month) monthly_contribution_level[idx] = 0;
         else monthly_contribution_level[idx] = 5;
       }
     });
@@ -243,7 +243,6 @@ function setVisualModal(){
       }
     }
     pie_chart.destroy();
-    
     const pie_label = [];
     let divisor = 0
     for(; divisor<=standard_contr; divisor=Math.floor(divisor+standard_contr/3)){
@@ -251,14 +250,21 @@ function setVisualModal(){
       else pie_label.push(String(Math.ceil(divisor-standard_contr/3+1))+"~"+String(divisor));
     }
     pie_label.push(String(Math.ceil(divisor-standard_contr/3+1)+" 이상"));
-    const pie_dataset = Array(5).fill(0);
+    const pie_dataset = Array(6).fill(0);
     let active_grass = 0;
     monthly_contribution_level.forEach((val)=>{
-      if(val<=4){
+      if(val<=4) {
         pie_dataset[val]++;
         active_grass++;
       }
     });
+    if(active_grass === 0) {
+      monthly_contribution_level.forEach((val)=>{
+          pie_dataset[val]++;
+          active_grass++;
+      });
+    }
+    console.log("pie_dataset", pie_dataset);
     const pie_data = {
       labels: pie_label,
       datasets: [{
@@ -715,7 +721,7 @@ function setGbtiModal(){
   let hour_chart = new Chart(type_ctx[0], {
       type: 'bar',
       data: { labels: typeE_label, datasets: [{data:typeE_data,
-         backgroundColor: hour_palette, borderRadius:5}],},
+          backgroundColor: hour_palette, borderRadius:5}],},
       options:{
         scales:{y:{
           beginAtZero: true,

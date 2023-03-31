@@ -80,18 +80,22 @@
     var tag_list = [];
     function submit_update_form(event){
         event.preventDefault();
-        let isFormValid = $('#team-update-form')[0].checkValidity()
+        $('#teamUpdateSubmit').prop('disabled', true);
+        const updateForm = $('#team-update-form');
+        let isFormValid = updateForm[0].checkValidity()
         if(!isFormValid) {
-            $('#team-update-form')[0].reportValidity();
+            updateForm[0].reportValidity();
+            $('#teamUpdateSubmit').prop('disabled', false);
             return;
         }
         if(!confirm("저장하시겠습니까?")){
+            $('#teamUpdateSubmit').prop('disabled', false);
             return;
         }
 
         var admin_li = [];
         var member_li = [];
-        var regex = /(icon\-normal\-user)/;
+        const regex = /(icon\-normal\-user)/;
 
         $('.member-tr').each(function(index, element){
             var name = element.id.replace("member-id-","");
@@ -100,12 +104,16 @@
             if (isMember == -1){ admin_li.push(name);}
             member_li.push(name);
         });
+        console.log("updateform validation", admin_li.length);
         if(!admin_li.length){
-            alert('admin은 1명 이상이어야 합니다.');
+            console.log("updateform validation2", admin_li.length);
+            updateForm.find(`[data-name=member`).addClass('is-invalid');
+            updateForm.find(`.invalid-feedback[data-feedback-type=team-member]`).html('admin은 1명 이상이어야 합니다.');
+            $('#teamUpdateSubmit').prop('disabled', false);
             return ;
         }
 
-        var form_data = new FormData($('#team-update-form')[0]);
+        const form_data = new FormData(updateForm[0]);
         form_data.append('team_id', $('#teamTab').attr('team-id'));
         form_data.append('category_tag_list', team_tag_select.selected().toString());
         form_data.append('admin_list', admin_li.toString());
@@ -120,13 +128,28 @@
             contentType: false,
             processData: false
         }).done(function(data){
+            console.log("data", data);
             if(data['status'] == 'fail'){
-                alert(data['message'])
+                $('input').removeClass('is-invalid');
+                updateForm.find('.invalid-feedback').html("");
+                for (const [field, errors] of Object.entries(data.errors)) {
+                    console.log(field, errors);
+                    if(updateForm.find(`[name=${field}`).length > 0){
+                        updateForm.find(`[name=${field}`).addClass('is-invalid');
+                        updateForm.find(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
+                    }else{
+                        alert(data['message']);
+                    }
+                }
             }
             else{
-                window.location.reload();
+                window.location.href = data['redirect'];
             }
-        });
+            $('#teamUpdateSubmit').prop('disabled', false);
+        }).fail(function (data) {
+            alert(data['message']);
+            $('#teamUpdateSubmit').prop('disabled', false);
+        });;
     }
 
     function toggleIsAdmin(member_name){
@@ -183,7 +206,7 @@
             success: function(data) {
                 if(data['status']=="success"){
                     alert('탈퇴가 완료되었습니다.');
-                    window.location.href = "{% url 'community:Community-Main' %}";
+                    window.location.href = "{% url 'community:main' %}";
                 }
                 else{
                     alert( data['message'] );
@@ -226,11 +249,6 @@
                 });
                 admin_list = [];
                 $('#teamUpdateSubmit').click(function(){
-                    var desc_length = $('textarea[name="team-desc"]').val().length
-                    if((desc_length<30) && (desc_length>150)){
-                        alert('팀 설명은 30자 이상 150자 이하여야합니다.\n현재 ' + desc_length + '자 입니다.');
-                        return;
-                    }
                     $("#team-update-form").submit();
                 }
                 );

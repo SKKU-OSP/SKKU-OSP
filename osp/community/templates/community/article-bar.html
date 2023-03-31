@@ -1,11 +1,7 @@
 {% load community_tag %}
 
 {% for article in article_list %}
-{% if comment_visible or bartype == 'compact' %}
 <div class="article-bar">
-{% else %}
-<div class="article-bar background-shadow">
-{% endif %}
     <div class="article-head flex-grow-1" onclick="location.href='{% url 'community:article-view' article.id %}'">
         <div class="article-bar-title my-1">
             <div class="flex-grow" style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
@@ -19,9 +15,21 @@
                 {{article.title}}
             </div>
         </div>
-
     </div>
-    {% if board.board_type != 'Recruit'%}
+    {% if board.board_type == 'Recruit' %}
+    <div class="recruit-status">
+    {% is_period_end article.period_start as is_start %}
+    {% is_period_end article.period_end as is_end %}
+        {% if not article.team %}
+        {% elif not is_start %}
+        <div class="badge tag-recruit tag-recruit-end">모집 전</div>
+        {% elif not is_end %}
+        <div class="badge tag-recruit tag-recruit-ing">모집 중</div>
+        {% else %}
+        <div class="badge tag-recruit tag-recruit-end">모집 마감</div>
+        {% endif %}
+    </div>
+    {% else %}
     <div class="article-meta">
         <div class="d-flex justify-content-between">
             <div class="article-meta-stat d-flex">
@@ -38,24 +46,7 @@
             </div>
         </div>
     </div>
-    {% else %}
-    
-    {% if board.board_type == 'Recruit' %}
-    <div class="recruit-status">
-    {% is_period_end article.period_start as is_start %}
-    {% is_period_end article.period_end as is_end %}
-        {% if not article.team %}
-        {% elif not is_start %}
-        <div class="badge tag-recruit tag-recruit-end">모집 전</div>
-        {% elif not is_end %}
-        <div class="badge tag-recruit tag-recruit-ing">모집 중</div>
-        {% else %}
-        <div class="badge tag-recruit tag-recruit-end">모집 마감</div>
-        {% endif %}
     {% endif %}
-    </div>
-    {% endif %}
-    
 </div>
 {% if comment_visible %}
 <div class="d-flex article-bar-comment" style="padding-bottom: 0.2rem;">
@@ -65,12 +56,12 @@
         {{article.comment.body}}
     </div>
     <div class="ms-auto">
-        {% if request.user.is_anonymous %}
-        <span>사용자</span>
-        {% elif article.comment.anonymous_writer %}
+        {% if article.comment.anonymous_writer %}
         <span>익명</span>
-        {% else %}
+        {% elif request.user.is_authenticated and not article.comment.writer.user.is_superuser %}
         <a href="/user/{{article.comment.writer.user.username}}">{{article.comment.writer.user.username}}</a>
+        {% else %}
+        {{article.comment.writer.user.username}}
         {% endif %}
     </div>
     <div class="d-flex">
@@ -80,7 +71,7 @@
         </div>
     </div>
     {% else %}
-    <div class="m-auto color-b">댓글이 없습니다</div>
+    <div class="m-auto color-b">등록된 댓글이 없습니다.</div>
     {% endif %}
 </div>
 {% endif %}

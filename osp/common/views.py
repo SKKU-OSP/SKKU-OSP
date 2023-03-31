@@ -1,10 +1,10 @@
 from django.db import DatabaseError, transaction
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic.base import TemplateView
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
@@ -14,7 +14,9 @@ from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
 from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
+
 import re
+import smtplib
 
 class LoginView(auth_views.LoginView):
     template_name='common/login.html'
@@ -25,6 +27,9 @@ class LoginView(auth_views.LoginView):
 
 class PasswordResetView(auth_views.PasswordResetView):
     template_name='common/password_reset.html'
+    email_template_name = "registration/email_reset_password.html"
+    subject_template_name = "registration/subject_reset_password.txt"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"type": 'sign'})
@@ -36,17 +41,6 @@ class PasswordResetView(auth_views.PasswordResetView):
             email = self.request.POST.get("email")
 
             if Account.objects.filter(user__username=username, student_data__personal_email=email).exists():
-                opts = {
-                    'use_https': self.request.is_secure(),
-                    'token_generator': self.token_generator,
-                    'from_email': self.from_email,
-                    'email_template_name': self.email_template_name,
-                    'subject_template_name': self.subject_template_name,
-                    'request': self.request,
-                    'html_email_template_name': self.html_email_template_name,
-                    'extra_email_context': self.extra_email_context,
-                }
-                form.save(**opts)
                 return super().form_valid(form)
             else:
                 return render(self.request, 'common/password_reset_done_fail.html', context={"type": 'sign'})
@@ -131,8 +125,11 @@ def valid_check(request):
             except User.DoesNotExist as de:
                 print("valid_check DoesNotExist: ", de)
                 return JsonResponse({'status':'fail', 'message':'이메일을 찾을 수 없습니다. 이메일을 확인해주세요.'})
+            except smtplib.SMTPServerDisconnected as disconn:
+                print("valid_check SMTPServerDisconnected: ", disconn)
+                return JsonResponse({'status':'fail', 'message':'죄송합니다. 서비스에 문제가 있어 이메일을 발송할 수 없습니다.'})
             except Exception as e:
-                print("valid_check error: ", e)
+                print("valid_check error: ", e, type(e).__name__, e.args)
                 return JsonResponse({'status':'fail', 'message':'이메일 발송에 실패했습니다.'})
     return JsonResponse({'status':'fail', 'message':'이메일을 찾을 수 없습니다.'})
 
@@ -274,3 +271,6 @@ def check_email(email):
     p = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
     print(email, p.match(email) != None)
     return p.match(email) == None
+
+def csrf_failure(request, reason=""):
+    return redirect(reverse('common:login'))

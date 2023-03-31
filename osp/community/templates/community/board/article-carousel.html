@@ -1,4 +1,5 @@
 {% load static %}
+{% load markdown_filter %}
 {% if active_article|length != 0 %}
 <div class="active-article">
     <div id="carouselTeam" class="carousel slide" data-bs-ride="carousel">
@@ -26,7 +27,7 @@
                         {{ article.team.name }}
                     </div>
                     <div class="fs-6 flex-grow-1 overflow-hidden">
-                        {{ article.body }}
+                        {{ article.body|safe|mark }}
                     </div>
                     <div>
                         {% for tag in article.tags %}

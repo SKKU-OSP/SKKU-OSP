@@ -15,6 +15,8 @@ def articlecomment_create_alert(sender, instance, created, **kwargs):
         comment = instance
         comment_writer = comment.writer
         article_writer = comment.article.writer
+        article_title = comment.article.title
+        article_title = ellipsis_text(article_title, 20)
         if comment_writer == article_writer:
             return
         body_dict = {}
@@ -24,9 +26,10 @@ def articlecomment_create_alert(sender, instance, created, **kwargs):
             body_subject = comment_writer.user.username
         body_dict["subject"] = body_subject + ""
         body_dict["type"] = "comment"
-        body_dict["body"] = body_subject + " 님이 댓글을 작성하셨습니다."
+        body_dict["body"] = article_title + " 글에 " + body_subject + " 님이 댓글을 작성하셨습니다."
+
         body_dict["article_id"] = "" + str(comment.article.id)
-        body = json.dumps(body_dict)
+        body = json.dumps(body_dict, ensure_ascii = False)
         # body = str(body_dict)
         Message.objects.create(
             receiver=article_writer,
@@ -37,30 +40,6 @@ def articlecomment_create_alert(sender, instance, created, **kwargs):
             receiver_delete=False
         )
 
-@receiver(post_save, sender=ArticleLike)
-def articlelike_create_alert(sender, instance, created, **kwargs):
-    if created:
-        articlelike = instance
-        article = articlelike.article
-        like_account = articlelike.account
-        article_writer = article.writer
-        if like_account == article_writer:
-            return
-
-        body_dict = {}
-        body_dict["type"] = "articlelike"
-        body_dict["body"] = "게시글에 공감을 받았습니다."
-        body_dict["article_id"] = "" + str(article.id)
-        body = json.dumps(body_dict)
-
-        Message.objects.create(
-            receiver=article_writer, 
-            body=body, 
-            send_date=datetime.now(),
-            receiver_read=False, 
-            sender_delete=False, 
-            receiver_delete=False
-        )
 
 @receiver(post_save, sender=TeamInviteMessage)
 def teaminvite_create_alert(sender, instance, created, **kwargs):
@@ -79,7 +58,7 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
     if direction=="팀 지원" and status=="대기 중":
         # 지원한 팀의 admin권한을 가진 유저들에게 모두 메세지를 보낸다.
         body_dict = {"type": "team_apply", "body": f"[{body_subject}] 팀 지원 요청이 있습니다."}
-        body = json.dumps(body_dict)
+        body = json.dumps(body_dict, ensure_ascii = False)
         for tm_admin in tm_admin_li:
             print(tm_admin)
             account = Account.objects.get(user__id=tm_admin)
@@ -94,7 +73,7 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
     elif direction=="팀 지원": # 팀 지원 수락 또는 거절
         body_dict = {"type": "team_apply_result",
                      "body": f"[{body_subject}] 팀 지원이 {status} 되었습니다."}
-        body = json.dumps(body_dict)
+        body = json.dumps(body_dict, ensure_ascii = False)
         Message.objects.create(
             receiver=instance.account,
             body=body,
@@ -106,7 +85,7 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
     elif direction=="팀원 초대" and status=="대기 중":
         # 초대하는 유저에게 메세지를 보낸다.
         body_dict = {"type": "team_invite", "body": "[" + body_subject + "]" + "팀 초대가 있습니다.", "team_id":str(instance.team.id)+""}
-        body = json.dumps(body_dict)
+        body = json.dumps(body_dict, ensure_ascii = False)
         Message.objects.create(
             receiver=instance.account,
             body=body,
@@ -120,7 +99,7 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
         tmp += " " + instance.account.user.username + "님이 "
         tmp += "팀 초대를 " + status + "하셨습니다."
         body_dict = {"type": "team_invite_result", "body": tmp}
-        body = json.dumps(body_dict)
+        body = json.dumps(body_dict, ensure_ascii = False)
         for tm_admin in tm_admin_li:
             account = Account.objects.get(user__id=tm_admin)
 
@@ -133,7 +112,11 @@ def teaminvite_create_alert(sender, instance, created, **kwargs):
                 receiver_delete=False
             )
 
-# @receiver(post_save, sender=TeamInviteMessage)
-# def create_teaminvite_result_alert(sender, instance, created, **kwargs):
-#     if created:
-#         Message.objects.create(user=instance)
+
+def ellipsis_text(text, limit=20):
+    if limit < len(text) - 3:
+        return text[:limit] + "..."
+    elif len(text) - 3 <= limit and limit < len(text):
+        return text[:limit-3] + "..."
+
+    return text
