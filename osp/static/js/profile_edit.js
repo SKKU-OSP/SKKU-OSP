@@ -1,3 +1,13 @@
+$("#savebtn").click(function(){
+  if(confirm("정말 저장하시겠습니까 ?") == true){
+      alert("저장되었습니다. 프로필화면으로 돌아갑니다.");
+      saveImg();
+      saveAll();
+  }
+  else{
+      return ;
+  }
+});
 function intsAppend(){
     var formData = $("#intsform").serialize();
     formData += "&act=" + 'append';
