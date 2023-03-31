@@ -12,10 +12,8 @@ function intsAppend(){
     }
     var ints = $('.bg-tag-domain');
     var intsarr = [];
-    console.log(ints);
 
     for(int of ints){
-      console.log($(int).text());
       intsarr.push($(int).text());
     }
 
@@ -31,6 +29,7 @@ function intsAppend(){
         data : formData,
         success : function(data) {
             console.log('success');
+            
         }, 
 
         error : function(xhr, status) {
@@ -71,24 +70,130 @@ function intsDelete(target){
     });
 
 }
+    // 페이지 로드시에 이벤트 리스너 부여
+    let items = document.querySelectorAll(".lang-item");
+    items.forEach(item => {
+        item.addEventListener("dragstart", () => {
+            item.classList.add("dragging");
+        });
+        item.addEventListener("dragend", () => {
+            item.classList.remove("dragging");
+          });
+
+
+    });
+
+
+    let containers = document.querySelectorAll(".tier-container");
+    containers.forEach(container => {
+        container.addEventListener("dragover", e => {
+          e.preventDefault();
+          const afterElement = getDragAfterElement(container, e.clientX);
+          const draggable = document.querySelector(".dragging");
+          //console.log(draggable);
+          if (draggable == null){
+            console.log("undefined");
+          }
+          else if (afterElement === undefined) {
+            container.appendChild(draggable);
+          } else {
+            container.insertBefore(draggable, afterElement);
+          }
+        });
+      });
+
+    
+    const lang_trashcan = document.querySelector("#lang-trash-can")
+    lang_trashcan.addEventListener("dragover", e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(lang_trashcan, e.clientX);
+        const draggable = document.querySelector(".dragging");
+        
+        if (draggable == null){
+          console.log("undefined");
+          
+        }
+        if (afterElement === undefined) {          
+            lang_trashcan.appendChild(draggable);
+          } else {
+            lang_trashcan.insertBefore(draggable, afterElement);
+            
+        }
+
+    })
+    lang_trashcan.addEventListener("drop", e => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(lang_trashcan, e.clientX);
+      const draggable = document.querySelector(".dragging");
+      
+      if (draggable == null){
+        console.log("undefined");
+        
+      }
+      if (afterElement === undefined) {          
+          lang_trashcan.removeChild(draggable);   
+        } else {
+          lang_trashcan.insertBefore(draggable, afterElement);
+          
+      }
+
+  })
+
+    function dragEnter(ev) {
+        ev.preventDefault();
+    }
+    
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+    
+    function drop(ev) {
+        ev.preventDefault();
+        //var data = ev.dataTransfer.getData("text"); // img태그 아이디를 가져옴
+        // ev.target.appendChild(document.getElementById(data)); // 다른 div태그에 img를 추가함(옮김. 드래그처리)
+    }
+
+    function deldrop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var deltarget = document.getElementById(data);
+        deltarget.remove();
+    }
+
+
+    function getDragAfterElement(container, x) {
+        const draggableElements = [
+          ...container.querySelectorAll(".draggable:not(.dragging)"),
+        ];
+      
+        return draggableElements.reduce(
+          (closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = x - box.left - box.width / 2;
+            if (offset < 0 && offset > closest.offset) {
+              return { offset: offset, element: child };
+            } else {
+              return closest;
+            }
+          },
+          { offset: Number.NEGATIVE_INFINITY },
+        ).element;
+      }
 
 
 
 function reload_window(){
     return new Promise(function(resolve){
-      console.log('language is deleted, reload window');
       $('#languagediv').load(window.location.href + ' #languagediv');
       resolve('hello');
     });
   }
 async function reload(){
   let a = await reload_window();
-  console.log('middle of async');
   return('hello');
 }
 $(document).ready(function() {
     var langlists = $('.langlabel');
-    console.log(langlists);
 
 
 });
@@ -96,37 +201,44 @@ function languageAppend(){
   var formData = $("#languageform").serialize();
   formData += "&act=" + 'append';
   formData += "&target=" + '';
-  console.log(formData);
-  var langs = $('.langlabel');
+  
+  var langs = $('.stack-name');
   var langsarr = [];
 
-  console.log(langs);
   for(lang of langs){
-      console.log($(lang).attr('for').slice(4));
       langsarr.push($(lang).attr('for').slice(4));
   }
   var selected = $("#langdiv").find(".placeholder").text();
-  //selected = selected.slice(3);
+
   if(selected == "Language tag"){
     alert("선택하고 추가해주세요");
     return;
     }
-  var selected_nospace;
 
+  var selected_nospace;
   selected_nospace = selected.replace(/ /g, "");
-  console.log(langsarr);
-  console.log(selected);
+
+  var logo;
+  var color;
+  var fontcolor;
+  var name;
+
 
   console.log(!(langsarr.includes(selected)));
   if(!(langsarr.includes(selected))){
-  
     $.ajax({
     cache : false,
       url : "languages",
       type : 'POST', 
       data : formData,
-      success : function(data) {
-        console.log('success');
+      dataType : 'json',
+      success : function(retdata) {
+
+        name = retdata.name;
+        logo = retdata.logo;
+        color = retdata.color;
+        fontcolor = retdata.fontcolor;
+        appendTagicon(name, logo, color, fontcolor);
       }, 
       error : function(xhr, status) {
           // alert(xhr + " : " + status);
@@ -134,81 +246,53 @@ function languageAppend(){
           // alert("선택하고 추가해주세요")
       }  
     });
-    $("#languagediv").append(`
-    <div id="langdiv_`+ selected_nospace + `"class="langdiv">
-    <span style="display:inline-block; width: 120px;">
-        <label for="tag_`+ selected_nospace + `" class="badge bg-tag-language me-1 langlabel" style="height:20px; margin-bottom:5px; ">` + selected + `</label>
-    </span>
-    <span class="range-wrap" style="margin-right:30px;">
-        <input style="width:50%; color:#0094FF;" type="range" class="form-control-range lang-tag" min="0" max="4" step="1" value ="0" name ="tag_`+ selected +`" id="tag_`+ selected +`" list="tickmarks">
-        <!--output for="range" class="bubble" id="out_` + selected_nospace + `"></output-->
-    </span>  
-    <button class="btn delete-lang" name="action" onclick="languageDelete('`+ selected +`', '`+ selected_nospace + `'); return false;">
-        <svg width="14" height="19" viewBox="0 0 14 19" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 16.5C1 17.6 1.9 18.5 3 18.5H11C12.1 18.5 13 17.6 13 16.5V4.5H1V16.5ZM3 6.5H11V16.5H3V6.5ZM10.5 1.5L9.5 0.5H4.5L3.5 1.5H0V3.5H14V1.5H10.5Z"/>
-        </svg>
-    </button>
-    <hr>
-    </div>
-  `);
   }
 
-}
-function languageDelete(target){
-  var formData = $("#languageform").serialize();
-  formData += "&act=" + 'delete';
-  target = encodeURIComponent(target);
-  formData += "&target=" + target;
-
-  // console.log(target);
-  // console.log(formData);
-  
-  target = decodeURI(target);
-  
-  divtarget = target.replace(/ /g, "");
-  divtarget = decodeURIComponent(divtarget);
-  console.log(divtarget);
-  console.log("div[id='langdiv_" +  divtarget + "']");
-  $("div[id='langdiv_" +  divtarget + "']").remove();
-  $.ajax({
-    cache : false,
-    url : "languages",
-    type : 'POST', 
-    data : formData,
-    success : function(data) {
-      //var jsonObj = JSON.parse(data);
-      console.log('success');
-    },
-
-    error : function(xhr, status) {
-      console.log('error');
+  function appendTagicon(name, logo, color, fontcolor){
+    if(logo == "default.svg"){
+      $("#tier0-container").append(`
+        <div id="tag_` + name.replace(" ", "_") + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
+          <div class="stack-box"  style="background-color: ` + color + `;">
+            <span class="stack-name" for="tag_` + name.replace(" ", "_") + `" style="color:`+ fontcolor +`">`+ name +`</span>
+          </div>
+        </div>
+      `);
     }
+    else{
+      $("#tier0-container").append(`
+        <div id="tag_` + name.replace(" ", "_") + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
+          <div class="stack-box"  style="background-color: ` + color + `;">
+            <img class="stack-icon" src="`+ logo +`/`+ fontcolor +`" alt="temp"/>
+            <span class="stack-name" for="tag_` + name.replace(" ", "_") + `" style="color:`+ fontcolor +`">`+ name +`</span>
+          </div>
+        </div>
+      `);
+    }
+    let newitem = document.querySelector("#tag_" + name.replace(" ", "_"));
 
-  });
-  /*
-  reload();
-  */
+    newitem.addEventListener("dragstart", () => {
+      newitem.classList.add("dragging");
+    });
+    newitem.addEventListener("dragend", () => {
+      newitem.classList.remove("dragging");
+    }); 
+  }
 }
 
 function saveImg(){
   const imageInput = $("#photo")[0];
-  console.log("imageInput: ", imageInput.files)
-  console.log("이미지 섹션의 값");
-  console.log($("#image_section").attr('src'));
-
   if($("#image_section").attr('src') == "/data/media/img/profile_img/default.jpg"){
-    console.log("잡앗다.");
     
     $.ajax({
       type: "POST",
       url: "imagedefault",
       headers: {'X-CSRFToken': csrftoken},
       success: function(rtn){
-        //const message = rtn.data.values[0];
-        //console.log("message: ", message)
+
+
       },
       err: function(err){
-        //console.log("err:", err)
+
       }
     })
     return;
@@ -230,11 +314,11 @@ function saveImg(){
       contentType: false,
       data: formData,
       success: function(rtn){
-        //const message = rtn.data.values[0];
-        //console.log("message: ", message)
+
+
       },
       err: function(err){
-        //console.log("err:", err)
+
       }
     })
 
@@ -242,24 +326,50 @@ function saveImg(){
 }
 
 function saveAll(){
-  var formData = $("#portform").serialize();
-  formData += '&' + $('#infoform').serialize();
-  formData += '&' + $('#introform').serialize();
-  formData += '&' + $('.lang-tag').serialize();
-  formData += ''
-  alert("저장되었습니다.");
-  console.log(formData);
-  
+  let profiledata = {};
+  profiledata.portfolio = $("#id_portfolio").val();
+  profiledata.introduction = $("#id_introduction").val();
+  profiledata.plural_major = $("#plural_major").val();
+  profiledata.personal_email = $("#personal_email").val();
+  profiledata.primary_email = $("#primary_email").val();
+  profiledata.secondary_email = $("#secondary_email").val();
+  profiledata.profileprivacy = $("#profileprivacy").val();
+  profiledata.articleprivacy = $("#articleprivacy").val();
+  profiledata.teamprivacy = $("#teamprivacy").val();
+
+  let tier0langs = $("#tier0-container").children('.lang-item');
+  let tier1langs = $("#tier1-container").children('.lang-item');
+  let tier2langs = $("#tier2-container").children('.lang-item');
+  let tier3langs = $("#tier3-container").children('.lang-item');
+  let tier4langs = $("#tier4-container").children('.lang-item');
+
+  var i;
+  var tier0arr = {}
+  var tier1arr = {}
+  var tier2arr = {}
+  var tier3arr = {}
+  var tier4arr = {}
+
+  for(i=0; i<tier0langs.length; i++) tier0arr[i] = tier0langs[i].id.slice(4)
+  for(i=0; i<tier1langs.length; i++) tier1arr[i] = tier1langs[i].id.slice(4)
+  for(i=0; i<tier2langs.length; i++) tier2arr[i] = tier2langs[i].id.slice(4)
+  for(i=0; i<tier3langs.length; i++) tier3arr[i] = tier3langs[i].id.slice(4)
+  for(i=0; i<tier4langs.length; i++) tier4arr[i] = tier4langs[i].id.slice(4)
+
+  profiledata.tier0langs = tier0arr;
+  profiledata.tier1langs = tier1arr;
+  profiledata.tier2langs = tier2arr;
+  profiledata.tier3langs = tier3arr;
+  profiledata.tier4langs = tier4arr;
+
   $.ajax({
     cache : false,
     url : "all",
-    type : 'POST', 
-    data : formData,
+    type : 'POST',
+    data : JSON.stringify(profiledata),
     success : function(data, response) {
-      //var jsonObj = JSON.parse(data);
-      
       console.log('success');
-
+      window.location.href='..';
     }, // success 
 
     error : function(xhr, status) {
@@ -268,7 +378,7 @@ function saveAll(){
     }
 
     });
-    window.location.href='..';
+    
     
 
 }
@@ -281,26 +391,19 @@ reader.onload = function (e) {
 }
   reader.readAsDataURL(input.files[0]);
 }
-console.log('이미지 확인2');
 }
 
 $("#profileimg").ready(function() {
-  console.log('change detected');
   $("#photo").change(function(){
-    console.log('이미지 확인1-로드');
     let input = this;
-    console.log(input);
 
     if (input.files && input.files[0]) {
-      console.log('preview avaliable');
       var reader = new FileReader();  
       reader.onload = function (e) {
-        console.log($('#image_section'));
         $('#image_section').attr('src', e.target.result);
       }
       reader.readAsDataURL(input.files[0]);
     }
-    console.log('이미지 확인2');
   });
 });
 
@@ -313,17 +416,15 @@ else{
   $(":radio[id=flexRadioDefault2]").prop('checked', true);
 }
 $("#flexRadioDefault1").change(function(){
-  console.log('라디오변경');
+
   var radio = $(':radio[name="flexRadioDefault"]:checked').val();
   $('#plural_major').val('0');
-  console.log(radio);
   
 });
 $("#flexRadioDefault2").change(function(){
-  console.log('라디오변경');
   var radio = $(':radio[name="flexRadioDefault"]:checked').val();
   $('#plural_major').val('1');
-  console.log(radio);
+
   
 });
 });
@@ -336,17 +437,16 @@ else{
   $(":radio[id=teamprivacyradio1]").prop('checked', true);
 }
 $("#teamprivacyradio0").change(function(){
-  console.log('라디오변경');
+
   var radio = $(':radio[name="teamprivacyradio"]:checked').val();
   $('#teamprivacy').val('True');
-  console.log($('#teamprivacy').attr('value'));
+
   
 });
 $("#teamprivacyradio1").change(function(){
-  console.log('라디오변경');
+
   var radio = $(':radio[name="teamprivacyradio"]:checked').val();
   $('#teamprivacy').val('False');
-  console.log($('#teamprivacy').attr('value'));
 });
 });
 $(document).ready(function() {
@@ -358,22 +458,17 @@ else{
   $(":radio[id=articleprivacyradio1]").prop('checked', true);
 }
 $("#articleprivacyradio0").change(function(){
-  console.log('라디오변경');
   var radio = $(':radio[name="articleprivacyradio"]:checked').val();
   $('#articleprivacy').val('True');
-  console.log($('#articleprivacy').attr('value'));
   
 });
 $("#articleprivacyradio1").change(function(){
-  console.log('라디오변경');
   var radio = $(':radio[name="articleprivacyradio"]:checked').val();
   $('#articleprivacy').val('False');
-  console.log($('#articleprivacy').attr('value'));
 });
 });
 $(document).ready(function() {
 profile_privacy = $('#profileprivacy').attr('value');
-console.log(profile_privacy);
 if(profile_privacy== '0'){
   $(":radio[id=profileprivacyradio0]").prop('checked', true);
 }
@@ -384,22 +479,16 @@ else{
   $(":radio[id=profileprivacyradio2]").prop('checked', true);
 }
 $("#profileprivacyradio0").change(function(){
-  console.log('라디오변경');
   var radio = $(':radio[name="profileprivacyradio"]:checked').val();
   $('#profileprivacy').val('0');
-  console.log($('#profileprivacy').attr('value'));
 });
 $("#profileprivacyradio1").change(function(){
-  console.log('라디오변경');
   var radio = $(':radio[name="profileprivacyradio"]:checked').val();
   $('#profileprivacy').val('1');
-  console.log($('#profileprivacy').attr('value'));
 });
 $("#profileprivacyradio2").change(function(){
-  console.log('라디오변경');
   var radio = $(':radio[name="profileprivacyradio"]:checked').val();
   $('#profileprivacy').val('2');
-  console.log($('#profileprivacy').attr('value'));
 });
 });
 

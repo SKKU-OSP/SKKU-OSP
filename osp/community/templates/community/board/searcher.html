@@ -1,6 +1,6 @@
 {% load tag_templatetag %}
 {% load community_tag %}
-<div id="searcher" class="fade">
+<div id="searcher" class="fouc">
     <div id="article-filter" class="d-flex justify-content-between shadow-box rounded-2">
         <div id="search-field" class="input-group">
             <select id="board-searcher" name="board-filter-select" class="form-select form-control">
@@ -8,7 +8,7 @@
                 {% searcher_normal_board request %}
                 {% searcher_team_board request %}
             </select>
-            <input type="text" id="search-word" class="form-control" placeholder="검색어" aria-describedby="search-btn">
+            <input type="text" id="search-word" class="form-control" value="{{keyword}}" placeholder="검색어" aria-describedby="search-btn">
             <button type="button" id="tag-btn" class="btn btn-light" onclick="toggleTag();">#</button>
             <button type="button" id="search-btn" class="btn">검색</button>
         </div>

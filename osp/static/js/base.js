@@ -191,17 +191,17 @@ function ReadNotification(type, noti_id, target_id="") {
         url: '/message/noti-read/' + noti_id,
         dataType: 'JSON',
     }).done(function (data) {
-        if (data['status'] == 'success') {
-            if (type == 'comment' || type == 'articlelike') {
+        if (data['status'] === 'success') {
+            if (type === 'comment' || type === 'articlelike') {
                 window.location = '/community/article/' + target_id;
             }
-            if(type=='team_invite'){
+            if(type ==='team_invite'){
                 window.location = target_id;
             }
-            if (type == 'team_apply') {
+            if (type === 'team_apply') {
                 appListModalOpen();
             }
-            if (type == 'team_apply_result') {
+            if (type === 'team_apply_result') {
                 appListModalOpen(isResult=true);
             }
 
@@ -233,10 +233,10 @@ function appListModalOpen(isResult=false) {
             let new_send = $("#new-app").data("new-send");
             let recv_tab = $("#apply-recv-tab");
             let send_tab = $("#apply-send-tab");
-            if(new_recv == "True"){
+            if(new_recv === "True"){
                 recv_tab.prepend(`<span id="recv-new" class="badge bg-tag-new">new</span>`);
             }
-            if(new_send == "True"){
+            if(new_send === "True"){
                 send_tab.prepend(`<span id="send-new" class="badge bg-tag-new">new</span>`);
             }
             // active 상태일 경우 지움
@@ -263,7 +263,6 @@ function appListModalOpen(isResult=false) {
             });
 
             if(isResult){
-                console.log("applyteammodal");
                 recv_tab.toggleClass("active");
                 send_tab.toggleClass("active");
                 $("#apply-recv").toggleClass("show active");
@@ -271,6 +270,19 @@ function appListModalOpen(isResult=false) {
             }
         });
     } else {
+        let recv_tab = $("#apply-recv-tab");
+        let send_tab = $("#apply-send-tab");
+        if(isResult){
+            recv_tab.removeClass("active");
+            send_tab.addClass("active");
+            $("#apply-recv").removeClass("show active");
+            $("#apply-send").addClass("show active");
+        }else{
+            recv_tab.addClass("active");
+            send_tab.removeClass("active");
+            $("#apply-recv").addClass("show active");
+            $("#apply-send").removeClass("show active");
+        }
         teamModal.modal('show');
     }
 }
@@ -287,7 +299,8 @@ function readApp(type="recv") {
     });
 }
 
-$().ready(function () {
+$(function () {
+    $('html').addClass("render");
     $('#message').click(function () {
         msgModalOpen();
     })
@@ -314,5 +327,29 @@ function consentSignInOpen(){
     if($("#consentSignUp").hasClass("btn-secondary")){
         $("#consentSignUp").removeClass("btn-secondary");
         $("#consentSignUp").addClass("btn-primary");
+    }
+}
+
+/**
+ * 이미지 파일을 올리면 preview 영역에 이미지 렌더링
+ * 이미지 업로드를 취소하면 data-src의 값을 preview에 렌더링
+ */
+function previewSingleImage() {
+    let inputFiles = $('input[type="file"]');
+    if (inputFiles.length > 0){
+        for(inputFile of inputFiles) {
+            let file = inputFile.files[0];
+            const preview = $(`#${inputFile.id}-preview`);
+            if(file !== undefined){
+                const fileReader = new FileReader();
+                fileReader.onload = (e) => {
+                    preview.attr('src', e.target.result);
+                };
+                fileReader.readAsDataURL(file);
+            }
+            else {
+                preview.attr('src', preview.data('src'));
+            }
+        };
     }
 }

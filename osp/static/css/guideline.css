@@ -4,6 +4,34 @@
   flex-wrap: nowrap;
   color:black;
 }
+.card-half {
+  width: 50%;
+}
+.card-half:nth-child(1){
+  border-right: 1px solid var(--main-border-color-transparent);
+}
+.card-half:nth-child(2) {
+  border-left: 1px solid var(--main-border-color-transparent);
+}
+@media (max-width: 768px) {
+  .guideline-check{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    color:black;
+  }
+  .card-half {
+    width: 100%;
+  }
+  .card-half:nth-child(1){
+    border-right: 0;
+    border-bottom: 1px solid var(--main-border-color-transparent);
+  }
+  .card-half:nth-child(2) {
+    border-left: 0;
+    border-top: 1px solid var(--main-border-color-transparent);
+  }
+}
 .guideline-step{
   background-color: var(--sub-point-color);
   display: flex;
@@ -15,7 +43,7 @@
   color: var(--main-icon-color);
   list-style-type: none;
   display: flex;
-  padding: 20px 10px;
+  padding: 20px 0;
   position: relative;
   z-index: 10;
   width: 100%;

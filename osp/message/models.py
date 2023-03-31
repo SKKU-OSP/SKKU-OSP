@@ -8,7 +8,7 @@ class Message(models.Model):
     # If sender is null, this message is a notification message
     sender = models.ForeignKey(Account, models.CASCADE, related_name='sender', null=True, blank=True)
     receiver = models.ForeignKey(Account, models.CASCADE, related_name='receiver')
-    body = models.CharField(max_length=200)
+    body = models.TextField()
     send_date = models.DateTimeField(auto_now_add=True)
     receiver_read = models.BooleanField()
     sender_delete = models.BooleanField()
