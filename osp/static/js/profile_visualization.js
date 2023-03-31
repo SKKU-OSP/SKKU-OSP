@@ -314,19 +314,14 @@ window.addEventListener('load', function () {
     }
     if (isNaN(mean)) mean = 0;
     if (isNaN(sigma)) sigma = 1;
-    const scaleFactor = 100;
-    let s = 100, beforeVal = -1;
-    dist_data[chartFactor].reverse().forEach((val, idx) => {
-      if (beforeVal != Number(val).toFixed(3)) {
-        let x = (dist_data["num"] - idx) / dist_data["num"] * 100;
-        let y = gaussian(Number(val));
-        normal_dist_data.push({ x: (s + x) / 2, y: y * scaleFactor, tooltip: Number(val).toFixed(3) });
-        if (Number(user_data[chartFactor]).toFixed(3) === Number(val).toFixed(3)) {
-          dist_x = (s + x) / 2;
-          dist_text = String((100 - dist_x).toFixed(2)) + "%";
-        }
-        beforeVal = Number(val).toFixed(3);
-        s = x;
+    let fixIdx = 0;
+    if (chartFactor === "score") fixIdx = 3;
+    dist_data[chartFactor].forEach((val, idx) => {
+      let y = gaussian(Number(val));
+      normal_dist_data.push({ x: val, y: y, tooltip: Number(val).toFixed(fixIdx) });
+      if (Number(user_data[chartFactor]).toFixed(fixIdx) === Number(val).toFixed(fixIdx)) {
+        dist_x = val;
+        dist_text = String(val.toFixed(fixIdx));
       }
     });
     dist_data[chartFactor].reverse();
@@ -343,7 +338,7 @@ window.addEventListener('load', function () {
         for (let i = 0; i < chart._metasets[0].data.length; i++) {
           let target = chart._metasets[0].data[i];
           let findX = target["$context"].raw.x;
-          if (findX.toFixed(3) === dist_x.toFixed(3)) {
+          if (findX.toFixed(fixIdx) === dist_x.toFixed(fixIdx)) {
             dist_width = target.x;
           }
         }
@@ -362,7 +357,11 @@ window.addEventListener('load', function () {
             ctx.lineTo(this.width, bottom);
             ctx.stroke();
             ctx.font = '12px Helvetica Neue, Helvetica, Arial, sans-serif';
-            ctx.fillText(this.text, this.width - 20, top)
+            let offset = 0;
+            if (fixIdx === 0) {
+              offset = 3 * this.text.length;
+            }
+            ctx.fillText(this.text, this.width - 4 * (fixIdx) - offset, top)
             ctx.fillText("you", this.width - 10, bottom + 10)
             ctx.save();
           }
@@ -385,7 +384,7 @@ window.addEventListener('load', function () {
           tooltip: {
             callbacks: {
               title: (items) => {
-                return String((100 - items[0].raw.x).toFixed(2)) + "%";
+                return String((items[0].raw.x).toFixed(2));
               },
               label: (item) => {
                 return String(parseFloat(item.raw.tooltip));
