@@ -8,6 +8,9 @@ $(document).ready(function () {
             }
         },
         lengthChange: false,
+        select: {
+            style: 'os'
+        },
         buttons: {
             dom: {
                 button: {

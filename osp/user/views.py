@@ -3,24 +3,20 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
-from django.views.generic.edit import UpdateView, DeleteView
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.core.files.images import get_image_dimensions
 
 from home.models import DistFactor, DistScore
-from tag.models import Tag, DomainLayer
+from tag.models import Tag, TagIndependent, DomainLayer
 from team.models import TeamMember
 from repository.models import GithubRepoStats, GithubRepoCommits
 
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
-from user.forms import ProfileImgUploadForm
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
-import time, datetime
+import time
+import datetime
 import json
-import os
 import math
 
 
@@ -77,8 +73,11 @@ class ProfileView(TemplateView):
             context["success"] = False
             return context
         
-        student = StudentTab.objects.all()
-        star_data = GithubRepoStats.objects.filter(github_id__in=Subquery(student.values('github_id'))).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name", "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
+        star_subquery = Subquery(StudentTab.objects.values('github_id'))
+        where_stmt = ["github_repo_contributor.repo_name=github_repo_stats.repo_name", 
+                    "github_repo_contributor.owner_id=github_repo_stats.github_id", 
+                    "github_repo_stats.github_id = github_repo_contributor.github_id"]
+        star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
         
         own_star = {"star" : 0}
         star_temp_dist = []
@@ -202,64 +201,14 @@ class ProfileView(TemplateView):
         context["star"] = own_star["star"]
         context["chart_data"] = json.dumps(chartdata)
         
-        #GBTI test
-        hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(context['username'])
-        
-        major_act, indi_num, group_num = update_act.read_major_act(context['username'])
-        
-        commit_freq, commit_freq_dist = update_act.read_frequency(context['username'])
-        try:
-            type_data = {}
-            type_data["typeE_data"] = hour_dist
-            type_data["typeE_sector"] = [int(daytime_min/3600), int(daytime_max/3600)]
-            type_data["typeF_data"] = commit_freq_dist
-            type_data["typeG_data"] = [indi_num, group_num]
-            context["type_data"] = json.dumps(type_data)
-        except Exception as e:
-            print("Get Type data error", e)
+        developer_context = self.get_developer_type(account=account, username=context['username'])
+        context.update(developer_context)
 
-        try:
-            devtype_data = DevType.objects.get(account=account)
-            try:
-                devtype_data.typeE = -1 if daytime > night else 1
-                devtype_data.typeF = commit_freq
-                devtype_data.typeG = 1 if major_act == 'individual' else -1
-                devtype_data.save()
-                gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
-
-                gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
-                gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
-                context["gbti"] = gbti_data
-            except Exception as e:
-                print("Calculate dev type error", e)
-                context["gbti"] = None
-            test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
-            def get_type_len(type_val):
-                return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val)%2 - 3)
-
-            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
-            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
-            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
-            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
-        except Exception as e:
-            print("Get DevType object error", e)
-            test_data = None
-            typeE = -1 if daytime > night else 1
-            typeF = commit_freq
-            typeG = 1 if major_act == 'individual' else -1
-            gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
-            gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
-            gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
-            context["gbti"] = gbti_data
-        context["test"] = test_data
-        context["success"] = True
-
-        tags_domain = Tag.objects.filter(type='domain') # 분야 태그
+        tags_domain = TagIndependent.objects.filter(type='domain') # 분야 태그
         ints = AccountInterest.objects.filter(account=account).filter(tag__in=tags_domain)
         student_id = account.student_data.id
         domain_layer = DomainLayer.objects
-        lang_tags = Tag.objects.filter(name__in = AccountInterest.objects.filter(account=account).exclude(tag__type="domain").values("tag")).order_by("name")
+        lang_tags = TagIndependent.objects.filter(name__in = AccountInterest.objects.filter(account=account).exclude(tag__type="domain").values("tag")).order_by("name")
         account_lang = AccountInterest.objects.filter(account=account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
         level_list = [ al.level for al in account_lang ]
 
@@ -327,119 +276,117 @@ class ProfileView(TemplateView):
         context["lang_lv3"] = lang_lv3
         context["lang_lv4"] = lang_lv4
 
-
-        
         return context
 
     def get(self, request, *args, **kwargs):
 
         start = time.time()
-
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
-            return redirect('/community')
+            context = {"alert": "로그인이 필요합니다.", "url":"history"}
+            return render(request, "community/redirect.html", context)
 
+        # 유저 프로필의 접근 권한 체크
+        try:
+            target_username = kwargs.get('username')
+            target_user = User.objects.get(username=target_username)
+            target_account = Account.objects.get(user=target_user)
+            acc_pp = AccountPrivacy.objects.get(account=target_account)
+            print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+
+            # 권한 없을 시 리다이렉트
+            is_own = request.user.username == target_username
+            if not request.user.is_superuser:
+                is_redirect = True
+                if not is_own and acc_pp.open_lvl == 0:
+                    target_team = TeamMember.objects.filter(member=target_account).values('team')
+                    if target_team:
+                        # team check
+                        cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
+                        if cowork:
+                            is_redirect = False
+                            acc_pp.open_lvl = 1
+                    if is_redirect:
+                        context = {"alert": "해당 사용자는 정보 비공개 상태입니다.", "url":"history"}
+                        return render(request, "community/redirect.html", context)
+        except Exception as e:
+            print("permission check error", e)
+            context = {"alert": "프로필 페이지 로드 중 오류가 발생했습니다.", "url":"history"}
+            return render(request, "community/redirect.html", context)
+
+        # 접근 권한 있다면 유저 데이터 로드 후 분석
         context = self.get_context_data(request, *args, **kwargs)
         if not context:
-            return redirect('/community')
-
-        student_info = context['account'].student_data
+            context = {"alert": "유저 데이터를 가져올 수 없습니다.", "url":"history"}
+            return render(request, "community/redirect.html", context)
 
         # student repository info
         context['cur_repo_type'] = 'owned'
         ## owned repository
-        student_score = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
-
-       
-
-        student_account = context['account']
-        acc_pp = AccountPrivacy.objects.get(account=student_account)
-        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
-        
-        is_own = request.user.username == context['username']
-        # initialize
-        is_redirect = True
-        if 'privacy' in request.session:
-            del request.session['privacy']
-        if 'alert' in request.session:
-            del request.session['alert']
-        if not is_own and acc_pp.open_lvl == 0:
-            target_team = TeamMember.objects.filter(member=context['account']).values('team')
-            if target_team:
-                # team check
-                cowork = TeamMember.objects.filter(member=request.user.account, team__in=target_team)
-                if cowork:
-                    is_redirect = False
-                    request.session['privacy'] = "팀원의 프로필페이지 입니다."
-                    request.session['alert'] = True
-                    acc_pp.open_lvl = 1
-            if is_redirect:
-                request.session['privacy'] = "해당 사용자는 정보 비공개 상태입니다."
-                request.session['alert'] = True
-                return redirect('../'+request.user.username+'/')
-        data = {
-
-        }
-
-        context['score'] = student_score
+        student_info = context['account'].student_data
+        context['score'] = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
         context['is_own'] = is_own
         context['open_lvl'] = acc_pp.open_lvl
         context['is_write'] = acc_pp.is_write
         context['is_open'] = acc_pp.is_open
 
-        if 'alert' in request.session and request.session['alert']:
-            print(request.session['privacy'])
-            if 'privacy' in request.session and request.session['privacy']:
-                data['privacy'] = request.session['privacy']
-        context['data'] = data
         print("ProfileView get time :", time.time() - start)
-
         return render(request=request, template_name=self.template_name, context=context)
-
     
+    def get_developer_type(self, account, username):
+        context = {}
+        #GBTI test
+        hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(username)
+        major_act, indi_num, group_num = update_act.read_major_act(username)
+        commit_freq, commit_freq_dist = update_act.read_frequency(username)
+        try:
+            type_data = {}
+            type_data["typeE_data"] = hour_dist
+            type_data["typeE_sector"] = [int(daytime_min/3600), int(daytime_max/3600)]
+            type_data["typeF_data"] = commit_freq_dist
+            type_data["typeG_data"] = [indi_num, group_num]
+            context["type_data"] = json.dumps(type_data)
+        except Exception as e:
+            print("Get Type data error", e)
 
+        try:
+            devtype_data = DevType.objects.get(account=account)
+            try:
+                devtype_data.typeE = -1 if daytime > night else 1
+                devtype_data.typeF = commit_freq
+                devtype_data.typeG = 1 if major_act == 'individual' else -1
+                devtype_data.save()
+                gbti_data = {"typeE":devtype_data.typeE, "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
 
-class ProfileEditView(TemplateView):
-    '''
-    유저 프로필 수정 페이지
-    url        : /user/<username>
-    template   : profile/profile.html 
+                gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
+                gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
+                context["gbti"] = gbti_data
+            except Exception as e:
+                print("Calculate dev type error", e)
+                context["gbti"] = None
+            test_data = {"typeA":devtype_data.typeA, "typeB": devtype_data.typeB, "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
+            test_data.update(get_type_test(devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+            def get_type_len(type_val):
+                return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val)%2 - 3)
 
-    Returns :
-        GET     : render, redirect
-    '''
+            test_data["typeAl"], test_data["typeAr"] = get_type_len(test_data["typeA"])
+            test_data["typeBl"], test_data["typeBr"] = get_type_len(test_data["typeB"])
+            test_data["typeCl"], test_data["typeCr"] = get_type_len(test_data["typeC"])
+            test_data["typeDl"], test_data["typeDr"] = get_type_len(test_data["typeD"])
+        except Exception as e:
+            print("Get DevType object error", e)
+            test_data = None
+            typeE = -1 if daytime > night else 1
+            typeF = commit_freq
+            typeG = 1 if major_act == 'individual' else -1
+            gbti_data = {"typeE":typeE, "typeF": typeF, "typeG": typeG}
+            gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(list(gbti_data.values()))
+            gbti_data["zip"]=list(zip(gbti_desc, gbti_descKR, gbti_icon))
+            context["gbti"] = gbti_data
+        context["test"] = test_data
+        context["success"] = True
 
-    def get_context_data(self, request, *args, **kwargs):
-        # context 는 username과 view 인스턴스를 가진 딕셔너리
-        context = super().get_context_data(**kwargs)
-        if str(request.user) != context["username"] : # 타인이 edit페이지 접속 시도시 프로필 페이지로 돌려보냄
-            print("허용되지 않는 접근 입니다.")
-            context['valid'] = 0
-            return context
-        context['valid'] = 1
-        username = context['username']
-        user = User.objects.get(username=username)
-
-        student_account = Account.objects.get(user=user.id)
-        student_id = student_account.student_data.id
-
-        tags_domain = Tag.objects.filter(type='domain')
-
-        
-        context["account"] = Account.objects.get(user=user.id)
-        context["info"] = StudentTab.objects.get(id=student_id)
-        context["ints"] = AccountInterest.objects.filter(account=student_account).filter(tag__in=tags_domain)
-        context["lang"] = AccountInterest.objects.filter(account=student_account).exclude(tag__in=tags_domain)
-        context["privacy"] = AccountPrivacy.objects.get(account=student_account)
         return context
-
-    def get(self, request, *args, **kwargs):
-
-        context = self.get_context_data(request, *args, **kwargs)
-        if(context['valid'] == 0):
-            return redirect(f'/user/{context["username"]}/')
-
-        return render(request, 'profile/profile-edit.html', context)
 
 
 def student_id_to_username(request, student_id):
@@ -492,10 +439,11 @@ class ProfileRepoView(TemplateView):
         student_data = account.student_data
         github_id = student_data.github_id
         context['account'] = github_id
-        repo_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+        commit_repos = get_commit_repos(github_id)
+
         repos = {}
         id_reponame_pair_list = []
-        for commit in repo_commits:
+        for commit in commit_repos:
             commit_repo_name = commit['repo_name']
             if commit_repo_name not in repos:
                 repos[commit_repo_name] = {'repo_name': commit_repo_name}
@@ -511,7 +459,7 @@ class ProfileRepoView(TemplateView):
         ctx_repo_stats = sorted(ctx_repo_stats, key=lambda x:x['committer_date'], reverse=True)
         context["guideline"] = ctx_repo_stats
         print("ProfileRepoView time :", time.time() - start)
-        
+
         return context
 
 
@@ -545,6 +493,12 @@ def save_test_result(request, username):
         
         return JsonResponse(context)
 
+def get_commit_repos(github_id, primary_email="", secondary_email=""):
+    repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_commits = repo_commiter_commits | repo_author_commits
+    return repo_commits
+
 @csrf_exempt
 def load_repo_data(request, username):
     if request.method == 'POST':
@@ -557,7 +511,8 @@ def load_repo_data(request, username):
                 print("account error", e)
             # 리포지토리 목록
             github_id = account.student_data.github_id
-            commit_repos = GithubRepoCommits.objects.filter(committer_github=github_id).values("github_id", "repo_name", "committer_date").order_by("-committer_date")
+            commit_repos = get_commit_repos(github_id)
+            print("commit_repos len", len(commit_repos))
             recent_repos = {}
             id_reponame_pair_list = []
             # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
@@ -580,196 +535,10 @@ def load_repo_data(request, username):
             recent_repos = sorted(recent_repos.values(), key=lambda x:x['committer_date'], reverse=True)
             context = {"status": 200, "repo":recent_repos}
         except Exception as e:
-            print("error save", e)
+            print("load_repo_data error save", e)
             context = {"status": 400}
         print("ajax repo", time.time() - start)
         return JsonResponse(context)
-
-
-
-
-class ProfileInterestsView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        print(request.POST)
-        print(request.POST['act'])
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
-        if request.POST['act'] == 'append':
-            added_preferLanguage = request.POST.get('interestDomain') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-                already_ints.delete()
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=0)
-
-        else:
-            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-            print("Selected tag is successfully deleted")
-
-        return JsonResponse({'data':'asdfas'})
-
-class ProfileLanguagesView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        print(request.POST)
-        print(request.POST['act'])
-        print(request.POST['target'])
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-
-        if request.POST['act'] == 'append':
-            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
-
-
-            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-            for l in lang:
-                if "tag_" + l.tag.name in request.POST:
-                    added_tag = Tag.objects.get(name=l.tag.name)
-                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-            return JsonResponse({'data':'asdfas'})
-        else:
-            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-            print("Selected tag is successfully deleted")
-            return JsonResponse({'data':'asdfas'})
-
-class ProfileImageView(UpdateView):
-
-    def post(self, request, username, *args, **kwargs):
-        print("asdfds")
-        print('img 상태dffffffffffffffffffffffffff')
-        user = User.objects.get(username=username)
-        
-        user_account = Account.objects.get(user=user.id)
-
-        pre_img = user_account.photo.path
-        field_check_list = {}
-        profile_img = request.FILES.get('photo', False)
-        
-        print(profile_img)
-        is_valid = True
-        print(request.POST.get('is_default'))
-        if request.POST.get('is_default') == 'true':
-            print("is true!!")
-
-
-        if profile_img:
-            img_width, img_height = get_image_dimensions(profile_img)
-            print(img_width, img_height)
-            if img_width > 500 or img_height > 500:
-                is_valid = False
-                field_check_list['photo'] = f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px'
-                print(f'이미지 크기는 500px x 500px 이하입니다. 현재 {img_width}px X {img_height}px')
-
-        img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
-        print(img_form)
-        print(pre_img)
-        if bool(img_form.is_valid()) and is_valid:
-            if 'photo' in request.FILES: # 폼에 이미지가 있으면
-                print('form에 이미지 존재')
-                try:
-                    print(" path of pre_image is "+ pre_img)
-                    if(pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
-                        pass
-                    else:
-                        print(pre_img.split("/")[-1])
-                        os.remove(pre_img) # 기존 이미지 삭제
-                
-                except:                # 기존 이미지가 없을 경우에 pass
-                    pass    
-
-            print('Image is valid form')
-            img_form.save()
-
-        else:
-            print(field_check_list['photo'])
-        return redirect(f'/user/{username}/')
-
-class ProfileImageDefaultView(DeleteView):
-    def post(self, request, username, *args, **kwargs):
-        user = User.objects.get(username=username)
-        
-        user_account = Account.objects.get(user=user.id)
-        user_account.photo = "img/profile_img/default.jpg"
-        user_account.save()
-        return redirect(f'/user/{username}/')
-
-
-
-class ProfileEditSaveView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        user_tab = StudentTab.objects.get(id=student_id)
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
-
-        lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-        user_privacy = AccountPrivacy.objects.get(account=user_account)
-        print(user_privacy)
-        for l in lang:
-            if "tag_" + l.tag.name in request.POST:
-                added_tag = Tag.objects.get(name=l.tag.name)
-                AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-
-        user_tab.plural_major = request.POST['plural_major']
-        user_tab.personal_email = request.POST['personal_email']
-        user_tab.primary_email = request.POST['primary_email']
-        user_tab.secondary_email = request.POST['secondary_email']
-        user_tab.save()
-
-        user_account.introduction = request.POST['introduction']
-        user_account.portfolio = request.POST['portfolio']
-        user_account.save()
-
-
-        user_privacy.open_lvl = request.POST['profileprivacy']
-        user_privacy.is_write = request.POST['articleprivacy']
-        user_privacy.is_open = request.POST['teamprivacy']
-        user_privacy.save()
-
-
-        return redirect(f'/user/{username}/')
-
-class ProfilePasswdView(UpdateView):
-    def post(self, request, username, *args, **kwargs):
-        user = User.objects.get(username=username)
-
-        if(user.check_password(request.POST['inputOldPassword']) == False):
-            return JsonResponse({"status" : "error"})
-
-        if(request.POST['inputNewPassword'] != request.POST['inputValidPassword']):
-            return JsonResponse({"status" : "error"})
-
-        user.set_password(request.POST['inputNewPassword'])
-        user.save()
-        print("비밀번호가 변경되었습니다. ")
-        return 1
-
-def InitAllPassword():
-    users = User.objects.all()
-    accounts = Account.objects.filter(user__is_superuser = False)
-    for account in accounts:
-        user = users.get(id=account.user.id)
-        user.set_password(str(account.student_data.id))
-        user.save()
-
-    return
-
-
 
 
 class ProfileType(TemplateView):
@@ -815,7 +584,7 @@ def consent_write(request, username=""):
         except Exception as e:
             print(e)
             return JsonResponse({'status': 'fail', 'msg':'저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
-            
+
 
 def consent_open(request, username=""):
 
@@ -836,7 +605,7 @@ def consent_open(request, username=""):
         }
 
         return render(request, 'consent/consent_open.html',context)
-    
+
     if request.method == 'POST':
         try:
             account = Account.objects.get(user=request.user.id)

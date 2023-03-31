@@ -145,8 +145,6 @@
     const deptLabel = JSON.parse("{{dept_list | escapejs }}");
   </script>
   <script type="text/javascript" src="{% static 'js/statistic.js' %}"></script>
-  <script src="http://code.jquery.com/jquery-latest.js"></script>
-  
-  <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@3.8.0/build/index.umd.min.js"></script>
 {% endblock script %}

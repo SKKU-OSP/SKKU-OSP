@@ -4,7 +4,13 @@
   font-weight: normal;
   font-style: normal;
 }
-
+.render .fouc {
+  opacity: 1;
+}
+.fouc{
+  opacity: 0;
+  transition: opacity .01s linear;
+}
 html, body {
   margin: 0;
   padding: 0;
@@ -659,6 +665,23 @@ img.opponent-profile {
 }
 
 .modal-dialog-started {
-    display: flex;
-    min-height: calc(100% - var(--bs-modal-margin) * 2);
+  display: flex;
+  min-height: calc(100% - var(--bs-modal-margin) * 2);
+}
+.shadow-box {
+  box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
+}
+
+.flex-between {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.flex-start {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: start;
 }
