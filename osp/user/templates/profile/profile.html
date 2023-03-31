@@ -419,7 +419,9 @@
                 {% if lang|length == 0%}
                   <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
                 {% endif %}
+                {% if lang|length != 0%}
                 <div class="tier-row d-flex justify-content-start align-items-center">
+                  
                   <div class="tier-name">
                     <!--img class="tier-icon" src="/static/svg/diamond.svg" alt="diamond"/-->
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
@@ -428,6 +430,7 @@
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
                   </div>
+                  
                   <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">  
                   {% for row in lang_lv4%}
                       <div class="d-flex justify-content-between">
@@ -516,6 +519,7 @@
                     {% endfor %}
                   </div>
                 </div>
+                {% endif %}
               </div>
             </div>
           </div>
