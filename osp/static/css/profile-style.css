@@ -1,6 +1,24 @@
+.repo-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .recent_repos {
   min-height: 100px;
-  max-height: 130px;
+  max-height: 150px;
+}
+
+.recent_repos span {
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 992px) {
+  .recent_repos:nth-child(n+5) {
+    display: none;
+  }
 }
 
 /* Bootstrap Change */
@@ -502,13 +520,6 @@ span.row-raw {
   margin-bottom: 0.2rem;
 }
 
-.weak-text {
-  color: var(--main-icon-color);
-  font-size: 12px;
-}
-.weak-text-lg{
-  color: var(--main-icon-color);
-}
 .endpoint {
   height: 6px !important;
   width: 6px !important;
@@ -667,6 +678,10 @@ span.row-raw {
     height: 45vw;
     padding: 0 8%;
     text-align: center;
+  }
+  .font-focus {
+    font-size: 20px;
+    font-weight: 500;
   }
 }
 @media (min-width: 768px) {

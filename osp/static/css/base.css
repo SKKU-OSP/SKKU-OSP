@@ -614,6 +614,10 @@ img.opponent-profile {
   font-size: 12px;
 }
 
+.weak-text-lg{
+  color: var(--main-icon-color);
+}
+
 .user-info {
   margin: auto;
   background-color: var(--main-point-color);
@@ -639,6 +643,27 @@ img.opponent-profile {
   margin-left: auto;
   box-sizing: border-box;
   padding: 0;
+}
+@media (max-width: 992px) {
+  .user-info .profile-img {
+    width: 100px;
+    height: 100px;
+    margin-top: -30px;
+  }
+}
+@media (max-width: 768px) {
+  .user-info .profile-img {
+    width: 80px;
+    height: 80px;
+    margin-top: -20px;
+  }
+}
+@media (max-width: 576px) {
+  .user-info .profile-img {
+    width: 40px;
+    height: 40px;
+    margin-top: 0;
+  }
 }
 
 .flex-harf {
