@@ -300,3 +300,4 @@ const article = {
         $(`#input-group-${id}`).remove();
     }
 };
+article.init();
