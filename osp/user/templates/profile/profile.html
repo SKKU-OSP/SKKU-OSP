@@ -14,15 +14,8 @@
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
       {% endif %}
       >
-        <img src= {{account.photo.url}} alt="No Image now" class="profile-img" href="www.naver.com">
-        {% if is_own %}
-        <div class="d-flex justify-content-end" style="margin-bottom:11px;">
-          <a href="./profile-edit" id="edit-button" class="btn btn-bd-primary" role="button" aria-disabled="true"><i class="bi bi-gear-fill"></i></a>
-        </div>
-        {% else %}
-        <div class="d-flex justify-content-end mb-1" style="height:31px;">
-        </div>
-        {% endif %}
+        <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
+        
         <div class="info-body">
         {% if is_own %}
           <p class="font-focus">{{info.name}}</p>
@@ -44,6 +37,14 @@
               {{info.github_id}}
             </a>
           </p>
+        {% endif %}
+        {% if is_own %}
+        <div>
+          <a href="./profile-edit" role="button" class="w-100 btn btn-outline-light" aria-disabled="true">프로필 수정</a>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-end mb-1" style="height:31px;">
+        </div>
         {% endif %}
         </div>
       </div>
@@ -104,7 +105,7 @@
     </div>
     <div id="profile-grid-section" class="col-md-9 col-12">
       {% if success %}
-      <div class="row mb-3 profile-content">
+      <div class="row profile-content">
         <div id="modalBox" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="chartModal" aria-hidden="true">
           <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -213,7 +214,7 @@
             </div>
           </div>
         </div>
-        <div class="col-8">
+        <div class="col-md-8 mb-3">
           <div class="card" id="visualization">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">
@@ -318,7 +319,7 @@
             </div>
           </div>
         </div>
-        <div class="col-4">
+        <div class="col-md-4 mb-3">
           <div class="card h-100">
             <div class="card-body d-flex flex-column justify-content-between">
               <h5 class="card-title mb-2">{{end_year}} Score</h5>
@@ -371,22 +372,7 @@
         </div>
       </div>
       <div class="row profile-content">
-        <!--div class="col-4 expandable">
-
-          <div class="card mb-3" id="portfolio">
-            <div class="card-body">
-              <h5 class="card-title d-flex justify-content-between">
-                자기소개
-                <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
-              </h5>
-              {% if account.introduction == '' %}
-                <span class="weak-text">자기소개를 설정해주세요</span>
-              {% endif %}
-              {{account.introduction}}
-            </div>
-          </div>
-        </div-->
-        <div class="col-4 expandable">
+        <div class="col-md-4 expandable">
           <div class="card mb-3" id="interests">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">관심분야
@@ -409,7 +395,7 @@
             </div>
           </div>
         </div>
-        <div class="col-8 expandable">
+        <div class="col-md-8 expandable">
           <div class="card mb-3" id="languages">
             <div class="card-body">
               <h5 id="stack-card-title" class="card-title d-flex justify-content-between">사용언어/기술스택
@@ -419,7 +405,9 @@
                 {% if lang|length == 0%}
                   <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
                 {% endif %}
+                {% if lang|length != 0%}
                 <div class="tier-row d-flex justify-content-start align-items-center">
+                  
                   <div class="tier-name">
                     <!--img class="tier-icon" src="/static/svg/diamond.svg" alt="diamond"/-->
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
@@ -428,6 +416,7 @@
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
                   </div>
+                  
                   <div class="d-flex flex-nowrap justify-content-start align-content-center langs-row">  
                   {% for row in lang_lv4%}
                       <div class="d-flex justify-content-between">
@@ -516,14 +505,15 @@
                     {% endfor %}
                   </div>
                 </div>
+                {% endif %}
               </div>
             </div>
           </div>
         </div>
       </div>
       {% if success %}
-      <div class="row mb-3 profile-content">
-        <div class="col-7">
+      <div class="row profile-content">
+        <div class="col-md-7 mb-3">
           <div class="card h-100">
             <div id="recent-repos" class="card-body">
               <h5 class="card-title d-flex justify-content-between">최근 기여활동
@@ -532,7 +522,7 @@
             </div>
           </div>
         </div>
-        <div class="col-5">
+        <div class="col-md-5 mb-3">
           <div id="modalGbtiBox" class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="gbtiModal" aria-hidden="true">
             <div class="modal-dialog modal-xl">
               <div class="modal-content gbti-bg">
