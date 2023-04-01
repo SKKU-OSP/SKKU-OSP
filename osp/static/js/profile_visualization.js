@@ -113,9 +113,9 @@ window.addEventListener('load', function () {
         if (month === target_monthly_contr[i]['month']) tid = i;
       }
       for (let j = 0; j < factorLabels.length; j++) {
-        if (mid != -1) factor_contribution[j] = monthly_contr[mid][factorLabels[j]];
+        if (mid !== -1) factor_contribution[j] = monthly_contr[mid][factorLabels[j]];
         else factor_contribution[j] = 0;
-        if (tid != -1) target_contribution[j] = target_monthly_contr[tid][factorLabels[j]];
+        if (tid !== -1) target_contribution[j] = target_monthly_contr[tid][factorLabels[j]];
         else target_contribution[j] = 0;
       }
     }
@@ -164,7 +164,7 @@ window.addEventListener('load', function () {
           }
           mLabel.appendChild(mText);
         }
-        if (level != 5) {
+        if (level !== 5) {
           rect.style.cursor = "pointer";
           rect.addEventListener("click", (e) => {
             let focus = 1 - e.target.attributes[2].value;
@@ -314,19 +314,27 @@ window.addEventListener('load', function () {
     }
     if (isNaN(mean)) mean = 0;
     if (isNaN(sigma)) sigma = 1;
-    let fixIdx = 0;
+    let s = 100, beforeVal = -1;
+    let p = 0, percentage = "", fixIdx = 0;
     if (chartFactor === "score") fixIdx = 3;
-    dist_data[chartFactor].forEach((val, idx) => {
-      let y = gaussian(Number(val));
-      normal_dist_data.push({ x: val, y: y, tooltip: Number(val).toFixed(fixIdx) });
-      if (Number(user_data[chartFactor]).toFixed(fixIdx) === Number(val).toFixed(fixIdx)) {
-        dist_x = val;
-        dist_text = String(val.toFixed(fixIdx));
+    dist_data[chartFactor].reverse().forEach((val, idx) => {
+      if (beforeVal !== Number(val).toFixed(fixIdx)) {
+        let x = (dist_data["num"] - idx) / dist_data["num"] * 100;
+        let y = gaussian(Number(val));
+        normal_dist_data.push({ x: val, y: y, tooltip: Number(val).toFixed(fixIdx) });
+        if (Number(user_data[chartFactor]).toFixed(fixIdx) === Number(val).toFixed(fixIdx)) {
+          dist_x = val;
+          p = (s + x) / 2;
+          percentage = "(" + String((100 - p).toFixed(2)) + "%)";
+          dist_text = String(val.toFixed(fixIdx)) + percentage;
+        }
+        beforeVal = Number(val).toFixed(fixIdx);
+        s = x;
       }
     });
     dist_data[chartFactor].reverse();
+    /** 확률밀도함수 */
     function gaussian(x) {
-      // 확률밀도함수
       let gaussianConstant = 1 / Math.sqrt(2 * Math.PI);
       x = (x - mean) / sigma;
       return gaussianConstant * Math.exp(-.5 * x * x) / sigma;
@@ -357,11 +365,15 @@ window.addEventListener('load', function () {
             ctx.lineTo(this.width, bottom);
             ctx.stroke();
             ctx.font = '12px Helvetica Neue, Helvetica, Arial, sans-serif';
-            let offset = 0;
-            if (fixIdx === 0) {
-              offset = 3 * this.text.length;
-            }
-            ctx.fillText(this.text, this.width - 4 * (fixIdx) - offset, top)
+
+            // position x 계산
+            let posX = this.width;
+            if (fixIdx === 0)
+              posX -= 3 * this.text.length; // Score 제외 나머지 요소
+            else
+              posX -= 4 * (fixIdx); // Score의 x 좌표 계산
+            if (posX < 40) posX = 40;
+            ctx.fillText(this.text, posX, top)
             ctx.fillText("you", this.width - 10, bottom + 10)
             ctx.save();
           }
@@ -384,7 +396,7 @@ window.addEventListener('load', function () {
           tooltip: {
             callbacks: {
               title: (items) => {
-                return String((items[0].raw.x).toFixed(2));
+                return String((items[0].raw.x).toFixed(fixIdx));
               },
               label: (item) => {
                 return String(parseFloat(item.raw.tooltip));
@@ -459,7 +471,7 @@ window.addEventListener('load', function () {
             formatter: (value, context) => {
               const datasetArray = [];
               context.chart.data.datasets.forEach((dataset) => {
-                if (dataset.data[context.dataIndex] != 'undefined') {
+                if (dataset.data[context.dataIndex] !== 'undefined') {
                   datasetArray.push(dataset.data[context.dataIndex]);
                 }
               });
@@ -558,8 +570,8 @@ window.addEventListener('load', function () {
       borderWidth: 1,
     });
     let target = $("#target-search").find(".placeholder");
-    if (target.text() != chart_data["username"] &&
-      target.text() != "비교없음") {
+    if (target.text() !== chart_data["username"] &&
+      target.text() !== "비교없음") {
       radar_datasets.push({ // 비교 유저
         type: "radar",
         label: target.text(),
@@ -599,7 +611,7 @@ window.addEventListener('load', function () {
    */
   function showTooltip(selectMonth = 0) {
     $(".grass-tooltip").remove();
-    if (selectMonth != 0) {
+    if (selectMonth !== 0) {
       let rect_target = $(`rect.contrib[month=${selectMonth}]`).first();
       rect_target.attr({ "stroke": cssDecl.getPropertyValue('--data-line'), "stroke-width": "2px", "focus": 1 });
       let rect_x = Number(rect_target.attr("x"));
