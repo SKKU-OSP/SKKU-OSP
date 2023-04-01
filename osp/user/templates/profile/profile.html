@@ -14,15 +14,8 @@
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
       {% endif %}
       >
-        <img src= {{account.photo.url}} alt="No Image now" class="profile-img" href="www.naver.com">
-        {% if is_own %}
-        <div class="d-flex justify-content-end" style="margin-bottom:11px;">
-          <a href="./profile-edit" id="edit-button" class="btn btn-bd-primary" role="button" aria-disabled="true"><i class="bi bi-gear-fill"></i></a>
-        </div>
-        {% else %}
-        <div class="d-flex justify-content-end mb-1" style="height:31px;">
-        </div>
-        {% endif %}
+        <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
+        
         <div class="info-body">
         {% if is_own %}
           <p class="font-focus">{{info.name}}</p>
@@ -44,6 +37,14 @@
               {{info.github_id}}
             </a>
           </p>
+        {% endif %}
+        {% if is_own %}
+        <div>
+          <a href="./profile-edit" role="button" class="w-100 btn btn-outline-light" aria-disabled="true">프로필 수정</a>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-end mb-1" style="height:31px;">
+        </div>
         {% endif %}
         </div>
       </div>
