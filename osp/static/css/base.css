@@ -614,6 +614,10 @@ img.opponent-profile {
   font-size: 12px;
 }
 
+.weak-text-lg{
+  color: var(--main-icon-color);
+}
+
 .user-info {
   margin: auto;
   background-color: var(--main-point-color);
