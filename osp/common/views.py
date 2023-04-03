@@ -25,6 +25,19 @@ class LoginView(auth_views.LoginView):
         context.update({"type": 'sign'})
         return context
 
+    def get_success_url(self):
+        # ADMIN은 통계페이지로 이동
+        if self.request.user.is_superuser:
+            return reverse('home:statistic')
+        # 프로필페이지로 리다이렉트
+        return reverse_lazy('user:profile', args=[self.request.user.username])
+
+    def form_valid(self, form):
+        # 로그인 처리
+        response = super().form_valid(form)
+        # 로그인 후에 리다이렉트 처리
+        return redirect(self.get_success_url())
+
 class PasswordResetView(auth_views.PasswordResetView):
     template_name='common/password_reset.html'
     email_template_name = "registration/email_reset_password.html"

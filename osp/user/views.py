@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
@@ -18,7 +19,7 @@ import time
 import datetime
 import json
 import math
-
+import logging
 
 # Create your views here.
 class ProfileView(TemplateView):
@@ -26,7 +27,6 @@ class ProfileView(TemplateView):
     유저 프로필
     url        : /user/<username>
     template   : profile/profile.html 
-
     Returns :
         GET     : redirect, render
     '''
@@ -44,7 +44,7 @@ class ProfileView(TemplateView):
             student_data = account.student_data
             github_id = student_data.github_id
         except Exception as e:
-            print(e)
+            logging.exception("[ProfileView] Init get_context_data error", e)
             return None
             
         chartdata = {}
@@ -65,7 +65,8 @@ class ProfileView(TemplateView):
             context["year_list"] = [year for year in range(end_year, self.start_year-1, -1)]
             chartdata["score_data"] = score_data_list
         except Exception as e:
-            print("[profile view] There are no score_data", e)
+            logging.exception("[ProfileView] There are no score_data", e)
+            # default 세팅으로 리턴
             context["end_year"] = datetime.datetime.now().year
             context["score_data"] = None
             context["chart_data"] = []
@@ -73,25 +74,8 @@ class ProfileView(TemplateView):
             context["success"] = False
             return context
         
-        star_subquery = Subquery(StudentTab.objects.values('github_id'))
-        where_stmt = ["github_repo_contributor.repo_name=github_repo_stats.repo_name", 
-                    "github_repo_contributor.owner_id=github_repo_stats.github_id", 
-                    "github_repo_stats.github_id = github_repo_contributor.github_id"]
-        star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
         
-        own_star = {"star" : 0}
-        star_temp_dist = []
-        for row in star_data:
-            star_temp_dist.append(row["star"])
-            if row["github_id"] == github_id:
-                own_star["star"] = row["star"]
-        star_temp_dist.sort()
-
-        mean = sum(star_temp_dist)/len(star_temp_dist)
-        own_star["avg"] = mean
-        sigma = math.sqrt(sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
-        own_star["std"] = sigma
-        star_dist = [star_temp_dist for _ in range(num_year)]
+        star_dist, own_star = self.get_star_dist(github_id=github_id, num_year=num_year)
         
         annual_dist = {}
         dist_score_total = DistScore.objects.filter(case_num=0)
@@ -113,62 +97,54 @@ class ProfileView(TemplateView):
             key_name = "year"+str(annual_key)
             chartdata[key_name] = json.dumps([annual_dist[annual_key]])
 
-        # 유저 점수를 모두 가져와서 각 요소별로 분포 데이터를 만든다.
-        # 연도를 인덱스로 하여 저장한다.
-        score_data = GitHubScoreTable.objects.all()
-        user_data_list = []
-        score_dist = [[] for _ in range(num_year)]
-        commit_dist = [[] for _ in range(num_year)]
-        pr_dist = [[] for _ in range(num_year)]
-        issue_dist = [[] for _ in range(num_year)]
-        repo_dist = [[] for _ in range(num_year)]
-        for row in score_data:
-            score_json = row.to_json()
+        try:
+            # 유저 점수를 모두 가져와서 각 요소별로 분포 데이터를 만든다.
+            # 연도를 인덱스로 하여 저장한다.
+            score_data = GitHubScoreTable.objects.all()
+            user_data_list = []
+            score_dist = [[] for _ in range(num_year)]
+            commit_dist = [[] for _ in range(num_year)]
+            pr_dist = [[] for _ in range(num_year)]
+            issue_dist = [[] for _ in range(num_year)]
+            repo_dist = [[] for _ in range(num_year)]
+            for row in score_data:
+                score_json = row.to_json()
 
-            if score_json["year"] >= self.start_year :
-                yid = score_json["year"] - self.start_year
-                score_dist[yid].append(score_json["total_score"])
-                commit_dist[yid].append(score_json["commit_cnt"])
-                pr_dist[yid].append(score_json["pr_cnt"])
-                issue_dist[yid].append(score_json["issue_cnt"])
-                repo_dist[yid].append(score_json["repo_cnt"])
-            if row.github_id == github_id:
-                user_data_list.append(score_json)
+                if score_json["year"] >= self.start_year :
+                    yid = score_json["year"] - self.start_year
+                    score_dist[yid].append(score_json["total_score"])
+                    commit_dist[yid].append(score_json["commit_cnt"])
+                    pr_dist[yid].append(score_json["pr_cnt"])
+                    issue_dist[yid].append(score_json["issue_cnt"])
+                    repo_dist[yid].append(score_json["repo_cnt"])
+                if row.github_id == github_id:
+                    user_data_list.append(score_json)
+        except Exception as e:
+            logging.exception("[ProfileView] There are no user_data_list", e)
+            return context
         
         chartdata["user_data"] = json.dumps(user_data_list)
         
         # 연도별로 각 요소별 평균, 표준편차를 구해 확률밀도함수를 구할 수 있도록 한다.
         annual_dist_data = {"score":[], "commit": [], "pr": [], "issue": [], "repo": [], "score_std":[], "commit_std":[], "pr_std":[], "issue_std":[], "repo_std":[]}
-        for sub_dist in score_dist:
-            sub_dist.sort()
-            mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["score"].append(mean)
-            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["score_std"].append(sigma)
-        for sub_dist in commit_dist:
-            sub_dist.sort()
-            mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["commit"].append(mean)
-            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["commit_std"].append(sigma)
-        for sub_dist in pr_dist:
-            sub_dist.sort()
-            mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["pr"].append(mean)
-            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["pr_std"].append(sigma)
-        for sub_dist in issue_dist:
-            sub_dist.sort()
-            mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["issue"].append(mean)
-            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["issue_std"].append(sigma)
-        for sub_dist in repo_dist:
-            sub_dist.sort()
-            mean = sum(sub_dist)/len(sub_dist)
-            annual_dist_data["repo"].append(mean)
-            sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-            annual_dist_data["repo_std"].append(sigma)
+
+        def get_annual_dist(target_dist):
+            mean_list, sigma_list = [], []
+            for sub_dist in target_dist:
+                sub_dist.sort()
+                mean = sum(sub_dist)/len(sub_dist)
+                mean_list.append(mean)
+                sigma = math.sqrt(sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
+                sigma_list.append(sigma)
+                
+            return mean_list, sigma_list
+        
+        annual_dist_data["score"], annual_dist_data["score_std"] = get_annual_dist(score_dist)
+        annual_dist_data["commit"], annual_dist_data["commit_std"] = get_annual_dist(commit_dist)
+        annual_dist_data["pr"], annual_dist_data["pr_std"] = get_annual_dist(pr_dist)
+        annual_dist_data["issue"], annual_dist_data["issue_std"] = get_annual_dist(issue_dist)
+        annual_dist_data["repo"], annual_dist_data["repo_std"] = get_annual_dist(repo_dist)
+
         chartdata["annual_overview"] = json.dumps([annual_dist_data])
         chartdata["score_dist"] = score_dist
         chartdata["star_dist"] = star_dist
@@ -308,6 +284,7 @@ class ProfileView(TemplateView):
                             acc_pp.open_lvl = 1
                     if is_redirect:
                         context = {"alert": "해당 사용자는 정보 비공개 상태입니다.", "url":"history"}
+                        print("deny profile access", context)
                         return render(request, "community/redirect.html", context)
         except Exception as e:
             print("permission check error", e)
@@ -318,7 +295,8 @@ class ProfileView(TemplateView):
         context = self.get_context_data(request, *args, **kwargs)
         if not context:
             context = {"alert": "유저 데이터를 가져올 수 없습니다.", "url":"history"}
-            return render(request, "community/redirect.html", context)
+            print("no context error", context)
+            return redirect(reverse('community:main'))
 
         # student repository info
         context['cur_repo_type'] = 'owned'
@@ -387,6 +365,30 @@ class ProfileView(TemplateView):
         context["success"] = True
 
         return context
+    
+    def get_star_dist(self, github_id, num_year):
+        # 서브쿼리를 이용해 유저의 Star 개수를 구하는 방법
+        star_subquery = Subquery(StudentTab.objects.values('github_id'))
+        where_stmt = ["github_repo_contributor.repo_name=github_repo_stats.repo_name", 
+                    "github_repo_contributor.owner_id=github_repo_stats.github_id", 
+                    "github_repo_stats.github_id = github_repo_contributor.github_id"]
+        star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
+        
+        own_star = {"star" : 0}
+        star_temp_dist = []
+        for row in star_data:
+            star_temp_dist.append(row["star"])
+            if row["github_id"] == github_id:
+                own_star["star"] = row["star"]
+        star_temp_dist.sort()
+
+        mean = sum(star_temp_dist)/len(star_temp_dist)
+        own_star["avg"] = mean
+        sigma = math.sqrt(sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
+        own_star["std"] = sigma
+        star_dist = [star_temp_dist for _ in range(num_year)]
+
+        return star_dist, own_star
 
 
 def student_id_to_username(request, student_id):
