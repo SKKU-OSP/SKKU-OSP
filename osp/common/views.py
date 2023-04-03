@@ -13,7 +13,7 @@ from osp.settings import EMAIL_HOST_USER
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import Tag
 from data.api import GitHub_API
-from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN
+from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN_FOR_REG
 
 import re
 import smtplib
@@ -255,7 +255,7 @@ def check_duplicate_github_id(github_id):
     return True if len(acc) else False
 
 def check_api_github(github_id):
-    for auth_token in OAUTH_TOKEN:
+    for auth_token in OAUTH_TOKEN_FOR_REG:
         try:
             api = GitHub_API(auth_token)
             result = api.get_user(github_id)
