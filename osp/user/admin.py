@@ -6,6 +6,7 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = ('user', 'student_data')
 
 class StudentAdmin(admin.ModelAdmin):
+    search_fields = ['id', 'name', 'github_id']
     list_display = ('id', 'name', 'github_id', 'college', 'dept', 'personal_email')
 
 admin.site.register(StudentTab, StudentAdmin)
