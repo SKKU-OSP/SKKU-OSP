@@ -16,7 +16,7 @@ from user.update_act import update_commmit_time, update_individual, update_frequ
 
 def start():
     scheduler=BackgroundScheduler(timezone='Asia/Seoul')
-    @scheduler.scheduled_job('cron', hour='0', misfire_grace_time=60, id='crawling')
+    @scheduler.scheduled_job('cron', hour='3,15', misfire_grace_time=60, id='crawling')
     def crawl_job():
         print('crawl_job Start!', datetime.now())
         try:
@@ -35,6 +35,11 @@ def start():
             shell=True,
             cwd=os.path.join(BASE_DIR, 'crawler/Scrapy/SKKU_GitHub'),
         )
+        print('crawl_job:django.db.close_old_connections()')
+        django.db.close_old_connections()
+
+    @scheduler.scheduled_job('cron', hour='3,9,15,21', misfire_grace_time=60, id='update_score')
+    def update_score():
         print('Update Start!')
         challenge_list = Challenge.objects.all()
         year = datetime.now().year
@@ -46,7 +51,7 @@ def start():
         update_individual()
         update_frequency()
         update_chart(63)
-        print('django.db.close_old_connections()')
+        print('update_score:django.db.close_old_connections()')
         django.db.close_old_connections()
         print('Done!')
     

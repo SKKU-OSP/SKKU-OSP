@@ -176,8 +176,11 @@ class Student(models.Model):
             "pr" : self.pr,
             "issue" : self.issue,
         }
-        
     
+    def __str__(self) -> str:
+        return f'{self.year}:{self.github_id}'
+
+
 class Repository(models.Model):
     
     id = models.BigAutoField(primary_key=True)
@@ -189,3 +192,6 @@ class Repository(models.Model):
         return {
             self.owner : self.repo_num
         }
+
+    def __str__(self) -> str:
+        return f'{self.year}:{self.owner}'
