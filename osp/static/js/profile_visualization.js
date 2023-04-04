@@ -1,8 +1,34 @@
-window.addEventListener('load', function () {
-  const start_year = 2019;
+$(function(){
+  const username = $("#profile-username").val();
+  // 차트 데이터 받아와 프로필 차트 렌더링
+  $.ajax({
+    url: `/user/${username}/api/chart-data`,
+    type: "POST",
+    data: null,
+    dataType: 'json',
+    processData: false,
+    contentType: false,
+  }).done(function (data) {
+    console.log("done data", typeof data);
+    console.log(data['msg']);
+    renderProfileChart(data['data']);
+  }).fail(function (data) {
+    console.log("fail data", data)
+    if (data['msg']){
+      alert(data['msg']);
+    }
+  })
+  // 기여내역 시각화 탭 조작 설정
+  setChartNavs();
+});
+
+const renderProfileChart = function(chart_data) {
   const grass_size = 72;
   const standard_contr = 30;
   const NS = "http://www.w3.org/2000/svg";
+
+  const end_year = $("#profile-end-year").val();
+  const start_year = 2019;
   let year_intvl = end_year - start_year;
   let select_year = end_year;
   let select_month = 0;
@@ -21,7 +47,6 @@ window.addEventListener('load', function () {
   let dist_chart = new Chart(visual_ctx[2]);
   let specific_score_chart = new Chart(visual_ctx[3]);
 
-  setChartNavs();
   setYearDropdown();
   setMonthDropdown();
   setFactorDropdown();
@@ -281,6 +306,7 @@ window.addEventListener('load', function () {
       "repo": user_data_total["repo_cnt"],
     }
     user_data["star"] = chart_data["own_star"]["star"];
+    $("#profile-star").text(user_data["star"]);
     let annual_data = JSON.parse(chart_data["annual_overview"])[0];
     let dist_data = {
       "score": chart_data["score_dist"][select_year - start_year],
@@ -648,7 +674,7 @@ window.addEventListener('load', function () {
       rect_target.parent().append(mLabel);
     }
   }
-  setVisualModal();
+  setVisualModal(chart_data);
   setGbtiModal();
   $("#icon-devtype").on("click", () => {
     $('#modalGbtiBox').modal('show');
@@ -674,7 +700,6 @@ window.addEventListener('load', function () {
     }
     if (mt < 0 || document.documentElement.scrollTop === 0) sideCol.style.marginTop = '0';
   });
-
 
   /**
    * 연도버튼에 해당 연도에 맞는 잔디 차트를 렌더링하는 이벤트 추가
@@ -765,49 +790,49 @@ window.addEventListener('load', function () {
     palette.active = cssDecl.getPropertyValue('--bootstrap-primary');
     return palette;
   }
+}
 
-  /**
+/**
    * 차트 영역의 드롭다운의 기능을 제한합니다.
    * 차트마다 월, 기여요소, 연도 세가지 버튼을 비활성할지 결정합니다.
    */
-  function setChartNavs() {
-    let chartNavs = document.getElementsByClassName("nav-link");
-    for (let nav of chartNavs) {
-      nav.addEventListener("click", function (e) {
-        $('.nav-link.active').removeClass("active");
-        this.className += " active";
-        let nav_id = e.target.attributes.id.value;
-        let paneId = nav_id.split("-tab")[0];
-        const chart_pane = $('#' + paneId);
-        const before_pane = $('.tab-pane.show.active')
-        before_pane.removeClass("active");
-        before_pane.removeClass("show");
-        chart_pane.addClass("active");
-        chart_pane.addClass("show");
-        if (paneId === "pills-overview") {
-          $("#btnGroupDropMonth").attr("disabled", false);
-          $("#btnGroupDropFactor").attr("disabled", true);
-          $("#btnGroupDropYear").attr("disabled", false);
-        }
-        else if (paneId === "pills-radar") {
-          $("#btnGroupDropMonth").attr("disabled", false);
-          $("#btnGroupDropFactor").attr("disabled", true);
-          $("#btnGroupDropYear").attr("disabled", false);
-        }
-        else if (paneId === "pills-dist") {
-          $("#btnGroupDropMonth").attr("disabled", true);
-          $("#btnGroupDropFactor").attr("disabled", false);
-          $("#btnGroupDropYear").attr("disabled", false);
-        }
-        else if (paneId === "pills-detail") {
-          $("#btnGroupDropMonth").attr("disabled", true);
-          $("#btnGroupDropFactor").attr("disabled", true);
-          $("#btnGroupDropYear").attr("disabled", true);
-        }
-      });
-    }
+function setChartNavs() {
+  let chartNavs = document.getElementsByClassName("nav-link");
+  for (let nav of chartNavs) {
+    nav.addEventListener("click", function (e) {
+      $('.nav-link.active').removeClass("active");
+      this.className += " active";
+      let nav_id = e.target.attributes.id.value;
+      let paneId = nav_id.split("-tab")[0];
+      const chart_pane = $('#' + paneId);
+      const before_pane = $('.tab-pane.show.active')
+      before_pane.removeClass("active");
+      before_pane.removeClass("show");
+      chart_pane.addClass("active");
+      chart_pane.addClass("show");
+      if (paneId === "pills-overview") {
+        $("#btnGroupDropMonth").attr("disabled", false);
+        $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", false);
+      }
+      else if (paneId === "pills-radar") {
+        $("#btnGroupDropMonth").attr("disabled", false);
+        $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", false);
+      }
+      else if (paneId === "pills-dist") {
+        $("#btnGroupDropMonth").attr("disabled", true);
+        $("#btnGroupDropFactor").attr("disabled", false);
+        $("#btnGroupDropYear").attr("disabled", false);
+      }
+      else if (paneId === "pills-detail") {
+        $("#btnGroupDropMonth").attr("disabled", true);
+        $("#btnGroupDropFactor").attr("disabled", true);
+        $("#btnGroupDropYear").attr("disabled", true);
+      }
+    });
   }
-});
+}
 
 const profileRepo = {
   init: function (github_id) {

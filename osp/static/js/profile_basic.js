@@ -1,6 +1,6 @@
-window.addEventListener('load', function () {
-  let icon_portfolio_modal = document.getElementById("icon-portfolio");
-  icon_portfolio_modal.addEventListener("click", ()=>{
+$(function(){
+  const icon_portfolio_modal = $("#icon-portfolio");
+  icon_portfolio_modal.on("click", ()=>{
     $('#modalPortfolioBox').modal('show');
   });
   $("#icon-interests").on("click", function(){
