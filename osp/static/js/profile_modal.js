@@ -1,5 +1,6 @@
-function setVisualModal() {
+function setVisualModal(chart_data) {
   const start_year = 2019;
+  const end_year = $("#profile-end-year").val();
   const grass_size = 66;
   const standard_contr = 30;
   const NS = "http://www.w3.org/2000/svg";
@@ -736,6 +737,7 @@ function setVisualModal() {
     return palette;
   }
 }
+
 function setGbtiModal() {
   const cssDecl = getComputedStyle(document.documentElement);
   $("#btn-save-id-card").on("click", () => {
