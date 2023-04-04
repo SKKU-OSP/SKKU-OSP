@@ -297,7 +297,7 @@ function saveImg(){
       url: "imagedefault",
       headers: {'X-CSRFToken': csrftoken},
       success: function(rtn){
-
+        window.location.href='..';
 
       },
       err: function(err){
@@ -379,7 +379,7 @@ function saveAll(){
     success : function(data, response) {
       console.log('success');
       saveImg();
-      window.location.href='..';
+      
     }, // success 
 
     error : function(xhr, status) {
