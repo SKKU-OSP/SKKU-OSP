@@ -29,4 +29,5 @@ urlpatterns = [
 
     path('<username>/api/consent-write', views.consent_write, name='consent_write'),
     path('<username>/api/consent-open', views.consent_open, name='consent_open'),
+    path('<username>/api/chart-data', views.get_chart_data, name='chart-data'),
 ]

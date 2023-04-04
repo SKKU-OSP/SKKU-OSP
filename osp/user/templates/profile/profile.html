@@ -196,6 +196,8 @@
             <div class="card-body d-flex flex-column justify-content-between">
               <h5 class="card-title mb-2">{{end_year}} Score</h5>
               <span class="text-center font-focus my-auto" style="font-size:2.5rem;">{{score.total_score|floatformat:2}}</span>
+              <input type="hidden" id="profile-end-year" value="{{end_year}}">
+              <input type="hidden" id="profile-username" value="{{username}}">
               <div class="row-complex">
                 <div class="row-contr">
                   <span class="row-title" style="width:70%;">Repositories</span>
@@ -219,7 +221,7 @@
                 </div>
                 <div class="row-contr">
                   <span class="row-title">Stars</span>
-                  <span class="row-raw">{{star}}</span>
+                  <span id="profile-star" class="row-raw">{{star}}</span>
                 </div>
               </div>
             </div>
@@ -688,14 +690,9 @@
         }
       }
     });
+    let type_data = JSON.parse("{{ type_data | escapejs }}");
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script type="text/javascript">
-    let chart_data = JSON.parse("{{ chart_data | escapejs }}");
-    let type_data = JSON.parse("{{ type_data | escapejs }}");
-    const end_year = {{end_year}};
-    const github_id = '{{username}}';
-  </script>
   <script type="text/javascript" src="{% static 'js/profile_visualization.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/profile_modal.js' %}"></script>
   <script type="text/javascript" src="https://unpkg.com/chart.js@3.6.0/dist/chart.min.js"></script>
