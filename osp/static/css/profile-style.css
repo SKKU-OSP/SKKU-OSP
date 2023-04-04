@@ -843,10 +843,14 @@ span.row-raw {
   font-size: 15px;
 }
 
+#user-github-link{
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 #user-github-link:link{
- color: white;
- text-decoration: underline;
-
+  color: white;
+  text-decoration: underline;
 }
 #user-github-link:visited{
   color: white; text-decoration: none;
@@ -901,7 +905,7 @@ span.row-raw {
 }
 
 .bi-star-fill{
- margin-left: -12px;
+  margin-left: -12px;
 }
 
 #portfolio-nav{
