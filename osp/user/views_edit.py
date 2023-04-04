@@ -151,56 +151,25 @@ class ProfileLanguagesView(UpdateView):
             fontcolor = "black"
 
         return JsonResponse({'name': name, 'logo' : logo, 'color': color, 'fontcolor' : fontcolor})
-    '''
-    def post(self, request, username, *args, **kwargs):
-        print(request.POST)
-        print(request.POST['act'])
-        print(request.POST['target'])
-        user = User.objects.get(username=username)
-        user_account = Account.objects.get(user=user.id)
-        student_id = user_account.student_data.id
-        tags_all = Tag.objects
-        tags_domain = tags_all.filter(type='domain')
 
-        if request.POST['act'] == 'append':
-            added_preferLanguage = request.POST.get('preferLanguage') # 선택 된 태그
-            added_tag = Tag.objects.get(name=added_preferLanguage)
-            try:
-                already_ints = AccountInterest.objects.get(account=user_account, tag=added_tag)
-            except:
-                AccountInterest.objects.create(account=user_account, tag=added_tag, level=1)
-
-
-            lang = AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain)
-            for l in lang:
-                if "tag_" + l.tag.name in request.POST:
-                    added_tag = Tag.objects.get(name=l.tag.name)
-                    AccountInterest.objects.filter(account=user_account, tag=added_tag).update(level=request.POST.get("tag_" + l.tag.name))
-            return JsonResponse({'color':'asdfas', })
-        else:
-            delete_requested_tag = Tag.objects.get(name=request.POST['target'])
-            tag_deleted = AccountInterest.objects.get(account=user_account, tag=delete_requested_tag).delete()
-            print("Selected tag is successfully deleted")
-            return JsonResponse({'data':'asdfas'})
-    '''
 
 
 class ProfileImageView(UpdateView):
 
     def post(self, request, username, *args, **kwargs):
-        print("asdfds")
-        print('img 상태dffffffffffffffffffffffffff')
         user = User.objects.get(username=username)
-        
         user_account = Account.objects.get(user=user.id)
 
         pre_img = user_account.photo.path
+
         field_check_list = {}
+        
         profile_img = request.FILES.get('photo', False)
         
         print(profile_img)
         is_valid = True
         print(request.POST.get('is_default'))
+
         if request.POST.get('is_default') == 'true':
             print("is true!!")
 
@@ -214,6 +183,7 @@ class ProfileImageView(UpdateView):
                 print(f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px')
 
         img_form = ProfileImgUploadForm(request.POST, request.FILES, instance=user_account)
+        img_form.save()
         print(img_form)
         print(pre_img)
         if bool(img_form.is_valid()) and is_valid:
@@ -224,6 +194,7 @@ class ProfileImageView(UpdateView):
                     if(pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
                         pass
                     else:
+                        print("기존이미지를 삭제합니다.")
                         print(pre_img.split("/")[-1])
                         os.remove(pre_img) # 기존 이미지 삭제
                 
@@ -231,8 +202,13 @@ class ProfileImageView(UpdateView):
                     pass    
 
             print('Image is valid form')
-            img_form.save()
-
+            
+            print(user_account.photo.path)
+            
+            img_form.save() 
+            user_account.save()
+            print("세이브 완료되면출력되는 문구")
+        
         else:
             print(field_check_list['photo'])
         return redirect(f'/user/{username}/')
