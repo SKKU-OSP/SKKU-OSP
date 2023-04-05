@@ -43,6 +43,13 @@ def user_profile_image_url(user):
         return mark_safe(Account._meta.get_field('photo').get_default())
 
 @register.simple_tag
+def is_open(request):
+    if AccountPrivacy.objects.filter(account_id=request.user.id, open_lvl__gt=0):
+        return True
+    else:
+        return False
+
+@register.simple_tag
 def consent_text(request, type):
     try:
         with open(os.path.join(DATA_DIR, "consent_{}.json".format(type)), 'r') as consent:

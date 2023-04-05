@@ -32,7 +32,7 @@
           {% endif %}
         </div>
       </div>
-    {% if is_own or open_lvl == 2%}
+    {% if is_own or open_lvl == 2 %}
       <div class="d-flex flex-column user-detail">
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학번</span>
@@ -173,9 +173,14 @@
                   <canvas id="canvas1" class="ctx-item"></canvas>
                     <div id="target-search">
                       <select name="target" id="target-user">
-                        <option value="" selected="selected">비교없음</option>
-                        {% target_github_id request as target_option %}
-                        {{target_option}}
+                        {% is_open request as is_open %}
+                        {% if is_open == True %}
+                          <option value="" selected="selected">비교 대상을 선택해주세요</option>
+                          {% target_github_id request as target_option %}
+                          {{target_option}}
+                        {% else %}
+                          <option value="" selected="selected">프로필을 공개해야 이용할 수 있습니다</option>
+                        {% endif %}
                       </select>
                       <button id="btn-compare" class="btn btn-primary btn-sm">비교</button>
                       <button id="btn-toggle" class="btn btn-primary btn-sm">정규화</button>
