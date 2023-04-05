@@ -48,6 +48,8 @@ class ProfileView(TemplateView):
             return None
 
         context["end_year"] = datetime.datetime.now().year
+        context["year_list"] = [year for year in range(context["end_year"], self.start_year-1, -1)]
+
         developer_context = self.get_developer_type(account=account, username=context['username'])
         context.update(developer_context)
 
@@ -174,6 +176,7 @@ class ProfileView(TemplateView):
         ## owned repository
         student_info = context['account'].student_data
         context['score'] = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
+        context['success'] = False if not context['score'] else True
         context['is_own'] = is_own
         context['open_lvl'] = acc_pp.open_lvl
         context['is_write'] = acc_pp.is_write
@@ -588,7 +591,7 @@ def get_chart_data(request, username):
             # 유저 점수를 모두 가져와서 각 요소별로 분포 데이터를 만든다.
             # 연도를 인덱스로 하여 저장한다.
             score_data = GitHubScoreTable.objects.all()
-            user_data_list = []
+            user_data_list = [None for _ in range(num_year)]
             score_dist = [[] for _ in range(num_year)]
             commit_dist = [[] for _ in range(num_year)]
             pr_dist = [[] for _ in range(num_year)]
@@ -596,7 +599,6 @@ def get_chart_data(request, username):
             repo_dist = [[] for _ in range(num_year)]
             for row in score_data:
                 score_json = row.to_json()
-
                 if score_json["year"] >= start_year :
                     yid = score_json["year"] - start_year
                     score_dist[yid].append(score_json["total_score"])
@@ -605,7 +607,8 @@ def get_chart_data(request, username):
                     issue_dist[yid].append(score_json["issue_cnt"])
                     repo_dist[yid].append(score_json["repo_cnt"])
                 if row.github_id == github_id:
-                    user_data_list.append(score_json)
+                    yid = score_json["year"] - start_year
+                    user_data_list[yid] = score_json
         except Exception as e:
             logging.exception("[ProfileView] There are no user_data_list", e)
             return JsonResponse({'status': 'fail', 'msg':'차트 데이터를 생성 하는데 실패했습니다.'})

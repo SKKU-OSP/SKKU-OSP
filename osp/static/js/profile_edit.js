@@ -1,8 +1,7 @@
 $("#savebtn").click(function(){
-  if(confirm("정말 저장하시겠습니까 ?") == true){
-      alert("저장되었습니다. 프로필화면으로 돌아갑니다.");
-      saveImg();
-      saveAll();
+  if(confirm("변경사항을 저장하시겠습니까 ?") == true){
+    saveAll();
+    alert("저장되었습니다. 프로필화면으로 돌아갑니다.");
   }
   else{
       return ;
@@ -298,7 +297,7 @@ function saveImg(){
       url: "imagedefault",
       headers: {'X-CSRFToken': csrftoken},
       success: function(rtn){
-
+        window.location.href='..';
 
       },
       err: function(err){
@@ -379,7 +378,8 @@ function saveAll(){
     data : JSON.stringify(profiledata),
     success : function(data, response) {
       console.log('success');
-      window.location.href='..';
+      saveImg();
+      
     }, // success 
 
     error : function(xhr, status) {
@@ -503,7 +503,13 @@ $("#profileprivacyradio2").change(function(){
 });
 
 function deleteImg(){
+  if(confirm("기본 이미지로 변경하시겠습니까 ?") == true){
   $("#image_section").attr('src', "/data/media/img/profile_img/default.jpg");
+
+  }
+  else{
+  
+  }
   return;
 }
 
