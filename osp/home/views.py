@@ -1,10 +1,19 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from user.models import GitHubScoreTable
 from django.db.models import Count
 import json, time
+
+from datetime import datetime
+from user.models import Account
+from home.updateScore import user_score_update
+from home.updateChart import update_chart
+from challenge.models import Challenge
+from challenge.views import achievement_check
+from user.update_act import update_commmit_time, update_individual, update_frequency
 
 # Create your views here.
 @login_required
@@ -103,3 +112,24 @@ def statistic(request):
     print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
 
     return render(request, 'home/statistic.html', context)
+
+
+@login_required
+def update_score(request):
+    if request.user.is_superuser:
+        print('Update Start!')
+        challenge_list = Challenge.objects.all()
+        end_year = datetime.now().year
+        start_year = 2019
+        for user in Account.objects.filter(user__is_superuser=False):
+            for chal in challenge_list:
+                achievement_check(user, chal)
+            for year in range(end_year, start_year-1, -1):
+                user_score_update(user, year)
+        update_commmit_time()
+        update_individual()
+        update_frequency()
+        update_chart(63)
+        print('Done!')
+
+    return redirect(reverse('home:statistic'))
