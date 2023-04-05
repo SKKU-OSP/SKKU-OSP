@@ -176,6 +176,7 @@ class ProfileView(TemplateView):
         ## owned repository
         student_info = context['account'].student_data
         context['score'] = GitHubScoreTable.objects.filter(id=student_info.id).order_by('-year').first()
+        context['success'] = False if not context['score'] else True
         context['is_own'] = is_own
         context['open_lvl'] = acc_pp.open_lvl
         context['is_write'] = acc_pp.is_write
