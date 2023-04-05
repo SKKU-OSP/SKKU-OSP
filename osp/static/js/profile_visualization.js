@@ -16,7 +16,9 @@ $(function(){
     }
     else{
       console.log("fail data", typeof data);
-      alert(data['msg']);
+      if (data['msg']){
+        alert(data['msg']);
+      }
     }
   }).fail(function (data) {
     console.log("fail data", data)
