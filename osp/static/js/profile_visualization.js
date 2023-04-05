@@ -9,9 +9,15 @@ $(function(){
     processData: false,
     contentType: false,
   }).done(function (data) {
-    console.log("done data", typeof data);
-    console.log(data['msg']);
-    renderProfileChart(data['data']);
+    if(data['status'] === "success"){
+      console.log("done data", typeof data);
+      console.log(data['msg']);
+      renderProfileChart(data['data']);
+    }
+    else{
+      console.log("fail data", typeof data);
+      alert(data['msg']);
+    }
   }).fail(function (data) {
     console.log("fail data", data)
     if (data['msg']){
