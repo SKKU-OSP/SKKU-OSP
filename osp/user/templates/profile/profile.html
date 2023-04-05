@@ -16,7 +16,7 @@
       >
         <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
         <div class="info-body">
-          {% if is_own %}
+          {% if is_own or open_lvl == 2 %}
           <p class="font-focus">{{info.name}}</p>
           {% endif %}
           <div class="mb-3">
@@ -28,9 +28,6 @@
           {% if is_own %}
           <div>
             <a href="./profile-edit" role="button" class="w-100 btn btn-outline-light" aria-disabled="true">프로필 수정</a>
-          </div>
-          {% else %}
-          <div style="height:38px;">
           </div>
           {% endif %}
         </div>
