@@ -20,6 +20,19 @@
   }
 }
 
+.form-checks {
+  flex-direction: row;
+}
+
+@media (min-width: 768px) and (max-width: 1200px) {
+  .form-checks {
+    flex-direction: column;
+  }
+  .form-checks > .form-check {
+    margin-right: 0 !important;
+  }
+}
+
 div.edit-container {
   height: 500px;
   margin-bottom: 1rem;
@@ -34,6 +47,11 @@ h5.card-title {
 
 .card {
   height: 500px;
+}
+
+.profile-edit-description {
+  font-size: 9pt;
+  color: darkgrey;
 }
 
 a.nav-link {

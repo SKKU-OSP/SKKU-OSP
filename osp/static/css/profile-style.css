@@ -387,12 +387,12 @@ a.nav-link {
   flex-direction: row;
   align-items: center;
   border-top: 2px solid var(--profile-nav-border);
-  height: 60px;
+  min-height: 60px;
 }
 
 .row-title {
   flex-shrink: 0;
-  width: 68px;
+  width: 75px;
   font-weight: 550;
   margin-right: 5px;
 }
