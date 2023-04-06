@@ -672,6 +672,13 @@ span.row-raw {
 @media (max-width: 768px) {
   #profile-info {
     margin-top: 0 !important;
+    width: 100%;
+  }
+  #profile-grid-section{
+    width: 100% !important;
+  }
+  #visualization {
+    width: 100%;
   }
   .modal-item {
     width: 100%;
@@ -839,6 +846,7 @@ span.row-raw {
 #profile-grid-section{
   width: 80%;
 }
+
 #personal-email{
   font-size: 15px;
 }

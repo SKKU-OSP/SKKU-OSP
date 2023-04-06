@@ -11,10 +11,10 @@
     <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info"
       {% if not is_own %}
-        style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
+        style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;margin-bottom:15px"
       {% endif %}
       >
-        <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
+        <img src={{account.photo.url}} alt="No Image now" class="profile-img">
         <div class="info-body">
           {% if is_own or open_lvl == 2 %}
           <p class="font-focus">{{info.name}}</p>
