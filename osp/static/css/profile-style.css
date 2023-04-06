@@ -403,6 +403,7 @@ a.row-txt {
   width: calc(100%-68px);
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap; 
 }
 
 .row-complex {
