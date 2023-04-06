@@ -23,7 +23,7 @@
     .boardgroup-item>a>span{
         display: none!important;
     }
-    .profile-img{
+    a>.profile-img{
         width: 22px;
         height: 22px;
         border: 0 !important;
