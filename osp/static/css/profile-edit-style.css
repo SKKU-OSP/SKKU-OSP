@@ -11,6 +11,15 @@
   }
 }
 
+@media (max-width: 992px) {
+  #for-photo-delete {
+    margin-right: 75px !important;
+  }
+  #for-photo {
+    margin-right: 0 !important;
+  }
+}
+
 div.edit-container {
   height: 500px;
   margin-bottom: 1rem;
@@ -98,11 +107,10 @@ a.nav-link {
   margin:auto;
   margin-top: -20px;
   margin-right: 20px;
-
   z-index: 6;
 }
 
-#for-photo-delete{
+#for-photo-delete {
   position:relative;
   display:block;
   text-align: center;
@@ -112,9 +120,8 @@ a.nav-link {
   border-radius: 0.3rem;
   width: 25px;
   margin:auto;
-  margin-top: -26px;
+  margin-top: -24px;
   margin-right: 115px;
-
   z-index: 6;
 }
 
