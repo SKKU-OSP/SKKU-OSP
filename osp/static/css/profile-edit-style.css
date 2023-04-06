@@ -5,6 +5,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  #profile-info-edit {
+    margin-top: 50px;
+  }
+}
+
 div.edit-container {
   height: 500px;
   margin-bottom: 1rem;
