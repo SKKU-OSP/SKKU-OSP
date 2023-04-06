@@ -648,21 +648,6 @@ img.opponent-profile {
   .user-info .profile-img {
     width: 100px;
     height: 100px;
-    margin-top: -30px;
-  }
-}
-@media (max-width: 768px) {
-  .user-info .profile-img {
-    width: 80px;
-    height: 80px;
-    margin-top: -20px;
-  }
-}
-@media (max-width: 576px) {
-  .user-info .profile-img {
-    width: 40px;
-    height: 40px;
-    margin-top: 0;
   }
 }
 
