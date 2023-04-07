@@ -1,12 +1,11 @@
 # SOSD (Square of Software Developers)
-## 
--성균관대학교 소프트웨어융합대학 학생들을 위한
-오픈소스플랫폼 커뮤니티입니다.
+## 성균관대학교 소프트웨어융합대학 학생들을 위한 오픈소스플랫폼 커뮤니티
+![image](https://user-images.githubusercontent.com/50347615/230562674-4493287f-2387-46dc-8798-60ef21befb42.png)
+![image](https://user-images.githubusercontent.com/50347615/230562795-f9237669-6768-4404-8ad7-0f64ebb5c70f.png)
 
 
-## Stack
-
-<img src="https://img.shields.io/badge/django-003545?style=for-the-badge&logo=django&logoColor=white"> <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white">
+## Stacks
+<img src="https://img.shields.io/badge/django-003545?style=for-the-badge&logo=django&logoColor=white"><img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white">
 <img src="https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
 <img src="https://img.shields.io/badge/html-E34F26?style=for-the-badge&logo=html5&logoColor=white">
