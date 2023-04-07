@@ -690,3 +690,13 @@ img.opponent-profile {
   flex-wrap: wrap;
   justify-content: start;
 }
+
+.check-failed {
+  background-color: #DC3545;
+  color: #FFFFFF;
+}
+
+.check-success {
+  background-color: #0D6EFD;
+  color: #FFFFFF;
+}
