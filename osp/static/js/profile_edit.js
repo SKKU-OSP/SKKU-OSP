@@ -260,24 +260,24 @@ function languageAppend(){
   function appendTagicon(name, logo, color, fontcolor){
     if(logo == "default.svg"){
       $("#tier0-container").append(`
-        <div id="tag_` + name.replace(" ", "_") + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
+        <div id="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
           <div class="stack-box"  style="background-color: ` + color + `;">
-            <span class="stack-name" for="tag_` + name.replace(" ", "_") + `" style="color:`+ fontcolor +`">`+ name +`</span>
+            <span class="stack-name" for="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `" style="color:`+ fontcolor +`">`+ name +`</span>
           </div>
         </div>
       `);
     }
     else{
       $("#tier0-container").append(`
-        <div id="tag_` + name.replace(" ", "_") + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
+        <div id="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
           <div class="stack-box"  style="background-color: ` + color + `;">
             <img class="stack-icon" src="`+ logo +`/`+ fontcolor +`" alt="temp"/>
-            <span class="stack-name" for="tag_` + name.replace(" ", "_") + `" style="color:`+ fontcolor +`">`+ name +`</span>
+            <span class="stack-name" for="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `" style="color:`+ fontcolor +`">`+ name +`</span>
           </div>
         </div>
       `);
     }
-    let newitem = document.querySelector("#tag_" + name.replace(" ", "_"));
+    let newitem = document.querySelector("#tag_" + name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp'));
 
     newitem.addEventListener("dragstart", () => {
       newitem.classList.add("dragging");
