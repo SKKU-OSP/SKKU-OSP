@@ -1,0 +1,112 @@
+{% load user_templatetag %}
+<div class="modal-dialog modal-xl">
+  <div class="modal-content">
+    <div class="modal-light-header">
+      <h5 id="chartModal" class="modal-title">기여내역 시각화</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="container">
+      <div class="horizontal-menu">
+        <div id="modal-btnGroupYear">
+          {% for year in year_list %}
+            {% if year == end_year%}
+            <button class="modal-btn-year active">{{year}}</button>
+            {% else %}
+            <button class="modal-btn-year">{{year}}</button>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div>
+          <div class="btn-group" role="group">
+            <button id="modal-btnGroupDropMonth" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              ALL
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropMonth">
+              <li><button class="dropdown-item modal-month-item" value="0">ALL</button></li>
+              <li><button class="dropdown-item modal-month-item" value="1">JAN</button></li>
+              <li><button class="dropdown-item modal-month-item" value="2">FEB</button></li>
+              <li><button class="dropdown-item modal-month-item" value="3">MAR</button></li>
+              <li><button class="dropdown-item modal-month-item" value="4">APR</button></li>
+              <li><button class="dropdown-item modal-month-item" value="5">MAY</button></li>
+              <li><button class="dropdown-item modal-month-item" value="6">JUN</button></li>
+              <li><button class="dropdown-item modal-month-item" value="7">JUL</button></li>
+              <li><button class="dropdown-item modal-month-item" value="8">AUG</button></li>
+              <li><button class="dropdown-item modal-month-item" value="9">SEP</button></li>
+              <li><button class="dropdown-item modal-month-item" value="10">OCT</button></li>
+              <li><button class="dropdown-item modal-month-item" value="11">NOV</button></li>
+              <li><button class="dropdown-item modal-month-item" value="12">DEC</button></li>
+            </ul>
+          </div>
+          <div class="btn-group" role="group">
+            <button id="modal-btnGroupDropFactor" type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              Score
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="modal-btnGroupDropFactor">
+              <li><button class="dropdown-item modal-factor-item" value="score">Score</button></li>
+              <li><button class="dropdown-item modal-factor-item" value="star">Star</button></li>
+              <li><button class="dropdown-item modal-factor-item" value="commit">Commit</button></li>
+              <li><button class="dropdown-item modal-factor-item" value="pr">PR</button></li>
+              <li><button class="dropdown-item modal-factor-item" value="issue">Issue</button></li>
+              <li><button class="dropdown-item modal-factor-item" value="issue">Repo</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body justify-content-center" id="modal-visualization">
+        <div class="row justify-content-between">
+          <div class="modal-item modal-grass">
+            <h5 id="modal-grass-title">{{end_year}}년 오픈소스 활동</h5>
+            <div class="d-flex justify-content-between mt-3">
+              <div class="d-flex flex-column justify-content-center" style="width:40%;">
+                <canvas id="modal-canvas0" class="ctx-item"></canvas>
+              </div>
+              <div class="d-flex mt-3 justify-content-center" style="width:60%;">
+                <svg id="modal-activity-monthly" class="grass double" viewBox="0 0 440 192"></svg>
+              </div>
+            </div>
+            <div class="grass-group mt-2">
+              Less
+              <span class="grass-color" data-level="0"></span>
+              <span class="grass-color" data-level="1"></span>
+              <span class="grass-color" data-level="2"></span>
+              <span class="grass-color" data-level="3"></span>
+              <span class="grass-color" data-level="4"></span>
+              More
+            </div>
+          </div>
+          <div class="modal-item modal-radar">
+            <h5 id="modal-radar-title">{{end_year}}년 기여도 비교</h5>
+            <div id="radar-canvas">
+              <canvas id="modal-canvas1" class="ctx-item"></canvas>
+            </div>
+            <div class="select-compare">
+              <select name="target" id="modal-target-user">
+                {% is_open request as is_open %}
+                {% if is_open == True %}
+                  <option value="" selected="selected">비교 대상을 선택해주세요</option>
+                  {% target_github_id request as target_option %}
+                  {{target_option}}
+                {% else %}
+                  <option value="" selected="selected">프로필을 공개해야 이용할 수 있습니다</option>
+                {% endif %}
+              </select>
+              <button id="modal-btn-compare" class="btn btn-primary btn-sm">비교</button>
+              <button id="modal-btn-toggle" class="btn btn-primary btn-sm">정규화</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-line"></div>
+        <div class="row justify-content-between">
+          <div class="modal-item">
+            <h5 id="modal-histogram-title">분포</h5>
+            <canvas id="modal-canvas2" class="ctx-item"></canvas>
+          </div>
+          <div class="modal-item">
+            <h5 id="modal-stacked-title">세부점수</h5>
+            <canvas id="modal-canvas3" class="ctx-item"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

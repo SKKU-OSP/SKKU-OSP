@@ -37,7 +37,7 @@
         </div>
         <div id="tier4-container"  draggable="false" class="tier-container d-flex align-content-center flex-wrap" ondrop="drop(event)" ondragover="dragEnter(event)">
             {% for row in lang_lv4 %}
-            <div id="tag_{{ row.name }}"  draggable="true" class="lang-item" ondragstart="drag(event)">
+            <div id="tag_{% autoescape on %}{{ row.name }}{% endautoescape %}"  draggable="true" class="lang-item" ondragstart="drag(event)">
                 <div class="stack-box"  style="background-color: {{ row.color }};">
                     {% if row.logo != "default.svg"%}
                     <img class="stack-icon" src="{{row.logo}}/{{ row.fontcolor }}" alt="{{ row.name | lower }}"/>

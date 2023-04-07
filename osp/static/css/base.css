@@ -614,6 +614,10 @@ img.opponent-profile {
   font-size: 12px;
 }
 
+.weak-text-lg{
+  color: var(--main-icon-color);
+}
+
 .user-info {
   margin: auto;
   background-color: var(--main-point-color);
@@ -628,17 +632,18 @@ img.opponent-profile {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  object-fit: cover;
   background-color: var(--main-white);
   border: 2px solid var(--main-point-color);
   z-index: 5;
-  position: relative;
   margin-top: -40px;
-  display: inline-block;
   margin-right: auto;
   margin-left: auto;
-  box-sizing: border-box;
-  padding: 0;
+}
+@media (max-width: 992px) {
+  .user-info .profile-img {
+    width: 100px;
+    height: 100px;
+  }
 }
 
 .flex-harf {

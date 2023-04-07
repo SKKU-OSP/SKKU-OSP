@@ -1,3 +1,12 @@
+$("#savebtn").click(function(){
+  if(confirm("변경사항을 저장하시겠습니까 ?") == true){
+    saveAll();
+    alert("저장되었습니다. 프로필화면으로 돌아갑니다.");
+  }
+  else{
+      return ;
+  }
+});
 function intsAppend(){
     var formData = $("#intsform").serialize();
     formData += "&act=" + 'append';
@@ -251,24 +260,24 @@ function languageAppend(){
   function appendTagicon(name, logo, color, fontcolor){
     if(logo == "default.svg"){
       $("#tier0-container").append(`
-        <div id="tag_` + name.replace(" ", "_") + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
+        <div id="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
           <div class="stack-box"  style="background-color: ` + color + `;">
-            <span class="stack-name" for="tag_` + name.replace(" ", "_") + `" style="color:`+ fontcolor +`">`+ name +`</span>
+            <span class="stack-name" for="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `" style="color:`+ fontcolor +`">`+ name +`</span>
           </div>
         </div>
       `);
     }
     else{
       $("#tier0-container").append(`
-        <div id="tag_` + name.replace(" ", "_") + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
+        <div id="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `"  draggable="true" class="lang-item" ondragstart="drag(event)">
           <div class="stack-box"  style="background-color: ` + color + `;">
             <img class="stack-icon" src="`+ logo +`/`+ fontcolor +`" alt="temp"/>
-            <span class="stack-name" for="tag_` + name.replace(" ", "_") + `" style="color:`+ fontcolor +`">`+ name +`</span>
+            <span class="stack-name" for="tag_` +  name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp') + `" style="color:`+ fontcolor +`">`+ name +`</span>
           </div>
         </div>
       `);
     }
-    let newitem = document.querySelector("#tag_" + name.replace(" ", "_"));
+    let newitem = document.querySelector("#tag_" + name.replace(/ /gi, '_').replace(/\+/gi, 'plus').replace(/\#/gi, 'sharp'));
 
     newitem.addEventListener("dragstart", () => {
       newitem.classList.add("dragging");
@@ -288,7 +297,7 @@ function saveImg(){
       url: "imagedefault",
       headers: {'X-CSRFToken': csrftoken},
       success: function(rtn){
-
+        window.location.href='..';
 
       },
       err: function(err){
@@ -369,7 +378,8 @@ function saveAll(){
     data : JSON.stringify(profiledata),
     success : function(data, response) {
       console.log('success');
-      window.location.href='..';
+      saveImg();
+      
     }, // success 
 
     error : function(xhr, status) {
@@ -493,7 +503,13 @@ $("#profileprivacyradio2").change(function(){
 });
 
 function deleteImg(){
+  if(confirm("기본 이미지로 변경하시겠습니까 ?") == true){
   $("#image_section").attr('src', "/data/media/img/profile_img/default.jpg");
+
+  }
+  else{
+  
+  }
   return;
 }
 
