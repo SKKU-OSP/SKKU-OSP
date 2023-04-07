@@ -1,6 +1,24 @@
+.repo-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .recent_repos {
   min-height: 100px;
-  max-height: 130px;
+  max-height: 150px;
+}
+
+.recent_repos span {
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 992px) {
+  .recent_repos:nth-child(n+5) {
+    display: none;
+  }
 }
 
 /* Bootstrap Change */
@@ -369,12 +387,12 @@ a.nav-link {
   flex-direction: row;
   align-items: center;
   border-top: 2px solid var(--profile-nav-border);
-  height: 60px;
+  min-height: 60px;
 }
 
 .row-title {
   flex-shrink: 0;
-  width: 68px;
+  width: 75px;
   font-weight: 550;
   margin-right: 5px;
 }
@@ -385,6 +403,7 @@ a.row-txt {
   width: calc(100%-68px);
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap; 
 }
 
 .row-complex {
@@ -502,13 +521,6 @@ span.row-raw {
   margin-bottom: 0.2rem;
 }
 
-.weak-text {
-  color: var(--main-icon-color);
-  font-size: 12px;
-}
-.weak-text-lg{
-  color: var(--main-icon-color);
-}
 .endpoint {
   height: 6px !important;
   width: 6px !important;
@@ -661,12 +673,23 @@ span.row-raw {
 @media (max-width: 768px) {
   #profile-info {
     margin-top: 0 !important;
+    width: 100%;
+  }
+  #profile-grid-section{
+    width: 100% !important;
+  }
+  #visualization {
+    width: 100%;
   }
   .modal-item {
     width: 100%;
     height: 45vw;
     padding: 0 8%;
     text-align: center;
+  }
+  .font-focus {
+    font-size: 20px;
+    font-weight: 500;
   }
 }
 @media (min-width: 768px) {
@@ -824,14 +847,19 @@ span.row-raw {
 #profile-grid-section{
   width: 80%;
 }
+
 #personal-email{
   font-size: 15px;
 }
 
+#user-github-link{
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 #user-github-link:link{
- color: white;
- text-decoration: underline;
-
+  color: white;
+  text-decoration: underline;
 }
 #user-github-link:visited{
   color: white; text-decoration: none;
@@ -886,7 +914,7 @@ span.row-raw {
 }
 
 .bi-star-fill{
- margin-left: -12px;
+  margin-left: -12px;
 }
 
 #portfolio-nav{

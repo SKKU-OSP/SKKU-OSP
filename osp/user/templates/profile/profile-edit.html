@@ -16,7 +16,7 @@
     <button class="savebtn" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
       PW 변경
     </button>
-    <button class="savebtn" onclick="saveImg(); saveAll();">저장하기</button>
+    <button id="savebtn" class="savebtn">저장하기</button>
     <button class="savebtn" onclick="location.href='..'">돌아가기</button>      
   </div>
   <div class="row">
@@ -61,42 +61,40 @@
           {% csrf_token %}   
           <div class="d-flex row-userdata">
             <span class="row-title text-center">전공</span>
-            <div class="form-check plural-major-radio" style="margin-left: 20px; margin-right: 20px;" value="{{info.plural_major}}">
-              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
-              <label class="form-check-label" for="flexRadioDefault1">
-                원전공
-              </label>
-            </div>
-            <div class="form-check plural-major-radio">
-              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="1">
-              <label class="form-check-label" for="flexRadioDefault2">
-                복수전공
-              </label>
+            <div class="d-flex form-checks">
+              <div class="form-check plural-major-radio" style="margin-right: 20px;" value="{{info.plural_major}}">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='0'>
+                <label class="form-check-label" for="flexRadioDefault1">
+                  원전공
+                </label>
+              </div>
+              <div class="form-check plural-major-radio">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="1">
+                <label class="form-check-label" for="flexRadioDefault2">
+                  복수전공
+                </label>
+              </div>
             </div>
             <input type="text" class="form-control infoform-element" id="plural_major" name="plural_major" value="{{info.plural_major}}" hidden>
           </div>
           <div class="d-flex row-userdata">
-            <span class="row-title text-center">GitHub</span>
-            <span class="row-txt">{{info.github_id}}</span>
-          </div>
-          <div class="d-flex row-userdata">
-            <span class="row-title text-center">개인 Email</span>
+            <span class="row-title text-center">개인<br>Email</span>
             <input type="text" class="form-control infoform-element" id="personal_email" name="personal_email" value={{info.personal_email}}>
           </div>
           <div class="d-flex row-userdata">
-            <span class="row-title text-center">Github Email</span>
+            <span class="row-title text-center">Github<br>Email</span>
             <input type="text" class="form-control infoform-element" id="primary_email" name="primary_email" value={{info.primary_email}}>
           </div>
           <div class="d-flex row-userdata">
-            <span class="row-title text-center" style="font-size: 13px;">Secondary Email</span>
+            <span class="row-title text-center">보조<br>Email</span>
             <input type="text" class="form-control infoform-element" id="secondary_email" name="secondary_email" value={{info.secondary_email}}>
           </div>
           <div class="d-flex row-userdata">
-            <span class="row-title text-center" style="font-size: 13px;">팀원추천에 나를 노출</span>
+            <span class="row-title text-center" style="font-size: 13px;">팀원 추천에<br>나를 노출</span>
             <div>
-              <h5 style="font-size: 9pt; color:darkgrey">팀원 추천 목록에 내정보가 검색됩니다.</h5>
-              <div class="d-flex" style="flex-direction: row;">
-                <div class="form-check team-privacy-radio" style="margin-left: 30px; margin-right: 30px;">
+              <h5 class="profile-edit-description">팀원 추천 목록에 내정보가 검색됩니다.</h5>
+              <div class="d-flex form-checks">
+                <div class="form-check team-privacy-radio" style="margin-right: 30px;">
                   <input class="form-check-input" type="radio" name="teamprivacyradio" id="teamprivacyradio0" value='0'>
                   <label class="form-check-label" for="teamprivacyradio0">허용</label>
                 </div>
@@ -109,11 +107,11 @@
             <input type="text" class="form-control infoform-element" id="teamprivacy" name="teamprivacy" value="{{privacy.is_open}}" hidden>
           </div>
           <div class="d-flex row-userdata">
-            <span class="row-title text-center" style="font-size: 13px;">게시판에서 나를 공개</span>
+            <span class="row-title text-center" style="font-size: 13px;">게시판에서<br>나를 공개</span>
             <div>
-              <h5 style="font-size: 9pt; color:darkgrey">허용하여야 게시판에 글 작성이 가능합니다.</h5>
-              <div class="d-flex" style="flex-direction: row;">
-                <div class="form-check article-privacy-radio" style="margin-left: 30px; margin-right: 30px;">
+              <h5 class="profile-edit-description">허용하여야 게시판에 글 작성이 가능합니다.</h5>
+              <div class="d-flex form-checks">
+                <div class="form-check article-privacy-radio" style="margin-right: 30px;">
                   <input class="form-check-input" type="radio" name="articleprivacyradio" id="articleprivacyradio0" value='0'>
                   <label class="form-check-label" for="articleprivacyradio0">허용</label>
                 </div>
@@ -125,21 +123,21 @@
             </div>
             <input type="text" class="form-control infoform-element" id="articleprivacy" name="articleprivacy" value="{{privacy.is_write}}" hidden>
           </div>
-          <div class="d-flex row-userdata" style="height: 120px;">
-            <span class="row-title text-center" style="font-size: 13px;">프로필공개<br>범위설정</span>
+          <div class="d-flex row-userdata" style="min-height: 120px;">
+            <span class="row-title text-center" style="font-size: 13px;">프로필 공개<br>범위 설정</span>
             <div>
-              <h5 style="font-size: 9pt; color:darkgrey">내 프로필의 공개범위를 설정합니다.</h5>
+              <h5 class="profile-edit-description">내 프로필의 공개 범위를 설정합니다.</h5>
               <div class="form-check profile-privacy-radio">
                 <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio0" value="0">
-                <label class="form-check-label" for="profileprivacyradio0">팀원제외 공개거부</label>
+                <label class="form-check-label" for="profileprivacyradio0">팀원 제외 공개 거부</label>
               </div>
               <div class="form-check profile-privacy-radio">
                 <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio1" value="1">
-                <label class="form-check-label" for="profileprivacyradio1">활동내역만 공개허용</label>
+                <label class="form-check-label" for="profileprivacyradio1">활동 내역만 공개 허용</label>
               </div>
               <div class="form-check profile-privacy-radio">
                 <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio2" value="2">
-                <label class="form-check-label" for="profileprivacyradio2">모두 공개허용</label>
+                <label class="form-check-label" for="profileprivacyradio2">모두 공개 허용</label>
               </div>
             </div>
             <input type="text" class="form-control infoform-element" id="profileprivacy" name="profileprivacy" value="{{privacy.open_lvl}}" hidden>
@@ -147,7 +145,7 @@
         </form>
       </div>
     </div>
-    <div class="col-sm-9">
+    <div class="col-md-9">
       <div class="row">
         <div class="col">
           <div class="col edit-container">

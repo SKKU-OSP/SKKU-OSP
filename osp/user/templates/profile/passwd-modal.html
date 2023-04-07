@@ -63,21 +63,25 @@
           type : 'POST', 
           data : formData,
           headers: {'X-CSRFToken': csrftoken},
-          mode: 'same-origin',
           success : function(result) {
             //var jsonObj = JSON.parse(data);
-            console.log('success');
+            console.log('리절트');
             console.log(result)
-            alert("비밀번호가 변경되었습니다. 다시로그인해 주세요.");
+            if(result['result']=='success'){
+              alert("비밀번호가 변경되었습니다. 다시로그인해 주세요.");
+              window.location.reload();
+            }
+            
+            else{
+              alert("입력하신 비밀번호가 틀렸습니다.");
+            }
           }, // success 
           error : function(result) {
             console.log('error');
-            console.log(result)
-            alert("입력된 기존 비밀번호가 올바르지 않습니다.");
           }
         });
         
-        //window.location.reload();
+        
 
     }
   </script>
