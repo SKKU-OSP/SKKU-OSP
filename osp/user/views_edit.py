@@ -251,7 +251,7 @@ class ProfileEditSaveView(UpdateView):
         query_bulk = []
         def langupdater(tier, level):
             for lang, val in tier.items() :
-                lang_tag = TagIndependent.objects.get(name=val.replace("_", " "))
+                lang_tag = TagIndependent.objects.get(name=val.replace("_", " ").replace("plus", "+").replace("sharp","#"))
                 new_interest_obj = AccountInterest(account=user_account, tag=lang_tag, level=level)
                 query_bulk.append(new_interest_obj)
 

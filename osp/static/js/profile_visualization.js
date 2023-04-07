@@ -605,7 +605,7 @@ const renderProfileChart = function(chart_data) {
     });
     let target = $("#target-search").find(".placeholder");
     if (target.text() !== chart_data["username"] &&
-      target.text() !== "비교없음") {
+      target.val() !== "") {
       radar_datasets.push({ // 비교 유저
         type: "radar",
         label: target.text(),

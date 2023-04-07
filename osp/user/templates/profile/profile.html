@@ -11,16 +11,16 @@
     <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info"
       {% if not is_own %}
-        style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;"
+        style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;margin-bottom:15px"
       {% endif %}
       >
-        <img src= {{account.photo.url}} alt="No Image now" class="profile-img">
+        <img src={{account.photo.url}} alt="No Image now" class="profile-img">
         <div class="info-body">
-          {% if is_own %}
+          {% if is_own or open_lvl == 2 %}
           <p class="font-focus">{{info.name}}</p>
           {% endif %}
           <div class="mb-3">
-            <a id="user-github-link" class="row-txt" href="https://github.com/{{info.github_id}}" target="_blank">
+            <a id="user-github-link" href="https://github.com/{{info.github_id}}" target="_blank">
               <img id="user-github" src="/static/images/github-white.svg" alt="github" class="github">
               {{info.github_id}}
             </a>
@@ -29,13 +29,10 @@
           <div>
             <a href="./profile-edit" role="button" class="w-100 btn btn-outline-light" aria-disabled="true">프로필 수정</a>
           </div>
-          {% else %}
-          <div style="height:38px;">
-          </div>
           {% endif %}
         </div>
       </div>
-    {% if is_own or open_lvl == 2%}
+    {% if is_own or open_lvl == 2 %}
       <div class="d-flex flex-column user-detail">
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학번</span>
@@ -71,7 +68,11 @@
             <i id="icon-portfolio" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
           </h5>
           {% if account.introduction == '' %}
+            {% if is_own %}
             <span class="weak-text">자기소개를 설정해주세요</span>
+            {% else %}
+            <span class="weak-text">자기소개가 설정되지 않았습니다</span>
+            {% endif %}
           {% endif %}
           <div style="font-size: 12px;">
             {{account.introduction}}
@@ -172,8 +173,14 @@
                   <canvas id="canvas1" class="ctx-item"></canvas>
                     <div id="target-search">
                       <select name="target" id="target-user">
-                        <option value="" selected="selected">비교없음</option>
-                        {{target_option}}
+                        {% is_open request as is_open %}
+                        {% if is_open == True %}
+                          <option value="" selected="selected">비교 대상을 선택해주세요</option>
+                          {% target_github_id request as target_option %}
+                          {{target_option}}
+                        {% else %}
+                          <option value="" selected="selected">프로필을 공개해야 이용할 수 있습니다</option>
+                        {% endif %}
                       </select>
                       <button id="btn-compare" class="btn btn-primary btn-sm">비교</button>
                       <button id="btn-toggle" class="btn btn-primary btn-sm">정규화</button>
@@ -238,7 +245,11 @@
             </div>
             <div class="modal-body-markdown">
               {% if account.portfolio == '' %}
+                {% if is_own %}
                 <span class="weak-text">포트폴리오를 설정해주세요</span>
+                {% else %}
+                <span class="weak-text">포트폴리오가 설정되지 않았습니다</span>
+                {% endif %}
               {% endif %}
               {{ account.portfolio|mark }}
             </div>
@@ -253,7 +264,11 @@
                 <!--i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i-->
               </h5>
               {% if relations|length == 0 and remains|length == 0 %}
+                {% if is_own %}
                 <span class="weak-text">관심분야를 설정해주세요</span>
+                {% else %}
+                <span class="weak-text">관심분야가 설정되지 않았습니다</span>
+                {% endif %}
               {% endif %}
               
               {% for row in relations %}
@@ -277,7 +292,11 @@
               </h5>
               <div id="tiers-box" class="">
                 {% if lang|length == 0%}
+                  {% if is_own %}
                   <span class="weak-text">사용언어/기술스택을 설정해주세요</span>
+                  {% else %}
+                  <span class="weak-text">사용언어/기술스택이 설정되지 않았습니다</span>
+                  {% endif %}
                 {% endif %}
                 {% if lang|length != 0%}
                 <div class="tier-row d-flex justify-content-start align-items-center">

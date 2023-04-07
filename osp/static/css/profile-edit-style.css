@@ -5,6 +5,34 @@
   }
 }
 
+@media (max-width: 768px) {
+  #profile-info-edit {
+    margin-top: 50px;
+  }
+}
+
+@media (max-width: 992px) {
+  #for-photo-delete {
+    margin-right: 75px !important;
+  }
+  #for-photo {
+    margin-right: 0 !important;
+  }
+}
+
+.form-checks {
+  flex-direction: row;
+}
+
+@media (min-width: 768px) and (max-width: 1200px) {
+  .form-checks {
+    flex-direction: column;
+  }
+  .form-checks > .form-check {
+    margin-right: 0 !important;
+  }
+}
+
 div.edit-container {
   height: 500px;
   margin-bottom: 1rem;
@@ -19,6 +47,11 @@ h5.card-title {
 
 .card {
   height: 500px;
+}
+
+.profile-edit-description {
+  font-size: 9pt;
+  color: darkgrey;
 }
 
 a.nav-link {
@@ -92,11 +125,10 @@ a.nav-link {
   margin:auto;
   margin-top: -20px;
   margin-right: 20px;
-
   z-index: 6;
 }
 
-#for-photo-delete{
+#for-photo-delete {
   position:relative;
   display:block;
   text-align: center;
@@ -106,9 +138,8 @@ a.nav-link {
   border-radius: 0.3rem;
   width: 25px;
   margin:auto;
-  margin-top: -26px;
+  margin-top: -24px;
   margin-right: 115px;
-
   z-index: 6;
 }
 
