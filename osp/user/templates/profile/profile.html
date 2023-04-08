@@ -659,8 +659,7 @@
       });
       function post_github_user(data={}){
         if(data.hasOwnProperty("github_id") 
-        && data["github_id"] != ''
-        && data["github_id"] != '비교없음'){ 
+        && data["github_id"] != ''){ 
           $.ajax({
             type:"POST",
             url: `{% url 'user:comparestat' username='${data["github_id"]}' %}`,
