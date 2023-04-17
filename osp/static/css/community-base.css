@@ -4,15 +4,18 @@
     flex-direction: column;
     align-items: flex-start;
 }
-@media screen and (max-width: 768px) {
-    #community-sidebar, #header-logo{
-        position: absolute;
-        left:0;
+@media screen and (max-width: 767px) {
+    #community-sidebar {
         width: 50px;
-        z-index: 5;
+    }
+    #header-logo {
+        margin-right: 10px;
     }
     #community-container {
-        padding-left: 50px;
+        display: flex;
+    }
+    #community-main {
+        width: calc(100% - 50px);
     }
     #main-navbar{
         --bs-gutter-x: 0.8rem !important;
@@ -27,6 +30,11 @@
         width: 22px;
         height: 22px;
         border: 0 !important;
+    }
+}
+@media (max-width: 450px) {
+    #article-meta-scrap {
+        display: none !important;
     }
 }
 
