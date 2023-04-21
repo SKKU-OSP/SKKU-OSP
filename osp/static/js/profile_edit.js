@@ -345,6 +345,7 @@ function saveAll(){
   profiledata.profileprivacy = $("#profileprivacy").val();
   profiledata.articleprivacy = $("#articleprivacy").val();
   profiledata.teamprivacy = $("#teamprivacy").val();
+  profiledata.absence = $("#absence").val();
 
   let tier0langs = $("#tier0-container").children('.lang-item');
   let tier1langs = $("#tier1-container").children('.lang-item');
@@ -438,6 +439,32 @@ $("#flexRadioDefault2").change(function(){
   
 });
 });
+
+$(document).ready(function() {
+  absence = $('#absence').attr('value');
+  if(absence==0){
+    $(":radio[id=absenceRadio1]").prop('checked', true);
+  }
+  else if(absence==1){
+    $(":radio[id=absenceRadio2]").prop('checked', true);
+  }
+  else{
+    $(":radio[id=absenceRadio3]").prop('checked', true);
+  }
+  $("#absenceRadio1").change(function(){
+    var radio = $(':radio[name="absenceRadio"]:checked').val();
+    $('#absence').val('0');
+  });
+  $("#absenceRadio2").change(function(){
+    var radio = $(':radio[name="absenceRadio"]:checked').val();
+    $('#absence').val('1');
+  });
+  $("#absenceRadio3").change(function(){
+    var radio = $(':radio[name="absenceRadio"]:checked').val();
+    $('#absence').val('2');
+  });
+  });
+
 $(document).ready(function() {
 team_privacy = $('#teamprivacy').attr('value');
 if(team_privacy == "True"){
