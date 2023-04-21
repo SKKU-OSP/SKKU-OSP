@@ -33,9 +33,12 @@ class GithubOverview(models.Model):
     total_issues = models.CharField(max_length=45)
     achievements = models.CharField(max_length=200, blank=True, null=True)
     highlights = models.CharField(max_length=200, blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    github_updated_date = models.DateTimeField(null=True, default=None)
+    crawled_date = models.DateTimeField(null=True, default=None)
 
     class Meta:
-        managed = False
         db_table = 'github_overview'
 
 

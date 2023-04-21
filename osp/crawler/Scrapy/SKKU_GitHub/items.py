@@ -13,7 +13,9 @@ class User(scrapy.Item) :
     highlights = scrapy.Field()
     stars = scrapy.Field()
     request_cnt = scrapy.Field()
-
+    github_updated_date = scrapy.Field()
+    crawled_date = scrapy.Field()
+    updated_date = scrapy.Field()
 class UserUpdate(scrapy.Item) :
     github_id = scrapy.Field()
     target = scrapy.Field()
