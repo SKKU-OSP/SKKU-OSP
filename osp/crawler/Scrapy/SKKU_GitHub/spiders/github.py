@@ -1,7 +1,6 @@
 import json
 import math
 import logging
-import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import scrapy
@@ -44,7 +43,7 @@ class GithubSpider(scrapy.Spider):
             endpoint = res.meta["endpoint"]
             recent_json = json.loads(res.body)
             recent_at = recent_json[0]["pushed_at"]
-            metadata = {"recent":recent_at[:7]}
+            metadata = {"recent":recent_at[:10]}
         except Exception:
             logging.warning("parse err: recent pushed")
             metadata = {"recent":None}
@@ -77,18 +76,25 @@ class GithubSpider(scrapy.Spider):
         user_item['stars'] = 0
         user_item['request_cnt'] = 1 + max(math.ceil(user_json['public_repos'] / 100), 1)
 
-        created_date = user_json['created_at'][:7]
-        updated_date = user_json['updated_at'][:7]
+        created_date = user_json['created_at'][:10]
+        updated_date = user_json['updated_at'][:10]
 
-        pivot_date = datetime.strptime(created_date, '%Y-%m')
-        end_date = datetime.strptime(updated_date, '%Y-%m')
+        pivot_date = datetime.strptime(created_date[:7], '%Y-%m')
+        end_date = datetime.strptime(updated_date[:7], '%Y-%m')
 
         recent_date = res.meta['recent']
+        user_item["github_updated_date"] = updated_date
         if recent_date != None:
-            recent_date = datetime.strptime(recent_date, '%Y-%m')
-            end_date = recent_date if end_date < recent_date else end_date
+            recent_date_yy_mm = datetime.strptime(recent_date[:7], '%Y-%m')
+            if end_date < recent_date_yy_mm :
+                end_date = recent_date_yy_mm
+                user_item["github_updated_date"] = recent_date
 
-        logging.info(f"parse_user: created_date:{pivot_date} end_date {end_date}")
+        # 최근 업데이트 날짜와 비교하기 위해 크롤러 날짜 저장
+        user_item["crawled_date"] = datetime.now().strftime("%Y-%m-%d")
+        user_item["updated_date"] = datetime.now().strftime("%Y-%m-%d")
+
+        logging.info(f"parse_user: end_date {end_date}")
 
         end_date = self.__end_of_month(end_date)
         while pivot_date < end_date :
@@ -103,7 +109,7 @@ class GithubSpider(scrapy.Spider):
             {'github_id': github_id, 'page': 1}
             )
 
-        pivot_date = datetime.strptime(created_date, '%Y-%m')
+        pivot_date = datetime.strptime(created_date[:7], '%Y-%m')
         while pivot_date < end_date :
             from_date = pivot_date.strftime('%Y-%m-%d')
             to_date = self.__end_of_month(pivot_date).strftime('%Y-%m-%d')

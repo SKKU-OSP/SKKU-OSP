@@ -269,6 +269,7 @@ class ProfileEditSaveView(UpdateView):
         user_tab.personal_email = req['personal_email']
         user_tab.primary_email = req['primary_email']
         user_tab.secondary_email = req['secondary_email']
+        user_tab.absence = req['absence']
         user_tab.save()
 
         user_account.introduction = req['introduction']

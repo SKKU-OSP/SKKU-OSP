@@ -31,7 +31,7 @@ def target_github_id(request):
         account_id = acc['account_id']
         username = User.objects.get(id=account_id)
         result += f'<option value="{username}">{username}</option>'
-        
+    print(result)
     return mark_safe(result)
 
 @register.filter

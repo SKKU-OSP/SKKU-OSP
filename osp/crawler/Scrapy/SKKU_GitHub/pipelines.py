@@ -88,6 +88,11 @@ class SkkuGithubPipeline:
         insert = False
         if type(item) == User:
             self.wait[item['github_id']] = item
+            # github 최신 업데이트 날짜 반영
+            update_sql = f'''UPDATE github_overview SET github_updated_date=DATE_FORMAT("{item['github_updated_date']}", "%Y-%m-%d"), updated_date=DATE_FORMAT("{item['updated_date']}", "%Y-%m-%d") WHERE github_id="{item['github_id']}"'''
+            self.cursor.execute(update_sql)
+            self.crawlDB.commit()
+
         elif type(item) == UserUpdate:
             prev = self.wait[item['github_id']]
             if item['target'] == 'badge':
