@@ -603,9 +603,8 @@ const renderProfileChart = function(chart_data) {
       hoverBorderColor: palette.radars[1],
       borderWidth: 1,
     });
-    let target = $("#target-search").find(".placeholder");
-    if (target.text() !== chart_data["username"] &&
-      target.val() !== "") {
+    let target = $("#target-user option:selected");
+    if (target.text() !== chart_data["username"] && target.val() !== "") {
       radar_datasets.push({ // 비교 유저
         type: "radar",
         label: target.text(),
