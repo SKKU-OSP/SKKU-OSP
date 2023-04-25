@@ -29,6 +29,12 @@
           <div>
             <a href="./profile-edit" role="button" class="w-100 btn btn-outline-light" aria-disabled="true">프로필 수정</a>
           </div>
+          <div>
+            <form id="logout-form" method="post" action="{% url 'common:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="w-100 btn btn-outline-light" style="margin-top: 7px">로그아웃</button>
+            </form>
+          </div>
           {% endif %}
         </div>
       </div>
