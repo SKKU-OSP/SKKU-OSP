@@ -592,6 +592,9 @@
                 <i id="icon-devtype" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
               </h5>
               <div class="gbti-content p-lg">
+                {% if not test and user.is_authenticated and user.username == username %}
+                <button class="btn-gbti pb-inactive btn-gbti-outside" onclick="location.href='./test'">개발자 성향 검사하기</button>
+                {% endif %}
                 <div class="gbti-card">
                   <div class="gbti-img">
                     {% if test %}
