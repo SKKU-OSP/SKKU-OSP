@@ -4,10 +4,9 @@
 {% load tag_templatetag %}
 {% block content %}
 <div class="container my-4">
-    <div id="community-container" class="row">
+    <div id="community-container" class="row justify-content-end">
         {% include "community/sidebar.html" %}
-        <div id="community-main">
-            <div class="col-md-9">
+        <div id="community-main" class="col-md-9 col-12">
                 {% if need_login %}
                 <div class="m-2">
                     로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
