@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import get_image_dimensions
 
-from tag.models import TagIndependent
+from tag.models import TagIndependent, Tag
 
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from user.forms import ProfileImgUploadForm
@@ -245,8 +245,12 @@ class ProfileEditSaveView(UpdateView):
         tier3langs = req["tier3langs"]
         tier4langs = req["tier4langs"]
 
-        # 기존에 있던 사용언어/기술스택을 모두 삭제하고 다시 삽입한다.
-        AccountInterest.objects.filter(account=user_account).exclude(tag__in=tags_domain).delete()
+        interests = req["interests"]
+        print("intint")
+        print(interests)
+
+        # 기존에 있던 관심분야, 사용언어/기술스택을 모두 삭제하고 다시 삽입한다.
+        AccountInterest.objects.filter(account=user_account).delete()
         
         query_bulk = []
         def langupdater(tier, level):
@@ -254,12 +258,23 @@ class ProfileEditSaveView(UpdateView):
                 lang_tag = TagIndependent.objects.get(name=val.replace("_", " ").replace("plus", "+").replace("sharp","#"))
                 new_interest_obj = AccountInterest(account=user_account, tag=lang_tag, level=level)
                 query_bulk.append(new_interest_obj)
+        
+        def intsupdater(ints):
+            print(ints)
+            print("dddsdfsdfsdfd")
+            for intt, val in ints.items() :
+                int_tag = TagIndependent.objects.get(name=val.replace("_", " ").replace("plus", "+").replace("sharp","#"))
+                print("dddd")
+                print(int_tag)
+                new_interest_obj = AccountInterest(account=user_account, tag=int_tag)
+                query_bulk.append(new_interest_obj)
 
         langupdater(tier0langs, 0)
         langupdater(tier1langs, 1)
         langupdater(tier2langs, 2)
         langupdater(tier3langs, 3)
         langupdater(tier4langs, 4)
+        intsupdater(interests)
         AccountInterest.objects.bulk_create(query_bulk)
 
         end = time.time()
