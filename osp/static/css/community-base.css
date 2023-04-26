@@ -33,8 +33,14 @@
     }
 }
 @media (max-width: 450px) {
-    #article-meta-scrap {
-        display: none !important;
+    .article-bar {
+        display: block !important;
+    }
+    #article-recruit-bar {
+        display: flex !important;
+    }
+    .main-board{
+        height: 600px !important;
     }
 }
 
@@ -1012,9 +1018,7 @@
     padding: auto;
 }
 .main-board{
-
     height: 400px;
-
 }
 
 .main-board-title{
