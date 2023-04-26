@@ -9,9 +9,9 @@
 </div>
 {% else %}
 <div class="container my-4">
-    <div id="community-container" class="row">
+    <div id="community-container" class="row justify-content-end">
         {% include "community/sidebar.html" %}
-        <div class="col-md-9">
+        <div id="community-main" class="col-md-9">
             <div id="article-content">
             {# type은 세가지 값이 가능: view / register / edit #}
             {% if type == 'view' %}
