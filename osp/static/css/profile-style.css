@@ -489,6 +489,10 @@ span.row-raw {
   max-height: 350px;
 }
 
+.gbti-content {
+  text-align: center;
+}
+
 .gbti-img img {
   width: 100%;
   object-fit: cover;
@@ -511,6 +515,7 @@ span.row-raw {
 .gbti-textbox {
   padding: 6% 6% 3%;
   background-color: white;
+  text-align: start !important;
 }
 .gbti-text.bold {
   font-size: 18px;
@@ -570,6 +575,10 @@ span.row-raw {
   box-shadow: 0 2px 4px var(--card-box-shadow);
   border-radius: 10px;
   border: 0;
+}
+
+.btn-gbti-outside {
+  margin-bottom: 20px;
 }
 
 .btn-gbti-group {
