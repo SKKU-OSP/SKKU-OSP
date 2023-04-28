@@ -32,15 +32,15 @@
     {% else %}
     <div class="article-meta">
         <div class="d-flex justify-content-between">
-            <div class="article-meta-stat d-flex">
+            <div class="article-meta-stat d-flex" id="article-meta-like">
                 <div class="article-meta-stat-icon material-icons-outlined">thumb_up</div>
                 <div>{{article.like_cnt}}</div>
             </div>
-            <div class="article-meta-stat d-flex" role="button" onclick="location.href='{% url 'community:article-view' article.id %}#comment-content'">
+            <div class="article-meta-stat d-flex" id="article-meta-comment">
                 <div class="article-meta-stat-icon material-icons-outlined">textsms</div>
                 <div>{{article.comment_cnt}}</div>
             </div>
-            <div class="article-meta-stat d-flex">
+            <div class="article-meta-stat d-flex" id="article-meta-scrap">
                 <div class="article-meta-stat-icon material-icons-outlined">bookmark_border</div>
                 {{article.scrap_cnt}}
             </div>

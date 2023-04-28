@@ -76,8 +76,7 @@ class Account(models.Model):
     photo = models.ImageField(upload_to='img/profile_img', default='img/profile_img/default.jpg')
     introduction = models.TextField(default='')
     portfolio = models.TextField(default='')
-    profile_open = models.BooleanField(default=False)
-    recommend_open = models.BooleanField(default=False)
+    github_id = models.TextField(null=True)
 
     def __str__(self) -> str:
         return f'{self.user.username}'
