@@ -14,40 +14,21 @@ function intsAppend(){
     console.log(formData);
 
     var selected = $("#intsform").find(".placeholder").text();
-    console.log(selected);
+
     if(selected == "Tag"){
         alert("선택하고 추가해주세요");
         return;
     }
-    var ints = $('.bg-tag-domain');
+    var ints = $('.domain-item');
     var intsarr = [];
 
-    for(int of ints){
-      intsarr.push($(int).text());
+    for(intt of ints){
+      intsarr.push($(intt).attr("id").slice(8));
+      
     }
-
     if(!(intsarr.includes(selected))){
-      $("#interestsdiv").append(`<span id='intspan_`+ selected +`'>
-        <button type="submit" class="btn btn-outline-dark badge delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">` + selected +`
-        </button>
-        </span>`);
-        $.ajax({
-        cache : false,
-        url : "interests", 
-        type : 'POST', 
-        data : formData,
-        success : function(data) {
-            console.log('success');
-            
-        }, 
-
-        error : function(xhr, status) {
-            // alert(xhr + " : " + status);
-            console.log('error');
-            // alert("선택하고 추가해주세요")
-
-        }
-        });
+      $("#interestsdiv").append(`<span id='intspan_`+ selected +`' class='domain-item'>
+        <button type="submit" class="btn btn-outline-dark badge delete-domain" name="action" value="delete `+ selected +`" onclick="intsDelete('`+ selected +`'); return false;">`+selected+`</button></span>`);
 
     }
 }
@@ -60,6 +41,7 @@ function intsDelete(target){
     console.log("span[id='intspan_" +  target + "']");
     $("span[id='intspan_" +  target + "']").remove();
 
+    /*
     $.ajax({
         cache : false,
         url : "interests", // 요기에
@@ -77,6 +59,7 @@ function intsDelete(target){
             console.log('error');
         }
     });
+    */
 
 }
     // 페이지 로드시에 이벤트 리스너 부여
@@ -347,13 +330,21 @@ function saveAll(){
   profiledata.teamprivacy = $("#teamprivacy").val();
   profiledata.absence = $("#absence").val();
 
+  var i;
+  let interests = $("#interestsdiv").children('.domain-item');
+  console.log(interests)
+  var intsarr = {};
+
+  for(i=0; i<interests.length; i++) intsarr[i] = interests[i].id.slice(8);
+  console.log(intsarr)
+
   let tier0langs = $("#tier0-container").children('.lang-item');
   let tier1langs = $("#tier1-container").children('.lang-item');
   let tier2langs = $("#tier2-container").children('.lang-item');
   let tier3langs = $("#tier3-container").children('.lang-item');
   let tier4langs = $("#tier4-container").children('.lang-item');
 
-  var i;
+  
   var tier0arr = {}
   var tier1arr = {}
   var tier2arr = {}
@@ -371,6 +362,7 @@ function saveAll(){
   profiledata.tier2langs = tier2arr;
   profiledata.tier3langs = tier3arr;
   profiledata.tier4langs = tier4arr;
+  profiledata.interests = intsarr;
 
   $.ajax({
     cache : false,

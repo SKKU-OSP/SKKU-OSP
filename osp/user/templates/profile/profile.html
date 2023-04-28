@@ -29,6 +29,12 @@
           <div>
             <a href="./profile-edit" role="button" class="w-100 btn btn-outline-light" aria-disabled="true">프로필 수정</a>
           </div>
+          <div>
+            <form id="logout-form" method="post" action="{% url 'common:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="w-100 btn btn-outline-light" style="margin-top: 7px">로그아웃</button>
+            </form>
+          </div>
           {% endif %}
         </div>
       </div>
@@ -592,6 +598,9 @@
                 <i id="icon-devtype" class="bi-arrow-up-right-square evt-icon" title="확대"></i>
               </h5>
               <div class="gbti-content p-lg">
+                {% if not test and user.is_authenticated and user.username == username %}
+                <button class="btn-gbti pb-inactive btn-gbti-outside" onclick="location.href='./test'">개발자 성향 검사하기</button>
+                {% endif %}
                 <div class="gbti-card">
                   <div class="gbti-img">
                     {% if test %}
