@@ -25,7 +25,7 @@ def time_before(date):
     elif delta < timedelta(days=15):
         repr_string = f'{delta.days}일 전'
     else:
-        repr_string = date.strftime('%Y-%m-%d')
+        repr_string = date.strftime('%y.%m.%d')
     return repr_string
 
 @register.filter

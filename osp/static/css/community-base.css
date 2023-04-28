@@ -31,6 +31,16 @@
         height: 22px;
         border: 0 !important;
     }
+
+    .big-table {
+        display: none !important;
+    }
+    .small-table {
+        display: table !important;
+    }
+    .notice-line-up {
+        border-color: var(--notice-row) !important;
+    }
 }
 @media (max-width: 450px) {
     .article-bar {
@@ -975,15 +985,21 @@
     overflow-y: auto;
 }
 /* 새로운 디자인 */
+.table {
+    table-layout: fixed;
+}
+.small-table {
+    display: none;
+}
 .thead-board {
     background-color: var(--main-bg-color);
     border: transparent;
 }
 
-.thead-board > tr > th:first-child{
+.thead-board > tr:first-child > th:first-child{
     border-radius: 0.5rem 0 0 0;
 }
-.thead-board > tr > th:last-child{
+.thead-board > tr:first-child > th:last-child{
     border-radius: 0 0.5rem 0 0;
 }
 .white-box {
