@@ -11,6 +11,16 @@
         </div>
         <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
+            {% if username %}
+            <div class="col-lg-6 mb-3">
+                <label for="github-id">GitHub Username <span class="required-star">*</span></label>
+                <div class="weak-text form-label">GitHub 계정명으로 데이터 수집에 사용됩니다.</div>
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-plaintext" id="github-id" name="github-id" value="{{username}}" required readonly>
+                    <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
+                </div>
+            </div>
+            {% else %}
             <div class="col-lg-6 mb-3">
                 <label for="github-id">GitHub Username <span class="required-star">*</span></label>
                 <div class="weak-text form-label">GitHub 계정명으로 데이터 수집에 사용됩니다.</div>
@@ -20,11 +30,12 @@
                     <button class="btn btn-outline-secondary" type="button" id="github-id-check">Check</button>
                 </div>
             </div>
+            {% endif %}
             <div class="col-lg-6 mb-3">
                 <label for="username">Username <span class="required-star">*</span></label>
                 <div class="weak-text form-label">로그인에 사용할 아이디입니다.</div>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Username"
+                    <input type="text" class="form-control" id="username" name="username" value="{{username}}" placeholder="Username"
                     onchange="return_username_check()" required>
                     <button class="btn btn-outline-secondary" type="button" id="duplicate-check">Check</button>
                 </div>
@@ -113,9 +124,15 @@
                 <label for="personal-email">Email <span class="required-star">*</span></label>
                 <div class="weak-text form-label">계정정보를 찾을 때 사용합니다.</div>
                 <div class="d-flex">
+                    {% if personal_email %}
+                    <input type="text" class="form-control email-input" id="personal-email" name="personal-email" value="{{personal_email_username}}" placeholder="연락용 Email" required>
+                    <span class="input-group-text">@</span>
+                    <input type="text" id="email-domain" name="personal-email-domain" value="{{personal_email_domain}}" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/>
+                    {% else %}
                     <input type="text" class="form-control email-input" id="personal-email" name="personal-email" placeholder="연락용 Email" required>
-                    <span style="line-height: 38px;">@</span>
-                    <input type="text" id="email-domain" name="personal-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
+                    <span class="input-group-text">@</span>
+                    <input type="text" id="email-domain" name="personal-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/>
+                    {% endif %}
                     <select id="email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
                     </select>
@@ -125,9 +142,15 @@
                 <label for="primary-email">GitHub Email <span class="required-star">*</span></label>
                 <div class="weak-text form-label">GitHub Commit 기록을 추적하는데 사용합니다.</div>
                 <div class="d-flex">
-                    <input type="text" class="form-control email-input" id="primary-email" name="primary-email" placeholder="GitHub 계정 연동 Email" required>
-                    <span style="line-height: 38px;">@</span>
-                    <input type="text" id="primary-email-domain" name="primary-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
+                    {% if primary_email %}
+                    <input type="text" class="form-control email-input" id="primary-email" name="primary-email" value="{{primary_email_username}}" placeholder="GitHub 계정 Email" required>
+                    <span class="input-group-text">@</span>
+                    <input type="text" id="primary-email-domain" name="primary-email-domain" value="{{primary_email_domain}}" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/>
+                    {% else %}
+                    <input type="text" class="form-control email-input" id="primary-email" name="primary-email" placeholder="GitHub 계정 Email" required>
+                    <span class="input-group-text">@</span>
+                    <input type="text" id="primary-email-domain" name="primary-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/>
+                    {% endif %}
                     <select id="primary-email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
                     </select>
@@ -138,7 +161,7 @@
                 <div class="weak-text form-label">로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.</div>
                 <div class="d-flex">
                     <input type="text" id="secondary-email" name="secondary-email" class="form-control email-input" placeholder="기타 연동 Email">
-                    <span style="line-height: 38px;">@</span>
+                    <span class="input-group-text">@</span>
                     <input type="text" id="secondary-email-domain" name="secondary-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/> 
                     <select id="secondary-email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
