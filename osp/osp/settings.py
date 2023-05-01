@@ -188,3 +188,14 @@ EMAIL_HOST_SSL = True
 
 # 사이트와 관련한 자동응답을 받을 이메일 주소
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# GitHub OAuth
+GITHUB_CLIENT_ID = GITHUB_CLIENT_ID if 'GITHUB_CLIENT_ID' in vars() else ''
+GITHUB_CLIENT_SECRET = GITHUB_CLIENT_SECRET if 'GITHUB_CLIENT_SECRET' in vars() else ''
+
+GITHUB_LOGIN_URL = f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}"
+
+GITHUB_OAUTH_SETTING = {
+    'client_id': GITHUB_CLIENT_ID,
+    'client_secret': GITHUB_CLIENT_SECRET,
+}
