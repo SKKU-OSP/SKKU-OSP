@@ -28,6 +28,9 @@
             </div>
             <div class="d-flex flex-column">
                 <button type="submit" class="btn btn-primary mb-2">Login</button>
+                {% if GITHUB_LOGIN_URL %}
+                <a href="{{GITHUB_LOGIN_URL}}" class="btn btn-dark mb-2" role="button"> <i class="bi bi-github"></i> Login with Github </a>
+                {% endif %}
             </div>
         </form>
         <div class="d-flex justify-content-between flex-wrap">
