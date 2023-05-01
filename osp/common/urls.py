@@ -6,6 +6,7 @@ app_name = 'common'
 
 urlpatterns = [
   path('login/', views.LoginView.as_view(), name='login'),
+  path('login/github/callback/', views.github_login_callback, name='github_login_callback'),
   path('logout/', auth_views.LogoutView.as_view(), name='logout'),
   path('register/', views.register_page, name='signup'),
   path('register/checkuser', views.check_user, name='check_user'),
