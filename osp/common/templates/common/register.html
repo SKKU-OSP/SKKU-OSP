@@ -43,12 +43,12 @@
             <div class="col-lg-6 mb-3">
                 <label for="password">Password <span class="required-star">*</span></label>
                 <div class="weak-text form-label">비밀번호는 4자 이상이어야 합니다.</div>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" required onChange="checkPassword();">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" minlength="4" autoComplete="off" required onChange="checkPassword();">
             </div>
             <div class="col-lg-6 mb-3">
                 <label for="password-check">Password Check <span class="required-star">*</span></label>
                 <div id="password-check-sign" class="weak-text form-label">비밀번호를 다시 입력해주세요.</div>
-                <input type="password" class="form-control" id="password-check" name="password-check" placeholder="Password" minlength="4" required onChange="checkPassword();">
+                <input type="password" class="form-control" id="password-check" name="password-check" placeholder="Password" minlength="4" autoComplete="off" required onChange="checkPassword();">
             </div>
             <div class="col-lg-6 mb-3">
                 <label for="student-id" class="form-label">학번 <span class="required-star">*</span></label>
@@ -168,7 +168,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-lg-12 mb-3">
+            <div id="category_tag_list" class="col-lg-12 mb-3">
                 <label for="preferLanguage" class="form-label">사용 언어/프레임워크</label>
                 <select id="preferLanguage" name="preferLanguage" multiple>
                     {% category_tag request %}
@@ -287,6 +287,11 @@
                 return;
             } else {
                 const ajax_form_data = new FormData(signinForm);
+                const tag_list = [];
+                for(let tag of $("#category_tag_list").find(".ss-value-text")){
+                    tag_list.push($(tag).html());
+                }
+                ajax_form_data.append('category_tag_list', tag_list);
                 $.ajax({
                     type: "POST",
                     url: "{% url 'common:signup' %}",
