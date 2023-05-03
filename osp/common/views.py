@@ -9,7 +9,7 @@ from django.views.generic.base import TemplateView
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
 
-from osp.settings import EMAIL_HOST_USER, GITHUB_LOGIN_URL, GITHUB_OAUTH_SETTING
+from osp.settings import EMAIL_HOST_USER, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import TagIndependent
 from data.api import GitHub_API
@@ -23,6 +23,7 @@ class LoginView(auth_views.LoginView):
     template_name='common/login.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        GITHUB_LOGIN_URL = f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}" if GITHUB_CLIENT_ID else None
         context.update({"type": 'sign', "GITHUB_LOGIN_URL": GITHUB_LOGIN_URL})
         return context
 
@@ -66,16 +67,18 @@ def github_login_callback(request):
             print("GitHub Login Fail", e)
             context = {'type': 'sign', 'username':user_info['username'], 'personal_email':user_info['email'], 'primary_email':primary_email}
             if context['personal_email']:
-                context['personal_email_username'],  context['personal_email_domain']  = context['personal_email'].split('@')
+                context['personal_email_username'], context['personal_email_domain'] = context['personal_email'].split('@')
             if context['primary_email']:
-                context['primary_email_username'],  context['primary_email_domain']  = primary_email.split('@')
+                context['primary_email_username'], context['primary_email_domain'] = primary_email.split('@')
+            context['msg'] = f'GitHub Login에 실패했습니다. 계정이 있는데 문제가 발생했다면 {EMAIL_HOST_USER} 로 문의해주시기 바랍니다.'
             return render(request, 'common/register.html', context)
     else:
         context = {'type': 'sign', 'username':user_info['username'], 'personal_email':user_info['email'], 'primary_email':primary_email}
         if context['personal_email']:
-            context['personal_email_username'],  context['personal_email_domain']  = context['personal_email'].split('@')
+            context['personal_email_username'], context['personal_email_domain'] = context['personal_email'].split('@')
         if context['primary_email']:
-            context['primary_email_username'],  context['primary_email_domain']  = primary_email.split('@')
+            context['primary_email_username'], context['primary_email_domain'] = primary_email.split('@')
+        context["msg"] = f'SOSD에 와주셔서 감사합니다! GitHub 정보 외의 추가 정보를 입력하고 가입해주세요!'
         return render(request, 'common/register.html', context)
 
 class PasswordResetView(auth_views.PasswordResetView):
@@ -189,12 +192,12 @@ def valid_check(request):
 
 def register_page(request):
     if request.method == 'GET':
-        context = {'type': 'sign'}
-        return render(request, 'common/register.html', context)
+        REDIRECT_URL = f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}" if GITHUB_CLIENT_ID else reverse('common:login')
+        return redirect(REDIRECT_URL)
     if request.method == 'POST':
         fail_reason = []
         if len(request.POST.get('username')) < 5:
-            fail_reason.append('username은 5자 이상이여야 합니다.')
+            fail_reason.append('Username은 5자 이상이여야 합니다.')
         if request.POST['password-check'] != request.POST['password']:
             fail_reason.append('password가 일치하지 않습니다.')
         if not re.match('[0-9]{10}', request.POST['student-id']) :
@@ -210,11 +213,13 @@ def register_page(request):
         if len(request.POST['secondary-email']) > 100:
             fail_reason.append('이메일 주소는 100자를 넘을 수 없습니다.')
         if check_duplicate_username(request.POST.get('username')):
-            fail_reason.append('중복된 이름이 있습니다.\n')
+            fail_reason.append('중복된 Username이 있습니다.\n')
+        if check_duplicate_student_id(request.POST['student-id']):
+            fail_reason.append('중복된 학번이 있습니다.\n')
 
         personal_email=request.POST['personal-email'] + "@" + request.POST['personal-email-domain']
-        primary_email=request.POST['primary-email'] + "@" +  request.POST['primary-email-domain']
-        secondary_email=request.POST['secondary-email'] + "@" +  request.POST['secondary-email-domain']
+        primary_email=request.POST['primary-email'] + "@" + request.POST['primary-email-domain']
+        secondary_email=request.POST['secondary-email'] + "@" + request.POST['secondary-email-domain']
         try:
             if check_email(personal_email):
                 fail_reason.append('연락용 이메일이 형식에 맞지 않습니다. ' + personal_email)
@@ -267,38 +272,53 @@ def register_page(request):
         if len(fail_reason) > 0:
             return JsonResponse({'status': 'fail', 'message': fail_reason})
         return JsonResponse({'status': 'success'})
-    
+
+# 회원가입 페이지에서 Username Check 버튼 누를 때 유효성 확인
 def check_user(request):
     if request.method == 'POST':
         fail_reason = []
         username = request.POST.get('username')
         if len(username) < 5:
-            fail_reason.append('username은 5자 이상이여야 합니다.')
-        
+            fail_reason.append('Username은 5자 이상이여야 합니다.')
         if check_duplicate_username(username):
-            fail_reason.append('중복된 이름이 있습니다.')
+            fail_reason.append('중복된 Username이 있습니다.')
         if len(fail_reason) > 0:
             return JsonResponse({'status': 'fail', 'message': fail_reason})
         
         return JsonResponse({'status': 'success'})
-    
+
+# 회원가입 페이지에서 GitHub Username Check 버튼 누를 때 유효성 확인
 def check_github_id(request):
     if request.method == 'POST':
         fail_reason = []
         github_id = request.POST.get('github-id')
         
         if len(github_id) == 0:
-            fail_reason.append('GitHub ID를 입력해주세요.')
+            fail_reason.append('GitHub Username을 입력해주세요.')
         if check_duplicate_github_id(github_id):
             fail_reason.append('중복된 아이디가 있습니다.')
         if len(fail_reason) > 0:
             return JsonResponse({'status': 'fail', 'message': fail_reason})
         if not check_api_github(github_id):
-            fail_reason.append('GitHub ID를 확인할 수 없습니다.')
+            fail_reason.append('GitHub Username을 확인할 수 없습니다.')
         if len(fail_reason) > 0:
             return JsonResponse({'status': 'fail', 'message': fail_reason})
         return JsonResponse({'status': 'success'})
-    
+
+# 회원가입 페이지에서 학번 Check 버튼 누를 때 학번 유효성 확인
+def check_student_id(request):
+    if request.method == 'POST':
+        fail_reason = []
+        student_id = request.POST['student-id']
+
+        if not re.match('[0-9]{10}', student_id) :
+            fail_reason.append('학번 형식이 다릅니다.')
+        if check_duplicate_student_id(student_id) :
+            fail_reason.append('중복된 학번이 있습니다.')
+        if len(fail_reason) > 0:
+            return JsonResponse({'status': 'fail', 'message': fail_reason})
+        return JsonResponse({'status': 'success'})
+
 def check_duplicate_username(username):
     user = User.objects.filter(username=username)
     return True if len(user) else False
@@ -306,6 +326,10 @@ def check_duplicate_username(username):
 def check_duplicate_github_id(github_id):
     acc = Account.objects.filter(student_data__github_id=github_id)
     return True if len(acc) else False
+
+def check_duplicate_student_id(student_id):
+    student = StudentTab.objects.filter(id=student_id)
+    return True if len(student) else False
 
 def check_api_github(github_id):
     for auth_token in OAUTH_TOKEN_FOR_REG:
@@ -332,7 +356,9 @@ def csrf_failure(request, reason=""):
 def get_access_token(code):
     try:
         github_data = {"code":code}
-        github_data.update(GITHUB_OAUTH_SETTING)
+        github_data["client_id"] = GITHUB_CLIENT_ID
+        github_data["client_secret"] = GITHUB_CLIENT_SECRET
+
         HEADERS = {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',

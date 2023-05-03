@@ -9,6 +9,10 @@
         <div class="d-flex justify-content-center mb-3">
             <img src="/static/images/logo.svg" alt="Logo" class="w-25" />
         </div>
+        <div class="my-3 fs-5">
+            {{ msg }}
+        </div>
+        <hr />
         <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
             {% if username %}
@@ -52,8 +56,11 @@
             </div>
             <div class="col-lg-6 mb-3">
                 <label for="student-id" class="form-label">학번 <span class="required-star">*</span></label>
-                <input type="text" class="form-control" id="student-id" name="student-id" placeholder="ex) 20XXXXXXXX"
-                    required>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="student-id" name="student-id" placeholder="ex) 20XXXXXXXX" 
+                    onchange="return_student_check()" required>
+                    <button class="btn btn-outline-secondary" type="button" id="student-check">Check</button>
+                </div>
             </div>
             <div class="col-lg-6 mb-3">
                 <label for="name" class="form-label">이름 <span class="required-star">*</span></label>
@@ -143,17 +150,20 @@
                 <div class="weak-text form-label">GitHub Commit 기록을 추적하는데 사용합니다.</div>
                 <div class="d-flex">
                     {% if primary_email %}
-                    <input type="text" class="form-control email-input" id="primary-email" name="primary-email" value="{{primary_email_username}}" placeholder="GitHub 계정 Email" required>
+                    <input type="text" class="form-control form-control-plaintext email-input" id="primary-email" name="primary-email" value="{{primary_email_username}}" placeholder="GitHub 계정 Email" readonly required>
                     <span class="input-group-text">@</span>
-                    <input type="text" id="primary-email-domain" name="primary-email-domain" value="{{primary_email_domain}}" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/>
+                    <input type="text" id="primary-email-domain" name="primary-email-domain" value="{{primary_email_domain}}" class="form-control form-control-plaintext email-domain" placeholder="이메일 도메인" maxlength="18" readonly/>
+                    <select id="primary-email-domain-select" class="form-select form-control email-domain email-select" disabled>
+                        {% email_domain_tag request %}
+                    </select>
                     {% else %}
                     <input type="text" class="form-control email-input" id="primary-email" name="primary-email" placeholder="GitHub 계정 Email" required>
                     <span class="input-group-text">@</span>
                     <input type="text" id="primary-email-domain" name="primary-email-domain" class="form-control email-domain" placeholder="이메일 도메인" maxlength="18"/>
-                    {% endif %}
                     <select id="primary-email-domain-select" class="form-select form-control email-domain email-select" onChange="setEmailDomain(this.id, this.value);">
                         {% email_domain_tag request %}
                     </select>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-lg-12 mb-3">
@@ -241,6 +251,7 @@
     let categorySelect;
     let github_id_is_checked = false;
     let username_id_is_checked = false;
+    let student_id_is_checked = false;
     function return_github_id_check() {
         github_id_is_checked = false;
         $('#github-id-check').removeClass();
@@ -250,6 +261,11 @@
         username_id_is_checked = false;
         $('#duplicate-check').removeClass();
         $('#duplicate-check').addClass('btn btn-outline-secondary');
+    };
+    function return_student_check() {
+        student_id_is_checked = false;
+        $('#student-check').removeClass();
+        $('#student-check').addClass('btn btn-outline-secondary');
     };
     $(document).ready(function(){
         categorySelect = new SlimSelect({
@@ -261,13 +277,17 @@
                 }
             },
         });
-        {#유저 이름의 중복을 체크하는 함수 실행#}
-        $("#duplicate-check").on("click", ()=>{
+        {#유저 이름의 유효성을 체크하는 함수 실행#}
+        $("#duplicate-check").on("click", () => {
             ajaxCheckDup();
         })
-        {#Github id의 중복을 체크하는 함수 실행#}
-        $("#github-id-check").on("click", ()=>{
+        {#Github id의 유효성을 체크하는 함수 실행#}
+        $("#github-id-check").on("click", () => {
             ajaxCheckIdValid();
+        })
+        {#Stduent id의 유효성을 체크하는 함수 실행#}
+        $("#student-check").on("click", () => {
+            ajaxCheckStudentIdValid();
         })
         // sign form
         const signinForm = document.getElementById("signin-form");
@@ -283,6 +303,10 @@
                 return;
             } else if (!username_id_is_checked) {
                 alert('Username을 체크해 주세요.');
+                event.preventDefault();
+                return;
+            } else if (!student_id_is_checked) {
+                alert('학번을 체크해 주세요.');
                 event.preventDefault();
                 return;
             } else {
@@ -407,6 +431,43 @@
                     $('#github-id-check').addClass('check-failed');
                 }
                 $('#github-id-check').html("Check")
+            },
+            error: function(data){
+                alert('Error Occured');
+            }
+        });
+    }
+    function ajaxCheckStudentIdValid(){
+        console.log("ajaxCheckStudentIdValid");
+        const ajax_form_data=new FormData();
+        ajax_form_data.append('student-id',$('#student-id').val());
+        ajax_form_data.append('csrfmiddlewaretoken', csrftoken);
+        const checkButton = $('#student-check');
+        checkButton.html(`<div class="spinner-border text-dark spinner-border-sm" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>`);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'common:check_student_id' %}",
+            data: ajax_form_data,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                console.log(data);
+                if(data['status']=="success"){
+                    student_id_is_checked = true;
+                    alert('사용가능한 학번입니다.');
+                    checkButton.removeClass('btn-outline-secondary');
+                    checkButton.addClass('check-success');
+                }
+                else{
+                    alert( data['message'] );
+                    checkButton.removeClass('btn-outline-secondary');
+                    checkButton.addClass('check-failed');
+                }
+                checkButton.html("Check")
             },
             error: function(data){
                 alert('Error Occured');
