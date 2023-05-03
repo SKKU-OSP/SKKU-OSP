@@ -489,12 +489,12 @@ img.opponent-profile {
   border-bottom: 1px solid transparent;
 }
 
-.team-apply-item {
+.split-line {
   padding: 0.75rem;
   border-bottom: 1px solid var(--main-border-color);
 }
 
-.team-apply-item:first-child {
+.split-line:first-child {
   border-top: 1px solid var(--main-border-color);
 }
 
