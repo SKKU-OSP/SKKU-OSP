@@ -32,13 +32,13 @@ teamApplication = {
         });
     },
     showEmptyApply: function () {
-        msg_received = $(".team-apply-item.received");
+        msg_received = $(".split-line.received");
         console.log(msg_received);
         if (msg_received.length == 0){
             $("#apply-recv").empty();
             $("#apply-recv").append(`<div style="text-align:center; padding-top:40px;">받은 지원서가 없습니다. </div>`);
         }
-        msg_sent = $(".team-apply-item.sent");
+        msg_sent = $(".split-line.sent");
         console.log("msg_sent",msg_sent);
         if (msg_sent.length == 0){
             $("#apply-send").empty();

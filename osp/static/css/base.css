@@ -489,12 +489,12 @@ img.opponent-profile {
   border-bottom: 1px solid transparent;
 }
 
-.team-apply-item {
+.split-line {
   padding: 0.75rem;
   border-bottom: 1px solid var(--main-border-color);
 }
 
-.team-apply-item:first-child {
+.split-line:first-child {
   border-top: 1px solid var(--main-border-color);
 }
 
@@ -703,6 +703,8 @@ img.opponent-profile {
   color: #FFFFFF;
 }
 
-.input-group > .form-control-plaintext{
+.form-control-plaintext:read-only{
   border: 1px solid #6c757d !important;
+  padding-right: .75rem;
+  padding-left: .75rem;
 }
