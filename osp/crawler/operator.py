@@ -47,13 +47,13 @@ def start():
         print('crawl_job Start!', datetime.now())
         try:
             # 크롤링 날짜 이후에 Github 업데이트 내용이 있으면 크롤링 대상에 포함
-            pre_crawled_list = GithubOverview.objects.filter(github_updated_date__lte=F("crawled_date")).values_list("github_id", flat=True)
+            pre_crawled_list = GithubOverview.objects.filter(github_updated_date__lt=F("crawled_date")).values_list("github_id", flat=True)
             print("pre_crawled_list", len(pre_crawled_list))
             github_id_list = Account.objects.filter(user__is_superuser=False).exclude(student_data__github_id__in=pre_crawled_list).values_list('student_data__github_id', flat=True)
         except :
             print("try close_old_connections")
             django.db.close_old_connections()
-            pre_crawled_list = GithubOverview.objects.filter(github_updated_date__lte=F("crawled_date")).values_list("github_id", flat=True)
+            pre_crawled_list = GithubOverview.objects.filter(github_updated_date__lt=F("crawled_date")).values_list("github_id", flat=True)
             github_id_list = Account.objects.filter(user__is_superuser=False).exclude(student_data__github_id=pre_crawled_list).values_list('student_data__github_id', flat=True)
         print(f"crawl_job: Get Target Account {len(github_id_list)}")
         github_id_list = ','.join(github_id_list)
