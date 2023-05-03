@@ -1,8 +1,6 @@
 from django.urls import path
-from home import views
 
-
-from .views import statistic, update_score
+from home.views import statistic, update_score
 
 app_name = 'home'
 

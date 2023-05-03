@@ -11,6 +11,7 @@ urlpatterns = [
   path('register/', views.register_page, name='signup'),
   path('register/checkuser', views.check_user, name='check_user'),
   path('register/checkgithub', views.check_github_id, name='check_github_id'),
+  path('register/checkstudent', views.check_student_id, name='check_student_id'),
 
   path('find_account/', views.AccountFindView.as_view(), name="find_account"),
   path('find_account/done/', views.AccountFindDoneView.as_view(), name="find_account_done"),
