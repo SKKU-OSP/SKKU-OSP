@@ -70,6 +70,7 @@ def github_login_callback(request):
                 context['personal_email_username'], context['personal_email_domain'] = context['personal_email'].split('@')
             if context['primary_email']:
                 context['primary_email_username'], context['primary_email_domain'] = primary_email.split('@')
+            context['msg'] = f'GitHub Login에 실패했습니다. 계정이 있는데 문제가 발생했다면 {EMAIL_HOST_USER} 로 문의해주시기 바랍니다.'
             return render(request, 'common/register.html', context)
     else:
         context = {'type': 'sign', 'username':user_info['username'], 'personal_email':user_info['email'], 'primary_email':primary_email}
@@ -77,6 +78,7 @@ def github_login_callback(request):
             context['personal_email_username'], context['personal_email_domain'] = context['personal_email'].split('@')
         if context['primary_email']:
             context['primary_email_username'], context['primary_email_domain'] = primary_email.split('@')
+        context["msg"] = f'SOSD에 와주셔서 감사합니다! GitHub 정보 외의 추가 정보를 입력하고 가입해주세요!'
         return render(request, 'common/register.html', context)
 
 class PasswordResetView(auth_views.PasswordResetView):
@@ -190,8 +192,8 @@ def valid_check(request):
 
 def register_page(request):
     if request.method == 'GET':
-        context = {'type': 'sign'}
-        return render(request, 'common/register.html', context)
+        REDIRECT_URL = f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}" if GITHUB_CLIENT_ID else reverse('common:login')
+        return redirect(REDIRECT_URL)
     if request.method == 'POST':
         fail_reason = []
         if len(request.POST.get('username')) < 5:

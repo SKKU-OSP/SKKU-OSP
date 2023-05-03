@@ -9,6 +9,10 @@
         <div class="d-flex justify-content-center mb-3">
             <img src="/static/images/logo.svg" alt="Logo" class="w-25" />
         </div>
+        <div class="my-3 fs-5">
+            {{ msg }}
+        </div>
+        <hr />
         <form id="signin-form" method="post" action="." class="row">
             {% csrf_token %}
             {% if username %}
