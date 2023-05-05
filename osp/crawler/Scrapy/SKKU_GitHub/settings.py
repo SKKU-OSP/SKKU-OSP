@@ -90,3 +90,44 @@ ITEM_PIPELINES = {
 
 RETRY_HTTP_CODE = [429]
 REQUEST_FINGERPRINTER_IMPLEMENTATION = '2.7'
+
+# Load Secret.key
+import os
+import json
+from django.core.exceptions import ImproperlyConfigured
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+print("BASE_DIR", BASE_DIR)
+DATA_DIR = f"{BASE_DIR}/data"
+
+with open(os.path.join(DATA_DIR, "config", "secret.key"), "r") as f:
+    secret = json.loads(f.read())
+
+def get_secret(key, secret=secret):
+    try:
+        return secret[key]
+    except Exception as e:
+        msg = f"Setting Error: Can't read {key}, {e}"
+        raise ImproperlyConfigured(msg)
+
+DEBUG = True
+if 'ENV_MODE' not in os.environ:
+    SETTINGS = get_secret('DEBUG')
+elif os.environ['ENV_MODE'] == 'DEV':
+    SETTINGS = get_secret('DEV')
+elif os.environ['ENV_MODE'] == 'PRODUCT':
+    SETTINGS = get_secret('PRODUCT')
+    DEBUG = False
+else:
+    SETTINGS = get_secret('DEBUG')
+
+
+OAUTH_TOKEN = SETTINGS['OAUTH_TOKEN'] if 'OAUTH_TOKEN' in SETTINGS else []
+OAUTH_TOKEN_FOR_REG = SETTINGS['OAUTH_TOKEN_FOR_REG'] if 'OAUTH_TOKEN_FOR_REG' in SETTINGS else []
+CRAWLER_DB = SETTINGS['CRAWLER_DB'] if 'CRAWLER_DB' in SETTINGS else None
+if CRAWLER_DB:
+    SQL_USER= CRAWLER_DB['SQL_USER']
+    SQL_PW= CRAWLER_DB['SQL_PW']
+    SQL_HOST=CRAWLER_DB['SQL_HOST']
+    SQL_PORT=CRAWLER_DB['SQL_PORT']
+    SQL_DB=CRAWLER_DB['SQL_DB']
