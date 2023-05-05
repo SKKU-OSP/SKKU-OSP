@@ -13,7 +13,7 @@ from itemadapter import ItemAdapter
 from scrapy import signals
 from pydispatch import dispatcher
 from .items import *
-from .configure import *
+from .settings import *
 
 class SkkuGithubPipeline:
     def deEmoji(self, data):
