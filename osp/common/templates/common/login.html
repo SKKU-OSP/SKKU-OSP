@@ -23,17 +23,19 @@
                 <label for="username">Username</label>
             </div>
             <div class="form-floating mb-3">
-                <input type="password" class="form-control" name="password" id="password" placeholder="examplepw" required>
+                <input type="password" class="form-control" name="password" id="password" placeholder="examplepw" autoComplete="off" required>
                 <label for="password">Password</label>
             </div>
             <div class="d-flex flex-column">
                 <button type="submit" class="btn btn-primary mb-2">Login</button>
+                {% if GITHUB_LOGIN_URL %}
+                <a href="{{GITHUB_LOGIN_URL}}" class="btn btn-dark mb-2" role="button"> <i class="bi bi-github"></i> Start with Github </a>
+                {% else %}
+                <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>
+                {% endif %}
             </div>
         </form>
         <div class="d-flex justify-content-between flex-wrap">
-            <div>
-                <a href="/accounts/register" class="weak-text">회원가입</a>
-            </div>
             <div>
                 <a href="/accounts/find_account/" class="weak-text">계정 찾기</a>
                 <span>|</span>
