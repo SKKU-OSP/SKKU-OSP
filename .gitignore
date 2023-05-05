@@ -180,8 +180,8 @@ cython_debug/
 # develop server
 # individual server (developers)
 
-osp/production_settings.py
-osp/dev_settings.py
+production_settings.py
+dev_settings.py
 
 # Scrapy tokens
 configure.py
@@ -189,9 +189,9 @@ configure.py
 # secret file
 secret.key
 
-# static/media files
-static/data
-.data
+# static/media/config files
+osp/static/data/
+osp/data
 
 # macOS metadata file for developers with macOS
 .DS_store
