@@ -12,24 +12,63 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import pymysql  
 pymysql.install_as_MySQLdb()
 import os
+import json
 
-env_mode = 'ENV_MODE' in os.environ
-if env_mode:
-    from .production_settings import *
-else:
-    from .dev_settings import *
-
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+ROOT_DIR = os.path.dirname(BASE_DIR)
+DATA_DIR = f"{BASE_DIR}/data"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 with open(os.path.join(DATA_DIR, "config", "secret.key"), "r") as f:
-    SECRET_KEY = f.read()
+    secret = json.loads(f.read())
+
+def get_secret(key, secret=secret):
+    try:
+        return secret[key]
+    except Exception as e:
+        msg = f"Setting Error: Can't read {key}, {e}"
+        raise ImproperlyConfigured(msg)
+
+# Django secret key
+SECRET_KEY = get_secret('SECRET_KEY') 
+DEBUG = True
+if 'ENV_MODE' not in os.environ:
+    SETTINGS = get_secret('DEBUG')
+elif os.environ['ENV_MODE'] == 'DEV':
+    SETTINGS = get_secret('DEV')
+elif os.environ['ENV_MODE'] == 'PRODUCT':
+    SETTINGS = get_secret('PRODUCT')
+    DEBUG = False
+else:
+    SETTINGS = get_secret('DEBUG')
+
+# 발신할 이메일
+EMAIL_HOST_USER = SETTINGS['EMAIL_HOST_USER'] if 'EMAIL_HOST_USER' in SETTINGS else ''
+# 발신할 메일의 비밀번호
+EMAIL_HOST_PASSWORD = SETTINGS['EMAIL_HOST_PASSWORD'] if 'EMAIL_HOST_PASSWORD' in SETTINGS else ''
+
+EMAIL_HOST = SETTINGS['EMAIL_HOST'] if 'EMAIL_HOST' in SETTINGS else ''
+EMAIL_PORT = SETTINGS['EMAIL_PORT'] if 'EMAIL_PORT' in SETTINGS else ''
+EMAIL_HOST_SSL = True
+
+# 사이트와 관련한 자동응답을 받을 이메일 주소
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# GitHub OAuth
+GITHUB_CLIENT_ID = SETTINGS['GITHUB_CLIENT_ID'] if 'GITHUB_CLIENT_ID' in SETTINGS else None
+GITHUB_CLIENT_SECRET = SETTINGS['GITHUB_CLIENT_SECRET'] if 'GITHUB_CLIENT_SECRET' in SETTINGS else None
+
+DATABASES = SETTINGS['DATABASES'] if 'DATABASES' in SETTINGS else None
+
+ALLOWED_HOSTS = SETTINGS['ALLOWED_HOSTS'] if 'ALLOWED_HOSTS' in SETTINGS else []
+CSRF_TRUSTED_ORIGINS = SETTINGS['CSRF_TRUSTED_ORIGINS'] if 'CSRF_TRUSTED_ORIGINS' in SETTINGS else []
+
 
 # Application definition
 # debug_toolbar는 필요할 때 주석 해제하여 사용
@@ -176,19 +215,3 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
 SCHEDULER_DEFAULT = True
 
 CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
-
-# 발신할 이메일
-EMAIL_HOST_USER = EMAIL_HOST_USER if 'EMAIL_HOST_USER' in vars() else ''
-# 발신할 메일의 비밀번호
-EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD if 'EMAIL_HOST_PASSWORD' in vars() else ''
-
-EMAIL_HOST = EMAIL_HOST if 'EMAIL_HOST' in vars() else ''
-EMAIL_PORT = EMAIL_PORT if 'EMAIL_PORT' in vars() else ''
-EMAIL_HOST_SSL = True
-
-# 사이트와 관련한 자동응답을 받을 이메일 주소
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-# GitHub OAuth
-GITHUB_CLIENT_ID = GITHUB_CLIENT_ID if 'GITHUB_CLIENT_ID' in vars() else None
-GITHUB_CLIENT_SECRET = GITHUB_CLIENT_SECRET if 'GITHUB_CLIENT_SECRET' in vars() else None
