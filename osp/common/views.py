@@ -13,7 +13,7 @@ from osp.settings import EMAIL_HOST_USER, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import TagIndependent
 from data.api import GitHub_API
-from crawler.Scrapy.SKKU_GitHub.configure import OAUTH_TOKEN_FOR_REG
+from crawler.Scrapy.SKKU_GitHub.settings import OAUTH_TOKEN_FOR_REG
 
 import re
 import smtplib

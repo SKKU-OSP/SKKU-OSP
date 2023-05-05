@@ -132,7 +132,7 @@ class ProfileView(TemplateView):
         start = time.time()
         # 비 로그인 시 프로필 열람 불가
         if request.user.is_anonymous:
-            context = {"alert": "로그인이 필요합니다.", "url":"history"}
+            context = {"alert": "로그인이 필요합니다.", "url":reverse('common:login')}
             return render(request, "community/redirect.html", context)
 
         # 유저 프로필의 접근 권한 체크
