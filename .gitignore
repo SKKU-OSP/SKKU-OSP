@@ -13,7 +13,10 @@ media
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.
+
 staticfiles/
+.staticfiles/
+
 
 ### Django.Python Stack ###
 # Byte-compiled / optimized / DLL files
@@ -193,7 +196,13 @@ secret.key
 osp/static/data/
 osp/data
 
+# docker
+Dockerfile
+docker-compose.yml
+
 # macOS metadata file for developers with macOS
 .DS_store
+
+
 
 ####### SOSD #######
