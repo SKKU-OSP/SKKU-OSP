@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import scrapy
 
 from ..items import *
-from ..configure import *
+from ..settings import *
 
 
 API_URL = 'https://api.github.com'

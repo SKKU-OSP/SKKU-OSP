@@ -13,7 +13,7 @@ from scrapy.downloadermiddlewares.defaultheaders import DefaultHeadersMiddleware
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.utils.response import response_status_message
 from datetime import datetime, timedelta
-from .configure import OAUTH_TOKEN
+from .settings import OAUTH_TOKEN
 from queue import PriorityQueue
 import logging
 

@@ -2,7 +2,7 @@ import sys, os
 import MySQLdb
 import json, math, time, datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from osp.dev_settings import DATABASES
+from osp.settings import DATABASES
 
 # 파이썬 실행의 인자로 annualoverview, annualtotal, distscore, distfactor, student, repository 중에서 입력하여 해당 테이블에 데이터를 insert 할 수 있습니다.
 # 인자로 all을 넣으면 모든 테이블에 insert 할 수 있습니다.
