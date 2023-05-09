@@ -46,6 +46,12 @@
     .article-bar {
         display: block !important;
     }
+    .article-meta {
+        float: right;
+    }
+    .after-article-meta {
+        clear: both;
+    }
     #article-recruit-bar {
         display: flex !important;
     }
