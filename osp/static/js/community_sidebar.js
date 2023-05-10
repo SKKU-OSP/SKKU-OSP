@@ -71,9 +71,9 @@ const createTeam = function () {
         createForm.find('.invalid-feedback').html("");
         for (const [field, errors] of Object.entries(data.errors)) {
           console.log(field, errors);
-          if(createForm.find(`[name=${field}`).length > 0){
-            createForm.find(`[name=${field}`).addClass('is-invalid');
-            createForm.find(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
+          if(createForm.find(`[name=${field}]`).length > 0){
+            createForm.find(`[name=${field}]`).addClass('is-invalid');
+            createForm.find(`.invalid-feedback[data-feedback-type=team-${field}]`).html(errors);
           }else{
             alert(data['message']);
           }
@@ -146,8 +146,8 @@ const inviteTeam = function () {
       console.log(data);
       if (data.status == 'fail') {
         for (const [field, errors] of Object.entries(data.errors)) {
-          $(`[name=${field}`).addClass('is-invalid')
-          $(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors)
+          $(`[name=${field}]`).addClass('is-invalid')
+          $(`.invalid-feedback[data-feedback-type=team-${field}]`).html(errors)
         }
         $('#team-invite-submit').bind('click', function () {
           inviteTeam();
