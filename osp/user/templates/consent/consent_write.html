@@ -12,6 +12,7 @@
             <div class="modal-body w-100" style="min-height:400px;overflow-y:auto;">
                 <p>현재 개인정보 공개에 동의하지 않아 글쓰기 작업이 제한됩니다.</p>
                 <div class="tab-content">
+                    {% if not is_write %}
                     {% consent_text request "write" as consents %}
                     {% for obj in consents %}
                     <div class="team-apply-item received">
@@ -45,6 +46,7 @@
                     </div>
                     {% endif %}
                     {% endfor %}
+                    {% endif %}
                     {% if open_lvl == 0 %}
                     {% include "consent/consent_level.html" %}
                     {% endif %}

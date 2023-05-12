@@ -73,10 +73,12 @@ class TableBoardView(TemplateView):
                 acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
             context['is_write'] = acc_pp.is_write
             context['is_open'] = acc_pp.is_open
+            context['open_lvl'] = acc_pp.open_lvl
         else:
             account = None
             context['is_write'] = 0
             context['is_open'] = 0
+            context['open_lvl'] = 0
         
         # 게시판 별로 다른 데이터를 전달한다.
         if board.board_type == 'Notice':
@@ -347,6 +349,7 @@ class UserBoardView(TemplateView):
         try:
             acc_pp = AccountPrivacy.objects.get(account=request.user.id)
             context['is_open'] = acc_pp.is_open
+            context['open_lvl'] = acc_pp.open_lvl
         except Exception as e:
             print("community view account_cards error: ", e)
 
@@ -530,6 +533,21 @@ class ArticleSaveView(TemplateView):
         context['notice_check'] = ''
         context['is_auth_notice'] = False
         board_id = kwargs.get('board_id')
+        # 로그인된 정보공개 설정을 확인한다.
+        if request.user.is_authenticated:
+            account = Account.objects.get(user_id=request.user.id)
+            try:
+                acc_pp = AccountPrivacy.objects.get(account=account)
+            except:
+                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+            context['is_write'] = acc_pp.is_write
+            context['is_open'] = acc_pp.is_open
+            context['open_lvl'] = acc_pp.open_lvl
+        else:
+            account = None
+            context['is_write'] = 0
+            context['is_open'] = 0
+            context['open_lvl'] = 0
 
         context.update(get_auth(board_id, request.user))
         if 'alert' in context:
