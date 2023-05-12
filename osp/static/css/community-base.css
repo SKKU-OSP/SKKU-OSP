@@ -449,6 +449,12 @@
     #user-filter, #activity-filter{
         width: 41.6%;
     }
+    #article-teamcard {
+        display: block !important;
+    }
+    .article-info-desc {
+        min-width: 100% !important;
+    }
 }
 @media (max-width: 576px) {
     #user-filter, #activity-filter{
@@ -976,9 +982,8 @@
 }
 
 .desc-break{
-    display: block;
-    word-break: break-all;
-    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 /* admin이 아닌 팀원의 아이콘 색을 연하게 설정 */
