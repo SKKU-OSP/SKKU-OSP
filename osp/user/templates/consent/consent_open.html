@@ -45,6 +45,9 @@
                     </div>
                     {% endif %}
                     {% endfor %}
+                    {% if open_lvl == 0 %}
+                    {% include "consent/consent_level.html" %}
+                    {% endif %}
                 </div>
             </div>
             <div class="modal-footer">
