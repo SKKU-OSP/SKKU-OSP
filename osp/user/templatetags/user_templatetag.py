@@ -4,7 +4,7 @@ from user.models import Account, StudentTab, AccountPrivacy
 from osp.settings import BASE_DIR
 from django.contrib.auth.models import User
 import os, json
-DATA_DIR = os.path.join(BASE_DIR, "static/data/")
+DATA_DIR = os.path.join(BASE_DIR, "static/contents/")
 register = template.Library()
 
 @register.simple_tag
@@ -52,7 +52,7 @@ def is_open(request):
 @register.simple_tag
 def consent_text(request, type):
     try:
-        with open(os.path.join(DATA_DIR, "consent_{}.json".format(type)), 'r') as consent:
+        with open(os.path.join(DATA_DIR, f"consent_{type}.json"), 'r') as consent:
             data = json.load(consent)
     except:
         data = None
