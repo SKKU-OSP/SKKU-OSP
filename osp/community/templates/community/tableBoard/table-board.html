@@ -21,6 +21,8 @@
                         <div>
                             {% if board.board_type == 'Notice' %}
                             <a href="{% url 'community:notice-save' %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
+                            {% elif not is_write or open_lvl == 0 %}
+                            <button type="button" class="btn btn-outline-light" onclick="consentWriteOpen('{{request.user.username}}');">글쓰기</button>
                             {% else %}
                             <a href="{% url 'community:article-save' board_name=board.name board_id=board.id %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
                             {% endif %}
