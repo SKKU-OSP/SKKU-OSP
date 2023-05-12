@@ -134,9 +134,9 @@
                 updateForm.find('.invalid-feedback').html("");
                 for (const [field, errors] of Object.entries(data.errors)) {
                     console.log(field, errors);
-                    if(updateForm.find(`[name=${field}`).length > 0){
-                        updateForm.find(`[name=${field}`).addClass('is-invalid');
-                        updateForm.find(`.invalid-feedback[data-feedback-type=team-${field}`).html(errors);
+                    if(updateForm.find(`[name=${field}]`).length > 0){
+                        updateForm.find(`[name=${field}]`).addClass('is-invalid');
+                        updateForm.find(`.invalid-feedback[data-feedback-type=team-${field}]`).html(errors);
                     }else{
                         alert(data['message']);
                     }
