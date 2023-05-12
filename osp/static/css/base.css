@@ -153,6 +153,7 @@ li, a, button {
   opacity: 0;
   visibility: hidden;
   cursor: default;
+  height: 0px;
 }
 #board-searcher {
   flex-grow: 2;
