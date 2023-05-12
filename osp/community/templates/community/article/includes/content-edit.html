@@ -1,6 +1,15 @@
 {% load tag_templatetag %}
 {% load community_tag %}
 {% load team_tag %}
+{% if not is_write or open_lvl == 0 %}
+{# 정보공개 동의하지 않을 때, 렌더링하지 않음 #}
+<div>
+    <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
+    <button class="btn btn-primary" onclick="consentWriteOpen('{{request.user.username}}');">
+        정보공개하기
+    </button>
+</div>
+{% else %}
 <div id="board-title-bar" class="flex-between">
     <div id="board-title" class="p-board-title">
         <a href="/community/board/{{board.name}}/{{board.id}}">
@@ -108,3 +117,4 @@
         {% endif %}
     </div>
 </form>
+{% endif %}
