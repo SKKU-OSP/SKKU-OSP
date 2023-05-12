@@ -48,22 +48,22 @@ const searcher = {
         });
         // 엔터키 검색 이벤트 - 검색어를 입력했을 때만 이벤트 실행
         $(document).keypress(function(e) {
-            if ($("#search-username").val() !== "" && $("#search-username").val() !== undefined){
+            if ($("#search-username").val()){
                 targetBoard = "#user-board";
                 targetSearch = "#search-username";
                 targetTag = "#user-tag-filter";
             }
-            else if($("#search-activity").val() !== "" && $("#search-activity").val() !== undefined){
+            else if($("#search-activity").val()){
                 targetBoard = "#activity-board";
                 targetSearch = "#search-activity";
                 targetTag = "#tag-select";
             }
-            else if($("#search-word").val() !== ""){
+            else if($("#search-word").val()){
                 targetBoard = "#board-searcher";
                 targetSearch = "#search-word";
                 targetTag = "#tag-filter";
             }
-            if(e.keyCode==13 && $(targetSearch).val() !== "") 
+            if(e.keyCode==13 && $(targetSearch).val()) 
                 _this.redraw(targetSearch, targetTag, targetBoard, to_page_1=true);
         });
         // 맞춤 유저 추천 팀 적용
@@ -258,10 +258,11 @@ const searcher = {
         }
         console.log("searchWord", searchWord, "tag_list", tag_list);
 
-        if((searchWord === "" || searchWord === undefined) && tag_list.length === 0){
+        if((!searchWord || searchWord.trim() === "") && tag_list.length === 0){
             // 전부 빈값이면 검색하지 않음
             return;
         }
+        searchWord = searchWord.trim();
         // 유저 추천에 사용하는 팀 필터 
         const team_li = searcher.getTeamList();
         
@@ -276,7 +277,6 @@ const searcher = {
         }
         // boardId가 아이디 값이 아니면 통합검색 외의 검색으로 api 호출
         // 아이디 값이라면 통합검색이므로 링크 이동
-        console.log("boardId", boardId);
         if(!isNaN(boardId)){
             data["board"] = boardId;
             console.log("get data", data);
@@ -284,7 +284,6 @@ const searcher = {
         }
 
         let url = this.getUrl(board);
-        console.log("url", url);
         let containerId = "#body-content";
 
         data["team_li"] = JSON.stringify(team_li);
@@ -306,7 +305,6 @@ const searcher = {
         const boardValue = $("#board-title-bar").data("board-value");
         if(boardValue === undefined) return;
         const url = this.getUrl(boardValue);
-        console.log(url, "url");
         if(to_page_1){
             this.nowPage = 1;
         }
