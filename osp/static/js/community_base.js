@@ -42,13 +42,17 @@ function consentWriteOpen(user){
 
 function submitWriteConsent(e, user){
     e.preventDefault();
-    formHTML = $("#write-consent-form")[0]
-    
+    let formHTML = $("#write-consent-form")[0]
     let form_data = new FormData(formHTML);
-    let opt1 = form_data.get('radio-1')
-    let opt2 = form_data.get('radio-2')
 
-    if(Number(opt1[0])&Number(opt2[0])){
+    // form_data에서 모든 라디오 버튼의 값을 가져오기
+    let opt_check = true;
+    Array.from(form_data.keys()).forEach(key => {
+        if(form_data.get(key) == "0"){
+            opt_check = false;
+        }
+    });
+    if(opt_check){
         $.ajax({
             url: `/user/${user}/api/consent-write`,
             method: 'POST',
@@ -83,13 +87,17 @@ function consentUserOpen(user){
 
 function submitUserConsent(e, user){
     e.preventDefault();
-    formHTML = $("#open-consent-form")[0]
-    
+    let formHTML = $("#open-consent-form")[0];
     let form_data = new FormData(formHTML);
-    let opt1 = form_data.get('radio-1')
-    let opt2 = form_data.get('radio-2')
-
-    if(Number(opt1[0])&Number(opt2[0])){
+    
+    // form_data에서 모든 라디오 버튼의 값을 가져오기
+    let opt_check = true;
+    Array.from(form_data.keys()).forEach(key => {
+        if(form_data.get(key) == "0"){
+            opt_check = false;
+        }
+    });
+    if(opt_check){
         $.ajax({
             url: `/user/${user}/api/consent-open`,
             method: 'POST',
