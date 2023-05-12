@@ -454,7 +454,8 @@ def consent_write(request, username=""):
             account = Account.objects.get(user=request.user.id)
             acc_pp = AccountPrivacy.objects.get(account=account)
             acc_pp.is_write = True
-            acc_pp.open_lvl = 1
+            if request.POST.get('open_lvl', 0):
+                acc_pp.open_lvl = 1
             acc_pp.save()
             return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
         except Exception as e:
@@ -487,7 +488,8 @@ def consent_open(request, username=""):
             account = Account.objects.get(user=request.user.id)
             acc_pp = AccountPrivacy.objects.get(account=account)
             acc_pp.is_open = True
-            acc_pp.open_lvl = 1
+            if request.POST.get('open_lvl', 0):
+                acc_pp.open_lvl = 1
             acc_pp.save()
             return JsonResponse({'status': 'success', 'msg':'저장하였습니다.'})
         except Exception as e:
