@@ -568,7 +568,7 @@ img.opponent-profile {
 
 .btn-refuse:disabled {
   color: #000000;
-  background-color: var(--main-icon-color-transparent);
+  background-color: var(--danger-color-transparent);
 }
 
 .btn-accept {
