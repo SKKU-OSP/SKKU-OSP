@@ -559,11 +559,11 @@ img.opponent-profile {
 }
 
 .btn-refuse {
-  border: 1px solid var(--main-icon-color);
+  border: 1px solid var(--danger-color);
 }
 
 .btn-refuse:hover {
-  background-color: var(--main-icon-color-transparent);
+  background-color: var(--danger-color-transparent);
 }
 
 .btn-refuse:disabled {
@@ -598,12 +598,12 @@ img.opponent-profile {
 }
 
 .btn-wait {
-  border: 1px solid var(--sub-point-color);
+  border: 1px solid var(--main-point-color);
 }
 
 .btn-wait:disabled {
   color: #000000;
-  background-color: var(--sub-point-color-transparent);
+  background-color: var(--main-icon-color-transparent);
 }
 
 .writer-dropdown-btn {
