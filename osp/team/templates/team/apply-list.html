@@ -30,7 +30,7 @@
                 {% for admin_team in admin_teams %}
                     {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
                     {% for applymsg in waitedapplymessages %}
-                    <div class="team-apply-item received" id="apply-user-{{ applymsg.account.user.username }}">
+                    <div class="team-apply-item received split-line" id="apply-user-{{ applymsg.account.user.username }}">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
@@ -69,7 +69,7 @@
                     tabindex="0">
                     {% get_sent_teamapply request.user as sent_teamapply %}
                     {% for applymsg in sent_teamapply %}
-                    <div id="apply-{{applymsg.id}}" class="team-apply-item sent">
+                    <div id="apply-{{applymsg.id}}" class="team-apply-item sent split-line">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
@@ -88,11 +88,11 @@
                                 </button>
                                 {% elif applymsg.status == 1 %}
                                 <button class="btn-xs btn-accept" disabled>
-                                    승인
+                                    승인 완료
                                 </button>
                                 {% elif applymsg.status == 2 %}
                                 <button class="btn-xs btn-refuse" disabled>
-                                    거절
+                                    거절됨
                                 </button>
                                 {% endif %}
                             </div>
