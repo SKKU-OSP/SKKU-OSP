@@ -46,6 +46,12 @@
     .article-bar {
         display: block !important;
     }
+    .article-meta {
+        float: right;
+    }
+    .after-article-meta {
+        clear: both;
+    }
     #article-recruit-bar {
         display: flex !important;
     }
@@ -442,6 +448,12 @@
 @media (max-width: 992px) {
     #user-filter, #activity-filter{
         width: 41.6%;
+    }
+    #article-teamcard {
+        display: block !important;
+    }
+    .article-info-desc {
+        min-width: 100% !important;
     }
 }
 @media (max-width: 576px) {
@@ -970,9 +982,8 @@
 }
 
 .desc-break{
-    display: block;
-    word-break: break-all;
-    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 /* admin이 아닌 팀원의 아이콘 색을 연하게 설정 */
