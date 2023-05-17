@@ -1,7 +1,7 @@
 {% load tag_templatetag %}
 {% load community_tag %}
 {% load team_tag %}
-{% if not is_write or open_lvl == 0 %}
+{% if not is_write and type == 'register' %}
 {# 정보공개 동의하지 않을 때, 렌더링하지 않음 #}
 <div>
     <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
