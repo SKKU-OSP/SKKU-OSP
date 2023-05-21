@@ -16,16 +16,16 @@
             {# type은 세가지 값이 가능: view / register / edit #}
             {% if type == 'view' %}
                 {# article view #}
-                {% include 'community/article/includes/content-view.html' %}
+                {% include 'community/article/includes/content-view.html' with type=type %}
             {% else %}
                 {#  article add or edit #}
-                {% include 'community/article/includes/content-edit.html' %}
+                {% include 'community/article/includes/content-edit.html' with type=type %}
             {% endif %}
             </div>
             <div id="comment-content">
                 {% if type != 'register' %}
                 {# comment #}
-                {% include 'community/article/includes/comments.html' with article_id=article.id %}
+                {% include 'community/article/includes/comments.html' with article_id=article.id type=type %}
                 {% endif %}
             </div>
         </div>
