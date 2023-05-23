@@ -11,7 +11,7 @@
         </a>
     </div>
     {#검색창#}
-    <div id="searcher-box">
+    <div {% if user.is_authenticated %}id="searcher-box-1"{% endif %} class="searcher-box">
     {% if is_community %}
     {% include "community/board/searcher.html" with board=board %}
     {% endif %}
@@ -116,6 +116,12 @@
     </div>
     {% endif %}
 </header>
+{#검색창#}
+<div id="searcher-box-2" class="searcher-box">
+{% if is_community and user.is_authenticated %}
+{% include "community/board/searcher.html" with board=board %}
+{% endif %}
+</div>
 {% if user.is_authenticated %}
 <div id="message-modal" class="modal modal-lg fade">
     <div class="modal-dialog modal-dialog-started">
