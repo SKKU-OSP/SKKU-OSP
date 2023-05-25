@@ -152,11 +152,14 @@
           <div class="d-flex row-userdata">
             <span class="row-title text-center" style="font-size: 13px;">프로필 공개<br>범위 설정</span>
             <div>
-              <div class="profile-edit-description">내 프로필의 공개 범위를 설정합니다.</div>
+              {# 개인정보 정책 변경으로 임시로 단계를 텍스트로 표시합니다. #}
+              <div class="profile-edit-description">내 프로필의 공개 범위를 설정합니다. 현재 {{privacy.open_lvl}}단계</div>
+              {% comment %}
               <div class="form-check profile-privacy-radio">
                 <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio0" value="0">
                 <label class="form-check-label" for="profileprivacyradio0">팀원 외 공개 거부</label>
               </div>
+              {% endcomment %}
               <div class="form-check profile-privacy-radio">
                 <input class="form-check-input" type="radio" name="profileprivacyradio" id="profileprivacyradio1" value="1">
                 <label class="form-check-label" for="profileprivacyradio1">활동 내역 공개</label>
