@@ -226,7 +226,6 @@ function setVisualModal(chart_data) {
         active_grass++;
       });
     }
-    console.log("pie_dataset", pie_dataset);
     const pie_data = {
       labels: pie_label,
       datasets: [{

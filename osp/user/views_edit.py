@@ -246,8 +246,6 @@ class ProfileEditSaveView(UpdateView):
         tier4langs = req["tier4langs"]
 
         interests = req["interests"]
-        print("intint")
-        print(interests)
 
         # 기존에 있던 관심분야, 사용언어/기술스택을 모두 삭제하고 다시 삽입한다.
         AccountInterest.objects.filter(account=user_account).delete()
@@ -258,13 +256,12 @@ class ProfileEditSaveView(UpdateView):
                 lang_tag = TagIndependent.objects.get(name=val.replace("_", " ").replace("plus", "+").replace("sharp","#"))
                 new_interest_obj = AccountInterest(account=user_account, tag=lang_tag, level=level)
                 query_bulk.append(new_interest_obj)
-        
+
         def intsupdater(ints):
+            print("intsupdater")
             print(ints)
-            print("dddsdfsdfsdfd")
             for intt, val in ints.items() :
                 int_tag = TagIndependent.objects.get(name=val.replace("_", " ").replace("plus", "+").replace("sharp","#"))
-                print("dddd")
                 print(int_tag)
                 new_interest_obj = AccountInterest(account=user_account, tag=int_tag)
                 query_bulk.append(new_interest_obj)
@@ -277,9 +274,8 @@ class ProfileEditSaveView(UpdateView):
         intsupdater(interests)
         AccountInterest.objects.bulk_create(query_bulk)
 
-        end = time.time()
-        print("걸린시간은")
-        print(end-start)
+        print("elapsed time", time.time() - start)
+
         user_tab.plural_major = req['plural_major']
         user_tab.personal_email = req['personal_email']
         user_tab.primary_email = req['primary_email']
