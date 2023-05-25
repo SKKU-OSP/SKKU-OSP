@@ -10,8 +10,7 @@ $(function(){
     contentType: false,
   }).done(function (data) {
     if(data['status'] === "success"){
-      console.log("done data", typeof data);
-      console.log(data['msg']);
+      // console.log(data['msg']);
       renderProfileChart(data['data']);
     }
     else{
@@ -63,7 +62,7 @@ const renderProfileChart = function(chart_data) {
 
   const div_activity_monthly = document.getElementById("activity-monthly");
   let monthly_contr = chart_data["monthly_contr"][select_year - start_year];
-  console.log("monthly_contr", monthly_contr);
+  // console.log("monthly_contr", monthly_contr);
   let monthly_contribution = Array(12).fill(0);
   let monthly_contribution_level = Array(12).fill(0);
   let factor_contribution = Array(6).fill(0);
@@ -114,7 +113,7 @@ const renderProfileChart = function(chart_data) {
   function updateFactor(factorLabels, month = 0) {
     if (target_yearly_contr.length > 0)
       target_monthly_contr = target_yearly_contr[select_year - start_year];
-    console.log("target_monthly_contr", target_monthly_contr);
+    // console.log("target_monthly_contr", target_monthly_contr);
     if (month === 0) {
       //initialize
       for (let i = 0; i < factorLabels.length; i++) {
@@ -242,7 +241,7 @@ const renderProfileChart = function(chart_data) {
     pie_label.push(String(Math.ceil(divisor - standard_contr / 3 + 1) + " 이상"));
     const pie_dataset = Array(6).fill(0);
     let active_grass = 0;
-    console.log("monthly_contribution_level", monthly_contribution_level);
+    // console.log("monthly_contribution_level", monthly_contribution_level);
     monthly_contribution_level.forEach((val) => {
       if (val <= 4) {
         pie_dataset[val]++;
@@ -255,7 +254,7 @@ const renderProfileChart = function(chart_data) {
         active_grass++;
       });
     }
-    console.log("pie_dataset", pie_dataset);
+    // console.log("pie_dataset", pie_dataset);
     const pie_data = {
       labels: pie_label,
       datasets: [{

@@ -1,11 +1,9 @@
 $("#savebtn").click(function(){
-  if(confirm("변경사항을 저장하시겠습니까 ?") == true){
+  if(confirm("변경사항을 저장하시겠습니까?")){
     saveAll();
     alert("저장되었습니다. 프로필화면으로 돌아갑니다.");
   }
-  else{
-      return ;
-  }
+  return ;
 });
 function intsAppend(){
     var formData = $("#intsform").serialize();
