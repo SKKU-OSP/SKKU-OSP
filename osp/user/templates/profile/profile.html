@@ -10,7 +10,7 @@
   <div class="row">
     <div id="profile-info" class="col-md-3 col-12">
       <div class="d-flex flex-column justify-content-end text-center user-info"
-      {% if not is_own %}
+      {% if not is_own and open_lvl != 2 %}
         style="border-bottom-left-radius:0.625rem;border-bottom-right-radius:0.625rem;margin-bottom:15px"
       {% endif %}
       >
@@ -44,15 +44,18 @@
           <span class="row-title text-center">학번</span>
           <span class="row-txt">{{info.id}}</span>
         </div>
-        <!--div class="d-flex row-userdata">
+        {% comment %}
+        <div class="d-flex row-userdata">
           <span class="row-title text-center">대학</span>
           <span class="row-txt">{{info.college}}</span>
-        </div-->
+        </div>
+        {% endcomment %}
         <div class="d-flex row-userdata">
           <span class="row-title text-center">학과</span>
           <span class="row-txt">{{info.dept}}</span>
         </div>
-        <!--div class="d-flex row-userdata">
+        {% comment %}
+        <div class="d-flex row-userdata">
           <span class="row-title text-center">전공</span>
           <span class="row-txt">
             {% if info.plural_major %}
@@ -61,7 +64,8 @@
             원전공
             {% endif %}
           </span>
-        </div-->
+        </div>
+        {% endcomment %}
         <div class="d-flex row-userdata">
           <span class="row-title text-center">e-mail</span>
           <span id="personal-email" class="row-txt">{{info.personal_email}}</span>
@@ -267,7 +271,7 @@
           <div class="card mb-3" id="interests">
             <div class="card-body">
               <h5 class="card-title d-flex justify-content-between">관심분야
-                <!--i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i-->
+                {#<!--i id="icon-interests" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i-->#}
               </h5>
               {% if relations|length == 0 and remains|length == 0 %}
                 {% if is_own %}
@@ -294,7 +298,7 @@
           <div class="card mb-3" id="languages">
             <div class="card-body">
               <h5 id="stack-card-title" class="card-title d-flex justify-content-between">사용언어/기술스택
-                <!--i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i-->
+                {#<!--i id="icon-lang" class="bi bi-arrows-angle-expand evt-icon" title="확장"></i-->#}
               </h5>
               <div id="tiers-box" class="">
                 {% if lang|length == 0%}
@@ -308,7 +312,7 @@
                 <div class="tier-row d-flex justify-content-start align-items-center">
                   
                   <div class="tier-name">
-                    <!--img class="tier-icon" src="/static/svg/diamond.svg" alt="diamond"/-->
+                    {#<!--img class="tier-icon" src="/static/svg/diamond.svg" alt="diamond"/-->#}
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
                     <i class="bi bi-star-fill" style="color:#002743;"></i>
@@ -677,12 +681,10 @@
             processData: false,
             contentType: false,
             success:function(res){
-                console.log("data pass success",res);
                 if(res.hasOwnProperty('monthly_contr')){
                   target_yearly_contr = res['monthly_contr'];
                   target_github_id = res['github_id'];
                 }
-                console.log("res", target_github_id, target_yearly_contr);
             },
             error : function(data){ 
               console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
