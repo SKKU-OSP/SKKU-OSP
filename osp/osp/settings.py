@@ -42,7 +42,7 @@ if 'ENV_MODE' not in os.environ:
     SETTINGS = get_secret('DEBUG')
 elif os.environ['ENV_MODE'] == 'DEV':
     SETTINGS = get_secret('DEV')
-elif os.environ['ENV_MODE'] == 'PRODUCT':
+elif os.environ['ENV_MODE'] in ['PRODUCT', 'CRAWL']:
     SETTINGS = get_secret('PRODUCT')
     DEBUG = False
 else:
