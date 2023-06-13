@@ -16,8 +16,18 @@ from user.update_act import update_commmit_time, update_individual, update_frequ
 from django.contrib.auth.models import User
 
 def start():
+    envmode = os.getenv('ENV_MODE')
+    if(envmode == "PRODUCT"):
+        crawl_time = ''
+    elif(envmode == "CRAWL"):
+        crawl_time = '10, 22'
+    elif(envmode == "DEV"):
+        crawl_time = ''
+    else:
+        crawl_time = '4, 16'
+    
     scheduler=BackgroundScheduler(timezone='Asia/Seoul')
-    @scheduler.scheduled_job('cron', hour='10, 22', misfire_grace_time=60, id='crawling_overview')
+    @scheduler.scheduled_job('cron', hour=crawl_time, misfire_grace_time=60, id='crawling_overview')
     def crawl_overview_job():
         print('crawl_overview_job Start!', datetime.now())
         try:
