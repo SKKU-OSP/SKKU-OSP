@@ -12,7 +12,7 @@ def category_tag(request):
     pre_tags = request.GET.get('tag', "")
     pre_tags=pre_tags.split(",")
     result = ''
-    tags = Tag.objects.all()
+    tags = TagIndependent.objects.all()
     
     type_list = list(tags.values_list("type", flat=True).distinct())
 
