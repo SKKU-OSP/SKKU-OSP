@@ -74,9 +74,9 @@ class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE, null=True)
     photo = models.ImageField(upload_to='img/profile_img', default='img/profile_img/default.jpg')
-    introduction = models.TextField(default='')
-    portfolio = models.TextField(default='')
-    github_id = models.TextField(null=True)
+    introduction = models.TextField(default='', null=True, blank=True)
+    portfolio = models.TextField(default='', null=True, blank=True)
+    github_id = models.CharField(max_length=40, null=True)
 
     def __str__(self) -> str:
         return f'{self.user.username}'
