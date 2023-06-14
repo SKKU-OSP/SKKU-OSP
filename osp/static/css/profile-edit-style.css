@@ -186,57 +186,48 @@ a.nav-link {
 
 .appendbtn{
   /* + */
-border:0;
-outline: 0;
-width: 28px;
-height: 36px;
-padding-right: 6px;
-font-family: 'Inter';
-font-style: normal;
-font-weight: 400;
-font-size: 20px;
-line-height: 36px;
-border-radius: 6px;
+  border:0;
+  outline: 0;
+  width: 28px;
+  height: 36px;
+  padding-right: 6px;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 36px;
+  border-radius: 6px;
+  color: #000000;
 
-color: #000000;
-
-
-/* Inside auto layout */
-flex: none;
-order: 0;
-flex-grow: 0;
-
-
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 .savebtn{
-width: 100px;
-height: 30px;
-font-family: 'Inter';
-font-style: normal;
-font-weight: 400;
-font-size: 18px;
-line-height: 22px;
-/* identical to box height */
-border-radius: 10px;
-margin-left: 5px;
+  width: 100px;
+  height: 30px;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+  /* identical to box height */
+  border-radius: 10px;
+  margin-left: 5px;
 
-background-color: #E7EDF1;
-color: #000000;
+  background-color: #E7EDF1;
+  color: #000000;
 
-
-/* Inside auto layout */
-
-flex: none;
-order: 0;
-flex-grow: 0;
-
-
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 .stack-box.dragging{
   opacity: 0.5;
-   
 }
 
 
