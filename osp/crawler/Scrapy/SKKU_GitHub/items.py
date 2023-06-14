@@ -127,3 +127,10 @@ class PullRequest(scrapy.Item):
     number = scrapy.Field()
     title = scrapy.Field()
     date = scrapy.Field()
+
+class Star(scrapy.Item):
+    github_id = scrapy.Field()
+    owner_id = scrapy.Field()
+    repo_name = scrapy.Field()
+    stargazer = scrapy.Field()
+    date = scrapy.Field()
