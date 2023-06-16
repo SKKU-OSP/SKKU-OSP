@@ -17,7 +17,10 @@ const comment = {
         ajax_form_data.append('body', $('#comment-body').val());
         ajax_form_data.append('is_anonymous', $('#comment-is-anonymous').prop('checked'));
 
-        if (confirm("댓글을 등록하시겠습니까?")) {
+        if ($('#comment-body').val().trim() == "") {
+            alert("댓글을 입력해 주세요")
+        }
+        else if (confirm("댓글을 등록하시겠습니까?")) {
             $("#btn-comment-save").unbind("click");
             $.ajax({
                 type: "POST",
