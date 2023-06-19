@@ -256,3 +256,8 @@ a.nav-link {
   padding: 3px;
 }
 
+textarea {
+  width: 100%;
+  border: none;
+  resize: none;
+}
