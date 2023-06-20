@@ -1,6 +1,6 @@
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
+      <div class="modal-content has-footer">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">비밀번호 변경</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -8,28 +8,21 @@
         <div class="modal-body">
           <form id="passwdchangeform">
             <div class="row-sm">
-                <label for="inputOldPassword" class="col col-form-label">기존 패스워드</label>
-                <div class="col-sm-10">
-                  <input type="password" class="form-control" name="inputOldPassword" id="inputOldPassword">
-                </div>
+                <label for="inputOldPassword" class="col col-form-label">기존 비밀번호</label>
+                <input type="password" class="form-control" name="inputOldPassword" id="inputOldPassword" autocomplete="current-password">
             </div>
             <div class="row-sm">
-                <label for="inputNewPassword" class="col col-form-label">새 패스워드</label>
-                <div class="col-sm-10">
-                  <input type="password" class="form-control" name="inputNewPassword" id="inputNewPassword">
-                </div>
+                <label for="inputNewPassword" class="col col-form-label">새 비밀번호</label>
+                <input type="password" class="form-control" name="inputNewPassword" id="inputNewPassword" autocomplete="new-password">
             </div>
             <div class="row-sm">
-                <label for="inputValidPassword" class="col col-form-label">패스워드 확인</label>
-                <div class="col-sm-10">
-                  <input type="password" class="form-control" name="inputValidPassword" id="inputValidPassword">
-                </div>
+                <label for="inputValidPassword" class="col col-form-label">비밀번호 확인</label>
+                <input type="password" class="form-control" name="inputValidPassword" id="inputValidPassword" autocomplete="new-password">
             </div>
           </form>
         </div>      
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary " onclick="passwdChange(); return false;">비밀번호변경</button>
+          <button type="submit" class="btn btn-default" onclick="passwdChange(); return false;">변경</button>
         </div>
       </div>
     </div>
@@ -47,11 +40,11 @@
       var oldpw = $('#inputOldPassword').val();
       var newpw = $('#inputNewPassword').val();
       var valpw = $('#inputValidPassword').val();
-      if(oldpw==newpw){
+      if(oldpw === newpw){
         alert("입력하신 비밀번호가 기존비밀번호와 같습니다.");
         return;
       }
-      if(newpw!=valpw){
+      if(newpw !== valpw){
         alert("새 비밀번호와 확인 란의 값이 서로 다릅니다.");
         return;
       }
@@ -65,7 +58,6 @@
           headers: {'X-CSRFToken': csrftoken},
           success : function(result) {
             //var jsonObj = JSON.parse(data);
-            console.log('리절트');
             console.log(result)
             if(result['result']=='success'){
               alert("비밀번호가 변경되었습니다. 다시로그인해 주세요.");
@@ -80,8 +72,5 @@
             console.log('error');
           }
         });
-        
-        
-
     }
   </script>

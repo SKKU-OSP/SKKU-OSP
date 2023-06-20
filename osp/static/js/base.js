@@ -324,9 +324,23 @@ function consentSignInOpen(){
     $('#consent-signin').modal('show');
     // set is_modal_open in register.html
     is_modal_open = 1;
-    if($("#consentSignUp").hasClass("btn-secondary")){
-        $("#consentSignUp").removeClass("btn-secondary");
-        $("#consentSignUp").addClass("btn-primary");
+    let req = $('[data-required=true]');
+    if (Object.keys(required_checklist).length === 0) {
+        if (req.length === 0) {
+            is_required_checked = true;
+            $("#consentSignUp").removeClass("btn-secondary");
+            $("#consentSignUp").addClass("btn-primary");
+        }
+        else if (req.length === 1) {
+            let radioId = req.attr("name");
+            required_checklist[radioId] = 0;
+        }
+        else {
+            for (let r of req) {
+                let radioId = r.name;
+                required_checklist[radioId] = 0;
+            }
+        }
     }
 }
 

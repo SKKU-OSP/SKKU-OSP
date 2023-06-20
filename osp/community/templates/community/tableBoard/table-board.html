@@ -21,6 +21,8 @@
                         <div>
                             {% if board.board_type == 'Notice' %}
                             <a href="{% url 'community:notice-save' %}" class="btn btn-outline-light" role="button">글쓰기<i class="bi-pencil"></i></a>
+                            {% elif request.user.is_anonymous %}
+                            <button type="button" class="btn btn-outline-light" onclick="alert('로그인이 필요한 서비스입니다.')">글쓰기</button>
                             {% elif not is_write or open_lvl == 0 %}
                             <button type="button" class="btn btn-outline-light" onclick="consentWriteOpen('{{request.user.username}}');">글쓰기</button>
                             {% else %}

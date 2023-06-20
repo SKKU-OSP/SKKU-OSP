@@ -70,7 +70,7 @@ class TableBoardView(TemplateView):
             try:
                 acc_pp = AccountPrivacy.objects.get(account=account)
             except:
-                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=1, is_write=False, is_open=False)
             context['is_write'] = acc_pp.is_write
             context['is_open'] = acc_pp.is_open
             context['open_lvl'] = acc_pp.open_lvl
@@ -220,7 +220,7 @@ class SearchView(TemplateView):
             try:
                 acc_pp = AccountPrivacy.objects.get(account=account)
             except:
-                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=1, is_write=False, is_open=False)
             context['is_write'] = acc_pp.is_write
             context['is_open'] = acc_pp.is_open
         else:
@@ -539,7 +539,7 @@ class ArticleSaveView(TemplateView):
             try:
                 acc_pp = AccountPrivacy.objects.get(account=account)
             except:
-                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=0, is_write=False, is_open=False)
+                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=1, is_write=False, is_open=False)
             context['is_write'] = acc_pp.is_write
             context['is_open'] = acc_pp.is_open
             context['open_lvl'] = acc_pp.open_lvl
