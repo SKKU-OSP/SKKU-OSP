@@ -123,6 +123,12 @@ a.nav-link {
   padding-bottom: 3rem;
 }
 
+.modal-content.has-footer{
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
 .modal-body>.row {
   padding: 1rem 3rem;
 }
@@ -307,11 +313,6 @@ a.nav-link {
   display: inline;
   text-indent: 0;
   color: var(--main-icon-color);
-}
-
-.modal-footer {
-  padding: 0 calc(var(--bs-modal-padding) - var(--bs-modal-footer-gap) * .5);
-  ;
 }
 
 #visualization>.card-body {

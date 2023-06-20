@@ -93,7 +93,6 @@ class GithubIssues(models.Model):
         unique_together = (('owner_id', 'repo_name', 'number'),)
 
 
-
 class GithubPulls(models.Model):
     owner_id = models.CharField(primary_key=True, max_length=40)
     repo_name = models.CharField(max_length=100)
@@ -106,3 +105,16 @@ class GithubPulls(models.Model):
         managed = False
         db_table = 'github_pulls'
         unique_together = (('owner_id', 'repo_name', 'number'),)
+
+
+class GithubStars(models.Model):
+    id = models.AutoField(primary_key=True)
+    owner_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    github_id = models.CharField(max_length=40)
+    stargazer = models.CharField(max_length=40)
+    date = models.DateField()
+
+    class Meta:
+        db_table = 'github_stars'
+        unique_together = (('owner_id', 'repo_name', 'stargazer'),)

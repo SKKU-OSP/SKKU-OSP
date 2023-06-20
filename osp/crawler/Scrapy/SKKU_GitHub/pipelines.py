@@ -165,6 +165,10 @@ class SkkuGithubPipeline:
                 table_name = 'github_pulls'
                 key_col = ['github_id', 'repo_name', 'number']
                 data_col = list(set(data.keys()) - set(key_col))
+            if type(data) == Star:
+                table_name = 'github_stars'
+                key_col = ['github_id', 'repo_name', 'stargazer']
+                data_col = list(set(data.keys()) - set(key_col))
             
             select_sql = f'SELECT * FROM {table_name} WHERE {" AND ".join([f"{x} = %s" for x in key_col])}'
             select_data = [data[x] for x in key_col]
