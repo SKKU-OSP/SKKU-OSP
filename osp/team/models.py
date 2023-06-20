@@ -11,7 +11,7 @@ class Team(models.Model):
     description = models.CharField(max_length=150)
     image = models.ImageField(default='img/team/default.jpg', upload_to='img/team/')
     create_date = models.DateTimeField()
-    
+
     def __str__(self) -> str:
         return self.name
 
@@ -26,14 +26,14 @@ class TeamTag(models.Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f'{self.team.name} - {self.tag.name}'
+
 class TeamMember(models.Model):
     team = models.ForeignKey(Team, models.CASCADE)
     member = models.ForeignKey(Account, models.CASCADE)
     is_admin = models.BooleanField(default=False)
-    
-    def __str__(self) -> str:
-        return f'{self.team.name} - {self.member.user.username}'
-    
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -42,7 +42,8 @@ class TeamMember(models.Model):
             )
         ]
 
-
+    def __str__(self) -> str:
+        return f'{self.team.name} - {self.member.user.username}'
 
 class TeamInviteMessage(models.Model):
     STATUS_CHOICES = (
@@ -61,15 +62,3 @@ class TeamInviteMessage(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     direction = models.BooleanField(choices=DIRECTION_CHOICES, default=True)
     send_date = models.DateTimeField()
-
-    # __original_mode = None
-    #
-    # def __init__(self, *args, **kwargs):
-    #     super(Mode, self).__init__(*args, **kwargs)
-    #     self.__original_mode = self.mode
-    #
-    # def save(self, force_insert=False, force_update=False, *args, **kwargs):
-    #     if self.mode != self.__original_mode:  # then do this
-    #     else:  # do that
-    #         super(Mode, self).save(force_insert, force_update, *args, **kwargs)
-    #     self.__original_mode = self.mode
