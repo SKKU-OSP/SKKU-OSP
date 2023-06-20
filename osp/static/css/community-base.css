@@ -455,6 +455,9 @@
     .article-info-desc {
         min-width: 100% !important;
     }
+    #profile-username {
+        display: none;
+    }
 }
 @media (max-width: 576px) {
     #user-filter, #activity-filter{

@@ -42,6 +42,9 @@ class ArticleTag(models.Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f'{self.tag.name}: {ellipsis_name(self.article.title)}'
+
 class ArticleLike(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
     account = models.ForeignKey(Account, models.CASCADE)
@@ -52,6 +55,10 @@ class ArticleLike(models.Model):
                 name='unique_account_article'
             )
         ]
+    
+    def __str__(self) -> str:
+        return f'{self.account.user}: {ellipsis_name(self.article.title)}'
+
 
 class ArticleScrap(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
@@ -87,6 +94,9 @@ class ArticleCommentLike(models.Model):
                 name='unique_account_comment'
             )
         ]
+    
+    def __str__(self) -> str:
+        return f'{self.account.user}: {ellipsis_name(self.comment.body)}'
 
 class TeamRecruitArticle(models.Model):
     team = models.ForeignKey(Team, models.CASCADE)
@@ -123,3 +133,9 @@ class ArticleFile(models.Model):
 
     def __str__(self) -> str:
         return str(self.image.name)
+
+def ellipsis_name(name, max_length = 20):
+    if len(name) > max_length:
+        return name[:max_length] + '...'
+    else:
+        return name

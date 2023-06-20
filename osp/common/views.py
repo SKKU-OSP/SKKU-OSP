@@ -216,6 +216,9 @@ def register_page(request):
             fail_reason.append('중복된 Username이 있습니다.\n')
         if check_duplicate_student_id(request.POST['student-id']):
             fail_reason.append('중복된 학번이 있습니다.\n')
+        # 필수 항목 동의는 hard하게 확인
+        if not request.POST['radio-3'] == "1":
+            fail_reason.append('개인정보 이용내역의 필수항목에 동의하지 않았습니다.')
 
         personal_email=request.POST['personal-email'] + "@" + request.POST['personal-email-domain']
         primary_email=request.POST['primary-email'] + "@" + request.POST['primary-email-domain']

@@ -122,7 +122,26 @@ li, a, button {
     display: none!important;
   }
 }
+@media (max-width: 450px) {
+  #searcher-box-1 {
+    visibility: hidden;
+    cursor: default;
+  }
+  #searcher-box-2 {
+    display: block !important;
+    margin: 0 15px 0 13px;
+  }
+  .py-3 {
+    padding-bottom: 0 !important;
+  }
+  .searcher-box {
+    margin-left: 10px;
+  }
+}
 /*검색창*/
+#searcher-box-2 {
+  display: none;
+}
 #search-btn {
   margin: 1px;
   background-color: var(--main-point-color);
@@ -138,7 +157,7 @@ li, a, button {
   font-size: 24px;
   border: 2px 0 var(--main-border-color);
 }
-#searcher-box {
+.searcher-box {
   flex: 1 1 auto;
   box-sizing: border-box;
 }
