@@ -3,9 +3,11 @@ from django.utils.safestring import mark_safe
 from user.models import Account, StudentTab, AccountPrivacy
 from osp.settings import BASE_DIR
 from django.contrib.auth.models import User
-import os, json
+import os
+import json
 DATA_DIR = os.path.join(BASE_DIR, "static/contents/")
 register = template.Library()
+
 
 @register.simple_tag
 def github_link(*args):
@@ -15,6 +17,7 @@ def github_link(*args):
         link += "/"
     return link
 
+
 @register.simple_tag
 def tab_repo_type(request_type, tab_type):
     if request_type == tab_type:
@@ -22,10 +25,12 @@ def tab_repo_type(request_type, tab_type):
     else:
         return ""
 
+
 @register.simple_tag
 def target_github_id(request):
     result = ''
-    account = AccountPrivacy.objects.filter(open_lvl__gt=0).values("account_id").all()
+    account = AccountPrivacy.objects.filter(
+        open_lvl__gt=0).values("account_id").all()
 
     for acc in account:
         account_id = acc['account_id']
@@ -33,6 +38,7 @@ def target_github_id(request):
         result += f'<option value="{username}">{username}</option>'
     print(result)
     return mark_safe(result)
+
 
 @register.filter
 def user_profile_image_url(user):
@@ -42,12 +48,14 @@ def user_profile_image_url(user):
     else:
         return mark_safe(Account._meta.get_field('photo').get_default())
 
+
 @register.simple_tag
 def is_open(request):
     if AccountPrivacy.objects.filter(account_id=request.user.id, open_lvl__gt=0):
         return True
     else:
         return False
+
 
 @register.simple_tag
 def consent_text(request, type):
@@ -58,7 +66,7 @@ def consent_text(request, type):
         data = None
     if isinstance(data, list):
         for obj in data:
-            obj["body"] = obj["body"].split("\n") 
+            obj["body"] = obj["body"].split("\n")
         return data
     else:
-        return [{"id":0,"title":"준비중", "body":["이 기능은 현재 준비 중입니다."]}]
+        return [{"id": 0, "title": "준비중", "body": ["이 기능은 현재 준비 중입니다."]}]
