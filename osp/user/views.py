@@ -361,14 +361,15 @@ class ProfileRepoView(TemplateView):
                 id_reponame_pair_list.append(
                     (commit['github_id'], commit_repo_name))
         ctx_repo_stats = []
-        contr_repo_queryset = GithubRepoStats.objects.extra(
-            where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
-        for contr_repo in contr_repo_queryset:
-            repo_stat = contr_repo.get_guideline()
-            repo_stat['committer_date'] = repos[contr_repo.repo_name]['committer_date']
-            ctx_repo_stats.append(repo_stat)
-        ctx_repo_stats = sorted(
-            ctx_repo_stats, key=lambda x: x['committer_date'], reverse=True)
+        if len(id_reponame_pair_list) > 0:
+            contr_repo_queryset = GithubRepoStats.objects.extra(
+                where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+            for contr_repo in contr_repo_queryset:
+                repo_stat = contr_repo.get_guideline()
+                repo_stat['committer_date'] = repos[contr_repo.repo_name]['committer_date']
+                ctx_repo_stats.append(repo_stat)
+            ctx_repo_stats = sorted(
+                ctx_repo_stats, key=lambda x: x['committer_date'], reverse=True)
         context["guideline"] = ctx_repo_stats
         print("ProfileRepoView time :", time.time() - start)
 
@@ -416,7 +417,6 @@ def get_commit_repos(github_id, primary_email="", secondary_email=""):
     return repo_commits
 
 
-@csrf_exempt
 def load_repo_data(request, username):
     if request.method == 'POST':
         start = time.time()
@@ -541,15 +541,13 @@ def consent_open(request, username=""):
             return JsonResponse({'status': 'fail', 'msg': '저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
 
 
-'''
+def get_chart_data(request, username):
+    '''
     유저 차트 데이터 계산
     url     : /<username>/api/chart-data
     Returns :
         POST    : JsonResponse
-'''
-
-
-def get_chart_data(request, username):
+    '''
     start_year = 2019
     if request.method == 'POST':
         start = time.time()
