@@ -223,6 +223,11 @@ function readNotification(type, noti_id, target_id = '') {
   });
 }
 
+function checkNewAppBadge() {
+  if ($('#recv-new').text().length == 0 && $('#send-new').text().length == 0) {
+    $('#new-app').css('display', 'none');
+  }
+}
 function appListModalOpen(isResult = false) {
   let teamModal = $('#ApplyTeamModal');
   if (!teamModal.hasClass('ready')) {
@@ -254,22 +259,30 @@ function appListModalOpen(isResult = false) {
       if (recv_tab.hasClass('active')) {
         if ($('#recv-new').length > 0) {
           readApp('recv');
+          $('#recv-new').empty();
+          checkNewAppBadge();
         }
       }
       if (send_tab.hasClass('active')) {
         if ($('#send-new').length > 0) {
           readApp('send');
+          $('#send-new').empty();
+          checkNewAppBadge();
         }
       }
       // click 했을 때 다시 지움
       recv_tab.on('click', () => {
         if ($('#recv-new').length > 0) {
           readApp('recv');
+          $('#recv-new').empty();
+          checkNewAppBadge();
         }
       });
       send_tab.on('click', () => {
         if ($('#send-new').length > 0) {
           readApp('send');
+          $('#send-new').empty();
+          checkNewAppBadge();
         }
       });
 

@@ -30,7 +30,7 @@
                 {% for admin_team in admin_teams %}
                     {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
                     {% for applymsg in waitedapplymessages %}
-                    <div class="team-apply-item received split-line" id="apply-user-{{ applymsg.account.user.username }}">
+                    <div class="team-apply-item received split-line" id="apply-user-{{ applymsg.account.user.username }}-{{ applymsg.team.id }}">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
