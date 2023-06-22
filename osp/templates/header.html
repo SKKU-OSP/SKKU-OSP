@@ -1,7 +1,7 @@
 {% load static %}
 {% load tag_templatetag %}
 {% load message_tag %}
-<header class="container d-flex flex-row py-3 position-relative pointer">
+<header class="container d-flex flex-row py-3 position-relative">
     <div id="header-logo" class="col-lg-3 col-1">
         <a id="img-logo" href="/community/">
             <img width="42px" height="42px" src="/static/images/logo-simple.svg" alt="로고">
@@ -24,13 +24,13 @@
     {% has_new_message request.user as has_new_msg %}
     <div class="d-flex flex-row p-2">
         {#1.지원서#}
-        <div id="team-apply-list" class="position-relative pointer">
+        <div id="team-apply-list" class="position-relative">
             {% if notifications.has_new_app or notifications.has_new_app_result %}
             <span id="new-app" class="badge-new" data-new-send="{{ notifications.has_new_app_result }}" data-new-recv="{{ notifications.has_new_app }}">
                 <span class="visually-hidden">New Application</span>
             </span>
             {% endif %}
-            <button class="btn-none p-0">
+            <button type="button" class="btn-none p-0" data-bs-hover="tooltip" data-bs-placement="bottom" data-bs-title="팀 지원서">
                 <span class="material-icons-outlined nav-icon fs-4">
                     assignment_ind
                 </span>
@@ -38,13 +38,13 @@
         </div>
         
         {#2.메시지#}
-        <div id="message" class="position-relative pointer">
+        <div id="message" class="position-relative">
             {% if has_new_msg %}
             <span id="new-msg" class="badge-new">
                 <span class="visually-hidden">New Message</span>
             </span>
             {% endif %}
-            <button class="btn-none p-0">
+            <button type="button" class="btn-none p-0" data-bs-hover="tooltip" data-bs-placement="bottom" data-bs-title="메시지">
                 <span class="material-icons-outlined nav-icon fs-4">
                     email
                 </span>
@@ -58,15 +58,21 @@
             </span>
             {% endif %}
             <button class="noti-dropdown dropdown-toggle btn-none p-0" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
-                aria-expanded="false">
+                aria-expanded="false" data-bs-hover="tooltip" data-bs-placement="bottom" data-bs-title="알림" onclick="closeTooltip();">
                 <div id="notification" class="notification material-icons-outlined nav-icon pointer">
                     notifications
                 </div>
             </button>
             <ul id="noti-list" class="dropdown-menu noti-dropdown">
+                <li class="d-flex justify-content-start fixed-li px-1">
+                    <button type="button" class="btn btn-sm btn-none hover-gray" onclick="readAllNotification();">
+                        <i class="bi bi-check-square"></i>
+                        <span >모두읽음</span>
+                    </button>
+                </li>
                 {% for noti in notifications.list %}
                 <li id="noti-{{noti.id}}" class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
-                onclick="ReadNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
+                onclick="readNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
                     <div class="d-flex">
                         <div class="material-icons-outlined">
                             {{noti.icon}}
