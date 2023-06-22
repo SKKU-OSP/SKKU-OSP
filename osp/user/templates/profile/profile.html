@@ -185,7 +185,7 @@
                       <select name="target" id="target-user">
                         {% is_open request as is_open %}
                         {% if is_open == True %}
-                          <option value="" selected="selected">비교 대상을 선택해주세요</option>
+                          <option data-placeholder="true"></option>
                           {% target_github_id request as target_option %}
                           {{target_option}}
                         {% else %}
@@ -657,10 +657,12 @@
     var target_github_id = '';
     $(document).ready(function(){
       category_select = new SlimSelect({
-        select: '#target-user'
+        select: '#target-user',
+        placeholder: '비교 대상을 선택해주세요'
       });
       modal_category_select = new SlimSelect({
-        select: '#modal-target-user'
+        select: '#modal-target-user',
+        placeholder: '비교 대상을 선택해주세요'
       });
       $("#target-user").change(function(){
         let data={"github_id":category_select.selected().toString()};
