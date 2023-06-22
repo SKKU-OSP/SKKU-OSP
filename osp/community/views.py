@@ -605,6 +605,7 @@ class ArticleView(TemplateView):
         context['type'] = 'view'
         context['is_community'] = True
         article_id = kwargs.get('article_id')
+        
         try:
             article = Article.objects.get(id=article_id)
             context['tags'] = ArticleTag.objects.filter(article__id=article_id)
@@ -628,6 +629,17 @@ class ArticleView(TemplateView):
             context['article_file'] = article_files
         except:
             context['error_occur'] = True
+
+        context["need_login"] = False
+        context["need_member"] = False
+        if context['board'].board_type == 'Team':
+            if not request.user.is_authenticated:
+                context["need_login"] = True
+                return render(request, 'community/article/article.html', context)
+            if not TeamMember.objects.filter(team=context['board'].team_id, member_id=request.user.id).exists():
+                # 팀 멤버가 아니면 열람 불가
+                context["need_member"] = True
+                return render(request, 'community/article/article.html', context)
 
         return render(request, 'community/article/article.html', context)
 
