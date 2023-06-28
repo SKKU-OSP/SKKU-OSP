@@ -4,6 +4,7 @@ from tag.models import Tag, TagIndependent
 
 # Create your models here.
 
+
 class StudentTab(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=20)
@@ -19,7 +20,7 @@ class StudentTab(models.Model):
     class Meta:
         managed = False
         db_table = 'student_tab'
-        ordering  = ['id']
+        ordering = ['id']
 
 
 class GithubOverview(models.Model):
@@ -29,7 +30,8 @@ class GithubOverview(models.Model):
     followings = models.IntegerField()
     total_repos = models.IntegerField()
     total_commits = models.IntegerField()
-    total_prs = models.CharField(db_column='total_PRs', max_length=45)  # Field name made lowercase.
+    # Field name made lowercase.
+    total_prs = models.CharField(db_column='total_PRs', max_length=45)
     total_issues = models.CharField(max_length=45)
     achievements = models.CharField(max_length=200, blank=True, null=True)
     highlights = models.CharField(max_length=200, blank=True, null=True)
@@ -50,39 +52,51 @@ class GithubStatsYymm(models.Model):
     num_of_cr_repos = models.IntegerField()
     num_of_co_repos = models.IntegerField()
     num_of_commits = models.IntegerField()
-    num_of_prs = models.IntegerField(db_column='num_of_PRs')  # Field name made lowercase.
+    # Field name made lowercase.
+    num_of_prs = models.IntegerField(db_column='num_of_PRs')
     num_of_issues = models.IntegerField()
-    
+
     class Meta:
         managed = False
         db_table = 'github_stats_yymm'
-        
+
     def to_json(self):
-        return{
-            "year" : self.start_yymm.year,
-            "month" : self.start_yymm.month,
-            "repo_cr" : self.num_of_cr_repos,
+        return {
+            "year": self.start_yymm.year,
+            "month": self.start_yymm.month,
+            "repo_cr": self.num_of_cr_repos,
             "repo_co": self.num_of_co_repos,
-            "commit" : self.num_of_commits,
-            "pr" : self.num_of_prs,
-            "issue" : self.num_of_issues,
-            "total" : self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
+            "commit": self.num_of_commits,
+            "pr": self.num_of_prs,
+            "issue": self.num_of_issues,
+            "total": self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
         }
 
 
 class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    student_data = models.OneToOneField(StudentTab, on_delete=models.CASCADE, null=True)
-    photo = models.ImageField(upload_to='img/profile_img', default='img/profile_img/default.jpg')
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, primary_key=True)
+    student_data = models.OneToOneField(
+        StudentTab, on_delete=models.CASCADE, null=True)
+    photo = models.ImageField(
+        upload_to='img/profile_img', default='img/profile_img/default.jpg')
     introduction = models.TextField(default='', null=True, blank=True)
     portfolio = models.TextField(default='', null=True, blank=True)
     github_id = models.CharField(max_length=40, null=True)
 
     def __str__(self) -> str:
         return f'{self.user.username}'
-    
+
     class Meta:
-        ordering  = ['student_data']
+        ordering = ['student_data']
+
+    def to_json(self):
+        return {
+            "user_id": self.user.id,
+            "username": self.user.username,
+            "github_id": self.github_id
+        }
+
 
 class AccountInterest(models.Model):
     id = models.AutoField(primary_key=True)
@@ -91,7 +105,9 @@ class AccountInterest(models.Model):
     level = models.IntegerField(default=0)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['account', 'tag'], name="accountbytag")]
+        constraints = [models.UniqueConstraint(
+            fields=['account', 'tag'], name="accountbytag")]
+
 
 class AccountPrivacy(models.Model):
     id = models.AutoField(primary_key=True)
@@ -99,9 +115,10 @@ class AccountPrivacy(models.Model):
     open_lvl = models.IntegerField(default=0)
     is_write = models.BooleanField(default=False)
     is_open = models.BooleanField(default=False)
-    
+
+
 class GithubScore(models.Model):
-    yid =models.CharField(max_length=45, null=False, primary_key=True)
+    yid = models.CharField(max_length=45, null=False, primary_key=True)
     github_id = models.CharField(max_length=45, null=False)
     year = models.IntegerField(null=False)
     excellent_contributor = models.IntegerField(null=False)
@@ -112,47 +129,46 @@ class GithubScore(models.Model):
     contributor_score = models.FloatField(null=False)
     star_score = models.FloatField(null=False)
     contribution_score = models.FloatField(null=False)
-    
+
     star_count = models.IntegerField(null=False)
     commit_count = models.IntegerField(null=False)
     pr_count = models.IntegerField(null=False)
     issue_count = models.IntegerField(null=False)
     star_owner_count = models.IntegerField(null=False)
     fork_owner_count = models.IntegerField(null=False)
-    
+
     score_10000L_sub = models.FloatField(null=False)
     score_10000L_add = models.FloatField(null=False)
     score_10000L_sum = models.FloatField(null=False)
     score_50C = models.FloatField(null=False)
     score_pr_issue = models.FloatField(null=False)
-    
+
     guideline_score_v2 = models.FloatField(null=False)
     repo_score_sub = models.FloatField(null=False)
     repo_score_add = models.FloatField(null=False)
     repo_score_sum = models.FloatField(null=False)
-    
+
     score_star = models.FloatField(null=False)
     score_fork = models.FloatField(null=False)
     score_other_repo_sub = models.FloatField(null=False)
     score_other_repo_add = models.FloatField(null=False)
     score_other_repo_sum = models.FloatField(null=False)
-    
+
     additional_score_sub = models.FloatField(null=False)
     additional_score_add = models.FloatField(null=False)
     additional_score_sum = models.FloatField(null=False)
-    
-    
+
     class Meta:
         managed = False
         db_table = 'github_score'
-        
+
     def to_json(self):
         return {
             "yid": self.yid,
-            "github_id":self.github_id,
-            "year":self.year,
-            "excellent_contributor":self.excellent_contributor,
-            "best_repo":self.best_repo,
+            "github_id": self.github_id,
+            "year": self.year,
+            "excellent_contributor": self.excellent_contributor,
+            "best_repo": self.best_repo,
             "main_repo_score": self.repo_score_sum,
             "other_repo_score": self.score_other_repo_sum,
             "reputation_score": self.score_star+self.score_fork,
@@ -178,7 +194,8 @@ class GithubUserStarred(models.Model):
     class Meta:
         managed = False
         db_table = 'github_user_starred'
-        unique_together = (('github_id', 'starred_repo_owner', 'starred_repo_name'),)
+        unique_together = (
+            ('github_id', 'starred_repo_owner', 'starred_repo_name'),)
 
 
 class DevType(models.Model):
@@ -193,6 +210,7 @@ class DevType(models.Model):
     typeE = models.IntegerField()
     typeF = models.IntegerField()
     typeG = models.IntegerField()
+
 
 class GitHubScoreTable(models.Model):
     a_id = models.AutoField(primary_key=True)
@@ -217,21 +235,21 @@ class GitHubScoreTable(models.Model):
                 fields=['id', 'year'],
                 name='id_year_constraint'
             )]
-    
+
     def to_json(self):
         return {
-            "id":self.id,
-            "year":self.year,
-            "name":self.github_id,
-            "github_id":self.name,
-            "total_score":self.total_score,
-            "commit_cnt":self.commit_cnt,
-            "commit_line":self.commit_line,
-            "issue_cnt":self.issue_cnt,
-            "pr_cnt":self.pr_cnt,
-            "repo_cnt":self.repo_cnt,
-            "dept":self.dept,
-            "absence":self.absence,
-            "plural_major":self.plural_major,
-            "personal_email":self.personal_email,
+            "id": self.id,
+            "year": self.year,
+            "name": self.github_id,
+            "github_id": self.name,
+            "total_score": self.total_score,
+            "commit_cnt": self.commit_cnt,
+            "commit_line": self.commit_line,
+            "issue_cnt": self.issue_cnt,
+            "pr_cnt": self.pr_cnt,
+            "repo_cnt": self.repo_cnt,
+            "dept": self.dept,
+            "absence": self.absence,
+            "plural_major": self.plural_major,
+            "personal_email": self.personal_email,
         }
