@@ -1,0 +1,21 @@
+@media screen and (max-width: 767px) {
+  .logo {
+    margin-right: 10px;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .siteTitle {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .search {
+    visibility: hidden;
+    cursor: default;
+  }
+  .searcher-box {
+    margin-left: 10px;
+  }
+}
