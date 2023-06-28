@@ -6,12 +6,12 @@
         {% if user.is_authenticated %}
         <div id="sidebar-user-info">
             <a href="/user/{{user.username}}/">
-                <img width="42px" height="42px" src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image">
+                <img width="42px" height="42px" src="{{user|user_profile_image_url}}" class="profile-img" alt="profile-image" data-bs-hover="tooltip" data-bs-placement="top" data-bs-title="프로필 페이지">
                 <span id="profile-username">{{user.username}}</span>
             </a>
             <form id="logout-form" method="post" action="{% url 'common:logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="btn-none">
+                <button type="submit" class="btn-none" data-bs-hover="tooltip" data-bs-placement="top" data-bs-title="로그아웃">
                 <i class="material-icons align-middle hover-opacity text-white fa-lg">logout</i>
                 </button>
             </form>

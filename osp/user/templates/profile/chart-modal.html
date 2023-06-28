@@ -83,7 +83,7 @@
               <select name="target" id="modal-target-user">
                 {% is_open request as is_open %}
                 {% if is_open == True %}
-                  <option value="" selected="selected">비교 대상을 선택해주세요</option>
+                  <option data-placeholder="true"></option>
                   {% target_github_id request as target_option %}
                   {{target_option}}
                 {% else %}

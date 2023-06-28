@@ -28,7 +28,6 @@ def teamInviteValidation(user, username, team_id, invite_msg):
     is_valid = True
     field_check_list = {}
 
-    
     if user.is_anonymous:
         is_valid = False
     if not username:
@@ -82,7 +81,7 @@ def teamInfoValidation(team_name, team_desc, team_img, pre_team_name=""):
         if len(team_obj) > 0:
             is_valid = False
             field_check_list['name'] = '팀 이름이 이미 있습니다.'
-    else :
+    else:
         print("이전 이름과 동일합니다.")
 
     if not team_desc:
@@ -98,7 +97,8 @@ def teamInfoValidation(team_name, team_desc, team_img, pre_team_name=""):
         if img_width > 500 or img_height > 500:
             is_valid = False
             # \u00d7 는 곱셈기호
-            field_check_list['image'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
+            field_check_list[
+                'image'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
 
     return field_check_list, is_valid
 
@@ -116,7 +116,6 @@ def TeamInvite(request):
     '''
     if request.method == 'GET':
 
-
         # 팀원 초대장 팝업창 렌더링
         # context 정보
         # invite_user       : 초대 대상 유저의 Account 객체 ( 초대 대상 유저의 user_id로 쿼리)
@@ -126,9 +125,9 @@ def TeamInvite(request):
         context = {
             'invite_user': Account.objects.filter(user__id=request.GET.get('user_id')).first(),
             'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first(),
-            'recommend_team' : request.GET.get('recommend_team'),
-            }
-        return render(request, 'team/invite-form.html',context)
+            'recommend_team': request.GET.get('recommend_team'),
+        }
+        return render(request, 'team/invite-form.html', context)
 
     if request.method == 'POST':
 
@@ -143,8 +142,8 @@ def TeamInvite(request):
         invite_msg = request.POST.get('invite_msg', False)
 
         # Invite의 Validation 체크
-        field_check_list, is_valid = teamInviteValidation(request.user, username, team_id, invite_msg)
-
+        field_check_list, is_valid = teamInviteValidation(
+            request.user, username, team_id, invite_msg)
 
         # 초대 대상이 이미 해당팀의 팀원일 경우 is_valid=False
         if is_valid and TeamMember.objects.filter(member__user__username=username, team__id=team_id):
@@ -162,11 +161,11 @@ def TeamInvite(request):
 
                     # 팀원 초대 메세지 객체 생성
                     TeamInviteMessage.objects.create(
-                        team = team,
-                        account = account,
-                        message = invite_msg,
-                        direction = True,
-                        send_date = datetime.now(),
+                        team=team,
+                        account=account,
+                        message=invite_msg,
+                        direction=True,
+                        send_date=datetime.now(),
                     )
 
                     # noti - 자동생성 (signals)
@@ -177,7 +176,8 @@ def TeamInvite(request):
                     # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
                     board = Board.objects.get(team=team)
-                    url = resolve_url('community:Board', board_name=board.name, board_id=board.id)
+                    url = resolve_url('community:Board',
+                                      board_name=board.name, board_id=board.id)
                     sender = Account.objects.get(user=request.user.id)
 
                     # 메세지 객체 생성
@@ -185,10 +185,10 @@ def TeamInvite(request):
                         sender=sender,
                         receiver=account,
                         body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
-                        send_date = datetime.now(),
-                        receiver_read = False,
-                        sender_delete = False,
-                        receiver_delete = False
+                        send_date=datetime.now(),
+                        receiver_read=False,
+                        sender_delete=False,
+                        receiver_delete=False
                     )
 
                     # 요청 성공, status : sccess 리턴
@@ -197,13 +197,12 @@ def TeamInvite(request):
             except DatabaseError:
                 # Database Exception handling
                 field_check_list['DB'] = 'DB Error'
-                
+
                 # 요청 실패 / status : fail, error list 리턴
                 return JsonResponse({'status': 'fail', 'errors': field_check_list})
         else:
             # 요청 실패 / status : fail, error list 리턴
             return JsonResponse({'status': 'fail', 'errors': field_check_list})
-
 
 
 def TeamCreate(request):
@@ -235,7 +234,8 @@ def TeamCreate(request):
         team_img = request.FILES.get('image', False)
 
         # Invite의 Validation 체크
-        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img)
+        field_check_list, is_valid = teamInfoValidation(
+            team_name, team_desc, team_img)
 
         if is_valid:
             try:
@@ -312,19 +312,20 @@ def TeamUpdate(request):
     if request.method == 'GET':
 
         # team_id   : 업데이트할 팀의 team_id
-        # team      : 업데이트할 팀의 Team 객체 ( team_id로 쿼리) 
+        # team      : 업데이트할 팀의 Team 객체 ( team_id로 쿼리)
 
         context = {}
-        team_id=request.GET.get('team_id')
+        team_id = request.GET.get('team_id')
         team = Team.objects.get(id=team_id)
         context['team'] = team
-        context['team_members'] = TeamMember.objects.filter(team=team).select_related('member')
+        context['team_members'] = TeamMember.objects.filter(
+            team=team).select_related('member')
 
         return render(request, 'team/update-form.html', context)
 
     if request.method == 'POST':
 
-        team_id=request.POST.get('team_id')
+        team_id = request.POST.get('team_id')
         team = Team.objects.get(id=team_id)
 
         # validation
@@ -334,7 +335,8 @@ def TeamUpdate(request):
         team_desc = ' '.join(team_desc.split())
         team_img = request.FILES.get('image', False)
 
-        field_check_list, is_valid = teamInfoValidation(team_name, team_desc, team_img, team.name)
+        field_check_list, is_valid = teamInfoValidation(
+            team_name, team_desc, team_img, team.name)
 
         if is_valid:
             try:
@@ -342,12 +344,12 @@ def TeamUpdate(request):
                     # team update 후 저장
                     team.name = team_name
                     team.description = team_desc
-                    if team_img: 
+                    if team_img:
                         team.image = team_img
                     team.save()
 
                     # 팀 게시판 이름 수정
-                    team_board = Board.objects.get(team_id = team.id)
+                    team_board = Board.objects.get(team_id=team.id)
                     team_board.name = team_name
                     team_board.save()
 
@@ -362,27 +364,33 @@ def TeamUpdate(request):
                         if not x:
                             member_list = []
                             break
-                    member_list_old = list(TeamMember.objects.filter(team=team).values_list('member__user__username', flat=True))
+                    member_list_old = list(TeamMember.objects.filter(
+                        team=team).values_list('member__user__username', flat=True))
 
                     for member_name in list(set(member_list_old) - set(member_list)):
-                        account = Account.objects.get(user__username=member_name)
-                        TeamMember.objects.get(member=account, team=team).delete()
+                        account = Account.objects.get(
+                            user__username=member_name)
+                        TeamMember.objects.get(
+                            member=account, team=team).delete()
 
                     for member_name in member_list:
-                        teammember = TeamMember.objects.get(team=team, member__user__username=member_name)
+                        teammember = TeamMember.objects.get(
+                            team=team, member__user__username=member_name)
                         teammember.is_admin = member_name in admin_list
                         teammember.save()
 
                     # teamTag create and delete
                     tag_list = request.POST.get('category_tag_list').split(',')
-                    tag_list_old = list(TeamTag.objects.filter(team=team).values_list('tag__name', flat=True))
+                    tag_list_old = list(TeamTag.objects.filter(
+                        team=team).values_list('tag__name', flat=True))
 
                     for tag in tag_list:
                         if not tag:
                             tag_list = []
                             break
                     for tag_name in list(set(tag_list_old) - set(tag_list)):
-                        TeamTag.objects.get(team=team, tag__name=tag_name).delete()
+                        TeamTag.objects.get(
+                            team=team, tag__name=tag_name).delete()
                     for tag_name in list(set(tag_list) - set(tag_list_old)):
                         tag = Tag.objects.get(name=tag_name)
                         TeamTag.objects.create(team=team, tag=tag)
@@ -407,7 +415,7 @@ def TeamApply(request, team_id):
     팀 가입 팝업창
     url       : /team/api/team-apply/<int:team_id>
     template  : team/apply-form.html
-    
+
     Returns :
         GET     : render
         POST    : JsonResponse
@@ -421,7 +429,7 @@ def TeamApply(request, team_id):
     if request.method == 'POST':
         team = Team.objects.get(id=team_id)
         account = Account.objects.get(user=request.user.id)
-        teammember = TeamMember.objects.filter(team=team,member=account)
+        teammember = TeamMember.objects.filter(team=team, member=account)
         if not teammember:
             try:
                 with transaction.atomic():
@@ -430,8 +438,8 @@ def TeamApply(request, team_id):
                         team=team,
                         account=account,
                         message=message,
-                        status=0, # 대기 중
-                        direction=False, # FROM ACCOUNT TO_TEAM
+                        status=0,  # 대기 중
+                        direction=False,  # FROM ACCOUNT TO_TEAM
                         send_date=datetime.now(),
                     )
 
@@ -440,6 +448,7 @@ def TeamApply(request, team_id):
                 return JsonResponse({'status': 'fail', 'message': str(e)})
         else:
             return JsonResponse({'status': 'fail', 'message': "기존 팀원은 지원할 수 없습니다."})
+
 
 def TeamApplyList(request):
     '''
@@ -453,6 +462,7 @@ def TeamApplyList(request):
     if request.method == 'GET':
         return render(request, 'team/apply-list.html')
 
+
 def TeamOut(request):
     '''
     팀 탈퇴 요청 처리
@@ -463,25 +473,28 @@ def TeamOut(request):
     '''
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
-        account = Account.objects.get(user__username=request.POST.get('username'))
-        teammember = TeamMember.objects.get(team=team,member=account)
+        account = Account.objects.get(
+            user__username=request.POST.get('username'))
+        teammember = TeamMember.objects.get(team=team, member=account)
         teammembers = TeamMember.objects.filter(team=team)
 
         # 탈퇴 가능 조건: 팀에 멤버가 한명(자기자신), 팀멤버가 여러명이나 admin이 아님
-        if teammembers.count()>1 and teammember.is_admin:
+        if teammembers.count() > 1 and teammember.is_admin:
             return JsonResponse({'status': 'fail', 'message': '멤버가 여러명일 경우 admin은 탈퇴가 불가능합니다.\nadmin을 해제해주세요.'})
         try:
             with transaction.atomic():
                 teammember.delete()
                 teammembers = TeamMember.objects.filter(team=team)
-                if teammembers.count()==0:
+                if teammembers.count() == 0:
                     team.delete()
             return JsonResponse({'status': 'success'})
 
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
 
-#todo: inviteandapply Ehsms InvtieMessageUpdate로 바꿀것(이경우 document도 수정해야함.)
+# todo: inviteandapply Ehsms InvtieMessageUpdate로 바꿀것(이경우 document도 수정해야함.)
+
+
 def TeamInviteUpdate(request):
     '''
     팀 지원 및 팀원 초대시 생성되는 TeamInviteMessage의 변경 요청을 처리
@@ -492,25 +505,29 @@ def TeamInviteUpdate(request):
     '''
     if request.method == 'POST':
         team = Team.objects.get(id=request.POST.get('team_id'))
-        account = Account.objects.get(user__username=request.POST.get('username'))
+        account = Account.objects.get(
+            user__username=request.POST.get('username'))
         direction = request.POST.get('direction') == 'TO_ACCOUNT'
-        apply_msgs = TeamInviteMessage.objects.filter(team=team,account=account,direction=direction, status=0)
         try:
+            apply_msg = TeamInviteMessage.objects.get(
+                team=team, account=account, direction=direction, status=0)
             with transaction.atomic():
-                if request.POST.get('is_okay')=="true":
+                if request.POST.get('is_okay') == "true":
                     status = 1  # 승인
-                    TeamMember.objects.create(team=team,member=account)
+                    TeamMember.objects.create(team=team, member=account)
                 else:
                     status = 2  # 거절
-                for apply_msg in apply_msgs:
-                    apply_msg.status = status
-                    apply_msg.save()
+                apply_msg.status = status
+                apply_msg.save()
 
-                data = render_to_string('team/apply-list.html',request=request)
-                return JsonResponse({'status': 'success','data':data,'username':request.POST.get('username')})
+                data = render_to_string(
+                    'team/apply-list.html', request=request)
+                return JsonResponse({'status': 'success', 'data': data, 'username': request.POST.get('username'), 'team_id': apply_msg.team.id})
         except DatabaseError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)})
-#todo: inviteandapply Ehsms InvtieMessageDelete로 바꿀것(이경우 document도 수정해야함.)
+# TODO: inviteandapply 또는 InvtieMessageDelete로 바꿀것(이경우 document도 수정해야함.)
+
+
 def TeamInviteDelete(request):
     '''
     팀 지원서 및 팀원 초대장 삭제 요청을 처리
