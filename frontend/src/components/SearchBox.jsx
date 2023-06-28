@@ -57,7 +57,7 @@ function SearcherBox() {
             type="button"
             id="tag-btn"
             className="btn btn-light"
-            onClick={handleToggleTag()}
+            onClick={handleToggleTag}
             data-bs-hover="tooltip"
             data-bs-placement="bottom"
             data-bs-title="태그 검색"
