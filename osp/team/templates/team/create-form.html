@@ -15,8 +15,9 @@
         <div class="invalid-feedback" data-feedback-type="team-desc"></div>
     </div>
     <div class="mb-4">
-        <label for="team-image-input" class="form-label">팀 대표 이미지</label>
-        <input type="file" id="team-image-input" name="image" class="form-control" onchange="previewSingleImage()">
+        <label style="margin-bottom: 0;" for="team-image-input" class="form-label">팀 대표 이미지</label>
+        <p style="font-size: small; color: gray; margin-bottom: 10px;">png, jpg, jpeg 확장자만 지원합니다</p>
+        <input type="file" id="team-image-input" name="image" class="form-control" accept=".png, .jpg, .jpeg" onchange="previewSingleImage()">
         <div class="valid-feedback" data-feedback-type="team-image"></div>
         <div class="invalid-feedback" data-feedback-type="team-image"></div>
     </div>
