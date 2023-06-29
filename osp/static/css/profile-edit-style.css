@@ -246,12 +246,13 @@ a.nav-link {
 }
 
 #lang-trash-can{
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  min-width: 20px;
   max-width: 200px;
-  background-color: antiquewhite;
-  width: 20px;
   display: block;
   gap: 3px;
-  min-height: 30px;
+  height: 35px;
   border-radius: 0.3rem;
   padding: 3px;
 }

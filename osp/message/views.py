@@ -21,70 +21,76 @@ def message_list_view(request, selected_oppo):
     my_acc = Account.objects.get(user=request.user.id)
 
     selected_opponent = None
-    if selected_oppo!=0:
+    if selected_oppo != 0:
         selected_opponent = Account.objects.get(user__id=selected_oppo)
     msg_opponent = {}
     # 내가 가장 마지막에 보낸 메시지의 시간
-    my_last_send_date = { msg.receiver: msg \
-        for msg in Message.objects.filter(sender=my_acc)\
-        .annotate(last_date=Max('send_date'))
-    }
+    my_last_send_date = {msg.receiver: msg
+                         for msg in Message.objects.filter(sender=my_acc)
+                         .annotate(last_date=Max('send_date'))
+                         }
     for opponent, msg in my_last_send_date.items():
         msg_opponent[msg.receiver] = {
             'unread': 0,
-            'recent_date':time.mktime((msg.last_date).timetuple()),
+            'recent_date': time.mktime((msg.last_date).timetuple()),
             'last_msg': msg
         }
 
     # 다른 사용자에게서 받은 메시지를 가져와서 사용자 리스트를 만듦
-    received_msg_list = Message.objects.filter(receiver=my_acc).exclude(sender=None).values_list('sender', flat=True).distinct()
-    conn_acc = Account.objects.filter(user__in = received_msg_list)
+    received_msg_list = Message.objects.filter(receiver=my_acc).exclude(
+        sender=None).values_list('sender', flat=True).distinct()
+    conn_acc = Account.objects.filter(user__in=received_msg_list)
 
     unread_cnt = 0
-    for opponent in conn_acc :
+    for opponent in conn_acc:
 
         if opponent in my_last_send_date:
             last_date = my_last_send_date[opponent].send_date
-            # 받은 메시지 모두 가져오고 안 읽은 메시지는 따로 필터링하여 가져옴 
+            # 받은 메시지 모두 가져오고 안 읽은 메시지는 따로 필터링하여 가져옴
             msg_list = Message.objects.filter(
-                sender=opponent, 
-                receiver=my_acc, 
+                sender=opponent,
+                receiver=my_acc,
             ).order_by('-send_date')
-            unread_msg_list = msg_list.filter(receiver_read=False, send_date__gt=last_date)
+            unread_msg_list = msg_list.filter(
+                receiver_read=False, send_date__gt=last_date)
             unread_cnt = len(unread_msg_list)
         else:
             msg_list = Message.objects.filter(
-                sender=opponent, 
-                receiver=my_acc, 
+                sender=opponent,
+                receiver=my_acc,
                 receiver_read=False,
             ).order_by('-send_date')
             unread_cnt = len(msg_list)
-        
+
         # 최신순으로 정렬하기 위해 시각 비교 후 업데이트
-        target_timestamp = time.mktime((msg_list[0].send_date).timetuple()) if len(msg_list) != 0 else 1.0
+        target_timestamp = time.mktime(
+            (msg_list[0].send_date).timetuple()) if len(msg_list) != 0 else 1.0
         if opponent not in msg_opponent:
-            msg_opponent[opponent] = {'unread': unread_cnt, 'recent_date': target_timestamp}
-        elif msg_opponent[opponent]['recent_date'] <  target_timestamp :
-            msg_opponent[opponent] = {'unread': unread_cnt, 'recent_date': target_timestamp}
-    
+            msg_opponent[opponent] = {
+                'unread': unread_cnt, 'recent_date': target_timestamp}
+        elif msg_opponent[opponent]['recent_date'] < target_timestamp:
+            msg_opponent[opponent] = {
+                'unread': unread_cnt, 'recent_date': target_timestamp}
+
     def get_recent_date(item):
         recent_date = item[1]['recent_date']
         return recent_date
-    
+
     try:
-        sorted_dict = sorted(msg_opponent.items(), key=get_recent_date, reverse=True)
+        sorted_dict = sorted(msg_opponent.items(),
+                             key=get_recent_date, reverse=True)
     except Exception as e:
         sorted_dict = msg_opponent.items()
         print("fail sort msg_opponent", e)
-    
+
     data['msg_opponent'] = sorted_dict
     if selected_opponent in msg_opponent or not selected_opponent:
         data['selected_new_opponent'] = None
     else:
         data['selected_new_opponent'] = selected_opponent
 
-
     return render(request, 'message/list-view.html', data)
+
 
 @login_required
 def message_chat_view(request, opponent):
@@ -93,7 +99,8 @@ def message_chat_view(request, opponent):
     if request.method == 'GET':
         last_date = request.GET.get('oldest', datetime.now())
         raw_msg_list = Message.objects.filter(
-            (Q(sender=oppo_acc, receiver=my_acc) | Q(sender=my_acc, receiver=oppo_acc)) \
+            (Q(sender=oppo_acc, receiver=my_acc) |
+             Q(sender=my_acc, receiver=oppo_acc))
             & Q(send_date__lt=last_date)
         ).order_by('-send_date')[:10]
         msg_list = []
@@ -147,7 +154,7 @@ def message_chat_view(request, opponent):
         #         'send_date': str(msg.send_date),
         #         'read': str(msg.receiver_read)
         #     })
-        return JsonResponse({'status': 'success', 'msg_id': new_msg.id, 'new_msg_list':msg_list})
+        return JsonResponse({'status': 'success', 'msg_id': new_msg.id, 'new_msg_list': msg_list})
 
 
 def read_notification(request, noti_id):
@@ -163,6 +170,24 @@ def read_notification(request, noti_id):
     except DatabaseError:
         return JsonResponse({'status': 'fail', 'message': 'DB Failed'})
 
+
+def read_notification_all(request):
+    if request.method == 'POST':
+        try:
+            targets = Message.objects.filter(
+                receiver__user=request.user.id, receiver_read=False)
+            if len(targets) > 0:
+                targets.update(receiver_read=True)
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'status': 'fail', 'message': 'No such notification'})
+        except DatabaseError:
+            return JsonResponse({'status': 'fail', 'message': 'DB Failed'})
+        except Exception as e:
+            print("read_notification_all Exception", e)
+            return JsonResponse({'status': 'fail', 'message': 'Exception'})
+
+
 def read_app(request):
     print("read_app")
     if request.method == 'POST':
@@ -171,7 +196,8 @@ def read_app(request):
         try:
             user_id = request.user.id
             type_app = request.POST.get('type', 'recv')
-            new_msgs = Message.objects.filter(sender__isnull=True, receiver=user_id, receiver_read=False).order_by('-send_date')
+            new_msgs = Message.objects.filter(
+                sender__isnull=True, receiver=user_id, receiver_read=False).order_by('-send_date')
             type_target = 'team_apply' if type_app == 'recv' else 'team_apply_result'
             for msg in new_msgs:
                 try:

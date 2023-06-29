@@ -55,6 +55,10 @@ const article = {
                 alert('모집 기간을 입력해 주세요')
                 return 0;
             }
+            if ($('#team-option').val() == null ) {
+                alert('모집할 팀을 선택해 주세요')
+                return 0;
+            }
             ajax_form_data.append('team_id', $('#team-option').val());
             const offset = new Date().getTimezoneOffset() * 60000;
             let period_start_date = new Date($('#PeriodPickerStartInput').val()) - offset;
