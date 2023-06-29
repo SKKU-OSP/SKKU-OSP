@@ -30,7 +30,7 @@
                 {% for admin_team in admin_teams %}
                     {% get_teamappliedmessage_waited admin_team as waitedapplymessages %}
                     {% for applymsg in waitedapplymessages %}
-                    <div class="team-apply-item received split-line" id="apply-user-{{ applymsg.account.user.username }}">
+                    <div class="team-apply-item received split-line" id="apply-user-{{ applymsg.account.user.username }}-{{ applymsg.team.id }}">
                         <div class="team-apply-meta">
                             <div class="team-apply-teamname">
                                 {{ applymsg.team.name }}
@@ -84,11 +84,11 @@
                             <div class="team-apply-action">
                                 {% if applymsg.status == 0 %}
                                 <button class="btn-xs btn-wait" disabled>
-                                    검토 중
+                                    검토중
                                 </button>
                                 {% elif applymsg.status == 1 %}
                                 <button class="btn-xs btn-accept" disabled>
-                                    승인 완료
+                                    승인됨
                                 </button>
                                 {% elif applymsg.status == 2 %}
                                 <button class="btn-xs btn-refuse" disabled>
