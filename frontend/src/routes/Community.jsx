@@ -1,9 +1,9 @@
-import BoardOverview from '../components/BoardOverview';
+import MainBoard from '../components/Community/MainBoard/index';
 
 function Community() {
   return (
     <main>
-      <BoardOverview />
+      <MainBoard />
     </main>
   );
 }
