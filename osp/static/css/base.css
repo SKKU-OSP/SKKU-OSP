@@ -7,11 +7,12 @@
 .render .fouc {
   opacity: 1;
 }
-.fouc{
+.fouc {
   opacity: 0;
-  transition: opacity .01s linear;
+  transition: opacity 0.01s linear;
 }
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -44,41 +45,43 @@ body::-webkit-scrollbar {
   display: none;
 }
 /* div 내부 스크롤바 스타일 */
-div> ::-webkit-scrollbar {
+div > ::-webkit-scrollbar {
   width: 0.25rem;
   height: 0.25rem;
 }
-div> ::-webkit-scrollbar-track {
+div > ::-webkit-scrollbar-track {
   background: var(--main-border-color);
   border-radius: 0.625rem;
 }
-div> ::-webkit-scrollbar-thumb {
+div > ::-webkit-scrollbar-thumb {
   background: var(--profile-btn-inactive);
   border-radius: 0.625rem;
 }
-div> ::-webkit-scrollbar-thumb:hover {
+div > ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
 }
 body::-webkit-scrollbar {
   display: none;
 }
 /* table 내부 스크롤바 스타일 */
-td> ::-webkit-scrollbar {
+td > ::-webkit-scrollbar {
   width: 0.25rem;
   height: 0.25rem;
 }
-td> ::-webkit-scrollbar-track {
+td > ::-webkit-scrollbar-track {
   background: var(--main-border-color);
   border-radius: 0.625rem;
 }
-td> ::-webkit-scrollbar-thumb {
+td > ::-webkit-scrollbar-thumb {
   background: var(--profile-btn-inactive);
   border-radius: 0.625rem;
 }
-td> ::-webkit-scrollbar-thumb:hover {
+td > ::-webkit-scrollbar-thumb:hover {
   background: var(--profile-btn-inactive);
 }
-li, a, button {
+li,
+a,
+button {
   font-weight: 500;
   text-decoration: none;
 }
@@ -97,7 +100,7 @@ li, a, button {
 }
 
 .none {
-  display: none !important; 
+  display: none !important;
 }
 
 .nav-icon {
@@ -106,20 +109,20 @@ li, a, button {
   margin-right: 4px;
 }
 
-.col-dropdown:not(.show){
+.col-dropdown:not(.show) {
   visibility: hidden;
   opacity: 0;
 }
 @media (min-width: 992px) {
   .noti-dropdown {
     padding: 0;
-    left:auto !important;
+    left: auto !important;
     right: 0 !important;
   }
 }
 @media (max-width: 991px) {
-  #text-logo{
-    display: none!important;
+  #text-logo {
+    display: none !important;
   }
 }
 @media (max-width: 450px) {
@@ -161,14 +164,14 @@ li, a, button {
   flex: 1 1 auto;
   box-sizing: border-box;
 }
-#searcher{
-  position:relative;
+#searcher {
+  position: relative;
   flex: 0 0 auto;
 }
-#tag-filter{
+#tag-filter {
   transition-duration: 0.15s;
 }
-#tag-filter:not(.show){
+#tag-filter:not(.show) {
   opacity: 0;
   visibility: hidden;
   cursor: default;
@@ -178,7 +181,7 @@ li, a, button {
   flex-grow: 2;
 }
 #search-word {
-  flex-grow:7;
+  flex-grow: 7;
 }
 #search-field {
   flex-wrap: nowrap;
@@ -208,10 +211,17 @@ li, a, button {
   padding: 0.25rem;
 }
 #noti-list {
-  position:absolute;
-  max-height:185px;
-  overflow-y:auto;
-  overflow-x:hidden;
+  position: absolute;
+  max-height: 185px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.fixed-li {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--main-white);
+  border-bottom: solid 0.5px var(--main-border-color);
 }
 /* 메시지 모달 스타일 */
 #message-modal .modal-header {
@@ -262,8 +272,8 @@ img.opponent-profile {
 }
 .unread-count {
   border-radius: 1em;
-  padding: .25em;
-  color: #FFFFFF;
+  padding: 0.25em;
+  color: #ffffff;
   background-color: var(--sub-point-color);
   font-weight: 800;
   font-size: 12px;
@@ -342,7 +352,7 @@ img.opponent-profile {
 #chat-input {
   flex: 2;
   margin-right: 0.25rem;
-  background: #FFFFFF;
+  background: #ffffff;
   box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
   padding: 0.5em;
   border-radius: 0.5rem;
@@ -358,7 +368,7 @@ img.opponent-profile {
   border: 0;
   border-radius: 10%;
   background-color: var(--sub-point-color);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 /* 기본 모달 스타일 Overide */
@@ -379,7 +389,7 @@ img.opponent-profile {
 .email-input {
   flex: 2 1 60%;
 }
-.email-domain{
+.email-domain {
   flex: 0 1 40%;
 }
 
@@ -388,10 +398,10 @@ img.opponent-profile {
   border: none !important;
   box-shadow: inset 0 0.125rem 0.25rem var(--card-box-shadow);
 }
-.ss-single-selected>.placeholder {
+.ss-single-selected > .placeholder {
   background: none;
 }
-.ss-main .ss-single-selected>.placeholder {
+.ss-main .ss-single-selected > .placeholder {
   cursor: pointer;
   background-color: transparent;
   opacity: 1;
@@ -437,10 +447,9 @@ img.opponent-profile {
 }
 
 .bg-gray {
-  background: #CDCDCD;
+  background: #cdcdcd;
   font-weight: 600;
 }
-
 
 .default-cursor {
   cursor: default;
@@ -450,12 +459,16 @@ img.opponent-profile {
   cursor: pointer;
 }
 
-.hover-opacity{
+.hover-opacity {
   cursor: pointer;
 }
 
-.hover-opacity:hover{
+.hover-opacity:hover {
   opacity: 0.5;
+}
+
+.hover-gray:hover {
+  background-color: var(--btn-default-color);
 }
 
 .noti-dropdown::after,
@@ -481,7 +494,7 @@ img.opponent-profile {
 }
 
 #ApplyTeamModal .nav-pills .nav-link,
-#ApplyTeamModal .nav-pills>.nav-link {
+#ApplyTeamModal .nav-pills > .nav-link {
   color: #000000;
   border-top-color: transparent;
   border-bottom-color: #000000;
@@ -489,7 +502,7 @@ img.opponent-profile {
 }
 
 #ApplyTeamModal .nav-pills .nav-link.active,
-#ApplyTeamModal .nav-pills .show>.nav-link {
+#ApplyTeamModal .nav-pills .show > .nav-link {
   background-color: var(--main-bg-color);
   color: var(--sub-point-color);
   border-color: #000000;
@@ -497,13 +510,13 @@ img.opponent-profile {
   border-radius: 10px 10px 0 0;
 }
 
-#apply-recv-tab{
+#apply-recv-tab {
   border-right: 0.5px solid transparent;
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
 }
 
-#apply-send-tab{
+#apply-send-tab {
   border-left: 0.5px solid transparent;
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
@@ -631,12 +644,12 @@ img.opponent-profile {
   background: none;
 }
 
-.weak-text{
+.weak-text {
   color: var(--main-icon-color);
   font-size: 12px;
 }
 
-.weak-text-lg{
+.weak-text-lg {
   color: var(--main-icon-color);
 }
 
@@ -672,7 +685,7 @@ img.opponent-profile {
   flex: 1 0 40%;
 }
 
-.lh-xl{
+.lh-xl {
   line-height: 2.5 !important;
 }
 
@@ -714,17 +727,17 @@ img.opponent-profile {
 }
 
 .check-failed {
-  background-color: #DC3545;
-  color: #FFFFFF;
+  background-color: #dc3545;
+  color: #ffffff;
 }
 
 .check-success {
-  background-color: #0D6EFD;
-  color: #FFFFFF;
+  background-color: #0d6efd;
+  color: #ffffff;
 }
 
-.form-control-plaintext:read-only{
+.form-control-plaintext:read-only {
   border: 1px solid #6c757d !important;
-  padding-right: .75rem;
-  padding-left: .75rem;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
 }

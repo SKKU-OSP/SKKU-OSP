@@ -12,6 +12,15 @@
     <div id="community-container" class="row justify-content-end">
         {% include "community/sidebar.html" %}
         <div id="community-main" class="col-md-9">
+            {% if need_login %}
+            <div class="m-2">
+                로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
+            </div>
+            {% elif need_member %}
+            <div class="m-2">
+                팀 멤버만 열람할 수 있습니다. <a href="{% url 'community:Board' board_name="팀 모집" board_id=2%}">팀 모집 게시판 확인하기</a>
+            </div>
+            {% else %}
             <div id="article-content">
             {# type은 세가지 값이 가능: view / register / edit #}
             {% if type == 'view' %}
@@ -28,6 +37,7 @@
                 {% include 'community/article/includes/comments.html' with article_id=article.id type=type %}
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
