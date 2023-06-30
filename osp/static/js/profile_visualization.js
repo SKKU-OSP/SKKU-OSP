@@ -685,6 +685,7 @@ const renderProfileChart = function(chart_data) {
   $("#icon-devtype").on("click", () => {
     $('#modalGbtiBox').modal('show');
   });
+  // 스크롤 시 사이드바 이동
   let sideHeight = 0;
   const sideCol = document.getElementById("profile-info");
   for (let i = 0; i < sideCol.children.length; i++) {
@@ -698,7 +699,7 @@ const renderProfileChart = function(chart_data) {
       let ele = contents.item(i);
       bodyHeight += ele.getBoundingClientRect().height;
     }
-    mt = document.documentElement.scrollTop - article.offsetTop;
+    mt = document.documentElement.scrollTop - article.offsetTop + 16;
     sideCol.style.marginTop = mt + 'px';
     if (mt + sideHeight > bodyHeight) {
       mt = Math.floor(bodyHeight - sideHeight + 16);

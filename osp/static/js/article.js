@@ -55,12 +55,16 @@ const article = {
                 alert('모집 기간을 입력해 주세요')
                 return 0;
             }
+            if ($('#team-option').val() == null ) {
+                alert('모집할 팀을 선택해 주세요')
+                return 0;
+            }
             ajax_form_data.append('team_id', $('#team-option').val());
             const offset = new Date().getTimezoneOffset() * 60000;
             let period_start_date = new Date($('#PeriodPickerStartInput').val()) - offset;
             let period_end_date = new Date($('#PeriodPickerEndInput').val()) - offset;
-            if (period_start_date > period_end_date) {
-                alert('날짜입력에 오류가 있습니다.');
+            if (period_start_date > period_end_date - 3600000) {
+                alert('날짜 입력에 오류가 있습니다. 모집 기간은 최소 1시간이 되도록 설정해 주세요.');
                 return 0;
             }
             ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
@@ -122,6 +126,10 @@ const article = {
             const offset = new Date().getTimezoneOffset() * 60000;
             const period_start_date = new Date($('#PeriodPickerStartInput').val()) - offset;
             const period_end_date = new Date($('#PeriodPickerEndInput').val()) - offset;
+            if (period_start_date > period_end_date - 3600000) {
+                alert('날짜 입력에 오류가 있습니다. 모집 기간은 최소 1시간이 되도록 설정해 주세요.');
+                return 0;
+            }
             ajax_form_data.append('period_start', new Date(period_start_date).toISOString());
             ajax_form_data.append('period_end', new Date(period_end_date).toISOString());
         }
