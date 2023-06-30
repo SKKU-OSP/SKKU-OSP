@@ -1,73 +1,77 @@
 @media (max-width: 450px) {
-    .main-board{
-        height: 600px !important;
-    }
+  .main-board {
+    height: 600px !important;
+  }
 }
 
 @media screen and (max-width: 767px) {
-    .community-container {
-        display: flex;
-    }
+  .community-container {
+    display: flex;
+  }
 
-    .community-main {
-        width: calc(100% - 50px);
-    }
+  .community-main {
+    width: calc(100% - 50px);
+  }
 }
 
 .p-community-main {
-    padding: 6px 12px;
-    vertical-align: middle;
-    font-size: 20px;
+  padding: 6px 12px;
+  vertical-align: middle;
+  font-size: 20px;
 }
 
-.community-main-title{
-    max-width: 100%;
-    height: 60px;
+.community-main-title {
+  max-width: 100%;
+  height: 60px;
 
-    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
-    border-radius: 0.625rem;
+  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+  border-radius: 0.625rem;
 
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
 
-    background-color: #002743;
+  background-color: #002743;
 
-    justify-content: center;
-    margin-bottom: 10px;
-    padding: 0.55rem;
+  justify-content: center;
+  margin-bottom: 10px;
+  padding: 0.55rem;
 }
 
-.boards-card{
-    max-width: 100%;
-    box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
-    padding: auto;
+.boards-card {
+  max-width: 100%;
+  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
+  padding: auto;
 }
 
-.main-board{
-    height: 300px;
+.main-board {
+  height: 300px;
 }
 
-.main-board-head{
-    border-width: 0 0 3px 0;
-    border-style: solid;
-    border-color: #002743;
-    padding-bottom: 10px;
-    margin: 0 10px 0 10px;
+.main-board-head {
+  border-width: 0 0 3px 0;
+  border-style: solid;
+  border-color: #002743;
+  padding-bottom: 10px;
+  margin: 0 10px 0 10px;
 }
 
-.main-board-title{
-    font-size: 24px;
-    font-weight: bold;
-
+.main-board-title {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.main-board-more{
-    display: flex;
-    font-size: 12px;
-    align-items: end;
+.main-board-more {
+  display: flex;
+  font-size: 12px;
+  align-items: end;
 }
 
-.article-list-section{
-    margin: 0 10px 0 10px;
+.main-board-more:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.article-list-section {
+  margin: 0 10px 0 10px;
 }
