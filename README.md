@@ -1,7 +1,7 @@
 # SOSD (Square of Software Developers)
 ## 성균관대학교 소프트웨어융합대학 학생들을 위한 오픈소스플랫폼 커뮤니티
 ![image](https://user-images.githubusercontent.com/50347615/230562674-4493287f-2387-46dc-8798-60ef21befb42.png)
-![image](https://user-images.githubusercontent.com/50347615/230562795-f9237669-6768-4404-8ad7-0f64ebb5c70f.png)
+![230562795-f9237669-6768-4404-8ad7-0f64ebb5c70f](https://github.com/SKKU-OSP/SKKU-OSP/assets/50347615/a51d5274-0450-46da-bdbf-6a902a5f0032)
 
 
 ## Stacks
