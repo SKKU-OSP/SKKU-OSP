@@ -246,7 +246,7 @@ a.nav-link {
 }
 
 #lang-trash-can{
-  border: 1px solid #ccc;
+  border: 1px solid #dedede;
   border-radius: 16px;
   min-width: 20px;
   max-width: 200px;
@@ -255,6 +255,7 @@ a.nav-link {
   height: 35px;
   border-radius: 0.3rem;
   padding: 3px;
+  margin-right: 5px;
 }
 
 textarea {
