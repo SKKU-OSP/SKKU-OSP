@@ -4,15 +4,53 @@ from django.shortcuts import render
 from django.db.models import Q, Max
 from django.contrib.auth.decorators import login_required
 
-from message.models import Message
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from message.serializers import MessageSerializer
+from message.models import Message, Notification
 from user.models import Account
 
 from datetime import datetime
 import time
 import json
+import logging
 
 
-# Create your views here.
+class MessageListView(APIView):
+    def get(self, request, target_user_id):
+        data = {}
+        try:
+            print("MessageListView", request.user.id, target_user_id)
+            user_account = Account.objects.get(user__id=request.user.id)
+            print("user_account", user_account)
+
+            target_account = Account.objects.get(user__id=target_user_id)
+            print("target_account", target_account)
+
+            messages = Message.objects.filter(
+                sender=user_account, receiver=target_account)
+            print(f"msgs len {len(messages)}")
+            serialized_message = MessageSerializer(messages, many=True)
+            data = {"status": "success", "data": serialized_message.data}
+        except Exception as e:
+            logging.exception(f"MessageListView: {e}")
+        return Response(data)
+
+
+class MessageChatView(APIView):
+    def get(self, request, target_user_id):
+        data = {}
+        try:
+            user_account = Account.objects.get(user=request.user.id)
+            target_account = Account.objects.get(user__id=target_user_id)
+
+            data = {"status": "success", "data": data}
+        except Exception as e:
+            logging.exception(f"MessageListView: {e}")
+        return Response(data)
+
+
 @login_required
 def message_list_view(request, selected_oppo):
     data = {}
@@ -210,3 +248,52 @@ def read_app(request):
             return JsonResponse({'status': 'success'})
         except DatabaseError:
             return JsonResponse({'status': 'fail', 'message': 'DB Failed'})
+
+
+class MessageSplitView(APIView):
+    """
+    기존 알림 Message를 Notification에 이동시키는 작업
+    """
+
+    def get(self, request):
+        res = {}
+        try:
+            msg_qs = Message.objects.filter(sender=None)
+            print("msg_qs", len(msg_qs))
+            move_cnt, remove_cnt = 0, 0
+            if len(msg_qs) > len(Notification.objects.all()):
+                for i, msg in enumerate(msg_qs):
+                    body_json = json.loads(msg.body)
+                    print(i, body_json)
+                    print(body_json['type'])
+                    try:
+                        type_txt = body_json['type']
+                        sender_name = body_json.get('subject', '')
+                        body_txt = body_json['body']
+                        route_id = body_json.get('article_id', None)
+                        route_id = body_json.get(
+                            'team_id', None) if route_id is None else route_id
+                        receiver = msg.receiver
+                        send_date = msg.send_date
+                        receiver_read = msg.receiver_read
+                        receiver_delete = msg.receiver_delete
+                        with transaction.atomic():
+                            noti = Notification.objects.create(type=type_txt, sender_name=sender_name,
+                                                               receiver=receiver, body=body_txt, route_id=route_id,
+                                                               send_date=send_date, receiver_read=receiver_read, receiver_delete=receiver_delete)
+                            noti.send_date = send_date
+                            noti.save()
+                            move_cnt += 1
+
+                    except Exception as ex:
+                        logging.exception(f"Notification create: {ex}")
+            if len(msg_qs) == len(Notification.objects.all()):
+                for i, msg in enumerate(msg_qs):
+                    msg.delete()
+                    remove_cnt += 1
+
+            res = {"status": "success", "move_cnt": move_cnt,
+                   "remove_cnt": remove_cnt}
+        except Exception as e:
+            logging.exception(f"MessageSplitView: {e}")
+        return Response(res)
