@@ -20,3 +20,22 @@ class MessageSerializer(serializers.ModelSerializer):
             "sender_delete",
             "receiver_delete",
         )
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    receiver = AccountSerializer()
+
+    class Meta:
+        model = models.Notification
+
+        fields = (
+            "id",
+            "type",
+            "sender_name",
+            "receiver",
+            "body",
+            "send_date",
+            "receiver_read",
+            "receiver_delete",
+            "route_id",
+        )
