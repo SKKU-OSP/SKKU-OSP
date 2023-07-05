@@ -113,6 +113,9 @@ button {
   visibility: hidden;
   opacity: 0;
 }
+.noti-dropdown {
+  padding: 0;
+}
 @media (min-width: 992px) {
   .noti-dropdown {
     padding: 0;
