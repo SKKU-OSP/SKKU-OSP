@@ -1,13 +1,14 @@
 from django.db import DatabaseError, transaction
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Count
 from django.contrib.auth.decorators import login_required
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from message.serializers import MessageSerializer
+from user.serializers import AccountSerializer
 from message.models import Message, Notification
 from user.models import Account
 
@@ -19,23 +20,62 @@ import logging
 
 class MessageListView(APIView):
     def get(self, request, target_user_id):
-        data = {}
+
+        res = {"status": None, "data": None}
         try:
-            print("MessageListView", request.user.id, target_user_id)
+            data = {"chat_accounts": [], "new_account": None}
             user_account = Account.objects.get(user__id=request.user.id)
-            print("user_account", user_account)
 
-            target_account = Account.objects.get(user__id=target_user_id)
-            print("target_account", target_account)
+            # 받은 메시지 중 읽지 않은 메시지의 개수
+            user_unread_message_counts = Message.objects.filter(
+                receiver__user=user_account, receiver_read=False).values('sender').annotate(unread=Count('id'))
+            user_unread_message_counts = {
+                item['sender']: item['unread'] for item in user_unread_message_counts}
 
-            messages = Message.objects.filter(
-                sender=user_account, receiver=target_account)
-            print(f"msgs len {len(messages)}")
-            serialized_message = MessageSerializer(messages, many=True)
-            data = {"status": "success", "data": serialized_message.data}
+            # 유저가 받은 메시지의 최신 날짜
+            user_receiver_messages = Message.objects.filter(Q(receiver__user=user_account)).values(
+                'sender').annotate(recent_date=Max('send_date'))
+            # 유저가 보낸 메시지의 최신 날짜
+            user_sent_messages = Message.objects.filter(Q(sender__user=user_account)).values(
+                'receiver').annotate(recent_date=Max('send_date'))
+
+            # 받은 메시지와 보낸 메시지의 날짜 비교하여 최근 연락 날짜 구하기
+            chat_dict = {m['sender']: m['recent_date']
+                         for m in user_receiver_messages}
+            for m in user_sent_messages:
+                if m['receiver'] in chat_dict:
+                    chat_dict[m['receiver']] = max(
+                        chat_dict[m['receiver']], m['recent_date'])
+                else:
+                    chat_dict[m['receiver']] = m['recent_date']
+            # 유저와 연락 기록이 있는 계정 리스트
+            chat_accounts = Account.objects.filter(
+                user_id__in=chat_dict.keys())
+
+            result = [
+                {
+                    "account": AccountSerializer(account).data,
+                    "unread": user_unread_message_counts.get(account.user.id, 0),
+                    "recent_date": chat_dict.get(account.user.id).timestamp()
+                }
+                for account in chat_accounts
+            ]
+
+            # 날짜 내림차순 정렬
+            sorted_items = sorted(
+                result, key=lambda x: x['recent_date'], reverse=True)
+            data['chat_accounts'] = sorted_items
+
+            try:
+                target_account = Account.objects.get(user__id=target_user_id)
+                data['new_account'] = AccountSerializer(target_account).data
+            except:
+                data['new_account'] = None
+
+            res = {"status": "success", "data": data}
         except Exception as e:
             logging.exception(f"MessageListView: {e}")
-        return Response(data)
+        return Response(res)
 
 
 class MessageChatView(APIView):
@@ -47,7 +87,7 @@ class MessageChatView(APIView):
 
             data = {"status": "success", "data": data}
         except Exception as e:
-            logging.exception(f"MessageListView: {e}")
+            logging.exception(f"MessageChatView: {e}")
         return Response(data)
 
 
