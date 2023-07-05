@@ -1,11 +1,12 @@
 import '../Community.css';
 import TinyBoard from './TinyBoard/index.jsx';
+import SideBar from '../SideBar/index.jsx';
 
 export default function MainBoard_Presenter() {
   return (
     <div className="container my-4">
       <div className="row justify-content-end community-container">
-        {/* {% include "community/sidebar.html" with board=board %} */}
+        <SideBar />
         <div className="col-md-9 col-12 community-main">
           <div className="community-main-title">
             <div className="p-community-main">커뮤니티</div>
