@@ -7,10 +7,12 @@ from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from message.serializers import MessageSerializer
+from message.serializers import MessageSerializer, NotificationSerializer
 from user.serializers import AccountSerializer
+from community.serializers import BoardSerializer
 from message.models import Message, Notification
 from user.models import Account
+from community.models import Board
 
 from datetime import datetime
 import time
@@ -19,6 +21,10 @@ import logging
 
 
 class MessageListView(APIView):
+    '''
+    채팅 상대방의 리스트를 통신 날짜를 기준으로 내림차순 정렬하여 반환
+    '''
+
     def get(self, request, target_user_id):
 
         res = {"status": None, "data": None}
@@ -79,6 +85,11 @@ class MessageListView(APIView):
 
 
 class MessageChatView(APIView):
+    '''
+    GET: 상대방과의 채팅내역 요청 처리
+    POST: 상대방에게 보내는 채팅 메시지 저장 처리
+    '''
+
     def get(self, request, target_user_id):
         res = {"status": None, "data": None}
         data = {"messages": None}
@@ -231,6 +242,66 @@ class ApplicationReadView(APIView):
             res['status'] = 'fail'
             res['message'] = '작업을 완료하지 못했습니다.'
             return Response(res)
+
+
+# 기존 template_tags의 message_tag 영역에 대한 API 작업
+class NotificationListView(APIView):
+    def get(self, request):
+        res = {"status": None, "data": None}
+        data = {'has_new_noti': None, 'has_new_app': None,
+                'has_new_app_result': None, 'notifications': None, }
+        has_new_app = False
+        has_new_app_result = False
+        user_id = request.user.id
+        notifications = Notification.objects.filter(
+            receiver__user_id=user_id).order_by('-send_date')
+        has_new_noti = len(notifications.filter(receiver_read=False)) > 0
+
+        notifications = NotificationSerializer(notifications, many=True).data
+        # FIXME 모델 외의 속성값은 저장이 안되는 오류 수정할 것
+        try:
+            for noti in notifications:
+                if noti['type'] == 'comment':
+                    noti['icon'] = 'comment'
+                    noti['feedback'] = noti.route_id
+                elif noti['type'] == 'articlelike':
+                    noti['icon'] = 'thumb_up'
+                    noti['feedback'] = noti.route_id
+                elif noti['type'] == 'team_apply':
+                    noti['icon'] = 'assignment_ind'
+                    noti['feedback'] = 'team_apply'
+                    if not noti['receiver_read']:
+                        has_new_app = True
+                elif noti['type'] == 'team_apply_result':
+                    noti['icon'] = 'assignment_ind'
+                    noti['feedback'] = 'team_apply'
+                    if not noti['receiver_read']:
+                        has_new_app_result = True
+                elif noti['type'] == 'team_invite':
+                    noti['icon'] = 'group_add'
+                    board = Board.objects.get(team__id=noti.route_id)
+                    noti['feedback'] = BoardSerializer(board).data
+                elif noti['type'] == 'team_invite_result':
+                    noti['icon'] = 'group_add'
+                    board = Board.objects.get(team__id=noti.route_id)
+                    noti['feedback'] = BoardSerializer(board).data
+        except Exception as e:
+            print("Exception get_notifications", e)
+        data['has_new_noti'] = has_new_noti
+        data['has_new_app'] = has_new_app
+        data['has_new_app_result'] = has_new_app_result
+        data["notifications"] = notifications
+        res['data'] = data
+        return Response(res)
+
+# TODO: new message가 있는지 체크하는 API 제작
+# @register.simple_tag
+# def has_new_message(user):
+#     if user.is_anonymous:
+#         return None
+#     msgs = Message.objects.filter(
+#         receiver__user=user, receiver_read=False, sender__isnull=False)
+#     return len(msgs) > 0
 
 
 @login_required

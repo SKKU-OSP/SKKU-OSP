@@ -14,6 +14,8 @@ urlpatterns = [
          views.NotificationReadView.as_view(), name='NotificationRead'),
     path('api/app-read/', views.ApplicationReadView.as_view(),
          name='ApplicationRead'),
+    path('api/noti/list', views.NotificationListView.as_view(),
+         name='NotificationList'),
     path('api/split/',
          views.MessageSplitView.as_view(), name='MessageSplit'),
     path('list/<int:selected_oppo>', views.message_list_view, name='message-list'),
