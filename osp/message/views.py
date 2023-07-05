@@ -1,15 +1,18 @@
 from django.db import DatabaseError, transaction
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Count
 from django.contrib.auth.decorators import login_required
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from message.serializers import MessageSerializer
+from message.serializers import MessageSerializer, NotificationSerializer
+from user.serializers import AccountSerializer
+from community.serializers import BoardSerializer
 from message.models import Message, Notification
 from user.models import Account
+from community.models import Board
 
 from datetime import datetime
 import time
@@ -18,37 +21,287 @@ import logging
 
 
 class MessageListView(APIView):
+    '''
+    채팅 상대방의 리스트를 통신 날짜를 기준으로 내림차순 정렬하여 반환
+    '''
+
     def get(self, request, target_user_id):
-        data = {}
+
+        res = {"status": None, "data": None}
         try:
-            print("MessageListView", request.user.id, target_user_id)
+            data = {"chat_accounts": [], "target_account": None}
             user_account = Account.objects.get(user__id=request.user.id)
-            print("user_account", user_account)
 
-            target_account = Account.objects.get(user__id=target_user_id)
-            print("target_account", target_account)
+            # 받은 메시지 중 읽지 않은 메시지의 개수
+            user_unread_message_counts = Message.objects.filter(
+                receiver__user=user_account, receiver_read=False).values('sender').annotate(unread=Count('id'))
+            user_unread_message_counts = {
+                item['sender']: item['unread'] for item in user_unread_message_counts}
 
-            messages = Message.objects.filter(
-                sender=user_account, receiver=target_account)
-            print(f"msgs len {len(messages)}")
-            serialized_message = MessageSerializer(messages, many=True)
-            data = {"status": "success", "data": serialized_message.data}
+            # 유저가 받은 메시지의 최신 날짜
+            user_receiver_messages = Message.objects.filter(Q(receiver__user=user_account)).values(
+                'sender').annotate(recent_date=Max('send_date'))
+            # 유저가 보낸 메시지의 최신 날짜
+            user_sent_messages = Message.objects.filter(Q(sender__user=user_account)).values(
+                'receiver').annotate(recent_date=Max('send_date'))
+
+            # 받은 메시지와 보낸 메시지의 날짜 비교하여 최근 연락 날짜 구하기
+            chat_dict = {m['sender']: m['recent_date']
+                         for m in user_receiver_messages}
+            for m in user_sent_messages:
+                if m['receiver'] in chat_dict:
+                    chat_dict[m['receiver']] = max(
+                        chat_dict[m['receiver']], m['recent_date'])
+                else:
+                    chat_dict[m['receiver']] = m['recent_date']
+            # 유저와 연락 기록이 있는 계정 리스트
+            chat_accounts = Account.objects.filter(
+                user_id__in=chat_dict.keys())
+
+            result = [
+                {
+                    "account": AccountSerializer(account).data,
+                    "unread": user_unread_message_counts.get(account.user.id, 0),
+                    "recent_date": chat_dict.get(account.user.id).timestamp()
+                }
+                for account in chat_accounts
+            ]
+
+            # 날짜 내림차순 정렬
+            sorted_items = sorted(
+                result, key=lambda x: x['recent_date'], reverse=True)
+            data['chat_accounts'] = sorted_items
+
+            try:
+                target_account = Account.objects.get(user__id=target_user_id)
+                data['target_account'] = AccountSerializer(target_account).data
+            except:
+                data['target_account'] = None
+
+            res = {"status": "success", "data": data}
         except Exception as e:
             logging.exception(f"MessageListView: {e}")
-        return Response(data)
+        return Response(res)
 
 
 class MessageChatView(APIView):
+    '''
+    GET: 상대방과의 채팅내역 요청 처리
+    POST: 상대방에게 보내는 채팅 메시지 저장 처리
+    '''
+
     def get(self, request, target_user_id):
-        data = {}
+        res = {"status": None, "data": None}
+        data = {"messages": None}
         try:
             user_account = Account.objects.get(user=request.user.id)
             target_account = Account.objects.get(user__id=target_user_id)
+            before_date = request.GET.get('oldest', datetime.now())
 
-            data = {"status": "success", "data": data}
+            data['messages'] = self.get_chat_messages(
+                user_account, target_account, before_date)
+
+            res = {"status": "success", "data": data}
         except Exception as e:
-            logging.exception(f"MessageListView: {e}")
+            logging.exception(f"MessageChatView GET: {e}")
+        return Response(res)
+
+    def post(self, request, target_user_id):
+        res = {"status": None, "data": None}
+        data = {"messages": [], "new_message": None}
+        try:
+            user_account = Account.objects.get(user=request.user.id)
+            target_account = Account.objects.get(user__id=target_user_id)
+            chat_body = request.POST.get('chat-input', "")
+            if chat_body.strip() != "":
+                with transaction.atomic():
+                    new_message = Message.objects.create(
+                        sender=user_account,
+                        receiver=target_account,
+                        body=chat_body,
+                        receiver_read=False,
+                        sender_delete=False,
+                        receiver_delete=False
+                    )
+                    new_message.save()
+                data['new_message'] = MessageSerializer(new_message).data
+            else:
+                res['status'] = 'fail'
+                res['message'] = '내용이 없어서 채팅을 기록하지 못했습니다.'
+
+                return Response(res)
+
+        except Exception as e:
+            logging.exception(f"MessageChatView POST: {e}")
+        before_date = datetime.now()
+        reload_messages = self.get_chat_messages(
+            user_account, target_account, before_date)
+        data['messages'] = reload_messages
+
         return Response(data)
+
+    def get_chat_messages(self, user_account, target_account, before_date):
+        # 유저가 보낸 메시지와 받은 메시지 모두
+        messages = Message.objects.filter(
+            (Q(sender=target_account, receiver=user_account) |
+                Q(sender=user_account, receiver=target_account))
+            & Q(send_date__lt=before_date)
+        ).order_by('-send_date')[:10]
+
+        return MessageSerializer(messages, many=True).data
+
+
+class NotificationReadView(APIView):
+    '''
+    주어진 알림 id에 대한 알림을 읽음 처리하는 요청 처리
+    '''
+
+    def post(self, request, noti_id):
+        res = {'status': None, 'message': None}
+        try:
+            target_noti = Notification.objects.filter(id=noti_id)
+            if target_noti.exists():
+                target_noti = target_noti.first()
+                target_noti.receiver_read = True
+                target_noti.save()
+                res['status'] = 'success'
+                return Response(res)
+            else:
+                res['status'] = 'fail'
+                res['message'] = '해당 알림을 찾는데 실패했습니다.'
+                return Response(res)
+        except DatabaseError as db_error:
+            logging.exception(
+                f"ReadNotificationView DatabaseError: {db_error}")
+            res['status'] = 'fail'
+            res['message'] = '데이터베이스에 저장하는데 오류가 발생했습니다.'
+            return Response(res)
+        except Exception as e:
+            logging.exception(f"ReadNotificationView Exception: {e}")
+            res['status'] = 'fail'
+            res['message'] = '작업을 완료하지 못했습니다.'
+            return Response(res)
+
+
+class NotificationReadAllView(APIView):
+    '''
+    알림을 모두 읽음 처리하는 요청 처리
+    '''
+
+    def post(self, request):
+        res = {'status': None, 'message': None}
+        try:
+            target_notifications = Notification.objects.filter(
+                receiver__user=request.user.id, receiver_read=False)
+            target_notifications.update(receiver_read=True)
+            res['status'] = 'success'
+            return Response(res)
+        except DatabaseError as db_error:
+            logging.exception(
+                f"ReadNotificationAllView DatabaseError: {db_error}")
+            res['status'] = 'fail'
+            res['message'] = '데이터베이스에 저장하는데 오류가 발생했습니다.'
+            return Response(res)
+        except Exception as e:
+            logging.exception(f"ReadNotificationAllView Exception: {e}")
+            res['status'] = 'fail'
+            res['message'] = '작업을 완료하지 못했습니다.'
+            return Response(res)
+
+
+class ApplicationReadView(APIView):
+    '''
+    지원서 알림을 읽음 처리하는 요청 처리
+    '''
+
+    def post(self, request):
+        res = {'status': None, 'message': None}
+        try:
+            user_id = request.user.id
+            type_app = request.POST.get('type', None)
+
+            type_app_to_noti = {"recv": "team_apply",
+                                "send": "team_apply_result"}
+            if type_app not in type_app_to_noti:
+                res['status'] = 'fail'
+                res['message'] = '알 수 없는 type 입니다.'
+                return Response(res)
+
+            notifications = Notification.objects.filter(
+                receiver=user_id, receiver_read=False, type=type_app_to_noti[type_app]).order_by('-send_date')
+            notifications.update(receiver_read=True)
+            res['status'] = 'success'
+            return Response(res)
+        except DatabaseError as db_error:
+            logging.exception(f"ReadApplicationView DatabaseError: {db_error}")
+            res['status'] = 'fail'
+            res['message'] = '데이터베이스에 저장하는데 오류가 발생했습니다.'
+            return Response(res)
+        except Exception as e:
+            logging.exception(f"ReadApplicationView Exception: {e}")
+            res['status'] = 'fail'
+            res['message'] = '작업을 완료하지 못했습니다.'
+            return Response(res)
+
+
+# 기존 template_tags의 message_tag 영역에 대한 API 작업
+class NotificationListView(APIView):
+    def get(self, request):
+        res = {"status": None, "data": None}
+        data = {'has_new_noti': None, 'has_new_app': None,
+                'has_new_app_result': None, 'notifications': None, }
+        has_new_app = False
+        has_new_app_result = False
+        user_id = request.user.id
+        notifications = Notification.objects.filter(
+            receiver__user_id=user_id).order_by('-send_date')
+        has_new_noti = len(notifications.filter(receiver_read=False)) > 0
+
+        notifications = NotificationSerializer(notifications, many=True).data
+        # FIXME 모델 외의 속성값은 저장이 안되는 오류 수정할 것
+        try:
+            for noti in notifications:
+                if noti['type'] == 'comment':
+                    noti['icon'] = 'comment'
+                    noti['feedback'] = noti.route_id
+                elif noti['type'] == 'articlelike':
+                    noti['icon'] = 'thumb_up'
+                    noti['feedback'] = noti.route_id
+                elif noti['type'] == 'team_apply':
+                    noti['icon'] = 'assignment_ind'
+                    noti['feedback'] = 'team_apply'
+                    if not noti['receiver_read']:
+                        has_new_app = True
+                elif noti['type'] == 'team_apply_result':
+                    noti['icon'] = 'assignment_ind'
+                    noti['feedback'] = 'team_apply'
+                    if not noti['receiver_read']:
+                        has_new_app_result = True
+                elif noti['type'] == 'team_invite':
+                    noti['icon'] = 'group_add'
+                    board = Board.objects.get(team__id=noti.route_id)
+                    noti['feedback'] = BoardSerializer(board).data
+                elif noti['type'] == 'team_invite_result':
+                    noti['icon'] = 'group_add'
+                    board = Board.objects.get(team__id=noti.route_id)
+                    noti['feedback'] = BoardSerializer(board).data
+        except Exception as e:
+            print("Exception get_notifications", e)
+        data['has_new_noti'] = has_new_noti
+        data['has_new_app'] = has_new_app
+        data['has_new_app_result'] = has_new_app_result
+        data["notifications"] = notifications
+        res['data'] = data
+        return Response(res)
+
+# TODO: new message가 있는지 체크하는 API 제작
+# @register.simple_tag
+# def has_new_message(user):
+#     if user.is_anonymous:
+#         return None
+#     msgs = Message.objects.filter(
+#         receiver__user=user, receiver_read=False, sender__isnull=False)
+#     return len(msgs) > 0
 
 
 @login_required
@@ -173,25 +426,7 @@ def message_chat_view(request, opponent):
             err_msg = 'Internal Database Error'
             return JsonResponse({'status': 'fail', 'message': err_msg})
         msg_list = []
-        # TODO: 신규 메시지 생성시 기존메시지 <-> 신규 메시지 사이에 수신한 메시지도 조회
-        # raw_msg_list = Message.objects.filter(
-        #     (Q(sender=oppo_acc, receiver=my_acc) | Q(sender=my_acc, receiver=oppo_acc)) \
-        #     & Q(send_date__gt=last_date) & Q(send_date__lt=new_msg.send_date)
-        # ).order_by('-send_date')[:10]
-        # for msg in raw_msg_list:
-        #     if msg.receiver == my_acc and msg.receiver_read == False:
-        #         msg.receiver_read = True
-        #         msg.save()
-        #     msg_list.append({
-        #         'id': msg.id,
-        #         'sender': str(msg.sender),
-        #         'sender_id': msg.sender.user_id,
-        #         'receiver': str(msg.receiver),
-        #         'receiver_id': msg.receiver.user_id,
-        #         'body': str(msg.body),
-        #         'send_date': str(msg.send_date),
-        #         'read': str(msg.receiver_read)
-        #     })
+
         return JsonResponse({'status': 'success', 'msg_id': new_msg.id, 'new_msg_list': msg_list})
 
 
