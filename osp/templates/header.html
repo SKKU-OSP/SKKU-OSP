@@ -72,17 +72,17 @@
                 </li>
                 {% for noti in notifications.list %}
                 <li id="noti-{{noti.id}}" class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
-                onclick="readNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
+                onclick="readNotification('{{noti.type}}', '{{noti.id}}', '{{noti.feedback}}');">
                     <div class="d-flex">
                         <div class="material-icons-outlined">
                             {{noti.icon}}
                         </div>
                         <div>
-                            {{ noti.body.body }}
+                            {{ noti.body }}
                         </div>
                     </div>
                     <div>
-                        {% if noti.body.type in notifications.open_types %}
+                        {% if noti.type in notifications.open_types %}
                         <i class="bi bi-box-arrow-up-right"></i>
                         {% endif %}
                     </div>

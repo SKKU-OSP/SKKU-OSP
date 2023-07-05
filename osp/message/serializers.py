@@ -1,8 +1,13 @@
 from rest_framework import serializers
 from message import models
 
+from user.serializers import AccountSerializer
+
 
 class MessageSerializer(serializers.ModelSerializer):
+    sender = AccountSerializer()
+    receiver = AccountSerializer()
+
     class Meta:
         model = models.Message
         fields = (
