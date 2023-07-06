@@ -84,6 +84,55 @@
   margin: 0 10px 0 10px;
 }
 
+.article-head {
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.article-bar {
+  min-height: 20px;
+  display: flex;
+  justify-content: center;
+  background-color: var(--main-white);
+  border-top: 1px solid var(--main-border-color);
+  padding: 0.25rem;
+}
+
+.article-bar-title {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.article-bar-writer {
+  color: #0094ff;
+  text-decoration: underline;
+}
+
+.article-meta {
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: auto;
+  color: var(--main-black);
+}
+
+.article-meta-stat {
+  margin-left: 0.25em;
+  margin-right: 0.25em;
+  text-align: center;
+  color: #2f2f2f;
+}
+
+.article-meta-icon {
+  height: 14px;
+  margin-top: 5px;
+  margin-right: 3px;
+}
+
 /* sidebar */
 .community-sidebar {
   display: flex;
