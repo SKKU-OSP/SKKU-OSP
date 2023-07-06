@@ -84,7 +84,7 @@
   margin: 0 10px 0 10px;
 }
 
-.article-head {
+.article-bar-head {
   overflow: hidden;
   cursor: pointer;
   display: flex;
@@ -113,24 +113,51 @@
   text-decoration: underline;
 }
 
-.article-meta {
+.article-bar-meta {
   margin-top: auto;
   margin-bottom: auto;
   margin-left: auto;
   color: var(--main-black);
 }
 
-.article-meta-stat {
+.article-bar-meta-stat {
   margin-left: 0.25em;
   margin-right: 0.25em;
   text-align: center;
   color: #2f2f2f;
 }
 
-.article-meta-icon {
+.article-bar-meta-icon {
   height: 14px;
   margin-top: 5px;
   margin-right: 3px;
+}
+
+.article-bar-recruit-status {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: auto;
+}
+
+.article-bar-tag-recruit {
+  font-size: 0.75rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.article-bar-tag-recruit-ing {
+  background: var(--tag-bg-recruit) !important;
+  color: var(--sub-point-color) !important;
+}
+
+.article-bar-tag-recruit-end {
+  background: var(--main-border-color) !important;
+  color: var(--main-black) !important;
 }
 
 /* sidebar */

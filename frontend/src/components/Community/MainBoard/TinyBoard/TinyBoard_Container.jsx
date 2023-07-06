@@ -10,7 +10,7 @@ export default function TinyBoard_Container(props) {
   const navigate = useNavigate();
 
   const { board_name, board_id } = props;
-  const [articles, setArticles] = useState([1, 2, 3]);
+  const [articles, setArticles] = useState([1, 2, 3, 4, 5]);
 
   // const getArticles = () => {
   //   axios
