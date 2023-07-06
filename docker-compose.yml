@@ -1,15 +1,57 @@
 version: "3.8"
+# Please Change the version oa image before deploying
 
-services: 
-  OSP: 
-    image: osp
-    container_name: osp
+services:
+  ## Product
+  FRONTEND:
+    image: sosd/sosd-frontend-vitejs:test
+    container_name: sosd-frontend
     restart: always
-    command: >
-      sh -c "python3 manage.py makemigrations &&
-             python3 manage.py migrate &&
-             python3 manage.py runserver 0.0.0.0:8000 --insecure"
-    ports: 
-      - "8000:8000"
-    extra_hosts: 
-     - host.docker.internal:host-gateway
+    environment:
+      VIRTUAL_HOST: "sosd.skku.edu"
+      LETSENCRYPT_HOST: "sosd.skku.edu"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - "net"
+    ports:
+      - "4401:5173"
+  OSP:
+    image: sosd/sosd-backend-django:test
+    container_name: sosd-backend
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - "net"
+    ports:
+      - "4402:4402"
+  ## Dev
+  # FRONTEND:
+  #  image: sosd/sosd-frontend-vitejs:test
+  #  container_name: sosd-frontend
+  #  restart: always
+  #  environment:
+  #    VIRTUAL_HOST: "sosd-dev.skku.edu"
+  #    LETSENCRYPT_HOST: "sosd-dev.skku.edu"
+  #  extra_hosts:
+  #    - host.docker.internal:host-gateway
+  #  networks:
+  #    - "net"
+  #  ports:
+  #    - "4401:5173"
+  # OSP:
+  #  image: sosd/sosd-backend-django:test
+  #  container_name: sosd-backend
+  #  restart: always
+  #
+  #  extra_hosts:
+  #    - host.docker.internal:host-gateway
+  #  networks:
+  #    - "net"
+  #  ports:
+  #    - "4402:4402"
+
+networks:
+  net:
+    external: true
