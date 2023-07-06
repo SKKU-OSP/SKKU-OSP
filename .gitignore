@@ -142,7 +142,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+.vscode
 node_modules/
 
 # Spyder project settings
@@ -199,8 +199,8 @@ osp/static/data/
 osp/data
 
 # docker
-Dockerfile
-docker-compose.yml
+# Dockerfile
+# docker-compose.yml
 
 # macOS metadata file for developers with macOS
 .DS_store
