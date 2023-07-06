@@ -14,7 +14,7 @@ export default function TinyBoard_Presenter(props) {
       </div>
       <div className="article-list-section">
         {articles.map((article) => (
-          <TinyBoardArticle key={article} />
+          <TinyBoardArticle key={article} article={article} board_id={board_id} />
         ))}
       </div>
     </div>
