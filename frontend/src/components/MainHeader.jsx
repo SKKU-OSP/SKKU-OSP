@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import SearcherBox from './SearchBox';
 import classes from './MainHeader.module.css';
+import IconList_Container from './NavBar/IconList_Container';
 
 /**
  * TARGET: header.html
@@ -21,6 +22,9 @@ function MainHeader() {
       </div>
       <div className={isAuth ? `${classes.search} ms-2` : 'ms-2'}>
         <SearcherBox />
+      </div>
+      <div>
+        <IconList_Container />
       </div>
     </header>
   );
