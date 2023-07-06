@@ -112,7 +112,9 @@ class MessageChatView(APIView):
         try:
             user_account = Account.objects.get(user=request.user.id)
             target_account = Account.objects.get(user__id=target_user_id)
-            chat_body = request.POST.get('chat-input', "")
+
+            chat_body = request.data.get('chat-input', "")
+
             if chat_body.strip() != "":
                 with transaction.atomic():
                     new_message = Message.objects.create(
@@ -133,12 +135,19 @@ class MessageChatView(APIView):
 
         except Exception as e:
             logging.exception(f"MessageChatView POST: {e}")
+            res['status'] = 'fail'
+            res['message'] = e
+            return Response(data)
+
         before_date = datetime.now()
         reload_messages = self.get_chat_messages(
             user_account, target_account, before_date)
         data['messages'] = reload_messages
+        res['status'] = 'success'
+        res['message'] = '메시지 전송 완료'
+        res['data'] = data
 
-        return Response(data)
+        return Response(res)
 
     def get_chat_messages(self, user_account, target_account, before_date):
         # 유저가 보낸 메시지와 받은 메시지 모두
@@ -218,7 +227,7 @@ class ApplicationReadView(APIView):
         res = {'status': None, 'message': None}
         try:
             user_id = request.user.id
-            type_app = request.POST.get('type', None)
+            type_app = request.data.get('type', None)
 
             type_app_to_noti = {"recv": "team_apply",
                                 "send": "team_apply_result"}
