@@ -8,7 +8,8 @@ import {
   BsFillChatTextFill,
   BsQuestionCircleFill,
   BsFillInfoCircleFill,
-  BsFillMegaphoneFill
+  BsFillMegaphoneFill,
+  BsFillPersonPlusFill
 } from 'react-icons/bs';
 
 export default function SideBar_Presenter() {
@@ -82,27 +83,33 @@ export default function SideBar_Presenter() {
           <i className="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-board"></i>
         </div>
         <div className="boardgroup-item hover-opacity">
-          <a href="/community/">
+          <a href="/community/board/자유">
             <BsFillChatTextFill size="22" />
             <span>자유</span>
           </a>
         </div>
         <div className="boardgroup-item hover-opacity">
-          <a href="/community/">
+          <a href="/community/board/질문">
             <BsQuestionCircleFill size="22" />
             <span>질문</span>
           </a>
         </div>
         <div className="boardgroup-item hover-opacity">
-          <a href="/community/">
+          <a href="/community/board/정보">
             <BsFillInfoCircleFill size="22" />
             <span>정보</span>
           </a>
         </div>
         <div className="boardgroup-item hover-opacity">
-          <a href="/community/">
+          <a href="/community/board/홍보">
             <BsFillMegaphoneFill size="22" />
             <span>홍보</span>
+          </a>
+        </div>
+        <div className="boardgroup-item hover-opacity">
+          <a href="/community/board/팀 모집">
+            <BsFillPersonPlusFill size="22" />
+            <span>팀 모집</span>
           </a>
         </div>
 
