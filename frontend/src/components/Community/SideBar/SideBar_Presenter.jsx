@@ -110,11 +110,11 @@ export default function SideBar_Presenter() {
         {/* is_authenticated 확인 필요 */}
         {1 === 1 && (
           <div>
-            <div id="team-boardgroup" class="boardgroup-title">
+            <div id="team-boardgroup" className="boardgroup-title">
               <span>팀 게시판</span>
             </div>
 
-            <div id="team-create" class="boardgroup-item hover-opacity">
+            <div id="team-create" className="boardgroup-item hover-opacity">
               <a herf="#" role="button">
                 <BsPlusCircleDotted size="22" />
                 <span>팀 만들기</span>
