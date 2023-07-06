@@ -9,7 +9,7 @@ export default function TinyBoard_Container(props) {
   // const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { board_name, board_id } = props;
+  const { board_name } = props;
   const [articles, setArticles] = useState([1, 2, 3, 4, 5]);
 
   // const getArticles = () => {
@@ -26,8 +26,8 @@ export default function TinyBoard_Container(props) {
   // });
 
   const onBoard = () => {
-    navigate(`/community/board/${board_name}/${board_id}`);
+    navigate(`/community/board/${board_name}`);
   };
 
-  return <TinyBoard_Presenter board_name={board_name} board_id={board_id} articles={articles} onBoard={onBoard} />;
+  return <TinyBoard_Presenter board_name={board_name} articles={articles} onBoard={onBoard} />;
 }
