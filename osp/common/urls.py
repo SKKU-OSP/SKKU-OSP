@@ -30,4 +30,6 @@ urlpatterns = [
     path('reset/done/', views.PasswordResetCompleteView.as_view(),
          name="password_reset_complete"),
     path('api/v1/find_account', views.valid_check, name="api_find_account"),
+    path('api/email-domain', views.EmailDomainListView.as_view(),
+         name="EmailDomainList"),
 ]
