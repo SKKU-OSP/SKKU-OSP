@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ChatMessage_Presenter from './ChatMessage_Presenter';
 
-export default function ChatMessage_Container() {
+export default function ChatMessage_Container({ iconSize }) {
   const [newAlert, setNewAlert] = useState(false);
   const [show, setShow] = useState(false);
 
@@ -25,6 +25,7 @@ export default function ChatMessage_Container() {
       onCloseChatModal={handleClose}
       show={show}
       newAlert={newAlert}
+      iconSize={iconSize}
     />
   );
 }
