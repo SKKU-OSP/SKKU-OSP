@@ -1,7 +1,8 @@
 import IconList_Presenter from './IconList_Presenter';
 
 function IconList_Container() {
-  return <IconList_Presenter />;
+  const iconSize = '24';
+  return <IconList_Presenter iconSize={iconSize} />;
 }
 
 export default IconList_Container;
