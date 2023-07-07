@@ -535,3 +535,12 @@ def get_user_primary_email(access_token):
         print("status error", res.status_code)
 
     return primary_email
+
+
+class EmailDomainListView(APIView):
+    def get(self, request):
+        domain_list = ["g.skku.edu", "skku.edu", "gmail.com",
+                       "naver.com", "kakao.com", "nate.com", "yahoo.com"]
+        res = {'status': 'success', 'data': domain_list}
+
+        return Response(res)

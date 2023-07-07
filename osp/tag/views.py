@@ -64,6 +64,18 @@ class TagCreateView(APIView):
         return Response(res)
 
 
+'''
+# tag_templatetag.py 정리
+category_tag -> TagListView로 대체 가능
+get_account_tags -> user App으로 이동
+category_tag_domain -> TagListView로 대체 가능 ?type=domain
+category_tag_language -> TagListView로 대체 가능 ?type=language
+email_domain_tag -> common App으로 이동
+'''
+
+# deprecated
+
+
 class TagAPIView(View):
     def get(self, request):
         keyword = request.GET.get('keyword', '')
