@@ -1,0 +1,8 @@
+.badge-new {
+  height: 0.5rem;
+  width: 0.5rem;
+  position: absolute;
+  background-color: var(--alert-color);
+  border-radius: 50%;
+  padding: 0.25rem;
+}

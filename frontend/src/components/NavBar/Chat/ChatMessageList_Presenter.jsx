@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function ChatMessageList_Presenter() {
+export default function ChatMessageList_Presenter() {
   const [chatData, setChat] = useState({
     'chat-input': 'test axios data'
   });
@@ -27,5 +27,3 @@ function ChatMessageList_Presenter() {
     </>
   );
 }
-
-export default ChatMessageList_Presenter;

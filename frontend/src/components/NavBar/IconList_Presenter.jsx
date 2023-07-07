@@ -1,13 +1,13 @@
-import ChatMessage_Container from './ChatMessage_Container';
-import Notification_Container from './Notification_Container';
-import TeamApplication_Container from './TeamApplication_Container';
+import ChatMessage_Container from './Chat/ChatMessage_Container';
+import Notification_Container from './Notification/Notification_Container';
+import TeamApplication_Container from './TeamApplication/TeamApplication_Container';
 
-function IconList_Presenter() {
+function IconList_Presenter({ iconSize }) {
   return (
     <>
-      <TeamApplication_Container />
-      <ChatMessage_Container />
-      <Notification_Container />
+      <TeamApplication_Container iconSize={iconSize} />
+      <ChatMessage_Container iconSize={iconSize} />
+      <Notification_Container iconSize={iconSize} />
     </>
   );
 }
