@@ -45,6 +45,7 @@ export default function TinyBoardArticle_Presenter(props) {
             )}
           </div>
         )}
+        <div className="article-bar-after-meta"></div>
       </div>
     </div>
   );
