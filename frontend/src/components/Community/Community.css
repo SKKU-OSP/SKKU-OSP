@@ -1,6 +1,19 @@
 @media (max-width: 450px) {
+  .article-bar {
+    display: block !important;
+  }
+  .article-bar-meta,
+  .article-bar-recruit-status {
+    float: right;
+  }
+  .article-bar-after-meta {
+    clear: both !important;
+  }
+  #article-recruit-bar {
+    display: flex !important;
+  }
   .main-board {
-    height: 600px !important;
+    height: 430px !important;
   }
 }
 
@@ -8,15 +21,12 @@
   .community-sidebar {
     width: 50px;
   }
-
   .community-container {
     display: flex;
   }
-
   .community-main {
     width: calc(100% - 50px);
   }
-
   #sidebar-user-info > a > span {
     display: none !important;
   }
@@ -137,8 +147,8 @@
   display: flex;
   align-items: center;
   margin-top: auto;
-  margin-bottom: auto;
-  margin-left: auto;
+  margin-bottom: 0.25rem;
+  margin-left: 0.25rem;
 }
 
 .article-bar-tag-recruit {
