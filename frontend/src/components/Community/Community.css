@@ -19,17 +19,29 @@
 
 @media screen and (max-width: 767px) {
   .community-sidebar {
-    width: 50px;
+    width: 50px !important;
+    padding-right: 0 !important;
   }
-  .community-container {
-    display: flex;
+  .sidebar-profile-img {
+    width: 22px;
+    height: 22px;
+    border: 0 !important;
   }
-  .community-main {
-    width: calc(100% - 50px);
-  }
-  #sidebar-user-info > a > span {
+  #sidebar-user-info > a > span,
+  .sidebar-boardgroup-title,
+  .sidebar-boardgroup-item > a > span {
     display: none !important;
   }
+  .community-container {
+    display: flex !important;
+  }
+  .community-main {
+    width: calc(100% - 50px) !important;
+  }
+}
+
+.community-main {
+  margin-bottom: 50px;
 }
 
 .p-community-main {
@@ -116,6 +128,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  margin-right: 0.25rem;
 }
 
 .article-bar-writer {
@@ -148,7 +161,7 @@
   align-items: center;
   margin-top: auto;
   margin-bottom: 0.25rem;
-  margin-left: 0.25rem;
+  margin-left: auto;
 }
 
 .article-bar-tag-recruit {
@@ -177,7 +190,7 @@
   align-items: flex-start;
 }
 
-.profile-tab {
+.sidebar-profile-tab {
   width: 100%;
   background: var(--main-point-color);
   box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
@@ -195,11 +208,11 @@
   gap: 0.5rem;
 }
 
-#sidebar-user-info a {
+#sidebar-user-info > a {
   text-decoration: none;
 }
 
-#sidebar-user-info .profile-img {
+#sidebar-user-info .sidebar-profile-img {
   border-radius: 50%;
   object-fit: cover;
   background-color: var(--main-white);
@@ -208,7 +221,7 @@
   margin-right: 10px;
 }
 
-#profile-username {
+#sidebar-profile-username {
   font-size: 20px;
   color: var(--main-white);
   vertical-align: middle;
@@ -217,24 +230,24 @@
   text-overflow: ellipsis;
 }
 
-#community-tab {
+#sidebar-community-tab {
   box-shadow: 0 4px 4px var(--card-box-shadow);
   margin-bottom: 20px;
   border-bottom-left-radius: 0.625rem;
   border-bottom-right-radius: 0.625rem;
 }
 
-#community-tab > div:last-child {
+#sidebar-community-tab > div:last-child {
   border-bottom-left-radius: 0.625rem;
   border-bottom-right-radius: 0.625rem;
 }
 
-#community-tab > div:last-child > div:last-child {
+#sidebar-community-tab > div:last-child > div:last-child {
   border-bottom-left-radius: 0.625rem;
   border-bottom-right-radius: 0.625rem;
 }
 
-.boardgroup-title {
+.sidebar-boardgroup-title {
   display: flex;
   justify-content: space-between;
   padding: 0;
@@ -245,22 +258,22 @@
   padding: 0.5rem;
 }
 
-.boardgroup-title > a {
+.sidebar-boardgroup-title > a {
   text-decoration: none;
 }
 
-.boardgroup-title > a:hover {
+.sidebar-boardgroup-title > a:hover {
   color: blue;
 }
 
-.boardgroup-title > * {
+.sidebar-boardgroup-title > * {
   color: var(--main-black);
   display: inline-block;
   margin-top: auto;
   margin-bottom: auto;
 }
 
-.boardgroup-item {
+.sidebar-boardgroup-item {
   display: flex;
   justify-content: start;
   font-style: normal;
@@ -269,7 +282,7 @@
   border-top: 1px solid var(--main-border-color);
 }
 
-.boardgroup-item > a {
+.sidebar-boardgroup-item > a {
   color: var(--main-black);
   display: flex;
   column-gap: 0.5rem;
@@ -283,7 +296,7 @@
   text-decoration: none;
 }
 
-.boardgroup-item.selected > a {
+.sidebar-boardgroup-item.selected > a {
   color: var(--sub-point-color);
   font-weight: 600;
 }
