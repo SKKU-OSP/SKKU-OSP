@@ -20,7 +20,7 @@ import json
 import logging
 
 
-class MessageListView(APIView):
+class MessageRoomListView(APIView):
     '''
     채팅 상대방의 리스트를 통신 날짜를 기준으로 내림차순 정렬하여 반환
     '''
@@ -112,7 +112,9 @@ class MessageChatView(APIView):
         try:
             user_account = Account.objects.get(user=request.user.id)
             target_account = Account.objects.get(user__id=target_user_id)
-            chat_body = request.POST.get('chat-input', "")
+
+            chat_body = request.data.get('chat-input', "")
+
             if chat_body.strip() != "":
                 with transaction.atomic():
                     new_message = Message.objects.create(
@@ -133,12 +135,19 @@ class MessageChatView(APIView):
 
         except Exception as e:
             logging.exception(f"MessageChatView POST: {e}")
+            res['status'] = 'fail'
+            res['message'] = e
+            return Response(data)
+
         before_date = datetime.now()
         reload_messages = self.get_chat_messages(
             user_account, target_account, before_date)
         data['messages'] = reload_messages
+        res['status'] = 'success'
+        res['message'] = '메시지 전송 완료'
+        res['data'] = data
 
-        return Response(data)
+        return Response(res)
 
     def get_chat_messages(self, user_account, target_account, before_date):
         # 유저가 보낸 메시지와 받은 메시지 모두
@@ -218,7 +227,7 @@ class ApplicationReadView(APIView):
         res = {'status': None, 'message': None}
         try:
             user_id = request.user.id
-            type_app = request.POST.get('type', None)
+            type_app = request.data.get('type', None)
 
             type_app_to_noti = {"recv": "team_apply",
                                 "send": "team_apply_result"}
@@ -246,62 +255,72 @@ class ApplicationReadView(APIView):
 
 # 기존 template_tags의 message_tag 영역에 대한 API 작업
 class NotificationListView(APIView):
+    '''
+    알림 메시지 목록과 새로운 알림 배지 렌더링 유무 반환
+    '''
+
     def get(self, request):
         res = {"status": None, "data": None}
-        data = {'has_new_noti': None, 'has_new_app': None,
-                'has_new_app_result': None, 'notifications': None, }
-        has_new_app = False
-        has_new_app_result = False
+        data = {'show_new_noti': False, 'show_new_app': False,
+                'show_new_app_result': False, 'notifications': []}
+        show_new_app = False
+        show_new_app_result = False
         user_id = request.user.id
         notifications = Notification.objects.filter(
             receiver__user_id=user_id).order_by('-send_date')
-        has_new_noti = len(notifications.filter(receiver_read=False)) > 0
+        show_new_noti = len(notifications.filter(receiver_read=False)) > 0
 
         notifications = NotificationSerializer(notifications, many=True).data
-        # FIXME 모델 외의 속성값은 저장이 안되는 오류 수정할 것
         try:
             for noti in notifications:
                 if noti['type'] == 'comment':
                     noti['icon'] = 'comment'
-                    noti['feedback'] = noti.route_id
+                    noti['feedback'] = noti['route_id']
                 elif noti['type'] == 'articlelike':
+                    # articlelike 타입은 deprecated 알림
                     noti['icon'] = 'thumb_up'
-                    noti['feedback'] = noti.route_id
+                    noti['feedback'] = noti['route_id']
                 elif noti['type'] == 'team_apply':
                     noti['icon'] = 'assignment_ind'
                     noti['feedback'] = 'team_apply'
                     if not noti['receiver_read']:
-                        has_new_app = True
+                        show_new_app = True
                 elif noti['type'] == 'team_apply_result':
                     noti['icon'] = 'assignment_ind'
                     noti['feedback'] = 'team_apply'
                     if not noti['receiver_read']:
-                        has_new_app_result = True
+                        show_new_app_result = True
                 elif noti['type'] == 'team_invite':
                     noti['icon'] = 'group_add'
-                    board = Board.objects.get(team__id=noti.route_id)
+                    board = Board.objects.get(team__id=noti['route_id'])
                     noti['feedback'] = BoardSerializer(board).data
                 elif noti['type'] == 'team_invite_result':
                     noti['icon'] = 'group_add'
-                    board = Board.objects.get(team__id=noti.route_id)
+                    board = Board.objects.get(team__id=noti['route_id'])
                     noti['feedback'] = BoardSerializer(board).data
         except Exception as e:
             print("Exception get_notifications", e)
-        data['has_new_noti'] = has_new_noti
-        data['has_new_app'] = has_new_app
-        data['has_new_app_result'] = has_new_app_result
+        data['show_new_noti'] = show_new_noti
+        data['show_new_app'] = show_new_app
+        data['show_new_app_result'] = show_new_app_result
         data["notifications"] = notifications
         res['data'] = data
         return Response(res)
 
-# TODO: new message가 있는지 체크하는 API 제작
-# @register.simple_tag
-# def has_new_message(user):
-#     if user.is_anonymous:
-#         return None
-#     msgs = Message.objects.filter(
-#         receiver__user=user, receiver_read=False, sender__isnull=False)
-#     return len(msgs) > 0
+
+class MessageCheckNewView(APIView):
+    '''
+    읽지 않은 메시지가 있는지 확인하는 API
+    '''
+
+    def get(self, request):
+        res = {'status': None, 'data': None}
+        data = {'show_new_message': False}
+        unread_messages = Message.objects.filter(
+            receiver__user=request.user, receiver_read=False)
+        data['show_new_message'] = unread_messages.exists()
+        res['data'] = data
+        return Response(res)
 
 
 @login_required
@@ -496,36 +515,34 @@ class MessageSplitView(APIView):
             msg_qs = Message.objects.filter(sender=None)
             print("msg_qs", len(msg_qs))
             move_cnt, remove_cnt = 0, 0
-            if len(msg_qs) > len(Notification.objects.all()):
-                for i, msg in enumerate(msg_qs):
-                    body_json = json.loads(msg.body)
-                    print(i, body_json)
-                    print(body_json['type'])
-                    try:
-                        type_txt = body_json['type']
-                        sender_name = body_json.get('subject', '')
-                        body_txt = body_json['body']
-                        route_id = body_json.get('article_id', None)
-                        route_id = body_json.get(
-                            'team_id', None) if route_id is None else route_id
-                        receiver = msg.receiver
-                        send_date = msg.send_date
-                        receiver_read = msg.receiver_read
-                        receiver_delete = msg.receiver_delete
-                        with transaction.atomic():
-                            noti = Notification.objects.create(type=type_txt, sender_name=sender_name,
-                                                               receiver=receiver, body=body_txt, route_id=route_id,
-                                                               send_date=send_date, receiver_read=receiver_read, receiver_delete=receiver_delete)
-                            noti.send_date = send_date
-                            noti.save()
-                            move_cnt += 1
 
-                    except Exception as ex:
-                        logging.exception(f"Notification create: {ex}")
-            if len(msg_qs) == len(Notification.objects.all()):
-                for i, msg in enumerate(msg_qs):
-                    msg.delete()
-                    remove_cnt += 1
+            for i, msg in enumerate(msg_qs):
+                body_json = json.loads(msg.body)
+                try:
+                    type_txt = body_json['type']
+                    sender_name = body_json.get('subject', '')
+                    body_txt = body_json['body']
+                    route_id = body_json.get('article_id', None)
+                    route_id = body_json.get(
+                        'team_id', None) if route_id is None else route_id
+                    receiver = msg.receiver
+                    send_date = msg.send_date
+                    receiver_read = msg.receiver_read
+                    receiver_delete = msg.receiver_delete
+                    with transaction.atomic():
+                        noti = Notification.objects.create(type=type_txt, sender_name=sender_name,
+                                                           receiver=receiver, body=body_txt, route_id=route_id,
+                                                           send_date=send_date, receiver_read=receiver_read, receiver_delete=receiver_delete)
+                        noti.send_date = send_date
+                        noti.save()
+                        move_cnt += 1
+
+                except Exception as ex:
+                    logging.exception(f"Notification create: {ex}")
+
+            for i, msg in enumerate(msg_qs):
+                msg.delete()
+                remove_cnt += 1
 
             res = {"status": "success", "move_cnt": move_cnt,
                    "remove_cnt": remove_cnt}

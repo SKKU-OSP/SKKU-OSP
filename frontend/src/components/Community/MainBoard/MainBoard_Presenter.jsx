@@ -14,23 +14,23 @@ export default function MainBoard_Presenter() {
           <div className="card boards-card">
             <div className="card-body text-center d-flex flex-wrap">
               <div className="col-md-6 col-12 main-board">
-                <TinyBoard board_name="자유" board_id="0" />
+                <TinyBoard board_name="자유" />
               </div>
 
               <div className="col-md-6 col-12 main-board">
-                <TinyBoard board_name="질문" board_id="1" />
+                <TinyBoard board_name="질문" />
               </div>
 
               <div className="col-md-6 col-12 main-board">
-                <TinyBoard board_name="정보" board_id="5" />
+                <TinyBoard board_name="정보" />
               </div>
 
               <div className="col-md-6 col-12 main-board">
-                <TinyBoard board_name="홍보" board_id="6" />
+                <TinyBoard board_name="홍보" />
               </div>
 
               <div className="col-12 main-board">
-                <TinyBoard board_name="팀 모집" board_id="2" />
+                <TinyBoard board_name="팀 모집" />
               </div>
             </div>
           </div>

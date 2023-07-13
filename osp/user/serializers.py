@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from user import models
 
+from tag.serializers import TagIndependentSerializer
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,6 +21,18 @@ class AccountSerializer(serializers.ModelSerializer):
             "github_id"
         )
 
+class AccountInterestSerializer(serializers.ModelSerializer):
+    # account = AccountSerializer()
+    tag = TagIndependentSerializer()
+
+    class Meta:
+        model = models.AccountInterest
+        fields = (
+            "id",
+            # "account",
+            "tag",
+            "level"
+        )
 
 class AccountPrivacySerializer(serializers.ModelSerializer):
     account = AccountSerializer
