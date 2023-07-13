@@ -2,7 +2,7 @@ import '../../Community.css';
 import TinyBoardArticle from './TinyBoardArticle/index.jsx';
 
 export default function TinyBoard_Presenter(props) {
-  const { board_name, board_id, articles, onBoard } = props;
+  const { board_name, articles, onBoard } = props;
 
   return (
     <div>
@@ -14,7 +14,7 @@ export default function TinyBoard_Presenter(props) {
       </div>
       <div className="article-list-section">
         {articles.map((article) => (
-          <TinyBoardArticle key={article} />
+          <TinyBoardArticle key={article} article={article} board_name={board_name} />
         ))}
       </div>
     </div>

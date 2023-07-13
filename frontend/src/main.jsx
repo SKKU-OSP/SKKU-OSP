@@ -3,6 +3,7 @@ import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import RootLayout from './routes/RootLayout';
 import Community from './routes/Community';
+import BoardPage from './routes/BoardPage';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
 
@@ -16,8 +17,17 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'community',
-        element: <Community />,
-        children: []
+        element: <Outlet />,
+        children: [
+          {
+            path: '',
+            element: <Community />
+          },
+          {
+            path: 'board/:board_name',
+            element: <BoardPage />
+          }
+        ]
       },
       {
         path: 'accounts',

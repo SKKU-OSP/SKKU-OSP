@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 
 import SearcherBox from './SearchBox';
 import classes from './MainHeader.module.css';
+import IconList_Container from './NavBar/IconList_Container';
 
+import './MainHeader.css';
 /**
  * TARGET: header.html
  */
@@ -21,6 +23,9 @@ function MainHeader() {
       </div>
       <div className={isAuth ? `${classes.search} ms-2` : 'ms-2'}>
         <SearcherBox />
+      </div>
+      <div className="d-flex flex-row p-2">
+        <IconList_Container />
       </div>
     </header>
   );

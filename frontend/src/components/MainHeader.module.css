@@ -14,8 +14,12 @@
   .search {
     visibility: hidden;
     cursor: default;
+    flex: 1 1 auto;
   }
   .searcher-box {
     margin-left: 10px;
   }
+}
+.search {
+  flex: 1 1 auto;
 }
