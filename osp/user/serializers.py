@@ -18,3 +18,17 @@ class AccountSerializer(serializers.ModelSerializer):
             "photo",
             "github_id"
         )
+
+
+class AccountPrivacySerializer(serializers.ModelSerializer):
+    account = AccountSerializer
+
+    class Meta:
+        model = models.AccountPrivacy
+        fields = (
+            "id",
+            "account",
+            "open_lvl",
+            "is_write",
+            "is_open"
+        )
