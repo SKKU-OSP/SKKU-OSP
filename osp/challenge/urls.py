@@ -9,10 +9,9 @@ urlpatterns = [
 
     path('api/list/', views.ChallengeListView.as_view(), name='ChallengeList'),
     path('api/list/<int:target_user_id>',
-         views.ChallengeAchieveView.as_view(), name='ChallengeList'),
-
-
-
+         views.ChallengeAchieveView.as_view(), name='ChallengeAchieve'),
+    path('api/update/<int:target_user_id>',
+         views.AchievementUpdateView.as_view(), name='AchievementUpdate'),
 
     path('check/', views.challenge_acheive_update, name='ChallengeCheck'),
     path('forbidden/', views.forbidden_page, name='forbbiden')
