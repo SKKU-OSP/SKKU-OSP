@@ -49,7 +49,7 @@ class ChallengeAchieveView(APIView):
 
         # 유저의 도전과제 달성 정보
         achieves = ChallengeAchieve.objects.filter(
-            account__user=target_user_id)  # .select_related('challenge')
+            account__user=target_user_id)
 
         # 새로운 challenge가 있으면 달성여부 확인
         achieved_challenge_ids = achieves.values_list(
@@ -76,6 +76,31 @@ class ChallengeAchieveView(APIView):
             ch_id = achieve_cnt[achievement['id']]
             achievement['total_achievement'] = achieve_id_cnt[ch_id]
         data['achievements'] = achievements
+        res['data'] = data
+
+        return Response(res)
+
+
+class AchievementUpdateView(APIView):
+    '''
+    유저의 도전과제 달성 여부 업데이트
+    '''
+
+    def get(self, request, target_user_id):
+        res = {'status': 'success', 'message': '', 'data': []}
+        data = {}
+
+        try:
+            challenges = Challenge.objects.all()
+            account = Account.objects.get(user=target_user_id)
+            for challenge in challenges:
+                achievement_check(account, challenge)
+
+        except Exception as e:
+            print(f"AchievementUpdateView: {e}")
+            res['status'] = 'fail'
+            res['message'] = '도전과제 업데이트에 실패했습니다'
+        res['message'] = '도전과제 업데이트에 성공했습니다'
         res['data'] = data
 
         return Response(res)
@@ -131,9 +156,6 @@ def challenge_list_view(request):
 def challenge_acheive_update(request):
     challenge_list = Challenge.objects.all()
     my_acc = Account.objects.get(user=request.user.id)
-    acheive_list = ChallengeAchieve.objects.filter(account=my_acc)
-    acheive_id_list = acheive_list.values_list('challenge__id', flat=True)
-    print(acheive_id_list)
     for challenge in challenge_list:
         try:
             achievement_check(my_acc, challenge)
