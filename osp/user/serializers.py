@@ -21,7 +21,6 @@ class AccountSerializer(serializers.ModelSerializer):
             "github_id"
         )
 
-
 class AccountInterestSerializer(serializers.ModelSerializer):
     # account = AccountSerializer()
     tag = TagIndependentSerializer()
@@ -33,4 +32,17 @@ class AccountInterestSerializer(serializers.ModelSerializer):
             # "account",
             "tag",
             "level"
+        )
+
+class AccountPrivacySerializer(serializers.ModelSerializer):
+    account = AccountSerializer
+
+    class Meta:
+        model = models.AccountPrivacy
+        fields = (
+            "id",
+            "account",
+            "open_lvl",
+            "is_write",
+            "is_open"
         )
