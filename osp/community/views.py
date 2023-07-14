@@ -17,8 +17,9 @@ from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
 from team.recommend import get_team_recommendation_list
 
-from community.serializers import BoardSerializer, ArticleSerializer
+from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
 from user.serializers import AccountSerializer, AccountPrivacySerializer
+from tag.serializers import TagIndependentSerializer
 
 import math
 import json
@@ -730,6 +731,44 @@ class ArticleNoticeSaveView(APIView):
             return Response(res)
 
         res = {'status': 'success', 'data': data}
+        return Response(res)
+
+
+class ArticleAPIView(APIView):
+    '''
+    프론트엔드를 위해 임시로 만든 뷰입니다.
+    '''
+
+    def get(self, request, article_id):
+
+        try:
+            res = {'status': 'success', 'message': '', 'data': None}
+            data = {'article': None, 'tags': None,
+                    'comments': [], 'article_file': None}
+            # 게시글 정보
+            article = Article.objects.get(id=article_id)
+            data['article'] = ArticleSerializer(article).data
+
+            # 게시글 태그 정보
+            article_tags = ArticleTag.objects.filter(article__id=article_id)
+            data['tags'] = [TagIndependentSerializer(
+                article_tag.tag).data for article_tag in article_tags]
+
+            # 게시판 정보
+            board = Board.objects.get(id=article.board_id)
+            data['board'] = BoardSerializer(board).data
+
+            # 게시글 댓글 정보
+            comments = ArticleComment.objects.filter(article_id=article_id)
+            data['comments'] = ArticleCommentSerializer(
+                comments, many=True).data
+
+            res['data'] = data
+        except Exception as e:
+            print("ArticleAPIView", e)
+            res['message'] = e
+            Response(res)
+
         return Response(res)
 
 

@@ -12,7 +12,6 @@ class LogoField(serializers.Field):
 
 
 class TagIndependentSerializer(serializers.ModelSerializer):
-    logo = LogoField()
 
     class Meta:
         model = models.TagIndependent
