@@ -2,6 +2,7 @@ from rest_framework import serializers
 from community import models
 
 from user.serializers import AccountSerializer
+from tag.serializers import TagIndependentSerializer
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -37,3 +38,19 @@ class ArticleSerializer(serializers.ModelSerializer):
             "period_start",
             "period_end"
         )
+
+
+class ArticleCommentSerializer(serializers.ModelSerializer):
+    writer = AccountSerializer
+
+    class Meta:
+        model = models.ArticleComment
+        fields = ("id",
+                  #   "article", # article에서 article Comment 불러오므로 배제
+                  "body",
+                  "pub_date",
+                  "del_date",
+                  "anonymous_writer",
+                  "is_deleted",
+                  "writer"
+                  )

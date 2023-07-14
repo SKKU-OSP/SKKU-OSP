@@ -1,8 +1,7 @@
 from django.db import models
 from user.models import Account
-from tag.models import Tag
+from tag.models import TagIndependent
 from team.models import Team
-# Create your models here.
 
 
 class Board(models.Model):
@@ -37,7 +36,7 @@ class Article(models.Model):
 
 class ArticleTag(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
-    tag = models.ForeignKey(Tag, models.CASCADE)
+    tag = models.ForeignKey(TagIndependent, models.CASCADE)
 
     class Meta:
         constraints = [
