@@ -1,7 +1,7 @@
 # SOSD (Square of Software Developers)
 ## 성균관대학교 소프트웨어융합대학 학생들을 위한 오픈소스플랫폼 커뮤니티
 ![image](https://user-images.githubusercontent.com/50347615/230562674-4493287f-2387-46dc-8798-60ef21befb42.png)
-![image](https://user-images.githubusercontent.com/50347615/230562795-f9237669-6768-4404-8ad7-0f64ebb5c70f.png)
+![230562795-f9237669-6768-4404-8ad7-0f64ebb5c70f](https://github.com/SKKU-OSP/SKKU-OSP/assets/50347615/a51d5274-0450-46da-bdbf-6a902a5f0032)
 
 
 ## Stacks
@@ -33,5 +33,8 @@ Beta 1.1.2 (v1.1.2-beta) - 2023.05.05. - 게시판 반응형 디자인 개선, G
 Beta 1.1.3 (v1.1.3-beta) - 2023.05.12. - 정보공개 기능 개선, 검색기능 오류수정\
 Beta 1.1.4 (v1.1.4-beta) - 2023.05.12. - 지원서 hotfix\
 Beta 1.1.5 (v1.1.5-beta) - 2023.05.21. - 개인정보공개래벨 조정\
-Beta 1.1.6 (v1.1.5-beta) - 2023.06.20. - GitHub 토큰 갱신, 각종오류수정 
+Beta 1.1.6 (v1.1.6-beta) - 2023.06.20. - GitHub 토큰 갱신, 각종오류수정\
+Beta 1.2.0 (v1.2.0-beta) - 2023.06.30. - 베타테스팅 이후 결과반영\
+Beta 1.2.1 (v1.2.1-beta) - 2023.07.01. - 사용언어, 기술스택 설정 안내 문구 추가
+
 
