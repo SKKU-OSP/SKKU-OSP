@@ -1,27 +1,14 @@
 import { useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
 import classes from './ChallengePage.module.css';
 import { FaTrophy } from 'react-icons/fa';
-import Form from 'react-bootstrap/Form';
-import Select from 'react-select';
+import CreateTeamModal from '../components/Community/Team/CreateTeamModal';
 
 const ChallengePage = () => {
   const serverUrl = import.meta.env.VITE_SERVER_URL;
   const url = serverUrl + '/challenge/api/list/72';
   const [achievements, setAchievements] = useState([]);
   const [total, setTotal] = useState(1);
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const options = [
-    { value: 'Fastify', label: 'Fastify' },
-    { value: 'Fastlane', label: 'Fastlane' },
-    { value: 'Flask', label: 'Flask' }
-  ];
 
   useEffect(() => {
     try {
@@ -50,46 +37,7 @@ const ChallengePage = () => {
   return (
     <>
       <div className={'col-md-9'}>
-        <Button variant="primary" onClick={handleShow}>
-          팀 만들기
-        </Button>
-        <Modal show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              <h5>팀 만들기</h5>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="mb-4">
-              <span style={{ display: 'block' }}>팀 이름</span>
-              <Form.Control type="email" style={{ display: 'block' }} />
-            </div>
-            <div className="mb-4">
-              <span style={{ display: 'block' }}>팀 설명</span>
-              <Form.Control as="textarea" rows={3} style={{ display: 'block' }} />
-            </div>
-            <div className="mb-4">
-              <div>팀 대표 이미지</div>
-              <div style={{ fontSize: 'small', color: 'gray', marginBottom: '10px' }}>
-                png,jpg,jpeg 확장자만 지원합니다
-              </div>
-              <Form.Control type="file" multiple style={{ display: 'block' }} />
-            </div>
-            <div className="mb-4">
-              <span style={{ display: 'block' }}>이미지 미리보기</span>
-              <img src={'./chunsik.webp'} alt="" />
-            </div>
-            <div className="mb-4">
-              <span style={{ display: 'block' }}>팀 분야</span>
-              <Select isMulti options={options} />
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="primary" onClick={handleClose}>
-              저장
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <CreateTeamModal />
         <div className={classes.ChallengeTitle}>
           <div className={classes.ChallengeTitleContent}>챌린지</div>
         </div>
