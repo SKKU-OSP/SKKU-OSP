@@ -146,11 +146,11 @@ function Content_View(props) {
                 >
                   {/* {% is_article_thumb_up article request.user as is_thumb_up %} */}
                   {!is_thumb_up ? (
-                    <span class="material-icons-outlined">
+                    <span className="material-icons-outlined">
                       <FaRegThumbsUp />
                     </span>
                   ) : (
-                    <span class="material-icons">
+                    <span className="material-icons">
                       <FaThumbsUp />
                     </span>
                   )}
