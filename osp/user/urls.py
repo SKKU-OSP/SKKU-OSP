@@ -4,6 +4,8 @@ from user import views, views_edit, views_profile
 
 app_name = 'user'
 urlpatterns = [
+    path('api/info', views.UserAccountView.as_view(), name='UserAccount'),
+
     # 학생 id로 접속시도하면 /user/{username} 으로 리다이렉트
     path('<int:student_id>/', views.student_id_to_username, name='profile'),
 
