@@ -5,14 +5,16 @@ import Content_View from './TinyArticle/Content_View';
 import Content_Edit from './TinyArticle/Content_Edit';
 import Comment from './TinyArticle/Comment';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-function Article_Presenter(props) {
+function Article_Presenter() {
   const need_login = false;
   const need_member = false;
   const type = 'view';
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const url = server_url + '/community/api/article/164/';
+  const { article_id } = useParams();
+  const url = server_url + '/community/api/article/' + article_id;
   const [article, setArticle] = useState(null);
   const [tags, setTags] = useState([]);
   const [comments, setComments] = useState([]);
@@ -42,11 +44,11 @@ function Article_Presenter(props) {
       ) : (
         <div id="community-main" className="col-md-9">
           {need_login ? (
-            <div class="m-2">
+            <div className="m-2">
               로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
             </div>
           ) : need_member ? (
-            <div class="m-2">
+            <div className="m-2">
               팀 멤버만 열람할 수 있습니다.
               <a href={'' /*'community:Board' board_name="팀 모집" board_id=2*/}>팀 모집 게시판 확인하기</a>
             </div>
