@@ -1,11 +1,16 @@
 import ReactDOM from 'react-dom/client';
-import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import RootLayout from './routes/RootLayout';
 import Community from './routes/Community';
 import BoardPage from './routes/BoardPage';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
+import ChallengePage from './routes/ChallengePage';
+import CommunityLayout from './routes/CommunityLayout';
+import AccountsLayout from './routes/AccountsLayout';
+import ArticlePage from './routes/ArticlePage';
+import ArticleEdit from './routes/ArticleEdit';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -17,7 +22,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'community',
-        element: <Outlet />,
+        element: <CommunityLayout />,
         children: [
           {
             path: '',
@@ -26,12 +31,24 @@ const router = createBrowserRouter([
           {
             path: 'board/:board_name',
             element: <BoardPage />
+          },
+          {
+            path: 'article/:article_id',
+            element: <ArticlePage />
+          },
+          {
+            path: 'article/:article_id/edit',
+            element: <ArticleEdit />
+          },
+          {
+            path: 'challenge',
+            element: <ChallengePage />
           }
         ]
       },
       {
         path: 'accounts',
-        element: <Outlet />,
+        element: <AccountsLayout />,
         children: [
           {
             path: 'login',

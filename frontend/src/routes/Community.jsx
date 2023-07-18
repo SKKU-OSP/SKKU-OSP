@@ -1,11 +1,7 @@
 import MainBoard from '../components/Community/MainBoard/index';
 
 function Community() {
-  return (
-    <main>
-      <MainBoard />
-    </main>
-  );
+  return <MainBoard />;
 }
 
 export default Community;
