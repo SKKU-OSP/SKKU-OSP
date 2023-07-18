@@ -1,5 +1,6 @@
 import '../../Community.css';
 import '../Article.css';
+import '../base.css';
 import Comment_Item from './Comment_Item';
 
 function Comment(props) {

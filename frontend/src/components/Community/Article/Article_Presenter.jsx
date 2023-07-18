@@ -1,8 +1,8 @@
 import '../Community.css';
 import './Article.css';
 import SideBar from '../SideBar/index.jsx';
-import Content_View from './TinyArticle/Content_view';
-import Content_Edit from './TinyArticle/Content_edit';
+import Content_View from './TinyArticle/Content_View';
+import Content_Edit from './TinyArticle/Content_Edit';
 import Comment from './TinyArticle/Comment';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -53,7 +53,11 @@ function Article_Presenter(props) {
           ) : (
             <>
               <div id="article-content">
-                {type === 'view' ? <>{/*<Content_View />*/}</> : <>{/* <Content_Edit /> */}</>}
+                {type === 'view' ? (
+                  <Content_View board={board} tags={tags} comments={comments} article={article} />
+                ) : (
+                  <>{/* <Content_Edit /> */}</>
+                )}
               </div>
               <div id="comment-content">{type !== 'register' && <Comment comments={comments} article={article} />}</div>
             </>
