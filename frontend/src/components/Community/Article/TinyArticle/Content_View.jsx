@@ -41,7 +41,9 @@ function Content_View(props) {
           <div id="board-title-bar" className="flex-between">
             <div id="board-title" className="p-board-title">
               {board.board_type !== 'Notice' ? (
-                <a href={`/community/board/${board.name}/${board.id}`}>{board.name} 게시판</a>
+                <a href={`/community/board/${board.name}/${board.id}`} style={{ textDecoration: 'none' }}>
+                  {board.name} 게시판
+                </a>
               ) : (
                 <>{board.name} 게시판</>
               )}
