@@ -11,6 +11,9 @@ import CommunityLayout from './routes/CommunityLayout';
 import AccountsLayout from './routes/AccountsLayout';
 import ArticlePage from './routes/ArticlePage';
 import ArticleEdit from './routes/ArticleEdit';
+import SignUpPage from './routes/SignUpPage';
+import { tokenLoader } from './utils/auth';
+
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -19,6 +22,8 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
+    id: 'root',
+    loader: tokenLoader,
     children: [
       {
         path: 'community',
@@ -57,6 +62,10 @@ const router = createBrowserRouter([
           {
             path: 'login/github/callback',
             element: <OAuthPage />
+          },
+          {
+            path: 'signup',
+            element: <SignUpPage />
           }
         ]
       }
