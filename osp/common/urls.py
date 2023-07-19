@@ -11,6 +11,7 @@ urlpatterns = [
     # FOR JWT
     path('login/github/callback/', views.GitHubLoginView.as_view(),
          name='github_login_callback'),
+    path('login/user/', views.JWTLoginView.as_view(), name="JWTLogin"),
 
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register_page, name='signup'),
