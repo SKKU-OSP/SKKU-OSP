@@ -1,17 +1,45 @@
-import { useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { BsGithub } from 'react-icons/bs';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import classes from './Login.module.css';
+import axios from 'axios';
+import AuthContext from '../utils/auth-context';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
 const github_login_url = `oauth/authorize?client_id=${client_id}`;
+const domain_url = import.meta.env.VITE_SERVER_URL;
+const login_url = `${domain_url}/accounts/login/user/`;
 
 function Login() {
   const [error, setError] = useState(false);
+  const navigate = useNavigate();
+  const usernameInputRef = useRef();
+  const passwordInputRef = useRef();
+
+  const { setUser } = useContext(AuthContext);
+
+  const sendLoginRequest = async () => {
+    try {
+      const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
+      const response = await axios.post(login_url, data);
+      const res = response.data;
+
+      localStorage.setItem('access_token', res.data.access_token);
+      localStorage.setItem('refresh_token', res.data.refresh_token);
+      setUser();
+      navigate('/community');
+    } catch (error) {
+      console.log('error', error);
+      //   if (error.me)
+      setError(error.message);
+    }
+  };
 
   const handleLogin = () => {
-    setError('로그인 시도');
+    console.log('usernameInputRef', usernameInputRef.current.value);
+    console.log('passwordInputRef', passwordInputRef.current.value);
+    sendLoginRequest();
   };
 
   const handleGithubLogin = () => {
@@ -33,6 +61,7 @@ function Login() {
       <div>
         <div className="form-floating mb-3">
           <input
+            ref={usernameInputRef}
             type="text"
             className="form-control"
             name="username"
@@ -44,6 +73,7 @@ function Login() {
         </div>
         <div className="form-floating mb-3">
           <input
+            ref={passwordInputRef}
             type="password"
             className="form-control"
             name="password"
