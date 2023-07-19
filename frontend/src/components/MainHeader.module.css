@@ -23,3 +23,14 @@
 .search {
   flex: 1 1 auto;
 }
+
+.list a {
+  text-decoration: none;
+  color: var(--main-black);
+}
+
+.list a:hover,
+.list a.active {
+  color: var(--sub-point-color);
+  text-decoration: underline;
+}
