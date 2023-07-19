@@ -6,12 +6,16 @@ from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from home.models import DistFactor, DistScore
 from tag.models import TagIndependent, DomainLayer
 from team.models import TeamMember
 from repository.models import GithubRepoStats, GithubRepoCommits
 
 from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
+from user.serializers import AccountSerializer
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
@@ -20,6 +24,24 @@ import datetime
 import json
 import math
 import logging
+
+
+class UserAccountView(APIView):
+    '''
+    유저 계정 정보
+    '''
+
+    def get(self, request):
+        res = {'status': 'success', 'message': '', 'data': None}
+        if not request.user.is_authenticated:
+            res['status'] = 'fail'
+            res['message'] = 'user is not authenticated'
+            return Response(res)
+
+        account = Account.objects.get(user=request.user)
+        res['data'] = AccountSerializer(account).data
+
+        return Response(res)
 
 
 class ProfileView(TemplateView):
