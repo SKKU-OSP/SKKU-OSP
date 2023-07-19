@@ -19,8 +19,8 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
-    board = BoardSerializer
-    writer = AccountSerializer
+    board = BoardSerializer()
+    writer = AccountSerializer()
 
     class Meta:
         model = models.Article
@@ -41,7 +41,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class ArticleCommentSerializer(serializers.ModelSerializer):
-    writer = AccountSerializer
+    writer = AccountSerializer()
 
     class Meta:
         model = models.ArticleComment
