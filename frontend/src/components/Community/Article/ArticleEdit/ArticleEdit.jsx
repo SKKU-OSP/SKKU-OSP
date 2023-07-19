@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { BsPencilSquare, BsXLg } from "react-icons/bs";
+import { BsXLg, BsSave } from "react-icons/bs";
 import { Button } from 'react-bootstrap';
 import axios from 'axios'
 import Select from 'react-select'
@@ -13,33 +13,61 @@ import { Editor } from '@tinymce/tinymce-react';
 const domainUrl = import.meta.env.VITE_SERVER_URL
 
 
-function ArticleEdit({ isWrite, type, isAuthNotice, noticeCheck, anonymousCheck, board = {}, typeKr, consentWriteOpen }) {
+function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
   const articleID = useParams().article_id
   const url = domainUrl + "/community/api/article/" + articleID
+  const urlTag = domainUrl + "/tag/api/list/"
 
   const article = {}
+  const [isAuthNotice, setIsAuthNotice] = useState(true);
+  const [anonymousWriter, setAnonymousWriter] = useState(true);
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [articleFile, setArticleFile] = useState([]);
   const [title, setTitle] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [tags, setTags] = useState([]);
+  const [selectTags, setSelectTags] = useState([]);
   const editorRef = useRef(null);
 
   useEffect(() => { //axios 사용
     const getArticle = async() => {
       const response = await axios.get(url);
+      const responseTag = await axios.get(urlTag);
       const res = response.data;
+      const resTag = responseTag.data;
       if(res.status === "success"){
         setTitle(res.data.article.title);
         setBodyText(res.data.article.body);
-        setTags(res.data.tags);
+        setTags(resTag.data.tags.map(t => {
+          return{
+            value: t.name, label: t.name, color: t.color
+          }
+        }));
+        setSelectTags(res.data.tags.map(t => {
+          return{
+            value: t.name, label: t.name, color: t.color
+          }
+        }));
+        setIsAuthNotice(res.data.article.is_notice);
+        setAnonymousWriter(res.data.article.anonymous_writer);
       }
       else{console.log(res.message)}
     }
     getArticle()
   }, [])
 
+  // 공지 체크 여부 확인
+  const noticeCheck = () => {
+    return isAuthNotice;
+  };
+
+  // 익명 체크 여부 확인
+  const anonymousCheck = () => {
+    return anonymousWriter;
+  };
+
+  // 저장 버튼 클릭 시
   const handleShow = async() => {
     if (title.trim() === "") {
       window.alert('제목을 입력해 주세요');
@@ -47,7 +75,7 @@ function ArticleEdit({ isWrite, type, isAuthNotice, noticeCheck, anonymousCheck,
     // else if (bodyText.text().trim().length === 0) {
     //     window.alert('본문을 입력해 주세요');
     // }
-    else if (window.confirm("글을 수정하시겠습니까?")) {
+    else if (window.confirm("글을 수정하시겠습니까?")) { // 수정한 글 저장
       if (editorRef.current) {
         const modifiedContent = editorRef.current.getContent();
         
@@ -76,9 +104,8 @@ function ArticleEdit({ isWrite, type, isAuthNotice, noticeCheck, anonymousCheck,
   };
 
   const handleEditorInit = (editor) => {
-    
     console.log(editor);
-    // editorRef.current.value = bodyText;
+    editorRef.current.value = bodyText;
     return(editorRef.current = editor)
   };
 
@@ -94,49 +121,45 @@ function ArticleEdit({ isWrite, type, isAuthNotice, noticeCheck, anonymousCheck,
     setNumFile(nextNum);
   }
 
+  console.log(Object.keys({temp:1}))
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const deleteInput = (id) => {
-    const newFileObj = setFileObj([...files.slice(0, id), ...files.slice(id + 1)]);
+    const updatedFileObj = { ...fileObj };
+    delete updatedFileObj[id];
+
+    const newFileObj = setFileObj(updatedFileObj);
 
     const store = new DataTransfer();
-    newFileObj.forEach((file) => store.items.add(file));
+    Object.values(newFileObj).forEach((file) => store.items.add(file));
 
-    if(inputRef.current){
+    if (inputRef.current) {
       inputRef.current.files = store.files;
     }
   };
-
-  console.log(Object.keys({temp:1}))
-
-  const options = [
-    { value: 'a', label: 'A' },
-    { value: 'b', label: 'B' },
-    { value: 'c', label: 'C' },
-    { value: 'd', label: 'D' },
-    { value: 'e', label: 'E' },
-    { value: 'f', label: 'F' },
-    { value: 'g', label: 'G' },
-    { value: 'h', label: 'H' },
-    { value: 'i', label: 'I' },
-    { value: 'j', label: 'J' }
-  ]
-
-  const [selectedOptions, setSelectedOptions] = useState([]);
-
-  const handleOptionSelect = (selectedOption) => {
-    setSelectedOptions(selectedOption);
+  
+  // Tag
+  const handleOptionSelect = (selectedTags) => {
+    setSelectTags(selectedTags);
   };
-
   const customStyles = {
     option: (provided, state) => ({
       ...provided,
       color: state.isSelected ? 'lightgray' : 'black',
-      background: 'none'
+      background: 'none',
     }),
+    multiValue: (provided, state) => {
+      const tagColor = state.data.color;
+      return {
+        ...provided,
+        backgroundColor: tagColor,
+      };
+    },
   };
 
-  const renderConsentMessage = !isWrite && type === 'register' && ( //정보공개 미동의 시 뜨는 창
+  //정보공개 미동의 시 뜨는 창
+  const renderConsentMessage = !isWrite && type === 'register' && ( 
     <div>
       <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
       <button className="btn btn-primary" onClick={() => consentWriteOpen(request.user.username)}>
@@ -155,32 +178,47 @@ function ArticleEdit({ isWrite, type, isAuthNotice, noticeCheck, anonymousCheck,
                 {board.name} 게시판
             </a>
           </div>
-          <div className="d-flex justify-content-end gap-2">
-            {isAuthNotice && (
+          <div className="d-flex justify-content-end gap-2"> 
+            {isAuthNotice && ( //여기 수정해야 돼
               <div className="p-board-title">
-                  <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck} />
-                <label htmlFor="is-notice">공지</label>
+                  <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck()} />{' '}
+                <label htmlFor="is-notice">공지1</label>
               </div>
             )}
-            {board.anonymous_writer && (
+            <div className="p-board-title">
+                <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck()} />{' '}
+              <label htmlFor="is-notice">공지2</label>
+            </div>
+            {anonymousWriter && ( //여기 수정해야 돼
               <div className="p-board-title">
-                  <input type="checkbox" id="is-anonymous" className="align-middle" checked={anonymousCheck} />
-                <label htmlFor="is-anonymous">익명</label>
+                  <input type="checkbox" id="is-anonymous" className="align-middle" checked={anonymousCheck()} />{' '}
+                <label htmlFor="is-anonymous">익명1</label>
+              </div>
+            )}
+            {anonymousWriter ? (
+              <div className="p-board-title">
+                <input type="checkbox" id="is-anonymous" className="align-middle" checked={true} />{' '}
+                <label htmlFor="is-anonymous">익명2</label>
+              </div>
+            ) : (
+              <div className="p-board-title">
+                <input type="checkbox" id="is-anonymous" className="align-middle" checked={false} onChange={anonymousCheck} />{' '}
+                <label htmlFor="is-anonymous">익명3</label>
               </div>
             )}
             <Button variant="transparent" onClick={handleShow} type="button" id="btn-content-edit" className="btn btn-outline-light">
-              <BsPencilSquare /> 수정 {typeKr} 
+              <BsSave /> 저장 {typeKr}
             </Button>
           </div>
         </div>
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data">
-          <input type="hidden" id="board-type" className="board_type" value={board.board_type} />
+          {/* <input type="hidden" id="board-type" className="board_type" value={board.board_type} />
           <input type="hidden" id="board-name" className="board_name" value={board.name} />
           <input type="hidden" id="board-id" className="board_id" value={board.id} />
           <input type="hidden" id="article-id" className="article_id" value={article.id} />
           {board.board_type === 'Team' && 
             <input type="hidden" id="team-id" className="team_id" value={board.team.id} />
-          }
+          } */}
           <div className="d-flex flex-column border border-2">
             <div className="d-flex justify-content-between mb-1">
               <input type="text" id="article-title" name="title" className="form-control" value={title} placeholder="제목을 입력해 주세요" required autofocus onChange={handleTitleChange} />
@@ -209,23 +247,22 @@ function ArticleEdit({ isWrite, type, isAuthNotice, noticeCheck, anonymousCheck,
               <Editor onInit={handleEditorInit} onChange={handleBodyChange} />
             </div>
             <div className="w-100 mt-2">
-            <Select placeholder={'Tag'} options={options} isMulti menuPlacement="auto" value={selectedOptions} onChange={handleOptionSelect} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyles} />
+            <Select placeholder={'Tag'} options={tags} isMulti menuPlacement="auto" value={selectTags} onChange={handleOptionSelect} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyles} />
             </div>
             <div id="article-helper" className="mt-2">
-              <button type="button" id="add-image" className="btn btn-secondary">이미지 추가</button>{' '}
               <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>파일 추가</button>
             </div>
             <div id="article-file-container">
-              {articleFile.map((id, index) => ( //업로드 된 파일 목록
+              {/* {articleFile.map((id, index) => ( //업로드 된 파일 목록
                 <div id={`input-group-saved${index + 1}`} className="input-group my-1">
                   <input type="text" name={`article_file_${id}`} className="form-control article-file" value={name} readOnly />
-                  <button type="button" className="input-group-text default-btn" onClick={() => article.deleteInput(`saved${index + 1}`)}><BsXLg /></button>
+                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(`saved${index + 1}`)}><BsXLg /></button>
                 </div>
-              ))}
+              ))} */}
               {fileObj && Object.keys(fileObj).map((id) => ( //파일 추가 input
                 <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
                   <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file"/>
-                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(`${id}`)}><BsXLg /></button>
+                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
                 </div>
               ))}
             </div>
