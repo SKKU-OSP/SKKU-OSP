@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { BsGithub } from 'react-icons/bs';
+import { Link } from 'react-router-dom';
+
 import classes from './Login.module.css';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
+const github_login_url = `oauth/authorize?client_id=${client_id}`;
+
 function Login() {
   const [error, setError] = useState(false);
-  const github_login_url = `https://github.com/login/oauth/authorize?client_id=${client_id}`;
 
   const handleLogin = () => {
     setError('로그인 시도');
@@ -66,9 +69,9 @@ function Login() {
       </div>
       <div className="d-flex justify-content-between flex-wrap">
         <div className={classes.weakText}>
-          <a href="/accounts/find_account/">계정 찾기</a>
+          <Link to="/accounts/find_account">계정 찾기</Link>
           <span>|</span>
-          <a href="/accounts/password_reset/">비밀번호 재설정</a>
+          <Link to="/accounts/password_reset">비밀번호 재설정</Link>
         </div>
       </div>
     </>

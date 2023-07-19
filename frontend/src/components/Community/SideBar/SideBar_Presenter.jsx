@@ -1,6 +1,10 @@
-import '../Community.css';
+import { useContext } from 'react';
+import { Link } from 'react-router-dom';
+
+import AuthContext from '../../../utils/auth-context';
+import { tokenRemover } from '../../../utils/auth';
 import {
-  BsChevronUp,
+  //   BsChevronUp,
   BsFillFileTextFill,
   BsFillTrophyFill,
   BsFillHandThumbsUpFill,
@@ -12,39 +16,48 @@ import {
   BsFillPersonPlusFill
 } from 'react-icons/bs';
 
+import '../Community.css';
+
 export default function SideBar_Presenter() {
+  const authCtx = useContext(AuthContext);
+  const handleLogout = () => {
+    authCtx.unsetUser();
+    tokenRemover();
+  };
+
   return (
     <div className="col-md-3 community-sidebar">
       <div className="sidebar-profile-tab">
         {/* is_authenticated 확인 & 프로필 이미지 src 교체 필요 */}
-        {1 === 1 ? (
+        {authCtx.isLoggedIn ? (
           <div id="sidebar-user-info">
-            <a>
-              <img
-                width="42px"
-                height="42px"
-                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                className="sidebar-profile-img"
-                alt="profile-image"
-                data-bs-hover="tooltip"
-                data-bs-placement="top"
-                data-bs-title="프로필 페이지"
-              ></img>
-              <span id="sidebar-profile-username">username</span>
-            </a>
+            <img
+              width="42px"
+              height="42px"
+              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+              className="sidebar-profile-img"
+              alt="profile-image"
+              data-bs-hover="tooltip"
+              data-bs-placement="top"
+              data-bs-title="프로필 페이지"
+            ></img>
+            <span id="sidebar-profile-username">{authCtx.username}</span>
+            <button className="btn btn-sm btn-outline-light" onClick={handleLogout}>
+              로그아웃
+            </button>
           </div>
         ) : (
           <div id="sidebar-user-info">
-            <a href="/accounts/login/">
-              <img
-                width="42px"
-                height="42px"
-                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                className="profile-img"
-                alt="profile-image"
-              ></img>
-              <span id="profile-username">Log In</span>
-            </a>
+            <img
+              width="42px"
+              height="42px"
+              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+              className="sidebar-profile-img"
+              alt="profile-image"
+            ></img>
+            <Link to="/accounts/login" className="sidebar-info-link">
+              Log In
+            </Link>
           </div>
         )}
       </div>
@@ -122,7 +135,7 @@ export default function SideBar_Presenter() {
             </div>
 
             <div id="team-create" className="sidebar-boardgroup-item hover-opacity">
-              <a herf="#" role="button">
+              <a href="#" role="button">
                 <BsPlusCircleDotted size="22" />
                 <span>팀 만들기</span>
               </a>
