@@ -1,11 +1,84 @@
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
+import Select from 'react-select';
+import axios from 'axios';
+
 import classes from './SignUpPage.module.css';
 
+const option = [
+  { value: 'g.skku.edu', label: 'g.skku.edu' },
+  { value: 'skku.edu', label: 'skku.edu' },
+  { value: 'gmail.com', label: 'gmail.com' },
+  { value: 'naver.com', label: 'naver.com' },
+  { value: 'kakao.com', label: 'kakao.com' },
+  { value: 'nate.com', label: 'nate.com' },
+  { value: 'yahoo.com', label: 'yahoo.com' }
+];
+
 const SignUpPage = () => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
+  const tagListUrl = serverUrl + '/tag/api/list/';
+  const SignUpFormUrl = serverUrl + '/accounts/signup/';
+  const [tags, setTags] = useState([]);
+  const [nameList, setNameList] = useState([]);
+
+  const [error, setError] = useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    try {
+      const getTags = async () => {
+        const response = await axios.get(tagListUrl);
+        const res = response.data;
+        console.log(res);
+        if (res.status === 'success') {
+          setTags(
+            res.data.tags.map((tag) => {
+              return { value: tag.name, label: tag.name };
+            })
+          );
+        } else {
+        }
+      };
+      getTags();
+    } catch (error) {
+      console.log('error', error);
+    }
+  }, []);
+
+  const handleSelectTag = (selectTags) => {
+    setNameList(
+      selectTags.map((tag) => {
+        return tag.value;
+      })
+    );
+  };
+
+  const submitSignUpForm = (e) => {
+    e.preventDefault();
+    const data = { account_interests: nameList };
+    const sendSignUpForm = async () => {
+      try {
+        const response = await axios.post(SignUpFormUrl, data);
+        const res = response.data;
+        if (res.status === 'fail') {
+          console.log(res.feedback);
+        } else {
+          alert('회원가입에 성공했습니다.');
+          navigate('/community');
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    sendSignUpForm();
+  };
+  const checkUserName = () => {};
+
   return (
     <div className="d-flex container my-5 justify-content-center">
       <div className="col-lg-6 col-12 ">
@@ -16,6 +89,7 @@ const SignUpPage = () => {
           <span>SOSD에 와주셔서 감사합니다! GitHub 정보 외의 추가 정보를 입력하고 가입해주세요!</span>
         </div>
         <hr />
+
         {/* username */}
         <div className="d-flex flex-row justify-content-between mb-3">
           <div className={classes.FormControl}>
@@ -26,7 +100,7 @@ const SignUpPage = () => {
             <Form.Label className={classes.WeakText}>GitHub 계정명으로 데이터 수집에 사용됩니다.</Form.Label>
             <InputGroup className="mb-3">
               <Form.Control placeholder="GitHubUserName" aria-label="GitHubUserName" disabled />
-              <Button variant="outline-secondary" id="GitHubIdCheck">
+              <Button variant="outline-secondary" id="GitHubIdCheck" disabled>
                 Check
               </Button>
             </InputGroup>
@@ -38,8 +112,8 @@ const SignUpPage = () => {
             <br />
             <Form.Label className={classes.WeakText}>로그인에 사용할 아이디입니다.</Form.Label>
             <InputGroup className="mb-3">
-              <Form.Control placeholder="UserName" aria-label="UserName" />
-              <Button variant="outline-secondary" id="DuplicateCheck">
+              <Form.Control placeholder="UserName" aria-label="UserName" id="userName" />
+              <Button variant="outline-secondary" id="DuplicateCheck" onClick={checkUserName}>
                 Check
               </Button>
             </InputGroup>
@@ -55,7 +129,7 @@ const SignUpPage = () => {
             <br />
             <Form.Label className={classes.WeakText}>비밀번호는 4자 이상이어야 합니다.</Form.Label>
             <Form.Group className="mb-3">
-              <Form.Control type="password" placeholder="Password" aria-label="Password" />
+              <Form.Control type="password" placeholder="Password" aria-label="Password" id="password" />
             </Form.Group>
           </div>
           <div className={classes.FormControl}>
@@ -65,7 +139,7 @@ const SignUpPage = () => {
             <br />
             <Form.Label className={classes.WeakText}>비밀번호를 다시 입력해주세요.</Form.Label>
             <Form.Group className="mb-3">
-              <Form.Control type="password" placeholder="Password" aria-label="PasswordCheck" />
+              <Form.Control type="password" placeholder="Password" aria-label="PasswordCheck" id="rePassword" />
             </Form.Group>
           </div>
         </div>
@@ -77,7 +151,7 @@ const SignUpPage = () => {
               학번<span className={classes.RequiredStar}>*</span>
             </Form.Label>
             <InputGroup className="mb-3">
-              <Form.Control placeholder="ex) 20XXXXXXXX" aria-label="StudentId" />
+              <Form.Control placeholder="ex) 20XXXXXXXX" aria-label="StudentId" id="studentId" />
               <Button variant="outline-secondary" id="StudentCheck">
                 Check
               </Button>
@@ -180,16 +254,12 @@ const SignUpPage = () => {
             <Form.Control placeholder="연락용 Email" id="PersonalEmail" name="PersonalEmail" />
             <InputGroup.Text>@</InputGroup.Text>
             <Form.Control placeholder="이메일 도메인" id="EmailDomain" name="PersonalEmailDomain" />
-            <DropdownButton variant="outline-secondary" title="직접입력" id="EmailDomainSelect" onChange>
-              <Dropdown.Item href="#">@naver.com</Dropdown.Item>
-              <Dropdown.Item href="#">@gmail.com</Dropdown.Item>
-              <Dropdown.Item href="#">@~~</Dropdown.Item>
-              <Dropdown.Item href="#">@~~</Dropdown.Item>
-              <Dropdown.Item href="#">@naver.com</Dropdown.Item>
-              <Dropdown.Item href="#">@gmail.com</Dropdown.Item>
-              <Dropdown.Item href="#">@naver.com</Dropdown.Item>
-              <Dropdown.Item href="#">@gmail.com</Dropdown.Item>
-            </DropdownButton>
+            <Select
+              options={option}
+              menuPortalTarget={document.body}
+              placeholder="직접입력"
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+            />
           </InputGroup>
         </div>
 
@@ -204,12 +274,13 @@ const SignUpPage = () => {
             <Form.Control placeholder="깃헙 Email" id="PrimaryEmail" name="PrimaryEmail" disabled />
             <InputGroup.Text>@</InputGroup.Text>
             <Form.Control placeholder="이메일 도메인" id="PrimaryEmailDomain" name="PrimaryEmailDomain" disabled />
-            <DropdownButton variant="outline-secondary" title="직접입력" id="PrimaryEmailDomainSelect" onChange>
-              <Dropdown.Item href="#">@naver.com</Dropdown.Item>
-              <Dropdown.Item href="#">@gmail.com</Dropdown.Item>
-              <Dropdown.Item href="#">@~~</Dropdown.Item>
-              <Dropdown.Item href="#">@~~</Dropdown.Item>
-            </DropdownButton>
+            <Select
+              options={option}
+              menuPortalTarget={document.body}
+              placeholder="직접입력"
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+              isDisabled={true}
+            />
           </InputGroup>
         </div>
 
@@ -224,21 +295,22 @@ const SignUpPage = () => {
             <Form.Control placeholder="기타 연동 Email" id="SecondaryEmail" name="SecondaryEmail" />
             <InputGroup.Text>@</InputGroup.Text>
             <Form.Control placeholder="이메일 도메인" id="SecondaryEmailDomain" name="SecondaryEmailDomain" />
-            <DropdownButton variant="outline-secondary" title="직접입력" id="SecondaryEmailDomainSelect" onChange>
-              <Dropdown.Item href="#">@naver.com</Dropdown.Item>
-              <Dropdown.Item href="#">@gmail.com</Dropdown.Item>
-              <Dropdown.Item href="#">@~~</Dropdown.Item>
-              <Dropdown.Item href="#">@~~</Dropdown.Item>
-            </DropdownButton>
+            <Select
+              options={option}
+              menuPortalTarget={document.body}
+              placeholder="직접입력"
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+            />
           </InputGroup>
         </div>
 
         {/* 사용 언어 */}
         <div className="mb-3">
           <Form.Label htmlFor="personal-email">사용 언어/프레임워크</Form.Label>
-          <Form.Select size="sm">
-            <option>Tag</option>
-          </Form.Select>
+          <Select size="sm" onChange={handleSelectTag} options={tags} placeholder="tag" isMulti></Select>
+          {nameList.map((name) => {
+            return <div>{name}</div>;
+          })}
         </div>
         <br />
         {/* 버튼 */}
@@ -246,9 +318,9 @@ const SignUpPage = () => {
           개인정보 이용내역 동의 <span className={classes.RequiredStar}>*</span>
         </button>
         <div className="d-flex flex-row justify-content-end">
-          <button type="submit" className="btn btn-primary">
+          <Button variant="primary" onClick={submitSignUpForm}>
             가입하기
-          </button>
+          </Button>
         </div>
       </div>
     </div>
