@@ -6,23 +6,18 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Select from 'react-select';
 import axios from 'axios';
 
-import classes from './SignUpPage.module.css';
-
-const option = [
-  { value: 'g.skku.edu', label: 'g.skku.edu' },
-  { value: 'skku.edu', label: 'skku.edu' },
-  { value: 'gmail.com', label: 'gmail.com' },
-  { value: 'naver.com', label: 'naver.com' },
-  { value: 'kakao.com', label: 'kakao.com' },
-  { value: 'nate.com', label: 'nate.com' },
-  { value: 'yahoo.com', label: 'yahoo.com' }
-];
+import ConsentsModal from './ConsentsModal';
+import classes from './SignUpForm.module.css';
 
 const SignUpForm = () => {
   const serverUrl = import.meta.env.VITE_SERVER_URL;
-  const tagListUrl = serverUrl + '/tag/api/list/';
-  const SignUpFormUrl = serverUrl + '/accounts/signup/';
+  const signUpFormUrl = serverUrl + '/accounts/signup/';
+  //AXIOS GET
+  const [domains, setDomains] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [consents, setConsents] = useState([]);
   const [tags, setTags] = useState([]);
+  //INPUT
   const [myTags, setMyTags] = useState([]);
   const [userNameText, setUserNameText] = useState('로그인에 사용할 아이디입니다.');
   // const [texts,setTexts] = useState
@@ -74,8 +69,8 @@ const SignUpForm = () => {
 
   useEffect(() => {
     try {
-      const getTags = async () => {
-        const response = await axios.get(tagListUrl);
+      const getData = async () => {
+        const response = await axios.get(signUpFormUrl);
         const res = response.data;
         console.log(res);
         if (res.status === 'success') {
@@ -84,10 +79,21 @@ const SignUpForm = () => {
               return { value: tag.name, label: tag.name };
             })
           );
+          setColleges(
+            res.data.colleges.map((collegeName) => {
+              return { value: collegeName, label: collegeName };
+            })
+          );
+          setDomains(
+            res.data.email_domains.map((domainName) => {
+              return { value: domainName, label: domainName };
+            })
+          );
+          setConsents(res.data.consents);
         } else {
         }
       };
-      getTags();
+      getData();
     } catch (error) {
       console.log('error', error);
     }
@@ -108,7 +114,7 @@ const SignUpForm = () => {
     const data = { account_userName: userName, account_interests: myTags };
     const sendSignUpForm = async () => {
       try {
-        const response = await axios.post(SignUpFormUrl, data);
+        const response = await axios.post(signUpFormUrl, data);
         const res = response.data;
         if (res.status === 'fail') {
           console.log(res.feedback);
@@ -251,27 +257,7 @@ const SignUpForm = () => {
             <Form.Label htmlFor="College">
               소속 대학<span className={classes.RequiredStar}>*</span>
             </Form.Label>
-            <Form.Select name="college" id="College">
-              <option value="경영대학">경영대학</option>
-              <option value="경제대학">경제대학</option>
-              <option value="공과대학">공과대학</option>
-              <option value="문과대학">문과대학</option>
-              <option value="법과대학">법과대학</option>
-              <option value="사범대학">사범대학</option>
-              <option value="사회대학">사회과학대학</option>
-              <option value="생명공학대학">생명공학대학</option>
-              <option value="소프트웨어융합대학" selected>
-                소프트웨어융합대학
-              </option>
-              <option value="스포츠과학대학">스포츠과학대학</option>
-              <option value="약학대학">약학대학</option>
-              <option value="예술대학">예술대학</option>
-              <option value="유학대학">유학대학</option>
-              <option value="의학대학">의학대학</option>
-              <option value="자연과학대학">자연과학대학</option>
-              <option value="정보통신대학">정보통신대학</option>
-              <option value="학부대학">학부대학</option>
-            </Form.Select>
+            <Select size="sm" options={colleges}></Select>
           </div>
           <div className={classes.FormControl}>
             <Form.Label htmlFor="Dept">
@@ -343,12 +329,7 @@ const SignUpForm = () => {
               name="PersonalEmailDomain"
               onChange={handleInput}
             />
-            <Select
-              options={option}
-              menuPortalTarget={document.body}
-              placeholder="직접입력"
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-            />
+            <Select options={domains} placeholder="직접입력" />
           </InputGroup>
         </div>
 
@@ -363,13 +344,7 @@ const SignUpForm = () => {
             <Form.Control placeholder="깃헙 Email" id="PrimaryEmail" name="PrimaryEmail" disabled />
             <InputGroup.Text>@</InputGroup.Text>
             <Form.Control placeholder="이메일 도메인" id="PrimaryEmailDomain" name="PrimaryEmailDomain" disabled />
-            <Select
-              options={option}
-              menuPortalTarget={document.body}
-              placeholder="직접입력"
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              isDisabled={true}
-            />
+            <Select options={domains} placeholder="직접입력" isDisabled={true} />
           </InputGroup>
         </div>
 
@@ -394,12 +369,7 @@ const SignUpForm = () => {
               name="SecondaryEmailDomain"
               onChange={handleInput}
             />
-            <Select
-              options={option}
-              menuPortalTarget={document.body}
-              placeholder="직접입력"
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-            />
+            <Select options={domains} placeholder="직접입력" />
           </InputGroup>
         </div>
 
@@ -407,15 +377,11 @@ const SignUpForm = () => {
         <div className="mb-3">
           <Form.Label htmlFor="personal-email">사용 언어/프레임워크</Form.Label>
           <Select size="sm" onChange={handleSelectTag} options={tags} placeholder="tag" isMulti></Select>
-          {myTags.map((name) => {
-            return <div>{name}</div>;
-          })}
         </div>
         <br />
         {/* 버튼 */}
-        <button id="consentSignUp" type="button" className="btn btn-secondary">
-          개인정보 이용내역 동의 <span className={classes.RequiredStar}>*</span>
-        </button>
+        <ConsentsModal consents={consents} />
+
         <div className="d-flex flex-row justify-content-end">
           <Button variant="primary" onClick={submitSignUpForm}>
             가입하기
