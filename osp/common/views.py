@@ -207,7 +207,7 @@ class SignUpView(APIView):
         student_id = request.data.get('student_id', '').strip()
         if not re.match('[0-9]{10}', student_id):
             fail_reason['student_id'] = '학번 형식이 다릅니다.'
-        if check_duplicate_student_id(request.POST['student-id']):
+        if check_duplicate_student_id(request.data.get('student_id', '').strip()):
             fail_reason['student_id'] = '중복된 학번이 있습니다.'
         # 이름 유효성 검사
         name = request.data.get('name', '').strip()
@@ -217,7 +217,7 @@ class SignUpView(APIView):
         college = request.data.get('college', '')
         if college:
             fail_reason['college'] = f'소속대학을 선택해주세요.'
-        if not check_college():
+        if not check_college(college):
             fail_reason['college'] = f'{college}는 소속대학 목록에 없는 이름입니다.'
 
         # 학과 유효성 검사
