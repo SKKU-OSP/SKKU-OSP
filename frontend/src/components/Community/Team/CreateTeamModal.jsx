@@ -45,7 +45,7 @@ const CreateTeamModal = () => {
             <div style={{ fontSize: 'small', color: 'gray', marginBottom: '10px' }}>
               png,jpg,jpeg 확장자만 지원합니다
             </div>
-            <Form.Control type="file" multiple style={{ display: 'block' }} />
+            <Form.Control type="file" accept=".png, .jpg, .jpeg" multiple style={{ display: 'block' }} />
           </Form.Group>
 
           <div className="mb-4">
