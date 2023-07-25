@@ -9,18 +9,33 @@ const ConsentsModal = ({ consents }) => {
 
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
-        개인정보 동의
+      <Button variant="secondary" onClick={handleShow}>
+        개인정보 이용내역 동의 <span className="text-danger">*</span>
       </Button>
       <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton></Modal.Header>
+        <Modal.Header closeButton>
+          <h5>개인정보 이용내역 동의 설정</h5>
+          <br />
+        </Modal.Header>
 
         <Modal.Body>
+          <div className="mb-3">서비스 사용에 동의하지 않으면 일부 서비스 사용이 제한됩니다.</div>
           {consents.map((consent) => {
             return (
               <>
-                <div>{consent.title}</div>
-                <div>{consent.body}</div>
+                <Button variant="secondary" className="mb-3">
+                  {consent.title}
+                  <span className="text-danger">*</span>
+                </Button>
+                <div className="border rounded mb-5">
+                  {consent.body.map((body) => {
+                    return (
+                      <>
+                        <div className="mb-3">{body}</div>
+                      </>
+                    );
+                  })}
+                </div>
               </>
             );
           })}
@@ -28,7 +43,7 @@ const ConsentsModal = ({ consents }) => {
 
         <Modal.Footer>
           <Button variant="primary" onClick={handleClose}>
-            저장
+            닫기
           </Button>
         </Modal.Footer>
       </Modal>
