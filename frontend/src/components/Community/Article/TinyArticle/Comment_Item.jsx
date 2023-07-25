@@ -4,10 +4,12 @@ import '../base.css';
 import { FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 
 function Comment_Item(props) {
-  const comment = props.comments;
   const request = { user: { username: 'hoya', id: 1234, is_authenticated: false, is_superuser: false } };
-  const user = { id: 1234 };
   const is_comment_like = false;
+  // API 필요한 부분
+
+  const comment = props.comments;
+
   let pub_date1, pub_date2;
   const dateObject = new Date(comment.pub_date);
   pub_date1 = dateObject.toISOString().slice(0, 10);
@@ -16,6 +18,7 @@ function Comment_Item(props) {
   const period = hours >= 12 ? 'p.m.' : 'a.m.';
   const formattedHours = hours % 12 || 12;
   pub_date2 = `${formattedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  // 날짜 표현
 
   return (
     <>
@@ -31,35 +34,31 @@ function Comment_Item(props) {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                {comment.writer} {/*comment.writer.user.username*/}
+                {comment.writer.user.username}
               </button>
               <ul className="dropdown-menu">
                 {!comment.writer.user.is_superuser && (
                   <li>
-                    <a className="dropdown-item" href={`/user/${comment.writer}`}>
-                      {/*comment.writer.user.username*/}
+                    <a className="dropdown-item" href={`/user/${comment.writer.user.username}`}>
                       프로필
                     </a>
                   </li>
                 )}
                 <li>
-                  <a className="dropdown-item" onclick={`msgModalOpen(${comment.writer})`}>
-                    {/*comment.writer.user.id*/}
+                  <a className="dropdown-item" onclick={`msgModalOpen(${comment.writer.user.id})`}>
                     메시지
                   </a>
                 </li>
               </ul>
             </div>
           ) : (
-            <div className="comment-item-writer">{comment.writer}</div>
-            //comment.writer.user.username
+            <div className="comment-item-writer">{comment.writer.user.username}</div>
           )}
-          {request.user.id == comment.writer && (
+          {request.user.id === comment.writer.user.id && (
             <div className="comment-item-delete">
               <span onclick={`comment.delete(${comment.id});`}>삭제</span>
             </div>
           )}
-          {/*request.user == comment.writer.user*/}
         </div>
         <div className="comment-item-body">{comment.body}</div>
       </div>
@@ -70,7 +69,7 @@ function Comment_Item(props) {
         </div>
         <div className="comment-item-mod">
           {/* {% is_comment_like comment request.user as is_comment_like %} */}
-          <div className="comment-item-like" onclick={`CommentLike(${comment.id}, ${user.id})`}>
+          <div className="comment-item-like" onclick={`CommentLike(${comment.id}, ${comment.writer.user.id})`}>
             {is_comment_like ? (
               <span className="material-icons">
                 <FaThumbsUp />
