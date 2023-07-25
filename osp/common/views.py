@@ -215,7 +215,7 @@ class SignUpView(APIView):
             fail_reason['name'] = f'이름은 20자를 넘을 수 없습니다. 현재 {len(name)} 자'
         # 소속대학 유효성 검사
         college = request.data.get('college', '')
-        if college:
+        if not college:
             fail_reason['college'] = f'소속대학을 선택해주세요.'
         if not check_college(college):
             fail_reason['college'] = f'{college}는 소속대학 목록에 없는 이름입니다.'
