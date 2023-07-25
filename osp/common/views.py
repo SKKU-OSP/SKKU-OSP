@@ -17,8 +17,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from osp.settings import EMAIL_HOST_USER, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from user.models import StudentTab, Account, AccountInterest, AccountPrivacy
 from tag.models import TagIndependent
+from tag.serializers import TagIndependentSerializer
 from data.api import GitHub_API
 from crawler.Scrapy.SKKU_GitHub.settings import OAUTH_TOKEN_FOR_REG
+from common.utils import get_fail_res, check_email, get_college_list, check_college, get_consent_text, get_email_domains
 
 import re
 import smtplib
@@ -47,17 +49,6 @@ class LoginView(auth_views.LoginView):
         response = super().form_valid(form)
         # 로그인 후에 리다이렉트 처리
         return redirect(self.get_success_url())
-
-
-def get_fail_res(msg):
-    """ 
-    fail Response 생성
-    """
-    return {
-        'status': "fail",
-        'message': msg,
-        'data': None
-    }
 
 
 class JWTLoginView(APIView):
@@ -170,6 +161,160 @@ class GitHubLoginView(APIView):
             context["msg"] = f'SOSD에 와주셔서 감사합니다! GitHub 정보 외의 추가 정보를 입력하고 가입해주세요!'
 
             return Response({"message": "회원가입 페이지로 이동합니다.", "data": data}, status=status.HTTP_200_OK)
+
+
+class SignUpView(APIView):
+    def check_duplicate_username(self, username):
+        if Account.objects.filter(user__username=username).exists():
+            return True
+        return False
+
+    def get(self, request):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'colleges': [], 'email_domains': [],
+                'tags': [], 'consents': []}
+        # 소속대학 리스트
+        data['colleges'] = get_college_list()
+        # 이메일 도메인
+        data['email_domains'] = get_email_domains()
+        # 사용언어 / 프레임워크
+        tags = TagIndependent.objects.all()
+        data['tags'] = TagIndependentSerializer(tags, many=True).data
+        # 개인정보 이용내역 동의
+        data['consents'] = get_consent_text('signin')
+        res['data'] = data
+
+        return Response(res)
+
+    def post(self, request):
+        fail_reason = {}
+        # username 유효성 검사
+        username = request.data.get('username', '').strip()
+        if len(username) < 5:
+            fail_reason['username'] = f'Username은 5자 이상이여야 합니다. 현재 {len(username)} 자'
+        elif self.check_duplicate_username(username):
+            fail_reason['username'] = '중복된 Username이 있습니다.'
+
+        # password 유효성 검사
+        password = request.data.get('password', '').strip()
+        password_check = request.data.get('password_check', '').strip()
+        if len(password) < 4:
+            fail_reason['password'] = f'Password는 4자 이상이여야 합니다. 현재 {len(password)} 자'
+        if password != password_check:
+            fail_reason['password_check'] = 'Password가 일치하지 않습니다.'
+
+        # 학번 유효성 검사
+        student_id = request.data.get('student_id', '').strip()
+        if not re.match('[0-9]{10}', student_id):
+            fail_reason['student_id'] = '학번 형식이 다릅니다.'
+        if check_duplicate_student_id(request.POST['student-id']):
+            fail_reason['student_id'] = '중복된 학번이 있습니다.'
+        # 이름 유효성 검사
+        name = request.data.get('name', '').strip()
+        if len(name) > 20:
+            fail_reason['name'] = f'이름은 20자를 넘을 수 없습니다. 현재 {len(name)} 자'
+        # 소속대학 유효성 검사
+        college = request.data.get('college', '')
+        if college:
+            fail_reason['college'] = f'소속대학을 선택해주세요.'
+        if not check_college():
+            fail_reason['college'] = f'{college}는 소속대학 목록에 없는 이름입니다.'
+
+        # 학과 유효성 검사
+        dept = request.data.get('dept', '').strip()
+        if len(dept) > 45:
+            fail_reason['dept'] = f'학과명은 45자를 넘을 수 없습니다. 현재 {len(dept)} 자'
+
+        # 이메일 유효성 검사
+        personal_email = request.data.get('personal_email', '').strip()
+        personal_email = personal_email + "@" + \
+            request.data.get('personal_email_domain', '').strip()
+        if len(personal_email) > 100:
+            fail_reason['personal_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(personal_email)} 자'
+
+        primary_email = request.data.get('primary_email', '').strip()
+        primary_email = primary_email + "@" + \
+            request.data.get('primary_email_domain', '').strip()
+        if len(primary_email) > 100:
+            fail_reason['primary_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(primary_email)} 자'
+
+        # secondary email은 필수값이 아니므로 쓰지않았는지 확인
+        secondary_email = request.data.get('secondary_email', '').strip()
+        secondary_email = secondary_email + "@" + \
+            request.data.get('secondary_email_domain', '').strip()
+        secondary_email = None if secondary_email.strip() == "@" else secondary_email
+        if len(secondary_email) > 100:
+            fail_reason['secondary_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(secondary_email)} 자'
+
+        try:
+            if check_email(personal_email):
+                fail_reason['personal_email'] = '이메일이 형식에 맞지 않습니다.'
+            if check_email(primary_email):
+                fail_reason['primary_email'] = '이메일이 형식에 맞지 않습니다.'
+            if not secondary_email and check_email(secondary_email):
+                fail_reason['secondary_email'] = '이메일이 형식에 맞지 않습니다.'
+        except Exception as e:
+            print("SignUpView exception", e)
+
+        # 동의서 유효성 검사
+        check_consent = request.data.get('consent', False)
+        check_mandatory = request.data.get('consent_mandatory', False)
+
+        if not check_consent:
+            fail_reason['consent'] = '개인정보 이용내역을 확인하지 않았습니다.'
+        elif not check_mandatory:
+            fail_reason['consent'] = '개인정보 이용내역의 필수항목에 동의하지 않았습니다.'
+
+        if len(fail_reason) > 0:
+            return Response({'status': 'fail', 'message': f'{len(fail_reason.keys())} 개의 문제가 있습니다.', 'feedback': fail_reason})
+
+        # 실패 케이스가 없으면 저장
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(username=username,
+                                                password=password,
+                                                email=personal_email)
+                user.save()
+                github_id = request.data.get('github_id')
+                student_data = StudentTab.objects.create(
+                    id=student_id,
+                    name=name,
+                    college=college,
+                    dept=dept,
+                    github_id=github_id,
+                    absence=request.data.get('absence'),
+                    plural_major=request.data.get('plural_major'),
+                    personal_email=personal_email,
+                    primary_email=primary_email,
+                    secondary_email=secondary_email
+                )
+                student_data.save()
+                new_account = Account.objects.create(
+                    user=user, student_data=student_data, github_id=github_id)
+                new_account.save()
+                account_interests = request.data.get('account_interests', [])
+                for tag in account_interests:
+                    tag = TagIndependent.objects.filter(name=tag)
+                    if tag.exists():
+                        AccountInterest.objects.create(
+                            account=new_account, tag=tag.first(), level=0)
+
+                open_lvl = request.data.get('open_lvl', 1)
+                is_write = request.data.get('is_write', False)
+                is_open = request.data.get('is_open', False)
+
+                new_privacy = AccountPrivacy.objects.create(
+                    account=new_account,
+                    open_lvl=open_lvl,
+                    is_write=is_write,
+                    is_open=is_open
+                )
+                new_privacy.save()
+        except DatabaseError as e:
+            print('SignUpView 데이터베이스 오류.', e)
+            return Response({'status': 'fail', 'message': '데이터베이스에 문제가 발생했습니다.'})
+
+        return Response({'status': 'success'})
 
 
 def github_login_callback(request):
@@ -516,12 +661,6 @@ def check_api_github(github_id):
             print("check error github_id", e)
 
     return False
-
-
-def check_email(email):
-    p = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
-    print(email, p.match(email) != None)
-    return p.match(email) == None
 
 
 def csrf_failure(request, reason=""):
