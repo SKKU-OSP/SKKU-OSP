@@ -6,6 +6,7 @@ import Community from './routes/Community';
 import BoardPage from './routes/BoardPage';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
+import UserPage from './routes/UserPage';
 import ChallengePage from './routes/ChallengePage';
 import CommunityLayout from './routes/CommunityLayout';
 import AccountsLayout from './routes/AccountsLayout';
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
             element: <SignUpPage />
           }
         ]
+      },
+      {
+        path: 'user',
+        element: <UserPage />
       }
     ]
   }

@@ -1,0 +1,417 @@
+.user-container {
+  background: #ffffff;
+}
+.profile_info {
+  .info_left {
+    width: 257px;
+    height: 255px;
+    .info_img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: 1px solid black;
+    }
+  }
+  .info_right {
+    flex: 1;
+    gap: 8px;
+    .info_button {
+      padding: 8px 16px;
+      gap: 16px;
+      .info_btn-1 {
+        padding: 6px 12px;
+        border-radius: 10px;
+        border: 1px solid black;
+        gap: 5px;
+        background: linear-gradient(0deg, #000000, #000000), linear-gradient(0deg, #002743, #002743);
+      }
+      .info_btn-1-text {
+        color: #ffffff;
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 21.78px;
+        letter-spacing: 0em;
+        text-align: left;
+      }
+      .info_btn-2 {
+        padding: 6px 12px 6px 12px;
+        border-radius: 10px;
+        border: 1px solid #000000;
+        gap: 5px;
+        background: #ffffff;
+      }
+      .info_btn-2-text {
+        color: #000000;
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 21.78px;
+        letter-spacing: 0em;
+        text-align: left;
+      }
+    }
+
+    .info_username {
+      padding: 0px 10px;
+      gap: 6px;
+      .username {
+        font-family: Inter;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 29.05px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #000000;
+      }
+    }
+    .info_github {
+      padding: 6px 16px;
+      gap: 6px;
+      .github_username {
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 21.78px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #696969;
+      }
+    }
+    .info_introduction {
+      padding: 8px 16px;
+      gap: 6px;
+      height: 150px;
+      font-family: Inter;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 19px;
+      letter-spacing: -0.05em;
+      text-align: left;
+      color: #0f171a;
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+.profile-tab {
+  border-bottom: 2px solid #b0b0b0;
+  padding: 0px 40px;
+}
+
+.profile-interest {
+  padding: 10px 16px;
+  gap: 16px;
+  .profile-category {
+    padding: 24px 0px;
+    gap: 10px;
+    border-bottom: 1px solid #9d9d9d;
+    .category-intro {
+      padding: 8px 16px;
+      .intro {
+        font-family: Inter;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 29px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #000000;
+      }
+      .btn {
+        padding: 6px 12px;
+        border-radius: 10px;
+        gap: 5px;
+        border: 1px solid #000000;
+        .btn-text {
+          font-family: Inter;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 22px;
+          letter-spacing: 0em;
+          text-align: left;
+          color: #000000;
+        }
+      }
+    }
+    .category-icon {
+      padding: 8px 16px;
+      gap: 10px;
+      .icon {
+        padding: 4px 8px;
+        border-radius: 10px;
+        gap: 10px;
+        background-color: #cdcdcd;
+        .icon-text {
+          font-family: Inter;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 22px;
+          letter-spacing: 0em;
+          text-align: left;
+          color: #000000;
+        }
+      }
+    }
+  }
+  .profile-language {
+    padding: 24px 0px;
+    gap: 10px;
+    border-bottom: 1px solid #9d9d9d;
+    .language-intro {
+      padding: 8px 16px;
+      .intro {
+        font-family: Inter;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 29px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #000000;
+      }
+      .btn {
+        padding: 6px 12px;
+        border-radius: 10px;
+        gap: 5px;
+        border: 1px solid #000000;
+        .btn-text {
+          font-family: Inter;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 22px;
+          letter-spacing: 0em;
+          text-align: left;
+          color: #000000;
+        }
+      }
+    }
+    .language-level {
+      padding: 8px 16px;
+      gap: 10px;
+      .star-container {
+        width: 100px;
+        position: relative;
+      }
+      .language {
+        padding: 4px 8px;
+        border-radius: 10px;
+        gap: 10px;
+        background-color: #cdcdcd;
+        .language-text {
+          font-family: Inter;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 22px;
+          letter-spacing: 0em;
+          text-align: left;
+          color: #000000;
+        }
+      }
+    }
+  }
+}
+
+.profile-activity {
+  gap: 16px;
+  padding: 24px 0px;
+  .profile-portfolio {
+    padding: 24px 0px;
+    gap: 16px;
+    border-bottom: 1px solid #9d9d9d;
+    .portfolio-intro {
+      padding: 7px 16px;
+      .intro {
+        font-family: Inter;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 29px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #000000;
+      }
+      .btn {
+        padding: 6px 12px;
+        border-radius: 10px;
+        gap: 5px;
+        border: 1px solid #000000;
+        .btn-text {
+          font-family: Inter;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 22px;
+          letter-spacing: 0em;
+          text-align: left;
+          color: #000000;
+        }
+      }
+    }
+    .portfolio-text {
+      padding: 8px 16px;
+      border-radius: 10px;
+      gap: 10px;
+      .text {
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #000000;
+      }
+    }
+  }
+  .profile-contribution {
+    padding: 24px 0px;
+    gap: 10px;
+    border-bottom: 1px solid #9d9d9d;
+    .contribution-intro {
+      padding: 7px 16px;
+      .intro {
+        font-family: Inter;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 29px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #000000;
+      }
+      .href {
+        padding: 6px 12px;
+        border-radius: 10px;
+        gap: 5px;
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: '#0969DA';
+      }
+    }
+    .contribution-repo {
+      padding: 8px 16px;
+      gap: 10px;
+      .repo {
+        padding: 8px 16px;
+        border-radius: 10px;
+        gap: 10px;
+        border: 1px solid #9d9d9d;
+        .title {
+          padding: 1px 11px;
+          .title-text {
+            font-family: Inter;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 24px;
+            letter-spacing: 0em;
+            text-align: left;
+            color: #000000;
+          }
+          .commit-date {
+            font-family: Inter;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 19px;
+            letter-spacing: 0em;
+            text-align: left;
+            color: #000000;
+          }
+        }
+        .stat {
+          padding: 1px 11px;
+          gap: 10px;
+          .stat-text {
+            font-family: Inter;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 19px;
+            letter-spacing: 0em;
+            text-align: left;
+            color: #000000;
+          }
+        }
+        .desc {
+          padding: 1px 11px;
+          gap: 10px;
+          font-family: Inter;
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 19px;
+          letter-spacing: 0em;
+          text-align: left;
+          color: #000000;
+        }
+      }
+    }
+  }
+}
+.profile-owner-info {
+  padding: 1px 16px 1px 16px;
+  border: 0px 0px 1px 0px;
+  gap: 16px;
+  .info-university {
+    padding: 24px 16px;
+    gap: 16px;
+    border-bottom: 1px solid #9d9d9d;
+    .info-uniName {
+      font-family: Inter;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 29px;
+      letter-spacing: -0.05em;
+      text-align: center;
+      color: #696969;
+    }
+    .info-uniMajor {
+      font-family: Inter;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 29px;
+      letter-spacing: -0.05em;
+      text-align: center;
+      color: #696969;
+    }
+    .info-uniId {
+      .uniId {
+        font-family: Inter;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 19px;
+        letter-spacing: -0.05em;
+        text-align: center;
+        color: #696969;
+      }
+    }
+  }
+  .info-email {
+    border-bottom: 1px solid #9d9d9d;
+    padding: 24px 54px;
+    gap: 16px;
+    .email {
+      font-family: Inter;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 29px;
+      letter-spacing: -0.05em;
+      text-align: center;
+      color: #696969;
+    }
+  }
+  .info-github {
+    border-bottom: 1px solid #9d9d9d;
+    padding: 24px 54px;
+    gap: 16px;
+    .name {
+      font-family: Inter;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 29px;
+      letter-spacing: -0.05em;
+      text-align: center;
+      color: #696969;
+    }
+  }
+}

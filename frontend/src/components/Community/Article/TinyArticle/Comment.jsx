@@ -5,10 +5,10 @@ import Comment_Item from './Comment_Item';
 
 function Comment(props) {
   const request = { user: { is_authenticated: true } };
+  // API 필요한 부분
+
   const comments = props.comments;
   const article = props.article;
-  const article_id = 164;
-  console.log(comments);
   return (
     <>
       {request.user.is_authenticated ? (
@@ -45,7 +45,7 @@ function Comment(props) {
       {request.user.is_authenticated && (
         <form id="comment-form" method="post">
           {/* {% csrf_token %} */}
-          <input type="hidden" id="comment-article-id" name="article-id" value={article_id} />
+          <input type="hidden" id="comment-article-id" name="article-id" value={article ? article.id : ''} />
           <div id="comment-input">
             <div id="comment-annonymous">
               <label for="comment-is-anonymous">익명</label>

@@ -9,10 +9,6 @@ function Content_View(props) {
   // {% load team_tag %}
   // {% load markdown_filter %}
   // {% load static %}
-  const board = props.board;
-  const tags = props.tags;
-  const comments = props.comments;
-  const article = props.article;
   const user = { id: 1, is_authenticated: false };
   const request = {
     user: { username: 'hoya', id: 1234, is_authenticated: false, is_superuser: false, is_anonymous: false }
@@ -24,6 +20,13 @@ function Content_View(props) {
   const is_teammember = true;
   const is_scrap = false;
   const waited_teamapplymessage = true;
+  // API 필요
+
+  const board = props.board;
+  const tags = props.tags;
+  const comments = props.comments;
+  const article = props.article;
+
   let pub_date1, pub_date2;
   if (article !== null) {
     const dateObject = new Date(article.pub_date);
@@ -34,6 +37,8 @@ function Content_View(props) {
     const formattedHours = hours % 12 || 12;
     pub_date2 = `${formattedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
   }
+  // 날짜 표현
+
   return (
     <>
       {board && article ? (
@@ -48,8 +53,7 @@ function Content_View(props) {
                 <>{board.name} 게시판</>
               )}
             </div>
-            {/* user == article.writer.user */}
-            {user.id === article.writer && (
+            {user.id === article.writer.user.id && (
               <div className="d-flex justify-content-end gap-2">
                 <button type="button" className="btn btn-outline-light" onClick="edit();">
                   <i className="bi-pencil-square"></i> 수정
@@ -77,8 +81,7 @@ function Content_View(props) {
                 <div className="d-flex flex-column justify-content-center">
                   {article.anonymous_writer ? (
                     익명
-                  ) : // article.writer.user.username
-                  article.writer === null ? (
+                  ) : article.writer.user.username === null ? (
                     탈퇴한이용자
                   ) : request.user.is_authenticated ? (
                     <div className="dropdown writer-dropdown">
@@ -88,29 +91,25 @@ function Content_View(props) {
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                       >
-                        {/* article.writer.user.username */}
-                        {article.writer}
+                        {article.writer.user.username}
                       </button>
                       <ul className="dropdown-menu">
-                        {/*article.writer.user.is_superuser*/}( !article.writer &&
+                        ( !article.writer.user.is_superuser &&
                         <li>
-                          {/* article.writer.user.username */}
-                          <a className="dropdown-item" href={`/user/${article.writer}`}>
+                          <a className="dropdown-item" href={`/user/${article.writer.user.username}`}>
                             프로필
                           </a>
                         </li>
                         )
                         <li>
-                          {/* article.writer.user.id */}
-                          <a className="dropdown-item" href="#" onclick={`msgModalOpen(${article.writer})`}>
+                          <a className="dropdown-item" href="#" onclick={`msgModalOpen(${article.writer.user.id})`}>
                             메시지
                           </a>
                         </li>
                       </ul>
                     </div>
                   ) : (
-                    // article.writer.user.username
-                    <>{article.writer}</>
+                    <>{article.writer.user.username}</>
                   )}
                 </div>
                 <div id="article-datetime">
