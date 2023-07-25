@@ -1,29 +1,36 @@
 import '../Community.css';
 import './Article.css';
-import SideBar from '../SideBar/index.jsx';
 import Content_View from './TinyArticle/Content_View';
 import Content_Edit from './TinyArticle/Content_Edit';
 import Comment from './TinyArticle/Comment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import AuthContext from '../../../utils/auth-context';
+import { useContext } from 'react';
+import { getAuthConfig } from '../../../utils/auth';
 
 function Article_Presenter() {
   const need_login = false;
   const need_member = false;
   const type = 'view';
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const { article_id } = useParams();
-  const url = server_url + '/community/api/article/' + article_id;
+  // 아직 API로 필요한 것들
+
   const [article, setArticle] = useState(null);
   const [tags, setTags] = useState([]);
   const [comments, setComments] = useState([]);
   const [board, setBoard] = useState(null);
   const [error_occur, setError] = useState(false);
+  const authCtx = useContext(AuthContext);
+  const { article_id } = useParams();
+
+  const server_url = import.meta.env.VITE_SERVER_URL;
+  const url = server_url + '/community/api/article/' + article_id;
+
   useEffect(() => {
     const getArticle = async () => {
       try {
-        const response = await axios.get(url).then();
+        const response = await axios.get(url, getAuthConfig()).then();
         const res = response.data;
         if (res.status === 'success') {
           setArticle(res.data.article);
@@ -37,6 +44,7 @@ function Article_Presenter() {
     };
     getArticle();
   }, []);
+
   return (
     <>
       {error_occur ? (
@@ -50,7 +58,7 @@ function Article_Presenter() {
           ) : need_member ? (
             <div className="m-2">
               팀 멤버만 열람할 수 있습니다.
-              <a href={'' /*'community:Board' board_name="팀 모집" board_id=2*/}>팀 모집 게시판 확인하기</a>
+              <a href={`/community/board/팀 모집/2`}>팀 모집 게시판 확인하기</a>
             </div>
           ) : (
             <>
