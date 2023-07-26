@@ -1,0 +1,13 @@
+.nav-bar-icon-list {
+  display: flex;
+  align-items: center;
+}
+
+.nav-bar-icons:hover {
+  cursor: pointer;
+}
+
+.badge-new {
+  margin-left: 22px;
+  margin-bottom: 15px;
+}
