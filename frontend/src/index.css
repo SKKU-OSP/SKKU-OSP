@@ -12,10 +12,13 @@
   --main-black: #000000;
   --main-bg-color: #ebebeb;
   --main-bg-color-transparent: #ebebeb80;
-  --sub-bg-color: #dae2e8;
-  --sub-bg-color-transparent: #dae2e880;
+  --sub-bg-color: #ffffff;
+  --sub-bg-color-transparent: #ffffffff;
   --article-bg-color: #f5f5f5;
-  --main-border-color: #9d9d9d;
+  --header-bg-color: #e7edf1;
+  --main-font-color: #454545;
+  --main-light-font-color: #696969;
+  --main-border-color: #b0b0b0;
   --main-border-color-transparent: #9d9d9d80;
   --main-point-color: #002743;
   --main-point-color-transparent: #00274380;

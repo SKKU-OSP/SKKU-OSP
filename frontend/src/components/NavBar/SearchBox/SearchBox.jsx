@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
-import classes from './SearchBox.module.css';
+import { BsSearch, BsHash } from 'react-icons/bs';
+import './SearchBox.css';
 
 function SearcherBox() {
   const [curBoard, setCurBoard] = useState({ label: '질문', value: 1 });
@@ -40,37 +41,19 @@ function SearcherBox() {
   };
 
   return (
-    <div className={classes.searchBox}>
-      <div className="d-flex justify-content-between shadow-sm rounded-2">
-        <div className="input-group text-nowrap">
-          <Select options={fieldData} value={curBoard} onChange={(e) => handleSeletBoard(e)} />
-          <input
-            type="text"
-            id="search-word"
-            className="form-control"
-            value={keyword}
-            placeholder="제목/본문 검색어"
-            aria-describedby="search-btn"
-            onChange={(e) => handleKeyword(e)}
-          />
-          <button
-            type="button"
-            id="tag-btn"
-            className="btn btn-light"
-            onClick={handleToggleTag}
-            data-bs-hover="tooltip"
-            data-bs-placement="bottom"
-            data-bs-title="태그 검색"
-          >
-            #
-          </button>
-          <button type="button" className={classes.searchBtn}>
-            검색
-          </button>
-        </div>
-      </div>
-      <div id="tag-filter" className={`fade ${classes.tagFilter}`}>
-        <Select options={tagData} value="1" onChange={(e) => handleSeletTag(e)} multiple />
+    <div className="searchBox">
+      <div className="search">
+        <input
+          type="text"
+          id="search-word"
+          className="form-control"
+          value={keyword}
+          placeholder="검색"
+          aria-describedby="search-btn"
+          onChange={(e) => handleKeyword(e)}
+        />
+        <BsHash className="hash-icon" size="24" />
+        <BsSearch className="search-icon" />
       </div>
     </div>
   );
