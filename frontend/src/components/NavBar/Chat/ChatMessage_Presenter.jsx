@@ -1,5 +1,6 @@
 import { MdOutlineEmail } from 'react-icons/md';
 import ChatMessageModal_Container from './ChatMessageModal_Container';
+import '../IconList.css';
 
 export default function ChatMessage_Presenter({ newAlert, show, onOpenChatModal, onCloseChatModal, iconSize }) {
   return (
@@ -14,9 +15,7 @@ export default function ChatMessage_Presenter({ newAlert, show, onOpenChatModal,
         </span>
       )}
 
-      <button onClick={onOpenChatModal}>
-        <MdOutlineEmail size={iconSize} />
-      </button>
+      <MdOutlineEmail size={iconSize} onClick={onOpenChatModal} className="nav-bar-icons" />
       <ChatMessageModal_Container show={show} onCloseChatModal={onCloseChatModal} />
     </>
   );

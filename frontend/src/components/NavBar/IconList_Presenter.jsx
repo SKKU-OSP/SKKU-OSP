@@ -4,11 +4,11 @@ import TeamApplication_Container from './TeamApplication/TeamApplication_Contain
 
 function IconList_Presenter({ iconSize }) {
   return (
-    <>
+    <div className="nav-bar-icon-list">
       <TeamApplication_Container iconSize={iconSize} />
       <ChatMessage_Container iconSize={iconSize} />
       <Notification_Container iconSize={iconSize} />
-    </>
+    </div>
   );
 }
 
