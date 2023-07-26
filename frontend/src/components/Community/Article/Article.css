@@ -5,33 +5,6 @@
   align-items: flex-start;
 }
 @media screen and (max-width: 767px) {
-  #community-sidebar {
-    width: 50px;
-  }
-  #header-logo {
-    margin-right: 10px;
-  }
-  #community-container {
-    display: flex;
-  }
-  #community-main {
-    width: calc(100% - 50px);
-  }
-  #main-navbar {
-    --bs-gutter-x: 0.8rem !important;
-    padding-left: calc(50px + var(--bs-gutter-x));
-  }
-  #sidebar-user-info > a > span,
-  .boardgroup-title,
-  .boardgroup-item > a > span {
-    display: none !important;
-  }
-  a > .profile-img {
-    width: 22px;
-    height: 22px;
-    border: 0 !important;
-  }
-
   .big-table {
     display: none !important;
   }
@@ -66,23 +39,6 @@
   box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
   border-top-left-radius: 0.625rem;
   border-top-right-radius: 0.625rem;
-}
-#sidebar-user-info {
-  width: 100%;
-  padding: 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-#sidebar-user-info .profile-img {
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: var(--main-white);
-  border: 2px solid var(--main-point-color);
-  box-sizing: border-box;
 }
 
 #profile-username {
