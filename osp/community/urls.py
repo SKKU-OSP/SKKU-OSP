@@ -32,7 +32,6 @@ urlpatterns = [
     path('api/article/scrap/', views_api.article_scrap, name='article-scrap'),
     path('api/article/image/', views_api.upload_article_image, name='article-image'),
 
-    path('api/comment/create/', views_api.comment_create, name='comment-c'),
     path('api/comment/delete/', views_api.comment_delete, name='comment-d'),
     path('api/comment/like/', views_api.comment_like, name='comment-like'),
 
@@ -49,4 +48,6 @@ urlpatterns = [
          views_article.ArticleLikeView.as_view(), name='ArticleLike'),
     path('api/article/<int:article_id>/scrap/',
          views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
+    path('api/comment/create/',
+         views_article.CommentCreateView.as_view(), name='CommentCreate')
 ]

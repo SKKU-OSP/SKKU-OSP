@@ -360,6 +360,40 @@ class ArticleScrapView(APIView):
         return Response(res)
 
 
+class CommentCreateView(APIView):
+    def post(self, request):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'comment': None}
+        try:
+            with transaction.atomic():
+                # data 파싱
+                content = request.data.get('content', '').strip()
+                anonymous_writer = request.data.get('anonymous_writer', False)
+                article_id = request.data.get('article_id', 0)
+
+                writer = Account.objects.get(user=request.user.id)
+                article = Article.objects.get(id=article_id)
+                now_date = datetime.now()
+                article_comment = ArticleComment.objects.create(
+                    article=article,
+                    body=content,
+                    pub_date=now_date,
+                    del_date=now_date,
+                    anonymous_writer=anonymous_writer,
+                    writer=writer
+                )
+                res['message'] = "등록이 완료되었습니다!"
+                data['comment'] = ArticleCommentSerializer(
+                    article_comment).data
+                res['data'] = data
+        except Exception as e:
+            res['status'] = 'fail'
+            res['message'] = '댓글을 등록할 수 없습니다.'
+            print("comment_create error", e)
+
+        return Response(res)
+
+
 def set_article_period(article: Article, period_start: str, period_end: str):
     ret = {"article": article}
     message = ""
