@@ -288,6 +288,78 @@ class ArticleDeleteView(APIView):
             return Response(res)
 
 
+class ArticleLikeView(APIView):
+    def get(self, request, article_id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'like_cnt': 0}
+        like_cnt = len(ArticleLike.objects.filter(article__id=article_id))
+        data['like_cnt'] = like_cnt
+        res['data'] = data
+        return Response(res)
+
+    def post(self, request, article_id):
+        res = {'status': 'fail', 'message': '', 'data': None}
+        data = {'like_cnt': 0}
+
+        try:
+            article = Article.objects.get(id=article_id)
+            print("article", article)
+            account = Account.objects.get(user=request.user)
+            print("account", account)
+
+            article_like, created = ArticleLike.objects.get_or_create(
+                article=article, account=account)
+            print("article_like", article_like, "created", created)
+
+            if article.writer.user_id == request.user.id:
+                # 작성자가 추천한 경우
+                res['message'] = "자신의 게시글은 추천할 수 없습니다."
+                return Response(res)
+            if not created:
+                # 이미 추천한 게시글인 경우
+                article_like.delete()
+                res['message'] = "추천 취소"
+            like_cnt = len(ArticleLike.objects.filter(article=article))
+            data['like_cnt'] = like_cnt
+            res['data'] = data
+            res['status'] = 'success'
+            return Response(res)
+
+        except Exception as e:
+            res['message'] = "오류가 발생했습니다."
+            print("ArticleLikeView", e)
+            return Response(res)
+
+
+class ArticleScrapView(APIView):
+    def get(self, request, article_id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'scrap_cnt': 0}
+        scrap_cnt = len(ArticleScrap.objects.filter(article__id=article_id))
+        data['scrap_cnt'] = scrap_cnt
+        res['data'] = data
+        return Response(res)
+
+    def post(self, request, article_id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'scrap_cnt': 0}
+
+        article = Article.objects.get(id=article_id)
+        account = Account.objects.get(user=request.user)
+        article_scrap, created = ArticleScrap.objects.get_or_create(
+            article=article, account=account)
+
+        if not created:
+            # 이미 스크랩한 게시글인 경우
+            article_scrap.delete()
+            res['message'] = "스크랩 취소"
+        scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+        data['scrap_cnt'] = scrap_cnt
+        res['data'] = data
+        res['status'] = 'success'
+        return Response(res)
+
+
 def set_article_period(article: Article, period_start: str, period_end: str):
     ret = {"article": article}
     message = ""
