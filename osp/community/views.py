@@ -1,5 +1,5 @@
 from django.http import JsonResponse, Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
@@ -8,26 +8,22 @@ from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
-
 
 from .models import *
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
 from community.models import TeamRecruitArticle
 from team.recommend import get_team_recommendation_list
+from community.utils import convert_size
 
-from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
-from user.serializers import AccountSerializer, AccountPrivacySerializer
-from tag.serializers import TagIndependentSerializer
+from community.serializers import BoardSerializer, ArticleSerializer
+from user.serializers import AccountPrivacySerializer
 
 import math
 import json
 import time
 from django.views.generic import TemplateView
-from datetime import datetime, timedelta
-
-# Create your views here.
+from datetime import datetime
 
 
 class CommunityMainView(APIView):
@@ -734,132 +730,6 @@ class ArticleNoticeSaveView(APIView):
         return Response(res)
 
 
-class ArticleAPIView(APIView):
-    '''
-    프론트엔드를 위해 임시로 만든 뷰입니다.
-    '''
-
-    def get(self, request, article_id):
-
-        try:
-            res = {'status': 'success', 'message': '', 'data': None}
-            data = {'article': None, 'tags': None,
-                    'comments': [], 'article_file': None}
-            # 게시글 정보
-            article = Article.objects.get(id=article_id)
-            data['article'] = ArticleSerializer(article).data
-
-            # 게시글 태그 정보
-            article_tags = ArticleTag.objects.filter(article__id=article_id)
-            data['tags'] = [TagIndependentSerializer(
-                article_tag.tag).data for article_tag in article_tags]
-
-            # 게시판 정보
-            board = Board.objects.get(id=article.board_id)
-            data['board'] = BoardSerializer(board).data
-
-            # 게시글 댓글 정보
-            comments = ArticleComment.objects.filter(article_id=article_id)
-            data['comments'] = ArticleCommentSerializer(
-                comments, many=True).data
-
-            res['data'] = data
-        except Exception as e:
-            print("ArticleAPIView", e)
-            res['message'] = e
-            return Response(res)
-
-        return Response(res)
-
-    def post(self, request, article_id):
-        '''
-        article id로 게시글 수정
-        '''
-        res = {'status': 'fail', 'message': '', 'data': None}
-        try:
-            # article 존재 확인
-            article = Article.objects.get(id=article_id)
-        except Exception as e:
-            res['message'] = '게시글을 찾을 수 없습니다.'
-            return Response(res)
-        try:
-            # 유저 확인
-            if request.user.id != article.writer.user.id:
-                res['message'] = '수정 권한이 없습니다.'
-                return Response(res)
-            # data 파싱
-            title = request.data.get('title', '').strip()
-            content = request.data.get('content', '').strip()
-            anonymous_writer = request.data.get('anonymous_writer', False)
-            is_notice = request.data.get('is_notice', False)
-
-            # 게시글 내용 업데이트
-            article.title = title
-            article.body = content
-            article.mod_date = datetime.now()
-            article.anonymous_writer = anonymous_writer
-            article.is_notice = is_notice
-            if not article.board.anonymous_writer:
-                article.anonymous_writer = False
-
-            # 팀 모집 게시판의 경우 모집 기간 업데이트
-            if article.board.board_type == "Recruit":
-                try:
-                    # %Y-%m-%dT%H:%M:%S.%fZ 꼴로 데이터 수신
-                    period_start = request.data.get('period_start', None)
-                    period_end = request.data.get('period_end', None)
-
-                    #
-                    datetime_start = datetime.strptime(
-                        period_start, "%Y-%m-%dT%H:%M:%S.%fZ")
-                    datetime_end = datetime.strptime(
-                        period_end, "%Y-%m-%dT%H:%M:%S.%fZ")
-
-                    # 1시간 조건
-                    condition_hours = 1
-                    if datetime_end-datetime_start < timedelta(hours=condition_hours):
-                        res['message'] = f'모집기간이 너무 짧습니다. {condition_hours} 시간 이상으로 설정해주세요.'
-                        return Response(res)
-
-                    # 'T' and 'Z' 문자삭제, %Y-%m-%d %H:%M:%S.%f 꼴로 데이터 변환
-                    period_start = datetime_start.replace(tzinfo=None)
-                    period_end = datetime_end.replace(tzinfo=None)
-
-                    if period_start and period_end:
-                        article.period_start = period_start
-                        article.period_end = period_end
-                    else:
-                        res['message'] = '입력값에 오류가 있어 기간을 업데이트할 수 없습니다.'
-                        return Response(res)
-                except Exception as e:
-                    print("기간 업데이트", e)
-                    res['message'] = '기간을 업데이트할 수 없습니다.'
-                    return Response(res)
-
-            article.save()
-
-            # 게시글 태그 삭제 후 재생성
-            old_article_tags = ArticleTag.objects.filter(
-                article__id=article_id)
-            for old_article_tag in old_article_tags:
-                old_article_tag.delete()
-
-            article_tags = request.data.get('article_tags', [])
-            for article_tag in article_tags:
-                tag = TagIndependent.objects.filter(name=article_tag)
-                if tag.exists():
-                    ArticleTag.objects.create(article=article, tag=tag)
-
-            res['status'] = 'success'
-            res['message'] = '게시글을 수정했습니다.'
-            res['data'] = {'article_id': article.id}
-            return Response(res)
-        except Exception as e:
-            print("ArticleAPIView", e)
-            res['message'] = e
-            return Response(res)
-
-
 class ArticleView(TemplateView):
 
     @csrf_exempt
@@ -1143,13 +1013,3 @@ class redirectView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return render(request, 'community/redirect.html', context)
-
-
-def convert_size(size_bytes):
-    if size_bytes == 0:
-        return "0 B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return f"{s} {size_name[i]}"
