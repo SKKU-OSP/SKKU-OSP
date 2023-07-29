@@ -45,4 +45,8 @@ urlpatterns = [
          views_article.ArticleUpdateView.as_view(), name='ArticleUpdate'),
     path('api/article/<int:article_id>/delete/',
          views_article.ArticleDeleteView.as_view(), name='ArticleDelete'),
+    path('api/article/<int:article_id>/like/',
+         views_article.ArticleLikeView.as_view(), name='ArticleLike'),
+    path('api/article/<int:article_id>/scrap/',
+         views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
 ]
