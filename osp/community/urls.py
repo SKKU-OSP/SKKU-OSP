@@ -1,6 +1,6 @@
 from django.urls import path
 
-from community import views, views_api
+from community import views, views_api, views_article
 
 app_name = 'community'
 
@@ -27,9 +27,6 @@ urlpatterns = [
     path('article/<article_id>/', views.ArticleView.as_view(), name='article-view'),
     path('article/<article_id>/download/file/<file_id>',
          views_api.file_download, name='file-download'),
-    path('api/article/create/', views_api.article_create, name='article-c'),
-    path('api/article/update/', views_api.article_update, name='article-u'),
-    path('api/article/delete/', views_api.article_delete, name='article-d'),
 
     path('api/article/like/', views_api.article_like, name='article-like'),
     path('api/article/scrap/', views_api.article_scrap, name='article-scrap'),
@@ -39,7 +36,13 @@ urlpatterns = [
     path('api/comment/delete/', views_api.comment_delete, name='comment-d'),
     path('api/comment/like/', views_api.comment_like, name='comment-like'),
 
-    path('api/article/<int:article_id>/',
-         views.ArticleAPIView.as_view(), name='ArticleAPI'),
 
+    path('api/article/create/',
+         views_article.ArticleCreateView.as_view(), name='ArticleCreate'),
+    path('api/article/<int:article_id>/',
+         views_article.ArticleAPIView.as_view(), name='ArticleAPI'),
+    path('api/article/<int:article_id>/update/',
+         views_article.ArticleUpdateView.as_view(), name='ArticleUpdate'),
+    path('api/article/<int:article_id>/delete/',
+         views_article.ArticleDeleteView.as_view(), name='ArticleDelete'),
 ]

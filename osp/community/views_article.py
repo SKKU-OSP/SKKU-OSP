@@ -1,0 +1,317 @@
+from django.db import transaction
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from community.models import *
+from community.utils import convert_size
+from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
+from tag.serializers import TagIndependentSerializer
+from team.serializers import TeamSerializer
+
+from datetime import datetime, timedelta
+
+
+class ArticleAPIView(APIView):
+    '''
+    게시글 읽기 API
+    '''
+
+    def get(self, request, article_id):
+
+        try:
+            res = {'status': 'success', 'message': '', 'data': None}
+            data = {'board': None, 'article': None, 'tags': None,
+                    'comments': [], 'files': None, 'team': None}
+            # 게시글 정보
+            article = Article.objects.get(id=article_id)
+            if article.writer.user_id != request.user.id:
+                article.view_cnt += 1
+
+            # 팀 모집 게시글 확인
+            if article.board.board_type == "Recruit":
+                teamrecruit = TeamRecruitArticle.objects.filter(
+                    article=article).first()
+                if teamrecruit:
+                    data['team'] = TeamSerializer(teamrecruit.team).data
+            article.save()
+
+            data['article'] = ArticleSerializer(article).data
+
+            # 게시글 태그 정보
+            article_tags = ArticleTag.objects.filter(article__id=article_id)
+            data['tags'] = [TagIndependentSerializer(
+                article_tag.tag).data for article_tag in article_tags]
+
+            # 게시판 정보
+            board = Board.objects.get(id=article.board_id)
+            data['board'] = BoardSerializer(board).data
+
+            # 게시글 댓글 정보
+            comments = ArticleComment.objects.filter(article_id=article_id)
+            data['comments'] = ArticleCommentSerializer(
+                comments, many=True).data
+
+            # 게시글 파일 확인
+            article_file_objs = ArticleFile.objects.filter(
+                article_id=article.id, status="POST")
+            article_files = []
+            for obj in article_file_objs:
+                article_files.append({'id': obj.id,
+                                      'name': obj.filename,
+                                      'file': obj.file.name,
+                                      'size': convert_size(obj.file.size)})
+            data['files'] = article_files
+
+            res['data'] = data
+        except Exception as e:
+            print("ArticleAPIView", e)
+            res['message'] = "해당 게시글이 존재하지 않습니다."
+            return Response(res)
+
+        return Response(res)
+
+
+class ArticleCreateView(APIView):
+
+    def post(self, request):
+        '''
+        게시글 생성 API
+        '''
+        res = {'status': 'fail', 'message': '', 'data': None}
+        try:
+            # 유저 확인
+            account = Account.objects.get(user=request.user)
+        except:
+            print()
+            res['message'] = f"유저를 찾을 수 없습니다."
+            return Response(res)
+
+        try:
+            # data 파싱
+            title = request.data.get('title', '').strip()
+            content = request.data.get('content', '').strip()
+            anonymous_writer = request.data.get('anonymous_writer', False)
+            is_notice = request.data.get('is_notice', False)
+            board_id = request.data.get('board_id', False)
+
+            # board id 확인
+            board = Board.objects.get(id=board_id)
+
+            # Article 생성
+            article = Article.objects.create(
+                title=title,
+                body=content,
+                pub_date=datetime.now(),
+                mod_date=datetime.now(),
+                anonymous_writer=anonymous_writer,
+                is_notice=is_notice,
+                board_id=board.id,
+                writer=account)
+
+            # 팀 모집 게시글 확인
+            if article.board.board_type == "Recruit":
+                # 기간 업데이트
+                try:
+                    # %Y-%m-%dT%H:%M:%S.%fZ 꼴로 데이터 수신
+                    period_start = request.data.get('period_start', None)
+                    period_end = request.data.get('period_end', None)
+                    updated_article = set_article_period(
+                        article, period_start, period_end)
+                    if 'error' in updated_article:
+                        res['message'] = updated_article['error']
+                        return Response(res)
+                    article = updated_article['article']
+                    article.save()
+                except Exception as e:
+                    print("기간 업데이트 Exception:", e)
+                    res['message'] = '기간을 업데이트할 수 없습니다.'
+                    return Response(res)
+                # 팀 게시글
+                try:
+                    team_id = request.data.get('team_id', 0)
+                    team = Team.objects.get(id=team_id)
+                    TeamRecruitArticle.objects.create(
+                        team=team, article=article)
+                except:
+                    res['message'] = '해당 팀의 모집글을 작성할 수 없습니다.'
+                    print(res['message'])
+                    return Response(res)
+
+            # 태그 생성
+            article_tags = request.data.get('article_tags', [])
+            for article_tag in article_tags:
+                tag = TagIndependent.objects.filter(name=article_tag)
+                if tag.exists():
+                    ArticleTag.objects.create(article=article, tag=tag.first())
+
+        except Exception as e:
+            print("게시글 쓰기 Exception:", e)
+        return Response(res)
+
+
+class ArticleUpdateView(APIView):
+
+    def post(self, request, article_id):
+        '''
+        article id로 게시글 수정
+        '''
+        res = {'status': 'fail', 'message': '', 'data': None}
+        try:
+            # article 존재 확인
+            article = Article.objects.get(id=article_id)
+        except Exception as e:
+            res['message'] = '게시글을 찾을 수 없습니다.'
+            return Response(res)
+        try:
+            # 유저 확인
+            if request.user.id != article.writer.user.id:
+                res['message'] = '수정 권한이 없습니다.'
+                return Response(res)
+            # data 파싱
+            title = request.data.get('title', '').strip()
+            content = request.data.get('content', '').strip()
+            anonymous_writer = request.data.get('anonymous_writer', False)
+            is_notice = request.data.get('is_notice', False)
+
+            # 게시글 내용 업데이트
+            article.title = title
+            article.body = content
+            article.mod_date = datetime.now()
+            article.anonymous_writer = anonymous_writer
+            article.is_notice = is_notice
+            if not article.board.anonymous_writer:
+                article.anonymous_writer = False
+
+            # 팀 모집 게시판의 경우 모집 기간 업데이트
+            if article.board.board_type == "Recruit":
+                try:
+                    # %Y-%m-%dT%H:%M:%S.%fZ 꼴로 데이터 수신
+                    period_start = request.data.get('period_start', None)
+                    period_end = request.data.get('period_end', None)
+                    updated_article = set_article_period(
+                        article, period_start, period_end)
+                    if 'error' in updated_article:
+                        res['message'] = updated_article['error']
+                        return Response(res)
+                    article = updated_article['article']
+                    article.save()
+                except Exception as e:
+                    print("기간 업데이트 Exception:", e)
+                    res['message'] = '기간을 업데이트할 수 없습니다.'
+                    return Response(res)
+                # 팀 게시글
+                try:
+                    team_id = request.data.get('team_id', 0)
+                    team = Team.objects.get(id=team_id)
+                    team_recruit_article = TeamRecruitArticle.objects.get(
+                        article=article)
+                    team_recruit_article.team = team
+                    team_recruit_article.save()
+                except:
+                    res['message'] = '해당 모집글의 팀을 수정할 수 없습니다.'
+                    print(res['message'])
+                    return Response(res)
+
+            # 게시글 태그 삭제 후 재생성
+            old_article_tags = ArticleTag.objects.filter(
+                article__id=article.id)
+            for old_article_tag in old_article_tags:
+                old_article_tag.delete()
+
+            article_tags = request.data.get('article_tags', [])
+            for article_tag in article_tags:
+                tag = TagIndependent.objects.filter(name=article_tag)
+                if tag.exists():
+                    ArticleTag.objects.create(article=article, tag=tag.first())
+
+            res['status'] = 'success'
+            res['message'] = '게시글을 수정했습니다.'
+            res['data'] = {'article_id': article.id}
+            return Response(res)
+        except Exception as e:
+            print("ArticleAPIView", e)
+            res['message'] = e
+            return Response(res)
+
+
+class ArticleDeleteView(APIView):
+
+    def post(self, request, article_id):
+        '''
+        article id로 게시글 수정
+        '''
+        res = {'status': 'fail', 'message': '', 'data': None}
+        try:
+            # article 존재 확인
+            article = Article.objects.get(id=article_id)
+        except Exception as e:
+            res['message'] = '게시글을 찾을 수 없습니다.'
+            return Response(res)
+        try:
+            with transaction.atomic():
+                # 유저 확인
+                if request.user.id != article.writer.user.id:
+                    res['message'] = '삭제 권한이 없습니다.'
+                    return Response(res)
+
+                # 팀 모집 게시판의 경우 팀-게시글 관계 삭제
+                if article.board.board_type == "Recruit":
+                    # 팀 게시글
+                    try:
+                        team_recruit_article = TeamRecruitArticle.objects.get(
+                            article=article)
+                        team_recruit_article.delete()
+                    except:
+                        res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                        print(res['message'])
+                        return Response(res)
+
+                # 게시글 태그 삭제
+                old_article_tags = ArticleTag.objects.filter(
+                    article__id=article.id)
+                for old_article_tag in old_article_tags:
+                    old_article_tag.delete()
+
+                article_tags = ArticleTag.objects.filter(article=article)
+                for article_tag in article_tags:
+                    article_tag.delete()
+                article.delete()
+
+                res['status'] = 'success'
+                res['message'] = '게시글을 삭제했습니다.'
+                res['data'] = {'article_id': article.id}
+                return Response(res)
+
+        except Exception as e:
+            print("ArticleDeleteView", e)
+            res['message'] = e
+            return Response(res)
+
+
+def set_article_period(article: Article, period_start: str, period_end: str):
+    ret = {"article": article}
+    message = ""
+    datetime_start = datetime.strptime(
+        period_start, "%Y-%m-%dT%H:%M:%S.%fZ")
+    datetime_end = datetime.strptime(
+        period_end, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+    # 1시간 조건
+    condition_hours = 1
+    if datetime_end-datetime_start < timedelta(hours=condition_hours):
+        ret['error'] = f'모집기간이 너무 짧습니다. {condition_hours} 시간 이상으로 설정해주세요.'
+        return message
+
+    # 'T' and 'Z' 문자삭제, %Y-%m-%d %H:%M:%S.%f 꼴로 데이터 변환
+    period_start = datetime_start.replace(tzinfo=None)
+    period_end = datetime_end.replace(tzinfo=None)
+
+    if period_start and period_end:
+        article.period_start = period_start
+        article.period_end = period_end
+    else:
+        ret['error'] = '입력값에 오류가 있어 기간을 업데이트할 수 없습니다.'
+        return message
+
+    # 게시 기간 설정된 Article 객체 반환
+    return article
