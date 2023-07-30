@@ -4,15 +4,20 @@ from team import views
 app_name = 'team'
 
 urlpatterns = [
-    path('api/team-invite', views.TeamInvite, name='team-invite'),
-    path('api/team-create', views.TeamCreate, name='team-create'),
-    path('api/team-update', views.TeamUpdate, name='team-update'),
-    path('api/team-apply-list', views.TeamApplyList, name='team-apply-list'),
+    path('api/team-invite-on-teamboard', views.TeamInviteOnTeamboardView.as_view(),
+         name='team-invite-on-teamboard'),
+    path('api/team-invite-on-recommend', views.TeamInviteOnRecommendView.as_view(),
+         name='team-invite-on-recommend'),
+    path('api/team-create', views.TeamCreateView.as_view(), name='team-create'),
+    path('api/team-update', views.TeamUpdateView.as_view(), name='team-update'),
 
-    path('api/team-apply/<int:team_id>', views.TeamApply, name='team-apply'),
+    path('api/team-apply/',
+         views.TeamApplyView.as_view(), name='team-apply'),
+    path('api/team-out/', views.TeamOutView.as_view(), name='team-out'),
+    path('api/team-invite-update/',
+         views.TeamInviteUpdateView.as_view(), name='invite-update'),
+    path('api/team-invite-delete/',
+         views.TeamInviteDeleteView.as_view(), name='invite-delete'),
 
-    path('api/team-invite-update/', views.TeamInviteUpdate, name='invite-update'),
-    path('api/team-invite-delete/', views.TeamInviteDelete, name='invite-delete'),
-    path('api/team-out/', views.TeamOut, name='team-out'),
     # path('api/member', views.TeamMemberAPI.asView(), name='TeamMember API'),
 ]
