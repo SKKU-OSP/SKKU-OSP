@@ -5,7 +5,6 @@ from user.serializers import AccountSerializer
 from tag.serializers import TagIndependentSerializer
 
 
-
 class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -42,5 +41,3 @@ class TemaTagSerializer(serializers.ModelSerializer):
             "team",
             "tag",
         )
-=======
->>>>>>> cc40bd7c1e4ab22fe6a831cfee1bf5e32428e353

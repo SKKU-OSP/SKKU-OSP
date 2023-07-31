@@ -18,6 +18,10 @@ urlpatterns = [
          views.TeamInviteUpdateView.as_view(), name='invite-update'),
     path('api/team-invite-delete/',
          views.TeamInviteDeleteView.as_view(), name='invite-delete'),
+    path('api/team-apply-update/',
+         views.TeamApplyUpdateView.as_view(), name='apply-update'),
+    path('api/team-apply-delete/',
+         views.TeamApplyDeleteView.as_view(), name='apply-delete'),
 
     # path('api/member', views.TeamMemberAPI.asView(), name='TeamMember API'),
 ]
