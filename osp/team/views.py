@@ -4,547 +4,1239 @@ from django.urls import reverse
 from django.http import JsonResponse
 from django.core.files.images import get_image_dimensions
 from django.template.loader import render_to_string
-from .models import Team, TeamMember, TeamTag, TeamInviteMessage
+from .models import Team, TeamMember, TeamTag, TeamInviteMessage, TeamApplyMessage
 from tag.models import Tag
-from user.models import Account
-from community.models import Board
+from user.models import Account, User
+from community.models import Board, Article, TeamRecruitArticle
 from message.models import Message
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.parsers import JSONParser
+
+from community.serializers import BoardSerializer, ArticleSerializer
+from user.serializers import AccountSerializer, AccountPrivacySerializer
+from team.serializers import TeamSerializer, TeamMemberSerializer, TemaTagSerializer
+from tag.serializers import TagIndependentSerializer
+
 
 from datetime import datetime
 
-
-def teamInviteValidation(user, username, team_id, invite_msg):
-    '''
-    팀 초대 시 가져온 사용자의 입력 값에 대하여 validation을 수행
-    validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
-
-    Returns:
-        field_check_list, is_valid
-
-    Caller :
-        TeamInvite
-    '''
-
-    is_valid = True
-    field_check_list = {}
-
-    if user.is_anonymous:
-        is_valid = False
-    if not username:
-        is_valid = False
-        field_check_list['name'] = '필수 입력값입니다.'
-    else:
-        try:
-            Account.objects.get(user__username=username)
-        except:
-            is_valid = False
-
-    # Team Name Check
-    if not team_id:
-        is_valid = False
-        field_check_list['id'] = '필수 입력값입니다.'
-    else:
-        try:
-            Team.objects.get(id=team_id)
-        except:
-            is_valid = False
-            pass
-
-    if len(invite_msg) > 150:
-        is_valid = False
-        field_check_list['desc'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
-
-    return field_check_list, is_valid
+from .utils import *
 
 
-def teamInfoValidation(team_name, team_desc, team_img, pre_team_name=""):
-    '''
-    팀 정보 생성/수정 시 가져온 사용자의 입력 값에 대하여 validation을 수행
-    validation 결과가 오류일 경우에 사용자에게 오류메세지를 전달
+class TeamInviteOnTeamboardView(APIView):
 
-    Returns:
-        field_check_list, is_valid
-
-    Caller :
-        TeamCreate, TeamUpdate
-    '''
-    is_valid = True
-    field_check_list = {}
-
-    # Team Name Check
-    if not team_name:
-        is_valid = False
-        field_check_list['name'] = '필수 입력값입니다.'
-    elif pre_team_name != team_name:
-        # 생성 및 팀이름 포함 업데이트 시 팀 이름 중복 확인
-        team_obj = Team.objects.filter(name=team_name)
-        if len(team_obj) > 0:
-            is_valid = False
-            field_check_list['name'] = '팀 이름이 이미 있습니다.'
-    else:
-        print("이전 이름과 동일합니다.")
-
-    if not team_desc:
-        is_valid = False
-        field_check_list['desc'] = '필수 입력값입니다.'
-    else:
-        if len(team_desc) < 30 or len(team_desc) > 150:
-            is_valid = False
-            field_check_list['desc'] = f'팀 설명은 30자 이상 150자 이하입니다. 현재 {len(team_desc)}자'
-
-    if team_img:
-        img_width, img_height = get_image_dimensions(team_img)
-        if img_width > 500 or img_height > 500:
-            is_valid = False
-            # \u00d7 는 곱셈기호
-            field_check_list[
-                'image'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
-
-    return field_check_list, is_valid
-
-
-def TeamInvite(request):
-    '''
-    팀원 초대 창
-    url       : /team/api/team-invite
-    template  : team/invite-form.html
-
-    Returns :
-        GET  : render
-        POST : JsonResponse
-
-    '''
-    if request.method == 'GET':
-
-        # 팀원 초대장 팝업창 렌더링
-        # context 정보
-        # invite_user       : 초대 대상 유저의 Account 객체 ( 초대 대상 유저의 user_id로 쿼리)
-        # invite_team       : 초대 팀의 Team 객체 ( 초대 할 팀의 team_id로 쿼리 )
-        # recommend_team    : ???
-
-        context = {
-            'invite_user': Account.objects.filter(user__id=request.GET.get('user_id')).first(),
-            'invite_team': Team.objects.filter(id=request.GET.get('team_id')).first(),
-            'recommend_team': request.GET.get('recommend_team'),
-        }
-        return render(request, 'team/invite-form.html', context)
-
-    if request.method == 'POST':
-
-        # 팀원 초대 메시지 객체 생성
-
-        # username          : 초대 대상 유저의 username
-        # team_id           : 초대 팀의 team_id
-        # invite_msg        : 팀 초대 메세지 본문
-
-        username = request.POST.get('username', False)
-        team_id = request.POST.get('team_id', False)
-        invite_msg = request.POST.get('invite_msg', False)
-
-        # Invite의 Validation 체크
-        field_check_list, is_valid = teamInviteValidation(
-            request.user, username, team_id, invite_msg)
-
-        # 초대 대상이 이미 해당팀의 팀원일 경우 is_valid=False
-        if is_valid and TeamMember.objects.filter(member__user__username=username, team__id=team_id):
-            is_valid = False
-
-        if is_valid:
-            try:
-                with transaction.atomic():
-
-                    # team      : 초대 팀의 Team 객체 ( team_id 로 쿼리 )
-                    # account   : 초대 대상의 Account 객체 ( username 으로 쿼리 )
-
-                    team = Team.objects.get(id=team_id)
-                    account = Account.objects.get(user__username=username)
-
-                    # 팀원 초대 메세지 객체 생성
-                    TeamInviteMessage.objects.create(
-                        team=team,
-                        account=account,
-                        message=invite_msg,
-                        direction=True,
-                        send_date=datetime.now(),
-                    )
-
-                    # noti - 자동생성 (signals)
-                    # msg
-
-                    # board     : 초대대상 팀 Board 객체 ( team Team 객체로 쿼리 )
-                    # url       : 메세지 url ( board.name, board.id로 생성 )
-                    # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
-
-                    board = Board.objects.get(team=team)
-                    url = resolve_url('community:Board',
-                                      board_name=board.name, board_id=board.id)
-                    sender = Account.objects.get(user=request.user.id)
-
-                    # 메세지 객체 생성
-                    Message.objects.create(
-                        sender=sender,
-                        receiver=account,
-                        body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
-                        send_date=datetime.now(),
-                        receiver_read=False,
-                        sender_delete=False,
-                        receiver_delete=False
-                    )
-
-                    # 요청 성공, status : sccess 리턴
-                    return JsonResponse({'status': 'success'})
-
-            except DatabaseError:
-                # Database Exception handling
-                field_check_list['DB'] = 'DB Error'
-
-                # 요청 실패 / status : fail, error list 리턴
-                return JsonResponse({'status': 'fail', 'errors': field_check_list})
-        else:
-            # 요청 실패 / status : fail, error list 리턴
-            return JsonResponse({'status': 'fail', 'errors': field_check_list})
-
-
-def TeamCreate(request):
-    '''
-    팀 생성
-    url       : /team/api/team-create
-    template  : team/create-form.html
-
-    Returns :
-        GET  : render
-        POST : JsonResponse
-
-    '''
-    if request.method == 'GET':
-        # 팀 생성 팝업창 랜더링
-        return render(request, 'team/create-form.html')
-
-    if request.method == 'POST':
-        # 팀 생성 요청 처리
-
-        # team_name : 생성할 팀 이름
-        # team_desc : 생성할 팀 설명
-        # team_img  : 생성할 팀의 이미지
-
-        team_name = request.POST.get('name', False)
-        team_name = team_name.strip() if isinstance(team_name, str) else team_name
-        team_desc = request.POST.get('desc', False)
-        team_desc = ' '.join(team_desc.split())
-        team_img = request.FILES.get('image', False)
-
-        # Invite의 Validation 체크
-        field_check_list, is_valid = teamInfoValidation(
-            team_name, team_desc, team_img)
-
-        if is_valid:
-            try:
-                with transaction.atomic():
-                    if team_img:
-                        # team_img를 입력 받았을 시
-                        # image 가 포함된 Team 객체 생성
-                        new_team = Team.objects.create(
-                            name=team_name,
-                            description=team_desc,
-                            image=team_img,
-                            create_date=datetime.now()
-                        )
-                    else:
-                        # team_img를 입력 받지 않을시
-                        # imager가 포함되지 않은 Team 객체 생성 ( dedault = img/team/default.jpg )
-                        new_team = Team.objects.create(
-                            name=team_name,
-                            description=team_desc,
-                            create_date=datetime.now()
-                        )
-
-                    # 생성한 team 객체 DB 저장
-                    new_team.save()
-
-                    # 팀 생성한 유저 Account 객체 ( request.user 로 쿼리 )
-                    account = Account.objects.get(user=request.user.id)
-
-                    # TeamMember 객체 생성, admin으로 설정
-                    team_member = TeamMember.objects.create(
-                        team=new_team,
-                        member=account,
-                        is_admin=True,
-                    )
-
-                    # 생성한 TeamMember 객체 저장
-                    team_member.save()
-
-                    # 생성한 team의 Board 생성
-                    Board.objects.create(
-                        name=team_name,
-                        board_type='Team',
-                        anonymous_writer=False,
-                        team=new_team,
-                    )
-
-                    # 요청 성공 / status : success 리턴
-                    return JsonResponse({'status': 'success', 'message': "팀을 만들었습니다. 팀 게시판에 방문해보세요!"})
-
-            except DatabaseError:
-                field_check_list['DB'] = 'DB Error'
-                # 요청 실패 / status : fail, error list 리턴
-                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '데이터 저장 중 오류가 발생했습니다.'})
-            except Exception as e:
-                field_check_list['Error'] = str(e)
-                # 요청 실패 / status : fail, error list 리턴
-                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '팀 생성 중에 오류가 발생했습니다.'})
-        else:
-            # 요청 실패 / status : fail, error list 리턴
-            return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '입력 값에 문제가 있습니다.'})
-
-
-def TeamUpdate(request):
-    '''
-    팀 정보 업데이트
-    url       : /team/api/team-update
-    template  : team/update-form.html
-
-    Returns:
-        GET     : render
-        POST    : JsonResponse
-        others  : JsonResponse
-    '''
-    if request.method == 'GET':
-
-        # team_id   : 업데이트할 팀의 team_id
-        # team      : 업데이트할 팀의 Team 객체 ( team_id로 쿼리)
-
-        context = {}
+    def get_validation(self, request, status, errors):
         team_id = request.GET.get('team_id')
-        team = Team.objects.get(id=team_id)
-        context['team'] = team
-        context['team_members'] = TeamMember.objects.filter(
-            team=team).select_related('member')
+        user = request.user
 
-        return render(request, 'team/update-form.html', context)
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
 
-    if request.method == 'POST':
+        elif (len(TeamMember.objects.filter(team__id=team_id, member=user.id).values_list('id')) == 0):
+            errors['is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
+            status = 'fail'
 
-        team_id = request.POST.get('team_id')
-        team = Team.objects.get(id=team_id)
+        return status, errors
 
-        # validation
-        team_name = request.POST.get('name', False)
-        team_name = team_name.strip() if isinstance(team_name, str) else team_name
-        team_desc = request.POST.get('desc', False)
-        team_desc = ' '.join(team_desc.split())
-        team_img = request.FILES.get('image', False)
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
 
-        field_check_list, is_valid = teamInfoValidation(
-            team_name, team_desc, team_img, team.name)
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors)
 
-        if is_valid:
-            try:
-                with transaction.atomic():
-                    # team update 후 저장
-                    team.name = team_name
-                    team.description = team_desc
-                    if team_img:
-                        team.image = team_img
-                    team.save()
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
 
-                    # 팀 게시판 이름 수정
-                    team_board = Board.objects.get(team_id=team.id)
-                    team_board.name = team_name
-                    team_board.save()
+        # Transactions
+        team_id = request.GET.get('team_id')
+        try:
+            teammembers = TeamMember.objects.filter(
+                team__id=team_id).values_list('id')
 
-                    # teamMember create and update
-                    admin_list = request.POST.get('admin_list').split(',')
-                    for x in admin_list:
-                        if not x:
-                            admin_list = []
-                            break
-                    member_list = request.POST.get('member_list').split(',')
-                    for x in member_list:
-                        if not x:
-                            member_list = []
-                            break
-                    member_list_old = list(TeamMember.objects.filter(
-                        team=team).values_list('member__user__username', flat=True))
+            usernames_exclude_members = User.objects.exclude(
+                id__in=teammembers).exclude(is_staff=True).values('id', 'username')
 
-                    for member_name in list(set(member_list_old) - set(member_list)):
-                        account = Account.objects.get(
-                            user__username=member_name)
-                        TeamMember.objects.get(
-                            member=account, team=team).delete()
+            data['usernames_exclude_members'] = usernames_exclude_members
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
 
-                    for member_name in member_list:
-                        teammember = TeamMember.objects.get(
-                            team=team, member__user__username=member_name)
-                        teammember.is_admin = member_name in admin_list
-                        teammember.save()
-
-                    # teamTag create and delete
-                    tag_list = request.POST.get('category_tag_list').split(',')
-                    tag_list_old = list(TeamTag.objects.filter(
-                        team=team).values_list('tag__name', flat=True))
-
-                    for tag in tag_list:
-                        if not tag:
-                            tag_list = []
-                            break
-                    for tag_name in list(set(tag_list_old) - set(tag_list)):
-                        TeamTag.objects.get(
-                            team=team, tag__name=tag_name).delete()
-                    for tag_name in list(set(tag_list) - set(tag_list_old)):
-                        tag = Tag.objects.get(name=tag_name)
-                        TeamTag.objects.create(team=team, tag=tag)
-
-                    if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
-                        raise Exception('팀 관리자는 0명이 될 수 없습니다.')
-                    team.save()
-
-                    return JsonResponse({'status': 'success', 'message': '팀 설정을 업데이트했습니다.', 'redirect': reverse('community:Board', args=[team_board.name, team_board.id])})
-            except DatabaseError:
-                field_check_list['DB'] = 'DB Error'
-                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '데이터 저장 중 오류가 발생했습니다.'})
-            except Exception as e:
-                field_check_list['Error'] = str(e)
-                return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '팀 업데이트 중에 오류가 발생했습니다.'})
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
         else:
-            return JsonResponse({'status': 'fail', 'errors': field_check_list, 'message': '입력 값에 문제가 있습니다.'})
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+    def post_validation(self, request, status, errors):
+
+        target_user_id = request.data.get('target_user_id', False)
+        target_team_id = request.data.get('target_team_id', False)
+        invite_msg = request.data.get('invite_msg', False)
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        try:
+            target_team = Team.objects.get(id=target_team_id)
+        except Team.DoesNotExist:
+            errors['team_not_found'] = '초대할 팀이 존재하지 않습니다.'
+            status = 'fail'
+
+        try:
+            target_user = User.objects.get(id=target_user_id)
+        except User.DoesNotExist:
+            errors['team_not_found'] = '초대할 대상이 존재하지 않습니다.'
+            status = 'fail'
+
+        if not is_teammember(target_team_id, request.user.id):
+            errors['is_not_teammember'] = '현재 접속한 유저가 해당 팀의 멤버가 아닙니다.'
+            status = 'fail'
+
+        if is_teammember(target_team_id, target_user_id):
+            errors['already_member'] = '초대 대상이 이미 팀의 멤버입니다.'
+            status = 'fail'
+
+        if len(invite_msg) > 150:
+            errors['msg_too_long'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
+            status = 'fail'
+
+        return target_team, target_user, status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        target_team, target_user, status, errors \
+            = self.post_validation(request, status, errors, *args, **kwargs)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        target_user_id = request.data.get('target_user_id', False)
+        target_team_id = request.data.get('target_team_id', False)
+        invite_msg = request.data.get('invite_msg', False)
+
+        try:
+            with transaction.atomic():
+                team = Team.objects.get(id=target_team_id)
+                target_account = Account.objects.get(
+                    user__id=target_user.id)
+
+                # 팀원 초대 메세지 객체 생성
+                TeamInviteMessage.objects.create(
+                    team=target_team,
+                    account=target_account,
+                    message=invite_msg,
+                    direction=True,
+                    send_date=datetime.now(),
+                )
+
+                # noti - 자동생성 (signals)
+                # msg
+
+                # board     : 초대대상 팀 Board 객체 ( team Team 객체로 쿼리 )
+                # url       : 메세지 url ( board.name, board.id로 생성 )
+                # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
+
+                board = Board.objects.get(team=team)
+                url = resolve_url('community:Board',
+                                  board_name=board.name, board_id=board.id)
+                sender = Account.objects.get(user=request.user.id)
+
+                # 메세지 객체 생성
+                Message.objects.create(
+                    sender=sender,
+                    receiver=target_account,
+                    body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
+                    send_date=datetime.now(),
+                    receiver_read=False,
+                    sender_delete=False,
+                    receiver_delete=False
+                )
+
+                # 요청 성공, status : sccess 리턴
+                status = 'success'
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
 
 
-def TeamApply(request, team_id):
-    '''
-    팀 가입 팝업창
-    url       : /team/api/team-apply/<int:team_id>
-    template  : team/apply-form.html
+class TeamInviteOnRecommendView(APIView):
 
-    Returns :
-        GET     : render
-        POST    : JsonResponse
-        others  : JsonResponse
-    '''
-    if request.method == 'GET':
-        context = {}
-        team = Team.objects.get(id=team_id)
-        context['team'] = team
-        return render(request, 'team/apply-form.html', context)
-    if request.method == 'POST':
-        team = Team.objects.get(id=team_id)
-        account = Account.objects.get(user=request.user.id)
-        teammember = TeamMember.objects.filter(team=team, member=account)
-        if not teammember:
+    def get_validation(self, request, status, errors):
+        team_id = request.GET.get('team_id')
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        elif (len(TeamMember.objects.filter(team__id=team_id, member=user.id).values_list('id')) == 0):
+            errors['is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
+            status = 'fail'
+
+        return status, errors
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Requset Validation
+        status, errors \
+            = self.get_validation(request, errors, status)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        user = request.user
+        try:
+
+            team_id_include_user = TeamMember.objects.filter(
+                member=user.id).values_list('team_id')
+            teams_of_user = Team.objects.filter(
+                id__in=team_id_include_user).values('id', 'name')
+
+            data['teams_of_user'] = teams_of_user
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+    def post_validation(self, request, status, errors):
+
+        target_user_id = request.data.get('target_user_id', False)
+        target_team_id = request.data.get('target_team_id', False)
+        invite_msg = request.data.get('invite_msg', False)
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
             try:
-                with transaction.atomic():
-                    message = request.POST.get('desc')
-                    TeamInviteMessage.objects.create(
-                        team=team,
-                        account=account,
-                        message=message,
-                        status=0,  # 대기 중
-                        direction=False,  # FROM ACCOUNT TO_TEAM
-                        send_date=datetime.now(),
+                target_team = Team.objects.get(id=target_team_id)
+            except Team.DoesNotExist:
+                errors['team_not_found'] = '초대할 팀이 존재하지 않습니다.'
+                status = 'fail'
+
+            try:
+                target_user = User.objects.get(id=target_user_id)
+            except User.DoesNotExist:
+                errors['team_not_found'] = '초대할 대상이 존재하지 않습니다.'
+                status = 'fail'
+
+            if not is_teammember(target_team_id, request.user.id):
+                errors['is_not_teammember'] = '현재 접속한 유저가 해당 팀의 멤버가 아닙니다.'
+                status = 'fail'
+
+            if is_teammember(target_team_id, target_user_id):
+                errors['already_member'] = '초대 대상이 이미 팀의 멤버입니다.'
+                status = 'fail'
+
+            if len(invite_msg) > 150:
+                errors['msg_too_long'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
+                status = 'fail'
+
+        return target_team, target_user, status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        target_user_id = request.data.get('target_user_id', False)
+        target_team_id = request.data.get('target_team_id', False)
+        invite_msg = request.data.get('invite_msg', False)
+        try:
+            with transaction.atomic():
+
+                # team      : 초대 팀의 Team 객체 ( target_team_name 로 쿼리 )
+                # account   : 초대 대상의 Account 객체 ( target_user_username 으로 쿼리 )
+
+                team = Team.objects.get(name=target_team_id)
+                account = Account.objects.get(
+                    user__username=target_user_id)
+
+                # 팀원 초대 메세지 객체 생성
+                TeamInviteMessage.objects.create(
+                    team=team,
+                    account=account,
+                    message=invite_msg,
+                    direction=True,
+                    send_date=datetime.now(),
+                )
+
+                # noti - 자동생성 (signals)
+                # msg
+
+                # board     : 초대대상 팀 Board 객체 ( team Team 객체로 쿼리 )
+                # url       : 메세지 url ( board.name, board.id로 생성 )
+                # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
+
+                board = Board.objects.get(team=team)
+                url = resolve_url('community:Board',
+                                  board_name=board.name, board_id=board.id)
+                sender = Account.objects.get(user=request.user.id)
+
+                # 메세지 객체 생성
+                Message.objects.create(
+                    sender=sender,
+                    receiver=account,
+                    body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
+                    send_date=datetime.now(),
+                    receiver_read=False,
+                    sender_delete=False,
+                    receiver_delete=False
+                )
+
+                # 요청 성공, status : sccess 리턴
+                res = {'status': 'success'}
+                return Response(res)
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+
+class TeamCreateView(APIView):
+
+    def get_validation(self, request, status, errors):
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, errors
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+    def post_validation(request, status, errors):
+
+        team_name = request.data.get('team_name', False)
+        team_name = team_name.strip() if isinstance(team_name, str) else team_name
+        team_description = request.data.get('team_description', False)
+        team_description = ' '.join(team_description.split())
+        team_image = request.FILES.get('team_image', False)
+
+        if not request.user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        # Team Name Check
+        if not team_name:
+            errors['team_name_empty'] = '이름은 필수 입력값입니다.'
+            status = 'fail'
+
+        else:
+            team_obj = Team.objects.filter(name=team_name)
+            if len(team_obj) > 0:
+                errors['team_name_duplicate'] = '팀 이름이 이미 존재합니다.'
+                status = 'fail'
+
+        if not team_description:
+            errors['team_description_duplicate'] = '설명은 필수 입력값입니다.'
+            status = 'fail'
+        else:
+            if len(team_description) < 30 or len(team_description) > 150:
+                errors[
+                    'team_description_length'] = f'팀 설명은 30자 이상 150자 이하입니다. 현재 {len(team_description)}자'
+                status = 'fail'
+
+        if team_image:
+            img_width, img_height = get_image_dimensions(team_image)
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                # \u00d7 는 곱셈기호
+                errors['team_image_too_big'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        team_name = request.data.get('team_name', False)
+        team_name = team_name.strip() if isinstance(team_name, str) else team_name
+        team_description = request.data.get('team_description', False)
+        team_description = ' '.join(team_description.split())
+        team_image = request.FILES.get('team_image', False)
+
+        try:
+            with transaction.atomic():
+                if team_image:
+                    # team_img를 입력 받았을 시
+                    # image 가 포함된 Team 객체 생성
+                    new_team = Team.objects.create(
+                        name=team_name,
+                        description=team_description,
+                        image=team_image,
+                        create_date=datetime.now()
+                    )
+                else:
+                    # team_img를 입력 받지 않을시
+                    # imager가 포함되지 않은 Team 객체 생성 ( dedault = img/team/default.jpg )
+                    new_team = Team.objects.create(
+                        name=team_name,
+                        description=team_description,
+                        create_date=datetime.now()
                     )
 
-                    return JsonResponse({'status': 'success'})
-            except DatabaseError as e:
-                return JsonResponse({'status': 'fail', 'message': str(e)})
+                # 생성한 team 객체 DB 저장
+                new_team.save()
+
+                # 팀 생성한 유저 Account 객체 ( request.user 로 쿼리 )
+                account = Account.objects.get(user=request.user.id)
+
+                # TeamMember 객체 생성, admin으로 설정
+                team_member = TeamMember.objects.create(
+                    team=new_team,
+                    member=account,
+                    is_admin=True,
+                )
+
+                # 생성한 TeamMember 객체 저장
+                team_member.save()
+
+                # 생성한 team의 Board 생성
+                Board.objects.create(
+                    name=team_name,
+                    board_type='Team',
+                    anonymous_writer=False,
+                    team=new_team,
+                )
+
+                # 요청 성공 / status : success 리턴
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
         else:
-            return JsonResponse({'status': 'fail', 'message': "기존 팀원은 지원할 수 없습니다."})
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
 
 
-def TeamApplyList(request):
-    '''
-    팀 초대장/가입 신청서 목록렌더링
-    url : /team/api/team-apply-list
-    template : team/apply-list.html
+class TeamUpdateView(APIView):
 
-    Returns :
-        render
-    '''
-    if request.method == 'GET':
-        return render(request, 'team/apply-list.html')
+    def get_validation(self, request, status, errors):
 
+        user = request.user
+        account = Account.objects.get(user=user)
+        target_team_id = request.GET.get('target_team_id')
 
-def TeamOut(request):
-    '''
-    팀 탈퇴 요청 처리
-    url : /team/api/team-out
+        if not request.user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            # team = Team.objects.get(id=target_team_id)
+            if status == 'success':
+                try:
+                    team = Team.objects.get(id=target_team_id)
 
-    Returns :
-        JsonResponse
-    '''
-    if request.method == 'POST':
-        team = Team.objects.get(id=request.POST.get('team_id'))
-        account = Account.objects.get(
-            user__username=request.POST.get('username'))
-        teammember = TeamMember.objects.get(team=team, member=account)
-        teammembers = TeamMember.objects.filter(team=team)
+                except Team.DoesNotExist:
+                    errors['team_not_found'] = "해당 팀이 존재하지 않습니다."
+                    status = 'fail'
 
-        # 탈퇴 가능 조건: 팀에 멤버가 한명(자기자신), 팀멤버가 여러명이나 admin이 아님
-        if teammembers.count() > 1 and teammember.is_admin:
-            return JsonResponse({'status': 'fail', 'message': '멤버가 여러명일 경우 admin은 탈퇴가 불가능합니다.\nadmin을 해제해주세요.'})
+            if status == 'success':
+                try:
+                    TeamMember.objects.get(team=team, member=account)
+                except TeamMember.DoesNotExist:
+                    errors['user_is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
+                    status = 'fail'
+
+            if status == 'success':
+                try:
+                    TeamMember.objects.get(
+                        team=team, member=account, is_admin=1)
+                except TeamMember.DoesNotExist:
+                    errors['user_is_not_teamadmin'] = '해당 팀의 관리자가 아닙니다.'
+                    status = 'fail'
+
+        return status, errors
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
         try:
+            target_team_id = request.GET.get('target_team_id')
+            team = Team.objects.get(id=target_team_id)
+            team_members = TeamMember.objects.filter(
+                team=team)
+            print(team_members)
+            team_tag_list = TeamTag.objects.filter(team=team)
+
+            data['team'] = TeamSerializer(team).data
+            data['team_members'] = TeamMemberSerializer(
+                team_members, many=True).data
+            data['team_tag_list'] = TemaTagSerializer(
+                team_tag_list, many=True).data
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+    def post_validation(self, request, status, errors):
+
+        target_team_id = request.data.get('target_team_id', False)
+
+        team_name = request.data.get('team_name', False)
+        team_name = team_name.strip() if isinstance(team_name, str) else team_name
+
+        team_description = request.data.get('team_description', False)
+        team_description = ' '.join(team_description.split())
+
+        team_image = request.FILES.get('team_image', False)
+
+        if not request.user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        # Team Name Check
+        if not team_name:
+            errors['team_name_empty'] = '이름은 필수 입력값입니다.'
+            status = 'fail'
+
+        else:
+            team_obj = Team.objects.filter(name=team_name)
+            if len(team_obj) > 0:
+                errors['team_name_duplicate'] = '팀 이름이 이미 존재합니다.'
+                status = 'fail'
+
+        if not team_description:
+            errors['team_description_duplicate'] = '설명은 필수 입력값입니다.'
+            status = 'fail'
+        else:
+            if len(team_description) < 30 or len(team_description) > 150:
+                errors[
+                    'team_description_length'] = f'팀 설명은 30자 이상 150자 이하입니다. 현재 {len(team_description)}자'
+                status = 'fail'
+
+        if team_image:
+            img_width, img_height = get_image_dimensions(team_image)
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                # \u00d7 는 곱셈기호
+                errors['team_image_too_big'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        target_team_id = request.data.get('target_team_id')
+        team = Team.objects.get(id=target_team_id)
+
+        # Transactions
+        team_name = request.data.get('team_name', False)
+        team_name = team_name.strip() if isinstance(team_name, str) else team_name
+        team_description = request.data.get('team_description', False)
+        team_description = ' '.join(team_description.split())
+        team_image = request.FILES.get('team_image', False)
+
+        try:
+            with transaction.atomic():
+                # team update 후 저장
+                team.name = team_name
+                team.description = team_description
+                if team_image:
+                    team.image = team_image
+                team.save()
+
+                # 팀 게시판 이름 수정
+                team_board = Board.objects.get(team_id=team.id)
+                team_board.name = team_name
+                team_board.save()
+                # teamMember create and update
+                admin_list = request.data.get('admin_list').split(',')
+                for x in admin_list:
+                    if not x:
+                        admin_list = []
+                        break
+                member_list = request.data.get('member_list').split(',')
+                for x in member_list:
+                    if not x:
+                        member_list = []
+                        break
+                member_list_old = list(TeamMember.objects.filter(
+                    team=team).values_list('member__user__username', flat=True))
+
+                for member_name in list(set(member_list_old) - set(member_list)):
+                    account = Account.objects.get(
+                        user__username=member_name)
+                    TeamMember.objects.get(
+                        member=account, team=team).delete()
+
+                for member_name in member_list:
+                    teammember = TeamMember.objects.get(
+                        team=team, member__user__username=member_name)
+                    teammember.is_admin = member_name in admin_list
+                    teammember.save()
+
+                # teamTag create and delete
+                tag_list = request.data.get('category_tag_list').split(',')
+                tag_list_old = list(TeamTag.objects.filter(
+                    team=team).values_list('tag__name', flat=True))
+
+                for tag in tag_list:
+                    if not tag:
+                        tag_list = []
+                        break
+                for tag_name in list(set(tag_list_old) - set(tag_list)):
+                    TeamTag.objects.get(
+                        team=team, tag__name=tag_name).delete()
+                for tag_name in list(set(tag_list) - set(tag_list_old)):
+                    tag = Tag.objects.get(name=tag_name)
+                    TeamTag.objects.create(team=team, tag=tag)
+
+                if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
+                    raise Exception('팀 관리자는 0명이 될 수 없습니다.')
+                team.save()
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+
+class TeamApplyView(APIView):
+
+    def get_validation(self, request, status, errors):
+        user = request.user
+        target_article_id = request.GET.get('target_article_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            if status == 'success':
+                try:
+                    team_recruit_article = TeamRecruitArticle.objects.get(
+                        id=target_article_id)
+                except TeamRecruitArticle.DoesNotExist:
+                    errors['teamrecruitarticle_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    status = 'fail'
+
+            if status == 'success':
+                try:
+                    team = team_recruit_article.team
+                except Team.DoesNotExist:
+                    errors['team_not_found'] = '더이상 존재하지 않는 팀 입니다.'
+                    status = 'fail'
+
+            if status == 'success':
+                if TeamRecruitArticle.period_end < datetime.datetime.now():
+                    errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
+                    status = 'fail'
+
+        return status, errors
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        target_article_id = request.GET.get('target_article_id')
+        try:
+            team_recruit_article = TeamRecruitArticle.objects.get(
+                id=target_article_id)
+            team = team_recruit_article.team
+
+            data['team'] = TeamSerializer(team).data
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            errors['undefined_exception'] = 'undefined_exception'
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+    def post_validation(self, request, status, errors):
+        user = request.user
+        target_article_id = request.data.get('target_article_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            if status == 'success':
+                try:
+                    team_recruit_article = TeamRecruitArticle.objects.get(
+                        id=target_article_id)
+                except TeamRecruitArticle.DoesNotExist:
+                    errors['teamrecruitarticle_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    status = 'fail'
+
+            if status == 'success':
+                try:
+                    team = team_recruit_article.team
+                except Team.DoesNotExist:
+                    errors['team_not_found'] = '더이상 존재하지 않는 팀 입니다.'
+                    status = 'fail'
+
+            if status == 'success':
+                if TeamRecruitArticle.period_end < datetime.datetime.now():
+                    errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
+                    status = 'fail'
+
+            if status == 'success':
+                if is_teammember(team.id, user.id):
+                    errors['user_already_teammember'] = '이미 해당 팀의 멤버입니다.'
+                    status = 'fail'
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+
+        account = Account.objects.get(user=request.user.id)
+        target_article_id = request.data.get('target_article_id')
+        team_recruit_article = TeamRecruitArticle.objects.get(
+            id=target_article_id)
+        team = team_recruit_article.team
+        try:
+            with transaction.atomic():
+                message = request.data.get('message')
+                TeamApplyMessage.objects.create(
+                    team=team,
+                    account=account,
+                    message=message,
+                    status=0,  # 대기 중
+                    direction=False,  # FROM ACCOUNT TO_TEAM
+                    send_date=datetime.now(),
+                )
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            errors['undefined_exception'] = 'undefined_exception'
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+
+class TeamOutView(APIView):
+
+    def post_validation(request, status, errors):
+        user = request.user
+        account = Account.objects.get(user=user)
+        target_team_id = request.data.get('target_team_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            if status == 'success':
+                try:
+                    team = Team.objects.get(id=target_team_id)
+                except Team.DoesNotExist:
+                    errors['team_not_found'] = '존재하지 않는 팀 입니다.'
+                    status = 'fail'
+
+            if status == 'success':
+                try:
+                    teammember = TeamMember.objects.get(
+                        team=team, member=account)
+                    teammembers = TeamMember.objects.filter(team=team)
+
+                    if teammembers.count() > 1 and teammember.is_admin:
+                        errors['teammember_less'] = '멤버가 여러명일 경우 admin은 탈퇴가 불가능합니다.\nadmin을 해제해주세요.'
+
+                except TeamMember.DoesNotExist:
+                    errors['teammember_not_found'] = '팀멤버가 존재하지 않습니다. '
+                    status = 'fail'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+
+        try:
+            team_id = request.data.get('team_id')
+            team = Team.objects.get(id=team_id)
+            user = request.user
+            account = Account.objects.get(user=user)
+            teammember = TeamMember.objects.get(team=team, member=account)
+            teammembers = TeamMember.objects.filter(team=team)
             with transaction.atomic():
                 teammember.delete()
                 teammembers = TeamMember.objects.filter(team=team)
                 if teammembers.count() == 0:
                     team.delete()
-            return JsonResponse({'status': 'success'})
+            return Response({'status': 'success'})
 
-        except DatabaseError as e:
-            return JsonResponse({'status': 'fail', 'message': str(e)})
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
 
-# todo: inviteandapply Ehsms InvtieMessageUpdate로 바꿀것(이경우 document도 수정해야함.)
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
 
 
-def TeamInviteUpdate(request):
-    '''
-    팀 지원 및 팀원 초대시 생성되는 TeamInviteMessage의 변경 요청을 처리
-    url : /team/api/team-invite-update
+class TeamInviteUpdateView(APIView):
 
-    Returns :
-        JsonResponse
-    '''
-    if request.method == 'POST':
-        team = Team.objects.get(id=request.POST.get('team_id'))
-        account = Account.objects.get(
-            user__username=request.POST.get('username'))
-        direction = request.POST.get('direction') == 'TO_ACCOUNT'
+    def post_validation(self, request, status, errors):
+        user = request.user
+        target_teaminvitemessage_id = request.data.get(
+            'target_teaminvitemessage_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                teaminvitemessage = TeamInviteMessage.objects.get(
+                    id=target_teaminvitemessage_id)
+                if teaminvitemessage.account_id != request.user.id:
+                    errors["teaminvitemessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
+                    status = 'fail'
+            except TeamInviteMessage.DoesNotExist:
+                errors["teaminvitemessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
+                status = 'fail'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+
+        target_teaminvitemessage_id = request.data.get(
+            'target_teaminvitemessage_id')
+        account = Account.objects.get(user=request.user)
         try:
-            apply_msg = TeamInviteMessage.objects.get(
-                team=team, account=account, direction=direction, status=0)
+            teaminvitemessage = TeamInviteMessage.objects.get(
+                id=target_teaminvitemessage_id)
             with transaction.atomic():
-                if request.POST.get('is_okay') == "true":
+                if request.data.get('is_okay') == "true":
                     status = 1  # 승인
-                    TeamMember.objects.create(team=team, member=account)
+                    TeamMember.objects.create(
+                        team=teaminvitemessage.team, member=account)
                 else:
                     status = 2  # 거절
-                apply_msg.status = status
-                apply_msg.save()
+                teaminvitemessage.status = status
+                teaminvitemessage.save()
 
-                data = render_to_string(
-                    'team/apply-list.html', request=request)
-                return JsonResponse({'status': 'success', 'data': data, 'username': request.POST.get('username'), 'team_id': apply_msg.team.id})
-        except DatabaseError as e:
-            return JsonResponse({'status': 'fail', 'message': str(e)})
-# TODO: inviteandapply 또는 InvtieMessageDelete로 바꿀것(이경우 document도 수정해야함.)
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            errors['undefined_exception'] = 'undefined_exception'
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
 
 
-def TeamInviteDelete(request):
-    '''
-    팀 지원서 및 팀원 초대장 삭제 요청을 처리
-    url : /team/api/team-invite-delete
+class TeamInviteDeleteView(APIView):
 
-    Retruns:
-        JsonResponse
-    '''
-    if request.method == 'POST':
-        msg_id = request.POST.get('msg_id')
-        apply_msg = TeamInviteMessage.objects.get(id=msg_id)
-        print(request.user.id, apply_msg.account_id)
-        if apply_msg.account_id != request.user.id:
-            return JsonResponse({'status': 'fail', 'message': 'Not Authorized Request'})
+    def post_validation(self, request, status, errors):
+        user = request.user
+        target_teaminvitemessage_id = request.data.get(
+            'target_teaminvitemessage_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                teaminvitemessage = TeamInviteMessage.objects.get(id=target_teaminvitemessage_id)
+                if teaminvitemessage.account_id != request.user.id:
+                    errors["teaminvitemessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
+                    status = 'fail'
+            except TeamInviteMessage.DoesNotExist:
+                errors["teaminvitemessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
+                status = 'fail'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        target_teaminvitemessage_id = request.data.get('target_teaminvitemessage_id')
+        teaminvitemessage = TeamInviteMessage.objects.get(id=target_teaminvitemessage_id))
+
         try:
             with transaction.atomic():
-                apply_msg.delete()
-                return JsonResponse({'status': 'success'})
-        except DatabaseError as e:
-            return JsonResponse({'status': 'fail', 'message': str(e)})
+                teaminvitemessage.delete()
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            errors['undefined_exception'] = 'undefined_exception'
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+
+class TeamApplyUpdateView(APIView):
+
+    def post_validation(self, request, status, errors):
+        user = request.user
+        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+                if teamapplymessage.account_id != request.user.id:
+                    errors["teamapplymessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
+                    status = 'fail'
+            except TeamApplyMessage.DoesNotExist:
+                errors["teamapplymessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
+                status = 'fail'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+
+        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+        account = Account.objects.get(user=request.user)
+        try:
+            teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+            with transaction.atomic():
+                if request.data.get('is_okay') == "true":
+                    status = 1  # 승인
+                    TeamMember.objects.create(team=teamapplymessage.team, member=account)
+                else:
+                    status = 2  # 거절
+                teamapplymessage.status = status
+                teamapplymessage.save()
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            errors['undefined_exception'] = 'undefined_exception'
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
+
+
+class TeamApplyDeleteView(APIView):
+
+    def post_validation(self, request, status, errors):
+        user = request.user
+        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+                if teamapplymessage.account_id != request.user.id:
+                    errors["teamapplymessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
+                    status = 'fail'
+            except TeamInviteMessage.DoesNotExist:
+                errors["teamapplymessage_not_found"] = "해당 지원메세지를 찾을 수 없습니다. "
+                status = 'fail'
+
+        return status, errors
+
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = \
+            self.post_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+        teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+        try:
+            with transaction.atomic():
+                teamapplymessage.delete()
+
+        except DatabaseError:
+            errors['DB'] = 'DB Error'
+            status = 'fail'
+        except:
+            errors['undefined_exception'] = 'undefined_exception'
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+
+        return Response(res)
