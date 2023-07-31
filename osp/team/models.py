@@ -67,3 +67,22 @@ class TeamInviteMessage(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     direction = models.BooleanField(choices=DIRECTION_CHOICES, default=True)
     send_date = models.DateTimeField()
+
+
+class TeamApplyMessage(models.Model):
+    STATUS_CHOICES = (
+        (0, '대기 중'),
+        (1, '승인'),
+        (2, '거절'),
+    )
+    DIRECTION_CHOICES = (
+        (True, 'TO_ACCOUNT'),
+        (False, 'TO_TEAM')
+    )
+    id = models.AutoField(primary_key=True)
+    team = models.ForeignKey(Team, models.CASCADE)
+    account = models.ForeignKey(Account, models.CASCADE)
+    message = models.TextField(max_length=200)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    direction = models.BooleanField(choices=DIRECTION_CHOICES, default=True)
+    send_date = models.DateTimeField()
