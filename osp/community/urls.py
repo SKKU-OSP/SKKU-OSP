@@ -48,6 +48,12 @@ urlpatterns = [
          views_article.ArticleLikeView.as_view(), name='ArticleLike'),
     path('api/article/<int:article_id>/scrap/',
          views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
+    path('api/article/<int:article_id>/comments/',
+         views_article.ArticleCommentsView.as_view(), name='ArticleComments'),
     path('api/comment/create/',
-         views_article.CommentCreateView.as_view(), name='CommentCreate')
+         views_article.CommentCreateView.as_view(), name='CommentCreate'),
+    path('api/comment/<int:comment_id>/delete/',
+         views_article.CommentDeleteView.as_view(), name='CommentDelete'),
+    path('api/comment/<int:comment_id>/like/',
+         views_article.CommentLikeView.as_view(), name='CommentLike')
 ]
