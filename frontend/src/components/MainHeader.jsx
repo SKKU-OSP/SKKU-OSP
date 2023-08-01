@@ -25,12 +25,7 @@ function MainHeader(props) {
 
   return (
     <header>
-<<<<<<< HEAD
-      <div className="container d-flex py-3 header">
-=======
-<<<<<<< HEAD
       <div className="container d-flex py-3 position-relative header">
->>>>>>> 6395f90 (dd)
         <div className="head-of-header d-flex">
           <div className="col-lg-3 col-1 logo">
             <Link to="/" className="fs-3 bold text-nowrap align-middle" style={{ textDecoration: 'none' }}>
@@ -65,32 +60,6 @@ function MainHeader(props) {
           <div className="on-desktop p-2">
             <IconList_Container />
           </div>
-=======
-      <div className="container d-flex flex-row py-3 position-relative header">
-        <div className={`col-lg-3 col-1 ${classes.logo}`}>
-          <Link to="/" className="fs-3 bold text-nowrap align-middle" style={{ textDecoration: 'none' }}>
-            <img width="42px" height="42px" src="/images/logo-simple.svg" alt="로고" />
-            <span className={classes.siteTitle}>SKKU SOSD</span>
-          </Link>
-        </div>
-        <div className="nav-bar">
-          <Link to="/community/" className="nav-bar-menu">
-            커뮤니티
-          </Link>
-          <Link to="/community/" className="nav-bar-menu">
-            팀 모집
-          </Link>
-          <Link to="/community/" className="nav-bar-menu">
-            팀 게시판
-          </Link>
-          <Link to="/community/" className="nav-bar-menu">
-            챌린지
-          </Link>
-        </div>
-        <SearcherBox />
-        <div className="d-flex flex-row p-2">
-          <IconList_Container />
->>>>>>> e0312c3 (renewal header and sidebar)
         </div>
       </div>
     </header>
