@@ -22,7 +22,11 @@ class TagListView(APIView):
         if keyword:
             filter_kwargs['name__contains'] = keyword
         if target_type:
-            filter_kwargs['type'] = target_type
+            target_type = target_type.split(",")
+            if type(target_type) == "str":
+                filter_kwargs['type'] = target_type
+            else:
+                filter_kwargs['type__in'] = target_type
 
         tags = TagIndependent.objects.filter(**filter_kwargs)
 
