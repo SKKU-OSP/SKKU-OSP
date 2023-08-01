@@ -25,7 +25,7 @@ function MainHeader(props) {
 
   return (
     <header>
-      <div className="container d-flex py-3 position-relative header">
+      <div className="container d-flex py-3 header">
         <div className="head-of-header d-flex">
           <div className="col-lg-3 col-1 logo">
             <Link to="/" className="fs-3 bold text-nowrap align-middle" style={{ textDecoration: 'none' }}>
