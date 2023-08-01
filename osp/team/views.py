@@ -1069,7 +1069,8 @@ class TeamInviteDeleteView(APIView):
             status = 'fail'
         else:
             try:
-                teaminvitemessage = TeamInviteMessage.objects.get(id=target_teaminvitemessage_id)
+                teaminvitemessage = TeamInviteMessage.objects.get(
+                    id=target_teaminvitemessage_id)
                 if teaminvitemessage.account_id != request.user.id:
                     errors["teaminvitemessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
                     status = 'fail'
@@ -1094,8 +1095,10 @@ class TeamInviteDeleteView(APIView):
             return Response(res)
 
         # Transactions
-        target_teaminvitemessage_id = request.data.get('target_teaminvitemessage_id')
-        teaminvitemessage = TeamInviteMessage.objects.get(id=target_teaminvitemessage_id))
+        target_teaminvitemessage_id = request.data.get(
+            'target_teaminvitemessage_id')
+        teaminvitemessage = TeamInviteMessage.objects.get(
+            id=target_teaminvitemessage_id)
 
         try:
             with transaction.atomic():
@@ -1121,7 +1124,8 @@ class TeamApplyUpdateView(APIView):
 
     def post_validation(self, request, status, errors):
         user = request.user
-        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+        target_teamapplymessage_id = request.data.get(
+            'target_teamapplymessage_id')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -1129,7 +1133,8 @@ class TeamApplyUpdateView(APIView):
 
         else:
             try:
-                teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+                teamapplymessage = TeamApplyMessage.objects.get(
+                    id=target_teamapplymessage_id)
                 if teamapplymessage.account_id != request.user.id:
                     errors["teamapplymessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
                     status = 'fail'
@@ -1155,14 +1160,17 @@ class TeamApplyUpdateView(APIView):
 
         # Transactions
 
-        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+        target_teamapplymessage_id = request.data.get(
+            'target_teamapplymessage_id')
         account = Account.objects.get(user=request.user)
         try:
-            teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+            teamapplymessage = TeamApplyMessage.objects.get(
+                id=target_teamapplymessage_id)
             with transaction.atomic():
                 if request.data.get('is_okay') == "true":
                     status = 1  # 승인
-                    TeamMember.objects.create(team=teamapplymessage.team, member=account)
+                    TeamMember.objects.create(
+                        team=teamapplymessage.team, member=account)
                 else:
                     status = 2  # 거절
                 teamapplymessage.status = status
@@ -1188,14 +1196,16 @@ class TeamApplyDeleteView(APIView):
 
     def post_validation(self, request, status, errors):
         user = request.user
-        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
+        target_teamapplymessage_id = request.data.get(
+            'target_teamapplymessage_id')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
             try:
-                teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+                teamapplymessage = TeamApplyMessage.objects.get(
+                    id=target_teamapplymessage_id)
                 if teamapplymessage.account_id != request.user.id:
                     errors["teamapplymessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
                     status = 'fail'
@@ -1220,8 +1230,10 @@ class TeamApplyDeleteView(APIView):
             return Response(res)
 
         # Transactions
-        target_teamapplymessage_id = request.data.get('target_teamapplymessage_id')
-        teamapplymessage = TeamApplyMessage.objects.get(id=target_teamapplymessage_id)
+        target_teamapplymessage_id = request.data.get(
+            'target_teamapplymessage_id')
+        teamapplymessage = TeamApplyMessage.objects.get(
+            id=target_teamapplymessage_id)
         try:
             with transaction.atomic():
                 teamapplymessage.delete()
