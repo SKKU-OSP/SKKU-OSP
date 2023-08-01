@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import RootLayout from './routes/RootLayout';
-import Community from './routes/Community';
 import BoardPage from './routes/BoardPage';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
@@ -14,7 +13,6 @@ import ArticlePage from './routes/ArticlePage';
 import ArticleEdit from './components/Community/Article/ArticleEdit/ArticleEdit';
 import SignUpPage from './routes/SignUpPage';
 import { tokenLoader } from './utils/auth';
-
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -31,11 +29,7 @@ const router = createBrowserRouter([
         element: <CommunityLayout />,
         children: [
           {
-            path: '',
-            element: <Community />
-          },
-          {
-            path: 'board/:board_name',
+            path: ':board_name',
             element: <BoardPage />
           },
           {
