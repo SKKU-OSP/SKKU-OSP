@@ -1,26 +1,31 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { BsXLg, BsSave } from "react-icons/bs";
-import { Button } from 'react-bootstrap';
-import axios from 'axios'
-import Select from 'react-select'
-
-import './ArticleEdit.css';
 import { useParams } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
+import axios from 'axios';
+import Select from 'react-select';
+import { BsXLg, BsSave } from "react-icons/bs";
+import { Button } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import './ArticleEdit.css';
+
 /**
  * TARGET: content-edit.html
  */
 const domainUrl = import.meta.env.VITE_SERVER_URL
 
 
-function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
+function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id
-  const url = domainUrl + "/community/api/article/" + articleID
+  const url = domainUrl + "/community/"
+  const urlArticle = domainUrl + "/community/api/article/" + articleID
   const urlTag = domainUrl + "/tag/api/list/"
 
   const article = {}
+  const [board, setBoard] = useState("");
   const [isAuthNotice, setIsAuthNotice] = useState(true);
   const [anonymousWriter, setAnonymousWriter] = useState(true);
+  const [team, setTeam] = useState([]);
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [articleFile, setArticleFile] = useState([]);
@@ -28,53 +33,76 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
   const [bodyText, setBodyText] = useState("");
   const [tags, setTags] = useState([]);
   const [selectTags, setSelectTags] = useState([]);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const getCurrentDateTime = () => new Date();
   const editorRef = useRef(null);
 
   useEffect(() => { //axios 사용
     const getArticle = async() => {
       const response = await axios.get(url);
+      const responseArticle = await axios.get(urlArticle);
       const responseTag = await axios.get(urlTag);
       const res = response.data;
+      const resArticle = responseArticle.data;
       const resTag = responseTag.data;
-      if(res.status === "success"){
-        setTitle(res.data.article.title);
-        setBodyText(res.data.article.body);
+      if(resArticle.status === "success"){
+        setBoard(resArticle.data.article.board);
+        setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
+          prev['board_type'] = "Recruit"
+          return prev
+        });
+        setTitle(resArticle.data.article.title);
+        setBodyText(resArticle.data.article.body);
         setTags(resTag.data.tags.map(t => {
           return{
             value: t.name, label: t.name, color: t.color
           }
         }));
-        setSelectTags(res.data.tags.map(t => {
+        setSelectTags(resArticle.data.tags.map(t => {
           return{
             value: t.name, label: t.name, color: t.color
           }
         }));
-        setIsAuthNotice(res.data.article.is_notice);
-        setAnonymousWriter(res.data.article.anonymous_writer);
+        setIsAuthNotice(resArticle.data.article.is_notice);
+        setAnonymousWriter(resArticle.data.article.anonymous_writer);
       }
-      else{console.log(res.message)}
+      else{console.log(resArticle.message)}
     }
     getArticle()
   }, [])
 
   // 공지 체크 여부 확인
   const noticeCheck = () => {
+    console.log(isAuthNotice);
     return isAuthNotice;
   };
 
   // 익명 체크 여부 확인
   const anonymousCheck = () => {
+    console.log(anonymousWriter);
     return anonymousWriter;
   };
 
   // 저장 버튼 클릭 시
   const handleShow = async() => {
+    if(board.board_type === "Recruit"){
+      const offset = new Date().getTimezoneOffset() * 60000;
+      const period_start_date = startDate.getTime() - offset;
+      const period_end_date = endDate.getTime() - offset;
+
+      if (period_start_date > period_end_date - 3600000) {
+        window.alert("날짜 입력에 오류가 있습니다. 모집 기간은 최소 1시간이 되도록 설정해 주세요.");
+        return;
+      }
+    }
     if (title.trim() === "") {
       window.alert('제목을 입력해 주세요');
     }
-    // else if (bodyText.text().trim().length === 0) {
-    //     window.alert('본문을 입력해 주세요');
-    // }
+    else if (bodyText.trim() === "") {
+        window.alert('본문을 입력해 주세요');
+        return;
+    }
     else if (window.confirm("글을 수정하시겠습니까?")) { // 수정한 글 저장
       if (editorRef.current) {
         const modifiedContent = editorRef.current.getContent();
@@ -98,15 +126,12 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
   };
 
   const handleBodyChange = (e) => {
-    setBodyText(e.target.value);
-
-    console.log(e.target.value);
+    console.log(e.target.getContent());
+    setBodyText(e.target.getContent());
   };
 
   const handleEditorInit = (editor) => {
-    console.log(editor);
-    editorRef.current.value = bodyText;
-    return(editorRef.current = editor)
+    editorRef.current = editor;
   };
 
   const handleFile = () => {
@@ -117,10 +142,12 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
       prevObj[nextNum] = nextNum;
       return prevObj
     });
-    setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 떄 주의점 numFile 줄이면 안돼!!
+    setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 때 주의점 numFile 줄이면 안돼!!
     setNumFile(nextNum);
-  }
 
+    console.log(numFile);
+    console.log(nextNum + "v");
+  }
   console.log(Object.keys({temp:1}))
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -158,6 +185,26 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
     },
   };
 
+  const options = [
+    { value: 'chocolate', label: 'Chocolate' },
+    { value: 'strawberry', label: 'Strawberry' },
+    { value: 'vanilla', label: 'Vanilla' }
+  ]
+  const handleOption = (team) => {
+    setTeam(team);
+  };
+  const customStyle = {
+    control: (provided) => ({
+      ...provided,
+      height: '45px',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      color: state.isSelected ? 'lightgray' : 'black',
+      background: 'none',
+    }),
+  };
+
   //정보공개 미동의 시 뜨는 창
   const renderConsentMessage = !isWrite && type === 'register' && ( 
     <div>
@@ -174,60 +221,43 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
       <div id='community-main' className="col-md-9">
         <div id="board-title-bar" className="flex-between">
           <div id="board-title" className="p-board-title">
-            <a href={'/community/board/${board.name}/${board.id}'}>                   
+            <a href={`/community/board/${board.name}/${board.id}`}>       
                 {board.name} 게시판
             </a>
           </div>
           <div className="d-flex justify-content-end gap-2"> 
-            {isAuthNotice && ( //여기 수정해야 돼
+            {board.board_type === "Notice" && (
               <div className="p-board-title">
-                  <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck()} />{' '}
-                <label htmlFor="is-notice">공지1</label>
+                  <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck()} onChange={() => setIsAuthNotice(!isAuthNotice)} />{' '}
+                <label htmlFor="is-notice">공지</label>
               </div>
             )}
-            <div className="p-board-title">
-                <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck()} />{' '}
-              <label htmlFor="is-notice">공지2</label>
-            </div>
-            {anonymousWriter && ( //여기 수정해야 돼
+            {board.board_type === "QnA" && (
               <div className="p-board-title">
-                  <input type="checkbox" id="is-anonymous" className="align-middle" checked={anonymousCheck()} />{' '}
-                <label htmlFor="is-anonymous">익명1</label>
-              </div>
-            )}
-            {anonymousWriter ? (
-              <div className="p-board-title">
-                <input type="checkbox" id="is-anonymous" className="align-middle" checked={true} />{' '}
-                <label htmlFor="is-anonymous">익명2</label>
-              </div>
-            ) : (
-              <div className="p-board-title">
-                <input type="checkbox" id="is-anonymous" className="align-middle" checked={false} onChange={anonymousCheck} />{' '}
-                <label htmlFor="is-anonymous">익명3</label>
+                  <input type="checkbox" id="is-anonymous" className="align-middle" checked={anonymousCheck()} onChange={() => setAnonymousWriter(!anonymousWriter)} />{' '}
+                <label htmlFor="is-anonymous">익명</label>
               </div>
             )}
             <Button variant="transparent" onClick={handleShow} type="button" id="btn-content-edit" className="btn btn-outline-light">
-              <BsSave /> 저장 {typeKr}
+              <BsSave /> 저장
             </Button>
           </div>
         </div>
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data">
-          {/* <input type="hidden" id="board-type" className="board_type" value={board.board_type} />
+          <input type="hidden" id="board-type" className="board_type" value={board.board_type} />
           <input type="hidden" id="board-name" className="board_name" value={board.name} />
           <input type="hidden" id="board-id" className="board_id" value={board.id} />
           <input type="hidden" id="article-id" className="article_id" value={article.id} />
           {board.board_type === 'Team' && 
             <input type="hidden" id="team-id" className="team_id" value={board.team.id} />
-          } */}
+          }
           <div className="d-flex flex-column border border-2">
             <div className="d-flex justify-content-between mb-1">
               <input type="text" id="article-title" name="title" className="form-control" value={title} placeholder="제목을 입력해 주세요" required autofocus onChange={handleTitleChange} />
-              {board.board_type === 'Recruit' && (
+              {board.board_type === "Recruit" && ( //여기 수정
                 <>
                   {team ? (
-                    <Select id="team-option" name="team-option" className="form-select pointer" disabled>
-                      <option value={team.id} selected>{team.name}</option>
-                    </Select>
+                    <Select placeholder={'팀 선택'} options={options} menuPlacement="auto" value={team} onChange={handleOption} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyle} />
                   ) : type === 'register' ? (
                     <Select id="team-option" name="team-option" className="form-select pointer" required>
                       {teamOptions(request.user)}
@@ -240,14 +270,31 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
                 </>
               )}
             </div>
-            <div className="mt-2">
+            <div className="mt-2" style={{zIndex: 0}}>
               {/* <div id="article-body" className="form-control block-article" contentEditable="true" onChange={handleBodyChange}>
                 {bodyText}
               </div> */}
-              <Editor onInit={handleEditorInit} onChange={handleBodyChange} />
+              <Editor initialValue={bodyText} onInit={handleEditorInit} apiKey={'0g27ik0o894gdcxk2zb3wtiou6dep9z8of1jaga5qawhw9fx'} onChange={handleBodyChange} init={{
+                selector: board,
+                custom_undo_redo_levels: 10,
+                height: 350,
+                branding: false,
+                statusbar: false,
+                paste_data_images: true,
+                plugins: [
+                  'advlist autolink lists link image charmap print preview anchor',
+                  'searchreplace visualblocks code fullscreen',
+                  'insertdatetime media table paste code help wordcount', 
+                  'undo', 'redo'
+                ],
+                toolbar:
+                  'undo redo | fontfamily ' +
+                  'bold italic underline strikethrough forecolor backcolor align | ' + 
+                  'removeformat help| image',
+              }}/>
             </div>
             <div className="w-100 mt-2">
-            <Select placeholder={'Tag'} options={tags} isMulti menuPlacement="auto" value={selectTags} onChange={handleOptionSelect} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyles} />
+              <Select placeholder={'Tag'} options={tags} isMulti menuPlacement="auto" value={selectTags} onChange={handleOptionSelect} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyles} />
             </div>
             <div id="article-helper" className="mt-2">
               <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>파일 추가</button>
@@ -266,35 +313,29 @@ function ArticleEdit({ isWrite, type, board = {}, typeKr, consentWriteOpen }) {
                 </div>
               ))}
             </div>
-            {board.board_type === 'Recruit' && (
+            {board.board_type === "Recruit" && (
               <div id="period-setting" className="mt-3">
                 <div className="d-flex">
-                  <div id="date-label" className="p-date-label">모집 기간</div>
+                  <div id="date-label" className="p-date-label d-flex">모집 기간</div>
                   <div className="row flex-fill">
                     <div className="col-sm-6 d-flex">
                       <div id="date-label" className="p-date-label d-flex"><a>From</a></div>
                       <div id="PeriodPickerStart" InputGroup className="log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
-                        <input type="text" id="PeriodPickerStartInput" className="form-control" data-td-target="#PeriodPickerStart" required/>
-                        <span InputGroup className="text" data-td-target="#PeriodPickerStart" data-td-toggle="datetimepicker">
-                          <span className="material-icons-outlined">
-                            today
-                          </span>
-                        </span>
+                        <div className="mt-1">
+                          <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} selectsStart fixedHeight dateFormat="MM/dd/yyyy, hh:mm aa" showTimeInput className="form-control"/>
+                        </div>
                       </div>
                     </div>
                     <div className="col-sm-6 d-flex">
                       <div id="date-label" className="p-date-label d-flex"><a>To</a></div>
                       <div id="PeriodPickerEnd" InputGroup className="log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
-                        <input type="text" id="PeriodPickerEndInput" className="form-control" data-td-target="#PeriodPickerEnd" required/>
-                        <span InputGroup className="text" data-td-target="#PeriodPickerEnd" data-td-toggle="datetimepicker">
-                          <span className="material-icons-outlined">
-                            event
-                          </span>
-                        </span>
+                        <div className="mt-1">
+                          <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} selectsEnd fixedHeight dateFormat="MM/dd/yyyy, hh:mm aa"  minDate={new Date()} showTimeInput className="form-control"/>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <button id="end-button" type="button" className="btn btn-outline-light" onClick={() => setToDateEnd()}>마감</button>
+                  <button id="end-button" type="button" className="btn btn-outline-light" onClick={() => setEndDate(getCurrentDateTime())}>마감</button>
                 </div>
               </div>
             )}
