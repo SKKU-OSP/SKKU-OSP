@@ -11,7 +11,7 @@ import ChallengePage from './routes/ChallengePage';
 import CommunityLayout from './routes/CommunityLayout';
 import AccountsLayout from './routes/AccountsLayout';
 import ArticlePage from './routes/ArticlePage';
-import ArticleEdit from './routes/ArticleEdit';
+import ArticleEdit from './components/Community/Article/ArticleEdit/ArticleEdit';
 import SignUpPage from './routes/SignUpPage';
 import { tokenLoader } from './utils/auth';
 
