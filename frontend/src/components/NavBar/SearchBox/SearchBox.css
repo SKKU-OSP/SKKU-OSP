@@ -1,3 +1,9 @@
+@media screen and (max-width: 767px) {
+  .searchBox {
+    width: 100% !important;
+  }
+}
+
 .search {
   position: relative;
   width: 300px;
@@ -29,7 +35,6 @@
 
 .searchBox {
   width: 30%;
-  margin-left: 20px;
   position: relative;
   display: flex;
   align-items: center;
