@@ -44,5 +44,9 @@ urlpatterns = [
     # Rest API
     path('api/tag/<int:user_id>/', views_profile.UserInterestTagListView.as_view(),
          name='UserInterestTagList'),
+    path('api/interests/update/',
+         views_profile.UserInterestTagUpdateView.as_view(), name='UserInterestTagUpdate'),
+    path('api/langs/update/',
+         views_profile.UserLangTagUpdateView.as_view(), name='UserLangTagUpdate')
 
 ]
