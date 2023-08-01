@@ -8,6 +8,7 @@ import { Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import './ArticleEdit.css';
+import { getAuthConfig } from '../../../../utils/auth';
 
 /**
  * TARGET: content-edit.html
@@ -18,6 +19,7 @@ const domainUrl = import.meta.env.VITE_SERVER_URL
 function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id
   const url = domainUrl + "/community/"
+  const urlEditArticle = domainUrl + "/community/api/article/" + articleID + "/update/"
   const urlArticle = domainUrl + "/community/api/article/" + articleID
   const urlTag = domainUrl + "/tag/api/list/"
 
@@ -48,10 +50,10 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       const resTag = responseTag.data;
       if(resArticle.status === "success"){
         setBoard(resArticle.data.article.board);
-        setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
-          prev['board_type'] = "Recruit"
-          return prev
-        });
+        // setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
+        //   prev['board_type'] = "Recruit"
+        //   return prev
+        // });
         setTitle(resArticle.data.article.title);
         setBodyText(resArticle.data.article.body);
         setTags(resTag.data.tags.map(t => {
@@ -105,15 +107,18 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }
     else if (window.confirm("글을 수정하시겠습니까?")) { // 수정한 글 저장
       if (editorRef.current) {
-        const modifiedContent = editorRef.current.getContent();
-        
-        const response = await axios.post(url, {
-          type: "POST",
-          content: modifiedContent,
-          title: res.data.article.title,
-          bodyText: res.data.article.body,
-          tags: res.data.tags
-        });
+        // const modifiedContent = editorRef.current.getContent();
+        console.log("bodyText", bodyText);
+        console.log("title", title);
+        console.log("tags", selectTags);
+
+        const response = await axios.post(urlEditArticle, {
+          content: bodyText,
+          title: title,
+          is_notice: false,
+          anonymous_writer: false,
+          article_tags: selectTags
+        }, getAuthConfig());
         const res = response.data;
 
         console.log(res);
@@ -168,6 +173,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   
   // Tag
   const handleOptionSelect = (selectedTags) => {
+    console.log(selectTags);
     setSelectTags(selectedTags);
   };
   const customStyles = {
