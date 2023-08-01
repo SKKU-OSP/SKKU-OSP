@@ -19,15 +19,43 @@ const SignUpForm = () => {
   const [tags, setTags] = useState([]);
   //INPUT
   const [usernameText, setUsernameText] = useState('로그인에 사용할 아이디입니다.');
+  const [usernameError, setUsernameError] = useState(false);
+  const [passwordText, setPasswordText] = useState('비밀번호는 4자 이상이어야 합니다.');
+  const [passwordError, setPasswordError] = useState(false);
+  const [checkPasswordText, setCheckPasswordText] = useState('비밀번호를 다시 입력해주세요.');
+  const [checkPasswordError, setCheckPasswordError] = useState(false);
+  const [studentIdText, setStudentIdText] = useState('');
+  const [studentIdError, setStudentIdError] = useState(false);
+  const [nameText, setNameText] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [collegeText, setCollegeText] = useState('');
+  const [collegeError, setCollegeError] = useState(false);
+  const [deptText, setDeptText] = useState('');
+  const [deptError, setDeptError] = useState(false);
+  const [personalEmailText, setPersonalEmailText] = useState('계정정보를 찾을 때 사용합니다.');
+  const [personalEmailError, setPersonalEmailError] = useState(false);
+  const [secondaryEmailText, setSecondaryEmailText] = useState(
+    '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.'
+  );
+  const [secondaryEmailError, setSecondaryEmailError] = useState(false);
+  const [clicked, setClicked] = useState(false);
 
   const [selectCollege, setSelectCollege] = useState('');
   const [selectAbsence, setSelectAbsence] = useState('0');
   const [selectPluralMajor, setSelectPluralMajor] = useState('0');
   const [personalDomain, setPersonalDomain] = useState('');
   const [inputPersonalDomain, setInputPersonalDomain] = useState('');
-
   const [secondaryDomain, setSecondaryDomain] = useState('');
   const [inputSecondaryDomain, setInputSecondaryDomain] = useState('');
+  const [selectConsent, setSelectConsent] = useState(false);
+  const [selectConsentMandatory, setSelectConsentMandatory] = useState(false);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [consentRadios, setConsentRadios] = useState({
+    open_lvl: 0,
+    is_write: 0,
+    is_open: 0
+  });
 
   const [selectTags, setSelectTags] = useState([]);
   const [formData, setFormData] = useState({
@@ -35,12 +63,12 @@ const SignUpForm = () => {
     username: '',
     password: '',
     password_check: '',
-    student_id: '',
+    student_id: 0,
     name: '',
     college: '',
     dept: '',
-    absence: '',
-    plural_major: '',
+    absence: 0,
+    plural_major: 0,
     personal_email: '',
     personal_email_domain: '',
     primary_email: '',
@@ -48,18 +76,10 @@ const SignUpForm = () => {
     secondary_email: '',
     secondary_email_domain: '',
     account_interests: '',
-    consent: true,
-    consent_mandatory: true
+    consent: false,
+    consent_mandatory: false
   });
 
-  const handleInput = (event) => {
-    const { name, value } = event.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    console.log(formData);
-  };
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -148,22 +168,37 @@ const SignUpForm = () => {
     });
   };
 
-  //가입하기 버튼을 눌렀을 때 실행되는 함수
-  const checkUsername = () => {
-    const data = formData.username;
-    if (data.length < 5) {
-      setUsernameText('Username은 5자 이상이여야 합니다.');
-    } else {
-      setUsernameText('로그인에 사용할 아이디입니다.');
-    }
-  };
-
   const sendSignUpForm = async () => {
     try {
       const response = await axios.post(signUpFormUrl, formData);
       const res = response.data;
       if (res.status === 'fail') {
+        //feedback을 통해 에러정보 들어옴
         console.log(res.feedback);
+        if (res.feedback.username) {
+          setUsernameText(res.feedback.username);
+          setUsernameError(true);
+        }
+        if (res.feedback.password) {
+          setPasswordText(res.feedback.password);
+          setPasswordError(true);
+        }
+        if (res.feedback.student_id) {
+          setStudentIdText(res.feedback.student_id);
+          setStudentIdError(true);
+        }
+        if (res.feedback.college) {
+          setCollegeText(res.feedback.college);
+          setCollegeError(true);
+        }
+        if (res.feedback.personal_email) {
+          setPersonalEmailText(res.feedback.personal_email);
+          setPersonalEmailError(true);
+        }
+        if (res.feedback.secondary_email) {
+          setSecondaryEmailText(res.feedback.secondary_email);
+          setSecondaryEmailError(true);
+        }
       } else {
         alert('회원가입에 성공했습니다.');
         navigate('/community');
@@ -209,6 +244,120 @@ const SignUpForm = () => {
       });
     }
   };
+  //유효성검사
+  //가입하기 버튼을 눌렀을 때 실행되는 함수
+  const onChangeUsername = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length < 5) {
+      setUsernameText('Username은 5자 이상이여야 합니다.');
+    } else {
+      setUsernameText('로그인에 사용할 아이디입니다.');
+      setUsernameError(false);
+    }
+  };
+
+  const onChangePassword = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length < 4) {
+      setPasswordText('비밀번호는 4자 이상이어야 합니다.');
+    } else {
+      setPasswordText('알맞은 형식의 비밀번호입니다.');
+      setPasswordError(false);
+    }
+  };
+
+  const onChangeCheckPassword = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value === formData['password']) {
+      setCheckPasswordText('비밀번호와 일치합니다.');
+      setCheckPasswordError(false);
+    } else {
+      setCheckPasswordText('password가 일치하지 않습니다.');
+    }
+  };
+
+  const onChangeStudentId = (e) => {
+    const { name, value } = e.target;
+    const regex = /^[0-9]{10}$/;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (!regex.test(e.target.value)) {
+      setStudentIdText('학번 형식이 다릅니다.');
+    } else {
+      setStudentIdText('알맞은 학번 형식입니다');
+      setStudentIdError(false);
+    }
+  };
+
+  const onChangeName = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length > 20) {
+      setNameText('이름은 20자를 넘을 수 없습니다.');
+    } else {
+      setNameText('');
+      setNameError(false);
+    }
+  };
+
+  const onChangeDept = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length > 45) {
+      setDeptText('학과는 45자를 넘을 수 없습니다.');
+    } else {
+      setDeptText('');
+      setDeptError(false);
+    }
+  };
+
+  const onChangePersonalEmail = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length > 100) {
+      setPersonalEmailText('이메일 주소는 100자를 넘을 수 없습니다.');
+    } else {
+      setPersonalEmailText('계정정보를 찾을 때 사용합니다.');
+      setPersonalEmailError(false);
+    }
+  };
+
+  const onChangeSecondaryEmail = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length > 100) {
+      setSecondaryEmailText('이메일 주소는 100자를 넘을 수 없습니다.');
+    } else {
+      setSecondaryEmailText('로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.');
+      setSecondaryEmailError(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -221,6 +370,9 @@ const SignUpForm = () => {
       newData['account_interests'] = selectTags;
       newData['primary_email'] = 'qq';
       newData['primary_email_domain'] = 'naver.com';
+      newData['consent'] = selectConsent;
+
+      newData['consent_mandatory'] = selectConsentMandatory;
       console.log('newData');
       console.log(newData);
       return newData;
@@ -259,16 +411,16 @@ const SignUpForm = () => {
                 Username <span className={classes.RequiredStar}>*</span>
               </label>
               <br />
-              <Form.Label className={classes.WeakText}>{usernameText}</Form.Label>
+              <Form.Label className={usernameError ? classes.ErrorText : classes.WeakText}>{usernameText}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   placeholder="Username"
                   aria-label="Username"
                   id="username"
                   name="username"
-                  onChange={handleInput}
+                  onChange={onChangeUsername}
                 />
-                <Button variant="outline-secondary" id="DuplicateCheck" onClick={checkUsername}>
+                <Button variant="outline-secondary" id="DuplicateCheck">
                   Check
                 </Button>
               </InputGroup>
@@ -282,7 +434,7 @@ const SignUpForm = () => {
                 Password<span className={classes.RequiredStar}>*</span>
               </label>
               <br />
-              <Form.Label className={classes.WeakText}>비밀번호는 4자 이상이어야 합니다.</Form.Label>
+              <Form.Label className={passwordError ? classes.ErrorText : classes.WeakText}>{passwordText}</Form.Label>
               <Form.Group className="mb-3">
                 <Form.Control
                   type="password"
@@ -290,7 +442,7 @@ const SignUpForm = () => {
                   aria-label="Password"
                   id="password"
                   name="password"
-                  onChange={handleInput}
+                  onChange={onChangePassword}
                 />
               </Form.Group>
             </div>
@@ -299,7 +451,9 @@ const SignUpForm = () => {
                 Password Check <span className={classes.RequiredStar}>*</span>
               </label>
               <br />
-              <Form.Label className={classes.WeakText}>비밀번호를 다시 입력해주세요.</Form.Label>
+              <Form.Label className={checkPasswordError ? classes.ErrorText : classes.WeakText}>
+                {checkPasswordText}
+              </Form.Label>
               <Form.Group className="mb-3">
                 <Form.Control
                   type="password"
@@ -307,7 +461,7 @@ const SignUpForm = () => {
                   aria-label="PasswordCheck"
                   id="password_check"
                   name="password_check"
-                  onChange={handleInput}
+                  onChange={onChangeCheckPassword}
                 />
               </Form.Group>
             </div>
@@ -316,16 +470,17 @@ const SignUpForm = () => {
           {/* StudentId, Name */}
           <div className="d-flex flex-row justify-content-between mb-3">
             <div className={classes.FormControl}>
-              <Form.Label htmlFor="student_id">
+              <Form.Label htmlFor="student_id" className="me-2">
                 학번<span className={classes.RequiredStar}>*</span>
               </Form.Label>
+              <Form.Label className={studentIdError ? classes.ErrorText : classes.WeakText}>{studentIdText}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   placeholder="ex) 20XXXXXXXX"
                   aria-label="student_id"
                   id="student_id"
                   name="student_id"
-                  onChange={handleInput}
+                  onChange={onChangeStudentId}
                 />
                 <Button variant="outline-secondary" id="StudentCheck">
                   Check
@@ -333,11 +488,18 @@ const SignUpForm = () => {
               </InputGroup>
             </div>
             <div className={classes.FormControl}>
-              <Form.Label htmlFor="name">
+              <Form.Label htmlFor="name" className="me-2">
                 이름<span className={classes.RequiredStar}>*</span>
               </Form.Label>
+              <Form.Label className={nameError ? classes.ErrorText : classes.WeakText}>{nameText}</Form.Label>
               <InputGroup className="mb-3">
-                <Form.Control placeholder="ex) 홍길동" aria-label="name" id="name" name="name" onChange={handleInput} />
+                <Form.Control
+                  placeholder="ex) 홍길동"
+                  aria-label="name"
+                  id="name"
+                  name="name"
+                  onChange={onChangeName}
+                />
               </InputGroup>
             </div>
           </div>
@@ -347,19 +509,21 @@ const SignUpForm = () => {
               <Form.Label htmlFor="college">
                 소속 대학<span className={classes.RequiredStar}>*</span>
               </Form.Label>
+              <Form.Label className={collegeError ? classes.ErrorText : classes.WeakText}>{collegeText}</Form.Label>
               <Select size="sm" options={colleges} id="college" name="college" onChange={handleSelectCollege}></Select>
             </div>
             <div className={classes.FormControl}>
-              <Form.Label htmlFor="dept">
+              <Form.Label htmlFor="dept" className="me-1">
                 소속 학과<span className={classes.RequiredStar}>*</span>
               </Form.Label>
+              <Form.Label className={deptError ? classes.ErrorText : classes.WeakText}>{deptText}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   id="dept"
                   name="dept"
                   placeholder="ex) 소프트웨어학과"
                   aria-label="dept"
-                  onChange={handleInput}
+                  onChange={onChangeDept}
                 />
               </InputGroup>
             </div>
@@ -455,13 +619,15 @@ const SignUpForm = () => {
               Email <span className={classes.RequiredStar}>*</span>
             </label>
             <br />
-            <Form.Label className={classes.WeakText}>계정정보를 찾을 때 사용합니다.</Form.Label>
+            <Form.Label className={personalEmailError ? classes.ErrorText : classes.WeakText}>
+              {personalEmailText}
+            </Form.Label>
             <InputGroup className="mb-3">
               <Form.Control
                 placeholder="연락용 Email"
                 id="personal_email"
                 name="personal_email"
-                onChange={handleInput}
+                onChange={onChangePersonalEmail}
               />
               <InputGroup.Text>@</InputGroup.Text>
               <Form.Control
@@ -499,15 +665,15 @@ const SignUpForm = () => {
           <div className="mb-3">
             <label htmlFor="secondary_email">기타 연동 Email</label>
             <br />
-            <Form.Label className={classes.WeakText}>
-              로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.
+            <Form.Label className={secondaryEmailError ? classes.ErrorText : classes.WeakText}>
+              {secondaryEmailText}
             </Form.Label>
             <InputGroup className="mb-3">
               <Form.Control
                 placeholder="기타 연동 Email"
                 id="secondary_email"
                 name="secondary_email"
-                onChange={handleInput}
+                onChange={onChangeSecondaryEmail}
               />
               <InputGroup.Text>@</InputGroup.Text>
               <Form.Control
@@ -536,8 +702,30 @@ const SignUpForm = () => {
           </div>
           <br />
           {/* 버튼 */}
-          <ConsentsModal consents={consents} />
 
+          <button
+            variant="secondary"
+            onClick={() => {
+              setOpenModal(!openModal);
+              setSelectConsent(true);
+              setClicked(true);
+            }}
+            type="button"
+            className={`${clicked === true ? 'btn btn-primary ms-auto mb-1' : 'btn btn-secondary ms-auto mb-1'}`}
+          >
+            개인정보 이용내역 동의<span className="text-danger">*</span>
+          </button>
+          {openModal === true ? (
+            <ConsentsModal
+              consents={consents}
+              show={openModal}
+              changeModal={setOpenModal}
+              mandatory={setSelectConsentMandatory}
+              radioValue={consentRadios}
+              changeRadioValue={setConsentRadios}
+              changeMandatoryValue={setSelectConsentMandatory}
+            />
+          ) : null}
           <div className="d-flex flex-row justify-content-end">
             <Button variant="primary" type="submit">
               가입하기
