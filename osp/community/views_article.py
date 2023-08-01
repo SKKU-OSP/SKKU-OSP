@@ -47,7 +47,8 @@ class ArticleAPIView(APIView):
             data['board'] = BoardSerializer(board).data
 
             # 게시글 댓글 정보
-            comments = ArticleComment.objects.filter(article_id=article_id)
+            comments = ArticleComment.objects.filter(
+                article_id=article_id, is_deleted=False)
             data['comments'] = ArticleCommentSerializer(
                 comments, many=True).data
 
@@ -360,6 +361,20 @@ class ArticleScrapView(APIView):
         return Response(res)
 
 
+class ArticleCommentsView(APIView):
+    def get(self, request, article_id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'comments': None}
+        # 게시글 댓글 정보
+        comments = ArticleComment.objects.filter(
+            article_id=article_id, is_deleted=False)
+        print(len(comments))
+        data['comments'] = ArticleCommentSerializer(
+            comments, many=True).data
+        res['data'] = data
+        return Response(res)
+
+
 class CommentCreateView(APIView):
     def post(self, request):
         res = {'status': 'success', 'message': '', 'data': None}
@@ -389,7 +404,103 @@ class CommentCreateView(APIView):
         except Exception as e:
             res['status'] = 'fail'
             res['message'] = '댓글을 등록할 수 없습니다.'
-            print("comment_create error", e)
+            print("CommentCreateView error", e)
+
+        return Response(res)
+
+
+class CommentDeleteView(APIView):
+    '''
+    댓글 삭제 이후 해당 게시글의 댓글 리스트 반환
+    '''
+
+    def post(self, request, comment_id):
+        res = {'status': 'fail', 'message': '', 'data': None}
+        data = {'comments': None}
+        try:
+            with transaction.atomic():
+
+                article_comment = ArticleComment.objects.filter(
+                    id=comment_id, is_deleted=False)
+                if not article_comment.exists():
+                    res['message'] = '해당 댓글이 존재하지 않습니다.'
+                    return Response(res)
+                article_comment = article_comment.first()
+                if not article_comment.writer.user == request.user:
+                    res['message'] = '작성자만 삭제할 수 있습니다.'
+                    return Response(res)
+
+                # comment.delete()
+                article_comment.del_date = datetime.now()
+                article_comment.is_deleted = True
+                article_comment.save()
+
+                # 게시글 댓글 리스트 반환
+                article = Article.objects.get(id=article_comment.article.id)
+                comments = ArticleComment.objects.filter(
+                    article_id=article.id, is_deleted=False)
+                data['comments'] = ArticleCommentSerializer(
+                    comments, many=True).data
+
+                res['data'] = data
+                res['status'] = 'success'
+                res['message'] = "삭제했습니다."
+
+        except Exception as e:
+            res['message'] = '댓글을 삭제할 수 없습니다.'
+            print("CommentDeleteView error", e)
+
+        return Response(res)
+
+
+class CommentLikeView(APIView):
+    '''
+    댓글 좋아요
+    '''
+
+    def get(self, request, comment_id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'like_cnt': None}
+        like_cnt = len(ArticleCommentLike.objects.filter(
+            comment__id=comment_id))
+        data['like_cnt'] = like_cnt
+        res['data'] = data
+        return Response(res)
+
+    def post(self, request, comment_id):
+        res = {'status': 'fail', 'message': '', 'data': None}
+        data = {'like_cnt': None}
+        try:
+            with transaction.atomic():
+
+                account = Account.objects.get(user=request.user.id)
+                article_comment = ArticleComment.objects.filter(
+                    id=comment_id, is_deleted=False)
+                if not article_comment.exists():
+                    res['message'] = '해당 댓글이 존재하지 않습니다.'
+                    return Response(res)
+                article_comment = article_comment.first()
+
+                if article_comment.writer.user_id == request.user.id:
+                    # 작성자가 추천한 경우
+                    res['message'] = '본인의 댓글은 추천할 수 없습니다.'
+                    return Response(res)
+                comment_like, created = ArticleCommentLike.objects.get_or_create(
+                    comment=article_comment, account=account)
+                if not created:
+                    comment_like.delete()
+                    res['message'] = '댓글 추천 취소'
+
+                like_cnt = len(ArticleCommentLike.objects.filter(
+                    comment=article_comment))
+                data['like_cnt'] = like_cnt
+
+                res['data'] = data
+                res['status'] = 'success'
+
+        except Exception as e:
+            res['message'] = '댓글을 추천할 수 없습니다.'
+            print("CommentLikeView error", e)
 
         return Response(res)
 
