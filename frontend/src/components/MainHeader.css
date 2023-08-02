@@ -17,6 +17,9 @@
   .body-of-header {
     flex-direction: column !important;
   }
+  .sidebar-in-header {
+    display: flex !important;
+  }
 }
 
 @media screen and (max-width: 991px) {
@@ -44,7 +47,7 @@
 
 header {
   background-color: var(--header-bg-color);
-  border: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
 }
 
 .logo {
@@ -54,6 +57,10 @@ header {
 
 .header {
   justify-content: space-between;
+}
+
+.sidebar-in-header {
+  display: none;
 }
 
 .badge-new {

@@ -18,11 +18,18 @@
 }
 
 @media screen and (max-width: 767px) {
+  .col-9 {
+    width: 100% !important;
+  }
   .community-container {
-    display: flex !important;
+    display: block !important;
   }
   .community-main {
     width: calc(100% - 50px) !important;
+  }
+  .community-nav {
+    padding: 0 !important;
+    border: 0 !important;
   }
   .community-nav-items {
     min-width: 65% !important;
@@ -58,6 +65,10 @@
   justify-content: center;
   margin-bottom: 10px;
   padding: 0.55rem;
+}
+
+.community-container {
+  display: flex;
 }
 
 .boards-card {
