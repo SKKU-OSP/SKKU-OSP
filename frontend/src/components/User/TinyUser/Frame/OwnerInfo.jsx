@@ -2,7 +2,7 @@ import '../../User.css';
 import { FaUniversity } from 'react-icons/fa';
 import { BsFillCheckCircleFill, BsGithub } from 'react-icons/bs';
 import { MdAlternateEmail } from 'react-icons/md';
-function Owner_Info() {
+function OwnerInfo() {
   return (
     <div className="d-flex flex-column profile-owner-info">
       <div className="d-flex flex-column info-university">
@@ -31,4 +31,4 @@ function Owner_Info() {
     </div>
   );
 }
-export default Owner_Info;
+export default OwnerInfo;

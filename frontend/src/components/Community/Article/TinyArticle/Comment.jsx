@@ -1,7 +1,7 @@
 import '../../Community.css';
 import '../Article.css';
 import '../base.css';
-import Comment_Item from './Comment_Item';
+import CommentItem from './CommentItem';
 
 function Comment(props) {
   const request = { user: { is_authenticated: true } };
@@ -16,7 +16,7 @@ function Comment(props) {
           {comments.length > 0 ? (
             comments.map((comment) => (
               <div id={`comment-${comment.id}`} className="comment-item">
-                <Comment_Item comments={comment} />
+                <CommentItem comments={comment} />
               </div>
             ))
           ) : (
@@ -29,11 +29,11 @@ function Comment(props) {
             comments.map((comment, index) => {
               comments.length !== index ? (
                 <div id={`comment-${comment.id}`} className="comment-item">
-                  <Comment_Item comments={comment} />
+                  <CommentItem comments={comment} />
                 </div>
               ) : (
                 <div id={`comment-${comment.id}`} className="comment-item-last">
-                  <Comment_Item comments={comment} />
+                  <CommentItem comments={comment} />
                 </div>
               );
             })
