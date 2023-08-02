@@ -1,21 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import '../../User.css';
 import { BsFillStarFill, BsXLg } from 'react-icons/bs';
-import Select from 'react-select';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import Modal from 'react-bootstrap/Modal';
 import SkillModal from './SkillModal';
 import InterestModal from './InterestModal';
 
 function Interest() {
-  // Interest과 관련된 훅
+  // Interest 모달창
   const [interestShow, setInterestShow] = useState(false);
+  const OnHandleInterestShow = () => setInterestShow(true);
   const OnHandleInterestClose = () => setInterestShow(false);
-  const OnHandleInterestShow = () => (
-    setModalInterest(myInterest), setSelectedInterest(myInterest), setInterestShow(true)
-  );
-  // interest 모달창에 대한 내용
+  const OnHandleInterestSaveClose = (modalInterest) => {
+    setMyInterest(modalInterest), setInterestShow(false);
+  };
 
   const [interest, setInterest] = useState([
     { value: '컨테이너', label: '컨테이너' },
@@ -30,25 +28,11 @@ function Interest() {
   ]);
   // interest와 myInterest 대한 값은 이제 서버에서 받아온거 하면 됨.
 
-  const [selectedInterest, setSelectedInterest] = useState(myInterest);
-  const [modalInterest, setModalInterest] = useState(myInterest);
-  const OnHandleInterestSelect = (selectedInterest) => setSelectedInterest(selectedInterest);
-  const OnHandleModalInterest = () => setModalInterest(selectedInterest);
-  const OnHandleRemoveInterest = (removeLabel) => {
-    setModalInterest((prevInterest) => prevInterest.filter((interest) => interest.label !== removeLabel));
-  };
-  const OnHandleInterestSaveClose = () => {
-    setMyInterest(modalInterest), setInterestShow(false);
-  };
-  useEffect(() => {
-    setSelectedInterest(modalInterest);
-  }, [modalInterest]);
-
+  // Skill 모달창
   const [skillShow, setSkillShow] = useState(false);
   const OnHandleSkillShow = () => setSkillShow(true);
   const OnHandleSkillClose = () => setSkillShow(false);
   const OnHandleSkillSaveClose = (modalSkill) => (setMySkill(modalSkill), setSkillShow(false));
-  // Skill 모달창
 
   const [skill, setSkill] = useState([
     { value: 'Django', label: 'Django' },
@@ -77,7 +61,13 @@ function Interest() {
           <Button className="btn" onClick={OnHandleInterestShow} style={{ backgroundColor: 'white' }}>
             <span className="btn-text">수정</span>
           </Button>
-          <InterestModal interest={interest} myInterest={myInterest} OnHandleInterestClose={OnHandleInterestClose} />
+          <InterestModal
+            interest={interest}
+            myInterest={myInterest}
+            interestShow={interestShow}
+            OnHandleInterestClose={OnHandleInterestClose}
+            OnHandleInterestSaveClose={OnHandleInterestSaveClose}
+          />
         </div>
         <div className="d-flex flex-row category-icon">
           {myInterest.map((interest) => (

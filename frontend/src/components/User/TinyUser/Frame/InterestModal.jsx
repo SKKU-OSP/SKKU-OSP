@@ -1,4 +1,30 @@
+import { useEffect, useState } from 'react';
+import '../../User.css';
+import { BsXLg } from 'react-icons/bs';
+import Select from 'react-select';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+
 function InterestModal(props) {
+  const interest = props.interest;
+  const myInterest = props.myInterest;
+  const interestShow = props.interestShow;
+  const OnHandleInterestSaveClose = props.OnHandleInterestSaveClose;
+  const [selectedInterest, setSelectedInterest] = useState(myInterest);
+  const [modalInterest, setModalInterest] = useState(myInterest);
+  const OnHandleInterestSelect = (selectedInterest) => setSelectedInterest(selectedInterest);
+  const OnHandleModalInterest = () => setModalInterest(selectedInterest);
+  const OnHandleInterestClose = () => (
+    setSelectedInterest(myInterest), setModalInterest(myInterest), props.OnHandleInterestClose()
+  );
+  const OnHandleRemoveInterest = (removeLabel) => {
+    setModalInterest((prevInterest) => prevInterest.filter((interest) => interest.label !== removeLabel));
+  };
+  useEffect(() => {
+    setSelectedInterest(modalInterest);
+  }, [modalInterest]);
+
   return (
     <Modal size="lg" show={interestShow} onHide={OnHandleInterestClose}>
       <Modal.Header closeButton>
@@ -31,7 +57,7 @@ function InterestModal(props) {
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-dark" onClick={OnHandleInterestSaveClose}>
+        <Button variant="outline-dark" onClick={() => OnHandleInterestSaveClose(modalInterest)}>
           저장
         </Button>
       </Modal.Footer>
