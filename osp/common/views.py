@@ -204,10 +204,10 @@ class SignUpView(APIView):
             fail_reason['password_check'] = 'Password가 일치하지 않습니다.'
 
         # 학번 유효성 검사
-        student_id = request.data.get('student_id', '').strip()
-        if not re.match('[0-9]{10}', student_id):
+        student_id = request.data.get('student_id', 0)
+        if not re.match('[0-9]{10}', str(student_id)):
             fail_reason['student_id'] = '학번 형식이 다릅니다.'
-        if check_duplicate_student_id(request.POST['student-id']):
+        if check_duplicate_student_id(request.data.get('student_id', 0)):
             fail_reason['student_id'] = '중복된 학번이 있습니다.'
         # 이름 유효성 검사
         name = request.data.get('name', '').strip()
@@ -215,9 +215,9 @@ class SignUpView(APIView):
             fail_reason['name'] = f'이름은 20자를 넘을 수 없습니다. 현재 {len(name)} 자'
         # 소속대학 유효성 검사
         college = request.data.get('college', '')
-        if college:
+        if not college:
             fail_reason['college'] = f'소속대학을 선택해주세요.'
-        if not check_college():
+        if not check_college(college):
             fail_reason['college'] = f'{college}는 소속대학 목록에 없는 이름입니다.'
 
         # 학과 유효성 검사
@@ -243,7 +243,9 @@ class SignUpView(APIView):
         secondary_email = secondary_email + "@" + \
             request.data.get('secondary_email_domain', '').strip()
         secondary_email = None if secondary_email.strip() == "@" else secondary_email
-        if len(secondary_email) > 100:
+        if not secondary_email: 
+            fail_reason['secondary_email'] = f'이메일이 형식에 맞지 않습니다.'
+        elif len(secondary_email) > 100:
             fail_reason['secondary_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(secondary_email)} 자'
 
         try:
