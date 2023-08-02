@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,7 +14,8 @@ from datetime import datetime, timedelta
 
 class ArticleAPIView(APIView):
     '''
-    게시글 읽기 API
+    GET : 게시글 읽기 API
+    URL : api/article/<int:article_id>/
     '''
 
     def get(self, request, article_id):
@@ -26,6 +28,7 @@ class ArticleAPIView(APIView):
             article = Article.objects.get(id=article_id)
             if article.writer.user_id != request.user.id:
                 article.view_cnt += 1
+            article.save()
 
             # 팀 모집 게시글 확인
             if article.board.board_type == "Recruit":
@@ -33,8 +36,6 @@ class ArticleAPIView(APIView):
                     article=article).first()
                 if teamrecruit:
                     data['team'] = TeamSerializer(teamrecruit.team).data
-            article.save()
-
             data['article'] = ArticleSerializer(article).data
 
             # 게시글 태그 정보
@@ -73,6 +74,10 @@ class ArticleAPIView(APIView):
 
 
 class ArticleCreateView(APIView):
+    '''
+    POST : 게시글 생성 API
+    URL : api/article/create/
+    '''
 
     def post(self, request):
         '''
@@ -93,7 +98,7 @@ class ArticleCreateView(APIView):
             content = request.data.get('content', '').strip()
             anonymous_writer = request.data.get('anonymous_writer', False)
             is_notice = request.data.get('is_notice', False)
-            board_id = request.data.get('board_id', False)
+            board_id = request.data.get('board_id', 0)
 
             # board id 확인
             board = Board.objects.get(id=board_id)
@@ -151,6 +156,10 @@ class ArticleCreateView(APIView):
 
 
 class ArticleUpdateView(APIView):
+    '''
+    POST : 게시글 수정 API
+    URL : api/article/<int:article_id>/update/
+    '''
 
     def post(self, request, article_id):
         '''
@@ -236,6 +245,10 @@ class ArticleUpdateView(APIView):
 
 
 class ArticleDeleteView(APIView):
+    '''
+    POST : 게시글 삭제 API
+    URL : api/article/<int:article_id>/delete/
+    '''
 
     def post(self, request, article_id):
         '''
@@ -362,13 +375,18 @@ class ArticleScrapView(APIView):
 
 
 class ArticleCommentsView(APIView):
+    '''
+    GET: 게시글의 댓글 리스트 API
+    URL: api/article/<int:article_id>/comments/
+    '''
+
     def get(self, request, article_id):
         res = {'status': 'success', 'message': '', 'data': None}
         data = {'comments': None}
         # 게시글 댓글 정보
         comments = ArticleComment.objects.filter(
             article_id=article_id, is_deleted=False)
-        print(len(comments))
+
         data['comments'] = ArticleCommentSerializer(
             comments, many=True).data
         res['data'] = data
