@@ -18,26 +18,23 @@ const SignUpForm = () => {
   const [consents, setConsents] = useState([]);
   const [tags, setTags] = useState([]);
   //INPUT
-  const [usernameText, setUsernameText] = useState('로그인에 사용할 아이디입니다.');
-  const [usernameError, setUsernameError] = useState(false);
-  const [passwordText, setPasswordText] = useState('비밀번호는 4자 이상이어야 합니다.');
-  const [passwordError, setPasswordError] = useState(false);
-  const [checkPasswordText, setCheckPasswordText] = useState('비밀번호를 다시 입력해주세요.');
-  const [checkPasswordError, setCheckPasswordError] = useState(false);
-  const [studentIdText, setStudentIdText] = useState('');
-  const [studentIdError, setStudentIdError] = useState(false);
-  const [nameText, setNameText] = useState('');
-  const [nameError, setNameError] = useState(false);
-  const [collegeText, setCollegeText] = useState('');
-  const [collegeError, setCollegeError] = useState(false);
-  const [deptText, setDeptText] = useState('');
-  const [deptError, setDeptError] = useState(false);
-  const [personalEmailText, setPersonalEmailText] = useState('계정정보를 찾을 때 사용합니다.');
-  const [personalEmailError, setPersonalEmailError] = useState(false);
-  const [secondaryEmailText, setSecondaryEmailText] = useState(
-    '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.'
-  );
-  const [secondaryEmailError, setSecondaryEmailError] = useState(false);
+
+  const [labels, setLabels] = useState({
+    username: { label: '로그인에 사용할 아이디입니다.', status: 'info' },
+    password: { label: '비밀번호는 4자 이상이어야 합니다.', status: 'info' },
+    checkPassword: { label: '비밀번호를 다시 입력해주세요.', status: 'info' },
+    student_id: { label: '', status: 'info' },
+    name: { label: '', status: 'info' },
+    college: { label: '', status: 'info' },
+    dept: { label: '', status: 'info' },
+    personal_email: { label: '계정정보를 찾을 때 사용합니다.', status: 'info' },
+    primary_email: { label: 'GitHub Commit 기록을 추적하는데 사용합니다.', status: 'info' },
+    secondary_email: {
+      label: '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.',
+      status: 'info'
+    }
+  });
+  console.log(labels);
   const [clicked, setClicked] = useState(false);
 
   const [selectCollege, setSelectCollege] = useState('');
@@ -176,28 +173,34 @@ const SignUpForm = () => {
         //feedback을 통해 에러정보 들어옴
         console.log(res.feedback);
         if (res.feedback.username) {
-          setUsernameText(res.feedback.username);
-          setUsernameError(true);
+          setLabels((prev) => {
+            return { ...prev, username: { label: res.feedback.username, status: 'error' } };
+          });
         }
         if (res.feedback.password) {
-          setPasswordText(res.feedback.password);
-          setPasswordError(true);
+          setLabels((prev) => {
+            return { ...prev, password: { label: res.feedback.password, status: 'error' } };
+          });
         }
         if (res.feedback.student_id) {
-          setStudentIdText(res.feedback.student_id);
-          setStudentIdError(true);
+          setLabels((prev) => {
+            return { ...prev, student_id: { label: res.feedback.student_id, status: 'error' } };
+          });
         }
         if (res.feedback.college) {
-          setCollegeText(res.feedback.college);
-          setCollegeError(true);
+          setLabels((prev) => {
+            return { ...prev, college: { label: res.feedback.college, status: 'error' } };
+          });
         }
         if (res.feedback.personal_email) {
-          setPersonalEmailText(res.feedback.personal_email);
-          setPersonalEmailError(true);
+          setLabels((prev) => {
+            return { ...prev, personal_email: { label: res.feedback.personal_email, status: 'error' } };
+          });
         }
         if (res.feedback.secondary_email) {
-          setSecondaryEmailText(res.feedback.secondary_email);
-          setSecondaryEmailError(true);
+          setLabels((prev) => {
+            return { ...prev, secondary_email: { label: res.feedback.secondary_email, status: 'error' } };
+          });
         }
       } else {
         alert('회원가입에 성공했습니다.');
@@ -253,10 +256,15 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value.length < 5) {
-      setUsernameText('Username은 5자 이상이여야 합니다.');
+      setLabels((prev) => {
+        prev['username'] = { label: 'Username은 5자 이상이여야 합니다.', status: 'error' };
+        return prev;
+      });
     } else {
-      setUsernameText('로그인에 사용할 아이디입니다.');
-      setUsernameError(false);
+      setLabels((prev) => {
+        prev['username'] = { label: '로그인에 사용할 아이디입니다.', status: 'info' };
+        return prev;
+      });
     }
   };
 
@@ -267,10 +275,15 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value.length < 4) {
-      setPasswordText('비밀번호는 4자 이상이어야 합니다.');
+      setLabels((prev) => {
+        prev['password'] = { label: '비밀번호는 4자 이상이어야 합니다.', status: 'error' };
+        return prev;
+      });
     } else {
-      setPasswordText('알맞은 형식의 비밀번호입니다.');
-      setPasswordError(false);
+      setLabels((prev) => {
+        prev['password'] = { label: '알맞은 형식의 비밀번호입니다.', status: 'info' };
+        return prev;
+      });
     }
   };
 
@@ -281,10 +294,15 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value === formData['password']) {
-      setCheckPasswordText('비밀번호와 일치합니다.');
-      setCheckPasswordError(false);
+      setLabels((prev) => {
+        prev['checkPassword'] = { label: '비밀번호와 일치합니다.', status: 'info' };
+        return prev;
+      });
     } else {
-      setCheckPasswordText('password가 일치하지 않습니다.');
+      setLabels((prev) => {
+        prev['checkPassword'] = { label: 'password가 일치하지 않습니다.', status: 'error' };
+        return prev;
+      });
     }
   };
 
@@ -296,10 +314,15 @@ const SignUpForm = () => {
       [name]: value
     });
     if (!regex.test(e.target.value)) {
-      setStudentIdText('학번 형식이 다릅니다.');
+      setLabels((prev) => {
+        prev['student_id'] = { label: '학번 형식이 다릅니다.', status: 'error' };
+        return prev;
+      });
     } else {
-      setStudentIdText('알맞은 학번 형식입니다');
-      setStudentIdError(false);
+      setLabels((prev) => {
+        prev['student_id'] = { label: '알맞은 학번 형식입니다.', status: 'success' };
+        return prev;
+      });
     }
   };
 
@@ -310,10 +333,20 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value.length > 20) {
-      setNameText('이름은 20자를 넘을 수 없습니다.');
+      setLabels((prev) => {
+        prev['name'] = { label: '이름은 20자를 넘을 수 없습니다.', status: 'error' };
+        return prev;
+      });
+    } else if (value.length < 1) {
+      setLabels((prev) => {
+        prev['name'] = { label: '이름을 입력해주세요!', status: 'error' };
+        return prev;
+      });
     } else {
-      setNameText('');
-      setNameError(false);
+      setLabels((prev) => {
+        prev['name'] = { label: '', status: 'success' };
+        return prev;
+      });
     }
   };
 
@@ -324,10 +357,15 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value.length > 45) {
-      setDeptText('학과는 45자를 넘을 수 없습니다.');
+      setLabels((prev) => {
+        prev['dept'] = { label: '학과는 45자를 넘을 수 없습니다.', status: 'error' };
+        return prev;
+      });
     } else {
-      setDeptText('');
-      setDeptError(false);
+      setLabels((prev) => {
+        prev['dept'] = { label: '', status: 'info' };
+        return prev;
+      });
     }
   };
 
@@ -338,10 +376,15 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value.length > 100) {
-      setPersonalEmailText('이메일 주소는 100자를 넘을 수 없습니다.');
+      setLabels((prev) => {
+        prev['personal_email'] = { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' };
+        return prev;
+      });
     } else {
-      setPersonalEmailText('계정정보를 찾을 때 사용합니다.');
-      setPersonalEmailError(false);
+      setLabels((prev) => {
+        prev['personal_email'] = { label: '계정정보를 찾을 때 사용합니다.', status: 'info' };
+        return prev;
+      });
     }
   };
 
@@ -352,10 +395,18 @@ const SignUpForm = () => {
       [name]: value
     });
     if (value.length > 100) {
-      setSecondaryEmailText('이메일 주소는 100자를 넘을 수 없습니다.');
+      setLabels((prev) => {
+        prev['secondary_email'] = { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' };
+        return prev;
+      });
     } else {
-      setSecondaryEmailText('로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.');
-      setSecondaryEmailError(false);
+      setLabels((prev) => {
+        prev['secondary_email'] = {
+          label: '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.',
+          status: 'info'
+        };
+        return prev;
+      });
     }
   };
 
@@ -379,6 +430,13 @@ const SignUpForm = () => {
     });
     sendSignUpForm();
   };
+
+  const labelClass = {
+    info: classes.WeakText,
+    error: classes.ErrorText,
+    success: classes.SuccessText
+  };
+
   return (
     <Form onSubmit={handleSubmit} method="post">
       <div className="d-flex container my-5 justify-content-center">
@@ -411,7 +469,7 @@ const SignUpForm = () => {
                 Username <span className={classes.RequiredStar}>*</span>
               </label>
               <br />
-              <Form.Label className={usernameError ? classes.ErrorText : classes.WeakText}>{usernameText}</Form.Label>
+              <Form.Label className={labelClass[labels.username.status]}>{labels.username.label}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   placeholder="Username"
@@ -434,7 +492,7 @@ const SignUpForm = () => {
                 Password<span className={classes.RequiredStar}>*</span>
               </label>
               <br />
-              <Form.Label className={passwordError ? classes.ErrorText : classes.WeakText}>{passwordText}</Form.Label>
+              <Form.Label className={labelClass[labels.password.status]}>{labels.password.label}</Form.Label>
               <Form.Group className="mb-3">
                 <Form.Control
                   type="password"
@@ -451,9 +509,7 @@ const SignUpForm = () => {
                 Password Check <span className={classes.RequiredStar}>*</span>
               </label>
               <br />
-              <Form.Label className={checkPasswordError ? classes.ErrorText : classes.WeakText}>
-                {checkPasswordText}
-              </Form.Label>
+              <Form.Label className={labelClass[labels.checkPassword.status]}>{labels.checkPassword.label}</Form.Label>
               <Form.Group className="mb-3">
                 <Form.Control
                   type="password"
@@ -473,7 +529,7 @@ const SignUpForm = () => {
               <Form.Label htmlFor="student_id" className="me-2">
                 학번<span className={classes.RequiredStar}>*</span>
               </Form.Label>
-              <Form.Label className={studentIdError ? classes.ErrorText : classes.WeakText}>{studentIdText}</Form.Label>
+              <Form.Label className={labelClass[labels.student_id.status]}>{labels.student_id.label}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   placeholder="ex) 20XXXXXXXX"
@@ -491,7 +547,7 @@ const SignUpForm = () => {
               <Form.Label htmlFor="name" className="me-2">
                 이름<span className={classes.RequiredStar}>*</span>
               </Form.Label>
-              <Form.Label className={nameError ? classes.ErrorText : classes.WeakText}>{nameText}</Form.Label>
+              <Form.Label className={labelClass[labels.name.status]}>{labels.name.label}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   placeholder="ex) 홍길동"
@@ -509,14 +565,14 @@ const SignUpForm = () => {
               <Form.Label htmlFor="college">
                 소속 대학<span className={classes.RequiredStar}>*</span>
               </Form.Label>
-              <Form.Label className={collegeError ? classes.ErrorText : classes.WeakText}>{collegeText}</Form.Label>
+              <Form.Label className={labelClass[labels.college.status]}>{labels.college.label}</Form.Label>
               <Select size="sm" options={colleges} id="college" name="college" onChange={handleSelectCollege}></Select>
             </div>
             <div className={classes.FormControl}>
               <Form.Label htmlFor="dept" className="me-1">
                 소속 학과<span className={classes.RequiredStar}>*</span>
               </Form.Label>
-              <Form.Label className={deptError ? classes.ErrorText : classes.WeakText}>{deptText}</Form.Label>
+              <Form.Label className={labelClass[labels.dept.status]}>{labels.dept.label}</Form.Label>
               <InputGroup className="mb-3">
                 <Form.Control
                   id="dept"
@@ -619,9 +675,7 @@ const SignUpForm = () => {
               Email <span className={classes.RequiredStar}>*</span>
             </label>
             <br />
-            <Form.Label className={personalEmailError ? classes.ErrorText : classes.WeakText}>
-              {personalEmailText}
-            </Form.Label>
+            <Form.Label className={labelClass[labels.personal_email.status]}>{labels.personal_email.label}</Form.Label>
             <InputGroup className="mb-3">
               <Form.Control
                 placeholder="연락용 Email"
@@ -647,7 +701,7 @@ const SignUpForm = () => {
               GitHub Email <span className={classes.RequiredStar}>*</span>
             </label>
             <br />
-            <Form.Label className={classes.WeakText}>GitHub Commit 기록을 추적하는데 사용합니다.</Form.Label>
+            <Form.Label className={labelClass[labels.primary_email.status]}>{labels.primary_email.label}</Form.Label>
             <InputGroup className="mb-3">
               <Form.Control placeholder="깃헙 Email" id="primary_email" name="primary_email" disabled />
               <InputGroup.Text>@</InputGroup.Text>
@@ -665,8 +719,8 @@ const SignUpForm = () => {
           <div className="mb-3">
             <label htmlFor="secondary_email">기타 연동 Email</label>
             <br />
-            <Form.Label className={secondaryEmailError ? classes.ErrorText : classes.WeakText}>
-              {secondaryEmailText}
+            <Form.Label className={labelClass[labels.secondary_email.status]}>
+              {labels.secondary_email.label}
             </Form.Label>
             <InputGroup className="mb-3">
               <Form.Control
