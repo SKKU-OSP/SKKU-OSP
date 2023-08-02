@@ -191,6 +191,7 @@
     .language-level {
       padding: 8px 16px;
       gap: 10px;
+      min-height: 47.93px;
       .star-container {
         width: 100px;
         position: relative;
@@ -412,6 +413,142 @@
       letter-spacing: -0.05em;
       text-align: center;
       color: #696969;
+    }
+  }
+}
+
+.modal-interest {
+  padding: 8px 16px;
+  gap: 10px;
+  .modal-interest-input {
+    padding: 10px;
+    gap: 16px;
+    .modal-interest-select {
+      flex: 1;
+    }
+    .btn {
+      width: 36px;
+      height: 36px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      gap: 5px;
+      border: 1px solid #000000;
+      background-color: white;
+      .btn-text {
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 10px;
+        letter-spacing: 0em;
+        text-align: center;
+        color: #000000;
+      }
+    }
+  }
+  .modal-interest-result {
+    padding: 8px 16px;
+    gap: 10px;
+    .modal-input {
+      padding: 4px 8px;
+      border-radius: 10px;
+      gap: 10px;
+      background-color: #cdcdcd;
+      .input-text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #000000;
+      }
+    }
+  }
+}
+
+.modal-skill {
+  padding: 8px 16px;
+  gap: 10px;
+  .modal-skill-input {
+    padding: 10px;
+    gap: 16px;
+    .modal-skill-select {
+      flex: 1;
+    }
+    .btn {
+      width: 36px;
+      height: 36px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      gap: 5px;
+      border: 1px solid #000000;
+      background-color: white;
+      .btn-text {
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 10px;
+        letter-spacing: 0em;
+        text-align: center;
+        color: #000000;
+      }
+    }
+  }
+  .modal-skill-result {
+    padding: 8px 16px;
+    gap: 10px;
+    .modal-input {
+      padding: 4px 8px;
+      border-radius: 10px;
+      gap: 10px;
+      background-color: #cdcdcd;
+      .input-text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #000000;
+      }
+    }
+  }
+  .modal-skill-message {
+    padding: 8px 16px;
+    gap: 10px;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 0px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #a9a9a9;
+  }
+  .modal-language-level {
+    padding: 8px 16px;
+    gap: 10px;
+    .modal-star-container {
+      width: 100px;
+      position: relative;
+    }
+    .modal-level {
+      flex: 1;
+      min-height: 28.98px;
+    }
+    .modal-language {
+      padding: 6px 12px;
+      border-radius: 10px;
+      gap: 10px;
+      background-color: #cdcdcd;
+      .modal-language-text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #000000;
+      }
     }
   }
 }
