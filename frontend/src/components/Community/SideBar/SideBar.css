@@ -1,18 +1,6 @@
 @media screen and (max-width: 767px) {
   .community-sidebar {
-  }
-  .sidebar-profile-img {
-    width: 22px;
-    height: 22px;
-    border: 0 !important;
-  }
-  #sidebar-user-info > a > span,
-  .sidebar-boardgroup-title,
-  .sidebar-boardgroup-item > a > span {
     display: none !important;
-  }
-  .sidebar-community-tab {
-    flex-direction: row;
   }
 }
 
@@ -31,7 +19,7 @@
   width: 70%;
   border-radius: 50%;
   object-fit: cover;
-  margin: 20px;
+  margin: 10px;
 }
 
 #sidebar-profile-name {
@@ -39,13 +27,13 @@
   font-weight: 700;
   font-size: 20px;
   letter-spacing: -2px;
+  cursor: pointer;
 }
 
 #sidebar-profile-username {
   color: var(--main-light-font-color);
   font-weight: 500;
   font-size: 20px;
-  margin-bottom: 20px;
   text-decoration: underline;
   cursor: pointer;
 }
