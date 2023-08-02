@@ -1,5 +1,5 @@
 import './User.css';
-import Profile_Info from './TinyUser/Profile_info';
+import Profile_Info from './TinyUser/Profile_Info';
 import Profile_Tab from './TinyUser/Profile_Tab';
 import Profile_Activity from './TinyUser/Profile_Activity';
 
