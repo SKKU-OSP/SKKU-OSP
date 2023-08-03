@@ -63,7 +63,6 @@ class UserInterestTagUpdateView(APIView):
                 AccountInterest.objects.filter(
                     account=user_account, tag__type="domain").delete()
                 objs = self.interests_updater(user_account, account_interests)
-                print("objs", objs, type(objs))
                 interests = AccountInterest.objects.bulk_create(objs)
                 data['user_interests'] = AccountInterestSerializer(
                     interests, many=True).data
@@ -74,7 +73,7 @@ class UserInterestTagUpdateView(APIView):
             return Response(res)
 
         except Exception as e:
-            print("UserInterestTagListView", e)
+            logging.exception(f"UserInterestTagUpdateView: {e}")
             res['message'] = '유저 관심분야를 수정하는데 실패했습니다.'
 
             return Response(res)
@@ -103,8 +102,7 @@ class UserLangTagUpdateView(APIView):
             with transaction.atomic():
                 AccountInterest.objects.filter(
                     account=user_account).exclude(tag__type='domain').delete()
-                objs = self.langs_updater(user_account, account_langs)
-                print("objs", objs, type(objs))
+                objs = self.skills_updater(user_account, account_langs)
                 updated_interests = AccountInterest.objects.bulk_create(objs)
                 data['user_langs'] = AccountInterestSerializer(
                     updated_interests, many=True).data
@@ -114,17 +112,18 @@ class UserLangTagUpdateView(APIView):
                 return Response(res)
 
         except Exception as e:
-            print("UserInterestTagListView", e)
+            logging.exception(f"UserLangTagUpdateView: {e}")
             res['message'] = '유저 사용언어를 수정하는데 실패했습니다.'
 
             return Response(res)
 
-    def langs_updater(self, account, interests):
+    def skills_updater(self, account, skills):
         objs = []
-        for interest in interests:
-            lang_tag = TagIndependent.objects.get(name=interest['value'].replace(
-                "_", " ").replace("plus", "+").replace("sharp", "#"))
-            new_interest_obj = AccountInterest(
-                account=account, tag=lang_tag, level=interest['level'])
-            objs.append(new_interest_obj)
+        for level_skills in skills.values():
+            for skill in level_skills:
+                lang_tag = TagIndependent.objects.get(name=skill['value'].replace(
+                    "_", " ").replace("plus", "+").replace("sharp", "#"))
+                new_interest_obj = AccountInterest(
+                    account=account, tag=lang_tag, level=int(skill['level']))
+                objs.append(new_interest_obj)
         return objs
