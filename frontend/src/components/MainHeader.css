@@ -121,3 +121,11 @@ header {
 .on-desktop {
   display: flex;
 }
+
+.header-profile-img {
+  border: 2px solid var(--main-black);
+  border-radius: 50%;
+}
+.header-profile-img:hover {
+  cursor: pointer;
+}
