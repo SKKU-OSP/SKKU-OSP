@@ -42,6 +42,10 @@ export default function SideBar_Container() {
     navigate(`/accounts/login`);
   };
 
+  const onSignUp = () => {
+    navigate(`/accounts/signup`);
+  };
+
   useEffect(() => {});
 
   return (
@@ -52,6 +56,7 @@ export default function SideBar_Container() {
       onMyProfile={onMyProfile}
       onMyGithub={onMyGithub}
       onLogin={onLogin}
+      onSignUp={onSignUp}
       sendLogoutRequest={sendLogoutRequest}
     />
   );
