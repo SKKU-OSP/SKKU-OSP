@@ -62,7 +62,7 @@ export default function SideBar_Presenter(props) {
               로그인
             </button>
             <br></br>
-            <button type="button" className="btn btn-outline-primary btn-signup" onClick={onSignUp}>
+            <button type="button" className="btn btn-outline-primary btn-signup" onClick={onLogin}>
               회원가입
             </button>
           </div>
