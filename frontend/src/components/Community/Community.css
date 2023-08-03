@@ -223,14 +223,8 @@
   color: var(--main-selected-color);
 }
 
-.primary-btn {
-  background-color: var(--main-selected-color);
-  color: var(--main-white);
-  height: 30px;
-  line-height: 25px !important;
-  border-radius: 10px;
-  border: 0;
-  padding: 0 10px 0 10px;
+.btn {
+  border-radius: 10px !important;
 }
 
 .hidden {

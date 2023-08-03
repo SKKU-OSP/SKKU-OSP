@@ -13,7 +13,9 @@ export default function Board_Presenter(props) {
         <CommunityNavItem this_board_name="정보" />
         <CommunityNavItem this_board_name="홍보" />
       </ul>
-      <button className="primary-btn">작성하기</button>
+      <button type="button" class="btn btn-primary">
+        작성하기
+      </button>
     </div>
   );
 }
