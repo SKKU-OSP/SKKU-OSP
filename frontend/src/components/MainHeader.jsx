@@ -33,10 +33,14 @@ function MainHeader(props) {
               <span className="siteTitle">SKKU SOSD</span>
             </Link>
           </div>
+          <div className="on-mobile p-2">
+            <IconList_Container />
+          </div>
           <button className="header-toggler" type="button" onClick={onClickToggle}>
             <BsList size="24" />
           </button>
         </div>
+
         <div className={isToggled ? 'body-of-header' : 'toggle-display-none body-of-header'}>
           <div className="header-navbar">
             <Link to="/community/자유" className="header-navbar-menu">
@@ -53,7 +57,7 @@ function MainHeader(props) {
             </Link>
           </div>
           <SearchBox />
-          <div className="d-flex p-2">
+          <div className="on-desktop p-2">
             <IconList_Container />
           </div>
         </div>

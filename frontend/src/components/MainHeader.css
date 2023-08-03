@@ -1,6 +1,6 @@
 @media screen and (max-width: 767px) {
   .logo {
-    margin-right: 10px;
+    margin-right: auto;
   }
   .header {
     flex-direction: column !important;
@@ -11,14 +11,23 @@
   .toggle-display-none {
     display: none !important;
   }
+
   .header-navbar {
     justify-content: space-between;
+  }
+
+  .head-of-header {
+    justify-content: flex-end !important;
   }
   .body-of-header {
     flex-direction: column !important;
   }
-  .sidebar-in-header {
+
+  .on-mobile {
     display: flex !important;
+  }
+  .on-desktop {
+    display: none !important;
   }
 }
 
@@ -102,5 +111,13 @@ header {
 .body-of-header {
   width: 75%;
   justify-content: space-between;
+  display: flex;
+}
+
+.on-mobile {
+  display: none;
+}
+
+.on-desktop {
   display: flex;
 }
