@@ -4,7 +4,7 @@ import SideBar_Presenter from './SideBar_Presenter';
 import AuthContext from '../../../utils/auth-context';
 
 export default function SideBar_Container() {
-  const { username, githubUsername } = useContext(AuthContext);
+  const { name, username, githubUsername } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const onMyProfile = () => {
@@ -19,12 +19,11 @@ export default function SideBar_Container() {
     navigate(`/accounts/login`);
   };
 
-  useEffect(() => {
-    console.log('username:', username);
-  });
+  useEffect(() => {});
 
   return (
     <SideBar_Presenter
+      name={name}
       username={username}
       githubUsername={githubUsername}
       onMyProfile={onMyProfile}

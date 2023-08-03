@@ -2,7 +2,7 @@ import './SideBar.css';
 import { BsGithub } from 'react-icons/bs';
 
 export default function SideBar_Presenter(props) {
-  const { username, githubUsername, onMyProfile, onMyGithub, onLogin } = props;
+  const { name, username, githubUsername, onMyProfile, onMyGithub, onLogin } = props;
 
   return (
     <div>
@@ -19,7 +19,7 @@ export default function SideBar_Presenter(props) {
               data-bs-title="프로필 페이지"
             ></img>
             <div id="sidebar-profile-name" onClick={onMyProfile}>
-              성이름
+              {name}
             </div>
             <div id="sidebar-profile-username" onClick={onMyGithub}>
               <BsGithub />

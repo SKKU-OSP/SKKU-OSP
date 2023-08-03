@@ -27,20 +27,52 @@ import logging
 
 
 class UserAccountView(APIView):
-    '''
-    유저 계정 정보
-    '''
+
+    def get_validation(self, request, status, errors):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, errors
 
     def get(self, request):
-        res = {'status': 'success', 'message': '', 'data': None}
-        if not request.user.is_authenticated:
-            res['status'] = 'fail'
-            res['message'] = 'user is not authenticated'
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
             return Response(res)
 
-        account = Account.objects.get(user=request.user)
-        res['data'] = AccountSerializer(account).data
+        # Transactions
+        try:
+            account = Account.objects.get(user=request.user)
+            data['account'] = AccountSerializer(account).data
 
+            name = StudentTab.objects.get(id=account.student_data_id).name
+
+            data['name'] = name
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
         return Response(res)
 
 

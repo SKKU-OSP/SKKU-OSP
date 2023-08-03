@@ -8,6 +8,7 @@ const AuthContext = React.createContext({
   userId: null,
   username: null,
   githubUsername: null,
+  name: null,
   photo: null,
   isSuperuser: false,
   setUser: () => {},
@@ -25,6 +26,7 @@ export const AuthContextProvider = (props) => {
 
   const [githubUsername, setGithubUsername] = useState(null);
   const [photo, setPhoto] = useState(null);
+  const [name, setName] = useState(null);
 
   const setUser = () => {
     console.log('setUser');
@@ -36,14 +38,15 @@ export const AuthContextProvider = (props) => {
         const response = await axios.get(url, config);
         console.log('user info', response);
         const res = response.data;
-        console.log('res.data.user.id', res.data.user.id);
-        console.log('res.data.user.username', res.data.user.username);
+        console.log('res.data.account.user.id', res.data.account.user.id);
+        console.log('res.data.account.user.username', res.data.account.user.username);
 
-        setUserId(res.data.user.id);
-        setUsername(res.data.user.username);
-        setIsSuperuser(res.data.user.is_superuser);
-        setPhoto(res.data.photo);
-        setGithubUsername(res.data.github_id);
+        setUserId(res.data.account.user.id);
+        setUsername(res.data.account.user.username);
+        setIsSuperuser(res.data.account.user.is_superuser);
+        setPhoto(res.data.account.photo);
+        setGithubUsername(res.data.account.github_id);
+        setName(res.data.name);
       } catch (error) {
         console.log('setUserInfo error', error);
       }
@@ -62,6 +65,7 @@ export const AuthContextProvider = (props) => {
     setUserId(null);
     setUsername(null);
     setIsSuperuser(false);
+    setName(null);
     setPhoto(null);
     setGithubUsername(null);
   };
@@ -79,6 +83,7 @@ export const AuthContextProvider = (props) => {
         username: username,
         isSuperuser: isSuperuser,
         githubUsername: githubUsername,
+        name: name,
         photo: photo,
         setUser: setUser,
         unsetUser: unsetUser
