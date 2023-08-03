@@ -25,6 +25,9 @@ export default function SideBar_Presenter(props) {
               <BsGithub />
               {githubUsername}
             </div>
+            <button type="button" class="btn btn-outline-secondary btn-logout">
+              로그아웃
+            </button>
           </div>
           <div className="sidebar-community-tab w-100">
             <div className="sidebar-activity hover-opacity">
@@ -55,9 +58,13 @@ export default function SideBar_Presenter(props) {
               data-bs-placement="top"
               data-bs-title="프로필 페이지"
             ></img>
-            <div id="sidebar-profile-name" onClick={onLogin}>
+            <button type="button" class="btn btn-outline-secondary btn-login" onClick={onLogin}>
               로그인
-            </div>
+            </button>
+            <br></br>
+            <button type="button" class="btn btn-outline-primary btn-signup">
+              회원가입
+            </button>
           </div>
         </div>
       )}
