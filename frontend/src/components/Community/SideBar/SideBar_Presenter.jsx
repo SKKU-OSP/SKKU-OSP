@@ -2,7 +2,7 @@ import './SideBar.css';
 import { BsGithub } from 'react-icons/bs';
 
 export default function SideBar_Presenter(props) {
-  const { name, username, githubUsername, onMyProfile, onMyGithub, onLogin } = props;
+  const { name, username, githubUsername, onMyProfile, onMyGithub, onLogin, sendLogoutRequest } = props;
 
   return (
     <div>
@@ -25,7 +25,7 @@ export default function SideBar_Presenter(props) {
               <BsGithub />
               {githubUsername}
             </div>
-            <button type="button" class="btn btn-outline-secondary btn-logout">
+            <button type="button" className="btn btn-outline-secondary btn-logout" onClick={sendLogoutRequest}>
               로그아웃
             </button>
           </div>
@@ -58,11 +58,11 @@ export default function SideBar_Presenter(props) {
               data-bs-placement="top"
               data-bs-title="프로필 페이지"
             ></img>
-            <button type="button" class="btn btn-outline-secondary btn-login" onClick={onLogin}>
+            <button type="button" className="btn btn-outline-secondary btn-login" onClick={onLogin}>
               로그인
             </button>
             <br></br>
-            <button type="button" class="btn btn-outline-primary btn-signup">
+            <button type="button" className="btn btn-outline-primary btn-signup">
               회원가입
             </button>
           </div>
