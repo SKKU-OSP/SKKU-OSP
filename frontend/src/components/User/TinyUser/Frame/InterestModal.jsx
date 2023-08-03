@@ -11,19 +11,17 @@ function InterestModal(props) {
   const myInterest = props.myInterest;
   const interestShow = props.interestShow;
   const OnHandleInterestSaveClose = props.OnHandleInterestSaveClose;
-  const [selectedInterest, setSelectedInterest] = useState(myInterest);
+  const [selectedInterest, setSelectedInterest] = useState();
   const [modalInterest, setModalInterest] = useState(myInterest);
   const OnHandleInterestSelect = (selectedInterest) => setSelectedInterest(selectedInterest);
-  const OnHandleModalInterest = () => setModalInterest(selectedInterest);
-  const OnHandleInterestClose = () => (
-    setSelectedInterest(myInterest), setModalInterest(myInterest), props.OnHandleInterestClose()
-  );
+  const OnHandleModalInterest = () => setModalInterest([...modalInterest, selectedInterest]);
+  const OnHandleInterestClose = () => (setModalInterest(myInterest), props.OnHandleInterestClose());
   const OnHandleRemoveInterest = (removeLabel) => {
-    setModalInterest((prevInterest) => prevInterest.filter((interest) => interest.label !== removeLabel));
+    setModalInterest(modalInterest.filter((interest) => interest.label !== removeLabel));
   };
   useEffect(() => {
-    setSelectedInterest(modalInterest);
-  }, [modalInterest]);
+    setModalInterest(myInterest);
+  }, [myInterest]);
 
   return (
     <Modal size="lg" show={interestShow} onHide={OnHandleInterestClose}>
@@ -36,11 +34,9 @@ function InterestModal(props) {
             <Select
               className="modal-interest-select"
               size="lg"
-              isMulti={true}
               name="interest"
-              value={selectedInterest}
               onChange={OnHandleInterestSelect}
-              options={interest}
+              options={interest.filter((item) => !modalInterest.some((mi) => item.value === mi.value))}
             />
             <button className="btn" onClick={OnHandleModalInterest}>
               <span className="btn-text">+</span>

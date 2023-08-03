@@ -1,57 +1,124 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../../User.css';
 import { BsFillStarFill, BsXLg } from 'react-icons/bs';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import SkillModal from './SkillModal';
 import InterestModal from './InterestModal';
+import axios from 'axios';
+import { getAuthConfig } from '../../../../utils/auth';
 
 function Interest() {
-  // Interest 모달창
+  // Interest 훅
   const [interestShow, setInterestShow] = useState(false);
+  const [interest, setInterest] = useState([]);
+  const [myInterest, setMyInterest] = useState([]);
+
+  // Skill 훅
+  const [skillShow, setSkillShow] = useState(false);
+  const [skill, setSkill] = useState([]);
+  const [mySkill, setMySkill] = useState({ 4: [], 3: [], 2: [], 1: [], 0: [] });
+
+  // Interest 모달 함수
   const OnHandleInterestShow = () => setInterestShow(true);
   const OnHandleInterestClose = () => setInterestShow(false);
   const OnHandleInterestSaveClose = (modalInterest) => {
     setMyInterest(modalInterest), setInterestShow(false);
   };
 
-  const [interest, setInterest] = useState([
-    { value: '컨테이너', label: '컨테이너' },
-    { value: 'CI/CD', label: 'CI/CD' },
-    { value: 'UI', label: 'UI' },
-    { value: 'UX', label: 'UX' }
-  ]);
-  const [myInterest, setMyInterest] = useState([
-    { value: '컨테이너', label: '컨테이너' },
-    { value: 'CI/CD', label: 'CI/CD' },
-    { value: 'UI', label: 'UI' }
-  ]);
-  // interest와 myInterest 대한 값은 이제 서버에서 받아온거 하면 됨.
-
-  // Skill 모달창
-  const [skillShow, setSkillShow] = useState(false);
+  // Skill 모달 함수
   const OnHandleSkillShow = () => setSkillShow(true);
   const OnHandleSkillClose = () => setSkillShow(false);
   const OnHandleSkillSaveClose = (modalSkill) => (setMySkill(modalSkill), setSkillShow(false));
 
-  const [skill, setSkill] = useState([
-    { value: 'Django', label: 'Django' },
-    { value: 'React', label: 'React' },
-    { value: 'Python', label: 'Python' },
-    { value: 'HTML', label: 'HTML' },
-    { value: 'JavaScript', label: 'JavaScript' },
-    { value: 'JAVA', label: 'JAVA' },
-    { value: 'Go', label: 'Go' },
-    { value: 'C++', label: 'C++' }
-  ]);
-  const [mySkill, setMySkill] = useState({
-    level1: ['Django'],
-    level2: ['Python'],
-    level3: ['React'],
-    level4: ['Go'],
-    level5: ['C++']
-  });
-  // skill과 mySkill 대한 값은 이제 서버에서 받아온거 하면 됨.
+  // 서버와 연동
+  const server_url = import.meta.env.VITE_SERVER_URL;
+  const profileTagsUrl = server_url + '/user/api/tag/72/';
+  const tagsUrl = server_url + '/tag/api/list/';
+  const profileInterestPostUrl = server_url + '/user/api/interests/update/';
+  const profileSkillPostUrl = server_url + '/user/api/langs/update/';
+
+  // 서버에서 데이터 받아오기
+  useEffect(() => {
+    const getTags = async () => {
+      try {
+        const response = await axios.get(tagsUrl, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          const tags = res.data.tags;
+          const interest = tags
+            .filter((tag) => tag.type === 'domain')
+            .map((tag) => {
+              return { ...tag, value: tag.name, label: tag.name };
+            });
+          const skill = tags
+            .filter((tag) => tag.type !== 'domain')
+            .map((tag) => {
+              return { ...tag, value: tag.name, label: tag.name };
+            });
+          setInterest(interest);
+          setSkill(skill);
+        }
+      } catch (error) {}
+    };
+    const getProfileTags = async () => {
+      try {
+        const response = await axios.get(profileTagsUrl, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          const profileTags = res.data.interest_tags;
+          const profileInterest = profileTags
+            .filter((interest) => interest.tag.type === 'domain')
+            .map((interest) => {
+              return { ...interest, value: interest.tag.name, label: interest.tag.name };
+            });
+          const profileSkill = profileTags
+            .filter((skill) => skill.tag.type !== 'domain')
+            .map((skill) => {
+              return { ...skill, value: skill.tag.name, label: skill.tag.name };
+            });
+          const profileSkillLevel = { 4: [], 3: [], 2: [], 1: [], 0: [] };
+          profileSkill.forEach((skill) => {
+            profileSkillLevel[skill.level].push(skill);
+          });
+          setMyInterest(profileInterest);
+          setMySkill(profileSkillLevel);
+          console.log('mySkill', mySkill);
+        }
+      } catch (error) {}
+    };
+    getTags();
+    getProfileTags();
+  }, []);
+
+  // 서버에 데이터 저장
+  const updatePostProfileInterest = async () => {
+    await axios.post(profileInterestPostUrl, { user_interests: myInterest }, getAuthConfig());
+  };
+  useEffect(() => {
+    updatePostProfileInterest();
+  }, [myInterest]);
+
+  const updatePostProfileSkill = async () => {
+    await axios.post(profileSkillPostUrl, { user_langs: mySkill }, getAuthConfig());
+  };
+  useEffect(() => {
+    Object.keys(mySkill).forEach((key) => {
+      mySkill[key].forEach((obj) => {
+        obj.level = Number(key);
+      });
+    });
+    console.log('Update!', mySkill);
+    updatePostProfileSkill();
+  }, [mySkill]);
+
+  const starColor = {
+    4: '#002743',
+    3: '#00518C',
+    2: '#0081DF',
+    1: '#51B5FF',
+    0: '#B5DFFF'
+  };
 
   return (
     <div className="d-flex flex-column profile-interest">
@@ -71,7 +138,7 @@ function Interest() {
         </div>
         <div className="d-flex flex-row category-icon">
           {myInterest.map((interest) => (
-            <div className="icon">
+            <div className="icon" key={interest.id}>
               <span className="icon-text">{interest.label}</span>
             </div>
           ))}
@@ -83,74 +150,44 @@ function Interest() {
           <Button className="btn" onClick={OnHandleSkillShow} style={{ backgroundColor: 'white' }}>
             <span className="btn-text">수정</span>
           </Button>
-          <SkillModal
-            mySkill={mySkill}
-            skill={skill}
-            skillShow={skillShow}
-            OnHandleSkillClose={OnHandleSkillClose}
-            OnHandleSkillSaveClose={OnHandleSkillSaveClose}
-          />
+          {
+            <SkillModal
+              mySkill={mySkill}
+              skill={skill}
+              skillShow={skillShow}
+              OnHandleSkillClose={OnHandleSkillClose}
+              OnHandleSkillSaveClose={OnHandleSkillSaveClose}
+              starColor={starColor}
+            />
+          }
         </div>
-        <div className="d-flex flex-row language-level">
-          <div className="d-flex flex-row justify-content-center align-items-center star-container">
-            <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '14px' }} />
-            <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '26px' }} />
-            <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '38px' }} />
-            <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '50px' }} />
-            <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '62px' }} />
-          </div>
-          {mySkill.level5.map((element) => (
-            <div className="language">
-              <span className="language-text">{element}</span>
-            </div>
-          ))}
-        </div>
-        <div className="d-flex flex-row language-level">
-          <div className="d-flex flex-row justify-content-center align-items-center star-container">
-            <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '20px' }} />
-            <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '32px' }} />
-            <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '44px' }} />
-            <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '56px' }} />
-          </div>
-          {mySkill.level4.map((element) => (
-            <div className="language">
-              <span className="language-text">{element}</span>
-            </div>
-          ))}
-        </div>
-        <div className="d-flex flex-row language-level">
-          <div className="d-flex flex-row justify-content-center align-items-center star-container">
-            <BsFillStarFill size={24} color="#0081DF" style={{ position: 'absolute', left: '26px' }} />
-            <BsFillStarFill size={24} color="#0081DF" style={{ position: 'absolute', left: '38px' }} />
-            <BsFillStarFill size={24} color="#0081DF" style={{ position: 'absolute', left: '50px' }} />
-          </div>
-          {mySkill.level3.map((element) => (
-            <div className="language">
-              <span className="language-text">{element}</span>
-            </div>
-          ))}
-        </div>
-        <div className="d-flex flex-row language-level">
-          <div className="d-flex flex-row justify-content-center align-items-center star-container">
-            <BsFillStarFill size={24} color="#51B5FF" style={{ position: 'absolute', left: '32px' }} />
-            <BsFillStarFill size={24} color="#51B5FF" style={{ position: 'absolute', left: '44px' }} />
-          </div>
-          {mySkill.level2.map((element) => (
-            <div className="language">
-              <span className="language-text">{element}</span>
-            </div>
-          ))}
-        </div>
-        <div className="d-flex flex-row language-level">
-          <div className="d-flex flex-row justify-content-center align-items-center star-container">
-            <BsFillStarFill size={24} color="#B5DFFF" />
-          </div>
-          {mySkill.level1.map((element) => (
-            <div className="language">
-              <span className="language-text">{element}</span>
-            </div>
-          ))}
-        </div>
+        {Object.entries(mySkill)
+          .reverse()
+          .map(([level, tags]) => {
+            return (
+              <div className="d-flex flex-row language-level" key={`level-${level}`}>
+                <div className="d-flex flex-row justify-content-center align-items-center star-container">
+                  {Array(Number(level) + 1)
+                    .fill(0)
+                    .map((element, idx) => {
+                      return (
+                        <BsFillStarFill
+                          size={24}
+                          color={starColor[level]}
+                          style={{ margin: '-6px' }}
+                          key={`star-${level}-${idx}`}
+                        />
+                      );
+                    })}
+                </div>
+                {tags.map((element) => (
+                  <div className="language">
+                    <span className="language-text">{element.label}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
       </div>
     </div>
   );

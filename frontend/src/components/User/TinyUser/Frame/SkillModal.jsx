@@ -10,53 +10,57 @@ function SkillModal(props) {
   const skill = props.skill;
   const mySkill = props.mySkill;
   const skillShow = props.skillShow;
+  const starColor = props.starColor;
   const OnHandleSkillClose = props.OnHandleSkillClose;
   const OnHandleSkillSaveClose = props.OnHandleSkillSaveClose;
+
   const [modalSkill, setModalSkill] = useState(mySkill);
   const [selectedSkill, setSelectedSkill] = useState([]);
   const [undefinedSkill, setUndefinedSkill] = useState([]);
+
   const OnHandleSkillSelect = (selectedSkill) => setSelectedSkill(selectedSkill);
-  const OnHandleUndefinedSkill = () => setUndefinedSkill(selectedSkill);
-  const OnHandleRemoveSkill = (removeLabel) => {
-    setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.label !== removeLabel));
+  const OnHandleUndefinedSkill = () => setUndefinedSkill([...undefinedSkill, selectedSkill]);
+  const OnHandleRemoveSkill = (removeSkill) => {
+    setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.label !== removeSkill.label));
   };
+
   useEffect(() => {
-    setSelectedSkill(undefinedSkill);
-  }, [undefinedSkill]);
+    setModalSkill(mySkill);
+  }, [mySkill]);
 
-  function OnHandleOnDrag(e, skillName) {
-    e.dataTransfer.setData('skill', skillName);
-  }
+  const OnHandleOnDrag = (e, skill) => {
+    const skillJsonString = JSON.stringify(skill);
+    e.dataTransfer.setData('skill', skillJsonString);
+  };
 
-  function OnHandleDragOver(e) {
+  const OnHandleDragOver = (e) => {
     e.preventDefault();
-  }
+  };
 
-  function OnHandleOnDrop(e, targetLevel) {
-    const newSkill = e.dataTransfer.getData('skill');
-    if (!modalSkill[targetLevel].includes(newSkill)) {
+  const OnHandleOnDrop = (e, targetLevel) => {
+    const skillJsonString = e.dataTransfer.getData('skill');
+    const newSkill = JSON.parse(skillJsonString);
+    if (!modalSkill[targetLevel].some((skill) => skill.label === newSkill.label)) {
       setModalSkill((prevLevels) => ({
         ...prevLevels,
         [targetLevel]: [...prevLevels[targetLevel], newSkill]
       }));
     }
     for (const level in modalSkill) {
-      console.log(level);
       if (level !== targetLevel) {
         setModalSkill((prevLevels) => ({
           ...prevLevels,
-          [level]: prevLevels[level].filter((skill) => skill !== newSkill)
+          [level]: prevLevels[level].filter((skill) => skill.label !== newSkill.label)
         }));
       }
     }
-    setUndefinedSkill((prev) => prev.filter((skill) => skill.label !== newSkill));
-    setSelectedSkill((prev) => prev.filter((skill) => skill.label !== newSkill));
-  }
+    setUndefinedSkill((prev) => prev.filter((skill) => skill.label !== newSkill.label));
+  };
 
   const OnHandleRemoveModalSkill = (removeSkill, level) => {
     setModalSkill((prevLevels) => ({
       ...prevLevels,
-      [level]: prevLevels[level].filter((skill) => skill !== removeSkill)
+      [level]: prevLevels[level].filter((skill) => skill.label !== removeSkill.label)
     }));
   };
 
@@ -72,11 +76,14 @@ function SkillModal(props) {
             <Select
               className="modal-skill-select"
               size="lg"
-              isMulti={true}
               name="skill"
-              value={selectedSkill}
               onChange={OnHandleSkillSelect}
-              options={skill.filter((item) => !Object.values(modalSkill).flat().includes(item.value))}
+              options={skill.filter(
+                (item) =>
+                  !Object.values(modalSkill)
+                    .flat()
+                    .some((obj) => obj.value === item.value)
+              )}
             />
             <button className="btn" onClick={OnHandleUndefinedSkill}>
               <span className="btn-text">+</span>
@@ -86,154 +93,56 @@ function SkillModal(props) {
             {undefinedSkill.map((skill) => (
               <div
                 draggable
-                onDragStart={(e) => OnHandleOnDrag(e, skill.label)}
+                onDragStart={(e) => OnHandleOnDrag(e, skill)}
                 className="d-flex flex-row align-items-center modal-input"
               >
                 <span className="input-text">{skill.label}</span>
-                <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill.label)} style={{ cursor: 'pointer' }} />
+                <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
               </div>
             ))}
           </div>
-          <div className="d-flex flex-row modal-language-level">
-            <div className="d-flex flex-row justify-content-center align-items-center modal-star-container">
-              <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '14px' }} />
-              <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '26px' }} />
-              <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '38px' }} />
-              <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '50px' }} />
-              <BsFillStarFill size={24} color="#002743" style={{ position: 'absolute', left: '62px' }} />
-            </div>
-            <div
-              className="d-flex flex-row gap-1 modal-level"
-              onDrop={(e) => OnHandleOnDrop(e, 'level5')}
-              onDragOver={OnHandleDragOver}
-            >
-              {modalSkill.level5.map((element, index) => (
-                <div
-                  draggable
-                  onDragStart={(e) => OnHandleOnDrag(e, element)}
-                  className="d-flex flex-row gap-1 align-items-center modal-language"
-                  key={index}
-                >
-                  <span className="modal-language-text">{element}</span>
-                  <BsXLg
-                    size={14}
-                    onClick={() => OnHandleRemoveModalSkill(element, 'level5')}
-                    style={{ cursor: 'pointer' }}
-                  />
+          {Object.entries(modalSkill)
+            .reverse()
+            .map(([level, tags]) => {
+              return (
+                <div className="d-flex flex-row modal-language-level" key={`modal-level-${level}`}>
+                  <div className="d-flex flex-row justify-content-center align-items-center modal-star-container">
+                    {Array(Number(level) + 1)
+                      .fill(0)
+                      .map((element, idx) => {
+                        return (
+                          <BsFillStarFill
+                            size={24}
+                            color={starColor[level]}
+                            style={{ margin: '-6px' }}
+                            key={`modal-star-${level}-${idx}`}
+                          />
+                        );
+                      })}
+                  </div>
+                  <div
+                    className="d-flex flex-row gap-1 modal-level"
+                    onDrop={(e) => OnHandleOnDrop(e, level)}
+                    onDragOver={OnHandleDragOver}
+                  >
+                    {tags.map((element) => (
+                      <div
+                        draggable
+                        onDragStart={(e) => OnHandleOnDrag(e, element)}
+                        className="d-flex flex-row gap-1 align-items-center modal-language"
+                      >
+                        <span className="modal-language-text">{element.label}</span>
+                        <BsXLg
+                          size={14}
+                          onClick={() => OnHandleRemoveModalSkill(element, level)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="d-flex flex-row modal-language-level">
-            <div className="d-flex flex-row justify-content-center align-items-center modal-star-container">
-              <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '20px' }} />
-              <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '32px' }} />
-              <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '44px' }} />
-              <BsFillStarFill size={24} color="#00518C" style={{ position: 'absolute', left: '56px' }} />
-            </div>
-            <div
-              className="d-flex flex-row gap-1 modal-level"
-              onDrop={(e) => OnHandleOnDrop(e, 'level4')}
-              onDragOver={OnHandleDragOver}
-            >
-              {modalSkill.level4.map((element, index) => (
-                <div
-                  draggable
-                  onDragStart={(e) => OnHandleOnDrag(e, element)}
-                  className="d-flex flex-row gap-1 align-items-center modal-language"
-                  key={index}
-                >
-                  <span className="modal-language-text">{element}</span>
-                  <BsXLg
-                    size={14}
-                    onClick={() => OnHandleRemoveModalSkill(element, 'level4')}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="d-flex flex-row modal-language-level">
-            <div className="d-flex flex-row justify-content-center align-items-center modal-star-container">
-              <BsFillStarFill size={24} color="#0081DF" style={{ position: 'absolute', left: '26px' }} />
-              <BsFillStarFill size={24} color="#0081DF" style={{ position: 'absolute', left: '38px' }} />
-              <BsFillStarFill size={24} color="#0081DF" style={{ position: 'absolute', left: '50px' }} />
-            </div>
-            <div
-              className="d-flex flex-row gap-1 modal-level"
-              onDrop={(e) => OnHandleOnDrop(e, 'level3')}
-              onDragOver={OnHandleDragOver}
-            >
-              {modalSkill.level3.map((element, index) => (
-                <div
-                  draggable
-                  onDragStart={(e) => OnHandleOnDrag(e, element)}
-                  className="d-flex flex-row gap-1 align-items-center modal-language"
-                  key={index}
-                >
-                  <span className="modal-language-text">{element}</span>
-                  <BsXLg
-                    size={14}
-                    onClick={() => OnHandleRemoveModalSkill(element, 'level3')}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="d-flex flex-row modal-language-level">
-            <div className="d-flex flex-row justify-content-center align-items-center modal-star-container">
-              <BsFillStarFill size={24} color="#51B5FF" style={{ position: 'absolute', left: '32px' }} />
-              <BsFillStarFill size={24} color="#51B5FF" style={{ position: 'absolute', left: '44px' }} />
-            </div>
-            <div
-              className="d-flex flex-row gap-1 modal-level"
-              onDrop={(e) => OnHandleOnDrop(e, 'level2')}
-              onDragOver={OnHandleDragOver}
-            >
-              {modalSkill.level2.map((element, index) => (
-                <div
-                  draggable
-                  onDragStart={(e) => OnHandleOnDrag(e, element)}
-                  className="d-flex flex-row gap-1 align-items-center modal-language"
-                  key={index}
-                >
-                  <span className="modal-language-text">{element}</span>
-                  <BsXLg
-                    size={14}
-                    onClick={() => OnHandleRemoveModalSkill(element, 'level2')}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="d-flex flex-row modal-language-level">
-            <div className="d-flex flex-row justify-content-center align-items-center modal-star-container">
-              <BsFillStarFill size={24} color="#B5DFFF" />
-            </div>
-            <div
-              className="d-flex flex-row gap-1 modal-level"
-              onDrop={(e) => OnHandleOnDrop(e, 'level1')}
-              onDragOver={OnHandleDragOver}
-            >
-              {modalSkill.level1.map((element, index) => (
-                <div
-                  draggable
-                  onDragStart={(e) => OnHandleOnDrag(e, element)}
-                  className="d-flex flex-row gap-1 align-items-center modal-language"
-                  key={index}
-                >
-                  <span className="modal-language-text">{element}</span>
-                  <BsXLg
-                    size={14}
-                    onClick={() => OnHandleRemoveModalSkill(element, 'level1')}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+              );
+            })}
         </div>
       </Modal.Body>
       <Modal.Footer>
