@@ -31,7 +31,7 @@ const InviteTeamModal = () => {
           <div className="mb-4">
             <span style={{ display: 'block' }}>초대할 팀 선택</span>
             <Select placeholder="팀 선택" options={options} />
-          </div>
+        </div>
 
           <Form.Group className="mb-4" controlId="InviteMessage">
             <Form.Label>초대 메세지</Form.Label>
