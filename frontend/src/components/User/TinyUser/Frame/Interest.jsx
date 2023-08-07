@@ -173,11 +173,40 @@ function Interest() {
                       );
                     })}
                 </div>
-                {tags.map((element) => (
-                  <div className="language">
-                    <span className="language-text">{element.label}</span>
-                  </div>
-                ))}
+                {tags.map((element) => {
+                  const color = element.tag.color;
+                  const hexColor = color.substring(1);
+                  const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+                  const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+                  const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+                  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                  const fontColor = luma < 127.5 ? 'white' : 'black';
+                  const logo = element.tag.logo;
+                  return (
+                    <div
+                      className="language"
+                      style={{ backgroundColor: `${element.tag.color}` }}
+                      key={`language-level-${level}-${element.id}`}
+                    >
+                      {logo !== 'default.svg' ? (
+                        <img
+                          className="stack-icon"
+                          src={`${element.tag.logo}`}
+                          style={{
+                            WebkitFilter:
+                              fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
+                            filter: fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
+                          }}
+                        />
+                      ) : (
+                        <></>
+                      )}
+                      <span className="language-text" style={{ color: fontColor }}>
+                        {element.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             );
           })}

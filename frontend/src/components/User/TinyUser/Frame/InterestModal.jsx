@@ -44,7 +44,7 @@ function InterestModal(props) {
           </div>
           <div className="d-flex flex-row modal-interest-result">
             {modalInterest.map((interest) => (
-              <div className="d-flex flex-row align-items-center modal-input">
+              <div className="d-flex flex-row align-items-center modal-input" key={`modal-interest-${interest.id}`}>
                 <span className="input-text">{interest.label}</span>
                 <BsXLg size={14} onClick={() => OnHandleRemoveInterest(interest.label)} style={{ cursor: 'pointer' }} />
               </div>
