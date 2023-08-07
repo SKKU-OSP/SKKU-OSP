@@ -11,7 +11,7 @@ urlpatterns = [
     path('api/team-create', views.TeamCreateView.as_view(), name='team-create'),
     path('api/team-update', views.TeamUpdateView.as_view(), name='team-update'),
 
-    path('api/team-apply/',
+    path('api/team-apply/<int:article_id>',
          views.TeamApplyView.as_view(), name='team-apply'),
     path('api/team-out/', views.TeamOutView.as_view(), name='team-out'),
     path('api/team-invite-update/',

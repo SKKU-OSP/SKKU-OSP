@@ -761,9 +761,8 @@ class TeamUpdateView(APIView):
 
 class TeamApplyView(APIView):
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, errors, article_id):
         user = request.user
-        target_article_id = request.GET.get('target_article_id')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -771,10 +770,16 @@ class TeamApplyView(APIView):
         else:
             if status == 'success':
                 try:
+                    article = Article.objects.get(id=article_id)
+
                     team_recruit_article = TeamRecruitArticle.objects.get(
-                        id=target_article_id)
+                        article_id=article.id)
+
+                except Article.DoesNotExist:
+                    errors['article_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    status = 'fail'
                 except TeamRecruitArticle.DoesNotExist:
-                    errors['teamrecruitarticle_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    errors['teamrecruitarticle_not_found'] = "해당 리크루트 게시글 관계가 존재하지 않습니다."
                     status = 'fail'
 
             if status == 'success':
@@ -785,13 +790,13 @@ class TeamApplyView(APIView):
                     status = 'fail'
 
             if status == 'success':
-                if TeamRecruitArticle.period_end < datetime.datetime.now():
+                if article.period_end < datetime.now():
                     errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
                     status = 'fail'
 
         return status, errors
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, article_id):
         # Declaration
         data = {}
         errors = {}
@@ -799,19 +804,19 @@ class TeamApplyView(APIView):
 
         # Request Validation
         status, errors = \
-            self.get_validation(request, status, errors)
+            self.get_validation(request, status, errors, article_id)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
             return Response(res)
 
         # Transactions
-        target_article_id = request.GET.get('target_article_id')
-        try:
-            team_recruit_article = TeamRecruitArticle.objects.get(
-                id=target_article_id)
-            team = team_recruit_article.team
 
+        try:
+            article = Article.objects.get(id=article_id)
+            team_recruit_article = TeamRecruitArticle.objects.get(
+                article_id=article.id)
+            team = team_recruit_article.team
             data['team'] = TeamSerializer(team).data
 
         except DatabaseError:
@@ -829,9 +834,8 @@ class TeamApplyView(APIView):
 
         return Response(res)
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, errors, article_id):
         user = request.user
-        target_article_id = request.data.get('target_article_id')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -839,10 +843,15 @@ class TeamApplyView(APIView):
         else:
             if status == 'success':
                 try:
+                    article = Article.objects.get(id=article_id)
                     team_recruit_article = TeamRecruitArticle.objects.get(
-                        id=target_article_id)
+                        article_id=article.id)
+
+                except Article.DoesNotExist:
+                    errors['article_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    status = 'fail'
                 except TeamRecruitArticle.DoesNotExist:
-                    errors['teamrecruitarticle_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    errors['teamrecruitarticle_not_found'] = "해당 리크루트 게시글 관계가 존재하지 않습니다."
                     status = 'fail'
 
             if status == 'success':
@@ -853,7 +862,7 @@ class TeamApplyView(APIView):
                     status = 'fail'
 
             if status == 'success':
-                if TeamRecruitArticle.period_end < datetime.datetime.now():
+                if article.period_end < datetime.now():
                     errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
                     status = 'fail'
 
@@ -862,7 +871,7 @@ class TeamApplyView(APIView):
                     errors['user_already_teammember'] = '이미 해당 팀의 멤버입니다.'
                     status = 'fail'
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, article_id):
         # Declaration
         data = {}
         errors = {}
@@ -870,7 +879,7 @@ class TeamApplyView(APIView):
 
         # Request Validation
         status, errors = \
-            self.post_validation(request, status, errors)
+            self.post_validation(request, status, errors, article_id)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -878,12 +887,12 @@ class TeamApplyView(APIView):
 
         # Transactions
 
-        account = Account.objects.get(user=request.user.id)
-        target_article_id = request.data.get('target_article_id')
-        team_recruit_article = TeamRecruitArticle.objects.get(
-            id=target_article_id)
-        team = team_recruit_article.team
         try:
+            account = Account.objects.get(user=request.user.id)
+            article = Article.objects.get(id=article_id)
+            team_recruit_article = TeamRecruitArticle.objects.get(
+                article_id=article.id)
+            team = team_recruit_article.team
             with transaction.atomic():
                 message = request.data.get('message')
                 TeamApplyMessage.objects.create(
