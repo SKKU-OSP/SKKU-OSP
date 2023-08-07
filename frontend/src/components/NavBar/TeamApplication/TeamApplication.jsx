@@ -4,9 +4,10 @@ import Modal from 'react-bootstrap/Modal';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import Dropdown from 'react-bootstrap/Dropdown';
+import { Link } from 'react-router-dom';
 
 import classes from './TeamApplication.module.css';
+import { ToggleButton } from 'react-bootstrap';
 
 const TeamApplication = () => {
   const handleClose = () => setShow(false);
@@ -31,11 +32,24 @@ const TeamApplication = () => {
       ),
       tabCont: (
         <>
-          <div className="d-flex justify-content-between border border-start-0 border-end-0">
-            <Dropdown> ChatGPT 개발자 되기 </Dropdown>
+          <div className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0">
+            <div className='d-flex'>
+            <div className='me-2'> ChatGPT 개발자 되기 </div>
+            <Link>bsstayo</Link>
+            </div> 
             <div>
-              <button>거절</button>
-              <button>수락</button>
+              <Button variant='outline-danger' size='sm' className='text-dark me-2'>거절</Button>
+              <Button variant='outline-primary' size='sm' className='text-dark me-2'>수락</Button>
+            </div>
+          </div>
+          <div className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0">
+            <div className='d-flex'>
+            <div className='me-2'> ChatGPT 개발자 되기 </div>
+            <Link>meltingOcean</Link>
+            </div> 
+            <div>
+              <Button variant='outline-danger' size='sm' className='text-dark me-2'>거절</Button>
+              <Button variant='outline-primary' size='sm' className='text-dark me-2'>수락</Button>
             </div>
           </div>
         </>
@@ -50,7 +64,18 @@ const TeamApplication = () => {
           보낸 지원서
         </Nav.Link>
       ),
-      tabCont: <div> {activeIndex} </div>
+      tabCont: (
+        <>
+          <div className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0">
+            <div> CREATE </div>
+            
+            <div>
+                <Button variant='outline-primary' size='sm' className='text-dark me-2' checked={true}>승인됨</Button>
+                <Button variant='outline-danger' size='sm' className='text-dark me-2'>삭제</Button>
+            </div>
+          </div>
+        </>
+      )
     }
   ];
 
@@ -59,7 +84,7 @@ const TeamApplication = () => {
       <Button variant="primary" onClick={handleShow}>
         팀 지원서
       </Button>
-      <Modal show={show} onHide={handleClose}>
+      <Modal size='lg' show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
             <h5>팀 지원서 목록</h5>
@@ -79,7 +104,6 @@ const TeamApplication = () => {
           </div>
         </Modal.Body>
 
-        <Modal.Footer></Modal.Footer>
       </Modal>
     </>
   );
