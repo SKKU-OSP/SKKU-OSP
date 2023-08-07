@@ -16,6 +16,7 @@ import { tokenLoader } from './utils/auth';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import StatisticsPage from './routes/StatisticsPage';
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: 'user',
         element: <UserPage />
+      },
+      {
+        path: 'statistics',
+        element: <StatisticsPage />
       }
     ]
   }
