@@ -19,18 +19,6 @@ function Interest() {
   const [skill, setSkill] = useState([]);
   const [mySkill, setMySkill] = useState({ 4: [], 3: [], 2: [], 1: [], 0: [] });
 
-  // Interest 모달 함수
-  const OnHandleInterestShow = () => setInterestShow(true);
-  const OnHandleInterestClose = () => setInterestShow(false);
-  const OnHandleInterestSaveClose = (modalInterest) => {
-    setMyInterest(modalInterest), setInterestShow(false);
-  };
-
-  // Skill 모달 함수
-  const OnHandleSkillShow = () => setSkillShow(true);
-  const OnHandleSkillClose = () => setSkillShow(false);
-  const OnHandleSkillSaveClose = (modalSkill) => (setMySkill(modalSkill), setSkillShow(false));
-
   // 서버와 연동
   const server_url = import.meta.env.VITE_SERVER_URL;
   const profileTagsUrl = server_url + '/user/api/tag/72/';
@@ -83,7 +71,6 @@ function Interest() {
           });
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
-          console.log('mySkill', mySkill);
         }
       } catch (error) {}
     };
@@ -92,25 +79,31 @@ function Interest() {
   }, []);
 
   // 서버에 데이터 저장
-  const updatePostProfileInterest = async () => {
-    await axios.post(profileInterestPostUrl, { user_interests: myInterest }, getAuthConfig());
+  const updatePostProfileInterest = async (updateInterest) => {
+    await axios.post(profileInterestPostUrl, { user_interests: updateInterest }, getAuthConfig());
   };
-  useEffect(() => {
-    updatePostProfileInterest();
-  }, [myInterest]);
+  const updatePostProfileSkill = async (updateSkill) => {
+    await axios.post(profileSkillPostUrl, { user_langs: updateSkill }, getAuthConfig());
+  };
 
-  const updatePostProfileSkill = async () => {
-    await axios.post(profileSkillPostUrl, { user_langs: mySkill }, getAuthConfig());
+  // Interest 모달 함수
+  const OnHandleInterestShow = () => setInterestShow(true);
+  const OnHandleInterestClose = () => setInterestShow(false);
+  const OnHandleInterestSaveClose = (modalInterest) => {
+    setMyInterest(modalInterest), setInterestShow(false), updatePostProfileInterest(modalInterest);
   };
-  useEffect(() => {
-    Object.keys(mySkill).forEach((key) => {
-      mySkill[key].forEach((obj) => {
+
+  // Skill 모달 함수
+  const OnHandleSkillShow = () => setSkillShow(true);
+  const OnHandleSkillClose = () => setSkillShow(false);
+  const OnHandleSkillSaveClose = (modalSkill) => {
+    Object.keys(modalSkill).forEach((key) => {
+      modalSkill[key].forEach((obj) => {
         obj.level = Number(key);
       });
     });
-    console.log('Update!', mySkill);
-    updatePostProfileSkill();
-  }, [mySkill]);
+    setMySkill(modalSkill), setSkillShow(false), updatePostProfileSkill(modalSkill);
+  };
 
   const starColor = {
     4: '#002743',
