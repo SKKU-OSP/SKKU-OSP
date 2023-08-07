@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import JsonResponse
+
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +12,7 @@ from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repo
 from user.models import GitHubScoreTable
 from user.models import Account
 from challenge.models import Challenge
-from home.serializers import AnnualOverviewSerializer
+from home.serializers import AnnualOverviewSerializer, AnnualTotalSerializer, DistScoreSerializer, DistFactorSerializer
 
 from home.updateScore import user_score_update
 from home.updateChart import update_chart
@@ -26,50 +28,108 @@ class StatisticView(APIView):
     start_year = 2019
 
     def get(self, request):
-        start = time.time()
         res = {'status': 'fail', 'message': '', 'data': None}
-        dept_set = GitHubScoreTable.objects.values(
-            "dept").annotate(Count("dept"))
-        print("dept_set", type(dept_set), dept_set)
 
-        dept_list = json.dumps(
-            [dept["dept"] for dept in dept_set], ensure_ascii=False)
-        print("dept_list", type(dept_list), dept_list)
+        try:
+            start = time.time()
+            data = {'annual_overview': None,
+                    'annual_total': None, 'annual_data': None}
+            annual_data = {}
+            dept_set = GitHubScoreTable.objects.values(
+                "dept").annotate(Count("dept"))
+            print("dept_set", type(dept_set), dept_set)
 
-        annual_overview = AnnualOverview.objects.order_by("case_num")
-        annual_overview_list = [overview.to_json()
-                                for overview in annual_overview]
+            dept_list = json.dumps(
+                [dept["dept"] for dept in dept_set], ensure_ascii=False)
+            print("dept_list", type(dept_list), dept_list)
 
-        print("annual_overview_list", annual_overview_list,
-              type(annual_overview_list))
-        data = AnnualOverviewSerializer(annual_overview, many=True).data
-        print("data", data, type(data))
+            # Factor의 연도별 평균 분포
+            annual_overview = AnnualOverview.objects.order_by("case_num")
+            data['annual_overview'] = AnnualOverviewSerializer(
+                annual_overview, many=True).data
+            end_year = self.start_year + \
+                len(data['annual_overview'][0]['score']) - 1
 
-        print("소요시간", time.time() - start)
+            # Factor의 연도별 합산 분포
+            annual_total = AnnualTotal.objects.order_by('case_num')
+            data['annual_total'] = AnnualTotalSerializer(
+                annual_total, many=True).data
+
+            dist_score = DistScore.objects.order_by('case_num', 'year')
+            dist_score_serializer = DistScoreSerializer(
+                dist_score, many=True).data
+
+            dist_factor = DistFactor.objects.order_by('case_num', 'year')
+            dist_factor_serializer = DistFactorSerializer(
+                dist_factor, many=True).data
+            # 효율적인 접근을 위한 구조화
+            structured_factor_data = [
+                {'case_num': i, 'years': {}} for i in range(4)]
+            # Score 관련 데이터 구조화
+            factor = 'score'
+            for obj in dist_score_serializer:
+                case_num = obj["case_num"]
+                year = obj["year"]
+                if year not in structured_factor_data[case_num]["years"]:
+                    structured_factor_data[case_num]["years"][year] = {}
+
+                factor_obj = {}
+                factor_obj["value"] = obj["score"]
+                factor_obj["value_sid"] = obj["score_sid"]
+                factor_obj["value_sid_std"] = obj["score_sid_std"]
+                factor_obj["value_sid_pct"] = obj["score_sid_pct"]
+                factor_obj["value_dept"] = obj["score_dept"]
+                factor_obj["value_dept_std"] = obj["score_dept_std"]
+                factor_obj["value_dept_pct"] = obj["score_dept_pct"]
+
+                structured_factor_data[case_num]["years"][year][factor] = factor_obj
+            # 기타 Factor 관련 데이터 구조화
+            for obj in dist_factor_serializer:
+                case_num = obj["case_num"]
+                year = obj["year"]
+                if year not in structured_factor_data[case_num]["years"]:
+                    structured_factor_data[case_num]["years"][year] = {}
+
+                factor = obj["factor"]
+                factor_obj = {}
+                factor_obj["value"] = obj["value"]
+                factor_obj["value_sid"] = obj["value_sid"]
+                factor_obj["value_sid_std"] = obj["value_sid_std"]
+                factor_obj["value_sid_pct"] = obj["value_sid_pct"]
+                factor_obj["value_dept"] = obj["value_dept"]
+                factor_obj["value_dept_std"] = obj["value_dept_std"]
+                factor_obj["value_dept_pct"] = obj["value_dept_pct"]
+
+                structured_factor_data[case_num]["years"][year][factor] = factor_obj
+
+            annual_data['factor'] = structured_factor_data
+
+            data['annual_data'] = annual_data
+
+            student_data = self.get_student_year(end_year)
+            data['student_data'] = student_data
+
+            data["years"] = [year for year in range(
+                self.start_year, end_year+1)]
+            res['data'] = data
+            print("소요시간", time.time() - start)
+        except Exception as e:
+            return Response(res)
 
         return Response(res)
 
     def get_student_year(self, end_year):
-        stdnt_case_list = [
-            [[] for _ in range(self.start_year, end_year+1)] for _ in range(4)]
+        structured_data = {}
+
+        for year in range(self.start_year, end_year+1):
+            if year not in structured_data:
+                structured_data[year] = []
+
         stdnt_list = Student.objects.all()
         for stdnt_data in stdnt_list:
             stdnt_json = stdnt_data.to_json()
-            yid = stdnt_data.year - self.start_year
-            if stdnt_data.absence == 0 and stdnt_data.plural_major == 0:
-                stdnt_case_list[0][yid].append(stdnt_json)
-                stdnt_case_list[1][yid].append(stdnt_json)
-                stdnt_case_list[2][yid].append(stdnt_json)
-                stdnt_case_list[3][yid].append(stdnt_json)
-            elif stdnt_data.absence == 0 and stdnt_data.plural_major == 1:
-                stdnt_case_list[0][yid].append(stdnt_json)
-                stdnt_case_list[2][yid].append(stdnt_json)
-            elif stdnt_data.absence >= 1 and stdnt_data.plural_major == 0:
-                stdnt_case_list[0][yid].append(stdnt_json)
-                stdnt_case_list[1][yid].append(stdnt_json)
-            elif stdnt_data.absence >= 1 and stdnt_data.plural_major == 1:
-                stdnt_case_list[0][yid].append(stdnt_json)
-        return stdnt_case_list
+            structured_data[stdnt_data.year].append(stdnt_json)
+        return structured_data
 
 
 @login_required
@@ -170,7 +230,7 @@ def statistic(request):
     context["year_list"].reverse()
     context['user_type'] = 'admin'
     print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
-
+    return JsonResponse(chartdata)
     return render(request, 'home/statistic.html', context)
 
 
