@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction, DatabaseError
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,6 +19,8 @@ from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, Acco
 from user.serializers import AccountSerializer
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
+
+from tag.serializers import TagIndependentSerializer
 
 import time
 import datetime
@@ -57,7 +60,6 @@ class UserAccountView(APIView):
             data['account'] = AccountSerializer(account).data
 
             name = StudentTab.objects.get(id=account.student_data_id).name
-
             data['name'] = name
 
         except DatabaseError as e:
