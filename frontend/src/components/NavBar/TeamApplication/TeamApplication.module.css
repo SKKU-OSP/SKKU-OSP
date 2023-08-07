@@ -1,0 +1,52 @@
+.UnselectedNavItem {
+  width: 50%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #454545;
+  display: flex;
+  justify-content: center;
+}
+
+.UnselectedNavItem:hover {
+  width: 50%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #454545;
+  display: flex;
+  justify-content: center;
+  border-bottom: 3px solid #0066ff;
+}
+
+.SelectedNavItem {
+  width: 50%;
+  font-size: 18px;
+  font-weight: bolder;
+  text-decoration: none;
+  color: #0066ff;
+  display: flex;
+  justify-content: center;
+}
+
+.SelectedNavItem:link {
+  width: 50%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #0066ff;
+  display: flex;
+  justify-content: center;
+}
+
+.SelectedNavItem:hover,
+.SelectedNavItem:active {
+  width: 50%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #0066ff;
+  display: flex;
+  justify-content: center;
+  border-bottom: 3px solid #0066ff;
+}
+
+.BorderLine {
+  border-bottom: 3px solid black;
+}

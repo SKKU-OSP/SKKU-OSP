@@ -2,7 +2,8 @@ import './SideBar.css';
 import { BsGithub } from 'react-icons/bs';
 
 export default function SideBar_Presenter(props) {
-  const { name, username, githubUsername, onMyProfile, onMyGithub, onLogin, onSignUp, sendLogoutRequest } = props;
+  const { name, username, githubUsername, photo, onMyProfile, onMyGithub, onLogin, onSignUp, sendLogoutRequest } =
+    props;
 
   return (
     <div>
@@ -11,7 +12,7 @@ export default function SideBar_Presenter(props) {
         <div className="community-sidebar">
           <div id="sidebar-user-info">
             <img
-              src="https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg"
+              src={photo}
               className="sidebar-profile-img"
               alt="profile-image"
               data-bs-hover="tooltip"
@@ -62,7 +63,7 @@ export default function SideBar_Presenter(props) {
               로그인
             </button>
             <br></br>
-            <button type="button" className="btn btn-outline-primary btn-signup" onClick={onSignUp}>
+            <button type="button" className="btn btn-outline-primary btn-signup" onClick={onLogin}>
               회원가입
             </button>
           </div>

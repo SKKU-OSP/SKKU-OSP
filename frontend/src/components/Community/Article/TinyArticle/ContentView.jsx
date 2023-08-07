@@ -3,7 +3,7 @@ import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icon
 import '../Article.css';
 import '../base.css';
 
-function Content_View(props) {
+function ContentView(props) {
   // {% load tag_templatetag %}
   // {% load community_tag %}
   // {% load team_tag %}
@@ -271,4 +271,4 @@ function Content_View(props) {
   );
 }
 
-export default Content_View;
+export default ContentView;
