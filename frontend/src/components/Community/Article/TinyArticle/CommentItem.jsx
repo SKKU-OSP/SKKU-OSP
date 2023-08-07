@@ -3,7 +3,7 @@ import '../Article.css';
 import '../base.css';
 import { FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 
-function Comment_Item(props) {
+function CommentItem(props) {
   const request = { user: { username: 'hoya', id: 1234, is_authenticated: false, is_superuser: false } };
   const is_comment_like = false;
   // API 필요한 부분
@@ -87,4 +87,4 @@ function Comment_Item(props) {
   );
 }
 
-export default Comment_Item;
+export default CommentItem;

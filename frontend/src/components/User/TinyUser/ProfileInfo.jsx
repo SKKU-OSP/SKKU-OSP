@@ -1,7 +1,7 @@
 import '../User.css';
 import { BsGithub } from 'react-icons/bs';
 
-function Profile_Info() {
+function ProfileInfo() {
   const img_url = '/images/empty-profile.png';
   return (
     <div className="d-flex flex-row profile_info">
@@ -34,4 +34,4 @@ function Profile_Info() {
     </div>
   );
 }
-export default Profile_Info;
+export default ProfileInfo;

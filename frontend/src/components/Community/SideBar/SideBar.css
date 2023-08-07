@@ -18,6 +18,7 @@
 
 #sidebar-user-info .sidebar-profile-img {
   width: 70%;
+  border: 1px solid var(--main-border-color);
   border-radius: 50%;
   object-fit: cover;
   margin: 10px;

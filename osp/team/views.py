@@ -84,7 +84,7 @@ class TeamInviteOnTeamboardView(APIView):
             res = {'status': status, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data):
 
         target_user_id = request.data.get('target_user_id', False)
         target_team_id = request.data.get('target_team_id', False)
@@ -97,12 +97,15 @@ class TeamInviteOnTeamboardView(APIView):
 
         try:
             target_team = Team.objects.get(id=target_team_id)
+            valid_data['target_team'] = target_team
+
         except Team.DoesNotExist:
             errors['team_not_found'] = '초대할 팀이 존재하지 않습니다.'
             status = 'fail'
 
         try:
             target_user = User.objects.get(id=target_user_id)
+            valid_data['target_user'] = target_user
         except User.DoesNotExist:
             errors['team_not_found'] = '초대할 대상이 존재하지 않습니다.'
             status = 'fail'
@@ -123,13 +126,15 @@ class TeamInviteOnTeamboardView(APIView):
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        target_team, target_user, status, errors \
-            = self.post_validation(request, status, errors, *args, **kwargs)
+        status, message, errors, valid_data \
+            = self.post_validation(request, status, message, errors, valid_data)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -142,9 +147,9 @@ class TeamInviteOnTeamboardView(APIView):
 
         try:
             with transaction.atomic():
-                team = Team.objects.get(id=target_team_id)
+                target_team = valid_data['target_team']
                 target_account = Account.objects.get(
-                    user__id=target_user.id)
+                    user__id=target_user_id)
 
                 # 팀원 초대 메세지 객체 생성
                 TeamInviteMessage.objects.create(
@@ -162,7 +167,7 @@ class TeamInviteOnTeamboardView(APIView):
                 # url       : 메세지 url ( board.name, board.id로 생성 )
                 # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
-                board = Board.objects.get(team=team)
+                board = Board.objects.get(team=target_team)
                 url = resolve_url('community:Board',
                                   board_name=board.name, board_id=board.id)
                 sender = Account.objects.get(user=request.user.id)
@@ -171,7 +176,7 @@ class TeamInviteOnTeamboardView(APIView):
                 Message.objects.create(
                     sender=sender,
                     receiver=target_account,
-                    body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
+                    body=f"[{target_team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
                     send_date=datetime.now(),
                     receiver_read=False,
                     sender_delete=False,
@@ -756,9 +761,8 @@ class TeamUpdateView(APIView):
 
 class TeamApplyView(APIView):
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, errors, article_id):
         user = request.user
-        target_article_id = request.GET.get('target_article_id')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -766,10 +770,16 @@ class TeamApplyView(APIView):
         else:
             if status == 'success':
                 try:
+                    article = Article.objects.get(id=article_id)
+
                     team_recruit_article = TeamRecruitArticle.objects.get(
-                        id=target_article_id)
+                        article_id=article.id)
+
+                except Article.DoesNotExist:
+                    errors['article_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    status = 'fail'
                 except TeamRecruitArticle.DoesNotExist:
-                    errors['teamrecruitarticle_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    errors['teamrecruitarticle_not_found'] = "해당 리크루트 게시글 관계가 존재하지 않습니다."
                     status = 'fail'
 
             if status == 'success':
@@ -780,13 +790,13 @@ class TeamApplyView(APIView):
                     status = 'fail'
 
             if status == 'success':
-                if TeamRecruitArticle.period_end < datetime.datetime.now():
+                if article.period_end < datetime.now():
                     errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
                     status = 'fail'
 
         return status, errors
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, article_id):
         # Declaration
         data = {}
         errors = {}
@@ -794,19 +804,19 @@ class TeamApplyView(APIView):
 
         # Request Validation
         status, errors = \
-            self.get_validation(request, status, errors)
+            self.get_validation(request, status, errors, article_id)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
             return Response(res)
 
         # Transactions
-        target_article_id = request.GET.get('target_article_id')
-        try:
-            team_recruit_article = TeamRecruitArticle.objects.get(
-                id=target_article_id)
-            team = team_recruit_article.team
 
+        try:
+            article = Article.objects.get(id=article_id)
+            team_recruit_article = TeamRecruitArticle.objects.get(
+                article_id=article.id)
+            team = team_recruit_article.team
             data['team'] = TeamSerializer(team).data
 
         except DatabaseError:
@@ -824,9 +834,8 @@ class TeamApplyView(APIView):
 
         return Response(res)
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, errors, article_id):
         user = request.user
-        target_article_id = request.data.get('target_article_id')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -834,10 +843,15 @@ class TeamApplyView(APIView):
         else:
             if status == 'success':
                 try:
+                    article = Article.objects.get(id=article_id)
                     team_recruit_article = TeamRecruitArticle.objects.get(
-                        id=target_article_id)
+                        article_id=article.id)
+
+                except Article.DoesNotExist:
+                    errors['article_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    status = 'fail'
                 except TeamRecruitArticle.DoesNotExist:
-                    errors['teamrecruitarticle_not_found'] = "해당 게시글이 존재하지 않습니다."
+                    errors['teamrecruitarticle_not_found'] = "해당 리크루트 게시글 관계가 존재하지 않습니다."
                     status = 'fail'
 
             if status == 'success':
@@ -848,7 +862,7 @@ class TeamApplyView(APIView):
                     status = 'fail'
 
             if status == 'success':
-                if TeamRecruitArticle.period_end < datetime.datetime.now():
+                if article.period_end < datetime.now():
                     errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
                     status = 'fail'
 
@@ -857,7 +871,7 @@ class TeamApplyView(APIView):
                     errors['user_already_teammember'] = '이미 해당 팀의 멤버입니다.'
                     status = 'fail'
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, article_id):
         # Declaration
         data = {}
         errors = {}
@@ -865,7 +879,7 @@ class TeamApplyView(APIView):
 
         # Request Validation
         status, errors = \
-            self.post_validation(request, status, errors)
+            self.post_validation(request, status, errors, article_id)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -873,12 +887,12 @@ class TeamApplyView(APIView):
 
         # Transactions
 
-        account = Account.objects.get(user=request.user.id)
-        target_article_id = request.data.get('target_article_id')
-        team_recruit_article = TeamRecruitArticle.objects.get(
-            id=target_article_id)
-        team = team_recruit_article.team
         try:
+            account = Account.objects.get(user=request.user.id)
+            article = Article.objects.get(id=article_id)
+            team_recruit_article = TeamRecruitArticle.objects.get(
+                article_id=article.id)
+            team = team_recruit_article.team
             with transaction.atomic():
                 message = request.data.get('message')
                 TeamApplyMessage.objects.create(

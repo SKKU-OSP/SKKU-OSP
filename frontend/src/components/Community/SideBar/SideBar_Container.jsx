@@ -8,7 +8,7 @@ const domain_url = import.meta.env.VITE_SERVER_URL;
 const logout_url = `${domain_url}/accounts/logout/`;
 
 export default function SideBar_Container() {
-  const { name, username, githubUsername } = useContext(AuthContext);
+  const { name, username, githubUsername, photo } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const { unsetUser } = useContext(AuthContext);
@@ -42,10 +42,6 @@ export default function SideBar_Container() {
     navigate(`/accounts/login`);
   };
 
-  const onSignUp = () => {
-    navigate(`/accounts/signup`);
-  };
-
   useEffect(() => {});
 
   return (
@@ -53,10 +49,10 @@ export default function SideBar_Container() {
       name={name}
       username={username}
       githubUsername={githubUsername}
+      photo={domain_url + photo}
       onMyProfile={onMyProfile}
       onMyGithub={onMyGithub}
       onLogin={onLogin}
-      onSignUp={onSignUp}
       sendLogoutRequest={sendLogoutRequest}
     />
   );
