@@ -5,7 +5,7 @@ export default function Board_Presenter(props) {
   const { board_name } = props;
 
   return (
-    <div className="col-md-9 col-9 community-nav d-flex">
+    <div className="col-9 community-nav d-flex">
       <button className="primary-btn hidden">hidden</button>
       <ul className="nav nav-fill community-nav-items">
         <CommunityNavItem this_board_name="자유" />
@@ -13,7 +13,9 @@ export default function Board_Presenter(props) {
         <CommunityNavItem this_board_name="정보" />
         <CommunityNavItem this_board_name="홍보" />
       </ul>
-      <button className="primary-btn">작성하기</button>
+      <button type="button" className="btn btn-primary">
+        작성하기
+      </button>
     </div>
   );
 }

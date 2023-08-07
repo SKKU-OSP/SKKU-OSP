@@ -1,6 +1,6 @@
 @media screen and (max-width: 767px) {
   .logo {
-    margin-right: 10px;
+    margin-right: auto;
   }
   .header {
     flex-direction: column !important;
@@ -11,11 +11,23 @@
   .toggle-display-none {
     display: none !important;
   }
+
   .header-navbar {
     justify-content: space-between;
   }
+
+  .head-of-header {
+    justify-content: flex-end !important;
+  }
   .body-of-header {
     flex-direction: column !important;
+  }
+
+  .on-mobile {
+    display: flex !important;
+  }
+  .on-desktop {
+    display: none !important;
   }
 }
 
@@ -44,7 +56,7 @@
 
 header {
   background-color: var(--header-bg-color);
-  border: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
 }
 
 .logo {
@@ -54,6 +66,10 @@ header {
 
 .header {
   justify-content: space-between;
+}
+
+.sidebar-in-header {
+  display: none;
 }
 
 .badge-new {
@@ -96,4 +112,20 @@ header {
   width: 75%;
   justify-content: space-between;
   display: flex;
+}
+
+.on-mobile {
+  display: none;
+}
+
+.on-desktop {
+  display: flex;
+}
+
+.header-profile-img {
+  border: 2px solid var(--main-black);
+  border-radius: 50%;
+}
+.header-profile-img:hover {
+  cursor: pointer;
 }

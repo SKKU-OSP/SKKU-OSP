@@ -96,7 +96,7 @@ class TableBoardView(APIView):
 
     '''
 
-    def get(self, request, board_name, board_id):
+    def get(self, request, board_name):
 
         res = {"status": None, "data": None}
 
@@ -548,9 +548,9 @@ def account_cards(request):
     return result
 
 
-def article_list(request, board_name, board_id):
+def article_list(request, board_name):
     try:
-        board = Board.objects.get(id=board_id)
+        board = Board.objects.get(name=board_name)
     except Board.DoesNotExist:
         result = {'html': '', 'max-page': 0}
         return JsonResponse(result)
@@ -600,7 +600,7 @@ def article_list(request, board_name, board_id):
                 article.team = tr.team
             else:
                 article.team = None
-    context['notices'] = get_notices(board_id=board_id)
+    context['notices'] = get_notices(board_id=board.id)
     context['article_list'] = article_list
     result = {}
     result['html'] = render_to_string(
@@ -622,63 +622,6 @@ def get_notices(board_id=None):
     notices = get_article_metas(notices)
     # 쿼리셋 합쳐서 리턴
     return notices
-
-
-class ArticleSaveView(APIView):
-    '''
-    GET: 게시글 작성하기
-    URL : board/<board_name>/<board_id>/save/
-
-    JSON RESPONSE
-    data :
-        show_anonymous_check : 해당 뷰에서 항상 true
-        show_notice_check : 해당 뷰에서 항상 false
-        privacy : AccountPrivacy 모델에 저장된 값
-        team : 팀 멤버임을 확인 후 team 객체 반환
-    '''
-
-    def get(self, request, board_name, board_id):
-        data = {}
-        data["url"] = f"/community/board/{board_name}/{board_id}/"
-
-        if request.user.is_anonymous:
-            data["alert"] = "로그인이 필요한 서비스입니다."
-            return render(request, "community/redirect.html", data)
-        # 쿼리스트링의 값을 가져온다.
-        if 'team_id' in request.GET:
-            team_id = request.GET['team_id']
-            members = TeamMember.objects.filter(
-                team_id=team_id).values_list("member_id", flat=True)
-
-            if request.user.id in members:
-                data['team'] = Team.objects.get(id=team_id)
-        data['type'] = 'register'
-        data['type_kr'] = '등록'
-        data['anonymous_check'] = 'checked'
-        data['notice_check'] = ''
-        data['is_auth_notice'] = False
-
-        # 로그인된 정보공개 설정을 확인한다.
-        if request.user.is_authenticated:
-            account = Account.objects.get(user_id=request.user.id)
-            try:
-                acc_pp = AccountPrivacy.objects.get(account=account)
-            except:
-                acc_pp = AccountPrivacy.objects.create(
-                    account=account, open_lvl=1, is_write=False, is_open=False)
-
-            data['privacy'] = AccountPrivacySerializer(acc_pp).data
-        else:
-            account = None
-            data['privacy'] = {'is_write': 0, 'is_open': 0, 'open_lvl': 0}
-
-        data.update(get_auth(board_id, request.user))
-        if 'alert' in data:
-            res = {'status': 'success', 'data': data}
-            return Response(res)
-
-        res = {'status': 'success', 'data': data}
-        return Response(res)
 
 
 class ArticleNoticeSaveView(APIView):

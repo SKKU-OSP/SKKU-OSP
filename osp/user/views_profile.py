@@ -2,19 +2,116 @@ from django.db import transaction
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from django.db import transaction, DatabaseError
 
 from user.models import Account, AccountInterest
 from user.serializers import AccountSerializer, AccountInterestSerializer
+from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
+from repository.models import GithubRepoStats, GithubRepoCommits
+
 from tag.models import TagIndependent
 
 import logging
+import time
+
+
+class ProfileMainView(APIView):
+    def get_validation(self, request, status, errors, user_id):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, user_id):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, user_id)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        try:
+            user = User.objects.get(id=user_id)
+            account = Account.objects.get(user=user)
+            data['account'] = AccountSerializer(account).data
+            name = StudentTab.objects.get(id=account.student_data_id).name
+            data['name'] = name
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
 
 
 class UserInterestTagListView(APIView):
+    '''
+    유저 관심분야 읽기 API
+    '''
+
+    def get_validation(self, request, status, errors, user_id):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
     def get(self, request, user_id):
-        '''
-        유저 관심분야 읽기 API
-        '''
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, user_id)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
         res = {'status': None, 'message': None, 'data': None}
         data = {'account': None, 'interest_tags': []}
         tag_type = request.GET.get('type', None)
@@ -30,31 +127,63 @@ class UserInterestTagListView(APIView):
 
         print("tag_type", tag_type)
         try:
-
             account = Account.objects.get(user_id=user_id)
             filter_kwargs['account'] = account
             account_tags = AccountInterest.objects.filter(**filter_kwargs)
 
             data['account'] = AccountSerializer(account).data
-
             data['interest_tags'] = AccountInterestSerializer(
                 account_tags, many=True).data
-            res['status'] = 'success'
-            res['message'] = f'User ID {user_id}의 태그'
-            res['data'] = data
+            message = f'User ID {user_id}의 태그'
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+            message = '요청실패'
+
         except Exception as e:
             logging.exception(f'UserInterestTagListView Exception: {e}')
+            message = '요청실패'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
 
         return Response(res)
 
 
 class UserInterestTagUpdateView(APIView):
+    '''
+    유저 관심분야 수정 API
+    '''
+
+    def post_validation(self, request, status, message, errors):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        return status, message, errors
+
     def post(self, request):
-        '''
-        유저 관심분야 수정 API
-        '''
-        res = {'status': 'fail', 'message': '', 'data': None}
-        data = {'user_interests': []}
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.post_validation(request, status, message, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        user_interests = []
         try:
             user_account = Account.objects.get(user=request.user)
             account_interests = request.data.get('user_interests', [])
@@ -66,17 +195,28 @@ class UserInterestTagUpdateView(APIView):
                 interests = AccountInterest.objects.bulk_create(objs)
                 data['user_interests'] = AccountInterestSerializer(
                     interests, many=True).data
-            res['data'] = data
-            res['status'] = 'success'
-            res['message'] = '관심분야를 수정했습니다.'
 
-            return Response(res)
+            message = '관심분야를 수정했습니다.'
+
+        except DatabaseError:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
 
         except Exception as e:
-            logging.exception(f"UserInterestTagUpdateView: {e}")
-            res['message'] = '유저 관심분야를 수정하는데 실패했습니다.'
 
-            return Response(res)
+            print("UserInterestTagListView", e)
+            status = 'fail'
+            message = '유저 관심분야를 수정하는데 실패했습니다.'
+
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
 
     def interests_updater(self, account, interests):
         objs = []
@@ -89,12 +229,25 @@ class UserInterestTagUpdateView(APIView):
 
 
 class UserLangTagUpdateView(APIView):
+    '''
+    유저 사용언어 기술스택 수정 API
+    '''
+
+    def post_validation(self, request, status, message, errors):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        return status, message, errors
+
     def post(self, request):
-        '''
-        유저 사용언어 기술스택 수정 API
-        '''
-        res = {'status': 'fail', 'message': '', 'data': None}
-        data = {'user_langs': []}
+
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
         try:
             user_account = Account.objects.get(user=request.user)
             account_langs = request.data.get('user_langs', [])
@@ -104,18 +257,24 @@ class UserLangTagUpdateView(APIView):
                     account=user_account).exclude(tag__type='domain').delete()
                 objs = self.skills_updater(user_account, account_langs)
                 updated_interests = AccountInterest.objects.bulk_create(objs)
+
                 data['user_langs'] = AccountInterestSerializer(
                     updated_interests, many=True).data
-                res['data'] = data
-                res['status'] = 'success'
-                res['message'] = '사용언어를 수정했습니다.'
-                return Response(res)
+                message = '사용언어를 수정했습니다.'
 
         except Exception as e:
-            logging.exception(f"UserLangTagUpdateView: {e}")
-            res['message'] = '유저 사용언어를 수정하는데 실패했습니다.'
+            print("UserInterestTagListView", e)
+            status = 'fail'
+            message = '유저 사용언어를 수정하는데 실패했습니다.'
 
-            return Response(res)
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
 
     def skills_updater(self, account, skills):
         objs = []
@@ -127,3 +286,165 @@ class UserLangTagUpdateView(APIView):
                     account=account, tag=lang_tag, level=int(skill['level']))
                 objs.append(new_interest_obj)
         return objs
+
+
+class ProfileActivityView(APIView):
+    def get_validation(self, request, status, errors, user_id):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, user_id):
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, user_id)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        start = time.time()
+        try:
+            user = User.objects.get(id=user_id)
+
+            try:
+                account = Account.objects.get(user=user)
+                portfolio = account.portfolio
+                data['portfolio'] = portfolio
+            except Exception as e:
+                print("account error", e)
+                status = 'fail'
+                message = 'account error'
+
+            # 리포지토리 목록
+            github_id = account.student_data.github_id
+            commit_repos = self.get_commit_repos(github_id)
+            recent_repos = {}
+            id_reponame_pair_list = []
+
+            # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
+            for commit in commit_repos:
+                commit_repo_name = commit['repo_name']
+                if len(recent_repos) == 4:
+                    break
+                if commit_repo_name not in recent_repos:
+                    recent_repos[commit_repo_name] = {
+                        'repo_name': commit_repo_name}
+                    recent_repos[commit_repo_name]['github_id'] = commit['github_id']
+                    recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
+                    id_reponame_pair_list.append(
+                        (commit['github_id'], commit_repo_name))
+            contr_repo_queryset = GithubRepoStats.objects.extra(
+                where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+            for contr_repo in contr_repo_queryset:
+                recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
+                recent_repos[contr_repo.repo_name]["stargazers_count"] = contr_repo.stargazers_count
+                recent_repos[contr_repo.repo_name]["commits_count"] = contr_repo.commits_count
+                recent_repos[contr_repo.repo_name]["prs_count"] = contr_repo.prs_count
+
+            recent_repos = sorted(recent_repos.values(
+            ), key=lambda x: x['committer_date'], reverse=True)
+            data['recent_repos'] = recent_repos
+        except Exception as e:
+            print("load_repo_data error save", e)
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
+
+    def get_commit_repos(self, github_id):
+        repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values(
+            "github_id", "repo_name", "committer_date").order_by("-committer_date")
+        repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values(
+            "github_id", "repo_name", "committer_date").order_by("-committer_date")
+        repo_commits = repo_commiter_commits | repo_author_commits
+
+        return repo_commits
+
+
+class ProfileInfoView(APIView):
+    def get_validation(self, request, status, errors, user_id):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, user_id):
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, user_id)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+
+        try:
+            user = User.objects.get(id=user_id)
+            account = Account.objects.get(user=user)
+            studenttab = StudentTab.objects.get(id=account.student_data_id)
+
+            data['student_data_id'] = studenttab.id
+            data['github_id'] = studenttab.github_id
+            data['email'] = studenttab.primary_email
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
