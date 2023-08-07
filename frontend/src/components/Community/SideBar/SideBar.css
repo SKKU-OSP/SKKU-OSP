@@ -1,18 +1,6 @@
 @media screen and (max-width: 767px) {
   .community-sidebar {
-  }
-  .sidebar-profile-img {
-    width: 22px;
-    height: 22px;
-    border: 0 !important;
-  }
-  #sidebar-user-info > a > span,
-  .sidebar-boardgroup-title,
-  .sidebar-boardgroup-item > a > span {
     display: none !important;
-  }
-  .sidebar-community-tab {
-    flex-direction: row;
   }
 }
 
@@ -23,15 +11,17 @@
 }
 
 #sidebar-user-info {
+  flex-direction: column;
   justify-content: center;
   padding: 0.625rem;
 }
 
 #sidebar-user-info .sidebar-profile-img {
   width: 70%;
+  border: 1px solid var(--main-border-color);
   border-radius: 50%;
   object-fit: cover;
-  margin: 20px;
+  margin: 10px;
 }
 
 #sidebar-profile-name {
@@ -39,13 +29,13 @@
   font-weight: 700;
   font-size: 20px;
   letter-spacing: -2px;
+  cursor: pointer;
 }
 
 #sidebar-profile-username {
   color: var(--main-light-font-color);
   font-weight: 500;
   font-size: 20px;
-  margin-bottom: 20px;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -76,4 +66,13 @@
 
 .hover-opacity:hover {
   opacity: 0.5;
+}
+
+.btn-login,
+.btn-signup {
+  margin: 7px;
+}
+
+.btn-logout {
+  margin: 10px;
 }
