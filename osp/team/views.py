@@ -84,7 +84,7 @@ class TeamInviteOnTeamboardView(APIView):
             res = {'status': status, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data):
 
         target_user_id = request.data.get('target_user_id', False)
         target_team_id = request.data.get('target_team_id', False)
@@ -97,12 +97,15 @@ class TeamInviteOnTeamboardView(APIView):
 
         try:
             target_team = Team.objects.get(id=target_team_id)
+            valid_data['target_team'] = target_team
+
         except Team.DoesNotExist:
             errors['team_not_found'] = '초대할 팀이 존재하지 않습니다.'
             status = 'fail'
 
         try:
             target_user = User.objects.get(id=target_user_id)
+            valid_data['target_user'] = target_user
         except User.DoesNotExist:
             errors['team_not_found'] = '초대할 대상이 존재하지 않습니다.'
             status = 'fail'
@@ -123,13 +126,15 @@ class TeamInviteOnTeamboardView(APIView):
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        target_team, target_user, status, errors \
-            = self.post_validation(request, status, errors, *args, **kwargs)
+        status, message, errors, valid_data \
+            = self.post_validation(request, status, message, errors, valid_data)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -142,9 +147,9 @@ class TeamInviteOnTeamboardView(APIView):
 
         try:
             with transaction.atomic():
-                team = Team.objects.get(id=target_team_id)
+                target_team = valid_data['target_team']
                 target_account = Account.objects.get(
-                    user__id=target_user.id)
+                    user__id=target_user_id)
 
                 # 팀원 초대 메세지 객체 생성
                 TeamInviteMessage.objects.create(
@@ -162,7 +167,7 @@ class TeamInviteOnTeamboardView(APIView):
                 # url       : 메세지 url ( board.name, board.id로 생성 )
                 # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
-                board = Board.objects.get(team=team)
+                board = Board.objects.get(team=target_team)
                 url = resolve_url('community:Board',
                                   board_name=board.name, board_id=board.id)
                 sender = Account.objects.get(user=request.user.id)
@@ -171,7 +176,7 @@ class TeamInviteOnTeamboardView(APIView):
                 Message.objects.create(
                     sender=sender,
                     receiver=target_account,
-                    body=f"[{team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
+                    body=f"[{target_team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
                     send_date=datetime.now(),
                     receiver_read=False,
                     sender_delete=False,
