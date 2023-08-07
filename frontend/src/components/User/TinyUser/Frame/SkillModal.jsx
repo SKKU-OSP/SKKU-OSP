@@ -95,6 +95,7 @@ function SkillModal(props) {
                 draggable
                 onDragStart={(e) => OnHandleOnDrag(e, skill)}
                 className="d-flex flex-row align-items-center modal-input"
+                key={`modal-undefined-language-${skill.id}`}
               >
                 <span className="input-text">{skill.label}</span>
                 <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
@@ -125,20 +126,48 @@ function SkillModal(props) {
                     onDrop={(e) => OnHandleOnDrop(e, level)}
                     onDragOver={OnHandleDragOver}
                   >
-                    {tags.map((element) => (
-                      <div
-                        draggable
-                        onDragStart={(e) => OnHandleOnDrag(e, element)}
-                        className="d-flex flex-row gap-1 align-items-center modal-language"
-                      >
-                        <span className="modal-language-text">{element.label}</span>
-                        <BsXLg
-                          size={14}
-                          onClick={() => OnHandleRemoveModalSkill(element, level)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </div>
-                    ))}
+                    {tags.map((element) => {
+                      const color = element.tag.color;
+                      const hexColor = color.substring(1);
+                      const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+                      const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+                      const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+                      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                      const fontColor = luma < 127.5 ? 'white' : 'black';
+                      const logo = element.tag.logo;
+                      return (
+                        <div
+                          draggable
+                          onDragStart={(e) => OnHandleOnDrag(e, element)}
+                          className="d-flex flex-row gap-1 align-items-center modal-language"
+                          style={{ backgroundColor: `${element.tag.color}` }}
+                          key={`modal-language-level-${level}-${element.id}`}
+                        >
+                          {logo !== 'default.svg' ? (
+                            <img
+                              className="modal-stack-icon"
+                              src={`${element.tag.logo}`}
+                              style={{
+                                WebkitFilter:
+                                  fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
+                                filter:
+                                  fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
+                              }}
+                            />
+                          ) : (
+                            <></>
+                          )}
+                          <span className="modal-language-text" style={{ color: fontColor }}>
+                            {element.label}
+                          </span>
+                          <BsXLg
+                            size={14}
+                            onClick={() => OnHandleRemoveModalSkill(element, level)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
