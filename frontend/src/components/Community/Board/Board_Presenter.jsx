@@ -1,19 +1,26 @@
 import '../Community.css';
-import SideBar from '../SideBar/index.jsx';
+import CommunityNavItem from './CommunityNavItem/index';
+import BoardArticle from './BoardArticle/index';
 
 export default function Board_Presenter(props) {
-  const { board_name } = props;
+  const {} = props;
 
   return (
-    <div className="container my-4">
-      <div className="row justify-content-end community-container">
-        <SideBar />
-        <div className="col-md-9 col-12 community-main">
-          <div className="community-main-title">
-            <div className="p-community-main">{board_name} 게시판</div>
-          </div>
-        </div>
+    <div className="col-9">
+      <div className="community-nav d-flex">
+        <button className="primary-btn hidden">hidden</button>
+        <ul className="nav nav-fill community-nav-items">
+          <CommunityNavItem this_board_name="자유" />
+          <CommunityNavItem this_board_name="질문" />
+          <CommunityNavItem this_board_name="정보" />
+          <CommunityNavItem this_board_name="홍보" />
+        </ul>
+        <button type="button" className="btn btn-primary">
+          작성하기
+        </button>
       </div>
+
+      <BoardArticle />
     </div>
   );
 }

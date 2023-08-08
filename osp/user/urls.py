@@ -11,7 +11,6 @@ urlpatterns = [
 
     # 프로필화면
     path('<username>/', views.ProfileView.as_view(), name='profile'),
-
     # 프로필수정 화면
     path('<username>/profile-edit/',
          views_edit.ProfileEditView.as_view(), name='profile-edit'),
@@ -44,5 +43,16 @@ urlpatterns = [
     # Rest API
     path('api/tag/<int:user_id>/', views_profile.UserInterestTagListView.as_view(),
          name='UserInterestTagList'),
+    path('api/interests/update/',
+         views_profile.UserInterestTagUpdateView.as_view(), name='UserInterestTagUpdate'),
+    path('api/langs/update/',
+         views_profile.UserLangTagUpdateView.as_view(), name='UserLangTagUpdate'),
+    path('api/profile-activity/<int:user_id>/',
+         views_profile.ProfileActivityView.as_view(), name='profile-activity'),
+    path('api/profile-info/<int:user_id>/',
+         views_profile.ProfileInfoView.as_view(), name='profile-info'),
+
+    path('api/guideline/<int:user_id>/',
+         views.GuidelineView.as_view(), name='guideline')
 
 ]

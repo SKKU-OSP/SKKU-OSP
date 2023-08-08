@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Sum, Subquery
 from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction, DatabaseError
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,6 +20,8 @@ from user.serializers import AccountSerializer
 from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
 
+from tag.serializers import TagIndependentSerializer
+
 import time
 import datetime
 import json
@@ -27,20 +30,51 @@ import logging
 
 
 class UserAccountView(APIView):
-    '''
-    유저 계정 정보
-    '''
+
+    def get_validation(self, request, status, errors):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, errors
 
     def get(self, request):
-        res = {'status': 'success', 'message': '', 'data': None}
-        if not request.user.is_authenticated:
-            res['status'] = 'fail'
-            res['message'] = 'user is not authenticated'
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
             return Response(res)
 
-        account = Account.objects.get(user=request.user)
-        res['data'] = AccountSerializer(account).data
+        # Transactions
+        try:
+            account = Account.objects.get(user=request.user)
+            data['account'] = AccountSerializer(account).data
 
+            name = StudentTab.objects.get(id=account.student_data_id).name
+            data['name'] = name
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
         return Response(res)
 
 
@@ -780,3 +814,85 @@ def get_star_dist(github_id, num_year):
     star_dist = [star_temp_dist for _ in range(num_year)]
 
     return star_dist, own_star
+
+
+class GuidelineView(APIView):
+
+    def get_validation(self, request, status, errors, user_id):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, user_id):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, user_id)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        try:
+            start = time.time()
+            user = User.objects.get(id=user_id)
+            account = Account.objects.get(user=user)
+            student_data = account.student_data
+            github_id = student_data.github_id
+            commit_repos = get_commit_repos(github_id)
+
+            repos = {}
+            id_reponame_pair_list = []
+            for commit in commit_repos:
+                commit_repo_name = commit['repo_name']
+                if commit_repo_name not in repos:
+                    repos[commit_repo_name] = {'repo_name': commit_repo_name}
+                    repos[commit_repo_name]['github_id'] = commit['github_id']
+                    repos[commit_repo_name]['committer_date'] = commit['committer_date']
+                    id_reponame_pair_list.append(
+                        (commit['github_id'], commit_repo_name))
+            ctx_repo_stats = []
+            if len(id_reponame_pair_list) > 0:
+                contr_repo_queryset = GithubRepoStats.objects.extra(
+                    where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+                for contr_repo in contr_repo_queryset:
+                    repo_stat = contr_repo.get_guideline()
+                    repo_stat['committer_date'] = repos[contr_repo.repo_name]['committer_date']
+                    ctx_repo_stats.append(repo_stat)
+                ctx_repo_stats = sorted(
+                    ctx_repo_stats, key=lambda x: x['committer_date'], reverse=True)
+
+            data["guideline"] = ctx_repo_stats
+            print("ProfileRepoView time :", time.time() - start)
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)

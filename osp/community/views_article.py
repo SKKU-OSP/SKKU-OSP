@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,7 +14,8 @@ from datetime import datetime, timedelta
 
 class ArticleAPIView(APIView):
     '''
-    게시글 읽기 API
+    GET : 게시글 읽기 API
+    URL : api/article/<int:article_id>/
     '''
 
     def get(self, request, article_id):
@@ -26,6 +28,7 @@ class ArticleAPIView(APIView):
             article = Article.objects.get(id=article_id)
             if article.writer.user_id != request.user.id:
                 article.view_cnt += 1
+            article.save()
 
             # 팀 모집 게시글 확인
             if article.board.board_type == "Recruit":
@@ -33,8 +36,6 @@ class ArticleAPIView(APIView):
                     article=article).first()
                 if teamrecruit:
                     data['team'] = TeamSerializer(teamrecruit.team).data
-            article.save()
-
             data['article'] = ArticleSerializer(article).data
 
             # 게시글 태그 정보
@@ -73,6 +74,10 @@ class ArticleAPIView(APIView):
 
 
 class ArticleCreateView(APIView):
+    '''
+    POST : 게시글 생성 API
+    URL : api/article/create/
+    '''
 
     def post(self, request):
         '''
@@ -83,7 +88,6 @@ class ArticleCreateView(APIView):
             # 유저 확인
             account = Account.objects.get(user=request.user)
         except:
-            print()
             res['message'] = f"유저를 찾을 수 없습니다."
             return Response(res)
 
@@ -93,7 +97,7 @@ class ArticleCreateView(APIView):
             content = request.data.get('content', '').strip()
             anonymous_writer = request.data.get('anonymous_writer', False)
             is_notice = request.data.get('is_notice', False)
-            board_id = request.data.get('board_id', False)
+            board_id = request.data.get('board_id', 0)
 
             # board id 확인
             board = Board.objects.get(id=board_id)
@@ -145,12 +149,40 @@ class ArticleCreateView(APIView):
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
 
+            # 게시글 파일 생성
+            files = request.FILES
+
+            # 파일 게시자 추적: created_user를 username과 user_id를 연결한 이유
+            # username은 변경가능하기 때문에 id로 추적하고자함
+            # user가 삭제되면 user_id를 이용해 이용자를 특정하기 어렵기 때문에 username도 사용
+            created_user = str(request.user.username) + \
+                "_" + str(request.user.id)
+            for key in files:
+                print("file", key, files[key])
+                ArticleFile.objects.create(
+                    file=files[key],
+                    filename=files[key],
+                    created_user=created_user,
+                    status="POST",
+                    article_id=article.id)
+
+            res['status'] = 'success'
+            res['message'] = '게시글을 등록했습니다.'
+            res['data'] = {'article_id': article.id}
+
         except Exception as e:
             print("게시글 쓰기 Exception:", e)
+            res['message'] = f"게시글 쓰기 Exception {e}"
+            return Response(res)
+
         return Response(res)
 
 
 class ArticleUpdateView(APIView):
+    '''
+    POST : 게시글 수정 API
+    URL : api/article/<int:article_id>/update/
+    '''
 
     def post(self, request, article_id):
         '''
@@ -226,6 +258,33 @@ class ArticleUpdateView(APIView):
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
 
+            article_files = ArticleFile.objects.filter(
+                article_id=article.id, status="POST")
+            files = request.FILES
+            created_user = str(request.user.username) + \
+                "_" + str(request.user.id)
+
+            # 제거한 파일을 DELETE 상태로 변경
+            existing_files = []
+            for obj in article_files:
+                # 기존 등록한 파일은 id 값으로 request를 받아 체크할 수 있음
+                # 기존 등록한 파일의 id 값이 오지 않은 경우 삭제된 것으로 간주하고 삭제 처리
+                if str(obj.id) not in files:
+                    ArticleFile.objects.filter(id=obj.id).update(
+                        status='DELETE', updated_date=datetime.now())
+                else:
+                    existing_files.append(str(obj.id))
+
+            # 새로 업로드한 파일을 POST상태로 create
+            for key in files:
+                if key not in existing_files:
+                    ArticleFile.objects.create(
+                        file=files[key],
+                        filename=files[key],
+                        created_user=created_user,
+                        status="POST",
+                        article_id=article.id)
+
             res['status'] = 'success'
             res['message'] = '게시글을 수정했습니다.'
             res['data'] = {'article_id': article.id}
@@ -237,6 +296,10 @@ class ArticleUpdateView(APIView):
 
 
 class ArticleDeleteView(APIView):
+    '''
+    POST : 게시글 삭제 API
+    URL : api/article/<int:article_id>/delete/
+    '''
 
     def post(self, request, article_id):
         '''
@@ -277,6 +340,9 @@ class ArticleDeleteView(APIView):
                 article_tags = ArticleTag.objects.filter(article=article)
                 for article_tag in article_tags:
                     article_tag.delete()
+                # 파일 삭제처리
+                ArticleFile.objects.filter(article_id=article.id).update(
+                    status="DELETE", updated_date=datetime.now())
                 article.delete()
 
                 res['status'] = 'success'
@@ -363,13 +429,18 @@ class ArticleScrapView(APIView):
 
 
 class ArticleCommentsView(APIView):
+    '''
+    GET: 게시글의 댓글 리스트 API
+    URL: api/article/<int:article_id>/comments/
+    '''
+
     def get(self, request, article_id):
         res = {'status': 'success', 'message': '', 'data': None}
         data = {'comments': None}
         # 게시글 댓글 정보
         comments = ArticleComment.objects.filter(
             article_id=article_id, is_deleted=False)
-        print(len(comments))
+
         data['comments'] = ArticleCommentSerializer(
             comments, many=True).data
         res['data'] = data
@@ -377,6 +448,11 @@ class ArticleCommentsView(APIView):
 
 
 class CommentCreateView(APIView):
+    '''
+    POST: 게시글에 댓글 생성
+    URL: api/comment/create/
+    '''
+
     def post(self, request):
         res = {'status': 'success', 'message': '', 'data': None}
         data = {'comment': None}
@@ -412,7 +488,8 @@ class CommentCreateView(APIView):
 
 class CommentDeleteView(APIView):
     '''
-    댓글 삭제 이후 해당 게시글의 댓글 리스트 반환
+    POST: 댓글 삭제 이후 해당 게시글의 댓글 리스트 반환
+    URL: api/comment/<int:comment_id>/delete/
     '''
 
     def post(self, request, comment_id):

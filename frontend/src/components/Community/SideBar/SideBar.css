@@ -1,0 +1,78 @@
+@media screen and (max-width: 767px) {
+  .community-sidebar {
+    display: none !important;
+  }
+}
+
+.community-sidebar {
+  text-align: center;
+  border: 1px solid var(--main-border-color);
+  border-top: none !important;
+}
+
+#sidebar-user-info {
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.625rem;
+}
+
+#sidebar-user-info .sidebar-profile-img {
+  width: 70%;
+  border: 1px solid var(--main-border-color);
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 10px;
+}
+
+#sidebar-profile-name {
+  color: var(--main-light-font-color);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -2px;
+  cursor: pointer;
+}
+
+#sidebar-profile-username {
+  color: var(--main-light-font-color);
+  font-weight: 500;
+  font-size: 20px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sidebar-activity {
+  font-size: 16px !important;
+  border-top: 1px solid var(--main-border-color);
+  padding: 0.625rem;
+}
+
+.sidebar-activity > a {
+  color: var(--main-font-color);
+  width: 100%;
+  height: 100%;
+  vertical-align: middle;
+  text-decoration: none;
+  letter-spacing: -2px;
+}
+
+.sidebar-boardgroup-item.selected > a {
+  color: var(--sub-point-color);
+  font-weight: 600;
+}
+
+.hover-opacity {
+  cursor: pointer;
+}
+
+.hover-opacity:hover {
+  opacity: 0.5;
+}
+
+.btn-login,
+.btn-signup {
+  margin: 7px;
+}
+
+.btn-logout {
+  margin: 10px;
+}

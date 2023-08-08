@@ -1,7 +1,7 @@
 import '../Community.css';
 import './Article.css';
-import Content_View from './TinyArticle/Content_View';
-import Content_Edit from './TinyArticle/Content_Edit';
+import ContentView from './TinyArticle/ContentView';
+import ContentEdit from './TinyArticle/ContentEdit';
 import Comment from './TinyArticle/Comment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -30,7 +30,7 @@ function Article_Presenter() {
   useEffect(() => {
     const getArticle = async () => {
       try {
-        const response = await axios.get(url, getAuthConfig()).then();
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setArticle(res.data.article);
@@ -64,7 +64,7 @@ function Article_Presenter() {
             <>
               <div id="article-content">
                 {type === 'view' ? (
-                  <Content_View board={board} tags={tags} comments={comments} article={article} />
+                  <ContentView board={board} tags={tags} comments={comments} article={article} />
                 ) : (
                   <>{/* <Content_Edit /> */}</>
                 )}

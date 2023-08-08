@@ -48,6 +48,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       const res = response.data;
       const resArticle = responseArticle.data;
       const resTag = responseTag.data;
+      console.log(resTag.data.tags);
       if(resArticle.status === "success"){
         setBoard(resArticle.data.article.board);
         // setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
@@ -148,6 +149,38 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   };
 
   // File
+  const handleFile = () => {
+    const nextNum = numFile + 1;
+    
+  //   setFileObj((prev) => {
+  //     const prevObj = {...prev};
+  //     prevObj[nextNum] = nextNum;
+  //     return prevObj
+  //   });
+  //   // setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 때 주의점 numFile 줄이면 안돼!!
+  //   setNumFile(nextNum);
+
+  //   console.log(numFile);
+  //   console.log(nextNum + "v");
+  // }
+  // console.log(Object.keys({temp:1}))
+
+  // const inputRef = useRef<HTMLInputElement>(null);
+
+  // const deleteInput = (id) => {
+  //   const updatedFileObj = { ...fileObj };
+  //   delete updatedFileObj[id];
+
+  //   const newFileObj = setFileObj(updatedFileObj);
+
+  //   const store = new DataTransfer();
+  //   Object.values(newFileObj).forEach((file) => store.items.add(file));
+
+  //   if (inputRef.current) {
+  //     inputRef.current.files = store.files;
+  //   }
+  // };
+
   const handleFile = () => {
     const nextNum = numFile + 1;
     
@@ -331,6 +364,20 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                   <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
                 </div>
               ))}
+            </div> */}
+            <div id="article-file-container">
+              {uploadedFiles.map((fileName, index) => ( // 업로드된 파일 목록
+                <div id={`input-group-saved${index + 1}`} className="input-group my-1" key={index}>
+                  <input type="text" name={`article_file_${index}`} className="form-control article-file" value={fileName} readOnly />
+                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(`saved${index + 1}`)}><BsXLg /></button>
+                </div>
+              ))}
+              {fileObj && Object.keys(fileObj).map((id) => ( // 추가한 파일 목록
+                  <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
+                    <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file" onChange={handleFileUpload} />
+                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
+                  </div>
+                ))}
             </div>
             {board.board_type === "Recruit" && (
               <div id="period-setting" className="mt-3">

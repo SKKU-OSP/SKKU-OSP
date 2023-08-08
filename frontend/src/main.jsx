@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import RootLayout from './routes/RootLayout';
-import Community from './routes/Community';
 import BoardPage from './routes/BoardPage';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
@@ -17,9 +16,12 @@ import Board from './components/Community/Board/Board'
 import SignUpPage from './routes/SignUpPage';
 import { tokenLoader } from './utils/auth';
 
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import StatisticsPage from './routes/StatisticsPage';
+
+import TeamApplication from './components/NavBar/TeamApplication/TeamApplication';
+
 
 const router = createBrowserRouter([
   {
@@ -56,7 +58,11 @@ const router = createBrowserRouter([
           {
             path: 'challenge',
             element: <ChallengePage />
-          }
+          },
+          {
+            path: 'TeamApplication',
+            element: <TeamApplication />
+          },
         ]
       },
       {
@@ -80,6 +86,14 @@ const router = createBrowserRouter([
       {
         path: 'user',
         element: <UserPage />
+      },
+      {
+        path: 'repository',
+        element: <Repository />
+      },
+      {
+        path: 'statistics',
+        element: <StatisticsPage />
       }
     ]
   }
