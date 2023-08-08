@@ -10,6 +10,7 @@ import ConsentsModal from './ConsentsModal';
 import classes from './SignUpForm.module.css';
 
 const SignUpForm = () => {
+  const kingoCoinKey = import.meta.env.VITE_KINGOCOIN_KEY;
   const serverUrl = import.meta.env.VITE_SERVER_URL;
   const signUpFormUrl = serverUrl + '/accounts/signup/';
   //AXIOS GET
@@ -34,7 +35,7 @@ const SignUpForm = () => {
       status: 'info'
     }
   });
-  console.log(labels);
+
   const [clicked, setClicked] = useState(false);
 
   const [selectCollege, setSelectCollege] = useState('');
@@ -204,6 +205,17 @@ const SignUpForm = () => {
         }
       } else {
         alert('회원가입에 성공했습니다.');
+        try {
+          const response = await axios.post('https://kingocoin.cs.skku.edu/api/coin/point/auto', {
+            stId: formData.student_id,
+            stName: formData.name,
+            key: kingoCoinKey,
+            plId: 7,
+            plus: true
+          });
+        } catch (error) {
+          console.log(error);
+        }
         navigate('/community');
       }
     } catch (error) {
