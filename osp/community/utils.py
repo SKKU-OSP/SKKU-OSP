@@ -9,3 +9,13 @@ def convert_size(size_bytes):
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return f"{s} {size_name[i]}"
+
+
+def convert_to_boolean(s):
+    if isinstance(s, str):
+        s = s.lower()
+        if s == "false":
+            return False
+        elif s == "true":
+            return True
+    return s

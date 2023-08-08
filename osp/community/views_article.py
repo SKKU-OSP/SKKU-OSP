@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from community.models import *
-from community.utils import convert_size
+from community.utils import convert_size, convert_to_boolean
 from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
 from tag.serializers import TagIndependentSerializer
 from team.serializers import TeamSerializer
@@ -96,14 +96,12 @@ class ArticleCreateView(APIView):
             title = request.data.get('title', '').strip()
             content = request.data.get('content', '').strip()
             anonymous_writer = request.data.get('anonymous_writer', False)
+            anonymous_writer = convert_to_boolean(anonymous_writer)
             is_notice = request.data.get('is_notice', False)
+            is_notice = convert_to_boolean(is_notice)
             board_name = request.data.get('board_name', '')
-            if anonymous_writer == "false" :
-                anonymous_writer = False
-            if is_notice == "false" :
-                is_notice = False
 
-            # board id 확인
+            # board name 확인
             board = Board.objects.get(name=board_name)
 
             # Article 생성
@@ -209,7 +207,9 @@ class ArticleUpdateView(APIView):
             title = request.data.get('title', '').strip()
             content = request.data.get('content', '').strip()
             anonymous_writer = request.data.get('anonymous_writer', False)
+            anonymous_writer = convert_to_boolean(anonymous_writer)
             is_notice = request.data.get('is_notice', False)
+            is_notice = convert_to_boolean(is_notice)
 
             # 게시글 내용 업데이트
             article.title = title
@@ -466,6 +466,7 @@ class CommentCreateView(APIView):
                 # data 파싱
                 content = request.data.get('content', '').strip()
                 anonymous_writer = request.data.get('anonymous_writer', False)
+                anonymous_writer = convert_to_boolean(anonymous_writer)
                 article_id = request.data.get('article_id', 0)
 
                 writer = Account.objects.get(user=request.user.id)
