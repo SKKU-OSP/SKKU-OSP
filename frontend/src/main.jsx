@@ -17,8 +17,8 @@ import { tokenLoader } from './utils/auth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
+import Repository from './components/User/TinyUser/Repository';
 import TeamApplication from './components/NavBar/TeamApplication/TeamApplication';
-
 
 const router = createBrowserRouter([
   {
@@ -50,7 +50,7 @@ const router = createBrowserRouter([
           {
             path: 'TeamApplication',
             element: <TeamApplication />
-          },
+          }
         ]
       },
       {
@@ -72,7 +72,7 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path: 'user',
+        path: 'user/:user_id',
         element: <UserPage />
       },
       {

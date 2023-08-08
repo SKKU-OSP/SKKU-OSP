@@ -508,10 +508,18 @@
     padding: 8px 16px;
     gap: 10px;
     .modal-input {
-      padding: 4px 8px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
       border-radius: 10px;
       gap: 10px;
       background-color: #cdcdcd;
+      & img {
+        height: 14px;
+        width: 14px;
+      }
       .input-text {
         font-family: Inter;
         font-size: 14px;
@@ -519,7 +527,9 @@
         line-height: 17px;
         letter-spacing: 0em;
         text-align: left;
-        color: #000000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
   }

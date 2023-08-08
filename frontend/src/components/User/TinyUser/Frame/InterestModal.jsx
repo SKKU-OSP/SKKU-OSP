@@ -10,18 +10,18 @@ function InterestModal(props) {
   const interest = props.interest;
   const myInterest = props.myInterest;
   const interestShow = props.interestShow;
+  const OnHandleInterestClose = props.OnHandleInterestClose;
   const OnHandleInterestSaveClose = props.OnHandleInterestSaveClose;
   const [selectedInterest, setSelectedInterest] = useState();
   const [modalInterest, setModalInterest] = useState(myInterest);
   const OnHandleInterestSelect = (selectedInterest) => setSelectedInterest(selectedInterest);
   const OnHandleModalInterest = () => setModalInterest([...modalInterest, selectedInterest]);
-  const OnHandleInterestClose = () => (setModalInterest(myInterest), props.OnHandleInterestClose());
   const OnHandleRemoveInterest = (removeLabel) => {
     setModalInterest(modalInterest.filter((interest) => interest.label !== removeLabel));
   };
   useEffect(() => {
     setModalInterest(myInterest);
-  }, [myInterest]);
+  }, [interestShow]);
 
   return (
     <Modal size="lg" show={interestShow} onHide={OnHandleInterestClose}>
@@ -44,7 +44,7 @@ function InterestModal(props) {
           </div>
           <div className="d-flex flex-row modal-interest-result">
             {modalInterest.map((interest) => (
-              <div className="d-flex flex-row align-items-center modal-input" key={`modal-interest-${interest.id}`}>
+              <div className="d-flex flex-row align-items-center modal-input" key={`modal-interest-${interest.value}`}>
                 <span className="input-text">{interest.label}</span>
                 <BsXLg size={14} onClick={() => OnHandleRemoveInterest(interest.label)} style={{ cursor: 'pointer' }} />
               </div>
