@@ -1,0 +1,32 @@
+@media screen and (max-width: 767px) {
+  .logo {
+    margin-right: 10px;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .siteTitle {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .search {
+    visibility: hidden;
+    cursor: default;
+    flex: 1 1 auto;
+  }
+  .searcher-box {
+    margin-left: 10px;
+  }
+}
+.search {
+  flex: 1 1 auto;
+}
+
+.siteTitle {
+  margin-left: 10px;
+  font-weight: 900;
+  color: var(--main-black);
+  letter-spacing: -2px;
+}
