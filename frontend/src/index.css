@@ -17,6 +17,7 @@
   --article-bg-color: #f5f5f5;
   --header-bg-color: #e7edf1;
   --main-font-color: #454545;
+  --main-selected-color: #0066ff;
   --main-light-font-color: #696969;
   --main-border-color: #b0b0b0;
   --main-border-color-transparent: #9d9d9d80;
@@ -100,7 +101,6 @@ body {
 }
 
 body {
-  font-family: 'IBMPlexSansKR-Regular';
   font-weight: 500;
   background-color: var(--sub-bg-color);
   -ms-overflow-style: none;

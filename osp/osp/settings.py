@@ -116,8 +116,8 @@ REST_FRAMEWORK = {
     # ),
     # 세션 인증과 JWT 쿠키 인증을 사용하여 API에 접근 가능하도록 인증 설정
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
 }
 

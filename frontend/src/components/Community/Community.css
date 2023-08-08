@@ -18,25 +18,24 @@
 }
 
 @media screen and (max-width: 767px) {
-  .community-sidebar {
-    width: 50px !important;
-    padding-right: 0 !important;
-  }
-  .sidebar-profile-img {
-    width: 22px;
-    height: 22px;
-    border: 0 !important;
-  }
-  #sidebar-user-info > a > span,
-  .sidebar-boardgroup-title,
-  .sidebar-boardgroup-item > a > span {
-    display: none !important;
+  .col-9 {
+    width: 100% !important;
   }
   .community-container {
-    display: flex !important;
+    display: block !important;
   }
   .community-main {
     width: calc(100% - 50px) !important;
+  }
+  .community-nav {
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  .community-nav-items {
+    min-width: 65% !important;
+  }
+  .hidden {
+    display: none;
   }
 }
 
@@ -66,6 +65,10 @@
   justify-content: center;
   margin-bottom: 10px;
   padding: 0.55rem;
+}
+
+.community-container {
+  display: flex;
 }
 
 .boards-card {
@@ -183,133 +186,47 @@
   color: var(--main-black) !important;
 }
 
-/* sidebar */
-.community-sidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.sidebar-profile-tab {
-  width: 100%;
-  background: var(--main-point-color);
-  box-shadow: 0 0.25rem 0.25rem var(--card-box-shadow);
-  border-top-left-radius: 0.625rem;
-  border-top-right-radius: 0.625rem;
-}
-
-#sidebar-user-info {
-  width: 100%;
-  padding: 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
+.community-nav {
+  padding: 0 10px 0 10px;
+  border-right: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
+  height: 50px;
+  line-height: 50px;
   align-items: center;
-  justify-content: space-start;
-  gap: 0.5rem;
-}
-
-#sidebar-user-info > a {
-  text-decoration: none;
-}
-
-.sidebar-profile-img {
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: var(--main-white);
-  border: 2px solid var(--main-point-color);
-  box-sizing: border-box;
-  margin-right: 10px;
-}
-
-#sidebar-profile-username {
-  font-size: 20px;
-  color: var(--main-white);
-  vertical-align: middle;
-  word-wrap: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#sidebar-community-tab {
-  box-shadow: 0 4px 4px var(--card-box-shadow);
-  margin-bottom: 20px;
-  border-bottom-left-radius: 0.625rem;
-  border-bottom-right-radius: 0.625rem;
-}
-
-#sidebar-community-tab > div:last-child {
-  border-bottom-left-radius: 0.625rem;
-  border-bottom-right-radius: 0.625rem;
-}
-
-#sidebar-community-tab > div:last-child > div:last-child {
-  border-bottom-left-radius: 0.625rem;
-  border-bottom-right-radius: 0.625rem;
-}
-
-.sidebar-boardgroup-title {
-  display: flex;
   justify-content: space-between;
-  padding: 0;
-  font-size: 16px !important;
-  background-color: var(--main-bg-color);
-  border-top: 1px solid var(--main-border-color);
-  text-align: left;
-  padding: 0.5rem;
 }
 
-.sidebar-boardgroup-title > a {
+.community-nav-items {
+  width: 50%;
+}
+
+.unselected-nav-item > div {
+  width: inherit;
+  font-size: 18px;
   text-decoration: none;
+  color: var(--main-font-color);
 }
 
-.sidebar-boardgroup-title > a:hover {
-  color: blue;
-}
-
-.sidebar-boardgroup-title > * {
-  color: var(--main-black);
-  display: inline-block;
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-.sidebar-boardgroup-item {
-  display: flex;
-  justify-content: start;
-  font-style: normal;
-  font-size: 16px !important;
-  background: var(--main-white);
-  border-top: 1px solid var(--main-border-color);
-}
-
-.sidebar-boardgroup-item > a {
-  color: var(--main-black);
-  display: flex;
-  column-gap: 0.5rem;
-  width: 100%;
-  height: 100%;
-  padding: 0.5rem;
-  vertical-align: middle;
-  word-wrap: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
-}
-
-.sidebar-boardgroup-item.selected > a {
-  color: var(--sub-point-color);
-  font-weight: 600;
-}
-
-.hover-opacity {
+.nav-item > div {
+  height: 50px;
   cursor: pointer;
 }
-
-.hover-opacity:hover {
-  opacity: 0.5;
+.nav-item > div:hover {
+  padding-bottom: 2px;
+  border-bottom: 3px solid var(--main-selected-color);
 }
 
-.sidebar-info-link {
+.selected-nav-item > div {
+  font-size: 18px;
+  font-weight: bolder;
   text-decoration: none;
-  color: var(--main-white);
+  color: var(--main-selected-color);
+}
+
+.btn {
+  border-radius: 10px !important;
+}
+
+.hidden {
+  visibility: hidden;
 }

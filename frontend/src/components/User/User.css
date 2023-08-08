@@ -191,15 +191,24 @@
     .language-level {
       padding: 8px 16px;
       gap: 10px;
+      min-height: 47.93px;
       .star-container {
         width: 100px;
         position: relative;
       }
       .language {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
         padding: 4px 8px;
         border-radius: 10px;
         gap: 10px;
         background-color: #cdcdcd;
+        & img {
+          height: 18px;
+          width: 18px;
+        }
         .language-text {
           font-family: Inter;
           font-size: 18px;
@@ -207,7 +216,9 @@
           line-height: 22px;
           letter-spacing: 0em;
           text-align: left;
-          color: #000000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
       }
     }
@@ -413,5 +424,381 @@
       text-align: center;
       color: #696969;
     }
+  }
+}
+
+.modal-interest {
+  padding: 8px 16px;
+  gap: 10px;
+  .modal-interest-input {
+    padding: 10px;
+    gap: 16px;
+    .modal-interest-select {
+      flex: 1;
+    }
+    .btn {
+      width: 36px;
+      height: 36px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      gap: 5px;
+      border: 1px solid #000000;
+      background-color: white;
+      .btn-text {
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 10px;
+        letter-spacing: 0em;
+        text-align: center;
+        color: #000000;
+      }
+    }
+  }
+  .modal-interest-result {
+    padding: 8px 16px;
+    gap: 10px;
+    .modal-input {
+      padding: 4px 8px;
+      border-radius: 10px;
+      gap: 10px;
+      background-color: #cdcdcd;
+      .input-text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #000000;
+      }
+    }
+  }
+}
+
+.modal-skill {
+  padding: 8px 16px;
+  gap: 10px;
+  .modal-skill-input {
+    padding: 10px;
+    gap: 16px;
+    .modal-skill-select {
+      flex: 1;
+    }
+    .btn {
+      width: 36px;
+      height: 36px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      gap: 5px;
+      border: 1px solid #000000;
+      background-color: white;
+      .btn-text {
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 10px;
+        letter-spacing: 0em;
+        text-align: center;
+        color: #000000;
+      }
+    }
+  }
+  .modal-skill-result {
+    padding: 8px 16px;
+    gap: 10px;
+    .modal-input {
+      padding: 4px 8px;
+      border-radius: 10px;
+      gap: 10px;
+      background-color: #cdcdcd;
+      .input-text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #000000;
+      }
+    }
+  }
+  .modal-skill-message {
+    padding: 8px 16px;
+    gap: 10px;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 0px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #a9a9a9;
+  }
+  .modal-language-level {
+    padding: 8px 16px;
+    gap: 10px;
+    .modal-star-container {
+      width: 100px;
+      position: relative;
+    }
+    .modal-level {
+      flex: 1;
+      min-height: 28.98px;
+    }
+    .modal-language {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 10px;
+      gap: 10px;
+      background-color: #cdcdcd;
+      & img {
+        height: 14px;
+        width: 14px;
+      }
+      .modal-language-text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.card.guideline-check {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  color: black;
+  box-shadow: 0 4px 4px 0 var(--card-box-shadow);
+  border-radius: 0.625rem;
+  .card-half {
+    width: 50%;
+    .card-body {
+      box-shadow: 0 0;
+      .card-title-block {
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+      }
+      .card-title-block.text-right {
+        text-align: right;
+      }
+      .repo-info {
+        font-size: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        & span {
+          display: flex;
+          align-items: center;
+          margin-right: 1rem;
+          & svg {
+            margin-right: 3px;
+          }
+        }
+      }
+      .repo-git {
+        .repo-git-info {
+          display: flex;
+          align-items: center;
+          & svg {
+            margin-right: 3px;
+          }
+          .progress-check-sm,
+          .progress-uncheck-sm {
+            height: 20px;
+            width: 20px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 15px;
+            position: relative;
+            z-index: 10;
+            color: transparent;
+          }
+          .progress-check-sm:after,
+          .progress-uncheck-sm:after {
+            content: '';
+            width: 15px;
+            height: 15px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: -10;
+          }
+          .progress-check-sm:before,
+          .progress-uncheck-sm:before {
+            content: '';
+            width: 9px;
+            height: 5px;
+            position: absolute;
+            left: 48%;
+            top: 48%;
+            border-left: 2px solid white;
+            border-bottom: 2px solid white;
+            position: absolute;
+            transform: translate(-50%, -60%) rotate(-45deg);
+            transform-origin: center center;
+          }
+          .progress-check-sm:after {
+            background: var(--sub-point-color);
+          }
+          .progress-check-sm:before {
+            background: var(--sub-point-color);
+          }
+          .progress-uncheck-sm:after {
+            background: var(--guideline-inactive);
+          }
+          .progress-uncheck-sm:before {
+            background: var(--guideline-inactive);
+          }
+        }
+      }
+      .guideline-step {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .guideline-step-list {
+          background-color: white;
+          color: var(--main-icon-color);
+          list-style-type: none;
+          display: flex;
+          padding: 20px 0;
+          position: relative;
+          z-index: 10;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+
+          .guideline-step-item {
+            padding: 0 5%;
+            flex-basis: 0;
+            -webkit-box-flex: 1;
+            flex-grow: 1;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            position: relative;
+            .progress-check {
+              height: 40px;
+              width: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+              font-weight: 400;
+              margin: 0 auto;
+              position: relative;
+              z-index: 10;
+              color: transparent;
+            }
+            .progress-check:after {
+              content: '';
+              width: 30px;
+              height: 30px;
+              background: white;
+              border: 3px solid var(--sub-point-color);
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              border-radius: 50%;
+              z-index: -10;
+            }
+            .progress-check:before {
+              content: '';
+              width: 16px;
+              height: 8px;
+              background: white;
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              border-left: 3px solid var(--sub-point-color);
+              border-bottom: 3px solid var(--sub-point-color);
+              position: absolute;
+              transform: translate(-50%, -60%) rotate(-45deg);
+              transform-origin: center center;
+            }
+            .progress-label {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              font-weight: 400;
+              margin-top: 10px;
+              color: var(--sub-point-color);
+              & svg {
+                margin-right: 3px;
+              }
+            }
+          }
+          .guideline-step-item + .guideline-step-item::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 19px;
+            background: var(--guideline-inactive);
+            width: 100%;
+            height: 2px;
+            transform: translateX(-50%);
+            z-index: -10;
+          }
+          .unfinished-item {
+            .progress-check:before {
+              border-left: 3px solid var(--tag-bg-ect);
+              border-bottom: 3px solid var(--tag-bg-ect);
+            }
+            .progress-check:after {
+              height: 30px;
+              width: 30px;
+              border: 3px solid var(--tag-bg-ect);
+            }
+            .progress-label {
+              opacity: 0.5;
+              color: black;
+            }
+          }
+        }
+      }
+      .weak-text {
+        color: var(--main-icon-color);
+        font-size: 12px;
+      }
+      .weak-text-lg {
+        color: var(--main-icon-color);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .card.guideline-check {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    color: black;
+  }
+  .card-half {
+    width: 100%;
+  }
+  .card-half:nth-child(1) {
+    border-right: 0;
+    border-bottom: 1px solid var(--main-border-color-transparent);
+  }
+  .card-half:nth-child(2) {
+    border-left: 0;
+    border-top: 1px solid var(--main-border-color-transparent);
   }
 }

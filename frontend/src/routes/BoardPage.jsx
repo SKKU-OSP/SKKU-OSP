@@ -1,11 +1,7 @@
 import Board from '../components/Community/Board/index';
 
 function BoardPage() {
-  return (
-    <main>
-      <Board />
-    </main>
-  );
+  return <Board />;
 }
 
 export default BoardPage;

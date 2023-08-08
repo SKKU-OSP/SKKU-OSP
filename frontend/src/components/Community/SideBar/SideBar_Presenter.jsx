@@ -1,148 +1,74 @@
-import { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import './SideBar.css';
+import { BsGithub } from 'react-icons/bs';
 
-import AuthContext from '../../../utils/auth-context';
-import { tokenRemover } from '../../../utils/auth';
-import {
-  //   BsChevronUp,
-  BsFillFileTextFill,
-  BsFillTrophyFill,
-  BsFillHandThumbsUpFill,
-  BsPlusCircleDotted,
-  BsFillChatTextFill,
-  BsQuestionCircleFill,
-  BsFillInfoCircleFill,
-  BsFillMegaphoneFill,
-  BsFillPersonPlusFill
-} from 'react-icons/bs';
-
-import '../Community.css';
-
-export default function SideBar_Presenter() {
-  const authCtx = useContext(AuthContext);
-  const handleLogout = () => {
-    authCtx.unsetUser();
-    tokenRemover();
-  };
+export default function SideBar_Presenter(props) {
+  const { name, username, githubUsername, photo, onMyProfile, onMyGithub, onLogin, onSignUp, sendLogoutRequest } =
+    props;
 
   return (
-    <div className="col-md-3 community-sidebar">
-      <div className="sidebar-profile-tab">
-        {/* is_authenticated 확인 & 프로필 이미지 src 교체 필요 */}
-        {authCtx.isLoggedIn ? (
+    <div>
+      {/* is_authenticated 확인 & 프로필 이미지 src 교체 필요 */}
+      {username ? (
+        <div className="community-sidebar">
           <div id="sidebar-user-info">
             <img
-              width="42px"
-              height="42px"
-              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+              src={photo}
               className="sidebar-profile-img"
               alt="profile-image"
               data-bs-hover="tooltip"
               data-bs-placement="top"
               data-bs-title="프로필 페이지"
             ></img>
-            <span id="sidebar-profile-username">{authCtx.username}</span>
-            <button className="btn btn-sm btn-outline-light" onClick={handleLogout}>
+            <div id="sidebar-profile-name" onClick={onMyProfile}>
+              {name}
+            </div>
+            <div id="sidebar-profile-username" onClick={onMyGithub}>
+              <BsGithub />
+              {githubUsername}
+            </div>
+            <button type="button" className="btn btn-outline-secondary btn-logout" onClick={sendLogoutRequest}>
               로그아웃
             </button>
           </div>
-        ) : (
+          <div className="sidebar-community-tab w-100">
+            <div className="sidebar-activity hover-opacity">
+              <a href="/community/activity/article">
+                <span>내가 작성한 글</span>
+              </a>
+            </div>
+            <div className="sidebar-activity hover-opacity">
+              <a href="/community/activity/comment">
+                <span>내가 작성한 댓글</span>
+              </a>
+            </div>
+            <div className="sidebar-activity hover-opacity">
+              <a href="/community/activity/scrap">
+                <span>내가 스크랩한 글</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="community-sidebar">
           <div id="sidebar-user-info">
             <img
-              width="42px"
-              height="42px"
-              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+              src="https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg"
               className="sidebar-profile-img"
               alt="profile-image"
+              data-bs-hover="tooltip"
+              data-bs-placement="top"
+              data-bs-title="프로필 페이지"
             ></img>
-            <Link to="/accounts/login" className="sidebar-info-link">
-              Log In
-            </Link>
+            <button type="button" className="btn btn-outline-secondary btn-login" onClick={onLogin}>
+              로그인
+            </button>
+            <br></br>
+            <button type="button" className="btn btn-outline-primary btn-signup" onClick={onLogin}>
+              회원가입
+            </button>
           </div>
-        )}
-      </div>
-      <div id="sidebar-community-tab" className="w-100">
-        {/* is_authenticated 확인 필요 */}
-        {/* 내 활동 */}
-        {1 === 1 && (
-          <div>
-            <div className="sidebar-boardgroup-title">
-              <span>내 활동</span>
-            </div>
-            <div className="sidebar-boardgroup-item hover-opacity">
-              <a href="/community/activity/">
-                <BsFillFileTextFill size="22" />
-                <span>내 활동 목록</span>
-              </a>
-            </div>
-            <div className="sidebar-boardgroup-item hover-opacity">
-              <a href="/challenge/">
-                <BsFillTrophyFill size="22" />
-                <span>챌린지</span>
-              </a>
-            </div>
-            <div className="sidebar-boardgroup-item hover-opacity">
-              <a href="/community/recommender/user/">
-                <BsFillHandThumbsUpFill size="22" />
-                <span>맞춤 유저 추천</span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* 일반 게시판 */}
-        <div id="normal-boardgroup" className="sidebar-boardgroup-title">
-          <a href="/community/">게시판</a>
-          <i className="bi bi-chevron-up folder hover-opacity" data-fold-target=".link-board"></i>
         </div>
-        <div className="sidebar-boardgroup-item hover-opacity">
-          <a href="/community/board/자유">
-            <BsFillChatTextFill size="22" />
-            <span>자유</span>
-          </a>
-        </div>
-        <div className="sidebar-boardgroup-item hover-opacity">
-          <a href="/community/board/질문">
-            <BsQuestionCircleFill size="22" />
-            <span>질문</span>
-          </a>
-        </div>
-        <div className="sidebar-boardgroup-item hover-opacity">
-          <a href="/community/board/정보">
-            <BsFillInfoCircleFill size="22" />
-            <span>정보</span>
-          </a>
-        </div>
-        <div className="sidebar-boardgroup-item hover-opacity">
-          <a href="/community/board/홍보">
-            <BsFillMegaphoneFill size="22" />
-            <span>홍보</span>
-          </a>
-        </div>
-        <div className="sidebar-boardgroup-item hover-opacity">
-          <a href="/community/board/팀 모집">
-            <BsFillPersonPlusFill size="22" />
-            <span>팀 모집</span>
-          </a>
-        </div>
-
-        {/* 팀 게시판 */}
-        {/* is_authenticated 확인 필요 */}
-        {1 === 1 && (
-          <div>
-            <div className="sidebar-boardgroup-title">
-              <span>팀 게시판</span>
-            </div>
-
-            <div id="team-create" className="sidebar-boardgroup-item hover-opacity">
-              <a href="#" role="button">
-                <BsPlusCircleDotted size="22" />
-                <span>팀 만들기</span>
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
