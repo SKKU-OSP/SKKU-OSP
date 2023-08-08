@@ -97,10 +97,14 @@ class ArticleCreateView(APIView):
             content = request.data.get('content', '').strip()
             anonymous_writer = request.data.get('anonymous_writer', False)
             is_notice = request.data.get('is_notice', False)
-            board_id = request.data.get('board_id', 0)
+            board_name = request.data.get('board_name', '')
+            if anonymous_writer == "false" :
+                anonymous_writer = False
+            if is_notice == "false" :
+                is_notice = False
 
             # board id 확인
-            board = Board.objects.get(id=board_id)
+            board = Board.objects.get(name=board_name)
 
             # Article 생성
             article = Article.objects.create(
@@ -151,6 +155,7 @@ class ArticleCreateView(APIView):
 
             # 게시글 파일 생성
             files = request.FILES
+            print(files)
 
             # 파일 게시자 추적: created_user를 username과 user_id를 연결한 이유
             # username은 변경가능하기 때문에 id로 추적하고자함
