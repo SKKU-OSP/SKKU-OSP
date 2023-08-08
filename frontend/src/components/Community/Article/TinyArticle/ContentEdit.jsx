@@ -1,6 +1,6 @@
 import '../../Community.css';
 import '../Article.css';
 
-function Content_Edit() {}
+function ContentEdit() {}
 
-export default Content_Edit;
+export default ContentEdit;

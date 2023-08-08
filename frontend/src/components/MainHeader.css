@@ -59,11 +59,6 @@ header {
   border-bottom: 1px solid var(--main-border-color);
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-}
-
 .header {
   justify-content: space-between;
 }

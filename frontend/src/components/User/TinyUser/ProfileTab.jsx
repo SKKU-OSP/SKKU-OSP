@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import '../User.css';
 import Nav from 'react-bootstrap/Nav';
-import Profile_Activity from './Profile_Activity';
+import ProfileActivity from './ProfileActivity';
 
-function Profile_Tab() {
+function ProfileTab() {
   const [activeTab, setActiveTab] = useState('관심분야');
 
   const handleTabSelect = (selectedKey) => {
@@ -25,9 +25,9 @@ function Profile_Tab() {
           </Nav.Item>
         </Nav>
       </div>
-      <Profile_Activity Tab={activeTab} />
+      <ProfileActivity Tab={activeTab} />
     </>
   );
 }
 
-export default Profile_Tab;
+export default ProfileTab;

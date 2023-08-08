@@ -1,0 +1,31 @@
+.searchBox {
+  width: 30%;
+  margin-left: 20px;
+  position: relative;
+}
+
+.tagFilter {
+  transition-duration: 0.15s;
+}
+.tagFilter:not(.show) {
+  opacity: 0;
+  visibility: hidden;
+  cursor: default;
+  height: 0px;
+}
+
+.searchBtn {
+  margin: 1px;
+  border: none;
+  background-color: var(--main-white);
+  color: var(--main-icon-color);
+  padding: 0.5rem;
+  user-select: none;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+.searchBtn:hover {
+  background-color: var(--main-white);
+  color: var(--main-point-color);
+  border-color: var(--main-white);
+}

@@ -451,8 +451,6 @@ const SignUpForm = () => {
 
   return (
     <Form onSubmit={handleSubmit} method="post">
-      <div className="d-flex container my-5 justify-content-center">
-        <div className="col-lg-6 col-12 ">
           <div className="d-flex justify-content-center mb-3">
             <img src="/images/logo.svg" alt="Logo" className="w-25" />
           </div>
@@ -797,8 +795,6 @@ const SignUpForm = () => {
               가입하기
             </Button>
           </div>
-        </div>
-      </div>
     </Form>
   );
 };
