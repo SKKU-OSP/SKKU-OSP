@@ -11,6 +11,8 @@ import CommunityLayout from './routes/CommunityLayout';
 import AccountsLayout from './routes/AccountsLayout';
 import ArticlePage from './routes/ArticlePage';
 import ArticleEdit from './components/Community/Article/ArticleEdit/ArticleEdit';
+import ArticleRegister from './components/Community/Article/ArticleRegister/ArticleRegister';
+import Board from './components/Community/Board/Board'
 import SignUpPage from './routes/SignUpPage';
 import { tokenLoader } from './utils/auth';
 
@@ -33,8 +35,17 @@ const router = createBrowserRouter([
         element: <CommunityLayout />,
         children: [
           {
-            path: ':board_name',
-            element: <BoardPage />
+            path: '',
+            element: <Community />
+          },
+          {
+            path: 'board/:board_name',
+          //   element: <BoardPage />
+            element: <Board />
+          },
+          {
+            path: 'board/:board_name/register',
+            element: <ArticleRegister />
           },
           {
             path: 'article/:article_id',
