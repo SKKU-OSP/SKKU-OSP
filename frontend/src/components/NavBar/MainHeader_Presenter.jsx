@@ -1,27 +1,15 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BsList } from 'react-icons/bs';
 
-import SearchBox from './NavBar/SearchBox/SearchBox';
-import IconList_Container from './NavBar/IconList_Container';
+import SearchBox from './SearchBox/SearchBox';
+import IconList_Container from './IconList/IconList_Container';
 
 import './MainHeader.css';
 /**
  * TARGET: header.html
  */
-function MainHeader(props) {
-  const [isToggled, setIsToggled] = useState(false);
-
-  function onClickToggle() {
-    if (isToggled) {
-      setIsToggled(false);
-    } else {
-      setIsToggled(true);
-    }
-  }
-
-  // TODO 유저 인증시 변경되는 설정 적용
-  const [isAuth] = useState(true);
+function MainHeader_Presenter(props) {
+  const { username, isToggled, onClickToggle } = props;
 
   return (
     <header>
@@ -33,9 +21,11 @@ function MainHeader(props) {
               <span className="siteTitle">SKKU SOSD</span>
             </Link>
           </div>
-          <div className="on-mobile p-2">
-            <IconList_Container />
-          </div>
+          {username && (
+            <div className="on-mobile p-2">
+              <IconList_Container />
+            </div>
+          )}
           <button className="header-toggler" type="button" onClick={onClickToggle}>
             <BsList size="24" />
           </button>
@@ -57,13 +47,15 @@ function MainHeader(props) {
             </Link>
           </div>
           <SearchBox />
-          <div className="on-desktop p-2">
-            <IconList_Container />
-          </div>
+          {username && (
+            <div className="on-desktop p-2">
+              <IconList_Container />
+            </div>
+          )}
         </div>
       </div>
     </header>
   );
 }
 
-export default MainHeader;
+export default MainHeader_Presenter;
