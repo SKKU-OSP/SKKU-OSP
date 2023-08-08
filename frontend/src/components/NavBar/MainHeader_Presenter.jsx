@@ -26,7 +26,7 @@ function MainHeader_Presenter(props) {
               <IconList_Container />
             </div>
           ) : (
-            <button type="button" className="btn btn-login" onClick={onLogin}>
+            <button type="button" className="btn-login on-mobile" onClick={onLogin}>
               로그인
             </button>
           )}

@@ -124,3 +124,9 @@ header {
 .header-profile-img:hover {
   cursor: pointer;
 }
+
+.btn-login {
+  border: 0;
+  background-color: var(--header-bg-color);
+  align-items: center;
+}
