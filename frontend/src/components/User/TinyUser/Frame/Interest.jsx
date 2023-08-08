@@ -7,6 +7,7 @@ import SkillModal from './SkillModal';
 import InterestModal from './InterestModal';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
+import { useParams } from 'react-router-dom';
 
 function Interest() {
   // Interest 훅
@@ -19,9 +20,11 @@ function Interest() {
   const [skill, setSkill] = useState([]);
   const [mySkill, setMySkill] = useState({ 4: [], 3: [], 2: [], 1: [], 0: [] });
 
+  const [error_occur, setError] = useState(false);
   // 서버와 연동
+  const { user_id } = useParams();
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const profileTagsUrl = server_url + '/user/api/tag/72/';
+  const profileTagsUrl = server_url + '/user/api/tag/' + user_id;
   const tagsUrl = server_url + '/tag/api/list/';
   const profileInterestPostUrl = server_url + '/user/api/interests/update/';
   const profileSkillPostUrl = server_url + '/user/api/langs/update/';
@@ -72,7 +75,9 @@ function Interest() {
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
         }
-      } catch (error) {}
+      } catch (error) {
+        setError(true);
+      }
     };
     getTags();
     getProfileTags();
@@ -100,6 +105,7 @@ function Interest() {
     Object.keys(modalSkill).forEach((key) => {
       modalSkill[key].forEach((obj) => {
         obj.level = Number(key);
+        obj.value = obj.tag.name;
       });
     });
     setMySkill(modalSkill), setSkillShow(false), updatePostProfileSkill(modalSkill);
@@ -114,104 +120,109 @@ function Interest() {
   };
 
   return (
-    <div className="d-flex flex-column profile-interest">
-      <div className="d-flex flex-column profile-category">
-        <div className="d-flex flex-row justify-content-between category-intro">
-          <span className="intro">관심분야</span>
-          <Button className="btn" onClick={OnHandleInterestShow} style={{ backgroundColor: 'white' }}>
-            <span className="btn-text">수정</span>
-          </Button>
-          <InterestModal
-            interest={interest}
-            myInterest={myInterest}
-            interestShow={interestShow}
-            OnHandleInterestClose={OnHandleInterestClose}
-            OnHandleInterestSaveClose={OnHandleInterestSaveClose}
-          />
-        </div>
-        <div className="d-flex flex-row category-icon">
-          {myInterest.map((interest) => (
-            <div className="icon" key={interest.id}>
-              <span className="icon-text">{interest.label}</span>
+    <>
+      {error_occur ? (
+        <>잘못된 페이지 입니다.</>
+      ) : (
+        <div className="d-flex flex-column profile-interest">
+          <div className="d-flex flex-column profile-category">
+            <div className="d-flex flex-row justify-content-between category-intro">
+              <span className="intro">관심분야</span>
+              <Button className="btn" onClick={OnHandleInterestShow} style={{ backgroundColor: 'white' }}>
+                <span className="btn-text">수정</span>
+              </Button>
+              <InterestModal
+                interest={interest}
+                myInterest={myInterest}
+                interestShow={interestShow}
+                OnHandleInterestClose={OnHandleInterestClose}
+                OnHandleInterestSaveClose={OnHandleInterestSaveClose}
+              />
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="d-flex flex-column profile-language">
-        <div className="d-flex flex-row justify-content-between language-intro">
-          <span className="intro">사용언어/기술스택</span>
-          <Button className="btn" onClick={OnHandleSkillShow} style={{ backgroundColor: 'white' }}>
-            <span className="btn-text">수정</span>
-          </Button>
-          {
-            <SkillModal
-              mySkill={mySkill}
-              skill={skill}
-              skillShow={skillShow}
-              OnHandleSkillClose={OnHandleSkillClose}
-              OnHandleSkillSaveClose={OnHandleSkillSaveClose}
-              starColor={starColor}
-            />
-          }
-        </div>
-        {Object.entries(mySkill)
-          .reverse()
-          .map(([level, tags]) => {
-            return (
-              <div className="d-flex flex-row language-level" key={`level-${level}`}>
-                <div className="d-flex flex-row justify-content-center align-items-center star-container">
-                  {Array(Number(level) + 1)
-                    .fill(0)
-                    .map((element, idx) => {
+            <div className="d-flex flex-row category-icon">
+              {myInterest.map((interest) => (
+                <div className="icon" key={interest.value}>
+                  <span className="icon-text">{interest.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="d-flex flex-column profile-language">
+            <div className="d-flex flex-row justify-content-between language-intro">
+              <span className="intro">사용언어/기술스택</span>
+              <Button className="btn" onClick={OnHandleSkillShow} style={{ backgroundColor: 'white' }}>
+                <span className="btn-text">수정</span>
+              </Button>
+              <SkillModal
+                mySkill={mySkill}
+                skill={skill}
+                skillShow={skillShow}
+                OnHandleSkillClose={OnHandleSkillClose}
+                OnHandleSkillSaveClose={OnHandleSkillSaveClose}
+                starColor={starColor}
+              />
+            </div>
+            {Object.entries(mySkill)
+              .reverse()
+              .map(([level, tags]) => {
+                return (
+                  <div className="d-flex flex-row language-level" key={`level-${level}`}>
+                    <div className="d-flex flex-row justify-content-center align-items-center star-container">
+                      {Array(Number(level) + 1)
+                        .fill(0)
+                        .map((element, idx) => {
+                          return (
+                            <BsFillStarFill
+                              size={24}
+                              color={starColor[level]}
+                              style={{ margin: '-6px' }}
+                              key={`star-${level}-${idx}`}
+                            />
+                          );
+                        })}
+                    </div>
+                    {tags.map((element) => {
+                      const color = element.tag.color;
+                      const hexColor = color.substring(1);
+                      const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+                      const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+                      const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+                      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                      const fontColor = luma < 127.5 ? 'white' : 'black';
+                      const logo = element.tag.logo;
                       return (
-                        <BsFillStarFill
-                          size={24}
-                          color={starColor[level]}
-                          style={{ margin: '-6px' }}
-                          key={`star-${level}-${idx}`}
-                        />
+                        <div
+                          className="language"
+                          style={{ backgroundColor: `${element.tag.color}` }}
+                          key={`language-level-${level}-${element.tag.name}`}
+                        >
+                          {logo !== 'default.svg' ? (
+                            <img
+                              className="stack-icon"
+                              src={`${element.tag.logo}`}
+                              style={{
+                                WebkitFilter:
+                                  fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
+                                filter:
+                                  fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
+                              }}
+                            />
+                          ) : (
+                            <></>
+                          )}
+                          <span className="language-text" style={{ color: fontColor }}>
+                            {element.tag.name}
+                          </span>
+                        </div>
                       );
                     })}
-                </div>
-                {tags.map((element) => {
-                  const color = element.tag.color;
-                  const hexColor = color.substring(1);
-                  const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
-                  const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
-                  const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
-                  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                  const fontColor = luma < 127.5 ? 'white' : 'black';
-                  const logo = element.tag.logo;
-                  return (
-                    <div
-                      className="language"
-                      style={{ backgroundColor: `${element.tag.color}` }}
-                      key={`language-level-${level}-${element.id}`}
-                    >
-                      {logo !== 'default.svg' ? (
-                        <img
-                          className="stack-icon"
-                          src={`${element.tag.logo}`}
-                          style={{
-                            WebkitFilter:
-                              fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
-                            filter: fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
-                          }}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                      <span className="language-text" style={{ color: fontColor }}>
-                        {element.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-      </div>
-    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 export default Interest;
