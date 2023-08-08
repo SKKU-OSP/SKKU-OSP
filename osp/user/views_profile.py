@@ -175,7 +175,7 @@ class UserInterestTagUpdateView(APIView):
         status = 'success'
 
         # Request Validation
-        status, errors \
+        status, message, errors \
             = self.post_validation(request, status, message, errors)
 
         if status == 'fail':

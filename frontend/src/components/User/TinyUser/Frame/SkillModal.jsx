@@ -19,16 +19,18 @@ function SkillModal(props) {
   const [undefinedSkill, setUndefinedSkill] = useState([]);
 
   const OnHandleSkillSelect = (selectedSkill) => setSelectedSkill(selectedSkill);
-  const OnHandleUndefinedSkill = () => setUndefinedSkill([...undefinedSkill, selectedSkill]);
+  const OnHandleUndefinedSkill = () => setUndefinedSkill([...undefinedSkill, { tag: selectedSkill }]);
   const OnHandleRemoveSkill = (removeSkill) => {
     setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.label !== removeSkill.label));
   };
 
   useEffect(() => {
+    setUndefinedSkill([]);
     setModalSkill(mySkill);
-  }, [mySkill]);
+  }, [skillShow]);
 
   const OnHandleOnDrag = (e, skill) => {
+    console.log(skill);
     const skillJsonString = JSON.stringify(skill);
     e.dataTransfer.setData('skill', skillJsonString);
   };
@@ -40,7 +42,7 @@ function SkillModal(props) {
   const OnHandleOnDrop = (e, targetLevel) => {
     const skillJsonString = e.dataTransfer.getData('skill');
     const newSkill = JSON.parse(skillJsonString);
-    if (!modalSkill[targetLevel].some((skill) => skill.label === newSkill.label)) {
+    if (!modalSkill[targetLevel].some((skill) => skill.tag.name === newSkill.tag.name)) {
       setModalSkill((prevLevels) => ({
         ...prevLevels,
         [targetLevel]: [...prevLevels[targetLevel], newSkill]
@@ -50,17 +52,17 @@ function SkillModal(props) {
       if (level !== targetLevel) {
         setModalSkill((prevLevels) => ({
           ...prevLevels,
-          [level]: prevLevels[level].filter((skill) => skill.label !== newSkill.label)
+          [level]: prevLevels[level].filter((skill) => skill.tag.name !== newSkill.tag.name)
         }));
       }
     }
-    setUndefinedSkill((prev) => prev.filter((skill) => skill.label !== newSkill.label));
+    setUndefinedSkill((prev) => prev.filter((skill) => skill.tag.name !== newSkill.tag.name));
   };
 
   const OnHandleRemoveModalSkill = (removeSkill, level) => {
     setModalSkill((prevLevels) => ({
       ...prevLevels,
-      [level]: prevLevels[level].filter((skill) => skill.label !== removeSkill.label)
+      [level]: prevLevels[level].filter((skill) => skill.tag.name !== removeSkill.tag.name)
     }));
   };
 
@@ -78,29 +80,62 @@ function SkillModal(props) {
               size="lg"
               name="skill"
               onChange={OnHandleSkillSelect}
-              options={skill.filter(
-                (item) =>
-                  !Object.values(modalSkill)
-                    .flat()
-                    .some((obj) => obj.value === item.value)
-              )}
+              options={skill
+                .filter(
+                  (item) =>
+                    !Object.values(modalSkill)
+                      .flat()
+                      .some((obj) => obj.tag.name === item.name)
+                )
+                .filter(
+                  (item) =>
+                    !Object.values(undefinedSkill)
+                      .flat()
+                      .some((obj) => obj.tag.name === item.name)
+                )}
             />
             <button className="btn" onClick={OnHandleUndefinedSkill}>
               <span className="btn-text">+</span>
             </button>
           </div>
           <div className="d-flex flex-row modal-skill-result">
-            {undefinedSkill.map((skill) => (
-              <div
-                draggable
-                onDragStart={(e) => OnHandleOnDrag(e, skill)}
-                className="d-flex flex-row align-items-center modal-input"
-                key={`modal-undefined-language-${skill.id}`}
-              >
-                <span className="input-text">{skill.label}</span>
-                <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
-              </div>
-            ))}
+            {undefinedSkill.map((element) => {
+              const color = element.tag.color;
+              const hexColor = color.substring(1);
+              const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+              const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+              const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+              const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+              const fontColor = luma < 127.5 ? 'white' : 'black';
+              const logo = element.tag.logo;
+              return (
+                <div
+                  draggable
+                  onDragStart={(e) => OnHandleOnDrag(e, element)}
+                  className="d-flex flex-row align-items-center modal-input"
+                  style={{ backgroundColor: `${element.tag.color}` }}
+                  key={`modal-undefined-language-${element.tag.name}`}
+                >
+                  {logo !== 'default.svg' ? (
+                    <img
+                      className="modal-stack-icon"
+                      src={`${element.tag.logo}`}
+                      style={{
+                        WebkitFilter:
+                          fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
+                        filter: fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
+                      }}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                  <span className="input-text" style={{ color: fontColor }}>
+                    {element.tag.name}
+                  </span>
+                  <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
+                </div>
+              );
+            })}
           </div>
           {Object.entries(modalSkill)
             .reverse()
@@ -141,7 +176,7 @@ function SkillModal(props) {
                           onDragStart={(e) => OnHandleOnDrag(e, element)}
                           className="d-flex flex-row gap-1 align-items-center modal-language"
                           style={{ backgroundColor: `${element.tag.color}` }}
-                          key={`modal-language-level-${level}-${element.id}`}
+                          key={`modal-language-level-${level}-${element.tag.name}`}
                         >
                           {logo !== 'default.svg' ? (
                             <img
@@ -158,7 +193,7 @@ function SkillModal(props) {
                             <></>
                           )}
                           <span className="modal-language-text" style={{ color: fontColor }}>
-                            {element.label}
+                            {element.tag.name}
                           </span>
                           <BsXLg
                             size={14}

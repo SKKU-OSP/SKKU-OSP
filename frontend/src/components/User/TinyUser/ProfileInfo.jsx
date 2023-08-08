@@ -2,7 +2,7 @@ import '../User.css';
 import { BsGithub } from 'react-icons/bs';
 
 function ProfileInfo() {
-  const img_url = '/images/empty-profile.png';
+  const img_url = '/static/images/empty-profile.png';
   return (
     <div className="d-flex flex-row profile_info">
       <div className="d-flex align-items-center justify-content-center info_left">
