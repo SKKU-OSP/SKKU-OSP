@@ -146,7 +146,7 @@ class ArticleCreateView(APIView):
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
             for article_tag in article_tags:
-                tag = TagIndependent.objects.filter(name=article_tag)
+                tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
 
@@ -191,6 +191,7 @@ class ArticleUpdateView(APIView):
             article.is_notice = is_notice
             if not article.board.anonymous_writer:
                 article.anonymous_writer = False
+            article.save()
 
             # 팀 모집 게시판의 경우 모집 기간 업데이트
             if article.board.board_type == "Recruit":
@@ -230,7 +231,7 @@ class ArticleUpdateView(APIView):
 
             article_tags = request.data.get('article_tags', [])
             for article_tag in article_tags:
-                tag = TagIndependent.objects.filter(name=article_tag)
+                tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
 

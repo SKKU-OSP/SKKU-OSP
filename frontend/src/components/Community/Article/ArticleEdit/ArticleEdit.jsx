@@ -8,16 +8,17 @@ import { Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import './ArticleEdit.css';
+import { getAuthConfig } from '../../../../utils/auth';
 
 /**
  * TARGET: content-edit.html
  */
 const domainUrl = import.meta.env.VITE_SERVER_URL
 
-
 function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id
   const url = domainUrl + "/community/"
+  const urlEditArticle = domainUrl + "/community/api/article/" + articleID + "/update/"
   const urlArticle = domainUrl + "/community/api/article/" + articleID
   const urlTag = domainUrl + "/tag/api/list/"
 
@@ -46,12 +47,13 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       const res = response.data;
       const resArticle = responseArticle.data;
       const resTag = responseTag.data;
+      console.log(resTag.data.tags);
       if(resArticle.status === "success"){
         setBoard(resArticle.data.article.board);
-        setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
-          prev['board_type'] = "Recruit"
-          return prev
-        });
+        // setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
+        //   prev['board_type'] = "Recruit"
+        //   return prev
+        // });
         setTitle(resArticle.data.article.title);
         setBodyText(resArticle.data.article.body);
         setTags(resTag.data.tags.map(t => {
@@ -105,16 +107,30 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }
     else if (window.confirm("글을 수정하시겠습니까?")) { // 수정한 글 저장
       if (editorRef.current) {
-        const modifiedContent = editorRef.current.getContent();
-        
-        const response = await axios.post(url, {
-          type: "POST",
-          content: modifiedContent,
-          title: res.data.article.title,
-          bodyText: res.data.article.body,
-          tags: res.data.tags
-        });
+        console.log("title", title);
+        console.log("bodyText", bodyText);
+        console.log("tags", selectTags);
+
+        const response = await axios.post(urlEditArticle, {
+          title: title,
+          content: bodyText,
+          is_notice: false,
+          anonymous_writer: false,
+          article_tags: selectTags,
+          article_file: articleFile
+        }, getAuthConfig());
         const res = response.data;
+        if (res['status'] === "success") {
+          window.alert('수정이 완료되었습니다!');
+          window.location.href = `/community/article/` + articleID + `/`;
+        }
+        // } catch (error) {
+        //   console.log("error", error);
+        //   window.alert('오류가 발생했습니다.');
+        //   $("#btn-content-edit").bind('click', () => {
+        //     article.editSubmit();
+        //   });
+        // }
 
         console.log(res);
       }
@@ -134,25 +150,59 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     editorRef.current = editor;
   };
 
-  const handleFile = () => {
-    const nextNum = numFile + 1;
+  // const handleFile = () => {
+  //   const nextNum = numFile + 1;
     
+  //   setFileObj((prev) => {
+  //     const prevObj = {...prev};
+  //     prevObj[nextNum] = nextNum;
+  //     return prevObj
+  //   });
+  //   // setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 때 주의점 numFile 줄이면 안돼!!
+  //   setNumFile(nextNum);
+
+  //   console.log(numFile);
+  //   console.log(nextNum + "v");
+  // }
+  // console.log(Object.keys({temp:1}))
+
+  // const inputRef = useRef<HTMLInputElement>(null);
+
+  // const deleteInput = (id) => {
+  //   const updatedFileObj = { ...fileObj };
+  //   delete updatedFileObj[id];
+
+  //   const newFileObj = setFileObj(updatedFileObj);
+
+  //   const store = new DataTransfer();
+  //   Object.values(newFileObj).forEach((file) => store.items.add(file));
+
+  //   if (inputRef.current) {
+  //     inputRef.current.files = store.files;
+  //   }
+  // };
+
+  const [uploadedFiles, setUploadedFiles] = useState([]); // 업로드된 파일 목록
+  const [fileCount, setFileCount] = useState(0); // 추가한 파일 개수
+
+  const handleFile = () => {
+    const nextNum = fileCount + 1;
+
     setFileObj((prev) => {
-      const prevObj = {...prev};
+      const prevObj = { ...prev };
       prevObj[nextNum] = nextNum;
-      return prevObj
+      return prevObj;
     });
-    setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 때 주의점 numFile 줄이면 안돼!!
-    setNumFile(nextNum);
 
-    console.log(numFile);
-    console.log(nextNum + "v");
-  }
-  console.log(Object.keys({temp:1}))
-
-  const inputRef = useRef<HTMLInputElement>(null);
+    setFileCount(nextNum);
+  };
 
   const deleteInput = (id) => {
+    if (uploadedFiles.includes(id)) {
+      // 업로드된 파일 목록에서 삭제
+      setUploadedFiles((prev) => prev.filter((fileId) => fileId !== id));
+    }
+
     const updatedFileObj = { ...fileObj };
     delete updatedFileObj[id];
 
@@ -164,6 +214,12 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     if (inputRef.current) {
       inputRef.current.files = store.files;
     }
+  };
+
+  const handleFileUpload = (e) => {
+    const files = e.target.files;
+    const newUploadedFiles = Array.from(files).map((file) => file.name);
+    setUploadedFiles((prev) => [...prev, ...newUploadedFiles]);
   };
   
   // Tag
@@ -299,19 +355,33 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
             <div id="article-helper" className="mt-2">
               <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>파일 추가</button>
             </div>
-            <div id="article-file-container">
-              {/* {articleFile.map((id, index) => ( //업로드 된 파일 목록
+            {/* <div id="article-file-container">
+              {articleFile.map((id, index) => ( //업로드 된 파일 목록
                 <div id={`input-group-saved${index + 1}`} className="input-group my-1">
                   <input type="text" name={`article_file_${id}`} className="form-control article-file" value={name} readOnly />
                   <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(`saved${index + 1}`)}><BsXLg /></button>
                 </div>
-              ))} */}
+              ))}
               {fileObj && Object.keys(fileObj).map((id) => ( //파일 추가 input
                 <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
                   <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file"/>
                   <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
                 </div>
               ))}
+            </div> */}
+            <div id="article-file-container">
+              {uploadedFiles.map((fileName, index) => ( // 업로드된 파일 목록
+                <div id={`input-group-saved${index + 1}`} className="input-group my-1" key={index}>
+                  <input type="text" name={`article_file_${index}`} className="form-control article-file" value={fileName} readOnly />
+                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(`saved${index + 1}`)}><BsXLg /></button>
+                </div>
+              ))}
+              {fileObj && Object.keys(fileObj).map((id) => ( // 추가한 파일 목록
+                  <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
+                    <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file" onChange={handleFileUpload} />
+                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
+                  </div>
+                ))}
             </div>
             {board.board_type === "Recruit" && (
               <div id="period-setting" className="mt-3">
