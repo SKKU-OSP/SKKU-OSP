@@ -9,7 +9,7 @@ import './MainHeader.css';
  * TARGET: header.html
  */
 function MainHeader_Presenter(props) {
-  const { username, isToggled, onClickToggle } = props;
+  const { username, isToggled, onClickToggle, onLogin } = props;
 
   return (
     <header>
@@ -21,10 +21,14 @@ function MainHeader_Presenter(props) {
               <span className="siteTitle">SKKU SOSD</span>
             </Link>
           </div>
-          {username && (
+          {username ? (
             <div className="on-mobile p-2">
               <IconList_Container />
             </div>
+          ) : (
+            <button type="button" className="btn btn-login" onClick={onLogin}>
+              로그인
+            </button>
           )}
           <button className="header-toggler" type="button" onClick={onClickToggle}>
             <BsList size="24" />
