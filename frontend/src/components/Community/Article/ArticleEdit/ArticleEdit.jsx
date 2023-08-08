@@ -15,7 +15,6 @@ import { getAuthConfig } from '../../../../utils/auth';
  */
 const domainUrl = import.meta.env.VITE_SERVER_URL
 
-
 function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id
   const url = domainUrl + "/community/"
@@ -37,6 +36,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [selectTags, setSelectTags] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [teamID, setTeamID] = useState("");
   const getCurrentDateTime = () => new Date();
   const editorRef = useRef(null);
 
@@ -51,7 +51,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       if(resArticle.status === "success"){
         setBoard(resArticle.data.article.board);
         // setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
-        //   prev['board_type'] = "Recruit"
+        //   prev['board_type'] = "Notice"
         //   return prev
         // });
         setTitle(resArticle.data.article.title);
@@ -68,21 +68,19 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         }));
         setIsAuthNotice(resArticle.data.article.is_notice);
         setAnonymousWriter(resArticle.data.article.anonymous_writer);
+        setArticleFile(resArticle.data.files.map(t => {
+          return{
+            id: t.id, name: t.fileName, file: t.file.name,
+          }
+        }));
       }
       else{console.log(resArticle.message)}
     }
     getArticle()
   }, [])
 
-  // 공지 체크 여부 확인
-  const noticeCheck = () => {
-    console.log(isAuthNotice);
-    return isAuthNotice;
-  };
-
   // 익명 체크 여부 확인
   const anonymousCheck = () => {
-    console.log(anonymousWriter);
     return anonymousWriter;
   };
 
@@ -107,19 +105,29 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }
     else if (window.confirm("글을 수정하시겠습니까?")) { // 수정한 글 저장
       if (editorRef.current) {
-        // const modifiedContent = editorRef.current.getContent();
-        console.log("bodyText", bodyText);
         console.log("title", title);
+        console.log("bodyText", bodyText);
         console.log("tags", selectTags);
+        console.log("ano", anonymousWriter);
+        console.log("file", articleFile);
 
         const response = await axios.post(urlEditArticle, {
-          content: bodyText,
           title: title,
+          content: bodyText,
           is_notice: false,
           anonymous_writer: false,
-          article_tags: selectTags
+          article_tags: selectTags,
+          article_file: articleFile,
+          ...(board.board_type === "Recruit" && {
+            period_start: startDate,
+            period_end: endDate
+          }),
         }, getAuthConfig());
         const res = response.data;
+        if (res['status'] === "success") {
+          window.alert('수정이 완료되었습니다!');
+          window.location.href = `/community/article/` + articleID + `/`;
+        }
 
         console.log(res);
       }
@@ -139,6 +147,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     editorRef.current = editor;
   };
 
+  // File
   const handleFile = () => {
     const nextNum = numFile + 1;
     
@@ -154,6 +163,8 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     console.log(nextNum + "v");
   }
   console.log(Object.keys({temp:1}))
+  console.log(fileObj);
+  console.log(articleFile);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -170,10 +181,9 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       inputRef.current.files = store.files;
     }
   };
-  
+
   // Tag
   const handleOptionSelect = (selectedTags) => {
-    console.log(selectTags);
     setSelectTags(selectedTags);
   };
   const customStyles = {
@@ -231,21 +241,15 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                 {board.name} 게시판
             </a>
           </div>
-          <div className="d-flex justify-content-end gap-2"> 
-            {board.board_type === "Notice" && (
-              <div className="p-board-title">
-                  <input type="checkbox" id="is-notice" className="align-middle" checked={noticeCheck()} onChange={() => setIsAuthNotice(!isAuthNotice)} />{' '}
-                <label htmlFor="is-notice">공지</label>
-              </div>
-            )}
+          <div className="d-flex justify-content-end gap-2">
             {board.board_type === "QnA" && (
               <div className="p-board-title">
                   <input type="checkbox" id="is-anonymous" className="align-middle" checked={anonymousCheck()} onChange={() => setAnonymousWriter(!anonymousWriter)} />{' '}
                 <label htmlFor="is-anonymous">익명</label>
               </div>
             )}
-            <Button variant="transparent" onClick={handleShow} type="button" id="btn-content-edit" className="btn btn-outline-light">
-              <BsSave /> 저장
+            <Button variant="transparent" onClick={handleShow} type="button" id="btn-content-edit">
+              저장하기
             </Button>
           </div>
         </div>
@@ -254,8 +258,8 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           <input type="hidden" id="board-name" className="board_name" value={board.name} />
           <input type="hidden" id="board-id" className="board_id" value={board.id} />
           <input type="hidden" id="article-id" className="article_id" value={article.id} />
-          {board.board_type === 'Team' && 
-            <input type="hidden" id="team-id" className="team_id" value={board.team.id} />
+          {board.board_type === "Recruit" && 
+            <input type="hidden" id="team-id" className="team_id" value={board.team_id} />
           }
           <div className="d-flex flex-column border border-2">
             <div className="d-flex justify-content-between mb-1">
@@ -306,13 +310,13 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
               <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>파일 추가</button>
             </div>
             <div id="article-file-container">
-              {/* {articleFile.map((id, index) => ( //업로드 된 파일 목록
-                <div id={`input-group-saved${index + 1}`} className="input-group my-1">
+              {articleFile.map((id, index) => ( //업로드 된 파일 목록
+                <div id={`input-group-saved${index + 1}`} className="input-group my-1" key={index}>
                   <input type="text" name={`article_file_${id}`} className="form-control article-file" value={name} readOnly />
                   <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(`saved${index + 1}`)}><BsXLg /></button>
                 </div>
-              ))} */}
-              {fileObj && Object.keys(fileObj).map((id) => ( //파일 추가 input
+              ))}
+              {fileObj && Object.keys(fileObj).map((id) => ( //파일 추가 input form으로 작성해서 제출할 때 console
                 <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
                   <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file"/>
                   <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
