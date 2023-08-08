@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
 import Select from 'react-select';
@@ -17,6 +17,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const url = domainUrl + "community/" + boardName + "/"
   const urlRegistArticle = domainUrl + "/community/api/article/create/"
   const urlTag = domainUrl + "/tag/api/list/"
+  const navigate = useNavigate();
 
   const article = {}
   const [isAuthNotice, setIsAuthNotice] = useState(false);
@@ -24,7 +25,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const [team, setTeam] = useState(null);
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
-  const [articleFile, setArticleFile] = useState([]);
+  const [articleFile, setArticleFile] = useState({});
   const [title, setTitle] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [tags, setTags] = useState([]);
@@ -55,8 +56,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     }
     getArticle()
   }, [])
-  
-  // console.log("board", boardName);
 
   // 익명 체크 여부 확인
   const anonymousCheck = () => {
@@ -65,7 +64,8 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   };
 
   // 저장 버튼 클릭 시
-  const handleShow = async() => {
+  const handleShow = (event) => {
+    event.preventDefault();
     if(boardName === "팀 모집"){
       if(team === null){
         window.alert("모집할 팀을 선택해 주세요");
@@ -103,42 +103,64 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         console.log("team", team);
         console.log("articleFile", articleFile);
 
-        try {
-          const response = await axios.post(urlRegistArticle, {
-            title: title,
-            content: bodyText,
-            is_notice: isAuthNotice,
-            anonymous_writer: anonymousWriter,
-            article_tags: selectTags,
-            article_file: articleFile,
-            ...(boardName === "팀 모집" && {
-              period_start: startDate,
-              period_end: endDate,
-              team_id: team,
-            }),
-          }, getAuthConfig());
-
-          const res = response.data;
-          if (res['status'] === "success") {
-            window.alert('등록이 완료되었습니다!');
-            window.location.href = `/community/board/${boardName}/`;
-          } else {
-            window.alert(res['message']);
-            return;
-          }
-          console.log(res);
-        } catch (error) {
-          console.error('에러:', error);
-          window.alert('Error Occured');
-        }
+        postArticle();
       }
     }
   };
+  
+  const postArticle = async() => {
+    try {
+      const config = getAuthConfig();
+      config.headers['Content-Type'] = 'multipart/form-data';
+      console.log("config", config);
+      
+      const postData = {
+        board_name: boardName,
+        title: title,
+        content: bodyText,
+        is_notice: isAuthNotice,
+        anonymous_writer: anonymousWriter,
+        article_tags: selectTags,
+        ...articleFile,
+        ...(boardName === "팀 모집" && {
+          period_start: startDate,
+          period_end: endDate,
+          team_id: team,
+        }),
+      }
 
+      const formData = new FormData();
+      Object.entries(postData).forEach(([key, value]) => {
+        formData.append(key, value);
+      })
+
+      console.log("postData", postData);
+      for(let key of formData){
+        console.log("key", key, formData[key]);
+      }
+      const response = await axios.post(urlRegistArticle, formData, getAuthConfig());
+
+      const res = response.data;
+      console.log(res);
+      if (res['status'] === "success") {
+        window.alert('등록이 완료되었습니다!');
+        navigate(`/community/board/${boardName}/`);
+      } else {
+        window.alert(res['message']);
+        return;
+      }
+    } catch (error) {
+      console.error('에러:', error);
+      window.alert('Error Occured');
+    }
+  };
+
+  // Title
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
   };
 
+  // Body
   const handleBodyChange = (e) => {
     setBodyText(e.target.getContent());
   };
@@ -170,12 +192,12 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     }
     setNumFile(nextNum);
 
-    console.log(numFile);
-    console.log(nextNum + "v");
+    // console.log(numFile);
+    // console.log(nextNum + "v");
   }
   // console.log(Object.keys({temp:1}))
-  console.log("file", articleFile);
-  console.log("Obj", fileObj);
+  // console.log("file", articleFile);
+  // console.log("Obj", fileObj);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -192,6 +214,16 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       inputRef.current.files = store.files;
     }
   };
+
+  const handleFileChange = (event) => {
+    const fileName = event.target.name;
+    const fileObjs = {...articleFile};
+    fileObjs[fileName] = event.target.files[0];
+    
+    setArticleFile(fileObjs);
+
+    console.log("fileObj", fileObjs);
+  }
   
   // Tag
   const handleOptionSelect = (selectedTags) => {
@@ -213,7 +245,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   };
 
   const handleClick = () => {
-    window.location.href = `/community/board/${boardName}/`;
+    navigate(`/community/board/${boardName}/`);
   }
 
   // Team
@@ -251,6 +283,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     <>
       {renderConsentMessage}
       <div id='community-main' className="col-md-9">
+        <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
         <div id="board-title-bar" className="flex-between">
           <div className="d-flex justify-content-end gap-2">
             <Button variant="transparent" onClick={handleClick} type="button" id="btn-content-back">
@@ -269,12 +302,11 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                 <label htmlFor="is-anonymous">익명</label>
               </div>
             )}
-            <Button variant="transparent" onClick={handleShow} type="button" id="btn-content-edit">
+            <Button variant="transparent" type="submit" id="btn-content-edit">
               작성하기
             </Button>
           </div>
         </div>
-        <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data">
           {/* <input type="hidden" id="board-type" className="board_type" value={board.board_type} /> */}
           <input type="hidden" id="board-name" className="board_name" value={boardName} />
           {/* <input type="hidden" id="board-id" className="board_id" value={board.id} />
@@ -334,7 +366,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             <div id="article-file-container">
               {fileObj && Object.keys(fileObj).map((id) => ( //파일 추가 input
                 <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
-                  <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file"/>
+                  <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file" onChange={handleFileChange}/>
                   <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
                 </div>
               ))}
