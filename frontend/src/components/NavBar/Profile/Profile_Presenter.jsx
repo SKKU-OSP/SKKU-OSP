@@ -1,6 +1,6 @@
 import Dropdown from 'react-bootstrap/Dropdown';
 import React from 'react';
-import '../../MainHeader.css';
+import '../MainHeader.css';
 
 export default function Profile_Presenter(props) {
   const { iconSize, photo, sendLogoutRequest } = props;

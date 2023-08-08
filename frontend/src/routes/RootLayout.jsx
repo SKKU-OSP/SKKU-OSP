@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 
-import MainHeader from '../components/MainHeader';
+import MainHeader from '../components/NavBar/MainHeader_Container';
 import { AuthContextProvider } from '../utils/auth-context.jsx';
 
 function RootLayout() {

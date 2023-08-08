@@ -1,6 +1,6 @@
 import { MdOutlineEmail } from 'react-icons/md';
 import ChatMessageModal_Container from './ChatMessageModal_Container';
-import '../IconList.css';
+import '../IconList/IconList.css';
 
 export default function ChatMessage_Presenter({ newAlert, show, onOpenChatModal, onCloseChatModal, iconSize }) {
   return (
