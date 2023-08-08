@@ -221,6 +221,10 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }),
   };
 
+  const handleClick = () => {
+    window.location.href = `/community/board/${board.name}/`;
+  }
+
   //정보공개 미동의 시 뜨는 창
   const renderConsentMessage = !isWrite && type === 'register' && ( 
     <div>
@@ -236,9 +240,14 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       {renderConsentMessage}
       <div id='community-main' className="col-md-9">
         <div id="board-title-bar" className="flex-between">
+          <div className="d-flex justify-content-end gap-2">
+            <Button variant="transparent" onClick={handleClick} type="button" id="btn-content-back">
+              뒤로가기
+            </Button>
+          </div>
           <div id="board-title" className="p-board-title">
-            <a href={`/community/board/${board.name}/${board.id}`}>       
-                {board.name} 게시판
+            <a>       
+              {board.name} 게시판
             </a>
           </div>
           <div className="d-flex justify-content-end gap-2">
