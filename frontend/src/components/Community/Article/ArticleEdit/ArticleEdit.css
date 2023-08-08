@@ -239,6 +239,15 @@
     margin-bottom: 1rem;
     border-radius: 0.65rem;
     position: relative;
+    /* display: flex;
+    width: 1109px;
+    height: 80px;
+    padding: 0px 40px;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid #B0B0B0;
+    background: #FFF; */
 }
 
 #board-title {
@@ -246,8 +255,15 @@
 }
 
 #board-title > a {
-    font-size: 20px;
-    color: var(--main-white);
+  width: 150px;
+  color: #06F;
+  text-align: center;
+  font-family: Inter;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  text-decoration: none;
 }
 
 .p-board-title {
