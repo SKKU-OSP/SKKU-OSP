@@ -35,10 +35,6 @@ const router = createBrowserRouter([
         element: <CommunityLayout />,
         children: [
           {
-            path: '',
-            element: <Community />
-          },
-          {
             path: 'board/:board_name',
           //   element: <BoardPage />
             element: <Board />
