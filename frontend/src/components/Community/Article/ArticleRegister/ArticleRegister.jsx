@@ -7,7 +7,6 @@ import { BsXLg } from "react-icons/bs";
 import { Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import './ArticleRegister.css';
 import { getAuthConfig } from '../../../../utils/auth';
 
 const domainUrl = import.meta.env.VITE_SERVER_URL
