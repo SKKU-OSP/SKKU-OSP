@@ -41,20 +41,20 @@ urlpatterns = [
     path('<username>/api/chart-data', views.get_chart_data, name='chart-data'),
 
     # Rest API
-    path('api/tag/<int:user_id>/', views_profile.UserInterestTagListView.as_view(),
+    path('api/tag/<username>/', views_profile.UserInterestTagListView.as_view(),
          name='UserInterestTagList'),
     path('api/interests/update/',
          views_profile.UserInterestTagUpdateView.as_view(), name='UserInterestTagUpdate'),
     path('api/langs/update/',
          views_profile.UserLangTagUpdateView.as_view(), name='UserLangTagUpdate'),
-    path('api/profile-activity/<int:user_id>/',
+    path('api/profile-activity/<username>/',
          views_profile.ProfileActivityView.as_view(), name='profile-activity'),
-    path('api/profile-info/<int:user_id>/',
+    path('api/profile-info/<username>/',
          views_profile.ProfileInfoView.as_view(), name='profile-info'),
-    path('api/profile-intro/<int:user_id>/',
+    path('api/profile-intro/<username>/',
          views_profile.ProfileMainView.as_view(), name='profile-main'),
 
-    path('api/guideline/<int:user_id>/',
+    path('api/guideline/<username>/',
          views.GuidelineView.as_view(), name='guideline')
 
 ]

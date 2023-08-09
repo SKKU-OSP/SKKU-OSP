@@ -15,7 +15,7 @@ import logging
 
 
 class ProfileMainView(APIView):
-    def get_validation(self, request, status, errors, user_id):
+    def get_validation(self, request, status, errors, username):
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -23,7 +23,7 @@ class ProfileMainView(APIView):
 
         else:
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
@@ -34,7 +34,7 @@ class ProfileMainView(APIView):
 
         return status, errors
 
-    def get(self, request, user_id):
+    def get(self, request, username):
         # Declaration
         data = {}
         errors = {}
@@ -42,7 +42,7 @@ class ProfileMainView(APIView):
 
         # Request Validation
         status, errors \
-            = self.get_validation(request, status, errors, user_id)
+            = self.get_validation(request, status, errors, username)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -50,7 +50,7 @@ class ProfileMainView(APIView):
 
         # Transactions
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(username=username)
             account = Account.objects.get(user=user)
             data['account'] = AccountDetailSerializer(account).data
             name = StudentTab.objects.get(id=account.student_data_id).name
@@ -72,13 +72,74 @@ class ProfileMainView(APIView):
             res = {'status': status, 'errors': errors}
         return Response(res)
 
+    def post_validation(self, request, username):
+        errors = {}
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            except Exception as e:
+                logging.exception(f'ProfileMainView undefined_exception: {e}')
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+
+        return errors
+
+    def post(self, request, username):
+        '''
+        introduction과 portfolio를 업데이트하는 요청 처리
+        '''
+        # Declaration
+        data = {}
+        status = 'fail'
+
+        # Request Validation
+        errors = self.post_validation(request, username)
+
+        if errors:
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        introduction = request.data.get('introduction', None)
+        portfolio = request.data.get('portfolio', None)
+
+        # Transactions
+        try:
+            account = Account.objects.get(user=request.user)
+            if introduction:
+                account = Account.objects.get(user=request.user)
+                account.introduction = introduction
+                account.save()
+                data['introduction'] = introduction
+            if portfolio:
+                account.portfolio = portfolio
+                account.save()
+                data['portfolio'] = portfolio
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+        except Exception as e:
+            logging.exception(
+                f'ProfileIntroUpdateView undefined_exception: {e}')
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if errors:
+            res = {'status': status, 'errors': errors}
+        else:
+            res = {'status': 'success', 'data': data}
+        return Response(res)
+
 
 class UserInterestTagListView(APIView):
     '''
     유저 관심분야 읽기 API
     '''
 
-    def get_validation(self, request, status, errors, user_id):
+    def get_validation(self, request, status, errors, username):
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -86,7 +147,7 @@ class UserInterestTagListView(APIView):
 
         else:
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
@@ -96,7 +157,7 @@ class UserInterestTagListView(APIView):
 
         return status, errors
 
-    def get(self, request, user_id):
+    def get(self, request, username):
         # Declaration
         data = {}
         errors = {}
@@ -105,7 +166,7 @@ class UserInterestTagListView(APIView):
 
         # Request Validation
         status, errors \
-            = self.get_validation(request, status, errors, user_id)
+            = self.get_validation(request, status, errors, username)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -127,14 +188,14 @@ class UserInterestTagListView(APIView):
 
         print("tag_type", tag_type)
         try:
-            account = Account.objects.get(user_id=user_id)
+            account = Account.objects.get(username=username)
             filter_kwargs['account'] = account
             account_tags = AccountInterest.objects.filter(**filter_kwargs)
 
             data['account'] = AccountSerializer(account).data
             data['interest_tags'] = AccountInterestSerializer(
                 account_tags, many=True).data
-            message = f'User ID {user_id}의 태그'
+            message = f'Username {username}의 태그'
 
         except DatabaseError as e:
             # Database Exception handling
@@ -286,7 +347,7 @@ class UserLangTagUpdateView(APIView):
 
 
 class ProfileActivityView(APIView):
-    def get_validation(self, request, status, errors, user_id):
+    def get_validation(self, request, status, errors, username):
         user = request.user
 
         if not user.is_authenticated:
@@ -295,7 +356,7 @@ class ProfileActivityView(APIView):
 
         else:
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
@@ -306,7 +367,7 @@ class ProfileActivityView(APIView):
 
         return status, errors
 
-    def get(self, request, user_id):
+    def get(self, request, username):
         # Declaration
         data = {}
         errors = {}
@@ -315,7 +376,7 @@ class ProfileActivityView(APIView):
 
         # Request Validation
         status, errors \
-            = self.get_validation(request, status, errors, user_id)
+            = self.get_validation(request, status, errors, username)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -323,7 +384,7 @@ class ProfileActivityView(APIView):
 
         # Transactions
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(username=username)
 
             try:
                 account = Account.objects.get(user=user)
@@ -386,7 +447,7 @@ class ProfileActivityView(APIView):
 
 
 class ProfileInfoView(APIView):
-    def get_validation(self, request, status, errors, user_id):
+    def get_validation(self, request, status, errors, username):
         user = request.user
 
         if not user.is_authenticated:
@@ -394,7 +455,7 @@ class ProfileInfoView(APIView):
             status = 'fail'
         else:
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
@@ -404,7 +465,7 @@ class ProfileInfoView(APIView):
 
         return status, errors
 
-    def get(self, request, user_id):
+    def get(self, request, username):
         # Declaration
         data = {}
         errors = {}
@@ -413,7 +474,7 @@ class ProfileInfoView(APIView):
 
         # Request Validation
         status, errors \
-            = self.get_validation(request, status, errors, user_id)
+            = self.get_validation(request, status, errors, username)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -422,7 +483,7 @@ class ProfileInfoView(APIView):
         # Transactions
 
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(username=username)
             account = Account.objects.get(user=user)
             studenttab = StudentTab.objects.get(id=account.student_data_id)
 
