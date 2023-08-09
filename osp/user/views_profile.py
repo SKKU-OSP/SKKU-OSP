@@ -188,7 +188,7 @@ class UserInterestTagListView(APIView):
 
         print("tag_type", tag_type)
         try:
-            account = Account.objects.get(username=username)
+            account = Account.objects.get(user__username=username)
             filter_kwargs['account'] = account
             account_tags = AccountInterest.objects.filter(**filter_kwargs)
 
@@ -199,12 +199,14 @@ class UserInterestTagListView(APIView):
 
         except DatabaseError as e:
             # Database Exception handling
+            logging.exception(f'UserInterestTagListView DB ERROR: {e}')
             status = 'fail'
             errors['DB_exception'] = 'DB Error'
             message = '요청실패'
 
         except Exception as e:
             logging.exception(f'UserInterestTagListView Exception: {e}')
+            status = 'fail'
             message = '요청실패'
 
         # Response
