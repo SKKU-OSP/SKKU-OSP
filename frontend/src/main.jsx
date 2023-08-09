@@ -22,6 +22,7 @@ import StatisticsPage from './routes/StatisticsPage';
 
 import Repository from './components/User/TinyUser/Repository';
 import TeamApplication from './components/NavBar/TeamApplication/TeamApplication';
+import RecommenderPage from './routes/RecommenderPage';
 
 const router = createBrowserRouter([
   {
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
           {
             path: 'TeamApplication',
             element: <TeamApplication />
+          },
+          {
+            path: 'recommender',
+            element: <RecommenderPage />
           }
         ]
       },
