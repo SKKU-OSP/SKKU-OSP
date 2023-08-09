@@ -327,7 +327,18 @@ class NoticeView(APIView):
         return status, errors
 
     def get(self, request):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
 
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
         data = {}
         data["require_login"] = False
         data["require_membership"] = False
