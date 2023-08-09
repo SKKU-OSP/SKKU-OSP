@@ -30,7 +30,6 @@ function SkillModal(props) {
   }, [skillShow]);
 
   const OnHandleOnDrag = (e, skill) => {
-    console.log(skill);
     const skillJsonString = JSON.stringify(skill);
     e.dataTransfer.setData('skill', skillJsonString);
   };
