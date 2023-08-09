@@ -12,7 +12,7 @@ import AccountsLayout from './routes/AccountsLayout';
 import ArticlePage from './routes/ArticlePage';
 import ArticleEdit from './components/Community/Article/ArticleEdit/ArticleEdit';
 import ArticleRegister from './components/Community/Article/ArticleRegister/ArticleRegister';
-import Board from './components/Community/Board/Board'
+import Board from './components/Community/Board/Board';
 import SignUpPage from './routes/SignUpPage';
 import { tokenLoader } from './utils/auth';
 
@@ -37,7 +37,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: 'board/:board_name',
-          //   element: <BoardPage />
+            //   element: <BoardPage />
             element: <Board />
           },
           {
@@ -89,7 +89,7 @@ const router = createBrowserRouter([
         element: <UserPage />
       },
       {
-        path: 'repository',
+        path: 'repository/:user_id',
         element: <Repository />
       },
       {
