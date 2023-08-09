@@ -1,19 +1,17 @@
 from django.db import transaction
-from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from django.db import transaction, DatabaseError
 
 from user.models import Account, AccountInterest
-from user.serializers import AccountSerializer, AccountInterestSerializer
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
+from user.serializers import AccountSerializer, AccountDetailSerializer, AccountInterestSerializer, StudentSerializer
+from user.models import StudentTab, Account, AccountInterest
 from repository.models import GithubRepoStats, GithubRepoCommits
 
 from tag.models import TagIndependent
 
 import logging
-import time
 
 
 class ProfileMainView(APIView):
@@ -29,7 +27,8 @@ class ProfileMainView(APIView):
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
-            except:
+            except Exception as e:
+                logging.exception(f'ProfileMainView undefined_exception: {e}')
                 errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
                 status = 'fail'
 
@@ -53,7 +52,7 @@ class ProfileMainView(APIView):
         try:
             user = User.objects.get(id=user_id)
             account = Account.objects.get(user=user)
-            data['account'] = AccountSerializer(account).data
+            data['account'] = AccountDetailSerializer(account).data
             name = StudentTab.objects.get(id=account.student_data_id).name
             data['name'] = name
 
@@ -61,7 +60,8 @@ class ProfileMainView(APIView):
             # Database Exception handling
             status = 'fail'
             errors['DB_exception'] = 'DB Error'
-        except:
+        except Exception as e:
+            logging.exception(f'ProfileMainView undefined_exception: {e}')
             status = 'fail'
             errors['undefined_exception'] = 'undefined_exception'
 
@@ -204,11 +204,9 @@ class UserInterestTagUpdateView(APIView):
             errors['DB_exception'] = 'DB Error'
 
         except Exception as e:
-
-            print("UserInterestTagListView", e)
+            logging.exception(f"UserInterestTagUpdateView Exception: {e}")
             status = 'fail'
             message = '유저 관심분야를 수정하는데 실패했습니다.'
-
 
         # Response
         if status == 'success':
@@ -263,10 +261,9 @@ class UserLangTagUpdateView(APIView):
                 message = '사용언어를 수정했습니다.'
 
         except Exception as e:
-            print("UserInterestTagListView", e)
+            logging.exception(f"UserLangTagUpdateView Exception: {e}")
             status = 'fail'
             message = '유저 사용언어를 수정하는데 실패했습니다.'
-
 
         # Response
         if status == 'success':
@@ -302,7 +299,8 @@ class ProfileActivityView(APIView):
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
-            except:
+            except Exception as e:
+                logging.exception(f"undefined_exception: {e}")
                 errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
                 status = 'fail'
 
@@ -324,7 +322,6 @@ class ProfileActivityView(APIView):
             return Response(res)
 
         # Transactions
-        start = time.time()
         try:
             user = User.objects.get(id=user_id)
 
@@ -333,7 +330,7 @@ class ProfileActivityView(APIView):
                 portfolio = account.portfolio
                 data['portfolio'] = portfolio
             except Exception as e:
-                print("account error", e)
+                logging.exception(f"account error: {e}")
                 status = 'fail'
                 message = 'account error'
 
@@ -367,7 +364,7 @@ class ProfileActivityView(APIView):
             ), key=lambda x: x['committer_date'], reverse=True)
             data['recent_repos'] = recent_repos
         except Exception as e:
-            print("load_repo_data error save", e)
+            logging.exception(f"load_repo_data error save: {e}")
             status = 'fail'
 
         # Response
@@ -429,17 +426,16 @@ class ProfileInfoView(APIView):
             account = Account.objects.get(user=user)
             studenttab = StudentTab.objects.get(id=account.student_data_id)
 
-            data['student_data_id'] = studenttab.id
-            data['github_id'] = studenttab.github_id
-            data['email'] = studenttab.primary_email
+            data['student'] = StudentSerializer(studenttab).data
 
         except DatabaseError as e:
             # Database Exception handling
             status = 'fail'
             errors['DB_exception'] = 'DB Error'
-        except:
+        except Exception as e:
             status = 'fail'
             errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(f"undefined_exception: {e}")
 
         # Response
         if status == 'success':
