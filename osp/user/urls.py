@@ -51,6 +51,8 @@ urlpatterns = [
          views_profile.ProfileActivityView.as_view(), name='profile-activity'),
     path('api/profile-info/<int:user_id>/',
          views_profile.ProfileInfoView.as_view(), name='profile-info'),
+    path('api/profile-intro/<int:user_id>/',
+         views_profile.ProfileMainView.as_view(), name='profile-main'),
 
     path('api/guideline/<int:user_id>/',
          views.GuidelineView.as_view(), name='guideline')
