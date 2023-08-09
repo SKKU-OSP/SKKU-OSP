@@ -7,7 +7,7 @@ app_name = 'community'
 urlpatterns = [
     path('', views.CommunityMainView.as_view(), name='main'),
     path('redirect/', views.redirectView.as_view(), name='RedirectView'),
-    path('board/<board_name>/',
+    path('board/<board_id>/',
          views.TableBoardView.as_view(), name='Board'),
     path('board/notice/', views.NoticeView.as_view(), name='notice-board'),
     path('board/notice-save/',
@@ -53,5 +53,12 @@ urlpatterns = [
     path('api/comment/<int:comment_id>/delete/',
          views_article.CommentDeleteView.as_view(), name='CommentDelete'),
     path('api/comment/<int:comment_id>/like/',
-         views_article.CommentLikeView.as_view(), name='CommentLike')
+         views_article.CommentLikeView.as_view(), name='CommentLike'),
+    path('api/main/',
+         views.CommunityMainView.as_view(), name='main'),
+    path('api/board/<int:board_id>/',
+         views.TableBoardView.as_view(), name='board'),
+    path('api/board/notice/',
+         views.NoticeView.as_view(), name='board')
+
 ]
