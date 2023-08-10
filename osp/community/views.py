@@ -19,6 +19,7 @@ from community.utils import convert_size
 
 from community.serializers import BoardSerializer, ArticleSerializer
 from user.serializers import AccountPrivacySerializer
+from team.serializers import TeamSerializer, TeamMemberSerializer
 
 import math
 import json
@@ -27,21 +28,19 @@ from django.views.generic import TemplateView
 from datetime import datetime
 
 import team.utils
-from team.serializers import TeamSerializer, TeamMemberSerializer
+
+
+import logging
 
 
 class CommunityMainView(APIView):
     '''
     GET: 커뮤니티 메인화면을 위한 JSON response
     URL : /community
-    data :
-        boards : 일반 게시판의 목록 리스트
-        show_searchbox : 검색창 렌더링 여부
     '''
 
     def get_validation(self, request, status, errors):
         user = request.user
-
         return status, errors
 
     def get(self, request, *args, **kwargs):
@@ -108,16 +107,15 @@ class CommunityMainView(APIView):
 
 class TableBoardView(APIView):
     '''
-    GET: 게시판을 위한 JSON response
-    URL : /community/board/<board_id>/
+    GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
+    URL : /community/api/board/<board_id>/
 
-    일반게시판, 팀 게시판, 팀 모집 게시판
+
 
     JSON RESPONSE
     data :
         board : URL 로 지정된 Board 객체
         show_searchbox : 검색창 렌더링 여부
-        require_login : 비로그인시 접근제한되면 True
         require_membership : 해당게시판의 팀원이 아니라서 접근제한되면 True
         privacy : AccountPrivacy 모델에 저장된 값
 
@@ -145,8 +143,9 @@ class TableBoardView(APIView):
                     errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
                     status = 'fail'
                 elif not team.utils.is_teammember(board.team.id, user.id):
-                    errors["user_is_not_teammember"] = "해당 팀의 멤버가 아닙니다."
-                    status = 'fail'
+                    if not TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0).exists():
+                        errors["user_is_not_teammember"] = "해당 팀의 멤버가 아닙니다. "
+                        status = 'fail'
             elif board.board_type == 'Notice':
                 errors["invalid_url"] = "공지게시판 api 접근 url 은 /community/api/board/notice 입니다."
                 status = 'fail'
@@ -175,121 +174,103 @@ class TableBoardView(APIView):
             return Response(res)
 
         # Transactions
-        metas = {}
-
         data['show_searchbox'] = True
-        data['require_login'] = False
-        data["require_membership"] = False
         try:
             board = Board.objects.get(id=board_id)
             data["board"] = BoardSerializer(board).data
+            account = Account.objects.get(user=request.user)
             if request.user.is_authenticated:
                 try:
                     acc_pp = AccountPrivacy.objects.get(account=account)
                 except:
                     acc_pp = AccountPrivacy.objects.create(
                         account=account, open_lvl=1, is_write=False, is_open=False)
-                    data['privacy'] = AccountPrivacySerializer(acc_pp).data
+                data['privacy'] = AccountPrivacySerializer(acc_pp).data
+
             else:
                 account = None
                 data['privacy'] = None
 
-        except DatabaseError as e:
-            # Database Exception handling
-            status = 'fail'
-            errors['DB_exception'] = 'DB Error'
-        except Exception as e:
-            status = 'fail'
-            errors['undefined_exception'] = 'undefined_exception : ' + str(e)
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F(
+                "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+            article_list = get_article_metas(article_list)
+            data['articles'] = ArticleSerializer(article_list, many=True).data
 
-        # 로그인된 정보공개 설정을 확인한다.
-        article_list = Article.objects.filter(board=board).annotate(writer_name=F(
-            "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-        article_list = article_list[:min(8, len(article_list))]
-        article_list = get_article_metas(article_list)
-        data['articles'] = ArticleSerializer(article_list, many=True).data
+            # 팀 게시판
+            if board.board_type == 'Team':
 
-        # 게시판 별로 다른 데이터를 전달한다.
-        # 공지게시판
-        if board.board_type == 'Notice':
+                # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
+                # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
+                account = Account.objects.get(user=request.user)
+                data['invite_message'] = TeamInviteMessage.objects.filter(
+                    team__id=board.team_id, account__user=request.user, direction=True, status=0)
 
-            return NoticeView.as_view()
+                if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
+                    # 팀 멤버라면 초대 상태 리셋
+                    data['is_invited_user'] = False
 
-        # 공지게시판
-        if board.board_type == 'User':
+                elif data['invite_message'].exists():
+                    # 초대 상태로 설정
+                    data['is_invited_user'] = True
 
-            return Response({'status': 'fail', 'data': data})
-
-        # 팀 게시판
-        if board.board_type == 'Team':
-            # 팀 소속일 경우 팀 게시판 로드
-            # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
-            # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
-            account = Account.objects.get(user=request.user)
-            data['invite_message'] = TeamInviteMessage.objects.filter(
-                team__id=board.team_id, account__user=request.user, direction=True, status=0)
-
-            if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
-                # 팀 멤버라면 초대 상태 리셋
-                data['is_invited_user'] = False
-
-            elif data['invite_message'].exists():
-                # 초대 상태로 설정
-                data['is_invited_user'] = True
-
-            else:
-                # 팀 멤버도 아니고 초대 받지 않았다면 열람 불가
-                data['require_membership'] = True
-                return Response({'status': 'fail'})
-
-            team = board.team
-            team_tags = TeamTag.objects.filter(team=team).values(
-                'team', 'tag__name', 'tag__type')
-            team_tags_list = []
-            try:
+                team = board.team
+                team_tags = TeamTag.objects.filter(team=team).values(
+                    'team', 'tag__name', 'tag__type')
+                team_tags_list = []
                 for atg in team_tags:
                     team_tags_list.append(
                         {'name': atg["tag__name"], 'type': atg["tag__type"]})
-            except Exception as e:
-                print("error in team tag", e)
 
-            team_members = TeamMember.objects.filter(team=team).order_by(
-                '-is_admin').prefetch_related('member__user')
+                team_members = TeamMember.objects.filter(team=team).order_by(
+                    '-is_admin').prefetch_related('member__user')
 
-            # 검색한 팀 멤버에서 유저 검색
-            tm = team_members.filter(member=account).first()
-            if tm:
-                data['team_admin'] = tm.is_admin
-            data['team'] = TeamSerializer(team).data
-            data['team_tags'] = team_tags_list
-            data['team_members'] = TeamMemberSerializer(
-                team_members, many=True).data
+                # 검색한 팀 멤버에서 유저 검색
+                tm = team_members.filter(member=account).first()
+                if tm:
+                    data['team_admin'] = tm.is_admin
+                data['team'] = TeamSerializer(team).data
+                data['team_tags'] = team_tags_list
+                data['team_members'] = TeamMemberSerializer(
+                    team_members, many=True).data
 
-        # 팀 모집 게시판일 경우
-        if board.board_type == 'Recruit':
-            account = Account.objects.get(user=request.user)
-            active_article = Article.objects.filter(
-                board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            active_article = get_article_board_data(active_article)
-            for article in active_article:
-                article.tags = [
-                    art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-                teamrecruitarticle = TeamRecruitArticle.objects.filter(
-                    article=article).first()
-                if teamrecruitarticle:
-                    article.team = teamrecruitarticle.team
-                else:
-                    article.team = None
+            # 팀 모집 게시판일 경우
+            if board.board_type == 'Recruit':
+                account = Account.objects.get(user=request.user)
+                active_article = Article.objects.filter(
+                    board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                active_article = get_article_board_data(active_article)
+                for article in active_article:
+                    article.tags = [
+                        art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
+                    teamrecruitarticle = TeamRecruitArticle.objects.filter(
+                        article=article).first()
+                    if teamrecruitarticle:
+                        article.team = teamrecruitarticle.team
+                    else:
+                        article.team = None
 
-            team_cnt = len(TeamMember.objects.filter(
-                member=account).prefetch_related('team'))
+                team_cnt = len(TeamMember.objects.filter(
+                    member=account).prefetch_related('team'))
 
-            data['team_cnt'] = team_cnt
-            data['active_article'] = ArticleSerializer(
-                active_article, many=True).data
+                data['team_cnt'] = team_cnt
+                data['active_article'] = ArticleSerializer(
+                    active_article, many=True).data
 
-        res = {"status": "success", "data": data}
-        print(data)
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'TableBoardView DB ERROR: {e}')
+            status = 'fail'
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + \
+                str(e)
+            logging.exception(f'TableBoardView undefined ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
         return Response(res)
 
 
@@ -324,6 +305,7 @@ class NoticeView(APIView):
             if user.is_superuser != 1:
                 errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있는 게시판 입니다."
                 status = 'fail'
+
         return status, errors
 
     def get(self, request):
@@ -339,37 +321,38 @@ class NoticeView(APIView):
         if status == 'fail':
             res = {'status': status, 'errors': errors}
             return Response(res)
-        data = {}
-        data["require_login"] = False
-        data["require_membership"] = False
-        data['show_notice_check'] = True
+
+        # Transactions
         try:
+            data["require_login"] = False
+            data["require_membership"] = False
+            data['show_notice_check'] = True
+
             board = Board.objects.get(board_type="Notice")
             data["board"] = BoardSerializer(board).data
-            # data["board_id"] = board.id
-            # data["board_name"] = board.name
 
-        except Board.DoesNotExist:
-            raise Http404("게시판을 찾을 수 없습니다.")
+            data.update(get_auth(board.id, request.user))
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F(
+                "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+            # article_list = article_list[:min(8, len(article_list))]
+            article_list = get_article_metas(article_list)
+            data['articles'] = ArticleSerializer(article_list, many=True).data
 
-        # data.update(get_auth(board.id, request.user))
-        article_list = Article.objects.filter(board=board).annotate(writer_name=F(
-            "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-        article_list = article_list[:min(8, len(article_list))]
-        article_list = get_article_metas(article_list)
-        data['articles'] = ArticleSerializer(article_list, many=True).data
-        if 'alert' in data:
-            res = {"status": "success", "data": data}
-            return Response(res)
+        except DatabaseError as e:
+            logging.exception(f'TableBoardView DB ERROR: {e}')
+            errors['DB_exception'] = 'DB Error'
+            status = 'fail'
+        except Exception as e:
+            logging.exception(f'TableBoardView undefined ERROR : {e}')
+            errors['undefined_exception'] = 'undefined_exception : ' + \
+                str(e)
+            status = 'fail'
 
-        if not data['show_notice_check']:
-            data['alert'] = "접근권한이 없습니다."
-            data['url'] = reverse("community:main")
-            print(data)
-            res = {"status": "success", "data": data}
-            return Response(res)
-
-        res = {"status": "success", "data": data}
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
         return Response(res)
 
 
