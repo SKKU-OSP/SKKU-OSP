@@ -15,6 +15,8 @@
     "axios": "^1.4.0",
     "bootstrap": "^5.3.0",
     "bootstrap-icons": "^1.10.5",
+    "chart.js": "^4.3.3",
+    "chartjs-chart-error-bars": "^4.3.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
     "react-datepicker": "^4.16.0",

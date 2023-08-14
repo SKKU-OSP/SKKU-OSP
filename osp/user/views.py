@@ -59,16 +59,19 @@ class UserAccountView(APIView):
             account = Account.objects.get(user=request.user)
             data['account'] = AccountSerializer(account).data
 
-            name = StudentTab.objects.get(id=account.student_data_id).name
-            data['name'] = name
+            if not request.user.is_superuser:
+                name = StudentTab.objects.get(id=account.student_data_id).name
+                data['name'] = name
 
         except DatabaseError as e:
             # Database Exception handling
             status = 'fail'
             errors['DB_exception'] = 'DB Error'
-        except:
+            logging.error(e)
+        except Exception as e:
             status = 'fail'
             errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(e)
 
         # Response
         if status == 'success':
