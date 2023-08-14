@@ -5,7 +5,7 @@ function AnnualSelectors() {
   useEffect(() => {
     setYearList([2019, 2020, 2021, 2022, 2023]);
   }, []);
-  const endYear = Math.max(yearList);
+  const endYear = Math.max(...yearList);
   return (
     <div className="d-flex text-lg mt-4">
       <div className="dropdown">
@@ -28,8 +28,8 @@ function AnnualSelectors() {
           })}
         </ul>
       </div>
-      <div className="form-check form-switch">
-        <input className="form-check-input" id="totalSwitch" type="checkbox" role="switch" checked="checked" />
+      <div className="form-check form-switch flex-switch">
+        <input className="form-check-input" id="totalSwitch" type="checkbox" role="switch" defaultChecked />
         <label className="form-check-label" htmlFor="totalSwitch">
           <span className="switch-toggle">개별</span>
           <span className="switch-toggle bold">합계</span>
