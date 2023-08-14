@@ -38,32 +38,36 @@ class CommunityMainView(APIView):
     URL : /community
     '''
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors \
-            = self.get_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'CommunityMainView validation error: {e}')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
-
-        data['show_searchbox'] = True
-
-        board_list = []
-        boards = Board.objects.exclude(
-            board_type='User').exclude(board_type='Team')
         try:
+            data['show_searchbox'] = True
+            boards = Board.objects.exclude(
+                board_type='User').exclude(board_type='Team')
             for board in boards:
                 # 최신 게시물
                 article_list = Article.objects.filter(board=board).annotate(writer_name=F(
@@ -101,9 +105,9 @@ class CommunityMainView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
@@ -114,19 +118,26 @@ class TableBoardView(APIView):
 
     '''
 
-    def get_validation(self, request, status, errors, board_id):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
-
+        board_id = kwargs.get('board_id')
         try:
             board = Board.objects.get(id=board_id)
+            valid_data['board'] = board
             if board.board_type == 'Team':
+                teaminvitemessage = TeamInviteMessage.objects.filter(
+                    team__id=board.team_id, account__user=request.user, direction=True, status=0)
                 if not request.user.is_authenticated:
                     errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
                     status = 'fail'
                 elif not team.utils.is_teammember(board.team.id, user.id):
-                    if not TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0).exists():
+                    if not teaminvitemessage.exists():
                         errors["user_is_not_teammember"] = "해당 팀의 멤버가 아닙니다. "
                         status = 'fail'
+                    else:
+                        valid_data['teaminvitemessage'] = teaminvitemessage
+                else:
+                    valid_data['teaminvitemessage'] = teaminvitemessage
             elif board.board_type == 'Notice':
                 errors["invalid_url"] = "공지게시판 api 접근 url 은 /community/api/board/notice 입니다."
                 status = 'fail'
@@ -138,27 +149,33 @@ class TableBoardView(APIView):
             errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
             status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
-    def get(self, request, board_id):
+    def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors \
-            = self.get_validation(request, status, errors, board_id)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'TableBoardView validation error: {e}')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
-
         try:
             data['show_searchbox'] = True
-            board = Board.objects.get(id=board_id)
+            board = valid_data['board']
             data["board"] = BoardSerializer(board).data
             account = Account.objects.get(user=request.user)
             if request.user.is_authenticated:
@@ -184,14 +201,13 @@ class TableBoardView(APIView):
                 # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
                 # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
                 account = Account.objects.get(user=request.user)
-                data['invite_message'] = TeamInviteMessage.objects.filter(
-                    team__id=board.team_id, account__user=request.user, direction=True, status=0)
+                teaminvitemessage = valid_data['teaminvitemessage']
 
-                if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
+                if teaminvitemessage.exists():
                     # 팀 멤버라면 초대 상태 리셋
                     data['is_invited_user'] = False
 
-                elif data['invite_message'].exists():
+                elif teaminvitemessage.exists():
                     # 초대 상태로 설정
                     data['is_invited_user'] = True
 
@@ -263,7 +279,7 @@ class NoticeView(APIView):
     URL : /community/board/notice
     '''
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -271,6 +287,7 @@ class NoticeView(APIView):
         else:
             try:
                 board = Board.objects.get(board_type="Notice")
+                valid_data['board'] = board
             except Board.DoesNotExist:
                 errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
                 status = 'fail'
@@ -280,18 +297,25 @@ class NoticeView(APIView):
 
         return status, errors
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors \
-            = self.get_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'NoticeView validation error: {e}')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -300,7 +324,7 @@ class NoticeView(APIView):
             data["require_membership"] = False
             data['show_notice_check'] = True
 
-            board = Board.objects.get(board_type="Notice")
+            board = valid_data['board']
             data["board"] = BoardSerializer(board).data
 
             data.update(get_auth(board.id, request.user))
@@ -315,8 +339,7 @@ class NoticeView(APIView):
             logging.exception(f'NoticeView DB ERROR: {e}')
             status = 'fail'
         except Exception as e:
-            errors['undefined_exception'] = 'undefined_exception : ' + \
-                str(e)
+            errors['undefined_exception'] = 'undefined_exception : ' + str(e)
             logging.exception(f'NoticeView undefined ERROR : {e}')
             status = 'fail'
 
@@ -344,24 +367,25 @@ class SearchView(APIView):
         articles : 검색된 게시글 리스트
     '''
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
 
         return status, errors
 
     def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors \
-            = self.get_validation(request, status, errors)
-
-        if status == 'fail':
-            res = {'status': status, 'errors': errors}
-            return Response(res)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         # Transactions
         try:
@@ -406,16 +430,15 @@ class SearchView(APIView):
             status = 'fail'
 
         except Exception as e:
-            errors['undefined_exception'] = 'undefined_exception : ' + \
-                str(e)
+            errors['undefined_exception'] = 'undefined_exception : ' + str(e)
             logging.exception(f'SearchView undefined ERROR : {e}')
             status = 'fail'
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
