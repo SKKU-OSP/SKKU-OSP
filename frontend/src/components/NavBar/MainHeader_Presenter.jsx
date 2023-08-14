@@ -37,7 +37,7 @@ function MainHeader_Presenter(props) {
 
         <div className={isToggled ? 'body-of-header' : 'toggle-display-none body-of-header'}>
           <div className="header-navbar">
-            <Link to="/community/자유" className="header-navbar-menu">
+            <Link to="/community/board/자유" className="header-navbar-menu">
               커뮤니티
             </Link>
             <Link to="/community/" className="header-navbar-menu">

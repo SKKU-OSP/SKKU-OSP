@@ -3,7 +3,7 @@ import CommunityNavItem from './CommunityNavItem/index';
 import BoardArticle from './BoardArticle/index';
 
 export default function Board_Presenter(props) {
-  const {} = props;
+  const {articles} = props;
 
   return (
     <div className="col-9">
@@ -20,7 +20,11 @@ export default function Board_Presenter(props) {
         </button>
       </div>
 
-      <BoardArticle />
+      {
+        articles.map(article => (
+          <BoardArticle key={article.id} article={article} />
+        ))
+      }
     </div>
   );
 }
