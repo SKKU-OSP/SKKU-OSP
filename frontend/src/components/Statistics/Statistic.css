@@ -2,3 +2,26 @@
   flex: 0 0 auto;
   width: 20%;
 }
+
+@media (max-width: 992px) {
+  .col-lg-percent-50 {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+
+  .col-lg-percent-33 {
+    flex: 0 0 auto;
+    width: 33.3%;
+  }
+}
+
+@media (max-width: 767px) {
+  .col-md-percent-100 {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+.flex-switch {
+  flex-basis: 160px;
+}
