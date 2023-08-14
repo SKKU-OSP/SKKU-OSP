@@ -112,6 +112,7 @@ class StatisticView(APIView):
             data["years"] = [year for year in range(
                 self.start_year, end_year+1)]
             res['data'] = data
+            res["status"] = 'success'
             print("소요시간", time.time() - start)
         except Exception as e:
             return Response(res)
