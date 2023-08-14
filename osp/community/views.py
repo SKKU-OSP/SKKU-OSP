@@ -177,8 +177,10 @@ class TableBoardView(APIView):
             data['show_searchbox'] = True
             board = valid_data['board']
             data["board"] = BoardSerializer(board).data
-            account = Account.objects.get(user=request.user)
+            user = request.GET.get('user')
+
             if request.user.is_authenticated:
+                account = Account.objects.get(user=request.user)
                 try:
                     acc_pp = AccountPrivacy.objects.get(account=account)
                 except:
