@@ -29,7 +29,6 @@ from datetime import datetime
 
 import team.utils
 
-
 import logging
 
 
@@ -66,7 +65,6 @@ class CommunityMainView(APIView):
             board_type='User').exclude(board_type='Team')
         try:
             for board in boards:
-
                 # 최신 게시물
                 article_list = Article.objects.filter(board=board).annotate(writer_name=F(
                     "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
@@ -89,13 +87,17 @@ class CommunityMainView(APIView):
                 data['boards_'+board.board_type+'_meta'] = meta
                 data['boards_'+board.board_type +
                      '_articles'] = articles
+
         except DatabaseError as e:
             # Database Exception handling
-            status = 'fail'
             errors['DB_exception'] = 'DB Error'
-        except Exception as e:
+            logging.exception(f'CommunityMainView DB ERROR: {e}')
             status = 'fail'
-            errors['undefined_exception'] = 'undefined_exception ' + e
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'CommunityMainView ERROR: {e}')
+            status = 'fail'
 
         # Response
         if status == 'success':
@@ -109,27 +111,6 @@ class TableBoardView(APIView):
     '''
     GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
     URL : /community/api/board/<board_id>/
-
-
-
-    JSON RESPONSE
-    data :
-        board : URL 로 지정된 Board 객체
-        show_searchbox : 검색창 렌더링 여부
-        require_membership : 해당게시판의 팀원이 아니라서 접근제한되면 True
-        privacy : AccountPrivacy 모델에 저장된 값
-
-        # 팀 게시판일 경우 
-        invite_message : 팀 초대 메세지 객체
-        is_invited_user : 해당 팀에 대해 초대상태인 유저이면 true
-        team : 게시판의 팀 객체
-        team_tags : 팀이 설정한 tag 리스트
-        team_members : 팀 멤버 리스트
-        team_admin : 팀 멤버중에 admin이 한 명이라도 있을경우 true
-
-        # 팀모집 게시판일 경우
-        active_article : 모집중 여부
-        team_cnt : 본인이 속한 팀 개수
 
     '''
 
@@ -174,8 +155,9 @@ class TableBoardView(APIView):
             return Response(res)
 
         # Transactions
-        data['show_searchbox'] = True
+
         try:
+            data['show_searchbox'] = True
             board = Board.objects.get(id=board_id)
             data["board"] = BoardSerializer(board).data
             account = Account.objects.get(user=request.user)
@@ -260,6 +242,7 @@ class TableBoardView(APIView):
             errors['DB_exception'] = 'DB Error'
             logging.exception(f'TableBoardView DB ERROR: {e}')
             status = 'fail'
+
         except Exception as e:
             errors['undefined_exception'] = 'undefined_exception : ' + \
                 str(e)
@@ -278,17 +261,6 @@ class NoticeView(APIView):
     '''
     GET: 공지게시판을 위한 JSON response
     URL : /community/board/notice
-
-    공지게시판
-
-    JSON RESPONSE
-    message : 권한이 없을 떄, 프론트에서 alert 할 내용
-    data :
-        show_searchbox : 검색창 렌더링 여부, 항상 True
-        require_login : 비로그인시 접근제한되면 True
-        require_membership : 해당게시판의 팀원이 아니라서 접근제한되면 True
-        board : notice 게시판 객체
-        show_notice_check : notice 작성권한 boolean
     '''
 
     def get_validation(self, request, status, errors):
@@ -339,13 +311,13 @@ class NoticeView(APIView):
             data['articles'] = ArticleSerializer(article_list, many=True).data
 
         except DatabaseError as e:
-            logging.exception(f'TableBoardView DB ERROR: {e}')
             errors['DB_exception'] = 'DB Error'
+            logging.exception(f'NoticeView DB ERROR: {e}')
             status = 'fail'
         except Exception as e:
-            logging.exception(f'TableBoardView undefined ERROR : {e}')
             errors['undefined_exception'] = 'undefined_exception : ' + \
                 str(e)
+            logging.exception(f'NoticeView undefined ERROR : {e}')
             status = 'fail'
 
         # Response
@@ -372,17 +344,33 @@ class SearchView(APIView):
         articles : 검색된 게시글 리스트
     '''
 
+    def get_validation(self, request, status, errors):
+        user = request.user
+
+        return status, errors
+
     def get(self, request, *args, **kwargs):
-
+        # Declaration
         data = {}
-        board_id = request.GET.get('board', 0)
-        board_id = int(board_id) if board_id.isdigit() else 0
+        errors = {}
+        status = 'success'
 
-        data["require_login"] = False
-        data["require_membership"] = False
-        data['show_searchbox'] = True
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors)
 
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
         try:
+            board_id = request.GET.get('board', 0)
+            board_id = int(board_id) if board_id.isdigit() else 0
+
+            data["require_login"] = False
+            data["require_membership"] = False
+            data['show_searchbox'] = True
             if (board_id):
                 board = Board.objects.get(id=board_id)
                 board_name = board.name
@@ -392,30 +380,42 @@ class SearchView(APIView):
                 board = {"name": board_name, "id": 0, "board_type": "Total"}
                 data["board"] = board
 
-        except Board.DoesNotExist:
-            raise Http404("게시판을 찾을 수 없습니다.")
+            # 로그인된 정보공개 설정을 확인한다.
+            if request.user.is_authenticated:
+                account = Account.objects.get(user_id=request.user.id)
 
-        # 로그인된 정보공개 설정을 확인한다.
-        if request.user.is_authenticated:
-            account = Account.objects.get(user_id=request.user.id)
+                try:
+                    acc_pp = AccountPrivacy.objects.get(account=account)
+                except:
+                    acc_pp = AccountPrivacy.objects.create(
+                        account=account, open_lvl=1, is_write=False, is_open=False)
+                data['privacy'] = AccountPrivacySerializer(acc_pp).data
+            else:
+                account = None
+                data['privacy'] = {'is_write': 0, 'is_open': 0}
 
-            try:
-                acc_pp = AccountPrivacy.objects.get(account=account)
-            except:
-                acc_pp = AccountPrivacy.objects.create(
-                    account=account, open_lvl=1, is_write=False, is_open=False)
-            data['privacy'] = AccountPrivacySerializer(acc_pp).data
+            result = search_article(request, board_name, board_id)
+
+            data['articles'] = ArticleSerializer(
+                result['articles'], many=True).data
+            data['max_page'] = result['max-page']
+
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'SearchView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + \
+                str(e)
+            logging.exception(f'SearchView undefined ERROR : {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
         else:
-            account = None
-            data['privacy'] = {'is_write': 0, 'is_open': 0}
-
-        result = search_article(request, board_name, board_id)
-
-        data['articles'] = ArticleSerializer(
-            result['articles'], many=True).data
-        data['max_page'] = result['max-page']
-
-        res = {"status": "success", "data": data}
+            res = {'status': status, 'errors': errors}
         return Response(res)
 
 
