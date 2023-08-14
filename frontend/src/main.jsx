@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import RootLayout from './routes/RootLayout';
-import BoardPage from './routes/BoardPage';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
 import UserPage from './routes/UserPage';
@@ -12,7 +11,7 @@ import AccountsLayout from './routes/AccountsLayout';
 import ArticlePage from './routes/ArticlePage';
 import ArticleEdit from './components/Community/Article/ArticleEdit/ArticleEdit';
 import ArticleRegister from './components/Community/Article/ArticleRegister/ArticleRegister';
-import Board from './components/Community/Board/Board';
+import Board_Container from './components/Community/Board/index';
 import SignUpPage from './routes/SignUpPage';
 import { tokenLoader } from './utils/auth';
 
@@ -37,8 +36,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: 'board/:board_name',
-            //   element: <BoardPage />
-            element: <Board />
+            element: <Board_Container />
           },
           {
             path: 'board/:board_name/register',

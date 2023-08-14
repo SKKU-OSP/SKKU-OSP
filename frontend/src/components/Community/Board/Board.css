@@ -86,3 +86,29 @@
   line-height: normal;
   letter-spacing: -1px;
 }
+
+.board-article {
+  padding: 20px;
+  border: 1px solid var(--main-border-color);
+  margin-top: -1px;
+  margin-left: -1px;
+}
+
+.board-article-title:hover,
+.board-article-writer:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.board-article-meta-list {
+  float: right;
+}
+
+.board-article-meta {
+  margin-left: 7px;
+  margin-bottom: 3px;
+}
+
+.inline {
+  display: inline;
+}

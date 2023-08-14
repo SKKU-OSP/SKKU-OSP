@@ -9,7 +9,8 @@ export default function CommunityNavItem_Container(props) {
   const [isOnBoard, setIsOnBoard] = useState(false);
 
   const getOnBoard = () => {
-    navigate(`/community/${this_board_name}`);
+    navigate(`/community/board/${this_board_name}`);
+    window.location.reload();
   };
 
   useEffect(() => {
