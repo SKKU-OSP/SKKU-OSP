@@ -49,9 +49,11 @@ class TeamInviteOnTeamboardView(APIView):
 
     def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
         status, errors \
@@ -81,9 +83,9 @@ class TeamInviteOnTeamboardView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
     def post_validation(self, request, status, message, errors, valid_data):
@@ -1270,4 +1272,114 @@ class TeamApplyDeleteView(APIView):
         else:
             res = {'status': status, 'errors': errors}
 
+        return Response(res)
+
+
+class TeamsListView(APIView):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        status = 'success'
+        message = ''
+        data = {}
+        errors = {}
+        valid_data = {}
+
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamsListView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        try:
+            teams = Team.objects.all()
+            data['teams'] = TeamSerializer(teams, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+
+class TeamsOfUserListView(APIView):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        status = 'success'
+        message = ''
+        data = {}
+        errors = {}
+        valid_data = {}
+
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamsOfUserListView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        user = request.user
+        try:
+
+            team_id_include_user = TeamMember.objects.filter(
+                member=user.id).values_list('team_id')
+            teams_of_user = Team.objects.filter(
+                id__in=team_id_include_user)
+
+            data['teams_of_user'] = TeamSerializer(
+                teams_of_user, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'TeamsOfUserList DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(f'TeamsOfUserList ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
