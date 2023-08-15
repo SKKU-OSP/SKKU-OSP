@@ -23,9 +23,9 @@ function Interest() {
 
   const [error_occur, setError] = useState(false);
   // 서버와 연동
-  const { user_id } = useParams();
+  const { username } = useParams();
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const profileTagsUrl = server_url + '/user/api/tag/' + user_id;
+  const profileTagsUrl = server_url + '/user/api/tag/' + username;
   const tagsUrl = server_url + '/tag/api/list/';
   const profileInterestPostUrl = server_url + '/user/api/interests/update/';
   const profileSkillPostUrl = server_url + '/user/api/langs/update/';
@@ -73,8 +73,11 @@ function Interest() {
           profileSkill.forEach((skill) => {
             profileSkillLevel[skill.level].push(skill);
           });
+          console.log(res);
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
+        } else {
+          console.log(res.errors);
         }
       } catch (error) {
         setError(true);

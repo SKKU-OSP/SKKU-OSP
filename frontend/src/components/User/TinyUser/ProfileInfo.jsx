@@ -8,11 +8,11 @@ import { getAuthConfig } from '../../../utils/auth';
 import { useParams } from 'react-router-dom';
 
 function ProfileInfo() {
-  const { user_id } = useParams();
+  const { username } = useParams();
   const [userInfo, setUserInfo] = useState();
   const [error_occur, setError] = useState(false);
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const url = server_url + '/user/api/profile-intro/' + user_id;
+  const url = server_url + '/user/api/profile-intro/' + username;
 
   useEffect(() => {
     const getProfileInfo = async () => {

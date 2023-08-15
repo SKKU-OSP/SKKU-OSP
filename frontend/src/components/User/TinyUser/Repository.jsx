@@ -18,11 +18,11 @@ import { getAuthConfig } from '../../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
 
 function Repository() {
-  const { user_id } = useParams();
+  const { username } = useParams();
   const [guideline, setGuideline] = useState();
   const [error_occur, setError] = useState(false);
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const url = server_url + '/user/api/guideline/' + user_id;
+  const url = server_url + '/user/api/guideline/' + username;
   useEffect(() => {
     const getGuideLine = async () => {
       try {
