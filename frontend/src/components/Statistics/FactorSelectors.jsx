@@ -1,32 +1,28 @@
-function FactorSelectors() {
+import Nav from 'react-bootstrap/Nav';
+
+function FactorSelectors({ factor, onSetFactor }) {
+  const handleSelect = (eventKey) => {
+    console.log('hello', eventKey);
+    onSetFactor(eventKey);
+  };
   return (
-    <ul className="nav nav-tabs mt-4 d-flex text-lg">
-      <li className="nav-item">
-        <a className="nav-link border-round active" id="pills-score-tab">
-          Score
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-commits-tab">
-          Commits
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-stars-tab">
-          Stars
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-pr-tab">
-          PR
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-issue-tab">
-          Issues
-        </a>
-      </li>
-    </ul>
+    <Nav variant="underline" onSelect={handleSelect} defaultActiveKey={factor} className="mt-4">
+      <Nav.Item className="flex-tab text-center">
+        <Nav.Link eventKey="score">Score</Nav.Link>
+      </Nav.Item>
+      <Nav.Item className="flex-tab text-center">
+        <Nav.Link eventKey="commit">Commits</Nav.Link>
+      </Nav.Item>
+      <Nav.Item className="flex-tab text-center">
+        <Nav.Link eventKey="star">Stars</Nav.Link>
+      </Nav.Item>
+      <Nav.Item className="flex-tab text-center">
+        <Nav.Link eventKey="pr">PR</Nav.Link>
+      </Nav.Item>
+      <Nav.Item className="flex-tab text-center">
+        <Nav.Link eventKey="issue">Issues</Nav.Link>
+      </Nav.Item>
+    </Nav>
   );
 }
 

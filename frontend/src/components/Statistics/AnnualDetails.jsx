@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import DetailChart from './Charts/DetailChart';
 import DetailCardContent from './DetailCardContent';
+import AnnualSelectors from './AnnualSelectors';
 
-function AnnualDetails({ detailData, isReady, years, targetYear }) {
+function AnnualDetails({ detailData, isReady, years, targetYear, onSetYear }) {
   const [kpiData, setKpiData] = useState({ target: 0, total: 1, percent: 0 });
   const [commitData, setCommitData] = useState({ target: 0, total: 1, percent: 0 });
   const [starData, setStarData] = useState({ target: 0, total: 1, percent: 0 });
   const [repoData, setRepoData] = useState({ target: 0, total: 1, percent: 0 });
+  const [isTotal, setIsTotal] = useState(true);
 
   // repo data는 최신연도부터 역순으로 데이터를 받아오기 때문에 reverse과정을 포함한다.
   const repoLineData = useMemo(() => {
@@ -65,32 +67,46 @@ function AnnualDetails({ detailData, isReady, years, targetYear }) {
   };
 
   return (
-    <div className="row pt-2">
-      <div className="col-md-3">
-        <div className="card p-3">
-          <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-          {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.student_KP)} />}
-        </div>
+    <>
+      <AnnualSelectors
+        years={years}
+        targetYear={targetYear}
+        onSetYear={onSetYear}
+        isTotal={isTotal}
+        onSetIsTotal={setIsTotal}
+      />
+      <div className="row pt-2">
+        {isTotal && (
+          <>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
+                {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.student_KP)} />}
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
+                {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.commit)} />}
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={starData} cardTitle="총 Star 수" />
+                {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.star)} />}
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
+                {isReady && <DetailChart options={noLegendOption} data={getDetailData(repoLineData)} />}
+              </div>
+            </div>
+          </>
+        )}
+        {!isTotal && <>개별 차트</>}
       </div>
-      <div className="col-md-3">
-        <div className="card p-3">
-          <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
-          {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.commit)} />}
-        </div>
-      </div>
-      <div className="col-md-3">
-        <div className="card p-3">
-          <DetailCardContent data={starData} cardTitle="총 Star 수" />
-          {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.star)} />}
-        </div>
-      </div>
-      <div className="col-md-3">
-        <div className="card p-3">
-          <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
-          {isReady && <DetailChart options={noLegendOption} data={getDetailData(repoLineData)} />}
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
