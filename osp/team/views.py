@@ -33,7 +33,7 @@ import logging
 
 class TeamInviteOnTeamboardView(APIView):
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         team_id = request.GET.get('team_id')
         user = request.user
 
@@ -45,7 +45,7 @@ class TeamInviteOnTeamboardView(APIView):
             errors['is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
             status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
@@ -56,11 +56,17 @@ class TeamInviteOnTeamboardView(APIView):
         valid_data = {}
 
         # Request Validation
-        status, errors \
-            = self.get_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamsInviteOnTeamboardView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -88,7 +94,7 @@ class TeamInviteOnTeamboardView(APIView):
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, message, errors, valid_data):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         target_user_id = request.data.get('target_user_id', False)
         target_team_id = request.data.get('target_team_id', False)
@@ -138,10 +144,16 @@ class TeamInviteOnTeamboardView(APIView):
 
         # Request Validation
         status, message, errors, valid_data \
-            = self.post_validation(request, status, message, errors, valid_data)
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamInviteOnTeamboardView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -200,10 +212,9 @@ class TeamInviteOnTeamboardView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
@@ -260,12 +271,12 @@ class TeamInviteOnRecommendView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         target_user_id = request.data.get('target_user_id', False)
         target_team_id = request.data.get('target_team_id', False)
@@ -304,16 +315,24 @@ class TeamInviteOnRecommendView(APIView):
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors \
-            = self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamInviteOnRecommendView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -376,49 +395,55 @@ class TeamInviteOnRecommendView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamCreateView(APIView):
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.get_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamsCreateView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         team_name = request.data.get('team_name', False)
         team_name = team_name.strip() if isinstance(team_name, str) else team_name
@@ -457,20 +482,28 @@ class TeamCreateView(APIView):
                 # \u00d7 는 곱셈기호
                 errors['team_image_too_big'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamCreateView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -536,16 +569,15 @@ class TeamCreateView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamUpdateView(APIView):
 
-    def get_validation(self, request, status, errors):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         user = request.user
         account = Account.objects.get(user=user)
@@ -579,20 +611,28 @@ class TeamUpdateView(APIView):
                     errors['user_is_not_teamadmin'] = '해당 팀의 관리자가 아닙니다.'
                     status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.get_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamUpdateView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -620,13 +660,12 @@ class TeamUpdateView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         target_team_id = request.data.get('target_team_id', False)
 
@@ -669,20 +708,29 @@ class TeamUpdateView(APIView):
                 # \u00d7 는 곱셈기호
                 errors['team_image_too_big'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
-        target_team_id = request.data.get('target_team_id')
-        team = Team.objects.get(id=target_team_id)
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamUpdateView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
 
         # Transactions
         team_name = request.data.get('team_name', False)
@@ -757,20 +805,20 @@ class TeamUpdateView(APIView):
         except:
             status = 'fail'
             errors['undefined_exception'] = 'undefined_exception'
+
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamApplyView(APIView):
 
-    def get_validation(self, request, status, errors, article_id):
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
-
+        article_id = kwargs.get('article_id')
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
@@ -801,25 +849,34 @@ class TeamApplyView(APIView):
                     errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
                     status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
-    def get(self, request, article_id):
+    def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.get_validation(request, status, errors, article_id)
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplyView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
 
         try:
+            article_id = kwargs.get('article_id')
             article = Article.objects.get(id=article_id)
             team_recruit_article = TeamRecruitArticle.objects.get(
                 article_id=article.id)
@@ -835,15 +892,14 @@ class TeamApplyView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, errors, article_id):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
-
+        article_id = kwargs.get('article_id')
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
@@ -878,23 +934,32 @@ class TeamApplyView(APIView):
                     errors['user_already_teammember'] = '이미 해당 팀의 멤버입니다.'
                     status = 'fail'
 
-    def post(self, request, article_id):
+    def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors, article_id)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplyView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
 
         try:
+            article_id = kwargs.get('article_id')
             account = Account.objects.get(user=request.user.id)
             article = Article.objects.get(id=article_id)
             team_recruit_article = TeamRecruitArticle.objects.get(
@@ -920,16 +985,15 @@ class TeamApplyView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamOutView(APIView):
 
-    def post_validation(request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         account = Account.objects.get(user=user)
         target_team_id = request.data.get('target_team_id')
@@ -958,20 +1022,28 @@ class TeamOutView(APIView):
                     errors['teammember_not_found'] = '팀멤버가 존재하지 않습니다. '
                     status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamOutView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -999,16 +1071,15 @@ class TeamOutView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamInviteUpdateView(APIView):
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         target_teaminvitemessage_id = request.data.get(
             'target_teaminvitemessage_id')
@@ -1028,20 +1099,28 @@ class TeamInviteUpdateView(APIView):
                 errors["teaminvitemessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
                 status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamInviteUpdateView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -1071,16 +1150,15 @@ class TeamInviteUpdateView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamInviteDeleteView(APIView):
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         target_teaminvitemessage_id = request.data.get(
             'target_teaminvitemessage_id')
@@ -1099,20 +1177,28 @@ class TeamInviteDeleteView(APIView):
                 errors["teaminvitemessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
                 status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamInviteDeleteView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -1134,16 +1220,15 @@ class TeamInviteDeleteView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamApplyUpdateView(APIView):
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
@@ -1163,20 +1248,28 @@ class TeamApplyUpdateView(APIView):
                 errors["teamapplymessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
                 status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplyUpdateView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -1206,16 +1299,15 @@ class TeamApplyUpdateView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
 class TeamApplyDeleteView(APIView):
 
-    def post_validation(self, request, status, errors):
+    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
@@ -1234,20 +1326,28 @@ class TeamApplyDeleteView(APIView):
                 errors["teamapplymessage_not_found"] = "해당 지원메세지를 찾을 수 없습니다. "
                 status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
         # Request Validation
-        status, errors = \
-            self.post_validation(request, status, errors)
+        status, message, errors, valid_data \
+            = self.post_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplyDeleteView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -1268,10 +1368,9 @@ class TeamApplyDeleteView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
-
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
@@ -1317,9 +1416,9 @@ class TeamsListView(APIView):
 
         # Response
         if status == 'success':
-            res = {'status': status, 'data': data}
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            res = {'status': status, 'errors': errors}
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
