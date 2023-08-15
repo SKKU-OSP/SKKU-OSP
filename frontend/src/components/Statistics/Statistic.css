@@ -25,3 +25,7 @@
 .flex-switch {
   flex-basis: 160px;
 }
+
+.flex-tab {
+  flex-basis: 72px;
+}
