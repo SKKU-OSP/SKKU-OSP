@@ -59,7 +59,7 @@ class CommunityMainView(APIView):
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(f'CommunityMainView validation error: {e}')
+            logging.exception(f'CommunityMainView validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
@@ -168,7 +168,7 @@ class TableBoardView(APIView):
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(f'TableBoardView validation error: {e}')
+            logging.exception(f'TableBoardView validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
@@ -316,7 +316,7 @@ class NoticeView(APIView):
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(f'NoticeView validation error: {e}')
+            logging.exception(f'NoticeView validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
