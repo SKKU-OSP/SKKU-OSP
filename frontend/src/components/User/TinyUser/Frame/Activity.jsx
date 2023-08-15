@@ -7,10 +7,10 @@ import { getAuthConfig } from '../../../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
 
 function Activity() {
-  const { user_id } = useParams();
+  const { username } = useParams();
   const [profileActivity, setProfileActivity] = useState();
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const activityUrl = server_url + '/user/api/profile-activity/' + user_id;
+  const activityUrl = server_url + '/user/api/profile-activity/' + username;
 
   useEffect(() => {
     const getProfileActivity = async () => {

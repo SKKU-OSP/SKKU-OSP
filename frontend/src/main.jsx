@@ -83,11 +83,11 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path: 'user/:user_id',
+        path: 'user/:username',
         element: <UserPage />
       },
       {
-        path: 'repository/:user_id',
+        path: 'repository/:username',
         element: <Repository />
       },
       {

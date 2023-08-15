@@ -9,10 +9,10 @@ import { getAuthConfig } from '../../../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
 
 function OwnerInfo() {
-  const { user_id } = useParams();
+  const { username } = useParams();
   const [ownerInfo, setOwnerInfo] = useState();
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const infoUrl = server_url + '/user/api/profile-info/' + user_id;
+  const infoUrl = server_url + '/user/api/profile-info/' + username;
   useEffect(() => {
     const getOwnerInfo = async () => {
       try {
