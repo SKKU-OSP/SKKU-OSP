@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
-import AnnualDetails from './AnnualDetails';
 import AnnualOverviews from './AnnualOverviews';
-import AnnualSelectors from './AnnualSelectors';
 import CaseSelectors from './CaseSelectors';
-import FactorDists from './FactorDists';
-import FactorSelectors from './FactorSelectors';
+import StatisticMain from './StatisticMain';
 
 import axios from 'axios';
 import { getAuthConfig } from '../../utils/auth';
@@ -18,8 +15,11 @@ function Statistic_Container() {
   const [chartData, setChartData] = useState(null);
   const [overviewData, setOverviewData] = useState(null);
   const [detailData, setDetailData] = useState(null);
+  const [distData, setDistData] = useState(null);
+  const [factorsClassNum, setFactorsClassNum] = useState([]);
+  const [factorLevelStep, setFactorLevelStep] = useState([]);
+
   const [years, setYears] = useState([]);
-  const [targetYear, setTargetYear] = useState(2023);
 
   useEffect(() => {
     console.log('Statistic_Container useEffect');
@@ -35,14 +35,12 @@ function Statistic_Container() {
           setChartData(res.data);
         } else {
           console.log('res.status', res.status);
-
           console.log('res.message', res.message);
         }
       } catch (error) {
         console.log(error);
       }
     };
-
     getStatisticData();
   }, []);
 
@@ -51,12 +49,13 @@ function Statistic_Container() {
     if (chartData) {
       const findOverview = chartData.annual_overview.find((obj) => obj.case_num === caseNum);
       const findDetail = chartData.annual_total.find((obj) => obj.case_num === caseNum);
-
-      console.log('findOverview', findOverview);
+      const findDist = chartData.annual_data.factor.find((obj) => obj.case_num === caseNum);
       setOverviewData(findOverview);
       setDetailData(findDetail);
       setYears(chartData.years);
-
+      setDistData(findDist);
+      setFactorsClassNum(findOverview.class_num);
+      setFactorLevelStep(findOverview.level_step);
       setIsReady(true);
     }
   }, [chartData, caseNum]);
@@ -69,10 +68,14 @@ function Statistic_Container() {
     <>
       <CaseSelectors onSetCaseNum={handleCaseNum} />
       <AnnualOverviews overviewData={overviewData} isReady={isReady} years={years} />
-      <AnnualSelectors />
-      <AnnualDetails detailData={detailData} isReady={isReady} years={years} targetYear={targetYear} />
-      <FactorSelectors />
-      <FactorDists />
+      <StatisticMain
+        detailData={detailData}
+        distData={distData}
+        factorsClassNum={factorsClassNum}
+        factorLevelStep={factorLevelStep}
+        isReady={isReady}
+        years={years}
+      />
     </>
   );
 }

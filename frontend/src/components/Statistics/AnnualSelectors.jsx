@@ -1,38 +1,42 @@
-import { useEffect, useState } from 'react';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
-function AnnualSelectors() {
-  const [yearList, setYearList] = useState([2019, 2020, 2021, 2022, 2023]);
-  useEffect(() => {
-    setYearList([2019, 2020, 2021, 2022, 2023]);
-  }, []);
-  const endYear = Math.max(...yearList);
+function AnnualSelectors({ years, targetYear, onSetYear, isTotal, onSetIsTotal }) {
+  const handleSwitch = (e) => {
+    onSetIsTotal(e.target.checked);
+  };
+
   return (
-    <div className="d-flex text-lg mt-4">
-      <div className="dropdown">
-        <button
-          className="btn btn-primary dropdown-toggle me-2"
-          id="yearDropdown"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          {endYear}
-        </button>
-        <ul className="dropdown-menu" aria-labelledby="yearDropdown">
-          {yearList.map((year) => {
+    <div className="d-flex text-lg mt-4 gap-4 align-items-center">
+      <DropdownButton id="dropdown-basic-button" title={targetYear}>
+        {years &&
+          years.map((year) => {
             return (
-              <li key={`year-${year}`}>
-                <button className="dropdown-item year-item">{year}</button>
-              </li>
+              <Dropdown.Item
+                key={year}
+                eventKey={year}
+                onClick={() => {
+                  onSetYear(year);
+                }}
+                active={year === targetYear}
+              >
+                {year}
+              </Dropdown.Item>
             );
           })}
-        </ul>
-      </div>
+      </DropdownButton>
       <div className="form-check form-switch flex-switch">
-        <input className="form-check-input" id="totalSwitch" type="checkbox" role="switch" defaultChecked />
+        <input
+          className="form-check-input"
+          id="totalSwitch"
+          type="checkbox"
+          role="switch"
+          defaultChecked
+          onChange={handleSwitch}
+        />
         <label className="form-check-label" htmlFor="totalSwitch">
-          <span className="switch-toggle">개별</span>
-          <span className="switch-toggle bold">합계</span>
+          <span className={!isTotal ? 'switch-toggle bold' : 'switch-toggle'}>개별</span>
+          <span className={isTotal ? 'switch-toggle bold' : 'switch-toggle'}>합계</span>
         </label>
       </div>
     </div>
