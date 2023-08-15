@@ -28,6 +28,8 @@ from datetime import datetime
 
 from .utils import *
 
+import logging
+
 
 class TeamInviteOnTeamboardView(APIView):
 
@@ -205,31 +207,34 @@ class TeamInviteOnTeamboardView(APIView):
 
 class TeamInviteOnRecommendView(APIView):
 
-    def get_validation(self, request, status, errors):
-        team_id = request.GET.get('team_id')
+    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
-        elif (len(TeamMember.objects.filter(team__id=team_id, member=user.id).values_list('id')) == 0):
-            errors['is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
-            status = 'fail'
-
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
+        status = 'success'
+        message = ''
         data = {}
         errors = {}
-        status = 'success'
+        valid_data = {}
 
-        # Requset Validation
-        status, errors \
-            = self.get_validation(request, errors, status)
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(
+                request,
+                status, message, errors, valid_data,
+                *args, **kwargs)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamInviteOnRecommendView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
