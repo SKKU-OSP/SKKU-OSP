@@ -2,7 +2,8 @@ import { useState } from 'react';
 import AnnualDetails from './AnnualDetails';
 import FactorDists from './FactorDists';
 
-function StatisticMain({ detailData, distData, isReady, years, factorsClassNum, factorLevelStep }) {
+function StatisticMain(props) {
+  const { detailData, distData, isReady, years, factorsClassNum, factorLevelStep } = props;
   const [targetYear, setTargetYear] = useState(2023);
 
   return (

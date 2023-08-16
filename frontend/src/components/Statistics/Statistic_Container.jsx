@@ -22,20 +22,15 @@ function Statistic_Container() {
   const [years, setYears] = useState([]);
 
   useEffect(() => {
-    console.log('Statistic_Container useEffect');
-
     const getStatisticData = async () => {
       try {
         const response = await axios.get(chartDataUrl, getAuthConfig());
         const res = response.data;
-        console.log('res', res);
         if (res.status === 'success') {
-          console.log(res.status, res.message);
-          console.log('res.data', res.data);
+          console.log(res.status, res.data);
           setChartData(res.data);
         } else {
-          console.log('res.status', res.status);
-          console.log('res.message', res.message);
+          console.log(res.status, res.message);
         }
       } catch (error) {
         console.log(error);
@@ -45,17 +40,19 @@ function Statistic_Container() {
   }, []);
 
   useEffect(() => {
-    console.log('caseNum', caseNum);
     if (chartData) {
+      setYears(chartData.years);
       const findOverview = chartData.annual_overview.find((obj) => obj.case_num === caseNum);
       const findDetail = chartData.annual_total.find((obj) => obj.case_num === caseNum);
       const findDist = chartData.annual_data.factor.find((obj) => obj.case_num === caseNum);
+      findDist.depts = chartData.depts;
+      findDist.sids = chartData.sids;
+      findDist.factors = chartData.factors;
       setOverviewData(findOverview);
-      setDetailData(findDetail);
-      setYears(chartData.years);
-      setDistData(findDist);
       setFactorsClassNum(findOverview.class_num);
       setFactorLevelStep(findOverview.level_step);
+      setDetailData(findDetail);
+      setDistData(findDist);
       setIsReady(true);
     }
   }, [chartData, caseNum]);

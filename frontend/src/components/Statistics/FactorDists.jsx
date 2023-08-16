@@ -2,8 +2,22 @@ import { useState } from 'react';
 
 import FactorSelectors from './FactorSelectors';
 import Histogram from './Charts/Histogram';
+import DistChart from './Charts/DistChart';
 
-function FactorDists({ distData, isReady, targetYear, factorsClassNum, factorLevelStep }) {
+const category10 = [
+  '#1f77b4',
+  '#ff7f0e',
+  '#2ca02c',
+  '#d62728',
+  '#9467bd',
+  '#8c564b',
+  '#e377c2',
+  '#7f7f7f',
+  '#bcbd22',
+  '#17becf'
+];
+function FactorDists(props) {
+  const { distData, isReady, targetYear, factorsClassNum, factorLevelStep } = props;
   const [targetFactor, setTargetFactor] = useState('score');
   const factorIdxMap = { score: 0, commit: 1, star: 2, pr: 3, issue: 4 };
   const factorIdx = factorIdxMap[targetFactor];
@@ -15,17 +29,33 @@ function FactorDists({ distData, isReady, targetYear, factorsClassNum, factorLev
     if (isReady && Object.hasOwn(distData, 'years')) return distData.years[targetYear][targetFactor];
     return null;
   };
+  const parseObjectByKey = (key) => {
+    if (isReady && Object.hasOwn(distData, key)) return distData[key];
+    return [];
+  };
   const data = parseDistData(distData);
-  const histogramRawData = data ? data.value : [];
+  const sids = parseObjectByKey('sids');
+  const depts = parseObjectByKey('depts');
+  const factors = parseObjectByKey('factors');
 
-  const getHistogramData = (labels, data) => {
+  const histogramRawData = data ? data.value : [];
+  // 학번별 분포 데이터
+  const sidRawData = data ? data.value_sid : [];
+  const sidStdData = data ? data.value_sid_std : [];
+  const sidPctData = data ? data.value_sid_pct : [];
+  // 학과별 분포 데이터
+  const deptRawData = data ? data.value_dept : [];
+  const deptStdData = data ? data.value_dept_std : [];
+  const deptPctData = data ? data.value_dept_pct : [];
+
+  const getHistogramData = (labels, distData) => {
     return {
       labels: labels,
       datasets: [
         {
           type: 'bar',
           label: 'num',
-          data: data,
+          data: distData,
           backgroundColor: '#0d6efd',
           borderWidth: 1,
           barPercentage: 1,
@@ -34,6 +64,37 @@ function FactorDists({ distData, isReady, targetYear, factorsClassNum, factorLev
       ]
     };
   };
+
+  const getDistChartData = (labels, distData, pctData) => {
+    return {
+      labels: labels,
+      datasets: [
+        {
+          type: 'barWithErrorBars',
+          label: 'num',
+          data: distData,
+          backgroundColor: category10,
+          borderWidth: 0.9,
+          barPercentage: 0.9,
+          categoryPercentage: 1
+        },
+        {
+          type: 'scatter',
+          data: pctData
+        }
+      ]
+    };
+  };
+
+  function makeScatterData(arr2d, labels) {
+    const scatterData = [];
+    arr2d.forEach((arr, i) => {
+      arr.forEach((value) => {
+        scatterData.push({ x: labels[i], y: value });
+      });
+    });
+    return scatterData;
+  }
 
   /**
    *
@@ -53,6 +114,22 @@ function FactorDists({ distData, isReady, targetYear, factorsClassNum, factorLev
     }
     return [];
   };
+
+  function makeErrorJson(dataArr, stdArr) {
+    let errorJsonData = dataArr.map((val, idx) => {
+      const y = Number(val);
+      const yMax = Number((y + Number(stdArr[idx])).toFixed(2));
+      const yMin = Number(Math.max(0, y - Number(stdArr[idx])).toFixed(2));
+      return {
+        y,
+        yMax,
+        yMin
+      };
+    });
+
+    return errorJsonData;
+  }
+
   function histogramOption(offset) {
     return {
       plugins: {
@@ -83,30 +160,52 @@ function FactorDists({ distData, isReady, targetYear, factorsClassNum, factorLev
     };
   }
 
+  const scoreOption = {
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: { max: 5, beginAtZero: true }
+    }
+  };
+  const noLegendOption = {
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true }
+    }
+  };
+
   const histogramJsonData = makeHistogramJson(histogramRawData, histogramLabels);
   const histogramData = getHistogramData(histogramLabels, histogramJsonData);
+  const distChartOption = targetFactor === 'score' ? scoreOption : noLegendOption;
+  const sidErrorJsonData = makeErrorJson(sidRawData, sidStdData);
+  const sidDistChartData = getDistChartData(sids, sidErrorJsonData, makeScatterData(sidPctData, sids));
+  const deptErrorJsonData = makeErrorJson(deptRawData, deptStdData);
+  const deptDistChartData = getDistChartData(depts, deptErrorJsonData, makeScatterData(deptPctData, depts));
 
   return (
     <>
-      <FactorSelectors factor={targetFactor} onSetFactor={setTargetFactor} />
-      <div className="tab-pane fade show mt-2" id="pills-score">
+      <FactorSelectors factor={targetFactor} onSetFactor={setTargetFactor} factors={factors} />
+      <div className="tab-pane fade show mt-2">
         <div className="row mt-2">
           <div className="col-md-4">
             <div className="card p-3">
-              <h5 className="card-title factor">전체 {targetFactor} 분포</h5>
+              <h5 className="card-title">전체 {targetFactor} 분포</h5>
               <Histogram options={histogramOption(levelStep / 2)} data={histogramData} />
             </div>
           </div>
           <div className="col-md-4">
             <div className="card p-3">
-              <h5 className="card-title factor">학번별 {targetFactor} 분포</h5>
-              <canvas id="sidScoreDist"></canvas>
+              <h5 className="card-title">학번별 {targetFactor} 분포</h5>
+              <DistChart options={distChartOption} data={sidDistChartData} />
             </div>
           </div>
           <div className="col-md-4">
             <div className="card p-3">
-              <h5 className="card-title factor">학과별 {targetFactor} 분포</h5>
-              <canvas id="deptScoreDist"></canvas>
+              <h5 className="card-title">학과별 {targetFactor} 분포</h5>
+              <DistChart options={distChartOption} data={deptDistChartData} />
             </div>
           </div>
         </div>
