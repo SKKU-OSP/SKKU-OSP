@@ -3,7 +3,7 @@ import DetailChart from './Charts/DetailChart';
 import DetailCardContent from './DetailCardContent';
 import AnnualSelectors from './AnnualSelectors';
 
-function AnnualDetails({ detailData, isReady, years, targetYear, onSetYear }) {
+function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSetYear }) {
   const [kpiData, setKpiData] = useState({ target: 0, total: 1, percent: 0 });
   const [commitData, setCommitData] = useState({ target: 0, total: 1, percent: 0 });
   const [starData, setStarData] = useState({ target: 0, total: 1, percent: 0 });
@@ -66,6 +66,30 @@ function AnnualDetails({ detailData, isReady, years, targetYear, onSetYear }) {
     }
   };
 
+  const getUserScatterData = () => {
+    const userScatterData = { score: [], commit: [], star: [], repo: [] };
+    ['commit', 'star'].forEach((factor) => {
+      years.forEach((year) => {
+        const annualUserData = userData[String(year)];
+        userScatterData[factor] = userScatterData[factor].concat(
+          annualUserData.map((obj) => {
+            return {
+              x: String(year),
+              y: obj[factor],
+              tooltip: obj.github_id
+            };
+          })
+        );
+      });
+    });
+    console.log('userScatterData', userScatterData);
+    return userScatterData;
+  };
+  let userScatterData = { score: [], commit: [], star: [], repo: [] };
+  if (isReady) {
+    userScatterData = getUserScatterData();
+  }
+
   return (
     <>
       <AnnualSelectors
@@ -104,7 +128,34 @@ function AnnualDetails({ detailData, isReady, years, targetYear, onSetYear }) {
             </div>
           </>
         )}
-        {!isTotal && <>개별 차트</>}
+        {!isTotal && (
+          <>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
+                개별데이터
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
+                {isReady && <DetailChart options={noLegendOption} data={getDetailData(userScatterData.commit)} />}
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={starData} cardTitle="총 Star 수" />
+                {isReady && <DetailChart options={noLegendOption} data={getDetailData(userScatterData.star)} />}
+              </div>
+            </div>
+            <div className="col-md-3">
+              <div className="card p-3">
+                <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
+                개별데이터
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );
