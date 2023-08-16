@@ -5,6 +5,7 @@ import OwnerInfo from './Frame/OwnerInfo';
 
 function ProfileActivity(props) {
   const Tab = props.Tab;
-  return <>{Tab === '관심분야' ? <Interest /> : Tab === '활동' ? <Activity /> : <OwnerInfo />}</>;
+  const githubId = props.githubId;
+  return <>{Tab === '관심분야' ? <Interest /> : Tab === '활동' ? <Activity githubId={githubId} /> : <OwnerInfo />}</>;
 }
 export default ProfileActivity;

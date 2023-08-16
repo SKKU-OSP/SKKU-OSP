@@ -821,7 +821,7 @@ def get_star_dist(github_id, num_year):
 
 class GuidelineView(APIView):
 
-    def get_validation(self, request, status, errors, user_id):
+    def get_validation(self, request, status, errors, username):
         user = request.user
 
         if not user.is_authenticated:
@@ -829,7 +829,7 @@ class GuidelineView(APIView):
             status = 'fail'
         else:
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
                 status = 'fail'
@@ -839,7 +839,7 @@ class GuidelineView(APIView):
 
         return status, errors
 
-    def get(self, request, user_id):
+    def get(self, request, username):
         # Declaration
         data = {}
         errors = {}
@@ -847,7 +847,7 @@ class GuidelineView(APIView):
 
         # Request Validation
         status, errors \
-            = self.get_validation(request, status, errors, user_id)
+            = self.get_validation(request, status, errors, username)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -856,7 +856,7 @@ class GuidelineView(APIView):
         # Transactions
         try:
             start = time.time()
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(username=username)
             account = Account.objects.get(user=user)
             student_data = account.student_data
             github_id = student_data.github_id
