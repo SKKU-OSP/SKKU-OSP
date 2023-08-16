@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import JsonResponse
 
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -21,6 +20,7 @@ from user.update_act import update_commmit_time, update_individual, update_frequ
 
 import json
 import time
+import logging
 from datetime import datetime
 
 
@@ -111,10 +111,24 @@ class StatisticView(APIView):
 
             data["years"] = [year for year in range(
                 self.start_year, end_year+1)]
+
+            # 학과 정보
+            DEPTS = ['컴퓨터공학과', '소프트웨어학과', '글로벌융합학부']
+            data["depts"] = DEPTS
+
+            # 학번 정보
+            # 성능상의 이슈로 하드코딩하여 sid 크기를 가져온다.
+            sid_len = len(
+                structured_factor_data[0]["years"][end_year]['score']['value_sid'])
+
+            data["sids"] = list(range(end_year, end_year - sid_len, -1))
+            print(data["sids"])
+            data["factors"] = ["score", "commit", "star", "pr", "issue"]
             res['data'] = data
             res["status"] = 'success'
             print("소요시간", time.time() - start)
         except Exception as e:
+            logging.exception(e)
             return Response(res)
 
         return Response(res)
