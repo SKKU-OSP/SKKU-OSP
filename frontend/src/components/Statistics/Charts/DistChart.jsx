@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, registerables } from 'chart.js';
+import {
+  BarWithErrorBar,
+  BarWithErrorBarsChart,
+  BarWithErrorBarsController,
+  PointWithErrorBar
+} from 'chartjs-chart-error-bars';
 
-const Histogram = (props) => {
+const DistChart = (props) => {
   const chartRef = useRef();
   const [chartInstance, setChartInstance] = useState(null);
 
@@ -9,10 +15,16 @@ const Histogram = (props) => {
     const ctx = chartRef.current.getContext('2d');
 
     const createChart = () => {
-      ChartJS.register(...registerables);
+      ChartJS.register(
+        ...registerables,
+        BarWithErrorBarsChart,
+        BarWithErrorBarsController,
+        BarWithErrorBar,
+        PointWithErrorBar
+      );
       setChartInstance(
         new ChartJS(ctx, {
-          type: 'bar',
+          type: 'barWithErrorBars',
           data: props.data,
           options: props.options
         })
@@ -37,4 +49,4 @@ const Histogram = (props) => {
   return <canvas ref={chartRef} />;
 };
 
-export default Histogram;
+export default DistChart;
