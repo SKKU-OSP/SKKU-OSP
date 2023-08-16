@@ -18,6 +18,7 @@ function Statistic_Container() {
   const [distData, setDistData] = useState(null);
   const [factorsClassNum, setFactorsClassNum] = useState([]);
   const [factorLevelStep, setFactorLevelStep] = useState([]);
+  const [userData, setUserData] = useState([]);
 
   const [years, setYears] = useState([]);
 
@@ -42,6 +43,7 @@ function Statistic_Container() {
   useEffect(() => {
     if (chartData) {
       setYears(chartData.years);
+      setUserData(chartData.student_data);
       const findOverview = chartData.annual_overview.find((obj) => obj.case_num === caseNum);
       const findDetail = chartData.annual_total.find((obj) => obj.case_num === caseNum);
       const findDist = chartData.annual_data.factor.find((obj) => obj.case_num === caseNum);
@@ -68,6 +70,7 @@ function Statistic_Container() {
       <StatisticMain
         detailData={detailData}
         distData={distData}
+        userData={userData}
         factorsClassNum={factorsClassNum}
         factorLevelStep={factorLevelStep}
         isReady={isReady}
