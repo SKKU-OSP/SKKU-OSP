@@ -12,8 +12,8 @@
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  border-bottom: 1px solid #B0B0B0;
-  background: #FFF;
+  border-bottom: 1px solid #b0b0b0;
+  background: #fff;
 }
 
 #community-frame {
@@ -27,9 +27,9 @@
   font-size: 30px;
 }
 
-#community-title > a{
+#community-title > a {
   width: 150px;
-  color: #06F;
+  color: #06f;
   text-align: center;
   font-family: Inter;
   font-style: normal;
@@ -42,7 +42,7 @@
   font-size: 30px;
 }
 
-#community-others > a{
+#community-others > a {
   width: 150px;
   color: #454545;
   text-align: center;
@@ -59,8 +59,8 @@
   justify-content: center;
   align-items: center;
   border-radius: 10px;
-  background: #06F;
-  color: #FFF;
+  background: #06f;
+  color: #fff;
   text-align: center;
   font-family: Inter;
   font-size: 20px;
@@ -76,8 +76,8 @@
   justify-content: center;
   align-items: center;
   border-radius: 10px;
-  background: #B0B0B0;
-  color: #FFF;
+  background: #b0b0b0;
+  color: #fff;
   text-align: center;
   font-family: Inter;
   font-size: 20px;
@@ -111,4 +111,8 @@
 
 .inline {
   display: inline;
+}
+
+.float-clear {
+  clear: both;
 }
