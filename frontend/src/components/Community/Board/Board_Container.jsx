@@ -1,7 +1,8 @@
 import Board_Presenter from './Board_Presenter';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import AuthContext from '../../../utils/auth-context';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -10,6 +11,8 @@ export default function Board_Container() {
   const { board_name } = useParams();
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState(false);
+  const { username } = useContext(AuthContext);
+
   const board_names = ['자유', '질문', '정보', '홍보'];
   const board_ids = {'자유': 0, '질문': 1, '정보': 5, '홍보': 6};
 
@@ -26,6 +29,16 @@ export default function Board_Container() {
     }
   };
 
+  const onWrite = () => {
+    if (username) {
+      navigate(`/community/board/${board_name}/register`);
+    } else {
+      if (confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
+      }
+    }
+  };
+
   useEffect(() => {
     // 존재하는 게시판인지 확인
     if (!board_names.includes(board_name)) {
@@ -36,5 +49,5 @@ export default function Board_Container() {
     }
   });
 
-  return <Board_Presenter articles={articles} />;
+  return <Board_Presenter articles={articles} onWrite={onWrite} />;
 }
