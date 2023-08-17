@@ -23,9 +23,9 @@ export default function BoardArticle_Container(props) {
     if (delta / (60 * 1000) < 1) {
       setPubDate('방금');
     } else if (delta / (60 * 1000) < 60) {
-      setPubDate(string(delta / (60 * 1000)) + '분 전');
+      setPubDate((delta / (60 * 1000)).toFixed() + '분 전');
     } else if (delta / (60 * 60 * 1000) < 24) {
-      setPubDate(string(delta / (60 * 60 * 1000)) + '시간 전');
+      setPubDate((delta / (60 * 60 * 1000)).toFixed() + '시간 전');
     } else if (delta / (24 * 60 * 60 * 1000) < 31) {
       setPubDate((delta / (24 * 60 * 60 * 1000)).toFixed() + '일 전');
     } else {
