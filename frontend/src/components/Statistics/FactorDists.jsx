@@ -4,6 +4,8 @@ import FactorSelectors from './FactorSelectors';
 import Histogram from './Charts/Histogram';
 import DistChart from './Charts/DistChart';
 
+import { makeErrorJson, getChartConfig, scoreOption, noLegendOption, histogramOption } from '../../utils/chartOption';
+
 const category10 = [
   '#1f77b4',
   '#ff7f0e',
@@ -48,45 +50,39 @@ function FactorDists(props) {
   const deptStdData = data ? data.value_dept_std : [];
   const deptPctData = data ? data.value_dept_pct : [];
 
-  const getHistogramData = (labels, distData) => {
-    return {
-      labels: labels,
-      datasets: [
-        {
-          type: 'bar',
-          label: 'num',
-          data: distData,
-          backgroundColor: '#0d6efd',
-          borderWidth: 1,
-          barPercentage: 1,
-          categoryPercentage: 1
-        }
-      ]
-    };
+  const getHistogramDatasets = (distData) => {
+    return [
+      {
+        type: 'bar',
+        label: 'num',
+        data: distData,
+        backgroundColor: '#0d6efd',
+        borderWidth: 1,
+        barPercentage: 1,
+        categoryPercentage: 1
+      }
+    ];
   };
 
-  const getDistChartData = (labels, distData, pctData) => {
-    return {
-      labels: labels,
-      datasets: [
-        {
-          type: 'barWithErrorBars',
-          label: 'num',
-          data: distData,
-          backgroundColor: category10,
-          borderWidth: 0.9,
-          barPercentage: 0.9,
-          categoryPercentage: 1
-        },
-        {
-          type: 'scatter',
-          data: pctData
-        }
-      ]
-    };
+  const getDistChartDatasets = (distData, pctData) => {
+    return [
+      {
+        type: 'barWithErrorBars',
+        label: 'num',
+        data: distData,
+        backgroundColor: category10,
+        borderWidth: 0.9,
+        barPercentage: 0.9,
+        categoryPercentage: 1
+      },
+      {
+        type: 'scatter',
+        data: pctData
+      }
+    ];
   };
 
-  function makeScatterData(arr2d, labels) {
+  function makeScatterData(labels, arr2d) {
     const scatterData = [];
     arr2d.forEach((arr, i) => {
       arr.forEach((value) => {
@@ -97,17 +93,16 @@ function FactorDists(props) {
   }
 
   /**
-   *
+   * @param {Array} labels
    * @param {Array} dist
-   * @param {Array} label
    * @returns
    */
-  const makeHistogramJson = (dist, label) => {
+  const makeHistogramJson = (labels, dist) => {
     let offset = levelStep / 2;
     if (dist) {
       return dist.map((val, idx) => {
         return {
-          x: Number(label[idx]) + offset,
+          x: Number(labels[idx]) + offset,
           y: val
         };
       });
@@ -115,75 +110,20 @@ function FactorDists(props) {
     return [];
   };
 
-  function makeErrorJson(dataArr, stdArr) {
-    let errorJsonData = dataArr.map((val, idx) => {
-      const y = Number(val);
-      const yMax = Number((y + Number(stdArr[idx])).toFixed(2));
-      const yMin = Number(Math.max(0, y - Number(stdArr[idx])).toFixed(2));
-      return {
-        y,
-        yMax,
-        yMin
-      };
-    });
+  const histogramJsonData = makeHistogramJson(histogramLabels, histogramRawData);
+  const histogramData = getChartConfig(histogramLabels, getHistogramDatasets(histogramJsonData));
 
-    return errorJsonData;
-  }
-
-  function histogramOption(offset) {
-    return {
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => {
-              if (!items.length) return '';
-              const item = items[0];
-              const x = item.parsed.x;
-              if (x === 0) return '0';
-              let min = x - offset <= 0 ? 0 : x - offset;
-              let max = x + offset;
-              return `${min}-${max}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          type: 'linear',
-          offset: false,
-          grid: { offset: false },
-          ticks: { stepSize: offset * 2 }
-        },
-        y: { beginAtZero: true }
-      }
-    };
-  }
-
-  const scoreOption = {
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
-      y: { max: 5, beginAtZero: true }
-    }
-  };
-  const noLegendOption = {
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
-      y: { beginAtZero: true }
-    }
-  };
-
-  const histogramJsonData = makeHistogramJson(histogramRawData, histogramLabels);
-  const histogramData = getHistogramData(histogramLabels, histogramJsonData);
   const distChartOption = targetFactor === 'score' ? scoreOption : noLegendOption;
   const sidErrorJsonData = makeErrorJson(sidRawData, sidStdData);
-  const sidDistChartData = getDistChartData(sids, sidErrorJsonData, makeScatterData(sidPctData, sids));
+  const sidDistChartData = getChartConfig(
+    sids,
+    getDistChartDatasets(sidErrorJsonData, makeScatterData(sids, sidPctData))
+  );
   const deptErrorJsonData = makeErrorJson(deptRawData, deptStdData);
-  const deptDistChartData = getDistChartData(depts, deptErrorJsonData, makeScatterData(deptPctData, depts));
+  const deptDistChartData = getChartConfig(
+    depts,
+    getDistChartDatasets(deptErrorJsonData, makeScatterData(depts, deptPctData))
+  );
 
   return (
     <>
