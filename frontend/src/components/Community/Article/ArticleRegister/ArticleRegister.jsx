@@ -287,7 +287,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       <div id="community-main" className="col-md-9">
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
           <div className="community-nav d-flex">
-            <>
+            <div>
               <button type="button" className="btn btn-secondary" onClick={onBack}>
                 뒤로가기
               </button>
@@ -296,9 +296,9 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                   <input type="checkbox" /> <label>익명</label>
                 </div>
               )}
-            </>
+            </div>
             <div className="board-name">{boardName} 게시판</div>
-            <>
+            <div className="hi-class">
               {boardName === '질문' && (
                 <div className="anonymous-btn">
                   <input
@@ -314,7 +314,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               <button type="submit" className="btn btn-primary">
                 작성하기
               </button>
-            </>
+            </div>
           </div>
           <input
             type="text"
