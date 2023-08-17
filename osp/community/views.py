@@ -38,24 +38,20 @@ class CommunityMainView(APIView):
     URL : /community
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
-        user = request.user
-        return status, message, errors, valid_data
-
-    def get(self, request, *args, **kwargs):
-        # Declaration
+    def get_validation(self, request, *args, **kwargs):
         status = 'success'
         message = ''
-        data = {}
         errors = {}
         valid_data = {}
 
+        user = request.user
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -64,6 +60,7 @@ class CommunityMainView(APIView):
             return Response(res)
 
         # Transactions
+        data = {}
         try:
             data['show_searchbox'] = True
             boards = Board.objects.exclude(
@@ -118,7 +115,12 @@ class TableBoardView(APIView):
 
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
         user = request.user
         board_name = kwargs.get('board_name')
         try:
@@ -152,19 +154,9 @@ class TableBoardView(APIView):
         return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
-        # Declaration
-        status = 'success'
-        message = ''
-        data = {}
-        errors = {}
-        valid_data = {}
-
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -173,6 +165,7 @@ class TableBoardView(APIView):
             return Response(res)
 
         # Transactions
+        data = {}
         try:
             data['show_searchbox'] = True
             board = valid_data['board']
@@ -285,7 +278,11 @@ class NoticeView(APIView):
     URL : /community/board/notice
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -301,22 +298,12 @@ class NoticeView(APIView):
                 errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있는 게시판 입니다."
                 status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
-        # Declaration
-        status = 'success'
-        message = ''
-        data = {}
-        errors = {}
-        valid_data = {}
-
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -325,6 +312,7 @@ class NoticeView(APIView):
             return Response(res)
 
         # Transactions
+        data = {}
         try:
             data["require_login"] = False
             data["require_membership"] = False
@@ -373,27 +361,22 @@ class SearchView(APIView):
         articles : 검색된 게시글 리스트
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
-        user = request.user
-
-        return status, errors
-
-    def get(self, request, *args, **kwargs):
-        # Declaration
+    def get_validation(self, request, *args, **kwargs):
         status = 'success'
         message = ''
-        data = {}
         errors = {}
         valid_data = {}
+        user = request.user
 
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         # Transactions
+        data = {}
         try:
             board_id = request.GET.get('board', 0)
             board_id = int(board_id) if board_id.isdigit() else 0
