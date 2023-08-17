@@ -17,7 +17,7 @@ from community.models import TeamRecruitArticle, ArticleTag
 from team.recommend import get_team_recommendation_list
 from community.utils import convert_size
 
-from community.serializers import BoardSerializer, ArticleSerializer
+from community.serializers import BoardSerializer, ArticleSerializer, BoardArticleSerializer
 from user.serializers import AccountPrivacySerializer
 from team.serializers import TeamSerializer, TeamMemberSerializer
 
@@ -198,7 +198,8 @@ class TableBoardView(APIView):
 
             # data['articles'] = get_article_metas(article_list)
             print(article_list)
-            data['articles'] = ArticleSerializer(article_list, many=True).data
+            data['articles'] = BoardArticleSerializer(
+                article_list, many=True).data
 
             # 팀 게시판
             if board.board_type == 'Team':
