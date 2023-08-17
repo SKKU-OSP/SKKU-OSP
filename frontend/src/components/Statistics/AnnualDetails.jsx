@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import DetailChart from './Charts/DetailChart';
 import DetailCardContent from './DetailCardContent';
 import AnnualSelectors from './AnnualSelectors';
+import ScatterChart from './Charts/ScatterChart';
 
 function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSetYear }) {
   const [kpiData, setKpiData] = useState({ target: 0, total: 1, percent: 0 });
@@ -45,9 +46,9 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     else return x;
   };
 
-  const getDetailData = (data) => {
+  const getConfig = (data, labels = years) => {
     return {
-      labels: years,
+      labels: labels,
       datasets: [
         {
           data: data,
@@ -66,23 +67,71 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     }
   };
 
+  const scatterPlugin = {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        title: (items) => {
+          return items[0].raw.y;
+        },
+        label: (item) => {
+          return item.raw.tooltip;
+        }
+      }
+    }
+  };
+
+  const getScatterScale = (yMax = null) => {
+    const scale = {
+      x: {
+        ticks: {
+          stepSize: 1
+        }
+      },
+      y: {
+        beginAtZero: true
+      }
+    };
+    if (yMax) scale.y['max'] = yMax;
+    return scale;
+  };
+  const scoreScatterOption = {
+    borderColor: '#0d6efd',
+    plugins: scatterPlugin,
+    scales: getScatterScale(5)
+  };
+
+  const ScatterOption = {
+    borderColor: '#0d6efd',
+    plugins: scatterPlugin,
+    scales: getScatterScale()
+  };
+
+  const factorMinLimitMap = {
+    score: 3,
+    commit: 8,
+    star: 1,
+    repo: 2
+  };
+
   const getUserScatterData = () => {
     const userScatterData = { score: [], commit: [], star: [], repo: [] };
-    ['commit', 'star'].forEach((factor) => {
+    ['score', 'commit', 'star', 'repo'].forEach((factor) => {
       years.forEach((year) => {
         const annualUserData = userData[String(year)];
         userScatterData[factor] = userScatterData[factor].concat(
-          annualUserData.map((obj) => {
-            return {
-              x: String(year),
-              y: obj[factor],
-              tooltip: obj.github_id
-            };
-          })
+          annualUserData
+            .filter((obj) => obj[factor] >= factorMinLimitMap[factor])
+            .map((obj) => {
+              return {
+                x: String(year),
+                y: obj[factor],
+                tooltip: obj.github_id
+              };
+            })
         );
       });
     });
-    console.log('userScatterData', userScatterData);
     return userScatterData;
   };
   let userScatterData = { score: [], commit: [], star: [], repo: [] };
@@ -105,25 +154,25 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-                {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.student_KP)} />}
+                {isReady && <DetailChart options={noLegendOption} data={getConfig(detailData.student_KP)} />}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.commit)} />}
+                {isReady && <DetailChart options={noLegendOption} data={getConfig(detailData.commit)} />}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={starData} cardTitle="총 Star 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getDetailData(detailData.star)} />}
+                {isReady && <DetailChart options={noLegendOption} data={getConfig(detailData.star)} />}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getDetailData(repoLineData)} />}
+                {isReady && <DetailChart options={noLegendOption} data={getConfig(repoLineData)} />}
               </div>
             </div>
           </>
@@ -133,25 +182,25 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-                개별데이터
+                {isReady && <ScatterChart options={scoreScatterOption} data={getConfig(userScatterData.score)} />}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getDetailData(userScatterData.commit)} />}
+                {isReady && <ScatterChart options={ScatterOption} data={getConfig(userScatterData.commit)} />}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={starData} cardTitle="총 Star 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getDetailData(userScatterData.star)} />}
+                {isReady && <ScatterChart options={ScatterOption} data={getConfig(userScatterData.star)} />}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
-                개별데이터
+                {isReady && <ScatterChart options={ScatterOption} data={getConfig(userScatterData.repo)} />}
               </div>
             </div>
           </>
