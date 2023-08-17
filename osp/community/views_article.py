@@ -57,11 +57,16 @@ class ArticleAPIView(APIView):
             article_file_objs = ArticleFile.objects.filter(
                 article_id=article.id, status="POST")
             article_files = []
+            print(article_files)
             for obj in article_file_objs:
-                article_files.append({'id': obj.id,
-                                      'name': obj.filename,
-                                      'file': obj.file.name,
-                                      'size': convert_size(obj.file.size)})
+                try:
+                    article_files.append({'id': obj.id,
+                                          'name': obj.filename,
+                                          'file': obj.file.name,
+                                          'size': convert_size(obj.file.size)})
+                except Exception as e:
+                    res['message'] = "파일이 존재하지 않습니다."
+                    print(e)
             data['files'] = article_files
 
             res['data'] = data
