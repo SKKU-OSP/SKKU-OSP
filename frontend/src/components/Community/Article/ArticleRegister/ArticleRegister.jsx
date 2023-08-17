@@ -3,30 +3,30 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
 import Select from 'react-select';
-import { BsXLg } from "react-icons/bs";
+import { BsXLg } from 'react-icons/bs';
 import { Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
 import { getAuthConfig } from '../../../../utils/auth';
 
-const domainUrl = import.meta.env.VITE_SERVER_URL
+const domainUrl = import.meta.env.VITE_SERVER_URL;
 
 function ArticleRegister({ isWrite, type, consentWriteOpen }) {
-  const boardName = useParams().board_name
-  const url = domainUrl + "community/" + boardName + "/"
-  const urlRegistArticle = domainUrl + "/community/api/article/create/"
-  const urlTag = domainUrl + "/tag/api/list/"
+  const boardName = useParams().board_name;
+  const url = domainUrl + 'community/' + boardName + '/';
+  const urlRegistArticle = domainUrl + '/community/api/article/create/';
+  const urlTag = domainUrl + '/tag/api/list/';
   const navigate = useNavigate();
 
-  const article = {}
+  const article = {};
   const [isAuthNotice, setIsAuthNotice] = useState(false);
   const [anonymousWriter, setAnonymousWriter] = useState(false);
   const [team, setTeam] = useState(null);
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [articleFile, setArticleFile] = useState({});
-  const [title, setTitle] = useState("");
-  const [bodyText, setBodyText] = useState("");
+  const [title, setTitle] = useState('');
+  const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
   const [selectTags, setSelectTags] = useState([]);
   const [startDate, setStartDate] = useState(null);
@@ -35,26 +35,30 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const editorRef = useRef(null);
   const [isTeamRegistration, setIsTeamRegistration] = useState(false);
 
-  useEffect(() => { //axios 사용
-    const getArticle = async() => {
+  useEffect(() => {
+    //axios 사용
+    const getArticle = async () => {
       try {
-
         const responseTag = await axios.get(urlTag);
         const resTag = responseTag.data;
-        setTags(resTag.data.tags.map(t => {
-          return{
-            value: t.name, label: t.name, color: t.color
-          }
-        }));
-        if(boardName === "공지"){
+        setTags(
+          resTag.data.tags.map((t) => {
+            return {
+              value: t.name,
+              label: t.name,
+              color: t.color
+            };
+          })
+        );
+        if (boardName === '공지') {
           setIsAuthNotice(!isAuthNotice);
         }
       } catch (error) {
         console.error(error);
       }
-    }
-    getArticle()
-  }, [])
+    };
+    getArticle();
+  }, []);
 
   // 익명 체크 여부 확인
   const anonymousCheck = () => {
@@ -65,13 +69,13 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // 저장 버튼 클릭 시
   const handleShow = (event) => {
     event.preventDefault();
-    if(boardName === "팀 모집"){
-      if(team === null){
-        window.alert("모집할 팀을 선택해 주세요");
+    if (boardName === '팀 모집') {
+      if (team === null) {
+        window.alert('모집할 팀을 선택해 주세요');
         return;
       }
       if (!startDate || !endDate) {
-        window.alert("모집 기간을 입력해 주세요");
+        window.alert('모집 기간을 입력해 주세요');
         return;
       }
       const offset = new Date().getTimezoneOffset() * 60000;
@@ -79,40 +83,39 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       const period_end_date = endDate.getTime() - offset;
 
       if (period_start_date > period_end_date - 3600000) {
-        window.alert("날짜 입력에 오류가 있습니다. 모집 기간은 최소 1시간이 되도록 설정해 주세요.");
+        window.alert('날짜 입력에 오류가 있습니다. 모집 기간은 최소 1시간이 되도록 설정해 주세요.');
         return;
       }
     }
-    if (title.trim() === "") {
+    if (title.trim() === '') {
       window.alert('제목을 입력해 주세요');
-    }
-    else if (bodyText.trim() === "") {
-        window.alert('본문을 입력해 주세요');
-        return;
-    }
-    else if (window.confirm("글을 등록하시겠습니까?")) { // 글 등록
+    } else if (bodyText.trim() === '') {
+      window.alert('본문을 입력해 주세요');
+      return;
+    } else if (window.confirm('글을 등록하시겠습니까?')) {
+      // 글 등록
       if (editorRef.current) {
-        console.log("title", title);
-        console.log("bodyText", bodyText);
-        console.log("tags", selectTags);
-        console.log("ano", anonymousWriter);
-        console.log("isn", isAuthNotice);
-        console.log("ps", startDate);
-        console.log("pe", endDate);
-        console.log("team", team);
-        console.log("articleFile", articleFile);
+        console.log('title', title);
+        console.log('bodyText', bodyText);
+        console.log('tags', selectTags);
+        console.log('ano', anonymousWriter);
+        console.log('isn', isAuthNotice);
+        console.log('ps', startDate);
+        console.log('pe', endDate);
+        console.log('team', team);
+        console.log('articleFile', articleFile);
 
         postArticle();
       }
     }
   };
-  
-  const postArticle = async() => {
+
+  const postArticle = async () => {
     try {
       const config = getAuthConfig();
       config.headers['Content-Type'] = 'multipart/form-data';
-      console.log("config", config);
-      
+      console.log('config', config);
+
       const postData = {
         board_name: boardName,
         title: title,
@@ -121,27 +124,27 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         anonymous_writer: anonymousWriter,
         article_tags: selectTags,
         ...articleFile,
-        ...(boardName === "팀 모집" && {
+        ...(boardName === '팀 모집' && {
           period_start: startDate,
           period_end: endDate,
-          team_id: team,
-        }),
-      }
+          team_id: team
+        })
+      };
 
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
         formData.append(key, value);
-      })
+      });
 
-      console.log("postData", postData);
-      for(let key of formData){
-        console.log("key", key, formData[key]);
+      console.log('postData', postData);
+      for (let key of formData) {
+        console.log('key', key, formData[key]);
       }
       const response = await axios.post(urlRegistArticle, formData, getAuthConfig());
 
       const res = response.data;
       console.log(res);
-      if (res['status'] === "success") {
+      if (res['status'] === 'success') {
         window.alert('등록이 완료되었습니다!');
         navigate(`/community/board/${boardName}/`);
       } else {
@@ -171,11 +174,11 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // File
   const handleFile = () => {
     const nextNum = numFile + 1;
-    
+
     setFileObj((prev) => {
-      const prevObj = {...prev};
+      const prevObj = { ...prev };
       prevObj[nextNum] = nextNum;
-      return prevObj
+      return prevObj;
     });
     // setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 때 주의점 numFile 줄이면 안돼!!
     if (inputRef.current && inputRef.current.files && inputRef.current.files.length > 0) {
@@ -193,12 +196,12 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
     // console.log(numFile);
     // console.log(nextNum + "v");
-  }
+  };
   // console.log(Object.keys({temp:1}))
   // console.log("file", articleFile);
   // console.log("Obj", fileObj);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef < HTMLInputElement > null;
 
   const deleteInput = (id) => {
     const updatedFileObj = { ...fileObj };
@@ -216,14 +219,14 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
   const handleFileChange = (event) => {
     const fileName = event.target.name;
-    const fileObjs = {...articleFile};
+    const fileObjs = { ...articleFile };
     fileObjs[fileName] = event.target.files[0];
-    
+
     setArticleFile(fileObjs);
 
-    console.log("fileObj", fileObjs);
-  }
-  
+    console.log('fileObj', fileObjs);
+  };
+
   // Tag
   const handleOptionSelect = (selectedTags) => {
     setSelectTags(selectedTags);
@@ -232,44 +235,44 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     option: (provided, state) => ({
       ...provided,
       color: state.isSelected ? 'lightgray' : 'black',
-      background: 'none',
+      background: 'none'
     }),
     multiValue: (provided, state) => {
       const tagColor = state.data.color;
       return {
         ...provided,
-        backgroundColor: tagColor,
+        backgroundColor: tagColor
       };
-    },
+    }
   };
 
-  const handleClick = () => {
+  const onBack = () => {
     navigate(`/community/board/${boardName}/`);
-  }
+  };
 
   // Team
   const options = [
     { value: 'chocolate', label: 'Chocolate' },
     { value: 'strawberry', label: 'Strawberry' },
     { value: 'vanilla', label: 'Vanilla' }
-  ]
+  ];
   const handleOption = (team) => {
     setTeam(team);
   };
   const customStyle = {
     control: (provided) => ({
       ...provided,
-      height: '45px',
+      height: '45px'
     }),
     option: (provided, state) => ({
       ...provided,
       color: state.isSelected ? 'lightgray' : 'black',
-      background: 'none',
-    }),
+      background: 'none'
+    })
   };
 
   //정보공개 미동의 시 뜨는 창
-  const renderConsentMessage = !isWrite && type === 'register' && ( 
+  const renderConsentMessage = !isWrite && type === 'register' && (
     <div>
       <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
       <button className="btn btn-primary" onClick={() => consentWriteOpen(request.user.username)}>
@@ -277,126 +280,216 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       </button>
     </div>
   );
-  
-  return(
+
+  return (
     <>
       {renderConsentMessage}
-      <div id='community-main' className="col-md-9">
+      <div id="community-main" className="col-md-9">
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
-        <div id="board-title-bar" className="flex-between">
-          <div className="d-flex justify-content-end gap-2">
-            <Button variant="transparent" onClick={handleClick} type="button" id="btn-content-back">
-              뒤로가기
-            </Button>
+          <div className="community-nav d-flex">
+            <div>
+              <button type="button" className="btn btn-secondary" onClick={onBack}>
+                뒤로가기
+              </button>
+              {boardName === '질문' && (
+                <div className="anonymous-btn hidden">
+                  <input type="checkbox" /> <label>익명</label>
+                </div>
+              )}
+            </div>
+            <div className="board-name">{boardName} 게시판</div>
+            <div>
+              {boardName === '질문' && (
+                <div className="anonymous-btn">
+                  <input
+                    type="checkbox"
+                    id="is-anonymous"
+                    className="align-middle"
+                    checked={anonymousCheck()}
+                    onChange={() => setAnonymousWriter(!anonymousWriter)}
+                  />{' '}
+                  <label htmlFor="is-anonymous">익명</label>
+                </div>
+              )}
+              <button type="submit" className="btn btn-primary">
+                작성하기
+              </button>
+            </div>
           </div>
-          <div id="board-title" className="p-board-title">
-            <a>       
-                {boardName} 게시판
-            </a>
-          </div>
-          <div className="d-flex justify-content-end gap-2"> 
-            {boardName === "질문" && (
-              <div className="p-board-title">
-                  <input type="checkbox" id="is-anonymous" className="align-middle" checked={anonymousCheck()} onChange={() => setAnonymousWriter(!anonymousWriter)} />{' '}
-                <label htmlFor="is-anonymous">익명</label>
-              </div>
-            )}
-            <Button variant="transparent" type="submit" id="btn-content-edit">
-              작성하기
-            </Button>
-          </div>
-        </div>
-          {/* <input type="hidden" id="board-type" className="board_type" value={board.board_type} /> */}
-          <input type="hidden" id="board-name" className="board_name" value={boardName} />
-          {/* <input type="hidden" id="board-id" className="board_id" value={board.id} />
-          <input type="hidden" id="article-id" className="article_id" value={article.id} /> */}
-          {/* {board.board_type === 'Team' && 
-            <input type="hidden" id="team-id" className="team_id" value={board.team.id} />
-          } */}
-          <div className="d-flex flex-column border border-2">
-            <div className="d-flex justify-content-between mb-1">
-              <input type="text" id="article-title" name="title" className="form-control" value={title} placeholder="제목을 입력해 주세요" required autofocus onChange={handleTitleChange} />
-              {boardName === "팀 모집" && ( //여기 수정
+          <input
+            type="text"
+            id="article-title"
+            name="title"
+            className="form-control"
+            value={title}
+            placeholder="제목을 입력해 주세요"
+            required
+            autofocus
+            onChange={handleTitleChange}
+          />
+          {boardName === '팀 모집' && ( //여기 수정
+            <>
+              {team ? (
+                <Select
+                  placeholder={team}
+                  options={options}
+                  menuPlacement="auto"
+                  value={team}
+                  onChange={handleOption}
+                  closeMenuOnSelect={false}
+                  hideSelectedOptions={false}
+                  styles={customStyle}
+                />
+              ) : (
                 <>
-                  {team ? (
-                    <Select placeholder={team} options={options} menuPlacement="auto" value={team} onChange={handleOption} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyle} />
+                  {isTeamRegistration ? (
+                    <Select id="team-option" name="team-option" className="form-select pointer" required>
+                      {teamOptions(request.user)}
+                    </Select>
                   ) : (
-                    <>
-                      {isTeamRegistration ? (
-                        <Select id="team-option" name="team-option" className="form-select pointer" required>
-                          {teamOptions(request.user)}
-                        </Select>
-                      ) : (
-                        <Select placeholder={"팀 선택"} options={options} menuPlacement="auto" value={team} onChange={handleOption} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyle} />
-                      )}
-                    </>
+                    <Select
+                      placeholder={'팀 선택'}
+                      options={options}
+                      menuPlacement="auto"
+                      value={team}
+                      onChange={handleOption}
+                      closeMenuOnSelect={false}
+                      hideSelectedOptions={false}
+                      styles={customStyle}
+                    />
                   )}
                 </>
               )}
-            </div>
-            <div className="mt-2" style={{zIndex: 0}}>
-              {/* <div id="article-body" className="form-control block-article" contentEditable="true" onChange={handleBodyChange}>
-                {bodyText}
-              </div> */}
-              <Editor initialValue={bodyText} onInit={handleEditorInit} onChange={handleBodyChange} init={{
-                height: 350,
-                branding: false,
-                statusbar: false,
-                paste_data_images: true,
-                plugins: [
-                  'advlist autolink lists link image charmap print preview anchor',
-                  'searchreplace visualblocks code fullscreen',
-                  'insertdatetime media table paste code help wordcount', 
-                  'undo', 'redo'
-                ],
-                toolbar:
-                  'undo redo | fontfamily ' +
-                  'bold italic underline strikethrough forecolor backcolor align | ' + 
-                  'removeformat help| image',
-                forced_root_block: 'div'
-              }}/>
-            </div>
-            <div className="w-100 mt-2">
-              <Select placeholder={'Tag'} options={tags} isMulti menuPlacement="auto" value={selectTags} onChange={handleOptionSelect} closeMenuOnSelect={false} hideSelectedOptions={false} styles={customStyles} />
-            </div>
-            <div id="article-helper" className="mt-2">
-              <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>파일 추가</button>
-            </div>
-            <div id="article-file-container">
-              {fileObj && Object.keys(fileObj).map((id) => ( //파일 추가 input
-                <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
-                  <input type="file" id={`article-file-${id}`} name={`article_file_${id}`} className="form-control article-file" onChange={handleFileChange}/>
-                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}><BsXLg /></button>
+            </>
+          )}
+          <Editor
+            initialValue={bodyText}
+            onInit={handleEditorInit}
+            onChange={handleBodyChange}
+            init={{
+              height: 350,
+              branding: false,
+              statusbar: false,
+              paste_data_images: true,
+              plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime media table paste code help wordcount',
+                'undo',
+                'redo'
+              ],
+              toolbar:
+                'undo redo | fontfamily ' +
+                'bold italic underline strikethrough forecolor backcolor align | ' +
+                'removeformat help| image',
+              forced_root_block: 'div'
+            }}
+          />
+          <Select
+            placeholder={'Tag'}
+            options={tags}
+            isMulti
+            menuPlacement="auto"
+            value={selectTags}
+            onChange={handleOptionSelect}
+            closeMenuOnSelect={false}
+            hideSelectedOptions={false}
+            styles={customStyles}
+          />
+          <div id="article-helper" className="mt-2">
+            <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>
+              파일 추가
+            </button>
+          </div>
+          <div id="article-file-container">
+            {fileObj &&
+              Object.keys(fileObj).map(
+                (
+                  id //파일 추가 input
+                ) => (
+                  <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
+                    <input
+                      type="file"
+                      id={`article-file-${id}`}
+                      name={`article_file_${id}`}
+                      className="form-control article-file"
+                      onChange={handleFileChange}
+                    />
+                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}>
+                      <BsXLg />
+                    </button>
+                  </div>
+                )
+              )}
+          </div>
+          {boardName === '팀 모집' && (
+            <div id="period-setting" className="mt-3">
+              <div className="d-flex">
+                <div id="date-label" className="p-date-label d-flex">
+                  모집 기간
                 </div>
-              ))}
-            </div>
-            {boardName === "팀 모집" && (
-              <div id="period-setting" className="mt-3">
-                <div className="d-flex">
-                  <div id="date-label" className="p-date-label d-flex">모집 기간</div>
-                  <div className="row flex-fill">
-                    <div className="col-sm-6 d-flex">
-                      <div id="date-label" className="p-date-label d-flex"><a>From</a></div>
-                      <div id="PeriodPickerStart" InputGroup className="log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
-                        <div className="mt-1">
-                          <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} selectsStart fixedHeight dateFormat="MM/dd/yyyy, hh:mm aa" showTimeInput className="form-control"/>
-                        </div>
-                      </div>
+                <div className="row flex-fill">
+                  <div className="col-sm-6 d-flex">
+                    <div id="date-label" className="p-date-label d-flex">
+                      <a>From</a>
                     </div>
-                    <div className="col-sm-6 d-flex">
-                      <div id="date-label" className="p-date-label d-flex"><a>To</a></div>
-                      <div id="PeriodPickerEnd" InputGroup className="log-event" data-td-target-input="nearest" data-td-target-toggle="nearest">
-                        <div className="mt-1">
-                          <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} selectsEnd fixedHeight dateFormat="MM/dd/yyyy, hh:mm aa"  minDate={new Date()} showTimeInput className="form-control"/>
-                        </div>
+                    <div
+                      id="PeriodPickerStart"
+                      InputGroup
+                      className="log-event"
+                      data-td-target-input="nearest"
+                      data-td-target-toggle="nearest"
+                    >
+                      <div className="mt-1">
+                        <DatePicker
+                          selected={startDate}
+                          onChange={(date) => setStartDate(date)}
+                          selectsStart
+                          fixedHeight
+                          dateFormat="MM/dd/yyyy, hh:mm aa"
+                          showTimeInput
+                          className="form-control"
+                        />
                       </div>
                     </div>
                   </div>
-                  <button id="end-button" type="button" className="btn btn-outline-light" onClick={() => setEndDate(getCurrentDateTime())}>마감</button>
+                  <div className="col-sm-6 d-flex">
+                    <div id="date-label" className="p-date-label d-flex">
+                      <a>To</a>
+                    </div>
+                    <div
+                      id="PeriodPickerEnd"
+                      InputGroup
+                      className="log-event"
+                      data-td-target-input="nearest"
+                      data-td-target-toggle="nearest"
+                    >
+                      <div className="mt-1">
+                        <DatePicker
+                          selected={endDate}
+                          onChange={(date) => setEndDate(date)}
+                          selectsEnd
+                          fixedHeight
+                          dateFormat="MM/dd/yyyy, hh:mm aa"
+                          minDate={new Date()}
+                          showTimeInput
+                          className="form-control"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                <button
+                  id="end-button"
+                  type="button"
+                  className="btn btn-outline-light"
+                  onClick={() => setEndDate(getCurrentDateTime())}
+                >
+                  마감
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </form>
       </div>
     </>
