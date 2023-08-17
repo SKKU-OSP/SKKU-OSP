@@ -3,6 +3,7 @@ import DetailChart from './Charts/DetailChart';
 import DetailCardContent from './DetailCardContent';
 import AnnualSelectors from './AnnualSelectors';
 import ScatterChart from './Charts/ScatterChart';
+import { getChartConfig, getScatterOption, noLegendOption } from '../../utils/chartOption';
 
 function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSetYear }) {
   const [kpiData, setKpiData] = useState({ target: 0, total: 1, percent: 0 });
@@ -46,65 +47,13 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     else return x;
   };
 
-  const getConfig = (data, labels = years) => {
-    return {
-      labels: labels,
-      datasets: [
-        {
-          data: data,
-          backgroundColor: '#0d6efd'
-        }
-      ]
-    };
-  };
-
-  const noLegendOption = {
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
-      y: { beginAtZero: true }
-    }
-  };
-
-  const scatterPlugin = {
-    legend: { display: false },
-    tooltip: {
-      callbacks: {
-        title: (items) => {
-          return items[0].raw.y;
-        },
-        label: (item) => {
-          return item.raw.tooltip;
-        }
+  const getDatasets = (data, colors = '#0d6efd') => {
+    return [
+      {
+        data: data,
+        backgroundColor: colors
       }
-    }
-  };
-
-  const getScatterScale = (yMax = null) => {
-    const scale = {
-      x: {
-        ticks: {
-          stepSize: 1
-        }
-      },
-      y: {
-        beginAtZero: true
-      }
-    };
-    if (yMax) scale.y['max'] = yMax;
-    return scale;
-  };
-  const scoreScatterOption = {
-    borderColor: '#0d6efd',
-    plugins: scatterPlugin,
-    scales: getScatterScale(5)
-  };
-
-  const ScatterOption = {
-    borderColor: '#0d6efd',
-    plugins: scatterPlugin,
-    scales: getScatterScale()
+    ];
   };
 
   const factorMinLimitMap = {
@@ -154,25 +103,36 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-                {isReady && <DetailChart options={noLegendOption} data={getConfig(detailData.student_KP)} />}
+                {isReady && (
+                  <DetailChart
+                    options={noLegendOption}
+                    data={getChartConfig(years, getDatasets(detailData.student_KP))}
+                  />
+                )}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getConfig(detailData.commit)} />}
+                {isReady && (
+                  <DetailChart options={noLegendOption} data={getChartConfig(years, getDatasets(detailData.commit))} />
+                )}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={starData} cardTitle="총 Star 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getConfig(detailData.star)} />}
+                {isReady && (
+                  <DetailChart options={noLegendOption} data={getChartConfig(years, getDatasets(detailData.star))} />
+                )}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
-                {isReady && <DetailChart options={noLegendOption} data={getConfig(repoLineData)} />}
+                {isReady && (
+                  <DetailChart options={noLegendOption} data={getChartConfig(years, getDatasets(repoLineData))} />
+                )}
               </div>
             </div>
           </>
@@ -182,25 +142,45 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-                {isReady && <ScatterChart options={scoreScatterOption} data={getConfig(userScatterData.score)} />}
+                {isReady && (
+                  <ScatterChart
+                    options={getScatterOption(5)}
+                    data={getChartConfig(years, getDatasets(userScatterData.score))}
+                  />
+                )}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
-                {isReady && <ScatterChart options={ScatterOption} data={getConfig(userScatterData.commit)} />}
+                {isReady && (
+                  <ScatterChart
+                    options={getScatterOption()}
+                    data={getChartConfig(years, getDatasets(userScatterData.commit))}
+                  />
+                )}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={starData} cardTitle="총 Star 수" />
-                {isReady && <ScatterChart options={ScatterOption} data={getConfig(userScatterData.star)} />}
+                {isReady && (
+                  <ScatterChart
+                    options={getScatterOption()}
+                    data={getChartConfig(years, getDatasets(userScatterData.star))}
+                  />
+                )}
               </div>
             </div>
             <div className="col-md-3">
               <div className="card p-3">
                 <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
-                {isReady && <ScatterChart options={ScatterOption} data={getConfig(userScatterData.repo)} />}
+                {isReady && (
+                  <ScatterChart
+                    options={getScatterOption()}
+                    data={getChartConfig(years, getDatasets(userScatterData.repo))}
+                  />
+                )}
               </div>
             </div>
           </>
