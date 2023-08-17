@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from .models import *
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
-from community.models import TeamRecruitArticle
+from community.models import TeamRecruitArticle, ArticleTag
 from team.recommend import get_team_recommendation_list
 from community.utils import convert_size
 
@@ -114,15 +114,15 @@ class CommunityMainView(APIView):
 class TableBoardView(APIView):
     '''
     GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
-    URL : /community/api/board/<board_id>/
+    URL : /community/api/board/<board_name>/
 
     '''
 
     def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
-        board_id = kwargs.get('board_id')
+        board_name = kwargs.get('board_name')
         try:
-            board = Board.objects.get(id=board_id)
+            board = Board.objects.get(name=board_name)
             valid_data['board'] = board
             if board.board_type == 'Team':
                 teaminvitemessage = TeamInviteMessage.objects.filter(
@@ -195,6 +195,9 @@ class TableBoardView(APIView):
             article_list = Article.objects.filter(board=board).annotate(writer_name=F(
                 "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
             article_list = get_article_metas(article_list)
+
+            # data['articles'] = get_article_metas(article_list)
+            print(article_list)
             data['articles'] = ArticleSerializer(article_list, many=True).data
 
             # 팀 게시판
