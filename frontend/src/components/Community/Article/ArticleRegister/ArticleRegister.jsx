@@ -323,7 +323,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             className="form-control"
             value={title}
             placeholder="제목을 입력해 주세요"
-            required
             autofocus
             onChange={handleTitleChange}
           />
@@ -343,7 +342,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               ) : (
                 <>
                   {isTeamRegistration ? (
-                    <Select id="team-option" name="team-option" className="form-select pointer" required>
+                    <Select id="team-option" name="team-option" className="form-select pointer">
                       {teamOptions(request.user)}
                     </Select>
                   ) : (
