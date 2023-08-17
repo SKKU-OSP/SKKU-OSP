@@ -73,16 +73,15 @@ function ContentView(props) {
           <div id="article-wrapper">
             <div id="article-title-wrapper" className="d-flex flex-row justify-content-between gap-2">
               <div id="article-title" className="fs-5">
-                {/*article.team.name |default:"팀이 더이상 존재하지 않습니다."*/}
                 {board.board_type === 'Recruit' && 'default: 팀이 더이상 존재하지 않습니다.'}
                 {article.title}
               </div>
               <div id="article-metadata">
                 <div className="d-flex flex-column justify-content-center">
                   {article.anonymous_writer ? (
-                    익명
+                    '익명'
                   ) : article.writer.user.username === null ? (
-                    탈퇴한이용자
+                    '탈퇴한 이용자'
                   ) : request.user.is_authenticated ? (
                     <div className="dropdown writer-dropdown">
                       <button
