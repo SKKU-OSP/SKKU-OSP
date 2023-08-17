@@ -8,18 +8,18 @@ export default function BoardArticle_Container(props) {
   const navigate = useNavigate();
 
   const onArticle = () => {
-    navigate(`/community/article/${article.id}`)
+    navigate(`/community/article/${article.id}`);
   };
 
   const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`)
+    navigate(`/user/${article.writer.user.username}`);
   };
 
   const getDate = (date) => {
     const now = new Date();
     const article_date = new Date(date);
     const delta = now.getTime() - article_date.getTime();
-    
+
     if (delta / (60 * 1000) < 1) {
       setPubDate('방금');
     } else if (delta / (60 * 1000) < 60) {
