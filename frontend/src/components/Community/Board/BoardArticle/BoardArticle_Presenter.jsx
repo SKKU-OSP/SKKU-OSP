@@ -2,7 +2,7 @@ import '../Board.css';
 import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs'
 
 export default function BoardArticle_Presenter(props) {
-  const { article, onArticle, onWriter } = props;
+  const { article, pubDate, onArticle, onWriter } = props;
 
   return <div className="board-article">
     <h6>{ article.writer ? (
@@ -11,7 +11,7 @@ export default function BoardArticle_Presenter(props) {
     <span className='board-article-writer' onClick={onWriter}>{article.writer.user.username}</span>
     ) : (
       <span>탈퇴한 이용자</span>
-    )} · {article.pub_date.substring(0, 10)}</h6>
+    )} · {pubDate}</h6>
     <h4 className='board-article-title' onClick={onArticle}>{article.title}</h4>
     <div>
       <h6 className='inline'>#hashtag</h6>
