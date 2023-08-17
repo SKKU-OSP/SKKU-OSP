@@ -56,9 +56,10 @@ urlpatterns = [
          views_article.CommentLikeView.as_view(), name='CommentLike'),
     path('api/main/',
          views.CommunityMainView.as_view(), name='main'),
+    path('api/board/notice/',
+         views.NoticeView.as_view(), name='board'),
     path('api/board/<str:board_name>/',
          views.TableBoardView.as_view(), name='board'),
-    path('api/board/notice/',
-         views.NoticeView.as_view(), name='board')
+
 
 ]
