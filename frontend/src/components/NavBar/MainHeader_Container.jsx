@@ -10,8 +10,12 @@ export default function MainHeader_Container(props) {
   function onClickToggle() {
     if (isToggled) {
       setIsToggled(false);
+      document.getElementsByTagName('header')[0].style.height = '85px';
+      document.getElementsByClassName('community-nav')[0].style.top = '85px';
     } else {
       setIsToggled(true);
+      document.getElementsByTagName('header')[0].style.height = '180px';
+      document.getElementsByClassName('community-nav')[0].style.top = '180px';
     }
   }
 
@@ -23,5 +27,7 @@ export default function MainHeader_Container(props) {
     navigate(`/accounts/login`);
   };
 
-  return <MainHeader_Presenter username={username} isToggled={isToggled} onClickToggle={onClickToggle} onLogin={onLogin} />;
+  return (
+    <MainHeader_Presenter username={username} isToggled={isToggled} onClickToggle={onClickToggle} onLogin={onLogin} />
+  );
 }

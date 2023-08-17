@@ -1,8 +1,9 @@
-/* #community-main {
-  width: 1440px;
-  height: 1024px;
-  background: #FFF;
-} */
+@media screen and (max-width: 767px) {
+  .board-article {
+    border-left: 0 !important;
+    border-right: 0 !important;
+  }
+}
 
 #community-bar {
   display: flex;

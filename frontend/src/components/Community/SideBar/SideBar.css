@@ -8,6 +8,8 @@
   text-align: center;
   border: 1px solid var(--main-border-color);
   border-top: none !important;
+  position: sticky;
+  top: 85px;
 }
 
 #sidebar-user-info {

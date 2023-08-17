@@ -25,7 +25,9 @@ export default function BoardArticle_Presenter(props) {
       </h4>
       <div>
         {article.tags.map((tag) => (
-          <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
+          <h6 className="inline" key={tag.name}>
+            #{tag.name.replace(' ', '_')}&nbsp;
+          </h6>
         ))}
         <div className="board-article-meta-list">
           <>
