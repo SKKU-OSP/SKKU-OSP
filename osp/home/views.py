@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Subquery, OuterRef
 from django.http import JsonResponse
 
 from rest_framework.response import Response
@@ -122,7 +122,6 @@ class StatisticView(APIView):
                 structured_factor_data[0]["years"][end_year]['score']['value_sid'])
 
             data["sids"] = list(range(end_year, end_year - sid_len, -1))
-            print(data["sids"])
             data["factors"] = ["score", "commit", "star", "pr", "issue"]
             res['data'] = data
             res["status"] = 'success'
@@ -140,10 +139,20 @@ class StatisticView(APIView):
             if year not in structured_data:
                 structured_data[year] = []
 
-        stdnt_list = Student.objects.all()
+        # Subquery를 사용하여 각 Student에 해당하는 Repository의 repo_num을 가져옵니다.
+        stdnt_list = Student.objects.annotate(
+            repo_num=Subquery(
+                Repository.objects.filter(
+                    year=OuterRef('year'),
+                    owner=OuterRef('github_id')
+                ).values('repo_num')[:1]
+            )
+        )
         for stdnt_data in stdnt_list:
             stdnt_json = stdnt_data.to_json()
+            stdnt_json['repo'] = stdnt_data.repo_num
             structured_data[stdnt_data.year].append(stdnt_json)
+
         return structured_data
 
 
@@ -245,7 +254,7 @@ def statistic(request):
     context["year_list"].reverse()
     context['user_type'] = 'admin'
     print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
-    return JsonResponse(chartdata)
+    # return JsonResponse(chartdata)
     return render(request, 'home/statistic.html', context)
 
 
