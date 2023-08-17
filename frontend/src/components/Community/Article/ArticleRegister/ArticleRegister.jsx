@@ -292,19 +292,18 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                 뒤로가기
               </button>
               {boardName === '질문' && (
-                <div className="anonymous-btn hidden">
+                <div className="anonymous-btn hidden align-middle">
                   <input type="checkbox" /> <label>익명</label>
                 </div>
               )}
             </div>
             <div className="board-name">{boardName} 게시판</div>
-            <div className="hi-class">
+            <div>
               {boardName === '질문' && (
-                <div className="anonymous-btn">
+                <div className="anonymous-btn align-middle">
                   <input
                     type="checkbox"
                     id="is-anonymous"
-                    className="align-middle"
                     checked={anonymousCheck()}
                     onChange={() => setAnonymousWriter(!anonymousWriter)}
                   />{' '}
