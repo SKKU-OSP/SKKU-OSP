@@ -26,6 +26,8 @@ urlpatterns = [
          views.TeamsListView.as_view(), name='teams-list'),
     path('api/teams-of-user-list/',
          views.TeamsOfUserListView.as_view(), name='teams-of-user-list'),
+    path('api/applications/', views.TeamApplicationListView.as_view(),
+         name='TeamApplicationList')
 
     # path('api/member', views.TeamMemberAPI.asView(), name='TeamMember API'),
 ]

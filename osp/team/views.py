@@ -3,7 +3,6 @@ from django.shortcuts import render, resolve_url
 from django.urls import reverse
 from django.http import JsonResponse
 from django.core.files.images import get_image_dimensions
-from django.template.loader import render_to_string
 from .models import Team, TeamMember, TeamTag, TeamInviteMessage, TeamApplyMessage
 from tag.models import Tag
 from user.models import Account, User
@@ -18,9 +17,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 
-from community.serializers import BoardSerializer, ArticleSerializer
 from user.serializers import AccountSerializer, AccountPrivacySerializer
-from team.serializers import TeamSerializer, TeamMemberSerializer, TemaTagSerializer
+from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerializer, TeamInviteMessageSerializer
 from tag.serializers import TagIndependentSerializer
 
 
@@ -647,7 +645,7 @@ class TeamUpdateView(APIView):
             data['team'] = TeamSerializer(team).data
             data['team_members'] = TeamMemberSerializer(
                 team_members, many=True).data
-            data['team_tag_list'] = TemaTagSerializer(
+            data['team_tag_list'] = TeamTagSerializer(
                 team_tag_list, many=True).data
 
         except DatabaseError:
@@ -1474,6 +1472,71 @@ class TeamsOfUserListView(APIView):
         except Exception as e:
             errors['undefined_exception'] = 'undefined_exception'
             logging.exception(f'TeamsOfUserList ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+class TeamApplicationListView(APIView):
+    def get_validation(self, request):
+        status, errors = "success", {}
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, errors
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        message = ''
+        data = {}
+
+        # Request Validation
+        status, errors = self.get_validation(request)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        user = request.user
+        try:
+            # 유저가 팀 관리자인 팀의 목록 쿼리
+            team_id_include_user = TeamMember.objects.filter(
+                member=user.id, is_admin=1).values_list('team_id')
+
+            team_apps_received = TeamInviteMessage.objects.filter(
+                team__in=team_id_include_user, status=0, direction=False)
+
+            data['received'] = TeamInviteMessageSerializer(
+                team_apps_received, many=True).data
+
+            team_apps_sent = TeamInviteMessage.objects.filter(
+                account__user_id=user.id,
+                direction=False,
+            )
+
+            data['sent'] = TeamInviteMessageSerializer(
+                team_apps_sent, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'TeamApplicationList DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(f'TeamApplicationList ERROR: {e}')
             status = 'fail'
 
         # Response

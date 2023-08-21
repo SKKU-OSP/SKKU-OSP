@@ -31,7 +31,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         )
 
 
-class TemaTagSerializer(serializers.ModelSerializer):
+class TeamTagSerializer(serializers.ModelSerializer):
     team = TeamSerializer()
     tag = TagIndependentSerializer()
 
@@ -40,4 +40,21 @@ class TemaTagSerializer(serializers.ModelSerializer):
         fields = (
             "team",
             "tag",
+        )
+
+
+class TeamInviteMessageSerializer(serializers.ModelSerializer):
+    team = TeamSerializer()
+    account = AccountSerializer()
+
+    class Meta:
+        model = models.TeamInviteMessage
+        fields = (
+            "id",
+            "team",
+            "account",
+            "message",
+            "status",
+            "direction",
+            "send_date",
         )
