@@ -673,15 +673,19 @@ class TeamUpdateView(APIView):
             status = 'fail'
 
         # Team 존재 여부 체크
-        if not Team.objects.filter(id=target_team_id).exists():
+        target_team = Team.objects.filter(id=target_team_id)
+        if not target_team.exists():
             errors['team_not_found'] = "해당 팀이 존재하지 않습니다."
             status = 'fail'
+            return status, message, errors, valid_data
+        valid_data['team'] = target_team.first()
+
         # Team Name Check
         if not team_name:
             errors['team_name_empty'] = '이름은 필수 입력값입니다.'
             status = 'fail'
-
-        else:
+        elif target_team.name != team_name:
+            # 이름 변경을 시도할 때, 이름 중복 체크
             team_obj = Team.objects.filter(name=team_name)
             if len(team_obj) > 0:
                 errors['team_name_duplicate'] = '팀 이름이 이미 존재합니다.'
@@ -728,6 +732,7 @@ class TeamUpdateView(APIView):
             return Response(res)
 
         # Transactions
+        team = valid_data['team']
         team_name = request.data.get('team_name', False)
         team_name = team_name.strip() if isinstance(team_name, str) else team_name
         team_description = request.data.get('team_description', False)
@@ -1609,18 +1614,16 @@ class UserRecommenderView(APIView):
             member__user=request.user).values_list("team_id", flat=True))
         user_teams = Team.objects.filter(id__in=user_team_ids)
         data['teams'] = TeamSerializer(user_teams, many=True).data
-
-        team_name = request.GET.get('team', None)
-        print("team_name", team_name)
+        team_id = request.GET.get('team_id', None)
         recommends = None
         if len(user_teams) == 0:
             # 팀 리스트가 비어있는 경우 소속팀이 없으므로 account 리스트 반환
             recommends = AccountWithInterestSerializer(
                 account_list, many=True).data
-        elif team_name:
+        elif team_id:
             try:
                 # 팀 이름으로 객체 불러와서 그 객체에 대한 추천 유저목록 읽어서 리턴
-                target_team = user_teams.filter(name=team_name).first()
+                target_team = user_teams.filter(id=team_id).first()
                 team_recommendation = get_team_recommendation(target_team.id)
 
                 # 추천 계정에 similarity 값 추가하여 리턴
