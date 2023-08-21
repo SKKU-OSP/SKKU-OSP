@@ -22,7 +22,7 @@ function TeamRecruit() {
   const getArticle = async () => {
     try {
       const responseTeamList = await axios.get(server_url + `/team/api/teams-list/`);
-      const responseRecruit = await axios.get(server_url + `/community/api/board/2/`, getAuthConfig());
+      const responseRecruit = await axios.get(server_url + `/community/api/board/${board_name}/`, getAuthConfig());
       const resTeamList = responseTeamList.data;
       const resRecruit = responseRecruit.data;
       if (resTeamList.status === 'success') {
