@@ -1,32 +1,25 @@
 from django.db import transaction, DatabaseError
 from django.shortcuts import render, resolve_url
-from django.urls import reverse
-from django.http import JsonResponse
 from django.core.files.images import get_image_dimensions
-from .models import Team, TeamMember, TeamTag, TeamInviteMessage, TeamApplyMessage
+from team.models import Team, TeamMember, TeamTag, TeamInviteMessage, TeamApplyMessage
 from tag.models import Tag
-from user.models import Account, User
+from user.models import Account, User, AccountPrivacy, AccountInterest
 from community.models import Board, Article, TeamRecruitArticle
 from message.models import Message
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 
-from user.serializers import AccountSerializer, AccountPrivacySerializer
+from user.serializers import AccountSerializer, AccountPrivacySerializer, AccountWithInterestSerializer
 from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerializer, TeamInviteMessageSerializer
-from tag.serializers import TagIndependentSerializer
 
+from team.recommend import get_team_recommendation_list, get_team_recommendation
+from team.utils import *
 
 from datetime import datetime
-
-from .utils import *
-
 import logging
+import time
 
 
 class TeamInviteOnTeamboardView(APIView):
@@ -679,6 +672,10 @@ class TeamUpdateView(APIView):
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
+        # Team 존재 여부 체크
+        if not Team.objects.filter(id=target_team_id).exists():
+            errors['team_not_found'] = "해당 팀이 존재하지 않습니다."
+            status = 'fail'
         # Team Name Check
         if not team_name:
             errors['team_name_empty'] = '이름은 필수 입력값입니다.'
@@ -1544,4 +1541,106 @@ class TeamApplicationListView(APIView):
             res = {'status': status, 'message': message, 'data': data}
         else:
             res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+class UserRecommenderView(APIView):
+    '''
+    GET: 
+    URL : /team/api/recommender/users/
+
+    JSON RESPONSE
+    data :
+        user_teams : 소속 팀 목록 리스트
+        recommended_teams : 팀 추천 리스트
+        privacy : 개인정보 공개 단계
+    '''
+
+    def get_validation(self, request):
+        status = 'success'
+        errors = {}
+        user = request.user
+
+        try:
+            if not user.is_authenticated:
+                errors["require_login"] = "로그인이 필요합니다."
+                status = 'fail'
+            else:
+                User.objects.get(id=user.id)
+        except User.DoesNotExist:
+            logging.exception(f'UserRecommender user_not_found: {e}')
+            errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            status = 'fail'
+        try:
+            acc_pp = AccountPrivacy.objects.get(account=request.user.id)
+        except Exception as e:
+            logging.exception(f'UserRecommender user_privacy_not_found: {e}')
+            errors["user_privacy_not_found"] = "해당 유저가 존재하지 않습니다."
+            status = 'fail'
+
+        return status, errors
+
+    def get(self, request, *args, **kwargs):
+        start = time.time()
+        res = {'status': 'success', 'data': None, 'message': ''}
+        data = {}
+        status, errors = self.get_validation(request)
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        try:
+            # acc_pp = AccountPrivacy.objects.get(account=request.user.id)
+            # data['privacy'] = AccountPrivacySerializer(acc_pp).data
+            open_acc = AccountPrivacy.objects.filter(is_open=True).exclude(
+                account=request.user.id).values('account_id')
+            print("open_acc", len(open_acc))
+            account_list = Account.objects.filter(
+                user__is_superuser=False, user__id__in=open_acc)
+            print("account_list", len(account_list))
+        except Exception as e:
+            logging.exception(
+                f"UserRecommenderView account load exception: {e}")
+            errors["user_privacy_not_found"] = "해당 유저가 존재하지 않습니다."
+            status = 'fail'
+
+        # 팀 데이터 받기 전에 사용할 팀 목록 리스트를 위해 데이터를 가져온다.
+        user_team_ids = list(TeamMember.objects.filter(
+            member__user=request.user).values_list("team_id", flat=True))
+        user_teams = Team.objects.filter(id__in=user_team_ids)
+        data['teams'] = TeamSerializer(user_teams, many=True).data
+
+        team_name = request.GET.get('team', None)
+        print("team_name", team_name)
+        recommends = None
+        if len(user_teams) == 0:
+            # 팀 리스트가 비어있는 경우 소속팀이 없으므로 account 리스트 반환
+            recommends = AccountWithInterestSerializer(
+                account_list, many=True).data
+        elif team_name:
+            try:
+                # 팀 이름으로 객체 불러와서 그 객체에 대한 추천 유저목록 읽어서 리턴
+                target_team = user_teams.filter(name=team_name).first()
+                team_recommendation = get_team_recommendation(target_team.id)
+
+                # 추천 계정에 similarity 값 추가하여 리턴
+                recommend_accounts = Account.objects.filter(
+                    user_id__in=team_recommendation)
+
+                recommends = AccountWithInterestSerializer(
+                    recommend_accounts, many=True).data
+                for rec in recommends:
+                    rec['value'] = team_recommendation[rec['user']['id']]
+
+            except Exception as e:
+                logging.exception(f"target_team exception: {e}")
+                status = 'fail'
+                errors["recommend_not_found"] = "추천 목록을 불러오는데 실패했습니다."
+        else:
+            recommends = AccountWithInterestSerializer(
+                account_list, many=True).data
+
+        data['recommend'] = recommends
+        res['data'] = data
+        print("elapsed time UserRecommenderView", time.time() - start)
         return Response(res)
