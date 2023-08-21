@@ -60,6 +60,12 @@ urlpatterns = [
          views.NoticeView.as_view(), name='board'),
     path('api/board/<str:board_name>/',
          views.TableBoardView.as_view(), name='board'),
+    path('api/user-articles/',
+         views.UserArticlesView.as_view(), name='user-articles'),
+    path('api/user-comments/',
+         views.UserCommentsView.as_view(), name='user-comments'),
+    path('api/user-scrap-articles/',
+         views.UserScrapArticlesView.as_view(), name='user-scrap-articles'),
 
 
 ]

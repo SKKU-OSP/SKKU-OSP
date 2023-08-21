@@ -17,7 +17,7 @@ from community.models import TeamRecruitArticle, ArticleTag
 from team.recommend import get_team_recommendation_list
 from community.utils import convert_size
 
-from community.serializers import BoardSerializer, ArticleSerializer, BoardArticleSerializer
+from community.serializers import BoardSerializer, ArticleSerializer, BoardArticleSerializer, ArticleCommentSerializer
 from user.serializers import AccountPrivacySerializer
 from team.serializers import TeamSerializer, TeamMemberSerializer
 
@@ -872,6 +872,166 @@ class ArticleView(TemplateView):
     def get_context_data(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class UserArticlesView(APIView):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserArticlesView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            account = Account.objects.get(user=user)
+            user_articles = Article.objects.filter(writer=account)
+            data['user_articles'] = ArticleSerializer(
+                user_articles, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserArticlesView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserArticlesView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+class UserCommentsView(APIView):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserCommentsView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            account = Account.objects.get(user=user)
+            articlecomments = ArticleComment.objects.filter(writer=account)
+            data['artclecomments'] = ArticleCommentSerializer(
+                articlecomments, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserCommentsView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserCommentsView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+class UserScrapArticlesView(APIView):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserScrapArticlesView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            account = Account.objects.get(user=user)
+            articlescraps = ArticleScrap.objects.filter(
+                account=account).values_list('article')
+            userscraparticles = Article.objects.filter(id__in=articlescraps)
+            data['userscraparticles'] = ArticleSerializer(
+                userscraparticles, many=True).data
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserScrapArticlesView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserScrapArticlesView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
 
 
 @login_required
