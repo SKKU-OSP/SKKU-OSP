@@ -258,7 +258,6 @@ button {
 }
 #chat-view-tab {
   width: 60%;
-  height: 100%;
   padding: 1rem;
   border-bottom-right-radius: 0.625rem;
   background-color: var(--main-bg-color);
