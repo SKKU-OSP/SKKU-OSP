@@ -77,3 +77,40 @@ class AccountPrivacySerializer(serializers.ModelSerializer):
             "is_write",
             "is_open"
         )
+
+
+class GithubScoreTableSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.GitHubScoreTable
+        fields = (
+            "id",
+            "year",
+            "name",
+            "github_id",
+            "total_score",
+            "commit_cnt",
+            "commit_line",
+            "issue_cnt",
+            "pr_cnt",
+            "repo_cnt",
+            "dept",
+            "absence",
+            "plural_major",
+            "personal_email",
+        )
+
+
+class AccountWithInterestSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    interests = AccountInterestSerializer(
+        source='accountinterest_set', many=True, read_only=True)
+
+    class Meta:
+        model = models.Account
+        fields = (
+            "user",
+            "photo",
+            "github_id",
+            "interests"
+        )

@@ -13,11 +13,11 @@ from rest_framework.views import APIView
 from .models import *
 from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
 from user.models import Account, AccountInterest, AccountPrivacy
-from community.models import TeamRecruitArticle
+from community.models import TeamRecruitArticle, ArticleTag
 from team.recommend import get_team_recommendation_list
 from community.utils import convert_size
 
-from community.serializers import BoardSerializer, ArticleSerializer
+from community.serializers import BoardSerializer, ArticleSerializer, BoardArticleSerializer, ArticleCommentSerializer
 from user.serializers import AccountPrivacySerializer
 from team.serializers import TeamSerializer, TeamMemberSerializer
 
@@ -38,24 +38,20 @@ class CommunityMainView(APIView):
     URL : /community
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
-        user = request.user
-        return status, message, errors, valid_data
-
-    def get(self, request, *args, **kwargs):
-        # Declaration
+    def get_validation(self, request, *args, **kwargs):
         status = 'success'
         message = ''
-        data = {}
         errors = {}
         valid_data = {}
 
+        user = request.user
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -64,6 +60,7 @@ class CommunityMainView(APIView):
             return Response(res)
 
         # Transactions
+        data = {}
         try:
             data['show_searchbox'] = True
             boards = Board.objects.exclude(
@@ -114,15 +111,20 @@ class CommunityMainView(APIView):
 class TableBoardView(APIView):
     '''
     GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
-    URL : /community/api/board/<board_id>/
+    URL : /community/api/board/<board_name>/
 
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
         user = request.user
-        board_id = kwargs.get('board_id')
+        board_name = kwargs.get('board_name')
         try:
-            board = Board.objects.get(id=board_id)
+            board = Board.objects.get(name=board_name)
             valid_data['board'] = board
             if board.board_type == 'Team':
                 teaminvitemessage = TeamInviteMessage.objects.filter(
@@ -152,19 +154,9 @@ class TableBoardView(APIView):
         return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
-        # Declaration
-        status = 'success'
-        message = ''
-        data = {}
-        errors = {}
-        valid_data = {}
-
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -173,6 +165,7 @@ class TableBoardView(APIView):
             return Response(res)
 
         # Transactions
+        data = {}
         try:
             data['show_searchbox'] = True
             board = valid_data['board']
@@ -195,7 +188,11 @@ class TableBoardView(APIView):
             article_list = Article.objects.filter(board=board).annotate(writer_name=F(
                 "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
             article_list = get_article_metas(article_list)
-            data['articles'] = ArticleSerializer(article_list, many=True).data
+
+            # data['articles'] = get_article_metas(article_list)
+            print(article_list)
+            data['articles'] = BoardArticleSerializer(
+                article_list, many=True).data
 
             # 팀 게시판
             if board.board_type == 'Team':
@@ -281,7 +278,11 @@ class NoticeView(APIView):
     URL : /community/board/notice
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
         user = request.user
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -297,22 +298,12 @@ class NoticeView(APIView):
                 errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있는 게시판 입니다."
                 status = 'fail'
 
-        return status, errors
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
-        # Declaration
-        status = 'success'
-        message = ''
-        data = {}
-        errors = {}
-        valid_data = {}
-
         # Request Validation
         status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+            = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -321,6 +312,7 @@ class NoticeView(APIView):
             return Response(res)
 
         # Transactions
+        data = {}
         try:
             data["require_login"] = False
             data["require_membership"] = False
@@ -442,6 +434,7 @@ class SearchView(APIView):
         else:
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
+
 
 
 def search_article(request, board):
@@ -875,6 +868,166 @@ class ArticleView(TemplateView):
     def get_context_data(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class UserArticlesView(APIView):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserArticlesView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            account = Account.objects.get(user=user)
+            user_articles = Article.objects.filter(writer=account)
+            data['user_articles'] = ArticleSerializer(
+                user_articles, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserArticlesView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserArticlesView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+class UserCommentsView(APIView):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserCommentsView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            account = Account.objects.get(user=user)
+            articlecomments = ArticleComment.objects.filter(writer=account)
+            data['artclecomments'] = ArticleCommentSerializer(
+                articlecomments, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserCommentsView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserCommentsView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+class UserScrapArticlesView(APIView):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserScrapArticlesView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            account = Account.objects.get(user=user)
+            articlescraps = ArticleScrap.objects.filter(
+                account=account).values_list('article')
+            userscraparticles = Article.objects.filter(id__in=articlescraps)
+            data['userscraparticles'] = ArticleSerializer(
+                userscraparticles, many=True).data
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserScrapArticlesView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserScrapArticlesView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
 
 
 @login_required

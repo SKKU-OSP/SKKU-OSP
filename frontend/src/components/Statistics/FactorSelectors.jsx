@@ -1,32 +1,27 @@
-function FactorSelectors() {
+import Nav from 'react-bootstrap/Nav';
+
+function FactorSelectors({ factor, onSetFactor, factors }) {
+  const handleSelect = (eventKey) => {
+    onSetFactor(eventKey);
+  };
+  const factorTitleMap = {
+    score: 'Score',
+    commit: 'Commits',
+    star: 'Stars',
+    pr: 'PR',
+    issue: 'Issues'
+  };
   return (
-    <ul className="nav nav-tabs mt-4 d-flex text-lg">
-      <li className="nav-item">
-        <a className="nav-link border-round active" id="pills-score-tab">
-          Score
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-commits-tab">
-          Commits
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-stars-tab">
-          Stars
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-pr-tab">
-          PR
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link border-round" id="pills-issue-tab">
-          Issues
-        </a>
-      </li>
-    </ul>
+    <Nav variant="underline" onSelect={handleSelect} defaultActiveKey={factor} className="mt-4">
+      {factors &&
+        factors.map((item) => {
+          return (
+            <Nav.Item key={item} className="flex-tab text-center">
+              <Nav.Link eventKey={item}>{factorTitleMap[item]}</Nav.Link>
+            </Nav.Item>
+          );
+        })}
+    </Nav>
   );
 }
 

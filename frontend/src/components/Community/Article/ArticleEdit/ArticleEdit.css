@@ -1,37 +1,7 @@
-/* 필요한 것 */
-#board-title-bar {
-  display: flex;
-  margin-bottom: 1rem;
-  width: 100%;
-  height: 80px;
-  padding: 0px 40px;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  border-bottom: 1px solid #B0B0B0;
-  background: var(--main-white) !important;
-  border-radius: 0;
-}
-
-#board-title {
+.board-name {
   font-size: 20px;
-}
-
-#board-title > a {
-  width: 150px;
-  color: #06F;
-  text-align: center;
-  font-family: Inter;
-  font-size: 30px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  text-decoration: none;
-}
-
-.p-board-title {
-  padding: 6px 12px;
-  vertical-align: middle;
+  font-weight: bolder;
+  color: var(--main-selected-color);
 }
 
 #article-title {
@@ -40,6 +10,20 @@
   padding: 16px 20px;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid #B0B0B0;
-  border-radius: 0;
+  border: solid var(--main-border-color) !important;
+  border-width: 0 1px 1px 0 !important;
+  border-radius: 0 !important;
+}
+
+.tox-tinymce,
+.css-13cymwt-control {
+  border: solid var(--main-border-color) !important;
+  border-width: 0 1px 1px 1px !important;
+  margin-left: -1px;
+  border-radius: 0 !important;
+}
+
+.anonymous-btn {
+  display: inline-block;
+  margin-right: 15px;
 }

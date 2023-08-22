@@ -120,3 +120,10 @@ footer {
   border-top: solid 2px black;
   text-align: center;
 }
+
+@media screen and (max-width: 767px) {
+  .container {
+    max-width: 767px !important;
+    --bs-gutter-x: 0 !important;
+  }
+}
