@@ -13,6 +13,7 @@ import ArticleEdit from './components/Community/Article/ArticleEdit/ArticleEdit'
 import ArticleRegister from './components/Community/Article/ArticleRegister/ArticleRegister';
 import Board_Container from './components/Community/Board/index';
 import SignUpPage from './routes/SignUpPage';
+import RankUserPage from './routes/RankUserPage';
 import { tokenLoader } from './utils/auth';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -93,6 +94,10 @@ const router = createBrowserRouter([
       {
         path: 'statistics',
         element: <StatisticsPage />
+      },
+      {
+        path: 'rank/user',
+        element: <RankUserPage />
       }
     ]
   }
