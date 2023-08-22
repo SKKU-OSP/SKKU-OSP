@@ -122,8 +122,10 @@ class TeamInviteOnTeamboardView(APIView):
         if len(invite_msg) > 150:
             errors['msg_too_long'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
             status = 'fail'
-
-        return target_team, target_user, status, errors
+        
+        valid_data['target_team'] = target_team
+        valid_data['target_user'] = target_user
+        return status, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
@@ -134,11 +136,8 @@ class TeamInviteOnTeamboardView(APIView):
         valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.post_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, errors, valid_data\
+            = self.post_validation(request, status, message, errors, valid_data)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -175,8 +174,7 @@ class TeamInviteOnTeamboardView(APIView):
                 # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
                 board = Board.objects.get(team=target_team)
-                url = resolve_url('community:Board',
-                                  board_name=board.name, board_id=board.id)
+                url = f'/community/board/{board.name}';
                 sender = Account.objects.get(user=request.user.id)
 
                 # 메세지 객체 생성
@@ -197,10 +195,10 @@ class TeamInviteOnTeamboardView(APIView):
             # Database Exception handling
             status = 'fail'
             errors['DB_exception'] = 'DB Error'
-        except:
+        except Exception as e:
             status = 'fail'
             errors['undefined_exception'] = 'undefined_exception'
-
+            logging.exception(f'undefined_exception {e}')
         # Response
         if status == 'success':
             res = {'status': status, 'message': message, 'data': data}
@@ -302,7 +300,7 @@ class TeamInviteOnRecommendView(APIView):
                 errors['msg_too_long'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
                 status = 'fail'
 
-        return target_team, target_user, status, errors
+        return status, errors, target_team, target_user
 
     def post(self, request, *args, **kwargs):
         # Declaration
@@ -357,8 +355,7 @@ class TeamInviteOnRecommendView(APIView):
                 # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
                 board = Board.objects.get(team=team)
-                url = resolve_url('community:Board',
-                                  board_name=board.name, board_id=board.id)
+                url = f'/community/board{board.name}'
                 sender = Account.objects.get(user=request.user.id)
 
                 # 메세지 객체 생성
