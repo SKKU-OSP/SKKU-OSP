@@ -73,11 +73,9 @@ function Interest() {
           profileSkill.forEach((skill) => {
             profileSkillLevel[skill.level].push(skill);
           });
-          console.log(res);
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
         } else {
-          console.log(res.errors);
         }
       } catch (error) {
         setError(true);
