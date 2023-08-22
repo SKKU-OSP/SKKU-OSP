@@ -80,6 +80,9 @@ class AccountPrivacySerializer(serializers.ModelSerializer):
 
 
 class GithubScoreTableSerializer(serializers.ModelSerializer):
+    absence_label = serializers.SerializerMethodField()
+    plural_major_label = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
 
     class Meta:
         model = models.GitHubScoreTable
@@ -88,7 +91,7 @@ class GithubScoreTableSerializer(serializers.ModelSerializer):
             "year",
             "name",
             "github_id",
-            "total_score",
+            "score",
             "commit_cnt",
             "commit_line",
             "issue_cnt",
@@ -98,7 +101,26 @@ class GithubScoreTableSerializer(serializers.ModelSerializer):
             "absence",
             "plural_major",
             "personal_email",
+            "absence_label",
+            "plural_major_label"
         )
+
+    def get_absence_label(self, table):
+        if table.absence == 0:
+            return "재학"
+        elif table.absence == 1:
+            return "휴학"
+        else:
+            return "졸업"
+
+    def get_plural_major_label(self, table):
+        if table.plural_major:
+            return "복수전공"
+        else:
+            return "원전공"
+
+    def get_score(self, table):
+        return round(table.total_score, 2)
 
 
 class AccountWithInterestSerializer(serializers.ModelSerializer):
