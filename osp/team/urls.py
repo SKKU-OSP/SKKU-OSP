@@ -22,6 +22,14 @@ urlpatterns = [
          views.TeamApplyUpdateView.as_view(), name='apply-update'),
     path('api/team-apply-delete/',
          views.TeamApplyDeleteView.as_view(), name='apply-delete'),
+    path('api/teams-list/',
+         views.TeamsListView.as_view(), name='teams-list'),
+    path('api/teams-of-user-list/',
+         views.TeamsOfUserListView.as_view(), name='teams-of-user-list'),
+    path('api/applications/', views.TeamApplicationListView.as_view(),
+         name='TeamApplicationList'),
+    path('api/recommender/users/', views.UserRecommenderView.as_view(),
+         name='UserRecommender')
 
     # path('api/member', views.TeamMemberAPI.asView(), name='TeamMember API'),
 ]

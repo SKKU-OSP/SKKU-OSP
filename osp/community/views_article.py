@@ -68,6 +68,7 @@ class ArticleAPIView(APIView):
             except Exception as e:
                 logging.exception(f"저장된 파일이 없습니다.{e}")
             
+
             data['files'] = article_files
             res['data'] = data
         except Exception as e:

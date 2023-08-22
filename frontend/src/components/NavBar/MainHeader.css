@@ -1,4 +1,8 @@
 @media screen and (max-width: 767px) {
+  header {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+  }
   .logo {
     margin-right: auto;
   }
@@ -55,8 +59,12 @@
 }
 
 header {
+  height: 85px;
+  padding: 15px;
   background-color: var(--header-bg-color);
   border-bottom: 1px solid var(--main-border-color);
+  position: sticky;
+  top: 0px;
 }
 
 .header {

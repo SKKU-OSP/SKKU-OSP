@@ -32,6 +32,7 @@ function Article_Presenter() {
       try {
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
+        console.log(res);
         if (res.status === 'success') {
           setArticle(res.data.article);
           setTags(res.data.tags);
