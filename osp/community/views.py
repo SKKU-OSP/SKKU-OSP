@@ -369,41 +369,43 @@ class SearchView(APIView):
         articles : 검색된 게시글 리스트
     '''
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
-        user = request.user
-
-        return status, errors
+    def get_validation(self, request):
+        board_name = request.GET.get("board",None)
+        status = "success"
+        errors = {}
+        vaild_data = {"board":None}
+        if board_name:
+            try: 
+                vaild_data['board'] = Board.objects.get(name=board_name)
+            except Board.DoesNotExist as e:
+                logging.exception(f"search_view {e}")    
+                errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
+                status = 'fail'
+            except Exception as e:
+                logging.exception(f"search_view {e}")
+                errors['undefined_exception'] = 'undefined_exception'
+                status = 'fail'
+        return status, errors, vaild_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
-        status = 'success'
         message = ''
         data = {}
-        errors = {}
-        valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, errors, valid_data = self.get_validation(request)
 
         # Transactions
         try:
-            board_id = request.GET.get('board', 0)
-            board_id = int(board_id) if board_id.isdigit() else 0
-
+            board = valid_data['board']
             data["require_login"] = False
             data["require_membership"] = False
             data['show_searchbox'] = True
-            if (board_id):
-                board = Board.objects.get(id=board_id)
-                board_name = board.name
-                data["board"] = BoardSerializer(board).data
+            if board:
+                board = BoardSerializer(board).data
+                data['board'] = board
             else:
-                board_name = "전체"
-                board = {"name": board_name, "id": 0, "board_type": "Total"}
+                board = {"name": "전체", "id": 0, "board_type": "Total"}
                 data["board"] = board
 
             # 로그인된 정보공개 설정을 확인한다.
@@ -419,11 +421,9 @@ class SearchView(APIView):
             else:
                 account = None
                 data['privacy'] = {'is_write': 0, 'is_open': 0}
-
-            result = search_article(request, board_name, board_id)
-
+            result = search_article(request, board)
             data['articles'] = ArticleSerializer(
-                result['articles'], many=True).data
+            result['articles'], many=True).data
             data['max_page'] = result['max-page']
 
         except DatabaseError as e:
@@ -444,7 +444,7 @@ class SearchView(APIView):
         return Response(res)
 
 
-def search_article(request, board_name, board_id):
+def search_article(request, board):
     '''
     게시글 검색
 
@@ -458,22 +458,21 @@ def search_article(request, board_name, board_id):
     keyword = request.GET.get('keyword', '')
     tags = request.GET.get('tag', False)
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
-    page = request.GET.get('page', 1)
+    page = request.GET.get('page', "1")
     page = int(page) if page.isdigit() else 1
 
     print("keyword", keyword, " tags", tags)
-
+    board_list = []
     # 타겟 게시판 설정
     try:
-        if board_id == 0:
+        if board["id"] == 0:
             # 전체 검색
-            boardList = []
 
             boards = Board.objects.filter(
                 team_id=None).exclude(board_type='User')
 
-            for board in boards:
-                boardList.append(board)
+            for obj in boards:
+                board_list.append(obj)
 
             if request.user.is_authenticated:
                 account = Account.objects.get(user=request.user.id)
@@ -481,42 +480,33 @@ def search_article(request, board_name, board_id):
                     member=account).prefetch_related('team')]
                 team_board_query = Q(name__in=team_list)
 
-                for board in Board.objects.filter(team_board_query):
-                    boardList.append(board)
-
-            print("total 검색", boardList)
-            board_type = "Total"
-            board_name = "전체"
-            board_data = {"name": board_name,
-                          "id": 0, "board_type": board_type}
+                for obj in Board.objects.filter(team_board_query):
+                    board_list.append(obj)
         else:
-            board_data = Board.objects.get(id=board_id)
-            board_type = board_data.board_type
-            board_name = board_data.name
-            boardList = [board_data]
+            board_list = list(Board.objects.filter(name=board["name"]))
 
     except Board.DoesNotExist:
         result = {'article': None, 'max-page': 0}
         return result
 
-    if board_type == 'Recruit':
+    if board['board_type'] == 'Recruit':
         PAGE_SIZE = 5
     else:
         PAGE_SIZE = 10
 
     data = {}
-    data['board'] = board_data
+    data['board'] = board
     data['type'] = "mix"
 
     total_article_list = Article.objects.none()
-    for board in boardList:
+    for obj in board_list:
         # Filter Board
-        if board.board_type == "Notice" and not request.user.is_superuser:
+        if obj.board_type == "Notice" and not request.user.is_superuser:
             # 일반유저가 검색할 때는 공지게시판에서 공지 설정된 게시글만 가져옴
-            article_list = Article.objects.filter(board=board, is_notice=True).annotate(
+            article_list = Article.objects.filter(board=obj, is_notice=True).annotate(
                 writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         else:
-            article_list = Article.objects.filter(board=board).annotate(writer_name=F(
+            article_list = Article.objects.filter(board=obj).annotate(writer_name=F(
                 "writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         article_list = filter_keyword_tag(article_list, keyword, tags)
         total_article_list = total_article_list.union(article_list)
@@ -529,7 +519,7 @@ def search_article(request, board_name, board_id):
         total_article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
 
     total_article_list = get_article_board_data(total_article_list)
-    if board_type == 'Recruit' or board_type == "Total":
+    if board["board_type"] == 'Recruit' or board["board_type"] == "Total":
         for article in total_article_list:
             if article.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
