@@ -25,6 +25,7 @@ function Search_Container() {
         });
         const res = response.data;
         if (res.status === 'success') {
+          console.log('Article', res.data.articles);
           setArticles(res.data.articles);
         }
       } catch (error) {
@@ -33,11 +34,6 @@ function Search_Container() {
     };
     getSearch();
   }, [location]);
-
-  useEffect(() => {
-    console.log('Update', keyword, articles);
-  }, [keyword, articles]);
-
   return (
     <>
       {articles && keyword ? (

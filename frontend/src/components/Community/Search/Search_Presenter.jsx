@@ -5,11 +5,11 @@ function Search_Presenter(props) {
   const keyword = props.keyword;
   return (
     <div className="col-9">
-      <div className="community-bar d-flex">
-        <span>'{keyword}' 검색 결과</span>
+      <div className="searchBar">
+        <span className="searchTitle">'{keyword}' 검색 결과</span>
       </div>
       {articles && articles.length > 0 ? (
-        articles.map((article) => <SearchArticle article={article} />)
+        articles.map((article) => <SearchArticle key={article.id} article={article} />)
       ) : (
         <>검색 결과가 없습니다.</>
       )}
