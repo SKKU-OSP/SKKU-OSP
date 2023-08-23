@@ -3,8 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Select from 'react-select';
-import axios from 'axios';
-import { getAuthConfig } from '../../../utils/auth';
+import { BsFillPersonPlusFill } from 'react-icons/bs';
 
 const InviteTeamModal = () => {
     const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -89,11 +88,9 @@ const InviteTeamModal = () => {
     handleClose();
   };
   return (
-    <Form>
-      <Button variant="primary" onClick={handleShow}>
-        팀 초대하기
-      </Button>
-      <Modal size='lg' show={show} onHide={handleClose}>
+    <>
+      <BsFillPersonPlusFill onClick={handleShow}/>
+      <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
             <h5>팀 초대하기</h5>
