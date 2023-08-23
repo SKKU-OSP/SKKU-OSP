@@ -9,7 +9,9 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { getAuthConfig } from '../../../../utils/auth';
 
-const domainUrl = import.meta.env.VITE_SERVER_URL;
+import '../../Board/Board.css';
+
+const domainUrl = import.meta.env.VITE_SERVER_URL
 
 function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const boardName = useParams().board_name;
@@ -247,7 +249,11 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   };
 
   const onBack = () => {
-    navigate(`/community/board/${boardName}/`);
+    if (boardName === "팀 모집") {
+      navigate(`/community/board/${boardName}/recruit`);
+    } else {
+      navigate(`/community/board/${boardName}/`);
+    }
   };
 
   // Team

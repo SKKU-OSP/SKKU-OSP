@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 import ApplyTeamModal from '../ApplyTeamModal';
-import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { getAuthConfig } from '../../../../utils/auth';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function TeamArticle(props) {
   const { article } = props;
   const navigate = useNavigate();
   const { board_name } = useParams();
   const [pubDate, setPubDate] = useState('');
+  const [userInfo, setUserInfo] = useState('');
+  const [error, setError] = useState(false);
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`)
@@ -39,8 +45,25 @@ export default function TeamArticle(props) {
     }
   };
 
+  const getUserInfo = async () => {
+    try {
+      const response = await axios.get(server_url + `/user/api/info`, getAuthConfig());
+      const res = response.data;
+      if (res.status === 'success') {
+        setUserInfo(res.data.user.username);
+        console.log("info", userInfo);
+      }
+    } catch (error) {
+      setError(true);
+    }
+  };
+
   useEffect(() => {
     getDate(article.pub_date);
+    
+    if (!userInfo) {
+      getUserInfo();
+    }
   });
 
   return (
@@ -61,11 +84,11 @@ export default function TeamArticle(props) {
             )}{' '}
             · {pubDate}
           </h6>
-          <h4 className='board-article-title' onClick={onArticle}>[{article.name}]{article.title}</h4>
+          <h4 className='board-article-title' onClick={onArticle}>[{article.team ? article.team.name : null}]{article.title}</h4>
           <div>
-            {article.tags.map((tag) => (
-              <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
-            ))}
+          {article.tags && article.tags.length > 0 ? article.tags.map((tag) => (
+            <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
+          )) : <h6 className="inline">{"\u00A0"}</h6>}
             <div className='board-article-meta-list'>{ article.board.period_end > new Date() ?
           <span>모집중</span> :
           <span>모집 마감</span>
@@ -77,7 +100,7 @@ export default function TeamArticle(props) {
         <div className="board-article">
           <div>
             <h4 className='board-article-title2'>{article.name}</h4>
-            <div className='board-article-modal'><ApplyTeamModal /></div>
+            <div className='board-article-modal'><ApplyTeamModal team_name={article.name} team_description={article.description} user_info={userInfo} /></div>
           </div>
           <div>
             <h6 className='inline'>{article.description}</h6>
@@ -114,9 +137,9 @@ export default function TeamArticle(props) {
           </h6>
           <h4 className='board-article-title' onClick={onArticle}>{article.title}</h4>
           <div>
-            {article.tags.map((tag) => (
-            <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
-          ))}
+            {article.tags && article.tags.length > 0 ? article.tags.map((tag) => (
+              <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
+            )) : <h6 className="inline">{"\u00A0"}</h6>}
             <div className="board-article-meta-list">
               <>
                 <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
