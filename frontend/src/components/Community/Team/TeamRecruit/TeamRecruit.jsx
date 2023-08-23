@@ -30,7 +30,6 @@ function TeamRecruit() {
       }
       if (resRecruit.status === 'success') {
         setArticle(resRecruit.data.articles);
-        // console.log("article", article);
       }
     } catch (error) {
       setError(true);
