@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Select from 'react-select';
+import { BsFillPersonPlusFill } from 'react-icons/bs';
 
 const InviteTeamModal = () => {
   const handleClose = () => setShow(false);
@@ -12,9 +13,7 @@ const InviteTeamModal = () => {
   const options = [];
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
-        팀 초대하기
-      </Button>
+      <BsFillPersonPlusFill onClick={handleShow}/>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
