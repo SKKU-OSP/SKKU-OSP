@@ -235,3 +235,33 @@
 .hidden {
   visibility: hidden;
 }
+
+.searchBar {
+  display: flex;
+  height: 80px;
+  padding: 0px 40px;
+  border-right: 1px solid var(--main-border-color);
+  align-items: center;
+  justify-content: center;
+}
+.searchTitle {
+  font-family: Inter;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: 0em;
+  text-align: center;
+  color: #0066ff;
+}
+
+.teamMemberInfo > .dropdown button {
+  text-decoration: none;
+  font-family: Inter;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 36px;
+  letter-spacing: -0.05em;
+  text-align: left;
+  padding-left: 0px;
+  color: #000000;
+}
