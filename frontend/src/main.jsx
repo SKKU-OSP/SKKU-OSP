@@ -14,6 +14,8 @@ import ArticleRegister from './components/Community/Article/ArticleRegister/Arti
 import Board_Container from './components/Community/Board/index';
 import SignUpPage from './routes/SignUpPage';
 import RankUserPage from './routes/RankUserPage';
+import RankRepoPage from './routes/RankRepoPage';
+
 import { tokenLoader } from './utils/auth';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -103,6 +105,10 @@ const router = createBrowserRouter([
       {
         path: 'rank/user',
         element: <RankUserPage />
+      },
+      {
+        path: 'rank/repo',
+        element: <RankRepoPage />
       }
     ]
   }
