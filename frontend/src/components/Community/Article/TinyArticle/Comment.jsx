@@ -1,64 +1,23 @@
-import '../../Community.css';
-import '../Article.css';
-import '../base.css';
+import styles from '../Article.module.css';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 import CommentItem from './CommentItem';
 
 function Comment(props) {
-  const request = { user: { is_authenticated: true } };
-  // API 필요한 부분
-
   const comments = props.comments;
   const article = props.article;
   return (
-    <>
-      {request.user.is_authenticated ? (
-        <div id="comment-group-login">
-          {comments.length > 0 ? (
-            comments.map((comment) => (
-              <div id={`comment-${comment.id}`} className="comment-item">
-                <CommentItem comments={comment} />
-              </div>
-            ))
-          ) : (
-            <div className="comment-none">등록된 댓글이 없습니다.</div>
-          )}
-        </div>
-      ) : (
-        <div id="comment-group-logout">
-          {comments.length > 0 ? (
-            comments.map((comment, index) => {
-              comments.length !== index ? (
-                <div id={`comment-${comment.id}`} className="comment-item">
-                  <CommentItem comments={comment} />
-                </div>
-              ) : (
-                <div id={`comment-${comment.id}`} className="comment-item-last">
-                  <CommentItem comments={comment} />
-                </div>
-              );
-            })
-          ) : (
-            <div className="comment-none">등록된 댓글이 없습니다.</div>
-          )}
-        </div>
-      )}
-      {request.user.is_authenticated && (
-        <form id="comment-form" method="post">
-          {/* {% csrf_token %} */}
-          <input type="hidden" id="comment-article-id" name="article-id" value={article ? article.id : ''} />
-          <div id="comment-input">
-            <div id="comment-annonymous">
-              <label for="comment-is-anonymous">익명</label>
-              <input type="checkbox" id="comment-is-anonymous" checked />
-            </div>
-            <textarea id="comment-body" className="form-control" placeholder="댓글을 입력해주세요." required></textarea>
-            <button type="button" id="btn-comment-save" className="hover-opacity" /*onclick={comment.save()}*/>
-              댓글 쓰기
-            </button>
-          </div>
-        </form>
-      )}
-    </>
+    <div className={styles.commentContainer}>
+      <div className="d-flex align-items-center m-2 gap-2">
+        <Form.Control size="lg" type="text" placeholder="댓글을 입력하세요" />
+        <Button variant="secondary" onClick={() => backToBoard(board.name)}>
+          +
+        </Button>
+      </div>
+      {comments.map((comment) => (
+        <CommentItem key={comment.id} comment={comment} />
+      ))}
+    </div>
   );
 }
 

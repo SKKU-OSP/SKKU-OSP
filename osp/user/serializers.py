@@ -134,5 +134,6 @@ class AccountWithInterestSerializer(serializers.ModelSerializer):
             "user",
             "photo",
             "github_id",
+            "introduction",
             "interests"
         )

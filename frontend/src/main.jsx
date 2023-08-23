@@ -23,6 +23,7 @@ import StatisticsPage from './routes/StatisticsPage';
 import Repository from './components/User/TinyUser/Repository';
 import TeamApplication from './components/NavBar/TeamApplication/TeamApplication';
 import RecommenderPage from './routes/RecommenderPage';
+import SearchPage from './routes/SearchPage';
 
 const router = createBrowserRouter([
   {
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
           {
             path: 'recommender',
             element: <RecommenderPage />
+          },
+          {
+            path: 'search',
+            element: <SearchPage />
           }
         ]
       },
