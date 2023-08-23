@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { BsSearch, BsHash } from 'react-icons/bs';
 import './SearchBox.css';
@@ -17,6 +18,19 @@ function SearcherBox() {
   const [fieldData, setFieldData] = useState([{ label: '전체', value: 0 }]);
   const [tagData, setTagData] = useState([{ type: 'tool', label: '태그이름', value: '태그이름' }]);
   const [keyword, setKeyword] = useState('');
+
+  const navigate = useNavigate();
+
+  const searchArticle = () => {
+    if (keyword !== '') {
+      navigate('/community/search', {
+        state: {
+          keyword: keyword
+        }
+      });
+      setKeyword('');
+    }
+  };
 
   useEffect(() => {
     // axios 들어갈 자리
@@ -53,7 +67,7 @@ function SearcherBox() {
           onChange={(e) => handleKeyword(e)}
         />
         <BsHash className="hash-icon" size="24" />
-        <BsSearch className="search-icon" />
+        <BsSearch className="search-icon" onClick={() => searchArticle()} />
       </div>
     </div>
   );

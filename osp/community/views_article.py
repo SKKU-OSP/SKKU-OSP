@@ -11,6 +11,7 @@ from team.serializers import TeamSerializer
 
 from datetime import datetime, timedelta
 
+import logging
 
 class ArticleAPIView(APIView):
     '''
@@ -54,24 +55,24 @@ class ArticleAPIView(APIView):
                 comments, many=True).data
 
             # 게시글 파일 확인
+            
             article_file_objs = ArticleFile.objects.filter(
                 article_id=article.id, status="POST")
             article_files = []
-            print(article_files)
-            for obj in article_file_objs:
-                try:
+            try:
+                for obj in article_file_objs:
                     article_files.append({'id': obj.id,
-                                          'name': obj.filename,
-                                          'file': obj.file.name,
-                                          'size': convert_size(obj.file.size)})
-                except Exception as e:
-                    res['message'] = "파일이 존재하지 않습니다."
-                    print(e)
-            data['files'] = article_files
+                                        'name': obj.filename,
+                                        'file': obj.file.name,
+                                        'size': convert_size(obj.file.size)})
+            except Exception as e:
+                logging.exception(f"저장된 파일이 없습니다.{e}")
+            
 
+            data['files'] = article_files
             res['data'] = data
         except Exception as e:
-            print("ArticleAPIView", e)
+            logging.exception(e)
             res['message'] = "해당 게시글이 존재하지 않습니다."
             return Response(res)
 

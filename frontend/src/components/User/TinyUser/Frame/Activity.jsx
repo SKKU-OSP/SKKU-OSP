@@ -6,20 +6,45 @@ import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
 
-function Activity() {
+function Activity(props) {
+  const githubId = props.githubId;
   const { username } = useParams();
   const [profileActivity, setProfileActivity] = useState();
+  const [editProfileActivity, setEditProfileActivity] = useState();
+  const [editing, setEditing] = useState(false);
   const server_url = import.meta.env.VITE_SERVER_URL;
-  const activityUrl = server_url + '/user/api/profile-activity/' + username;
+  const getUrl = server_url + '/user/api/profile-activity/' + username;
+  const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
+
+  const updatePostProfileActivity = async (editPortfolio) => {
+    if (profileActivity.portfolio !== editPortfolio) {
+      await axios.post(postUrl, { portfolio: editPortfolio }, getAuthConfig());
+    }
+  };
+  const handleEditClick = () => {
+    setEditProfileActivity(profileActivity);
+    setEditing(true);
+  };
+  const handleSaveClick = () => {
+    updatePostProfileActivity(editProfileActivity.portfolio);
+    setProfileActivity(editProfileActivity);
+    setEditing(false);
+  };
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditProfileActivity({
+      ...editProfileActivity,
+      [name]: value
+    });
+  };
 
   useEffect(() => {
     const getProfileActivity = async () => {
       try {
-        const response = await axios.get(activityUrl, getAuthConfig());
+        const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setProfileActivity(res.data);
-          console.log(res.data);
         }
       } catch (error) {}
     };
@@ -33,18 +58,34 @@ function Activity() {
           <div className="d-flex flex-column justify-content-start profile-portfolio">
             <div className="d-flex flex-row justify-content-between portfolio-intro">
               <span className="intro">포트폴리오</span>
-              <button className="btn">
-                <span className="btn-text">수정</span>
-              </button>
+              {editing ? (
+                <button className="btn" onClick={handleSaveClick}>
+                  <span className="btn-text">저장</span>
+                </button>
+              ) : (
+                <button className="btn" onClick={handleEditClick}>
+                  <span className="btn-text">수정</span>
+                </button>
+              )}
             </div>
             <div className="portfolio-text">
-              <span className="text">{profileActivity.portfolio}</span>
+              {editing ? (
+                <textarea
+                  name="portfolio"
+                  rows="3"
+                  style={{ width: '100%' }}
+                  value={editProfileActivity.portfolio}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <span className="text">{profileActivity.portfolio}</span>
+              )}
             </div>
           </div>
           <div className="d-flex flex-column justify-content-start profile-contribution">
             <div className="d-flex flex-row justify-content-between contribution-intro">
               <span className="intro">최근 기여활동</span>
-              <a href={`https://github.com/`} className="href">
+              <a href={`https://github.com/${githubId}`} className="href">
                 자세히 알아보기 &gt;
               </a>
             </div>
