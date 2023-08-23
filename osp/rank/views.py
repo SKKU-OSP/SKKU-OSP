@@ -6,10 +6,12 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
+from repository.serializers import GithubRepoContributorSerializer, GithubRepoStatsSerializer
 from user.models import GitHubScoreTable, StudentTab
 from user.serializers import GithubScoreTableSerializer
 
 import logging
+import time
 
 
 class UserRanking(APIView):
@@ -72,6 +74,118 @@ class UserRanking(APIView):
         data['years'] = distinct_years
         res['data'] = data
         res['status'] = status
+
+        return Response(res)
+
+
+class RepoRanking(APIView):
+    def get_validation(self, request):
+        status = 'fail'
+        errors = {}
+
+        user = request.user
+
+        try:
+            if not user.is_superuser:
+                errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있습니다."
+            else:
+                user = User.objects.get(id=user.id)
+                status = 'success'
+        except User.DoesNotExist:
+            logging.exception(f'UserRanking user_not_found: {e}')
+            errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+        except Exception as e:
+            logging.exception(f'UserRanking undefined_exception: {e}')
+            errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+
+        return status, errors
+
+    def get(self, request):
+        start = time.time()
+        res = {"status": "fail", "errors": None, "data": None}
+        data = {}
+        status, errors = self.get_validation(request)
+        if status == 'fail':
+            res['errors'] = errors
+            return Response(res)
+
+        # repo와 contributor의 관계 모델에서 repo 별 contributor의 리스트를 구함
+        repo_contrib_collections = {}
+        repo_contribs_queryset = GithubRepoContributor.objects.all()
+        repo_contribs = GithubRepoContributorSerializer(
+            repo_contribs_queryset, many=True).data
+
+        for contrib in repo_contribs:
+            repo = f"{contrib['owner_id']}/{contrib['repo_name']}"
+            if repo not in repo_contrib_collections:
+                repo_contrib_collections[repo] = []
+            repo_contrib_collections[repo].append(contrib)
+
+        repo_list = []
+        repo_stats = GithubRepoStats.objects.all()
+        repo_stats = GithubRepoStatsSerializer(repo_stats, many=True).data
+        for repo in repo_stats:
+            repo_link = f"{repo['github_id']}/{repo['repo_name']}"
+            if repo_link in repo_contrib_collections:
+                repo['contribs'] = repo_contrib_collections[repo_link]
+                if (repo['stargazers_count'] is not None and
+                    repo['forks_count'] is not None and
+                    repo['commits_count'] is not None and
+                    repo['prs_count'] is not None and
+                    repo['open_issue_count'] is not None and
+                        repo['close_issue_count'] is not None):
+                    repo['repo_link'] = repo_link
+                    repo['issues_count'] = repo['open_issue_count'] + \
+                        repo['close_issue_count']
+
+                    repo_list.append(repo)
+
+        data['repos'] = repo_list
+        res['data'] = data
+        res['status'] = status
+        print("RepoRanking elapsed time: ", time.time()-start)
+
+        return Response(res)
+
+
+class RepoContrib(APIView):
+    def get(self, request):
+        res = {'status': 'success', 'data': None}
+        owner_id = request.GET.get('github_id')
+        repo_name = request.GET.get('repo_name')
+        result = []
+        try:
+            for student in GithubRepoContributor.objects.filter(owner_id=owner_id).filter(repo_name=repo_name):
+                student_profile = list(
+                    StudentTab.objects.filter(github_id=student.github_id))
+                if len(student_profile) != 1:
+                    continue
+                commmit_cnt = len(GithubRepoCommits.objects.filter(
+                    github_id=owner_id,
+                    repo_name=repo_name,
+                    committer_github=student.github_id
+                ))
+                issue_cnt = len(GithubIssues.objects.filter(
+                    owner_id=owner_id,
+                    repo_name=repo_name,
+                    github_id=student.github_id
+                ))
+                pull_cnt = len(GithubPulls.objects.filter(
+                    owner_id=owner_id,
+                    repo_name=repo_name,
+                    github_id=student.github_id
+                ))
+                result.append({
+                    'name': student_profile[0].name,
+                    'github_id': student.github_id,
+                    'commit_cnt': commmit_cnt,
+                    'issue_cnt': issue_cnt,
+                    'pull_cnt': pull_cnt
+                })
+        except Exception as e:
+            logging.exception(f"RepoContrib Exception {e}")
+            res['stauts'] = 'fail'
+        res['data'] = result
 
         return Response(res)
 
