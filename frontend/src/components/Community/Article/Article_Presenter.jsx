@@ -30,7 +30,7 @@ function Article_Presenter() {
   useEffect(() => {
     const getArticle = async () => {
       try {
-        const response = await axios.get(url, getAuthConfig());
+        const response = await axios.get(url);
         const res = response.data;
         console.log(res);
         if (res.status === 'success') {
