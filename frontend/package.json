@@ -11,7 +11,13 @@
     "product": "vite --host"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.3",
+    "@mui/material": "^5.14.5",
     "@tinymce/tinymce-react": "^4.3.0",
+    "ag-grid-community": "^30.0.6",
+    "ag-grid-react": "^30.0.6",
     "axios": "^1.4.0",
     "bootstrap": "^5.3.0",
     "bootstrap-icons": "^1.10.5",

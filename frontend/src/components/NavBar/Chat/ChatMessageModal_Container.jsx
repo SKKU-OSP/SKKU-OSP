@@ -30,7 +30,7 @@ export default function ChatMessageModal_Container({ show, onCloseChatModal }) {
     };
     fetchChatRoom();
   }, []);
-
+  console.log(chatRoomMembers);
   return (
     <ChatMessageModal_Presenter
       show={show}

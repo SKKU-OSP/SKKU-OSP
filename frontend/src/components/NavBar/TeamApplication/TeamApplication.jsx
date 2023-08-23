@@ -5,6 +5,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from 'react-router-dom';
+import Badge from 'react-bootstrap/Badge';
 
 import classes from './TeamApplication.module.css';
 import { ToggleButton } from 'react-bootstrap';
@@ -69,8 +70,8 @@ const TeamApplication = () => {
           <div className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0">
             <div> CREATE </div>
             
-            <div>
-                <Button variant='outline-primary' size='sm' className='text-dark me-2' checked={true}>승인됨</Button>
+            <div className='d-flex align-items-center'>
+                <Badge bg='primary' className='text-center text-left fs-6 me-2' >승인됨</Badge>
                 <Button variant='outline-danger' size='sm' className='text-dark me-2'>삭제</Button>
             </div>
           </div>
