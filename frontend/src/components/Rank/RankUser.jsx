@@ -90,7 +90,7 @@ function RankUser() {
 
   return (
     <>
-      <div>
+      <div className="d-flex flex-column justify-content-center" style={{ maxWidth: 1180 }}>
         <div className="d-flex justify-content-between">
           <DropdownButton id="dropdown-basic-button" title={targetYear ? targetYear : '전체연도'}>
             {years &&
@@ -128,7 +128,7 @@ function RankUser() {
           </div>
         </div>
 
-        <div className="ag-theme-alpine" style={{ width: '100%', height: 768 }}>
+        <div className="ag-theme-alpine" style={{ width: '100%', height: 520 }}>
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
@@ -136,6 +136,8 @@ function RankUser() {
             defaultColDef={defaultColDef}
             animateRows={true}
             rowSelection="multiple"
+            pagination={true}
+            paginationPageSize={10}
           />
         </div>
       </div>
