@@ -12,8 +12,9 @@ function SearchArticle_Presenter(props) {
           </span>
         ) : (
           <span>익명</span>
-        )}
+        )}{' '}
         {article.pub_date.substring(0, 10)}
+        <span style={{ float: 'right' }}>{article.board.name} 게시판</span>
       </h6>
       <h4 className="board-article-title" onClick={onArticle}>
         {article.title}
