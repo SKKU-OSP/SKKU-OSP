@@ -1,4 +1,4 @@
-.UnselectedNavItem {
+.nav-link.UnselectedNavItem {
   width: 50%;
   font-size: 18px;
   text-decoration: none;
@@ -7,7 +7,7 @@
   justify-content: center;
 }
 
-.UnselectedNavItem:hover {
+.nav-link.UnselectedNavItem:hover {
   width: 50%;
   font-size: 18px;
   text-decoration: none;
@@ -17,7 +17,7 @@
   border-bottom: 3px solid #0066ff;
 }
 
-.SelectedNavItem {
+.nav-link.SelectedNavItem {
   width: 50%;
   font-size: 18px;
   font-weight: bolder;
@@ -27,7 +27,7 @@
   justify-content: center;
 }
 
-.SelectedNavItem:link {
+.nav-link.SelectedNavItem:link {
   width: 50%;
   font-size: 18px;
   text-decoration: none;
@@ -36,8 +36,8 @@
   justify-content: center;
 }
 
-.SelectedNavItem:hover,
-.SelectedNavItem:active {
+.nav-link.SelectedNavItem:hover,
+.nav-link.SelectedNavItem:active {
   width: 50%;
   font-size: 18px;
   text-decoration: none;
@@ -47,6 +47,6 @@
   border-bottom: 3px solid #0066ff;
 }
 
-.BorderLine {
+.nav-link.BorderLine {
   border-bottom: 3px solid black;
 }
