@@ -19,7 +19,10 @@ import { tokenLoader } from './utils/auth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import StatisticsPage from './routes/StatisticsPage';
-
+import UserActivity from './components/Community/Board/UserBoard/UserActivity';
+import TeamRecruit from './components/Community/Team/TeamRecruit/TeamRecruit';
+import MyTeamList from './components/Community/Team/TeamBoard/MyTeamList';
+import TeamBoard from './components/Community/Team/TeamBoard/TeamBoard';
 import Repository from './components/User/TinyUser/Repository';
 import TeamApplication from './components/NavBar/TeamApplication/TeamApplication';
 import RecommenderPage from './routes/RecommenderPage';
@@ -36,11 +39,27 @@ const router = createBrowserRouter([
         element: <CommunityLayout />,
         children: [
           {
+            path: 'activity/:activity_name',
+            element: < UserActivity />
+          },
+          {
             path: 'board/:board_name',
             element: <Board_Container />
           },
           {
-            path: 'board/:board_name/register',
+            path: 'board/:board_name/recruit',
+            element: <TeamRecruit />
+          },
+          {
+            path: 'board/:board_name/myteam',
+            element: <MyTeamList />
+          },
+          {
+            path: 'board/:team_name/:board_id',
+            element: <TeamBoard />
+          },
+          {
+            path: ':board_name/register',
             element: <ArticleRegister />
           },
           {
