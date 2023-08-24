@@ -124,3 +124,7 @@ footer {
     --bs-gutter-x: 0 !important;
   }
 }
+
+.bold {
+  font-weight: bold;
+}

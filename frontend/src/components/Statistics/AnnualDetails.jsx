@@ -24,6 +24,12 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     const getPercentageData = (data, totalNum = 0) => {
       let total = totalNum ? totalNum : data.reduce((acc, currentValue) => acc + currentValue, 0);
       let target = data[yid];
+      console.log(target);
+      if (!isTotal && !totalNum) {
+        // 개별 스위치일 때 유저당 평균값을 구함
+        target /= detailData.student_total[yid];
+        target = target.toFixed(1);
+      }
       const percent = ((target * 100) / total).toFixed(1);
       total = numberWithCommas(total);
       target = numberWithCommas(target);
@@ -40,14 +46,14 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     if (detailData && Object.hasOwn(detailData, 'commit')) setCommitData(getPercentageData(detailData.commit));
     if (detailData && Object.hasOwn(detailData, 'star')) setStarData(getPercentageData(detailData.star));
     if (repoLineData) setRepoData(getPercentageData(repoLineData));
-  }, [isReady, detailData, targetYear, years, repoLineData]);
+  }, [isReady, detailData, targetYear, years, repoLineData, isTotal]);
 
   const numberWithCommas = (x) => {
     if (typeof x === 'number') return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     else return x;
   };
 
-  const getDatasets = (data, colors = '#0d6efd') => {
+  const getDatasets = (data, colors = '#0d6efd30') => {
     return [
       {
         data: data,
@@ -152,7 +158,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             </div>
             <div className="col-md-3">
               <div className="card p-3">
-                <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
+                <DetailCardContent data={commitData} cardTitle="학생당 Commit 수" />
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption()}
@@ -163,7 +169,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             </div>
             <div className="col-md-3">
               <div className="card p-3">
-                <DetailCardContent data={starData} cardTitle="총 Star 수" />
+                <DetailCardContent data={starData} cardTitle="학생당 Star 수" />
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption()}
@@ -174,7 +180,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
             </div>
             <div className="col-md-3">
               <div className="card p-3">
-                <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
+                <DetailCardContent data={repoData} cardTitle="학생당 Repo 수" />
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption()}
