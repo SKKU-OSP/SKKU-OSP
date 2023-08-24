@@ -94,7 +94,7 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ArticleComment
         fields = ("id",
-                  #   "article", # article에서 article Comment 불러오므로 배제
+                  "article_id",  # article에서 article Comment 불러오므로 ID 값만 추가
                   "body",
                   "pub_date",
                   "del_date",
