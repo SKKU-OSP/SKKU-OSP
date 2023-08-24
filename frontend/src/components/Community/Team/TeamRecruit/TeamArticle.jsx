@@ -41,7 +41,7 @@ export default function TeamArticle(props) {
     } else if (delta / (24 * 60 * 60 * 1000) < 31) {
       setPubDate((delta / (24 * 60 * 60 * 1000)).toFixed() + '일 전');
     } else {
-      // setPubDate(date.substring(0, 10));
+      setPubDate(date.substring(0, 10));
     }
   };
 
@@ -59,7 +59,9 @@ export default function TeamArticle(props) {
   };
 
   useEffect(() => {
-    getDate(article.pub_date);
+    if (board_name === "팀 모집") {
+      getDate(article.pub_date);
+    }
     
     if (!userInfo) {
       getUserInfo();
