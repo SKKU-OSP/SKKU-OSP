@@ -25,7 +25,7 @@ function RankRepo() {
 
   // Column 세팅 값
   const columnDefs = [
-    { field: 'repo_link', headerName: 'Repository', width: 200 },
+    { field: 'repo_link', headerName: 'Repository', width: 200, cellClass: 'rank-cell link-cell' },
     { field: 'stargazers_count', headerName: 'Stars', width: 80, sort: 'desc' },
     { field: 'forks_count', headerName: 'Forks', width: 80 },
     { field: 'commits_count', headerName: 'Commits', width: 90 },
@@ -38,7 +38,13 @@ function RankRepo() {
       headerName: 'Contributors',
       width: 100
     },
-    { field: 'contrib', headerName: '기여학생', cellRenderer: cellRenderer, width: 80 }
+    {
+      field: 'contrib',
+      headerName: '기여학생',
+      cellRenderer: cellRenderer,
+      width: 80,
+      cellClass: 'rank-cell link-cell'
+    }
   ];
 
   // 기본 세팅 값
@@ -87,6 +93,10 @@ function RankRepo() {
   };
 
   const onCellClicked = (event) => {
+    if (event.colDef.field === 'repo_link') {
+      const repoUrl = `https://github.com/${event.data.repo_link}`;
+      window.open(repoUrl, '_blank');
+    }
     if (event.colDef.field === 'contrib') {
       getRepoContrib(event.data.github_id, event.data.repo_name);
       setShow(true);
