@@ -8,3 +8,11 @@
   padding-left: 0.25rem;
   padding-right: 0.25rem;
 }
+
+.link-cell {
+  color: #0d6efd;
+}
+.link-cell:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
