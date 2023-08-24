@@ -69,7 +69,7 @@ export function histogramOption(offset) {
 
 export function getScatterOption(yMax = null) {
   return {
-    borderColor: '#0d6efd',
+    borderColor: 'transparent',
     plugins: {
       legend: { display: false },
       tooltip: {

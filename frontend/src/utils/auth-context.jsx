@@ -29,24 +29,25 @@ export const AuthContextProvider = (props) => {
   const [name, setName] = useState(null);
 
   const setUser = () => {
-    console.log('setUser');
     // 로컬 스토리지에 로그인 설정되어있으면 로그인 상태 true 설정
     const token = tokenLoader();
     const setUserInfo = async () => {
       try {
         const config = getAuthConfig();
         const response = await axios.get(url, config);
-        console.log('user info', response);
         const res = response.data;
-        console.log('res.data.account.user.id', res.data.account.user.id);
-        console.log('res.data.account.user.username', res.data.account.user.username);
-
-        setUserId(res.data.account.user.id);
-        setUsername(res.data.account.user.username);
-        setIsSuperuser(res.data.account.user.is_superuser);
-        setPhoto(res.data.account.photo);
-        setGithubUsername(res.data.account.github_id);
-        setName(res.data.name);
+        if (res.status === 'success') {
+          const account = res.data.account;
+          console.log('Login User', account.user.id, account.user.username);
+          setUserId(account.user.id);
+          setUsername(account.user.username);
+          setIsSuperuser(account.user.is_superuser);
+          setPhoto(account.photo);
+          setGithubUsername(account.github_id);
+          setName(res.data.name);
+        } else {
+          console.log(res.errors);
+        }
       } catch (error) {
         console.log('setUserInfo error', error);
       }
