@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 from repository.serializers import GithubRepoContributorSerializer, GithubRepoStatsSerializer
-from user.models import GitHubScoreTable, StudentTab
+from user.models import GitHubScoreTable, StudentTab, Account
 from user.serializers import GithubScoreTableSerializer
 
 import logging
@@ -47,6 +47,15 @@ class UserRanking(APIView):
         distinct_years = list(GitHubScoreTable.objects.values_list(
             'year', flat=True).distinct())
 
+        # 학번에 따른 username을 얻기위한 딕셔너리 구성
+        student_user_relations = {}
+        account_maps = Account.objects.exclude(student_data=None).values(
+            'user__username', 'student_data_id')
+        for map in account_maps:
+            student_id = map['student_data_id']
+            username = map['user__username']
+            student_user_relations[student_id] = username
+
         target_year = request.GET.get('year', None)
         if target_year:
             score_table = GitHubScoreTable.objects.filter(year=target_year)
@@ -69,6 +78,7 @@ class UserRanking(APIView):
             if idx > 0 and sorted_score_by_year[idx]['score'] != sorted_score_by_year[idx - 1]['score']:
                 rank += 1
             row['rank'] = rank
+            row['username'] = student_user_relations[row['id']]
 
         data['score_table'] = score_table_data
         data['years'] = distinct_years

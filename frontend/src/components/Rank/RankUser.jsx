@@ -24,11 +24,11 @@ function RankUser() {
   const columnDefs = [
     { field: 'id', width: 130, hide: true },
     { field: 'rank', width: 80 },
-    { field: 'name', width: 100 },
+    { field: 'name', width: 100, cellClass: 'rank-cell link-cell' },
     { field: 'dept', width: 120, headerName: '학과' },
     { field: 'absence_label', width: 70, headerName: '재/휴학' },
     { field: 'plural_major_label', width: 90, headerName: '전공구분' },
-    { field: 'github_id', width: 120, headerName: 'GitHub ID' },
+    { field: 'github_id', width: 120, headerName: 'GitHub ID', cellClass: 'rank-cell link-cell' },
     {
       field: 'year',
       width: 60,
@@ -88,6 +88,16 @@ function RankUser() {
     else navigate(`/rank/user/`);
   };
 
+  const onCellClicked = (event) => {
+    if (event.colDef.field === 'name') {
+      window.open('/user/' + event.data.username, '_blank');
+    }
+    if (event.colDef.field === 'github_id') {
+      const githubUrl = `https://github.com/${event.data.github_id}`;
+      window.open(githubUrl, '_blank');
+    }
+  };
+
   return (
     <>
       <div className="d-flex flex-column justify-content-center" style={{ maxWidth: 1180 }}>
@@ -138,6 +148,7 @@ function RankUser() {
             rowSelection="multiple"
             pagination={true}
             paginationPageSize={10}
+            onCellClicked={onCellClicked}
           />
         </div>
       </div>
