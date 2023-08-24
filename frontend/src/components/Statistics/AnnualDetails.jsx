@@ -53,7 +53,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     else return x;
   };
 
-  const getDatasets = (data, colors = '#0d6efd30') => {
+  const getDatasets = (data, colors = '#0d6efd') => {
     return [
       {
         data: data,
@@ -151,7 +151,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption(5)}
-                    data={getChartConfig(years, getDatasets(userScatterData.score))}
+                    data={getChartConfig(years, getDatasets(userScatterData.score, '#0d6efd30'))}
                   />
                 )}
               </div>
@@ -162,7 +162,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption()}
-                    data={getChartConfig(years, getDatasets(userScatterData.commit))}
+                    data={getChartConfig(years, getDatasets(userScatterData.commit, '#0d6efd30'))}
                   />
                 )}
               </div>
@@ -173,7 +173,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption()}
-                    data={getChartConfig(years, getDatasets(userScatterData.star))}
+                    data={getChartConfig(years, getDatasets(userScatterData.star, '#0d6efd30'))}
                   />
                 )}
               </div>
@@ -184,7 +184,7 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
                 {isReady && (
                   <ScatterChart
                     options={getScatterOption()}
-                    data={getChartConfig(years, getDatasets(userScatterData.repo))}
+                    data={getChartConfig(years, getDatasets(userScatterData.repo, '#0d6efd30'))}
                   />
                 )}
               </div>
