@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, registerables } from 'chart.js';
-import {
-  BarWithErrorBar,
-  BarWithErrorBarsChart,
-  BarWithErrorBarsController,
-  PointWithErrorBar
-} from 'chartjs-chart-error-bars';
+import { BarWithErrorBar, BarWithErrorBarsController } from 'chartjs-chart-error-bars';
 
 const DistChart = (props) => {
   const chartRef = useRef();
@@ -15,13 +10,7 @@ const DistChart = (props) => {
     const ctx = chartRef.current.getContext('2d');
 
     const createChart = () => {
-      ChartJS.register(
-        ...registerables,
-        BarWithErrorBarsChart,
-        BarWithErrorBarsController,
-        BarWithErrorBar,
-        PointWithErrorBar
-      );
+      ChartJS.register(...registerables, BarWithErrorBarsController, BarWithErrorBar);
       setChartInstance(
         new ChartJS(ctx, {
           type: 'barWithErrorBars',
