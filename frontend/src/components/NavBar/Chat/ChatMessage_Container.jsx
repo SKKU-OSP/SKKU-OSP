@@ -6,11 +6,9 @@ export default function ChatMessage_Container({ iconSize }) {
   const [show, setShow] = useState(false);
 
   const handleClose = () => {
-    console.log('handleClose');
     setShow(false);
   };
   const handleShow = () => {
-    console.log('handleShow');
     setShow(true);
   };
 
