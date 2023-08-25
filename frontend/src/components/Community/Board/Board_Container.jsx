@@ -15,21 +15,6 @@ export default function Board_Container() {
 
   const board_names = ['자유', '질문', '정보', '홍보'];
 
-  const getArticle = async () => {
-    try {
-      const response = await axios.get(server_url + `/community/api/board/${board_name}`);
-      const res = response.data;
-      if (res.status === 'success') {
-        setArticles(res.data.articles);
-      } else {
-        alert('해당 게시판이 존재하지 않습니다.');
-        navigate('/community/board/정보');
-      }
-    } catch (error) {
-      setError(true);
-    }
-  };
-
   const onWrite = () => {
     if (username) {
       navigate(`/community/board/${board_name}/register`);
@@ -41,8 +26,21 @@ export default function Board_Container() {
   };
 
   useEffect(() => {
+    const getArticle = async () => {
+      try {
+        const response = await axios.get(server_url + `/community/api/board/${board_name}`);
+        const res = response.data;
+        if (res.status === 'success') {
+          setArticles(res.data.articles);
+        } else {
+          alert('해당 게시판이 존재하지 않습니다.');
+        }
+      } catch (error) {
+        setError(true);
+      }
+    };
     getArticle();
-  });
+  }, [board_name]);
 
   return <Board_Presenter articles={articles} onWrite={onWrite} />;
 }
