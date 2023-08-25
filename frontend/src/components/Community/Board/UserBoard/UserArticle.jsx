@@ -1,25 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
-import { getAuthConfig } from '../../../../utils/auth';
-
-const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function UserArticle(props) {
   const { article } = props;
   const navigate = useNavigate();
-  const { board_name } = useParams();
   const [pubDate, setPubDate] = useState('');
-  const [userInfo, setUserInfo] = useState('');
-  const [error, setError] = useState(false);
 
   const onArticle = () => {
-    navigate(`/community/article/${article.id}/`)
+    navigate(`/community/article/${article.id}/`);
   };
 
   const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`)
+    navigate(`/user/${article.writer.user.username}`);
   };
 
   const getDate = (date) => {
@@ -40,26 +33,11 @@ export default function UserArticle(props) {
     }
   };
 
-  const getUserInfo = async () => {
-    try {
-      const response = await axios.get(server_url + `/user/api/info`, getAuthConfig());
-      const res = response.data;
-      if (res.status === 'success') {
-        setUserInfo(res.data.user.username);
-        console.log("info", userInfo);
-      }
-    } catch (error) {
-      setError(true);
-    }
-  };
-
   useEffect(() => {
-    getDate(article.pub_date);
-    
-    if (!userInfo) {
-      getUserInfo();
+    if (article?.pub_date) {
+      getDate(article.pub_date);
     }
-  });
+  }, [article]);
 
   return (
     <>
@@ -82,7 +60,7 @@ export default function UserArticle(props) {
           ) : (
             <span>탈퇴한 이용자</span>
           ))} */}
-          {(article.writer ? (
+          {article.writer ? (
             article.anonymous_writer ? (
               <span>익명</span>
             ) : (
@@ -92,14 +70,22 @@ export default function UserArticle(props) {
             )
           ) : (
             <span>탈퇴한 이용자</span>
-          ))}
-          {' '}· {pubDate}
+          )}{' '}
+          · {pubDate}
         </h6>
-        <h4 className='board-article-title' onClick={onArticle}>{article.title}</h4>
+        <h4 className="board-article-title" onClick={onArticle}>
+          {article.title}
+        </h4>
         <div>
-          {article.tags && article.tags.length > 0 ? article.tags.map((tag) => (
-            <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
-          )) : <h6 className="inline">{"\u00A0"}</h6>}
+          {article.tags && article.tags.length > 0 ? (
+            article.tags.map((tag) => (
+              <h6 className="inline" key={tag.name}>
+                #{tag.name.replace(' ', '_')}&nbsp;
+              </h6>
+            ))
+          ) : (
+            <h6 className="inline">{'\u00A0'}</h6>
+          )}
           <div className="board-article-meta-list">
             <>
               <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
