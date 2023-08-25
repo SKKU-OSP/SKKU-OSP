@@ -2,26 +2,22 @@ import Article_Presenter from './Article_Presenter';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import AuthContext from '../../../utils/auth-context';
-import { useContext } from 'react';
 import { getAuthConfig } from '../../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
 
 function Article_Container() {
   const [article, setArticle] = useState();
-  const [tags, setTags] = useState();
-  const [comments, setComments] = useState();
+  const [tags, setTags] = useState([]);
+  const [comments, setComments] = useState([]);
   const [board, setBoard] = useState();
   const [error_occur, setError] = useState(false);
   const { article_id } = useParams();
-  const authCtx = useContext(AuthContext);
-
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const url = server_url + '/community/api/article/' + article_id;
 
   useEffect(() => {
     const getArticle = async () => {
       try {
+        const server_url = import.meta.env.VITE_SERVER_URL;
+        const url = server_url + '/community/api/article/' + article_id;
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         console.log(res);
@@ -38,11 +34,11 @@ function Article_Container() {
       }
     };
     getArticle();
-  }, []);
+  }, [article_id]);
 
   return (
     <>
-      {article && tags && comments && board ? (
+      {article && board ? (
         error_occur ? (
           <>잘못된 페이지입니다.</>
         ) : (

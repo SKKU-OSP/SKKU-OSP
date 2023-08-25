@@ -37,7 +37,7 @@ function ContentView(props) {
           <span className={styles.articleTitle}>{article.title}</span>
           <div>
             <span className={styles.articleInfo}>
-              {article.anonymous_writer ? 익명 : <>{article.writer.user.username}</>}{' '}
+              {article.anonymous_writer ? '익명' : <>{article.writer.user.username}</>}{' '}
             </span>
             <span className={styles.articleInfo}>{pub_date1} </span>
             <span className={styles.articleInfo}>{pub_date2}</span>
