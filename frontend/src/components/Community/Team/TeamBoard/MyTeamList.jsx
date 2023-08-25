@@ -11,22 +11,21 @@ function MyTeamList() {
   const [myTeams, setMyTeams] = useState([]);
   const [error, setError] = useState(false);
 
-  const getArticle = async () => {
-    try {
-      const responseTeamList = await axios.get(server_url + `/team/api/teams-of-user-list/`, getAuthConfig());
-      const resTeamList = responseTeamList.data;
-      if (resTeamList.status === 'success') {
-        setMyTeams(resTeamList.data.teams_of_user);
-      }
-    } catch (error) {
-      setError(true);
-    }
-  };
-  
-
   useEffect(() => {
-      getArticle();
-  });
+    const getMyTeamList = async () => {
+      try {
+        const responseTeamList = await axios.get(server_url + `/team/api/teams-of-user-list/`, getAuthConfig());
+        const resTeamList = responseTeamList.data;
+        if (resTeamList.status === 'success') {
+          setMyTeams(resTeamList.data.teams_of_user);
+        }
+      } catch (error) {
+        setError(true);
+        console.log('error', error);
+      }
+    };
+    getMyTeamList();
+  }, []);
 
   return (
     <div className="col-9">
@@ -38,11 +37,7 @@ function MyTeamList() {
         <CreateTeamModal />
       </div>
 
-      {myTeams && myTeams.length > 0 ? (
-        myTeams.map(a => (
-          <TeamArticle key={a.id} article={a} />
-        ))
-      ) : null}
+      {myTeams && myTeams.length > 0 ? myTeams.map((a) => <TeamArticle key={a.id} article={a} />) : null}
     </div>
   );
 }
