@@ -1,33 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import ApplyTeamModal from '../ApplyTeamModal';
 import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
-import { getAuthConfig } from '../../../../utils/auth';
-
-const server_url = import.meta.env.VITE_SERVER_URL;
+import AuthContext from '../../../../utils/auth-context';
 
 export default function TeamArticle(props) {
   const { article } = props;
+  const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
   const { board_name } = useParams();
-  const [pubDate, setPubDate] = useState('');
-  const [userInfo, setUserInfo] = useState('');
-  const [error, setError] = useState(false);
+  const { username } = useContext(AuthContext);
 
   const onArticle = () => {
-    navigate(`/community/article/${article.id}/`)
+    navigate(`/community/article/${article.id}/`);
   };
 
   const onTeamBoard = () => {
-    navigate(`/community/board/${article.name}/${article.id}/`)
+    navigate(`/community/board/${article.name}/${article.id}/`);
   };
 
   const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`)
+    navigate(`/user/${article.writer.user.username}`);
   };
 
   const getDate = (date) => {
+    if (!date) return;
     const now = new Date();
     const article_date = new Date(date);
     const delta = now.getTime() - article_date.getTime();
@@ -45,32 +42,15 @@ export default function TeamArticle(props) {
     }
   };
 
-  const getUserInfo = async () => {
-    try {
-      const response = await axios.get(server_url + `/user/api/info`, getAuthConfig());
-      const res = response.data;
-      if (res.status === 'success') {
-        setUserInfo(res.data.user.username);
-        console.log("info", userInfo);
-      }
-    } catch (error) {
-      setError(true);
-    }
-  };
-
   useEffect(() => {
-    if (board_name === "팀 모집") {
+    if (board_name === '팀 모집' && article?.pub_date) {
       getDate(article.pub_date);
     }
-    
-    if (!userInfo) {
-      getUserInfo();
-    }
-  });
+  }, [board_name, article]);
 
   return (
     <>
-      {board_name === "팀 모집" && (
+      {board_name === '팀 모집' && (
         <div className="board-article">
           <h6>
             {article.writer ? (
@@ -86,42 +66,57 @@ export default function TeamArticle(props) {
             )}{' '}
             · {pubDate}
           </h6>
-          <h4 className='board-article-title' onClick={onArticle}>[{article.team ? article.team.name : null}]{article.title}</h4>
+          <h4 className="board-article-title" onClick={onArticle}>
+            [{article.team ? article.team.name : null}]{article.title}
+          </h4>
           <div>
-          {article.tags && article.tags.length > 0 ? article.tags.map((tag) => (
-            <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
-          )) : <h6 className="inline">{"\u00A0"}</h6>}
-            <div className='board-article-meta-list'>{ article.board.period_end > new Date() ?
-          <span>모집중</span> :
-          <span>모집 마감</span>
-          }</div>
+            {article.tags && article.tags.length > 0 ? (
+              article.tags.map((tag) => (
+                <h6 className="inline" key={tag.name}>
+                  #{tag.name.replace(' ', '_')}&nbsp;
+                </h6>
+              ))
+            ) : (
+              <h6 className="inline">{'\u00A0'}</h6>
+            )}
+            <div className="board-article-meta-list">
+              {article.board?.period_end && article.board.period_end > new Date() ? (
+                <span>모집중</span>
+              ) : (
+                <span>모집 마감</span>
+              )}
+            </div>
           </div>
         </div>
       )}
-      {board_name === "전체 팀 목록" && (
+      {board_name === '전체 팀 목록' && (
         <div className="board-article">
           <div>
-            <h4 className='board-article-title2'>{article.name}</h4>
-            <div className='board-article-modal'><ApplyTeamModal team_name={article.name} team_description={article.description} user_info={userInfo} /></div>
+            <h4 className="board-article-title2">{article.name}</h4>
+            <div className="board-article-modal">
+              <ApplyTeamModal team_name={article.name} team_description={article.description} user_info={username} />
+            </div>
           </div>
           <div>
-            <h6 className='inline'>{article.description}</h6>
-            <div className='board-article-meta-list'>익명 외 몇 명</div>
+            <h6 className="inline">{article.description}</h6>
+            <div className="board-article-meta-list">익명 외 몇 명</div>
           </div>
         </div>
       )}
-      {board_name === "내 팀 목록" && (
+      {board_name === '내 팀 목록' && (
         <div className="board-article">
           <div>
-            <h4 className='board-article-title' onClick={onTeamBoard}>{article.name}</h4>
+            <h4 className="board-article-title" onClick={onTeamBoard}>
+              {article.name}
+            </h4>
           </div>
           <div>
-            <h6 className='inline'>{article.description}</h6>
-            <div className='board-article-meta-list'>익명 외 몇 명</div>
+            <h6 className="inline">{article.description}</h6>
+            <div className="board-article-meta-list">익명 외 몇 명</div>
           </div>
         </div>
       )}
-      {board_name !== "전체 팀 목록" && board_name !== "내 팀 목록" &&board_name !== "팀 모집" && (
+      {board_name !== '전체 팀 목록' && board_name !== '내 팀 목록' && board_name !== '팀 모집' && (
         <div className="board-article">
           <h6>
             {article.writer ? (
@@ -137,11 +132,19 @@ export default function TeamArticle(props) {
             )}{' '}
             · {pubDate}
           </h6>
-          <h4 className='board-article-title' onClick={onArticle}>{article.title}</h4>
+          <h4 className="board-article-title" onClick={onArticle}>
+            {article.title}
+          </h4>
           <div>
-            {article.tags && article.tags.length > 0 ? article.tags.map((tag) => (
-              <h6 className="inline">#{tag.name.replace(' ', '_')}&nbsp;</h6>
-            )) : <h6 className="inline">{"\u00A0"}</h6>}
+            {article.tags && article.tags.length > 0 ? (
+              article.tags.map((tag) => (
+                <h6 className="inline" key={tag.name}>
+                  #{tag.name.replace(' ', '_')}&nbsp;
+                </h6>
+              ))
+            ) : (
+              <h6 className="inline">{'\u00A0'}</h6>
+            )}
             <div className="board-article-meta-list">
               <>
                 <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
