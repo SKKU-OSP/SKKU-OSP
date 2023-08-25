@@ -188,9 +188,6 @@ class TableBoardView(APIView):
             article_list = Article.objects.filter(board=board).annotate(writer_name=F(
                 "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
             article_list = get_article_metas(article_list)
-
-            # data['articles'] = get_article_metas(article_list)
-            print(article_list)
             data['articles'] = BoardArticleSerializer(
                 article_list, many=True).data
 
@@ -362,15 +359,15 @@ class SearchView(APIView):
     '''
 
     def get_validation(self, request):
-        board_name = request.GET.get("board",None)
+        board_name = request.GET.get("board", None)
         status = "success"
         errors = {}
-        vaild_data = {"board":None}
+        vaild_data = {"board": None}
         if board_name:
-            try: 
+            try:
                 vaild_data['board'] = Board.objects.get(name=board_name)
             except Board.DoesNotExist as e:
-                logging.exception(f"search_view {e}")    
+                logging.exception(f"search_view {e}")
                 errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
                 status = 'fail'
             except Exception as e:
@@ -415,7 +412,7 @@ class SearchView(APIView):
                 data['privacy'] = {'is_write': 0, 'is_open': 0}
             result = search_article(request, board)
             data['articles'] = ArticleSerializer(
-            result['articles'], many=True).data
+                result['articles'], many=True).data
             data['max_page'] = result['max-page']
 
         except DatabaseError as e:
@@ -434,7 +431,6 @@ class SearchView(APIView):
         else:
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
-
 
 
 def search_article(request, board):

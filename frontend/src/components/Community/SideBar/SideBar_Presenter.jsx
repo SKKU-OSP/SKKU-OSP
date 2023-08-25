@@ -1,5 +1,6 @@
 import './SideBar.css';
 import { BsGithub } from 'react-icons/bs';
+import { Link } from 'react-router-dom';
 
 export default function SideBar_Presenter(props) {
   const { name, username, githubUsername, photo, onMyProfile, onMyGithub, onLogin, onSignUp, sendLogoutRequest } =
@@ -32,19 +33,13 @@ export default function SideBar_Presenter(props) {
           </div>
           <div className="sidebar-community-tab w-100">
             <div className="sidebar-activity hover-opacity">
-              <a href="/community/activity/article">
-                <span>내가 작성한 글</span>
-              </a>
+              <Link to="/community/activity/article">내가 작성한 글</Link>
             </div>
             <div className="sidebar-activity hover-opacity">
-              <a href="/community/activity/comment">
-                <span>내가 작성한 댓글</span>
-              </a>
+              <Link to="/community/activity/comment">내가 작성한 댓글</Link>
             </div>
             <div className="sidebar-activity hover-opacity">
-              <a href="/community/activity/scrap">
-                <span>내가 스크랩한 글</span>
-              </a>
+              <Link to="/community/activity/scrap">내가 스크랩한 글</Link>
             </div>
           </div>
         </div>
