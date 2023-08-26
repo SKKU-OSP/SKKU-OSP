@@ -96,13 +96,13 @@
   margin-left: -1px;
 }
 .board-article-title {
-  cursor: pointer;
   color: var(--main-black);
   text-decoration: none;
 }
 .board-article-title:hover,
 .board-article-writer:hover {
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .board-article-meta-list {
