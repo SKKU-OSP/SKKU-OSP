@@ -229,7 +229,6 @@ class TableBoardView(APIView):
 
             # 팀 모집 게시판일 경우
             if board.board_type == 'Recruit':
-                account = Account.objects.get(user=request.user)
                 active_article = Article.objects.filter(
                     board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 active_article = get_article_board_data(active_article)
@@ -242,11 +241,6 @@ class TableBoardView(APIView):
                         article.team = teamrecruitarticle.team
                     else:
                         article.team = None
-
-                team_cnt = len(TeamMember.objects.filter(
-                    member=account).prefetch_related('team'))
-
-                data['team_cnt'] = team_cnt
                 data['active_article'] = ArticleSerializer(
                     active_article, many=True).data
 
