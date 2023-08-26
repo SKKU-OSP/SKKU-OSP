@@ -1,3 +1,6 @@
+body::-webkit-scrollbar {
+  display: none;
+}
 :root {
   font-synthesis: none;
   text-rendering: optimizeLegibility;
