@@ -15,7 +15,7 @@ function Article_Presenter(props) {
   const board = props.board;
 
   return (
-    <div className="col-md-9 community-main">
+    <div className="col-md-9">
       {need_login && (
         <div className="m-2">
           로그인이 필요한 서비스입니다. <a href="/accounts/login/">바로가기</a>
