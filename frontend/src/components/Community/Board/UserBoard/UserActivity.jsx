@@ -1,19 +1,23 @@
-import CommunityNavItem from '../../Board/CommunityNavItem/index';
-import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import UserArticle from './UserArticle';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function UserActivity() {
-  const { activity_name } = useParams();
+  const { tabName } = useParams();
   const [articles, setArticles] = useState([]);
   const [comments, setComments] = useState([]);
   const [scraps, setScraps] = useState([]);
   const [error, setError] = useState(false);
   const activityNames = useMemo(() => ['article', 'comment', 'scrap'], []);
+  const activityNavMap = {
+    article: '내가 작성한 글',
+    comment: '내가 작성한 댓글',
+    scrap: '내가 스크랩한 글'
+  };
 
   useEffect(() => {
     const getWrittenArticle = async () => {
@@ -56,36 +60,40 @@ function UserActivity() {
       }
     };
     // 존재하는 게시판인지 확인
-    if (!activityNames.includes(activity_name)) {
+    if (!activityNames.includes(tabName)) {
       alert('존재하지 않는 게시판입니다.');
     } else {
-      if (activity_name === 'article') {
+      if (tabName === 'article') {
         getWrittenArticle();
-      } else if (activity_name === 'comment') {
+      } else if (tabName === 'comment') {
         getWrittenComment();
-      } else if (activity_name === 'scrap') {
+      } else if (tabName === 'scrap') {
         getScrapArticle();
       }
     }
-  }, [activity_name, activityNames]);
+  }, [tabName, activityNames]);
 
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <button className="primary-btn hidden">hidden</button>
+        <button className="hidden">hidden</button>
         <div className="nav nav-fill community-nav-items">
-          {activityNames.includes(activity_name) && <CommunityNavItem this_activity_name={activity_name} />}
+          {activityNames.includes(tabName) && (
+            <li className="nav-item selected-nav-item">
+              <div>{activityNavMap[tabName]}</div>
+            </li>
+          )}
         </div>
-        <button className="primary-btn hidden">hidden</button>
+        <button className="hidden">hidden</button>
       </div>
 
-      {activity_name === 'article' && articles && articles.length > 0
+      {tabName === 'article' && articles && articles.length > 0
         ? articles.map((a) => <UserArticle key={a.id} article={a} />)
         : null}
-      {activity_name === 'comment' && comments && comments.length > 0
+      {tabName === 'comment' && comments && comments.length > 0
         ? comments.map((a) => <UserArticle key={a.id} article={a} />)
         : null}
-      {activity_name === 'scrap' && scraps && scraps.length > 0
+      {tabName === 'scrap' && scraps && scraps.length > 0
         ? scraps.map((a) => <UserArticle key={a.id} article={a} />)
         : null}
     </div>

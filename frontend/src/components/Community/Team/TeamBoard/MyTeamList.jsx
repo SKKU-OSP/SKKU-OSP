@@ -1,7 +1,6 @@
-import CommunityNavItem from '../../Board/CommunityNavItem/index';
-import TeamArticle from '../TeamRecruit/TeamArticle';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 import CreateTeamModal from '../CreateTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
 
@@ -30,14 +29,30 @@ function MyTeamList() {
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <button className="primary-btn hidden">hidden</button>
+        <button className="hidden">hidden</button>
         <ul className="nav nav-fill community-nav-items">
-          <CommunityNavItem this_board_name="내 팀 목록" />
+          <li className="nav-item selected-nav-item">
+            <div>내 팀 목록</div>
+          </li>
         </ul>
         <CreateTeamModal />
       </div>
 
-      {myTeams && myTeams.length > 0 ? myTeams.map((a) => <TeamArticle key={a.id} article={a} />) : null}
+      {myTeams && myTeams.length > 0
+        ? myTeams.map((team) => (
+            <div className="board-article" key={team.id}>
+              <div>
+                <Link className="board-article-title" to={`/community/team/${team.name}`}>
+                  <h4 className="board-article-title">{team.name}</h4>
+                </Link>
+              </div>
+              <div>
+                <div className="inline-block">{team.description}</div>
+                <div className="text-end">익명 외 몇 명</div>
+              </div>
+            </div>
+          ))
+        : null}
     </div>
   );
 }

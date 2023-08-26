@@ -1,25 +1,14 @@
 import CommunityNavItem_Presenter from './CommunityNavItem_Presenter';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function CommunityNavItem_Container(props) {
-  const { this_board_name } = props;
-  const { board_name } = useParams();
+  const { navName, tabName } = props;
   const navigate = useNavigate();
-  const [isOnBoard, setIsOnBoard] = useState(false);
+  const isActive = navName === tabName;
 
-  const getOnBoard = () => {
-    navigate(`/community/board/${this_board_name}`);
-    window.location.reload();
+  const onNavigate = () => {
+    navigate(`./../${navName}`);
   };
 
-  useEffect(() => {
-    if (this_board_name === board_name) {
-      setIsOnBoard(true);
-    } else {
-      setIsOnBoard(false);
-    }
-  });
-
-  return <CommunityNavItem_Presenter isOnBoard={isOnBoard} this_board_name={this_board_name} getOnBoard={getOnBoard} />;
+  return <CommunityNavItem_Presenter isActive={isActive} navName={navName} onNavigate={onNavigate} />;
 }

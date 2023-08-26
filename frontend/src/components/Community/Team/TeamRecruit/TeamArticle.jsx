@@ -8,15 +8,11 @@ export default function TeamArticle(props) {
   const { article } = props;
   const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
-  const { board_name } = useParams();
+  const { tabName } = useParams();
   const { username } = useContext(AuthContext);
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
-  };
-
-  const onTeamBoard = () => {
-    navigate(`/community/board/${article.name}/${article.id}/`);
   };
 
   const onWriter = () => {
@@ -43,14 +39,14 @@ export default function TeamArticle(props) {
   };
 
   useEffect(() => {
-    if (board_name === '팀 모집' && article?.pub_date) {
+    if (tabName === '팀 모집' && article?.pub_date) {
       getDate(article.pub_date);
     }
-  }, [board_name, article]);
+  }, [tabName, article]);
 
   return (
     <>
-      {board_name === '팀 모집' && (
+      {tabName === '팀 모집' && (
         <div className="board-article">
           <h6>
             {article.writer ? (
@@ -89,12 +85,13 @@ export default function TeamArticle(props) {
           </div>
         </div>
       )}
-      {board_name === '전체 팀 목록' && (
+      {tabName === '전체 팀 목록' && (
         <div className="board-article">
           <div>
             <h4 className="board-article-title2">{article.name}</h4>
             <div className="board-article-modal">
-              <ApplyTeamModal team_name={article.name} team_description={article.description} user_info={username} />
+              {/* TODO 불필요한 ApplyTeamModal 까지 모두 렌더링하고 서버로 데이터 요청을 많이 보내는 문제로 개선 필요 */}
+              {/* <ApplyTeamModal team_name={article.name} team_description={article.description} user_info={username} /> */}
             </div>
           </div>
           <div>
@@ -103,20 +100,7 @@ export default function TeamArticle(props) {
           </div>
         </div>
       )}
-      {board_name === '내 팀 목록' && (
-        <div className="board-article">
-          <div>
-            <h4 className="board-article-title" onClick={onTeamBoard}>
-              {article.name}
-            </h4>
-          </div>
-          <div>
-            <h6 className="inline">{article.description}</h6>
-            <div className="board-article-meta-list">익명 외 몇 명</div>
-          </div>
-        </div>
-      )}
-      {board_name !== '전체 팀 목록' && board_name !== '내 팀 목록' && board_name !== '팀 모집' && (
+      {tabName !== '전체 팀 목록' && tabName !== '팀 모집' && (
         <div className="board-article">
           <h6>
             {article.writer ? (
