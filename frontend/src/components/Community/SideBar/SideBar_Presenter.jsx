@@ -7,19 +7,21 @@ export default function SideBar_Presenter(props) {
     props;
 
   return (
-    <div>
+    <div className="community-sidebar col-3">
       {/* is_authenticated 확인 & 프로필 이미지 src 교체 필요 */}
       {username ? (
-        <div className="community-sidebar">
+        <>
           <div id="sidebar-user-info">
-            <img
-              src={photo}
-              className="sidebar-profile-img"
-              alt="profile-image"
-              data-bs-hover="tooltip"
-              data-bs-placement="top"
-              data-bs-title="프로필 페이지"
-            ></img>
+            <div className="img-container">
+              <img
+                src={photo}
+                className="sidebar-profile-img"
+                alt="profile-image"
+                data-bs-hover="tooltip"
+                data-bs-placement="top"
+                data-bs-title="프로필 페이지"
+              ></img>
+            </div>
             <div id="sidebar-profile-name" onClick={onMyProfile}>
               {name}
             </div>
@@ -31,7 +33,7 @@ export default function SideBar_Presenter(props) {
               로그아웃
             </button>
           </div>
-          <div className="sidebar-community-tab w-100">
+          <div className="sidebar-content">
             <div className="sidebar-activity hover-opacity">
               <Link to="/community/activity/article">내가 작성한 글</Link>
             </div>
@@ -42,10 +44,10 @@ export default function SideBar_Presenter(props) {
               <Link to="/community/activity/scrap">내가 스크랩한 글</Link>
             </div>
           </div>
-        </div>
+        </>
       ) : (
-        <div className="community-sidebar">
-          <div id="sidebar-user-info">
+        <div id="sidebar-user-info">
+          <div className="img-container">
             <img
               src="https://cdn.vectorstock.com/i/preview-1x/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.jpg"
               className="sidebar-profile-img"
@@ -54,14 +56,13 @@ export default function SideBar_Presenter(props) {
               data-bs-placement="top"
               data-bs-title="프로필 페이지"
             ></img>
-            <button type="button" className="btn btn-outline-secondary btn-login" onClick={onLogin}>
-              로그인
-            </button>
-            <br></br>
-            <button type="button" className="btn btn-outline-primary btn-signup" onClick={onLogin}>
-              회원가입
-            </button>
           </div>
+          <button type="button" className="btn btn-outline-secondary btn-login" onClick={onLogin}>
+            로그인
+          </button>
+          <button type="button" className="btn btn-outline-primary btn-signup" onClick={onLogin}>
+            회원가입
+          </button>
         </div>
       )}
     </div>

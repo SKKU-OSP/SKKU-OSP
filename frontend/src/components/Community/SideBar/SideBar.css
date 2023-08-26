@@ -6,24 +6,32 @@
 
 .community-sidebar {
   text-align: center;
-  border: 1px solid var(--main-border-color);
-  border-top: none !important;
+  max-height: fit-content;
   position: sticky;
   top: 85px;
 }
 
 #sidebar-user-info {
+  display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   padding: 0.625rem;
+  width: 100%;
+  border: 1px solid var(--main-border-color);
+  border-top: none !important;
 }
-
-#sidebar-user-info .sidebar-profile-img {
+.img-container {
   width: 70%;
+  height: 100%;
+  margin: 10px;
+  display: block;
+}
+#sidebar-user-info .sidebar-profile-img {
+  width: 100%;
   border: 1px solid var(--main-border-color);
   border-radius: 50%;
   object-fit: cover;
-  margin: 10px;
 }
 
 #sidebar-profile-name {
@@ -41,10 +49,15 @@
   text-decoration: underline;
   cursor: pointer;
 }
-
+.sidebar-content {
+  border-left: 1px solid var(--main-border-color);
+  border-right: 1px solid var(--main-border-color);
+}
+.sidebar-content > div {
+  border-bottom: 1px solid var(--main-border-color);
+}
 .sidebar-activity {
   font-size: 16px !important;
-  border-top: 1px solid var(--main-border-color);
   padding: 0.625rem;
 }
 
