@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
 export default function ChatMessageInput() {
@@ -6,10 +6,6 @@ export default function ChatMessageInput() {
     'chat-input': 'test axios data'
   });
   const [receiver, setReceiver] = useState(294);
-
-  useEffect(() => {
-    console.log('use Effect');
-  }, []);
 
   const handlePostChat = async () => {
     const server_url = import.meta.env.VITE_SERVER_URL;
