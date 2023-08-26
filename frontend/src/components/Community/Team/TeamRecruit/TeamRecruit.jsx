@@ -9,71 +9,72 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 
 function TeamRecruit() {
   const navigate = useNavigate();
-  const { board_name } = useParams();
+  const { tabName } = useParams();
   const [teams, setTeams] = useState([]);
-  const [article, setArticle] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [error, setError] = useState(false);
-  const board_names = ['팀 모집', '전체 팀 목록'];
 
   const onWrite = () => {
-    navigate(`/community/${board_name}/register`);
-  }
-
-  const getArticle = async () => {
-    try {
-      const responseTeamList = await axios.get(server_url + `/team/api/teams-list/`);
-      const responseRecruit = await axios.get(server_url + `/community/api/board/${board_name}/`, getAuthConfig());
-      const resTeamList = responseTeamList.data;
-      const resRecruit = responseRecruit.data;
-      if (resTeamList.status === 'success') {
-        setTeams(resTeamList.data.teams);
-      }
-      if (resRecruit.status === 'success') {
-        setArticle(resRecruit.data.articles);
-      }
-    } catch (error) {
-      setError(true);
-    }
+    navigate(`/community/${tabName}/register`);
   };
 
   useEffect(() => {
+    const getRecruit = async () => {
+      try {
+        const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/`, getAuthConfig());
+        const resRecruit = responseRecruit.data;
+        if (resRecruit.status === 'success') {
+          setArticles(resRecruit.data.articles);
+        }
+      } catch (error) {
+        setError(true);
+        console.log('getRecruit error', error);
+      }
+    };
+    const getTeamList = async () => {
+      try {
+        const responseTeamList = await axios.get(server_url + `/team/api/teams-list/`);
+        const resTeamList = responseTeamList.data;
+        if (resTeamList.status === 'success') {
+          setTeams(resTeamList.data.teams);
+        }
+      } catch (error) {
+        setError(true);
+        console.log('getTeamList error', error);
+      }
+    };
     // 존재하는 게시판인지 확인
-    if (!board_names.includes(board_name)) {
-      alert('존재하지 않는 게시판입니다.');
-      navigate('/community/board/팀 모집/recruit');
+    if (tabName === '팀 모집') {
+      getRecruit();
+    } else if (tabName === '전체 팀 목록') {
+      getTeamList();
     } else {
-      getArticle();
+      alert('존재하지 않는 게시판입니다.');
     }
-  });
+  }, [tabName]);
 
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <button className="primary-btn hidden">hidden</button>
+        <button className="hidden">hidden</button>
         <ul className="nav nav-fill community-nav-items">
-          <CommunityNavItem this_board_name="팀 모집" />
-          <CommunityNavItem this_board_name="전체 팀 목록" />
+          <CommunityNavItem navName="팀 모집" tabName={tabName} />
+          <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
         </ul>
-        {board_name === "팀 모집" && (
+        {tabName === '팀 모집' && (
           <button type="button" onClick={onWrite} className="btn btn-primary">
             작성하기
           </button>
         )}
-        {board_name === "전체 팀 목록" && (
-          <button className="primary-btn hidden">hidden</button>
-        )}
+        {tabName === '전체 팀 목록' && <button className="hidden">hidden</button>}
       </div>
 
-      {board_name === "팀 모집" && article && article.length > 0 ? (
-        article.map(a => (
-          <TeamArticle key={a.id} article={a} />
-        ))
-      ) : null}
-      {board_name === "전체 팀 목록" && teams && teams.length > 0 ? (
-        teams.map(a => (
-          <TeamArticle key={a.id} article={a} />
-        ))
-      ) : null}
+      {tabName === '팀 모집' && articles.length > 0
+        ? articles.map((a) => <TeamArticle key={a.id} article={a} />)
+        : null}
+      {tabName === '전체 팀 목록' && teams && teams.length > 0
+        ? teams.map((a) => <TeamArticle key={a.id} article={a} />)
+        : null}
     </div>
   );
 }
