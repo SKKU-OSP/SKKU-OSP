@@ -127,12 +127,13 @@ class TableBoardView(APIView):
             board = Board.objects.get(name=board_name)
             valid_data['board'] = board
             if board.board_type == 'Team':
-                teaminvitemessage = TeamInviteMessage.objects.filter(
-                    team__id=board.team_id, account__user=request.user, direction=True, status=0)
                 if not request.user.is_authenticated:
                     errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
                     status = 'fail'
-                elif not team.utils.is_teammember(board.team.id, user.id):
+                    return status, message, errors, valid_data
+                teaminvitemessage = TeamInviteMessage.objects.filter(
+                    team__id=board.team_id, account__user=request.user, direction=True, status=0)
+                if not team.utils.is_teammember(board.team.id, user.id):
                     if not teaminvitemessage.exists():
                         errors["user_is_not_teammember"] = "해당 팀의 멤버가 아닙니다. "
                         status = 'fail'
@@ -170,7 +171,6 @@ class TableBoardView(APIView):
             data['show_searchbox'] = True
             board = valid_data['board']
             data["board"] = BoardSerializer(board).data
-            user = request.GET.get('user')
 
             if request.user.is_authenticated:
                 account = Account.objects.get(user=request.user)
