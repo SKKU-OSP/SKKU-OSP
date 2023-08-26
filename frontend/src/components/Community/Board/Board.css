@@ -95,10 +95,13 @@
   margin-top: -1px;
   margin-left: -1px;
 }
+
 .board-article-title {
   color: var(--main-black);
   text-decoration: none;
+  margin: 15px 0;
 }
+
 .board-article-title:hover,
 .board-article-writer:hover {
   text-decoration: underline;
