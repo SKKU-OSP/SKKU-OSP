@@ -1,21 +1,17 @@
 .articleBar {
-  height: 80px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 40px;
+  padding: 0px 20px;
   border-bottom: 1px solid var(--main-border-color);
   border-right: 1px solid var(--main-border-color);
 }
 
 .articleBoard {
-  font-family: Inter;
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 36px;
-  letter-spacing: 0em;
-  text-align: center;
-  color: #0066ff;
+  font-size: 20px;
+  font-weight: bolder;
+  color: var(--main-selected-color);
 }
 
 .articleBody {
@@ -25,20 +21,21 @@
   border-right: 1px solid var(--main-border-color);
   border-left: 1px solid var(--main-border-color);
   margin-left: -1px;
+  padding: 20px;
 }
 
 .articleTitle {
   font-family: Inter;
   font-size: 30px;
-  font-weight: 600;
+  font-weight: 00;
   line-height: 36px;
-  letter-spacing: -0.05em;
   text-align: left;
   color: black;
 }
 
 .articleContent {
   min-height: 300px;
+  margin: 20px 0;
 }
 
 .artcleInfo {
@@ -46,7 +43,6 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 24px;
-  letter-spacing: 0em;
   text-align: left;
 }
 
@@ -68,7 +64,6 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 24px;
-  letter-spacing: 0em;
   text-align: right;
   color: #454545;
 }

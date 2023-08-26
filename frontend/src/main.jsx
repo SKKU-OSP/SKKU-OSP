@@ -64,7 +64,7 @@ const router = createBrowserRouter([
             element: <TeamBoard />
           },
           {
-            path: ':board_name/register',
+            path: 'board/:board_name/register',
             element: <ArticleRegister />
           },
           {

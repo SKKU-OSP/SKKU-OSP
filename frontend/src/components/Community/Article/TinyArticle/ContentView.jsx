@@ -33,27 +33,28 @@ function ContentView(props) {
         </Button>
       </div>
       <div className={styles.articleBody}>
-        <div className="d-flex justify-content-between align-items-end m-2">
+        <div className="d-flex justify-content-between align-items-end">
           <span className={styles.articleTitle}>{article.title}</span>
           <div>
             <span className={styles.articleInfo}>
-              {article.anonymous_writer ? '익명' : <>{article.writer.user.username}</>}{' '}
+              {article.anonymous_writer ? '익명' : <>{article.writer.user.username}</>}
+              {' · '}
             </span>
             <span className={styles.articleInfo}>{pub_date1} </span>
             <span className={styles.articleInfo}>{pub_date2}</span>
           </div>
         </div>
-        <div className={`m-2 ${styles.articleContent}`}>
-          <span className={styles.articleInfo}>{article.body}</span>
+        <div className={`${styles.articleContent}`}>
+          <span dangerouslySetInnerHTML={{ __html: article.body }} className={styles.articleInfo}></span>
         </div>
-        <div className="m-2 d-flex gap-1">
+        <div className="d-flex gap-1">
           {tags.map((tag) => (
             <span className={`${styles.articleInfo}`} style={{ fontWeight: '600' }} key={tag.name}>
               #{tag.name}
             </span>
           ))}
         </div>
-        <div className="d-flex justify-content-between m-2">
+        <div className="d-flex justify-content-between">
           <div>
             <span className={styles.articleInfo}>조회수 {article.view_cnt} </span>
             <span className={styles.articleInfo}>댓글 {comments.length}</span>
