@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.db import transaction, DatabaseError
 from community.models import *
 from community.utils import convert_size, convert_to_boolean
 from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
@@ -13,20 +13,46 @@ from datetime import datetime, timedelta
 
 import logging
 
+
 class ArticleAPIView(APIView):
     '''
     GET : 게시글 읽기 API
     URL : api/article/<int:article_id>/
     '''
 
-    def get(self, request, article_id):
-
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+        article_id = kwargs.get('article_id')
         try:
-            res = {'status': 'success', 'message': '', 'data': None}
-            data = {'board': None, 'article': None, 'tags': None,
-                    'comments': [], 'files': None, 'team': None}
-            # 게시글 정보
             article = Article.objects.get(id=article_id)
+            valid_data['article'] = article
+        except Article.DoesNotExist as e:
+            logging.exception(f"search_view {e}")
+            errors["article_not_found"] = "해당 게시글이 존재하지않습니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'ArticleAPIView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            article = valid_data['article']
+
+            # 게시글 정보
             if article.writer.user_id != request.user.id:
                 article.view_cnt += 1
             article.save()
@@ -40,9 +66,12 @@ class ArticleAPIView(APIView):
             data['article'] = ArticleSerializer(article).data
 
             # 게시글 태그 정보
-            article_tags = ArticleTag.objects.filter(article__id=article_id)
-            data['tags'] = [TagIndependentSerializer(
-                article_tag.tag).data for article_tag in article_tags]
+            try:
+                article_tags = ArticleTag.objects.filter(article=article)
+                data['tags'] = [TagIndependentSerializer(
+                    article_tag.tag).data for article_tag in article_tags]
+            except TagIndependent.DoesNotExist:
+                data['tags'] = []
 
             # 게시판 정보
             board = Board.objects.get(id=article.board_id)
@@ -50,32 +79,40 @@ class ArticleAPIView(APIView):
 
             # 게시글 댓글 정보
             comments = ArticleComment.objects.filter(
-                article_id=article_id, is_deleted=False)
+                article_id=article.id, is_deleted=False)
             data['comments'] = ArticleCommentSerializer(
                 comments, many=True).data
 
             # 게시글 파일 확인
-            
+
             article_file_objs = ArticleFile.objects.filter(
                 article_id=article.id, status="POST")
             article_files = []
             try:
                 for obj in article_file_objs:
                     article_files.append({'id': obj.id,
-                                        'name': obj.filename,
-                                        'file': obj.file.name,
-                                        'size': convert_size(obj.file.size)})
+                                          'name': obj.filename,
+                                          'file': obj.file.name,
+                                          'size': convert_size(obj.file.size)})
             except Exception as e:
                 logging.exception(f"저장된 파일이 없습니다.{e}")
-            
 
             data['files'] = article_files
-            res['data'] = data
-        except Exception as e:
-            logging.exception(e)
-            res['message'] = "해당 게시글이 존재하지 않습니다."
-            return Response(res)
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'ArticleAPIView DB ERROR: {e}')
+            status = 'fail'
 
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + str(e)
+            logging.exception(f'ArticleAPIView undefined ERROR : {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
 
