@@ -354,6 +354,7 @@ class ArticleDeleteView(APIView):
         article id로 게시글 수정
         '''
         res = {'status': 'fail', 'message': '', 'data': None}
+        print(article_id)
         try:
             # article 존재 확인
             article = Article.objects.get(id=article_id)
