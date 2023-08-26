@@ -29,10 +29,11 @@ import Repository from './components/User/TinyUser/Repository';
 import TeamApplication from './components/NavBar/TeamApplication/TeamApplication';
 import RecommenderPage from './routes/RecommenderPage';
 import SearchPage from './routes/SearchPage';
+import HomePage from './routes/HomePage';
 
 const router = createBrowserRouter([
+  { path: '/', element: <HomePage /> },
   {
-    path: '/',
     element: <RootLayout />,
     id: 'root',
     loader: tokenLoader,
@@ -41,24 +42,25 @@ const router = createBrowserRouter([
         path: 'community',
         element: <CommunityLayout />,
         children: [
+          { path: '', element: <HomePage /> },
           {
-            path: 'activity/:activity_name',
-            element: < UserActivity />
+            path: 'activity/:tabName',
+            element: <UserActivity />
           },
           {
-            path: 'board/:board_name',
+            path: 'board/:tabName',
             element: <Board_Container />
           },
           {
-            path: 'board/:board_name/recruit',
+            path: 'recruit/:tabName',
             element: <TeamRecruit />
           },
           {
-            path: 'board/:board_name/myteam',
+            path: 'myteam',
             element: <MyTeamList />
           },
           {
-            path: 'board/:team_name/:board_id',
+            path: 'team/:team_name',
             element: <TeamBoard />
           },
           {

@@ -3,17 +3,17 @@ import CommunityNavItem from './CommunityNavItem/index';
 import BoardArticle from './BoardArticle/index';
 
 export default function Board_Presenter(props) {
-  const { articles, onWrite } = props;
+  const { articles, onWrite, tabName } = props;
 
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <button className="primary-btn hidden">hidden</button>
+        <button className="hidden">hidden</button>
         <ul className="nav nav-fill community-nav-items">
-          <CommunityNavItem this_board_name="자유" />
-          <CommunityNavItem this_board_name="질문" />
-          <CommunityNavItem this_board_name="정보" />
-          <CommunityNavItem this_board_name="홍보" />
+          <CommunityNavItem navName="자유" tabName={tabName} />
+          <CommunityNavItem navName="질문" tabName={tabName} />
+          <CommunityNavItem navName="정보" tabName={tabName} />
+          <CommunityNavItem navName="홍보" tabName={tabName} />
         </ul>
         <button type="button" className="btn btn-primary" onClick={onWrite}>
           작성하기
