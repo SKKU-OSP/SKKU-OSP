@@ -15,7 +15,6 @@ export default function ChatMessageModal_Container({ show, onCloseChatModal }) {
         const server_url = import.meta.env.VITE_SERVER_URL;
         const url = `${server_url}/message/api/room/list/47`;
         const response = await axios.get(url, getAuthConfig());
-        console.log(response);
         if (response.data.status === 'success') {
           console.log(response.data.data.chat_accounts);
 
@@ -30,7 +29,7 @@ export default function ChatMessageModal_Container({ show, onCloseChatModal }) {
     };
     fetchChatRoom();
   }, []);
-  console.log(chatRoomMembers);
+
   return (
     <ChatMessageModal_Presenter
       show={show}
