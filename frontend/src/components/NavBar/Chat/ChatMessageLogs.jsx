@@ -1,23 +1,26 @@
+import { useEffect, useRef } from 'react';
+import Spinner from 'react-bootstrap/Spinner';
 import SendIcon from '@mui/icons-material/Send';
-import { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
+
 import classes from './ChatMessageLogs.module.css';
 import { getAuthConfig } from '../../../utils/auth';
-import Spinner from 'react-bootstrap/Spinner';
 
 const ChatMessageLogs = (props) => {
-  const inputRef = useRef();
-
   const messageLogs = props.messageLogs;
 
+  const inputRef = useRef();
+  const scrollRef = useRef();
+
   useEffect(() => {
-    console.log('use Effect');
-  }, []);
+    // 채팅 메시지 리스트의 스크롤을 하단으로 이동
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [props.messageLogs]);
 
   const handlePostChat = async () => {
     const server_url = import.meta.env.VITE_SERVER_URL;
 
-    if (inputRef.current.value === '') {
+    if (inputRef.current.value.trim() === '') {
       return;
     }
     const chatData = { 'chat-input': inputRef.current.value };
@@ -30,12 +33,6 @@ const ChatMessageLogs = (props) => {
       props.setLogs(response.data.data.messages);
     }
   };
-
-  const scrollRef = useRef();
-
-  useEffect(() => {
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [props.messageLogs]);
 
   const chatBoxClasses = (senderId) => {
     return props.opponentId === senderId ? classes.ChatBoxRecieve : classes.ChatBoxSend;
@@ -55,18 +52,12 @@ const ChatMessageLogs = (props) => {
         return messageLogs.reverse().map((log) => (
           <div className={chatBoxClasses(log.sender.user.id)} key={log.id}>
             <div className={chatTextClasses(log.sender.user.id)}>
-              {log.receiver_read == false && props.opponentId !== log.sender.user.id ? (
+              {log.receiver_read == false && props.opponentId !== log.sender.user.id && (
                 <div className={classes.chatUnread}></div>
-              ) : (
-                <div />
               )}
               <div className={ChatTextBodyClasses(log.sender.user.id)}>{log.body}</div>
             </div>
-            {Number(log.send_date.split('-')[2].split('T')[1].split(':')[0]) > 12 ? (
-              <div className={classes.chatDate}>{log.format_date}</div>
-            ) : (
-              <div className={classes.chatDate}>{log.format_date}</div>
-            )}
+            <div className={classes.chatDate}>{log.format_date}</div>
           </div>
         ));
       } else {
