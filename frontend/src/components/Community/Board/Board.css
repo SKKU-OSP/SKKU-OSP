@@ -89,15 +89,19 @@
 }
 
 .board-article {
+  width: 100%;
   padding: 20px;
   border: 1px solid var(--main-border-color);
   margin-top: -1px;
   margin-left: -1px;
 }
-
+.board-article-title {
+  cursor: pointer;
+  color: var(--main-black);
+  text-decoration: none;
+}
 .board-article-title:hover,
 .board-article-writer:hover {
-  cursor: pointer;
   text-decoration: underline;
 }
 
@@ -112,6 +116,14 @@
 
 .inline {
   display: inline;
+}
+
+.inline-block {
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
 }
 
 .float-clear {

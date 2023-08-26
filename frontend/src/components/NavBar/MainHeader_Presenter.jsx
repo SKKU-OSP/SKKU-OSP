@@ -40,13 +40,13 @@ function MainHeader_Presenter(props) {
             <Link to="/community/board/자유" className="header-navbar-menu">
               커뮤니티
             </Link>
-            <Link to="/community/" className="header-navbar-menu">
+            <Link to="/community/recruit/팀 모집" className="header-navbar-menu">
               팀 모집
             </Link>
-            <Link to="/community/" className="header-navbar-menu">
+            <Link to="/community/myteam" className="header-navbar-menu">
               팀 게시판
             </Link>
-            <Link to="/community/" className="header-navbar-menu">
+            <Link to="/community/challenge" className="header-navbar-menu">
               챌린지
             </Link>
           </div>
