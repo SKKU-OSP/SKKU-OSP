@@ -1,13 +1,18 @@
 import styles from '../Article.module.css';
 import Button from 'react-bootstrap/Button';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icons/fa';
+import axios from 'axios';
+import AuthContext from '../../../../utils/auth-context';
+import { getAuthConfig } from '../../../../utils/auth';
 
 function ContentView(props) {
-  const board = props.board;
-  const tags = props.tags;
-  const comments = props.comments;
-  const article = props.article;
+  const { board, tags, comments, article } = props;
+  const { username } = useContext(AuthContext);
+
+  const domain_url = import.meta.env.VITE_SERVER_URL;
+  const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
 
   const dateObject = new Date(article.pub_date);
   const pub_date1 = dateObject.toISOString().slice(0, 10);
@@ -17,20 +22,56 @@ function ContentView(props) {
   const pub_date2 = `${hours}:${minutes.toString().padStart(2, '0')}`;
 
   const navigate = useNavigate();
+
   const backToBoard = (boardname) => {
     navigate('/community/board/' + boardname);
+  };
+
+  const onEdit = () => {
+    navigate(`/community/article/${article.id}/edit`);
+  };
+
+  const onDelete = async () => {
+    if (confirm('게시글을 삭제하시겠습니까?')) {
+      try {
+        const response = await axios.post(delete_url, { article_id: article.id }, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'fail') {
+          console.log(res.errors);
+        } else {
+          backToBoard(board.name);
+        }
+      } catch (error) {
+        console.log('error', error);
+      }
+    }
   };
 
   return (
     <div className="d-flex flex-column">
       <div className={styles.articleBar}>
-        <Button variant="secondary" onClick={() => backToBoard(board.name)}>
+        <Button
+          variant="secondary"
+          style={{ width: '80px', marginRight: '50px' }}
+          onClick={() => backToBoard(board.name)}
+        >
           글 목록
         </Button>
         <span className={styles.articleBoard}> {board.name} 게시판</span>
-        <Button variant="secondary" style={{ visibility: 'hidden' }}>
-          글 목록
-        </Button>
+        {username === article.writer.user.username ? (
+          <div>
+            <Button variant="outline-primary" style={{ width: '60px', marginRight: '10px' }} onClick={onEdit}>
+              수정
+            </Button>
+            <Button variant="outline-secondary" style={{ width: '60px' }} onClick={onDelete}>
+              삭제
+            </Button>
+          </div>
+        ) : (
+          <Button variant="secondary" style={{ width: '80px', marginRight: '50px', visibility: 'hidden' }}>
+            글 목록
+          </Button>
+        )}
       </div>
       <div className={styles.articleBody}>
         <div className="d-flex justify-content-between align-items-end">
