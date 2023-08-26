@@ -1,11 +1,13 @@
 import BoardArticle_Presenter from './BoardArticle_Presenter';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import AuthContext from '../../../../utils/auth-context';
 
 export default function BoardArticle_Container(props) {
   const { article } = props;
   const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
+  const { username } = useContext(AuthContext);
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}`);
@@ -34,8 +36,18 @@ export default function BoardArticle_Container(props) {
   };
 
   useEffect(() => {
-    getDate(article.pub_date);
+    if (article.pub_date) {
+      getDate(article.pub_date);
+    }
   });
 
-  return <BoardArticle_Presenter article={article} pubDate={pubDate} onArticle={onArticle} onWriter={onWriter} />;
+  return (
+    <BoardArticle_Presenter
+      username={username}
+      article={article}
+      pubDate={pubDate}
+      onArticle={onArticle}
+      onWriter={onWriter}
+    />
+  );
 }

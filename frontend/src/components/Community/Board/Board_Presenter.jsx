@@ -20,9 +20,11 @@ export default function Board_Presenter(props) {
         </button>
       </div>
 
-      {articles.map((article) => (
-        <BoardArticle key={article.id} article={article} />
-      ))}
+      {articles.length ? (
+        articles.map((article) => <BoardArticle key={article.id} article={article} />)
+      ) : (
+        <BoardArticle article={{}} />
+      )}
     </div>
   );
 }
