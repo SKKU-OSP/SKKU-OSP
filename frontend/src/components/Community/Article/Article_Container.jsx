@@ -2,15 +2,11 @@ import Article_Presenter from './Article_Presenter';
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-<<<<<<< HEAD
-import Spinner from 'react-bootstrap/Spinner';
-=======
 import LoaderIcon from 'react-loader-icon';
 import AuthContext from '../../../utils/auth-context';
 import { getAuthConfig } from '../../../utils/auth';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
->>>>>>> faf4e1d (팀 게시글 읽기 권한 제한)
 
 function Article_Container() {
   const [article, setArticle] = useState();
