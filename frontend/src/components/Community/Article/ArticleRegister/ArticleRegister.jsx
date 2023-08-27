@@ -11,7 +11,7 @@ import { getAuthConfig } from '../../../../utils/auth';
 
 import '../../Board/Board.css';
 
-const domainUrl = import.meta.env.VITE_SERVER_URL
+const domainUrl = import.meta.env.VITE_SERVER_URL;
 
 function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const boardName = useParams().board_name;
@@ -249,8 +249,9 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   };
 
   const onBack = () => {
-    if (boardName === "팀 모집") {
-      navigate(`/community/board/${boardName}/recruit`);
+    // TODO 팀 게시판의 경우를 고려해서 navigate(`/community/team/${boardName}/`) 을 사용해야함
+    if (boardName === '팀 모집') {
+      navigate(`/community/recruit/${boardName}/`);
     } else {
       navigate(`/community/board/${boardName}/`);
     }
@@ -336,7 +337,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             className="form-control"
             value={title}
             placeholder="제목을 입력해 주세요"
-            autofocus
+            autoFocus
             onChange={handleTitleChange}
           />
           {boardName === '팀 모집' && ( //여기 수정

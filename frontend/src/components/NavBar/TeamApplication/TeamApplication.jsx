@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import { Link } from 'react-router-dom';
 import Badge from 'react-bootstrap/Badge';
-import axios from 'axios';
+
 import { getAuthConfig } from '../../../utils/auth';
-
 import './TeamApplication.css';
-import { ToggleButton } from 'react-bootstrap';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
 const TeamApplication = ({ handleClose, show }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -22,11 +23,10 @@ const TeamApplication = ({ handleClose, show }) => {
   const [received, setReceived] = useState([]);
   const [sent, setSent] = useState([]);
 
-  const serverUrl = import.meta.env.VITE_SERVER_URL;
-  const url = serverUrl + '/team/api/applications';
   useEffect(() => {
     const getApplications = async () => {
       try {
+        const url = serverUrl + '/team/api/applications';
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
@@ -40,12 +40,13 @@ const TeamApplication = ({ handleClose, show }) => {
       }
     };
     getApplications();
-  });
+  }, []);
 
   const tabContArr = [
     {
       tabTitle: (
         <Nav.Link
+          key="recv-tab"
           className={activeIndex === 0 ? 'SelectedNavItem' : 'UnselectedNavItem'}
           onClick={() => tabClickHandler(0)}
         >
@@ -56,7 +57,10 @@ const TeamApplication = ({ handleClose, show }) => {
         <>
           {received &&
             received.map((application) => (
-              <div className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0">
+              <div
+                key={`recv-${application.id}`}
+                className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0"
+              >
                 <div className="d-flex">
                   <div className="me-2"> {application.team.name} </div>
                   <Link>{application.account.user.username}</Link>
@@ -77,6 +81,7 @@ const TeamApplication = ({ handleClose, show }) => {
     {
       tabTitle: (
         <Nav.Link
+          key="sent-tab"
           className={activeIndex === 1 ? 'SelectedNavItem' : 'UnselectedNavItem'}
           onClick={() => tabClickHandler(1)}
         >
@@ -87,7 +92,10 @@ const TeamApplication = ({ handleClose, show }) => {
         <>
           {sent &&
             sent.map((application) => (
-              <div className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0">
+              <div
+                key={`sent-${application.id}`}
+                className="d-flex justify-content-between align-items-center pt-2 pb-2 border border-start-0 border-end-0"
+              >
                 <div className="d-flex">
                   <div className="me-2"> {application.team.name} </div>
                 </div>
@@ -126,7 +134,7 @@ const TeamApplication = ({ handleClose, show }) => {
           <div>
             <Navbar collapseOnSelect className="tabs is-boxed d-flex flex-row justify-content-center w-100">
               <Container>
-                {tabContArr.map((section, index) => {
+                {tabContArr.map((section) => {
                   return section.tabTitle;
                 })}
               </Container>

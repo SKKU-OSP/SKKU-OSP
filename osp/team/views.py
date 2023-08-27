@@ -122,7 +122,7 @@ class TeamInviteOnTeamboardView(APIView):
         if len(invite_msg) > 150:
             errors['msg_too_long'] = f'초대 메세지는 150자 이하여야입니다. 현재 {len(invite_msg)}자'
             status = 'fail'
-        
+
         valid_data['target_team'] = target_team
         valid_data['target_user'] = target_user
         return status, errors, valid_data
@@ -174,7 +174,7 @@ class TeamInviteOnTeamboardView(APIView):
                 # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
                 board = Board.objects.get(team=target_team)
-                url = f'/community/board/{board.name}';
+                url = f'/community/board/{board.name}'
                 sender = Account.objects.get(user=request.user.id)
 
                 # 메세지 객체 생성
@@ -813,7 +813,10 @@ class TeamUpdateView(APIView):
 
 class TeamApplyView(APIView):
 
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        errors = {}
+        valid_data = {}
         user = request.user
         article_id = kwargs.get('article_id')
         if not user.is_authenticated:
@@ -846,22 +849,16 @@ class TeamApplyView(APIView):
                     errors['teamrecruitarticle_expired'] = '만료된 팀의 모집기간입니다. '
                     status = 'fail'
 
-        return status, message, errors, valid_data
+        return status, errors, valid_data
 
     def get(self, request, *args, **kwargs):
         # Declaration
-        status = 'success'
         message = ''
         data = {}
-        errors = {}
-        valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, errors, valid_data = self.get_validation(
+            request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'

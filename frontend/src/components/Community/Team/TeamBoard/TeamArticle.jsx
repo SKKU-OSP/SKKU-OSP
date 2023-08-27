@@ -1,15 +1,11 @@
-import { useState, useContext, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import ApplyTeamModal from '../ApplyTeamModal';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
-import AuthContext from '../../../../utils/auth-context';
 
 export default function TeamArticle(props) {
   const { article } = props;
   const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
-  const { tabName } = useParams();
-  const { username } = useContext(AuthContext);
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
@@ -39,69 +35,15 @@ export default function TeamArticle(props) {
   };
 
   useEffect(() => {
-    if (tabName === '팀 모집' && article?.pub_date) {
+    if (article?.pub_date) {
       getDate(article.pub_date);
     }
-  }, [tabName, article]);
+  }, [article]);
 
   return (
-    <>
-      {tabName === '팀 모집' && (
-        <div className="board-article">
-          <h6>
-            {article.writer ? (
-              article.anonymous_writer ? (
-                <span>익명</span>
-              ) : (
-                <span className="board-article-writer" onClick={onWriter}>
-                  {article.writer.user.username}
-                </span>
-              )
-            ) : (
-              <span>탈퇴한 이용자</span>
-            )}{' '}
-            · {pubDate}
-          </h6>
-          <h4 className="board-article-title" onClick={onArticle}>
-            [{article.team ? article.team.name : null}]{article.title}
-          </h4>
-          <div>
-            {article.tags && article.tags.length > 0 ? (
-              article.tags.map((tag) => (
-                <h6 className="inline" key={tag.name}>
-                  #{tag.name.replace(' ', '_')}&nbsp;
-                </h6>
-              ))
-            ) : (
-              <h6 className="inline">{'\u00A0'}</h6>
-            )}
-            <div className="board-article-meta-list">
-              {article.board?.period_end && article.board.period_end > new Date() ? (
-                <span>모집중</span>
-              ) : (
-                <span>모집 마감</span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      {tabName === '전체 팀 목록' && (
-        <div className="board-article">
-          <div>
-            <h4 className="board-article-title2">{article.name}</h4>
-            <div className="board-article-modal">
-              {/* TODO 불필요한 ApplyTeamModal 까지 모두 렌더링하고 서버로 데이터 요청을 많이 보내는 문제로 개선 필요 */}
-              {/* <ApplyTeamModal team_name={article.name} team_description={article.description} user_info={username} /> */}
-            </div>
-          </div>
-          <div>
-            <h6 className="inline">{article.description}</h6>
-            <div className="board-article-meta-list">익명 외 몇 명</div>
-          </div>
-        </div>
-      )}
-      {tabName !== '전체 팀 목록' && tabName !== '팀 모집' && (
-        <div className="board-article">
+    <div className="board-article">
+      {
+        <>
           <h6>
             {article.writer ? (
               article.anonymous_writer ? (
@@ -142,8 +84,8 @@ export default function TeamArticle(props) {
               </>
             </div>
           </div>
-        </div>
-      )}
-    </>
+        </>
+      }
+    </div>
   );
 }

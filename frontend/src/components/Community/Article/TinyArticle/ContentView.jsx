@@ -23,8 +23,14 @@ function ContentView(props) {
 
   const navigate = useNavigate();
 
-  const backToBoard = (boardname) => {
-    navigate('/community/board/' + boardname);
+  const backToBoard = (board) => {
+    if (board.board_type === 'Recruit') {
+      navigate('/community/recruit/' + board.name);
+    } else if (board.board_type === 'Team') {
+      navigate('/community/team/' + board.name);
+    } else {
+      navigate('/community/board/' + board.name);
+    }
   };
 
   const onEdit = () => {
@@ -39,7 +45,7 @@ function ContentView(props) {
         if (res.status === 'fail') {
           console.log(res.errors);
         } else {
-          backToBoard(board.name);
+          backToBoard(board);
         }
       } catch (error) {
         console.log('error', error);
@@ -50,11 +56,7 @@ function ContentView(props) {
   return (
     <div className="d-flex flex-column">
       <div className={styles.articleBar}>
-        <Button
-          variant="secondary"
-          style={{ width: '80px', marginRight: '50px' }}
-          onClick={() => backToBoard(board.name)}
-        >
+        <Button variant="secondary" style={{ width: '80px', marginRight: '50px' }} onClick={() => backToBoard(board)}>
           글 목록
         </Button>
         <span className={styles.articleBoard}> {board.name} 게시판</span>

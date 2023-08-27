@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
-import TeamArticle from '../TeamRecruit/TeamArticle';
+import TeamArticle from './TeamArticle';
 import InviteTeamModal from '../InviteTeamModal';
 import EditTeamModal from '../EditTeamModal';
 import { BsStarFill } from 'react-icons/bs';
@@ -17,7 +17,7 @@ function TeamBoard() {
   const [error, setError] = useState(false);
 
   const onMyTeamList = () => {
-    navigate(`/community/board/내 팀 목록/myteam`);
+    navigate(`/community/myteam`);
   };
 
   const onWrite = () => {
