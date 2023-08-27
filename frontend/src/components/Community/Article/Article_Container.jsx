@@ -2,7 +2,6 @@ import Article_Presenter from './Article_Presenter';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { getAuthConfig } from '../../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
 
 function Article_Container() {
@@ -18,7 +17,7 @@ function Article_Container() {
       try {
         const server_url = import.meta.env.VITE_SERVER_URL;
         const url = server_url + '/community/api/article/' + article_id;
-        const response = await axios.get(url, getAuthConfig());
+        const response = await axios.get(url);
         const res = response.data;
         console.log(res);
         if (res.status === 'success') {
