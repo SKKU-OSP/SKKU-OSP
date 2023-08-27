@@ -1,9 +1,10 @@
-import CommunityNavItem from '../../Board/CommunityNavItem/index';
-import TeamArticle from './TeamArticle';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getAuthConfig } from '../../../../utils/auth';
+import axios from 'axios';
+
+import CommunityNavItem from '../../Board/CommunityNavItem/index';
+import TeamArticle from './TeamArticle';
+import RecruitArticle from './RecruitArticle';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -21,7 +22,7 @@ function TeamRecruit() {
   useEffect(() => {
     const getRecruit = async () => {
       try {
-        const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/`, getAuthConfig());
+        const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/`);
         const resRecruit = responseRecruit.data;
         if (resRecruit.status === 'success') {
           setArticles(resRecruit.data.articles);
@@ -55,26 +56,27 @@ function TeamRecruit() {
 
   return (
     <div className="col-9">
-      <div className="community-nav d-flex">
-        <button className="hidden">hidden</button>
-        <ul className="nav nav-fill community-nav-items">
-          <CommunityNavItem navName="팀 모집" tabName={tabName} />
-          <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
-        </ul>
-        {tabName === '팀 모집' && (
-          <button type="button" onClick={onWrite} className="btn btn-primary">
-            작성하기
-          </button>
-        )}
-        {tabName === '전체 팀 목록' && <button className="hidden">hidden</button>}
-      </div>
+      {!error && (
+        <>
+          <div className="community-nav d-flex">
+            <button className="hidden">hidden</button>
+            <ul className="nav nav-fill community-nav-items">
+              <CommunityNavItem navName="팀 모집" tabName={tabName} />
+              <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
+            </ul>
+            {tabName === '팀 모집' && (
+              <button type="button" onClick={onWrite} className="btn btn-primary">
+                작성하기
+              </button>
+            )}
+            {tabName === '전체 팀 목록' && <button className="hidden">hidden</button>}
+          </div>
 
-      {tabName === '팀 모집' && articles.length > 0
-        ? articles.map((a) => <TeamArticle key={a.id} article={a} />)
-        : null}
-      {tabName === '전체 팀 목록' && teams && teams.length > 0
-        ? teams.map((a) => <TeamArticle key={a.id} article={a} />)
-        : null}
+          {tabName === '팀 모집' && articles.map((a) => <RecruitArticle key={a.id} article={a} />)}
+          {tabName === '전체 팀 목록' && teams.map((a) => <TeamArticle key={a.id} article={a} />)}
+        </>
+      )}
+      {error && <div>문제가 발생했습니다</div>}
     </div>
   );
 }

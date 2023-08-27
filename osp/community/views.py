@@ -229,6 +229,7 @@ class TableBoardView(APIView):
 
             # 팀 모집 게시판일 경우
             if board.board_type == 'Recruit':
+                # 현재 모집 중인 게시글 데이터를 구성
                 active_article = Article.objects.filter(
                     board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 active_article = get_article_board_data(active_article)
@@ -243,6 +244,16 @@ class TableBoardView(APIView):
                         article.team = None
                 data['active_article'] = ArticleSerializer(
                     active_article, many=True).data
+
+                # 팀 모집 게시판의 글인 경우 팀 이름을 추가로 전달
+                for article in data['articles']:
+                    recruit_article = TeamRecruitArticle.objects.filter(
+                        article_id=article['id']).first()
+
+                    if recruit_article:
+                        article['team_name'] = recruit_article.team.name
+                    else:
+                        article['team_name'] = None
 
         except DatabaseError as e:
             errors['DB_exception'] = 'DB Error'
