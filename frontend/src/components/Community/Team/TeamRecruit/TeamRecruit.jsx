@@ -1,23 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 import CommunityNavItem from '../../Board/CommunityNavItem/index';
-import TeamArticle from './TeamArticle';
+import TeamOverview from './TeamOverview';
 import RecruitArticle from './RecruitArticle';
+import AuthContext from '../../../../utils/auth-context';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function TeamRecruit() {
   const navigate = useNavigate();
   const { tabName } = useParams();
+  const { username } = useContext(AuthContext);
+
   const [teams, setTeams] = useState([]);
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState(false);
-
-  const onWrite = () => {
-    navigate(`/community/${tabName}/register`);
-  };
 
   useEffect(() => {
     const getRecruit = async () => {
@@ -54,6 +53,16 @@ function TeamRecruit() {
     }
   }, [tabName]);
 
+  const onWrite = () => {
+    if (username) {
+      navigate(`/community/${tabName}/register`);
+    } else {
+      if (confirm('로그인이 필요합니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate(`/accounts/login`);
+      }
+    }
+  };
+
   return (
     <div className="col-9">
       {!error && (
@@ -72,8 +81,8 @@ function TeamRecruit() {
             {tabName === '전체 팀 목록' && <button className="hidden">hidden</button>}
           </div>
 
-          {tabName === '팀 모집' && articles.map((a) => <RecruitArticle key={a.id} article={a} />)}
-          {tabName === '전체 팀 목록' && teams.map((a) => <TeamArticle key={a.id} article={a} />)}
+          {tabName === '팀 모집' && articles.map((article) => <RecruitArticle key={article.id} article={article} />)}
+          {tabName === '전체 팀 목록' && teams.map((team) => <TeamOverview key={team.id} team={team} />)}
         </>
       )}
       {error && <div>문제가 발생했습니다</div>}

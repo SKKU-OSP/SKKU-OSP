@@ -18,53 +18,32 @@ function Article_Container() {
   const { article_id } = useParams();
   const { username } = useContext(AuthContext);
 
-  const getArticle = async () => {
-    try {
-      const article_url = server_url + '/community/api/article/' + article_id;
-      const response = await axios.get(article_url);
-      const res = response.data;
-
-      if (res.status === 'success') {
-        if (res.data.board.board_type == 'Team') {
-          try {
-            const teams_url = server_url + '/team/api/teams-of-user-list/';
-            const response = await axios.get(teams_url, getAuthConfig());
-            const res2 = response.data;
-            const teams = res2.data.teams_of_user;
-
-            teams.map((team) => {
-              if (res.data.board.team_id === team.id) {
-                setCanView(true);
-              }
-            });
-          } catch (e) {
-            console.log(e.message);
-            setError(e.message);
-          }
-        } else {
-          setCanView(true);
-        }
-
-        setArticle(res.data.article);
-        setTags(res.data.tags);
-        setComments(res.data.comments);
-        setBoard(res.data.board);
-      }
-    } catch (e) {
-      setError(e.message);
-    }
-  };
-
   useEffect(() => {
     const getArticle = async () => {
       try {
-        const server_url = import.meta.env.VITE_SERVER_URL;
         const url = server_url + '/community/api/article/' + article_id;
         const response = await axios.get(url);
         const res = response.data;
-        console.log(res);
         if (res.status === 'success') {
-          console.log('GET', res.data, res.message);
+          if (res.data.board.board_type == 'Team') {
+            try {
+              const teams_url = server_url + '/team/api/teams-of-user-list/';
+              const response = await axios.get(teams_url, getAuthConfig());
+              const resTeam = response.data;
+              const teams = resTeam.data.teams_of_user;
+
+              teams.map((team) => {
+                if (res.data.board.team_id === team.id) {
+                  setCanView(true);
+                }
+              });
+            } catch (e) {
+              console.log(e.message);
+              setError(e.message);
+            }
+          } else {
+            setCanView(true);
+          }
           setArticle(res.data.article);
           setTags(res.data.tags);
           setComments(res.data.comments);

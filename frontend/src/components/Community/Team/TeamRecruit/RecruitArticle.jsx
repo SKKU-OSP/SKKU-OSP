@@ -7,7 +7,6 @@ export default function RecruitArticle(props) {
   const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
   const { username } = useContext(AuthContext);
-  console.log('username', username);
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
