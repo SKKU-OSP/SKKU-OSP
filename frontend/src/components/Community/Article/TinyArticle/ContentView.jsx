@@ -75,12 +75,12 @@ function ContentView(props) {
       </div>
       <div className={styles.articleBody}>
         <div className="d-flex justify-content-between align-items-end">
-          <span className={styles.articleTitle}>{article.title}</span>
+          <span className={`col-md-9 ${styles.articleTitle}`}>{article.title}</span>
           <div>
             <span className={styles.articleInfo}>
               {article.anonymous_writer ? '익명' : <>{article.writer.user.username}</>}
-              {' · '}
             </span>
+            <br></br>
             <span className={styles.articleInfo}>{pub_date1} </span>
             <span className={styles.articleInfo}>{pub_date2}</span>
           </div>

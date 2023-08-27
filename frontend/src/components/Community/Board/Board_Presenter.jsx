@@ -1,9 +1,10 @@
 import '../Community.css';
 import CommunityNavItem from './CommunityNavItem/index';
 import BoardArticle from './BoardArticle/index';
+import LoaderIcon from 'react-loader-icon';
 
 export default function Board_Presenter(props) {
-  const { articles, onWrite, tabName } = props;
+  const { isLoadedArticles, articles, onWrite, tabName } = props;
 
   return (
     <div className="col-9">
@@ -20,10 +21,16 @@ export default function Board_Presenter(props) {
         </button>
       </div>
 
-      {articles.length ? (
-        articles.map((article) => <BoardArticle key={article.id} article={article} />)
+      {isLoadedArticles ? (
+        <>
+          {articles.length ? (
+            articles.map((article) => <BoardArticle key={article.id} article={article} />)
+          ) : (
+            <BoardArticle article={{}} />
+          )}
+        </>
       ) : (
-        <BoardArticle article={{}} />
+        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
     </div>
   );
