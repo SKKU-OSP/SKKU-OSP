@@ -1,16 +1,63 @@
 import Article_Presenter from './Article_Presenter';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+<<<<<<< HEAD
 import Spinner from 'react-bootstrap/Spinner';
+=======
+import LoaderIcon from 'react-loader-icon';
+import AuthContext from '../../../utils/auth-context';
+import { getAuthConfig } from '../../../utils/auth';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
+>>>>>>> faf4e1d (팀 게시글 읽기 권한 제한)
 
 function Article_Container() {
   const [article, setArticle] = useState();
   const [tags, setTags] = useState([]);
   const [comments, setComments] = useState([]);
   const [board, setBoard] = useState();
-  const [error_occur, setError] = useState(false);
+  const [canView, setCanView] = useState(false);
+  const [error, setError] = useState(false);
   const { article_id } = useParams();
+  const { username } = useContext(AuthContext);
+
+  const getArticle = async () => {
+    try {
+      const article_url = server_url + '/community/api/article/' + article_id;
+      const response = await axios.get(article_url);
+      const res = response.data;
+
+      if (res.status === 'success') {
+        if (res.data.board.board_type == 'Team') {
+          try {
+            const teams_url = server_url + '/team/api/teams-of-user-list/';
+            const response = await axios.get(teams_url, getAuthConfig());
+            const res2 = response.data;
+            const teams = res2.data.teams_of_user;
+
+            teams.map((team) => {
+              if (res.data.board.team_id === team.id) {
+                setCanView(true);
+              }
+            });
+          } catch (e) {
+            console.log(e.message);
+            setError(e.message);
+          }
+        } else {
+          setCanView(true);
+        }
+
+        setArticle(res.data.article);
+        setTags(res.data.tags);
+        setComments(res.data.comments);
+        setBoard(res.data.board);
+      }
+    } catch (e) {
+      setError(e.message);
+    }
+  };
 
   useEffect(() => {
     const getArticle = async () => {
@@ -38,13 +85,16 @@ function Article_Container() {
   return (
     <>
       {article && board ? (
-        error_occur ? (
-          <>잘못된 페이지입니다.</>
-        ) : (
-          <Article_Presenter article={article} tags={tags} comments={comments} board={board} />
-        )
+        <Article_Presenter
+          username={username}
+          article={article}
+          tags={tags}
+          comments={comments}
+          board={board}
+          canView={canView}
+        />
       ) : (
-        <Spinner animation="border" style={{ position: 'absolute', top: '50%', left: '50%' }} />
+        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
     </>
   );
