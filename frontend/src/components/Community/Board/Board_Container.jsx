@@ -10,6 +10,7 @@ export default function Board_Container() {
   // tabName으로 '자유', '질문', '정보', '홍보' 를 받아 게시판의 게시글 목록을 렌더링
   const navigate = useNavigate();
   const { tabName } = useParams();
+  const [isLoadedArticles, setIsLoadedArticles] = useState(false);
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState(false);
   const { username } = useContext(AuthContext);
@@ -31,6 +32,7 @@ export default function Board_Container() {
         const res = response.data;
         if (res.status === 'success') {
           setArticles(res.data.articles);
+          setIsLoadedArticles(true);
         } else {
           alert('해당 게시판이 존재하지 않습니다.');
         }
@@ -41,5 +43,7 @@ export default function Board_Container() {
     getArticle();
   }, [tabName]);
 
-  return <Board_Presenter articles={articles} onWrite={onWrite} tabName={tabName} />;
+  return (
+    <Board_Presenter isLoadedArticles={isLoadedArticles} articles={articles} onWrite={onWrite} tabName={tabName} />
+  );
 }
