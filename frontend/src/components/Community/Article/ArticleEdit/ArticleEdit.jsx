@@ -1,17 +1,16 @@
-import React, { useEffect, useState, useRef, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState, useRef, useContext } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
 import Select from 'react-select';
-import { BsXLg, BsSave } from 'react-icons/bs';
+import { BsXLg } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
-import { Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
+import AuthContext from '../../../../utils/auth-context';
+import { getAuthConfig } from '../../../../utils/auth';
+
 import 'react-datepicker/dist/react-datepicker.css';
 import './ArticleEdit.css';
-import { getAuthConfig } from '../../../../utils/auth';
-import './ArticleEdit.css';
-import AuthContext from '../../../../utils/auth-context';
 
 /**
  * TARGET: content-edit.html
@@ -20,14 +19,10 @@ const domainUrl = import.meta.env.VITE_SERVER_URL;
 
 function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id;
-  const url = domainUrl + '/community/';
   const urlEditArticle = domainUrl + '/community/api/article/' + articleID + '/update/';
-  const urlArticle = domainUrl + '/community/api/article/' + articleID;
-  const urlTag = domainUrl + '/tag/api/list/';
 
   const article = {};
-  const { username } = useContext(AuthContext);
-
+  const username = useContext(AuthContext).username;
   const [myArticle, setMyArticle] = useState(false);
   const [board, setBoard] = useState('');
   const [isAuthNotice, setIsAuthNotice] = useState(true);
@@ -45,21 +40,38 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [teamID, setTeamID] = useState('');
   const getCurrentDateTime = () => new Date();
   const editorRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     //axios 사용
-    const getArticle = async () => {
-      const response = await axios.get(url);
-      const responseArticle = await axios.get(urlArticle);
+    const getTag = async () => {
+      const urlTag = domainUrl + '/tag/api/list/';
       const responseTag = await axios.get(urlTag);
-      const res = response.data;
-      const resArticle = responseArticle.data;
-      const resTag = responseTag.data;
 
+      const resTag = responseTag.data;
+      if (resTag.status === 'success') {
+        setTags(
+          resTag.data.tags.map((t) => {
+            return {
+              value: t.name,
+              label: t.name,
+              color: t.color
+            };
+          })
+        );
+      } else {
+        console.log(resTag.message);
+      }
+    };
+    const getArticle = async () => {
+      const urlArticle = domainUrl + '/community/api/article/' + articleID;
+      const responseArticle = await axios.get(urlArticle);
+      const resArticle = responseArticle.data;
       if (resArticle.status === 'success') {
+        console.log('vs', username, resArticle.data.article.writer.user.username);
         if (resArticle.data.article.writer.user.username !== username) {
           alert('본인의 게시글만 수정할 수 있습니다.');
-          onBack();
+          navigate(`/community/article/${articleID}`);
         } else {
           setBoard(resArticle.data.article.board);
           // setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
@@ -68,15 +80,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           // });
           setTitle(resArticle.data.article.title);
           setBodyText(resArticle.data.article.body);
-          setTags(
-            resTag.data.tags.map((t) => {
-              return {
-                value: t.name,
-                label: t.name,
-                color: t.color
-              };
-            })
-          );
+
           setSelectTags(
             resArticle.data.tags.map((t) => {
               return {
@@ -103,13 +107,12 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         console.log(resArticle.message);
       }
     };
-    getArticle();
-  }, []);
-
-  // 익명 체크 여부 확인
-  const anonymousCheck = () => {
-    return anonymousWriter;
-  };
+    // username에 값이 할당된 경우에 요청
+    if (username !== null) {
+      getArticle();
+      getTag();
+    }
+  }, [username, articleID, navigate]);
 
   // 수정 버튼 클릭 시
   const onModify = async () => {
@@ -252,14 +255,14 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   };
 
   const onBack = () => {
-    window.location.href = `/community/article/${articleID}`;
+    navigate(`/community/article/${articleID}`);
   };
 
   //정보공개 미동의 시 뜨는 창
   const renderConsentMessage = !isWrite && type === 'register' && (
     <div>
       <p>정보공개에 동의하지 않아 사용할 수 없는 기능입니다.</p>
-      <button className="btn btn-primary" onClick={() => consentWriteOpen(request.user.username)}>
+      <button className="btn btn-primary" onClick={() => consentWriteOpen(username)}>
         정보공개하기
       </button>
     </div>
@@ -293,7 +296,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                     <input
                       type="checkbox"
                       id="is-anonymous"
-                      checked={anonymousCheck()}
+                      checked={anonymousWriter}
                       onChange={() => setAnonymousWriter(!anonymousWriter)}
                     />{' '}
                     <label htmlFor="is-anonymous">익명</label>
@@ -323,14 +326,14 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                 className="form-control"
                 value={title}
                 placeholder="제목을 입력해 주세요"
-                autofocus
+                autoFocus
                 onChange={handleTitleChange}
               />
               {board.board_type === 'Recruit' && ( //여기 수정
                 <>
                   {team ? (
                     <Select
-                      placeholder={'팀 선택'}
+                      placeholder="팀 선택"
                       options={options}
                       menuPlacement="auto"
                       value={team}
@@ -341,7 +344,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                     />
                   ) : type === 'register' ? (
                     <Select id="team-option" name="team-option" className="form-select pointer">
-                      {teamOptions(request.user)}
+                      {teamOptions()}
                     </Select>
                   ) : (
                     <Select id="team-option" name="team-option" className="form-select pointer" disabled>
@@ -452,7 +455,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                         </div>
                         <div
                           id="PeriodPickerStart"
-                          InputGroup
                           className="log-event"
                           data-td-target-input="nearest"
                           data-td-target-toggle="nearest"
@@ -476,7 +478,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                         </div>
                         <div
                           id="PeriodPickerEnd"
-                          InputGroup
                           className="log-event"
                           data-td-target-input="nearest"
                           data-td-target-toggle="nearest"
