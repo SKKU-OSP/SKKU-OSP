@@ -15,8 +15,10 @@
   border-radius: 0 !important;
 }
 
-.tox-tinymce,
-.css-13cymwt-control {
+/* 게시글의 디자인을 고려하여 라이브러리 디자인을 직각으로 만듦 */
+#article-form .tox-tinymce,
+#article-form .css-13cymwt-control,
+#article-form .css-16rlsjj-control {
   border: solid var(--main-border-color) !important;
   border-width: 0 1px 1px 1px !important;
   margin-left: -1px;
