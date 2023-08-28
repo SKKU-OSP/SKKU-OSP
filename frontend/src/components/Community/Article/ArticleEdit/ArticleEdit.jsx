@@ -270,7 +270,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       {myArticle ? (
         <>
           {renderConsentMessage}
-          <div id="community-main" className="col-md-9">
+          <div id="community-main" className="col-9">
             <div className="community-nav d-flex">
               {board.name === '질문' ? (
                 <div>

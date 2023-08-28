@@ -291,7 +291,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   return (
     <>
       {renderConsentMessage}
-      <div id="community-main" className="col-md-9">
+      <div id="community-main" className="col-9">
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
           <div className="community-nav d-flex">
             {boardName === '질문' ? (

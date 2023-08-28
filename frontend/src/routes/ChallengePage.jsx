@@ -4,14 +4,16 @@ import classes from './ChallengePage.module.css';
 import { FaTrophy } from 'react-icons/fa';
 import CreateTeamModal from '../components/Community/Team/CreateTeamModal';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+
 const ChallengePage = () => {
-  const serverUrl = import.meta.env.VITE_SERVER_URL;
-  const url = serverUrl + '/challenge/api/list/72';
   const [achievements, setAchievements] = useState([]);
   const [total, setTotal] = useState(1);
 
   useEffect(() => {
     try {
+      const url = serverUrl + '/challenge/api/list/72';
+
       const getAchievements = async () => {
         const response = await axios.get(url);
         const res = response.data;
@@ -20,6 +22,7 @@ const ChallengePage = () => {
           setTotal(res.data.total_accounts);
           setAchievements(res.data.achievements);
         } else {
+          console.log(res.message);
         }
       };
       getAchievements();
@@ -36,7 +39,7 @@ const ChallengePage = () => {
 
   return (
     <>
-      <div className={'col-md-9'}>
+      <div className="col-md-9">
         <CreateTeamModal />
         <div className={classes.ChallengeTitle}>
           <div className={classes.ChallengeTitleContent}>챌린지</div>
