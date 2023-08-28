@@ -21,6 +21,7 @@ function Login() {
 
   const sendLoginRequest = async () => {
     try {
+      if ((usernameInputRef.current.value === '') | (passwordInputRef.current.value === '')) return;
       const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
       const response = await axios.post(login_url, data);
       const res = response.data;
@@ -31,14 +32,12 @@ function Login() {
       navigate('/community');
     } catch (error) {
       console.log('error', error);
-      //   if (error.me)
       setError(error.message);
     }
   };
 
-  const handleLogin = () => {
-    console.log('usernameInputRef', usernameInputRef.current.value);
-    console.log('passwordInputRef', passwordInputRef.current.value);
+  const handleLogin = (event) => {
+    event.preventDefault();
     sendLoginRequest();
   };
 
@@ -48,7 +47,7 @@ function Login() {
   };
 
   return (
-    <>
+    <div style={{ maxWidth: '460px', margin: 'auto' }}>
       <div className="d-flex justify-content-center mb-3">
         <img src="/images/logo.svg" alt="Logo" className="w-50" />
       </div>
@@ -58,7 +57,7 @@ function Login() {
         </div>
       )}
 
-      <div>
+      <form method="post" onSubmit={handleLogin}>
         <div className="form-floating mb-3">
           <input
             ref={usernameInputRef}
@@ -85,7 +84,7 @@ function Login() {
           <label htmlFor="password">Password</label>
         </div>
         <div className="d-flex flex-column">
-          <button type="submit" className="btn btn-primary mb-2" onClick={handleLogin}>
+          <button type="submit" className="btn btn-primary mb-2">
             Login
           </button>
           {github_login_url ? (
@@ -96,15 +95,15 @@ function Login() {
             <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>
           )}
         </div>
-      </div>
+      </form>
       <div className="d-flex justify-content-between flex-wrap">
         <div className={classes.weakText}>
-          <Link to="/accounts/find_account">계정 찾기</Link>
+          <Link to="/accounts/find-account">계정 찾기</Link>
           <span>|</span>
-          <Link to="/accounts/password_reset">비밀번호 재설정</Link>
+          <Link to="/accounts/password-reset">비밀번호 재설정</Link>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
