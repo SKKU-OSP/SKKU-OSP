@@ -228,10 +228,6 @@
   color: var(--main-selected-color);
 }
 
-.btn {
-  border-radius: 10px !important;
-}
-
 .hidden {
   visibility: hidden;
 }
