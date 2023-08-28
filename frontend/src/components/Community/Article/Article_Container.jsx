@@ -69,7 +69,9 @@ function Article_Container() {
           canView={canView}
         />
       ) : (
-        <LoaderIcon style={{ marginTop: '20px' }} />
+        <div className="col-9">
+          <LoaderIcon style={{ marginTop: '50px' }} />
+        </div>
       )}
     </>
   );
