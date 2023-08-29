@@ -105,8 +105,8 @@ function RankRepo() {
 
   return (
     <>
-      <div className="d-flex flex-column justify-content-center" style={{ maxWidth: 1000 }}>
-        <div className="d-flex justify-content-end gap-2">
+      <div className="m-auto" style={{ maxWidth: 1000 }}>
+        <div className="d-flex justify-content-end gap-2 mb-2">
           <button className="btn btn-success" onClick={onBtnExport}>
             Export CSV
           </button>
