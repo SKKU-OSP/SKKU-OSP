@@ -58,7 +58,7 @@ function TeamRecruit() {
 
   const onWrite = () => {
     if (username) {
-      navigate(`/community/${tabName}/register`);
+      navigate(`/community/board/${tabName}/register`);
     } else {
       if (confirm('로그인이 필요합니다. 로그인 화면으로 이동하시겠습니까?')) {
         navigate(`/accounts/login`);
@@ -66,24 +66,25 @@ function TeamRecruit() {
     }
   };
 
-  const hiddenWidth = isRecruitTab ? '100px' : '0';
-
   return (
     <div className="col-9">
       {!error && (
         <>
           <div className="community-nav d-flex">
-            <div style={{ width: hiddenWidth }}></div>
+            <button type="button" className="btn btn-primary hidden">
+              hidden
+            </button>
             <ul className="nav nav-fill community-nav-items">
               <CommunityNavItem navName="팀 모집" tabName={tabName} />
               <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
             </ul>
-            {isRecruitTab && (
-              <button type="button" onClick={onWrite} className="btn btn-primary" style={{ width: hiddenWidth }}>
-                작성하기
-              </button>
-            )}
-            {isTeamListTab && <div style={{ width: hiddenWidth }}></div>}
+            <button
+              type="button"
+              onClick={onWrite}
+              className={isRecruitTab ? 'btn btn-primary' : 'btn btn-primary hidden'}
+            >
+              작성하기
+            </button>
           </div>
           {isRecruitTab && articles.map((article) => <RecruitArticle key={article.id} article={article} />)}
           {isTeamListTab && teams.map((team) => <TeamOverview key={team.id} team={team} />)}
