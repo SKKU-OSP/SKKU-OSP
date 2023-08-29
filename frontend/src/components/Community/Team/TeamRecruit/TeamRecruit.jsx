@@ -18,6 +18,9 @@ function TeamRecruit() {
   const [articles, setArticles] = useState([]);
   const [error, setError] = useState(false);
 
+  const isRecruitTab = tabName === '팀 모집';
+  const isTeamListTab = tabName === '전체 팀 목록';
+
   useEffect(() => {
     const getRecruit = async () => {
       try {
@@ -44,9 +47,9 @@ function TeamRecruit() {
       }
     };
     // 존재하는 게시판인지 확인
-    if (tabName === '팀 모집') {
+    if (isRecruitTab) {
       getRecruit();
-    } else if (tabName === '전체 팀 목록') {
+    } else if (isTeamListTab) {
       getTeamList();
     } else {
       alert('존재하지 않는 게시판입니다.');
@@ -63,26 +66,27 @@ function TeamRecruit() {
     }
   };
 
+  const hiddenWidth = isRecruitTab ? '100px' : '0';
+
   return (
     <div className="col-9">
       {!error && (
         <>
           <div className="community-nav d-flex">
-            <button className="hidden">hidden</button>
+            <div style={{ width: hiddenWidth }}></div>
             <ul className="nav nav-fill community-nav-items">
               <CommunityNavItem navName="팀 모집" tabName={tabName} />
               <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
             </ul>
-            {tabName === '팀 모집' && (
-              <button type="button" onClick={onWrite} className="btn btn-primary">
+            {isRecruitTab && (
+              <button type="button" onClick={onWrite} className="btn btn-primary" style={{ width: hiddenWidth }}>
                 작성하기
               </button>
             )}
-            {tabName === '전체 팀 목록' && <button className="hidden">hidden</button>}
+            {isTeamListTab && <div style={{ width: hiddenWidth }}></div>}
           </div>
-
-          {tabName === '팀 모집' && articles.map((article) => <RecruitArticle key={article.id} article={article} />)}
-          {tabName === '전체 팀 목록' && teams.map((team) => <TeamOverview key={team.id} team={team} />)}
+          {isRecruitTab && articles.map((article) => <RecruitArticle key={article.id} article={article} />)}
+          {isTeamListTab && teams.map((team) => <TeamOverview key={team.id} team={team} />)}
         </>
       )}
       {error && <div>문제가 발생했습니다</div>}
