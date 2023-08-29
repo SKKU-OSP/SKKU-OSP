@@ -78,7 +78,11 @@ class UserRanking(APIView):
             if idx > 0 and sorted_score_by_year[idx]['score'] != sorted_score_by_year[idx - 1]['score']:
                 rank += 1
             row['rank'] = rank
-            row['username'] = student_user_relations[row['id']]
+            if row['id'] in student_user_relations:
+                row['username'] = student_user_relations[row['id']]
+            else:
+                # 계정정보는 없고(삭제되었고) 수집데이터만 존재하는 경우
+                row['username'] = None
 
         data['score_table'] = score_table_data
         data['years'] = distinct_years

@@ -9,6 +9,7 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 function MyTeamList() {
   const [myTeams, setMyTeams] = useState([]);
   const [error, setError] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
 
   useEffect(() => {
     const getMyTeamList = async () => {
@@ -26,16 +27,23 @@ function MyTeamList() {
     getMyTeamList();
   }, []);
 
+  const handleShow = () => setModalShow(true);
+  const handleClose = () => setModalShow(false);
+  const btnWidth = '100px';
+
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <button className="hidden">hidden</button>
+        <div style={{ width: btnWidth }}></div>
         <ul className="nav nav-fill community-nav-items">
           <li className="nav-item selected-nav-item">
             <div>내 팀 목록</div>
           </li>
         </ul>
-        <CreateTeamModal />
+        <button className="btn btn-primary" onClick={handleShow} style={{ width: btnWidth }}>
+          팀 만들기
+        </button>
+        <CreateTeamModal show={modalShow} onClose={handleClose} />
       </div>
 
       {myTeams && myTeams.length > 0

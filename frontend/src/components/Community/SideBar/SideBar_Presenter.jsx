@@ -34,7 +34,7 @@ export default function SideBar_Presenter(props) {
             </button>
           </div>
           <div className="sidebar-content">
-            <Link to="/community/activity/article" active>
+            <Link to="/community/activity/article">
               <div className="sidebar-activity hover-opacity">내가 작성한 글</div>
             </Link>
 

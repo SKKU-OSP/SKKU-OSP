@@ -76,7 +76,7 @@ function UserActivity() {
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <button className="hidden">hidden</button>
+        <div></div>
         <div className="nav nav-fill community-nav-items">
           {activityNames.includes(tabName) && (
             <li className="nav-item selected-nav-item">
@@ -84,7 +84,7 @@ function UserActivity() {
             </li>
           )}
         </div>
-        <button className="hidden">hidden</button>
+        <div></div>
       </div>
 
       {tabName === 'article' && articles && articles.length > 0
