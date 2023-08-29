@@ -100,8 +100,8 @@ function RankUser() {
 
   return (
     <>
-      <div className="d-flex flex-column justify-content-center" style={{ maxWidth: 1180 }}>
-        <div className="d-flex justify-content-between">
+      <div className="m-auto" style={{ maxWidth: 1180 }}>
+        <div className="d-flex justify-content-between gap-2 mb-2">
           <DropdownButton id="dropdown-basic-button" title={targetYear ? targetYear : '전체연도'}>
             {years &&
               years.map((year) => {
@@ -128,9 +128,9 @@ function RankUser() {
               전체연도
             </Dropdown.Item>
           </DropdownButton>
-          <div>
+          <div className="d-flex gap-2">
             <button className="btn btn-success" onClick={onBtnExport}>
-              Export
+              Export CSV
             </button>
             <button className="btn btn-success" onClick={clearFilters}>
               Clear Filter
