@@ -54,7 +54,7 @@ function TeamRecruit() {
     } else {
       alert('존재하지 않는 게시판입니다.');
     }
-  }, [tabName]);
+  }, [tabName, isRecruitTab, isTeamListTab]);
 
   const onWrite = () => {
     if (username) {

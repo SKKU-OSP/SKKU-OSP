@@ -1,5 +1,4 @@
 from django.db import transaction, DatabaseError
-from django.shortcuts import render, resolve_url
 from django.core.files.images import get_image_dimensions
 from team.models import Team, TeamMember, TeamTag, TeamInviteMessage, TeamApplyMessage
 from tag.models import Tag
@@ -9,10 +8,9 @@ from message.models import Message
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
 
 from user.serializers import AccountSerializer, AccountPrivacySerializer, AccountWithInterestSerializer
-from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerializer, TeamInviteMessageSerializer
+from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerializer, TeamInviteMessageSerializer, TeamApplyMessageSerializer
 
 from team.recommend import get_team_recommendation_list, get_team_recommendation
 from team.utils import *
@@ -891,7 +889,8 @@ class TeamApplyView(APIView):
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def post_validation(self, request, *args, **kwargs):
+        status, errors, valid_data = 'success', {}, {}
         user = request.user
         article_id = kwargs.get('article_id')
         if not user.is_authenticated:
@@ -928,20 +927,16 @@ class TeamApplyView(APIView):
                     errors['user_already_teammember'] = '이미 해당 팀의 멤버입니다.'
                     status = 'fail'
 
+        return status, errors, valid_data
+
     def post(self, request, *args, **kwargs):
         # Declaration
-        status = 'success'
         message = ''
         data = {}
-        errors = {}
-        valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.post_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, message, errors, valid_data = self.post_validation(
+            request, status, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -951,7 +946,6 @@ class TeamApplyView(APIView):
             return Response(res)
 
         # Transactions
-
         try:
             article_id = kwargs.get('article_id')
             account = Account.objects.get(user=request.user.id)
@@ -970,10 +964,12 @@ class TeamApplyView(APIView):
                     send_date=datetime.now(),
                 )
 
-        except DatabaseError:
+        except DatabaseError as e:
+            logging.error(f'TeamApplyView post error: {e}')
             errors['DB'] = 'DB Error'
             status = 'fail'
-        except:
+        except Exception as e:
+            logging.exception(f'TeamApplyView post exception: {e}')
             errors['undefined_exception'] = 'undefined_exception'
             status = 'fail'
 
@@ -982,6 +978,7 @@ class TeamApplyView(APIView):
             res = {'status': status, 'message': message, 'data': data}
         else:
             res = {'status': status, 'message': message, 'errors': errors}
+
         return Response(res)
 
 
@@ -1510,18 +1507,18 @@ class TeamApplicationListView(APIView):
             team_id_include_user = TeamMember.objects.filter(
                 member=user.id, is_admin=1).values_list('team_id')
 
-            team_apps_received = TeamInviteMessage.objects.filter(
+            team_apps_received = TeamApplyMessage.objects.filter(
                 team__in=team_id_include_user, status=0, direction=False)
 
-            data['received'] = TeamInviteMessageSerializer(
+            data['received'] = TeamApplyMessageSerializer(
                 team_apps_received, many=True).data
 
-            team_apps_sent = TeamInviteMessage.objects.filter(
+            team_apps_sent = TeamApplyMessage.objects.filter(
                 account__user_id=user.id,
                 direction=False,
             )
 
-            data['sent'] = TeamInviteMessageSerializer(
+            data['sent'] = TeamApplyMessageSerializer(
                 team_apps_sent, many=True).data
 
         except DatabaseError as e:
