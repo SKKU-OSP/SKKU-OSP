@@ -58,3 +58,20 @@ class TeamInviteMessageSerializer(serializers.ModelSerializer):
             "direction",
             "send_date",
         )
+
+
+class TeamApplyMessageSerializer(serializers.ModelSerializer):
+    team = TeamSerializer()
+    account = AccountSerializer()
+
+    class Meta:
+        model = models.TeamApplyMessage
+        fields = (
+            "id",
+            "team",
+            "account",
+            "message",
+            "status",
+            "direction",
+            "send_date",
+        )

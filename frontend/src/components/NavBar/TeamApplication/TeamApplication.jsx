@@ -39,8 +39,10 @@ const TeamApplication = ({ handleClose, show }) => {
         console.log(error);
       }
     };
-    getApplications();
-  }, []);
+    if (show) {
+      getApplications();
+    }
+  }, [show]);
 
   const tabContArr = [
     {

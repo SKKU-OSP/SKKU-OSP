@@ -24,8 +24,10 @@ export default function ChatMessageModal_Container({ show, onCloseChatModal }) {
         setLoading(false);
       }
     };
-    fetchChatRoom();
-  }, []);
+    if (show) {
+      fetchChatRoom();
+    }
+  }, [show]);
 
   return (
     <ChatMessageModal_Presenter
