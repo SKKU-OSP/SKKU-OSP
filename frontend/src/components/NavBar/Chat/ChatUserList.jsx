@@ -1,7 +1,4 @@
-import ReactDOM, { render } from 'react-dom';
-import Modal from 'react-bootstrap/Modal';
-import SendIcon from '@mui/icons-material/Send';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 import ChatMessageLogs from './ChatMessageLogs';
