@@ -1396,6 +1396,13 @@ class TeamsListView(APIView):
         try:
             teams = Team.objects.all()
             data['teams'] = TeamSerializer(teams, many=True).data
+            for team in data['teams']:
+                members = TeamMember.objects.filter(
+                    team_id=team['id'])
+                team['member_cnt'] = len(members)
+                leader = members.filter(is_admin=True).values_list(
+                    'member__user__username', flat=True).order_by('id').first()
+                team['leader'] = leader
 
         except DatabaseError as e:
             # Database Exception handling
@@ -1455,6 +1462,13 @@ class TeamsOfUserListView(APIView):
 
             data['teams_of_user'] = TeamSerializer(
                 teams_of_user, many=True).data
+            for team in data['teams_of_user']:
+                members = TeamMember.objects.filter(
+                    team_id=team['id'])
+                team['member_cnt'] = len(members)
+                leader = members.filter(is_admin=True).values_list(
+                    'member__user__username', flat=True).order_by('id').first()
+                team['leader'] = leader
 
         except DatabaseError as e:
             # Database Exception handling
