@@ -956,7 +956,7 @@ class UserCommentsView(APIView):
             user = request.user
             account = Account.objects.get(user=user)
             articlecomments = ArticleComment.objects.filter(writer=account)
-            data['artclecomments'] = ArticleCommentSerializer(
+            data['articlecomments'] = ArticleCommentSerializer(
                 articlecomments, many=True).data
 
         except DatabaseError as e:
