@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -13,6 +13,10 @@ const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 const SignUpForm = () => {
   const kingoCoinKey = import.meta.env.VITE_KINGOCOIN_KEY;
+
+  const location = useLocation();
+  const githubData = location.state;
+
   //AXIOS GET
   const [domains, setDomains] = useState([]);
   const [colleges, setColleges] = useState([]);
@@ -108,19 +112,21 @@ const SignUpForm = () => {
           console.log(res.message);
         }
       };
-      getData();
+      if (githubData) {
+        console.log('githubData', githubData);
+        getData();
+      } else {
+        alert('GitHub 로그인을 통해 가입해주세요');
+        navigate('/accounts/login');
+      }
     } catch (error) {
       console.log('error', error);
     }
-  }, []);
+  }, [githubData, navigate]);
 
   // Tag 저장을 위한 함수
   const handleSelectTag = (selectTags) => {
-    setSelectTags(
-      selectTags.map((tag) => {
-        return tag.value;
-      })
-    );
+    setSelectTags(selectTags.map((tag) => tag.value));
   };
 
   const handleSelectCollege = (obj) => {
@@ -469,7 +475,13 @@ const SignUpForm = () => {
           <br />
           <Form.Label className={classes.WeakText}>GitHub 계정명으로 데이터 수집에 사용됩니다.</Form.Label>
           <InputGroup className="mb-3">
-            <Form.Control id="github_id" placeholder="GitHub Username" aria-label="GitHub Username" disabled />
+            <Form.Control
+              id="github_id"
+              placeholder="GitHub Username"
+              aria-label="GitHub Username"
+              defaultValue={githubData?.github_username.value}
+              disabled={githubData?.github_username.readonly}
+            />
             <Button variant="outline-secondary" id="GitHubIdCheck" disabled>
               Check
             </Button>
@@ -487,6 +499,8 @@ const SignUpForm = () => {
               aria-label="Username"
               id="username"
               name="username"
+              defaultValue={githubData?.username.value}
+              disabled={githubData?.username.readonly}
               onChange={onChangeUsername}
             />
             <Button variant="outline-secondary" id="DuplicateCheck">
@@ -512,6 +526,7 @@ const SignUpForm = () => {
               id="password"
               name="password"
               onChange={onChangePassword}
+              autoComplete="new-password"
             />
           </Form.Group>
         </div>
@@ -529,6 +544,7 @@ const SignUpForm = () => {
               id="password_check"
               name="password_check"
               onChange={onChangeCheckPassword}
+              autoComplete="new-password"
             />
           </Form.Group>
         </div>
@@ -687,6 +703,8 @@ const SignUpForm = () => {
             id="personal_email"
             name="personal_email"
             onChange={onChangePersonalEmail}
+            defaultValue={githubData?.personal_email_id.value}
+            disabled={githubData?.personal_email_id.readonly}
           />
           <InputGroup.Text>@</InputGroup.Text>
           <Form.Control
@@ -695,8 +713,15 @@ const SignUpForm = () => {
             name="personal_email_domain"
             onChange={handleInputPersonalDomain}
             value={inputPersonalDomain}
+            defaultValue={githubData?.personal_email_domain.value}
+            disabled={githubData?.personal_email_domain.readonly}
           />
-          <Select options={domains} placeholder="직접입력" onChange={handleSelectPersonalDomain} />
+          <Select
+            options={domains}
+            placeholder="직접입력"
+            onChange={handleSelectPersonalDomain}
+            isDisabled={githubData?.personal_email_domain.readonly}
+          />
         </InputGroup>
       </div>
 
@@ -708,10 +733,22 @@ const SignUpForm = () => {
         <br />
         <Form.Label className={labelClass[labels.primary_email.status]}>{labels.primary_email.label}</Form.Label>
         <InputGroup className="mb-3">
-          <Form.Control placeholder="깃헙 Email" id="primary_email" name="primary_email" disabled />
+          <Form.Control
+            placeholder="깃헙 Email"
+            id="primary_email"
+            name="primary_email"
+            defaultValue={githubData?.github_email_id.value}
+            disabled={githubData?.github_email_id.readonly}
+          />
           <InputGroup.Text>@</InputGroup.Text>
-          <Form.Control placeholder="이메일 도메인" id="primary_email_domain" name="primary_email_domain" disabled />
-          <Select options={domains} placeholder="직접입력" isDisabled={true} />
+          <Form.Control
+            placeholder="이메일 도메인"
+            id="primary_email_domain"
+            name="primary_email_domain"
+            defaultValue={githubData?.github_email_domain.value}
+            disabled={githubData?.github_email_domain.readonly}
+          />
+          <Select options={domains} placeholder="직접입력" isDisabled={githubData?.github_email_domain.readonly} />
         </InputGroup>
       </div>
 

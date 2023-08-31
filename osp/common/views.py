@@ -63,8 +63,6 @@ class JWTLoginView(APIView):
             print("인증 실패")
             return Response(get_fail_res("인증에 실패했습니다. Username과 password를 다시 확인해주세요."))
 
-        print("user", user, type(user))
-
         if user is not None:
             # 접속일 업데이트
             login(request, user)
@@ -93,7 +91,6 @@ class JWTLoginView(APIView):
 
 class GitHubLoginView(APIView):
     def get(self, request):
-        print("GitHubLoginView")
         code = request.GET.get('code')
         if code is None:
             return Response(get_fail_res("요청에서 code를 얻지 못했습니다."))
@@ -111,56 +108,60 @@ class GitHubLoginView(APIView):
         if user_info is None:
             return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."))
 
-        account = Account.objects.filter(github_id=user_info['username'])
-        if account.exists():
-            try:
-                # 유저가 존재하면 데이터 조회하여 반환
-                user_account = account.first()
-                user = User.objects.get(id=user_account.user_id)
-                # 접속일 업데이트
-                login(request, user)
+        # account 존재하면 로그인, 없으면 회원가입
+        try:
+            account = Account.objects.filter(github_id=user_info['username'])
+            if account.exists():
+                try:
+                    # 유저가 존재하면 데이터 조회하여 반환
+                    user_account = account.first()
+                    user = User.objects.get(id=user_account.user_id)
+                    # 접속일 업데이트
+                    login(request, user)
 
-                token = RefreshToken.for_user(user)  # simple jwt로 토큰 발급
-                print("token", token)
-                print("access_token", token.access_token)
+                    token = RefreshToken.for_user(user)  # simple jwt로 토큰 발급
+                    print("access_token", token.access_token)
 
-                data = {
-                    'user': user_account.to_json(),
-                    'access_token': str(token.access_token),
-                    'refresh_token': str(token),
-                }
-                return Response({"message": "로그인 성공", "data": data}, status=status.HTTP_200_OK)
+                    data = {
+                        'user': user_account.to_json(),
+                        'access_token': str(token.access_token),
+                        'refresh_token': str(token),
+                    }
+                    return Response({"status": "success", "message": "로그인 성공", "data": data}, status=status.HTTP_200_OK)
 
-            except Exception as e:
-                logging.exception(f"[github_login_callback] user_account {e}")
-                return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    logging.exception(
+                        f"[github_login_callback] user_account {e}")
+                    return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
 
-        else:
-            data = {'github_username': None,
-                    'username': None, "github_email": None}
-            data['github_username'] = {
-                "value": user_info['username'], 'readonly': True}
-            data['username'] = {
-                "value": user_info['username'], 'readonly': False}
+            else:
+                # 회원가입 페이지에 필요한 GitHub username, username, GitHub email
+                data = {'github_username': None, 'username': None,
+                        "github_email_id": None, "github_email_domain": None,
+                        "personal_email_id": None, "personal_email_domain": None}
+                data['github_username'] = {
+                    "value": user_info['username'], 'readonly': True}
+                data['username'] = {
+                    "value": user_info['username'], 'readonly': False}
 
-            github_email_username, github_email_domail = user_info['email'].split(
-                '@')
-            data['github_email_username'] = {
-                "value": github_email_username, 'readonly': True}
-            data['github_email_domail'] = {
-                "value": github_email_domail, 'readonly': True}
+                data['github_email_id'], data['github_email_domain'] = split_email(
+                    primary_email, False)
+                data['personal_email_id'], data['personal_email_domain'] = split_email(
+                    user_info['email'], False)
 
-            context = {'type': 'sign', 'username': user_info['username'],
-                       'personal_email': user_info['email'], 'primary_email': primary_email}
-            if context['personal_email']:
-                context['personal_email_username'], context['personal_email_domain'] = context['personal_email'].split(
-                    '@')
-            if context['primary_email']:
-                context['primary_email_username'], context['primary_email_domain'] = primary_email.split(
-                    '@')
-            context["msg"] = f'SOSD에 와주셔서 감사합니다! GitHub 정보 외의 추가 정보를 입력하고 가입해주세요!'
+                return Response({"status": "success", "message": "회원가입 페이지로 이동합니다.", "data": data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logging.exception(f'Account Proccess Exception: {e}')
+            return Response(get_fail_res("계정을 확인할 수 없습니다."))
 
-            return Response({"message": "회원가입 페이지로 이동합니다.", "data": data}, status=status.HTTP_200_OK)
+
+def split_email(email, readonly=True):
+    if email and '@' in email:
+        email_id, email_domain = email.split('@')
+        return {"value": email_id, "readonly": readonly}, {"value": email_domain, "readonly": readonly}
+    elif not readonly:
+        return {"value": "", "readonly": readonly}, {"value": "", "readonly": readonly}
+    return None, None
 
 
 class SignUpView(APIView):
@@ -243,7 +244,7 @@ class SignUpView(APIView):
         secondary_email = secondary_email + "@" + \
             request.data.get('secondary_email_domain', '').strip()
         secondary_email = None if secondary_email.strip() == "@" else secondary_email
-        if not secondary_email: 
+        if not secondary_email:
             fail_reason['secondary_email'] = f'이메일이 형식에 맞지 않습니다.'
         elif len(secondary_email) > 100:
             fail_reason['secondary_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(secondary_email)} 자'
@@ -365,7 +366,7 @@ def github_login_callback(request):
         if context['primary_email']:
             context['primary_email_username'], context['primary_email_domain'] = primary_email.split(
                 '@')
-        context["msg"] = f'SOSD에 와주셔서 감사합니다! GitHub 정보 외의 추가 정보를 입력하고 가입해주세요!'
+        context["msg"] = f'SOSD에 와주셔서 감사합니다!'
         return render(request, 'common/register.html', context)
 
 
@@ -716,7 +717,10 @@ def get_user_info(access_token):
 
 
 def get_user_primary_email(access_token):
-    headers = {'Authorization': f'token {access_token}'}
+    # FIXME primary email 값 가져오지 못함
+    headers = {'Accept': 'application/vnd.github+json',
+               'Authorization': f'Bearer {access_token}',
+               'X-GitHub-Api-Version': '2022-11-28'}
     res = requests.get('https://api.github.com/user/emails', headers=headers)
     primary_email = None
 
@@ -728,7 +732,7 @@ def get_user_primary_email(access_token):
                 primary_email = email['email']
                 break
     else:
-        print("status error", res.status_code)
+        print("status error", res.status_code, res.reason, res.content)
 
     return primary_email
 
