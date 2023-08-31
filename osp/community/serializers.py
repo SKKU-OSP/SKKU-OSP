@@ -90,6 +90,7 @@ class BoardArticleSerializer(serializers.ModelSerializer):
 class ArticleCommentSerializer(serializers.ModelSerializer):
     writer = AccountSerializer()
     like_cnt = serializers.SerializerMethodField()
+    board = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ArticleComment
@@ -101,8 +102,12 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
                   "anonymous_writer",
                   "is_deleted",
                   "writer",
-                  "like_cnt"
+                  "like_cnt",
+                  "board"
                   )
 
     def get_like_cnt(self, comment):
         return comment.articlecommentlike_set.count()
+
+    def get_board(self, comment):
+        return BoardSerializer(comment.article.board).data
