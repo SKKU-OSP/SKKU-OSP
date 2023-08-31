@@ -902,7 +902,8 @@ class UserArticlesView(APIView):
             user = request.user
             account = Account.objects.get(user=user)
             user_articles = Article.objects.filter(writer=account)
-            data['user_articles'] = ArticleSerializer(
+            user_articles = get_article_metas(user_articles)
+            data['user_articles'] = BoardArticleSerializer(
                 user_articles, many=True).data
 
         except DatabaseError as e:
@@ -1007,11 +1008,12 @@ class UserScrapArticlesView(APIView):
         try:
             user = request.user
             account = Account.objects.get(user=user)
-            articlescraps = ArticleScrap.objects.filter(
+            article_scraps = ArticleScrap.objects.filter(
                 account=account).values_list('article')
-            userscraparticles = Article.objects.filter(id__in=articlescraps)
-            data['userscraparticles'] = ArticleSerializer(
-                userscraparticles, many=True).data
+            user_scrap_articles = Article.objects.filter(id__in=article_scraps)
+            user_scrap_articles = get_article_metas(user_scrap_articles)
+            data['userscraparticles'] = BoardArticleSerializer(
+                user_scrap_articles, many=True).data
         except DatabaseError as e:
             # Database Exception handling
             errors['DB_exception'] = 'DB Error'
