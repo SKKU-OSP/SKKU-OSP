@@ -16,6 +16,7 @@ export function tokenRemover() {
 
 export function getAuthConfig() {
   const token = localStorage.getItem('access_token');
+  if (token === 'null') return undefined;
   const config = {
     headers: {
       Authorization: `Bearer ${token}`

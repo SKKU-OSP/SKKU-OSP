@@ -22,7 +22,7 @@ function Article_Container() {
     const getArticle = async () => {
       try {
         const url = server_url + '/community/api/article/' + article_id;
-        const response = await axios.get(url);
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           if (res.data.board.board_type == 'Team') {
