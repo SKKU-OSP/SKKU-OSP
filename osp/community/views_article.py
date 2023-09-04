@@ -63,7 +63,17 @@ class ArticleAPIView(APIView):
                     article=article).first()
                 if teamrecruit:
                     data['team'] = TeamSerializer(teamrecruit.team).data
-            data['article'] = ArticleSerializer(article).data
+            article_data = ArticleSerializer(article).data
+            # 유저의 좋아요 여부 확인
+            like = ArticleLike.objects.filter(
+                article=article_data['id'], account__user=request.user)
+            article_data['marked_like'] = like.exists()
+            # 유저의 스크랩 여부 확인
+            scrap = ArticleScrap.objects.filter(
+                article=article_data['id'], account__user=request.user)
+            article_data['marked_scrap'] = scrap.exists()
+
+            data['article'] = article_data
 
             # 게시글 태그 정보
             try:
@@ -80,8 +90,16 @@ class ArticleAPIView(APIView):
             # 게시글 댓글 정보
             comments = ArticleComment.objects.filter(
                 article_id=article.id, is_deleted=False)
-            data['comments'] = ArticleCommentSerializer(
+            comments_data = ArticleCommentSerializer(
                 comments, many=True).data
+
+            # 유저의 댓글 좋아요 여부 확인
+            for comment in comments_data:
+                like = ArticleCommentLike.objects.filter(
+                    comment=comment['id'], account__user=request.user)
+                comment['marked_like'] = like.exists()
+
+            data['comments'] = comments_data
 
             # 게시글 파일 확인
 
@@ -492,6 +510,12 @@ class ArticleCommentsView(APIView):
 
         data['comments'] = ArticleCommentSerializer(
             comments, many=True).data
+
+        # 유저의 좋아요 여부 확인
+        for comment in data['comments']:
+            like = ArticleCommentLike.objects.filter(
+                comment=comment['id'], account__user=request.user)
+            comment['marked_like'] = like.exists()
         res['data'] = data
         return Response(res)
 
