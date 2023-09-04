@@ -64,14 +64,15 @@ class ArticleAPIView(APIView):
                 if teamrecruit:
                     data['team'] = TeamSerializer(teamrecruit.team).data
             article_data = ArticleSerializer(article).data
-            # 유저의 좋아요 여부 확인
-            like = ArticleLike.objects.filter(
-                article=article_data['id'], account__user=request.user)
-            article_data['marked_like'] = like.exists()
-            # 유저의 스크랩 여부 확인
-            scrap = ArticleScrap.objects.filter(
-                article=article_data['id'], account__user=request.user)
-            article_data['marked_scrap'] = scrap.exists()
+            if request.user.is_authenticated:
+                # 유저의 좋아요 여부 확인
+                like = ArticleLike.objects.filter(
+                    article=article_data['id'], account__user=request.user)
+                article_data['marked_like'] = like.exists()
+                # 유저의 스크랩 여부 확인
+                scrap = ArticleScrap.objects.filter(
+                    article=article_data['id'], account__user=request.user)
+                article_data['marked_scrap'] = scrap.exists()
 
             data['article'] = article_data
 
@@ -93,11 +94,12 @@ class ArticleAPIView(APIView):
             comments_data = ArticleCommentSerializer(
                 comments, many=True).data
 
-            # 유저의 댓글 좋아요 여부 확인
-            for comment in comments_data:
-                like = ArticleCommentLike.objects.filter(
-                    comment=comment['id'], account__user=request.user)
-                comment['marked_like'] = like.exists()
+            if request.user.is_authenticated:
+                # 유저의 댓글 좋아요 여부 확인
+                for comment in comments_data:
+                    like = ArticleCommentLike.objects.filter(
+                        comment=comment['id'], account__user=request.user)
+                    comment['marked_like'] = like.exists()
 
             data['comments'] = comments_data
 
