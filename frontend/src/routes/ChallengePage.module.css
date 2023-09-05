@@ -2,10 +2,15 @@
   box-sizing: border-box;
 }
 
+.ChallengeProgressTitle {
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
 .ChallengeTitle {
   max-width: 100%;
   height: 60px;
-  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
   border-radius: 0.625rem;
   font-size: 24px;
   font-weight: bold;
@@ -23,8 +28,16 @@
 }
 
 .ChallengeName {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
+  margin-top: 4px;
+}
+
+.ChallengeRate {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #9d9d9d;
 }
 
 .Progress {
@@ -66,9 +79,7 @@
   align-items: flex-start;
   padding: 2rem 3rem;
   background: #ffffff;
-  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.25);
-  border-radius: 0.625rem;
-  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #b0b0b0;
 }
 
 .ChallengeListWrapper {
@@ -85,45 +96,55 @@
 }
 
 .Achieved {
-  width: 48%;
+  width: 50%;
 }
 
 .Unachieved {
-  width: 48%;
+  width: 50%;
 }
 
 .AchievedTitle {
   text-align: center;
-  background-color: var(--main-point-color);
-  color: #ffffff;
+  color: #0066ff;
+  font-weight: 700;
+  font-size: 24px;
   padding: 1rem 1.25rem;
-  font-size: 1rem;
-  border-radius: 0.625rem;
+  border-bottom: 1px solid #b0b0b0;
   z-index: 1;
   position: relative;
 }
 
 .UnachievedTitle {
   text-align: center;
-  background-color: var(--main-point-color);
-  color: #ffffff;
+  color: #0066ff;
+  font-weight: 700;
+  font-size: 24px;
   padding: 1rem 1.25rem;
-  font-size: 1rem;
-  border-radius: 0.625rem;
+  border-bottom: 1px solid #b0b0b0;
+
   z-index: 1;
   position: relative;
 }
 
 .AchievedItem {
-  padding: 0.5rem 1rem 0.5rem 1rem;
-  border-bottom: 0.5px solid var(--main-border-color);
+  padding: 1rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #b0b0b0;
+  /* border-right: 1px solid #b0b0b0; */
   background-color: #ffffff;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .UnachievedItem {
-  padding: 0.5rem 1rem 0.5rem 1rem;
-  border-bottom: 0.5px solid var(--main-border-color);
+  padding: 1rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #b0b0b0;
   background-color: #ffffff;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .ChallengeWrapper {
@@ -131,10 +152,16 @@
   flex-direction: row;
 }
 
-.ChallengeInstruction,
+.ChallengeInstruction {
+  color: black;
+  font-size: 16px;
+  font-weight: 400;
+}
+
 .ChallengeDate {
-  color: var(--main-icon-color);
-  margin: 5px;
+  color: #0094ff;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .Tier-1 {
@@ -152,9 +179,11 @@
 .ImgName {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .NameRate {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
