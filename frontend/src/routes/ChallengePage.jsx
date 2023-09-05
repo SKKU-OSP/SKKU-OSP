@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import classes from './ChallengePage.module.css';
 import { FaTrophy } from 'react-icons/fa';
-import CreateTeamModal from '../components/Community/Team/CreateTeamModal';
+import { IoEllipseOutline } from 'react-icons/io5';
+import ApplyTeamModal from '../components/Community/Team/ApplyTeamModal';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 const ChallengePage = () => {
   const [achievements, setAchievements] = useState([]);
   const [total, setTotal] = useState(1);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     try {
@@ -17,7 +19,6 @@ const ChallengePage = () => {
       const getAchievements = async () => {
         const response = await axios.get(url);
         const res = response.data;
-        console.log(res);
         if (res.status === 'success') {
           setTotal(res.data.total_accounts);
           setAchievements(res.data.achievements);
@@ -40,17 +41,9 @@ const ChallengePage = () => {
   return (
     <>
       <div className="col-md-9">
-        <CreateTeamModal />
-        <div className={classes.ChallengeTitle}>
-          <div className={classes.ChallengeTitleContent}>챌린지</div>
-        </div>
         <div className={classes.ChallengeList}>
-          <h4>도전과제</h4>
-          <div className={classes.ChallengeListWrapper}>
-            <div className={classes.ChallengListContent}>전체 도전과제: {numAchieved}</div>
-            <div className={classes.ChallengListContent}>
-              도전과제 진행률: {numAchieved}/{totalnum}
-            </div>
+          <div className={classes.ChallengeProgressTitle}>
+            도전과제 진행률: {numAchieved}/{totalnum}
           </div>
           <div className={classes.Progress}>
             <div className={classes.ProgressBar} style={{ width: `${progressWidth}%` }}>
@@ -63,25 +56,41 @@ const ChallengePage = () => {
             <div className={classes.AchievedTitle}>달성한 도전과제</div>
             {achievements.map((prog) => {
               if (prog.acheive_date !== null) {
+                const year = prog.acheive_date.split('-')[0].substring(2, 4);
+                const month = prog.acheive_date.split('-')[1];
+                const day = prog.acheive_date.split('-')[2].split('T')[0];
+                const hour = Number(prog.acheive_date.split('-')[2].split('T')[1].split(':')[0]);
+                const minute = prog.acheive_date.split('-')[2].split('T')[1].split(':')[1];
                 return (
                   <div key={prog.id}>
-                    <div className={classes.UnachievedItem}>
-                      <div className={classes.ImgName}>
-                        <FaTrophy size="80" style={{ color: `${colorMap[prog.challenge.tier]}` }} />
-                        <div className={classes.NameRate}>
-                          <div className={classes.ChallengeName}>{prog.challenge.name}</div>
-                          <div className={classes.ChallengeRate}>
-                            {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 이 도전과제를 달성했습니다.
+                    <div className={classes.AchievedItem}>
+                      <div>
+                        <div className={classes.ImgName}>
+                          <FaTrophy size="48" style={{ color: `${colorMap[prog.challenge.tier]}` }} className="me-3" />
+                          <div className={classes.NameRate}>
+                            <div className={classes.ChallengeName}>{prog.challenge.name}</div>
+                            <div className={classes.ChallengeRate}>
+                              {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 달성
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div>
                         <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
-                        <span className={classes.ChallengeDate}>{prog.acheive_date}</span>
                       </div>
-                      <div className={classes.Progress}>
-                        <div className={classes.ProgressBar} style={{ width: `${100}%` }}>
-                          {100}%
+
+                      <div className="d-flex flex-column">
+                        {hour < 12 ? (
+                          <span className={classes.ChallengeDate}>
+                            {year}.{month}.{day} 완료
+                          </span>
+                        ) : (
+                          <span className={classes.ChallengeDate}>
+                            {year}.{month}.{day} 완료
+                          </span>
+                        )}
+                        <div className={classes.Progress}>
+                          <div className={classes.ProgressBar} style={{ width: `${100}%` }}>
+                            {100}%
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -90,6 +99,7 @@ const ChallengePage = () => {
               }
             })}
           </div>
+          <div style={{ width: '1px', backgroundColor: '#b0b0b0' }}></div>
           <div className={classes.Unachieved}>
             <div className={classes.UnachievedTitle}>진행중인 도전과제</div>
             {achievements
@@ -98,18 +108,17 @@ const ChallengePage = () => {
                 return (
                   <div key={prog.id}>
                     <div className={classes.UnachievedItem}>
-                      <div className={classes.ImgName}>
-                        <FaTrophy size="80" style={{ color: `${colorMap[prog.challenge.tier]}` }} />
-                        <div className={classes.NameRate}>
-                          <div className={classes.ChallengeName}>{prog.challenge.name}</div>
-                          <div className={classes.ChallengeRate}>
-                            {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 이 도전과제를 달성했습니다.
+                      <div>
+                        <div className={classes.ImgName}>
+                          <FaTrophy size="48" style={{ color: `${colorMap[prog.challenge.tier]}` }} className="me-3" />
+                          <div className={classes.NameRate}>
+                            <div className={classes.ChallengeName}>{prog.challenge.name}</div>
+                            <div className={classes.ChallengeRate}>
+                              {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 달성
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div>
                         <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
-                        <span className={classes.ChallengeDate}>{prog.acheive_date}</span>
                       </div>
                       <div className={classes.Progress}>
                         <div className={classes.ProgressBar} style={{ width: `${prog.achieve}%` }}>
