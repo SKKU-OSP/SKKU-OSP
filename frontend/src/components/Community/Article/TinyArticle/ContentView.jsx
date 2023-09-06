@@ -1,6 +1,6 @@
 import styles from '../Article.module.css';
 import Button from 'react-bootstrap/Button';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icons/fa';
 import axios from 'axios';
@@ -11,8 +11,15 @@ function ContentView(props) {
   const { board, tags, comments, article } = props;
   const { username } = useContext(AuthContext);
 
+  const [isLiked, setIsLiked] = useState(article.marked_like);
+  const [isScraped, setIsScraped] = useState(article.marked_scrap);
+  const [likeCnt, setLikeCnt] = useState(article.like_cnt);
+  const [scrapCnt, setScrapCnt] = useState(article.scrap_cnt);
+
   const domain_url = import.meta.env.VITE_SERVER_URL;
   const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
+  const like_url = `${domain_url}/community/api/article/${article.id}/like/`;
+  const scrap_url = `${domain_url}/community/api/article/${article.id}/scrap/`;
 
   const dateObject = new Date(article.pub_date);
   const pub_date1 = dateObject.toISOString().slice(0, 10);
@@ -50,6 +57,46 @@ function ContentView(props) {
       } catch (error) {
         console.log('error', error);
       }
+    }
+  };
+
+  const onLike = async () => {
+    try {
+      const response = await axios.post(like_url, { article_id: article.id }, getAuthConfig());
+      const res = response.data;
+      if (res.status === 'fail') {
+        alert(res.message);
+      } else {
+        if (res.message == '추천 취소') {
+          setIsLiked(false);
+          setLikeCnt(likeCnt - 1);
+        } else {
+          setIsLiked(true);
+          setLikeCnt(likeCnt + 1);
+        }
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const onScrap = async () => {
+    try {
+      const response = await axios.post(scrap_url, { article_id: article.id }, getAuthConfig());
+      const res = response.data;
+      if (res.status === 'fail') {
+        alert(res.message);
+      } else {
+        if (res.message == '스크랩 취소') {
+          setIsScraped(false);
+          setScrapCnt(scrapCnt - 1);
+        } else {
+          setIsScraped(true);
+          setScrapCnt(scrapCnt + 1);
+        }
+      }
+    } catch (error) {
+      console.log('error', error);
     }
   };
 
@@ -104,10 +151,14 @@ function ContentView(props) {
           </div>
           <div>
             <div className="d-flex align-items-center gap-1">
-              <FaRegThumbsUp />
-              <span className={styles.articleInfo}>{article.like_cnt} </span>
-              <FaRegBookmark />
-              <span className={styles.articleInfo}>{article.scrap_cnt}</span>
+              <span id="like-icon" onClick={onLike} style={{ cursor: 'pointer' }}>
+                {isLiked ? <FaThumbsUp /> : <FaRegThumbsUp />}
+              </span>
+              <span className={styles.articleInfo}>{likeCnt} </span>
+              <span id="scrap-icon" onClick={onScrap} style={{ cursor: 'pointer' }}>
+                {isScraped ? <FaBookmark /> : <FaRegBookmark />}
+              </span>
+              <span className={styles.articleInfo}>{scrapCnt}</span>
             </div>
           </div>
         </div>
