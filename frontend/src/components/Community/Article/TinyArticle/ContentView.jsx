@@ -161,7 +161,7 @@ function ContentView(props) {
           <div>
             <img
               src={`${domain_url}${team.image}`}
-              style={{ borderRadius: '50p%', width: '100px', height: '100px' }}
+              style={{ borderRadius: '50%', width: '100px', height: '100px' }}
             ></img>
           </div>
           <div>
