@@ -67,13 +67,8 @@ function ContentView(props) {
       if (res.status === 'fail') {
         alert(res.message);
       } else {
-        if (res.message == '추천 취소') {
-          setIsLiked(false);
-          setLikeCnt(likeCnt - 1);
-        } else {
-          setIsLiked(true);
-          setLikeCnt(likeCnt + 1);
-        }
+        setIsLiked(res.data.marked_like);
+        setLikeCnt(res.data.like_cnt);
       }
     } catch (error) {
       console.log('error', error);
@@ -87,13 +82,8 @@ function ContentView(props) {
       if (res.status === 'fail') {
         alert(res.message);
       } else {
-        if (res.message == '스크랩 취소') {
-          setIsScraped(false);
-          setScrapCnt(scrapCnt - 1);
-        } else {
-          setIsScraped(true);
-          setScrapCnt(scrapCnt + 1);
-        }
+        setIsScraped(res.data.marked_scrap);
+        setScrapCnt(res.data.scrap_cnt);
       }
     } catch (error) {
       console.log('error', error);
