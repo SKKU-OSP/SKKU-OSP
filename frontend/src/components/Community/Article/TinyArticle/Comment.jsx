@@ -5,7 +5,7 @@ import CommentItem from './CommentItem';
 
 function Comment(props) {
   const comments = props.comments;
-  const article = props.article;
+
   return (
     <div className={styles.commentContainer}>
       <div className="d-flex align-items-center m-2 gap-2">

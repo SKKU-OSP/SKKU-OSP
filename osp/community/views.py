@@ -819,6 +819,7 @@ class ArticleView(TemplateView):
 
         context["need_login"] = False
         context["need_member"] = False
+
         if context['board'].board_type == 'Team':
             if not request.user.is_authenticated:
                 context["need_login"] = True

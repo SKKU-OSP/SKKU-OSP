@@ -8,8 +8,10 @@ import AuthContext from '../../../../utils/auth-context';
 import { getAuthConfig } from '../../../../utils/auth';
 
 function ContentView(props) {
-  const { board, tags, comments, article } = props;
+  const { data } = props;
+  const { board, tags, comments, article, team } = data;
   const { username } = useContext(AuthContext);
+  console.log(team);
 
   const [isLiked, setIsLiked] = useState(article.marked_like);
   const [isScraped, setIsScraped] = useState(article.marked_scrap);
@@ -153,6 +155,42 @@ function ContentView(props) {
           </div>
         </div>
       </div>
+
+      {article.board.board_type == 'Recruit' && (
+        <div className={styles.articleTeam}>
+          <div>
+            <img src={`${domain_url}${team.image}`}></img>
+          </div>
+          <div>
+            <div className="article-info-name">{team.name}</div>
+            <div className="desc-break">{team.description}</div>
+          </div>
+          <div>
+            <div>
+              <div className="article-info-name">모집 기간</div>
+              <div>시작: {team.create_date}</div>
+              <div>마감: {team.create_date}</div>
+            </div>
+          </div>
+          {
+            // 현재 < 시작
+            team.create_date < team.create_date ? (
+              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                모집 전
+              </button>
+            ) : // 현재 < 마감
+            team.create_date < team.create_date ? (
+              <button type="button" className="btn btn-outline-primary">
+                지원하기
+              </button>
+            ) : (
+              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                모집 마감
+              </button>
+            )
+          }
+        </div>
+      )}
     </div>
   );
 }

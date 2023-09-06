@@ -14,7 +14,17 @@
   color: var(--main-selected-color);
 }
 
-.articleBody {
+.articleTeam > div {
+  max-width: 50%;
+}
+
+.articleTeam {
+  justify-content: space-between;
+  flex-direction: row !important;
+}
+
+.articleBody,
+.articleTeam {
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid var(--main-border-color);

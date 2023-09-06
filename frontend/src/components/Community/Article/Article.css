@@ -941,8 +941,7 @@
 }
 
 .desc-break {
-  word-wrap: break-word;
-  word-break: break-word;
+  word-break: break-all;
 }
 
 /* admin이 아닌 팀원의 아이콘 색을 연하게 설정 */
