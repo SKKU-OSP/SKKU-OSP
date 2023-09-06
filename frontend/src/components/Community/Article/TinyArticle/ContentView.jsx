@@ -159,11 +159,14 @@ function ContentView(props) {
       {article.board.board_type == 'Recruit' && (
         <div className={styles.articleTeam}>
           <div>
-            <img src={`${domain_url}${team.image}`}></img>
+            <img
+              src={`${domain_url}${team.image}`}
+              style={{ borderRadius: '50p%', width: '100px', height: '100px' }}
+            ></img>
           </div>
           <div>
             <div className="article-info-name">{team.name}</div>
-            <div className="desc-break">{team.description}</div>
+            <div style={{ wordWrap: 'break-word' }}>{team.description}</div>
           </div>
           <div>
             <div>
