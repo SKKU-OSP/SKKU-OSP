@@ -9,10 +9,7 @@ import { getAuthConfig } from '../../../utils/auth';
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function Article_Container() {
-  const [article, setArticle] = useState();
-  const [tags, setTags] = useState([]);
-  const [comments, setComments] = useState([]);
-  const [board, setBoard] = useState();
+  const [data, setData] = useState(null);
   const [canView, setCanView] = useState(false);
   const [error, setError] = useState(false);
   const { article_id } = useParams();
@@ -44,10 +41,7 @@ function Article_Container() {
           } else {
             setCanView(true);
           }
-          setArticle(res.data.article);
-          setTags(res.data.tags);
-          setComments(res.data.comments);
-          setBoard(res.data.board);
+          setData(res.data);
         }
       } catch (error) {
         console.log(error);
@@ -59,15 +53,8 @@ function Article_Container() {
 
   return (
     <>
-      {article && board ? (
-        <Article_Presenter
-          username={username}
-          article={article}
-          tags={tags}
-          comments={comments}
-          board={board}
-          canView={canView}
-        />
+      {data ? (
+        <Article_Presenter username={username} data={data} canView={canView} />
       ) : (
         <div className="col-9">
           <LoaderIcon style={{ marginTop: '50px' }} />
