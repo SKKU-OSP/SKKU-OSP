@@ -440,24 +440,24 @@ class ArticleLikeView(APIView):
 
         try:
             article = Article.objects.get(id=article_id)
-            print("article", article)
             account = Account.objects.get(user=request.user)
-            print("account", account)
-
-            article_like, created = ArticleLike.objects.get_or_create(
-                article=article, account=account)
-            print("article_like", article_like, "created", created)
 
             if article.writer.user_id == request.user.id:
                 # 작성자가 추천한 경우
                 res['message'] = "자신의 게시글은 추천할 수 없습니다."
                 return Response(res)
+
+            article_like, created = ArticleLike.objects.get_or_create(article=article, account=account)
+
             if not created:
                 # 이미 추천한 게시글인 경우
                 article_like.delete()
                 res['message'] = "추천 취소"
+
             like_cnt = len(ArticleLike.objects.filter(article=article))
+            data['marked_like'] = created
             data['like_cnt'] = like_cnt
+
             res['data'] = data
             res['status'] = 'success'
             return Response(res)
@@ -490,8 +490,12 @@ class ArticleScrapView(APIView):
             # 이미 스크랩한 게시글인 경우
             article_scrap.delete()
             res['message'] = "스크랩 취소"
+        
+
         scrap_cnt = len(ArticleScrap.objects.filter(article=article))
+        data['marked_scrap'] = created
         data['scrap_cnt'] = scrap_cnt
+
         res['data'] = data
         res['status'] = 'success'
         return Response(res)
