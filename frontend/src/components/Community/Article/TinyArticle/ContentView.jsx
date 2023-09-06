@@ -32,6 +32,10 @@ function ContentView(props) {
 
   const navigate = useNavigate();
 
+  const now = new Date();
+  const recruit_start_date = new Date(article.period_start);
+  const recruit_end_date = new Date(article.period_end);
+
   const backToBoard = (board) => {
     if (board.board_type === 'Recruit') {
       navigate('/community/recruit/' + board.name);
@@ -171,27 +175,23 @@ function ContentView(props) {
           <div>
             <div>
               <div className="article-info-name">모집 기간</div>
-              <div>시작: {team.create_date}</div>
-              <div>마감: {team.create_date}</div>
+              <div>시작: {recruit_start_date.toLocaleString()}</div>
+              <div>마감: {recruit_end_date.toLocaleString()}</div>
             </div>
           </div>
-          {
-            // 현재 < 시작
-            team.create_date < team.create_date ? (
-              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                모집 전
-              </button>
-            ) : // 현재 < 마감
-            team.create_date < team.create_date ? (
-              <button type="button" className="btn btn-outline-primary">
-                지원하기
-              </button>
-            ) : (
-              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                모집 마감
-              </button>
-            )
-          }
+          {now < recruit_start_date ? (
+            <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+              모집 전
+            </button>
+          ) : now < recruit_end_date ? (
+            <button type="button" className="btn btn-outline-primary">
+              지원하기
+            </button>
+          ) : (
+            <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+              모집 마감
+            </button>
+          )}
         </div>
       )}
     </div>
