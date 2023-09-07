@@ -4,7 +4,7 @@ import ContentView from './TinyArticle/ContentView';
 import Comment from './TinyArticle/Comment';
 
 function Article_Presenter(props) {
-  const { username, data, canView } = props;
+  const { username, data, canView, setData } = props;
 
   return (
     <div className="col-9">
@@ -19,7 +19,7 @@ function Article_Presenter(props) {
           </div>
           {username && (
             <div id="comment-content">
-              <Comment comments={data.comments} />
+              <Comment data={data} setData={setData} username={username} />
             </div>
           )}
         </>
