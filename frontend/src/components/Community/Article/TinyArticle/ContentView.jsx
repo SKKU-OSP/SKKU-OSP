@@ -130,32 +130,30 @@ function ContentView(props) {
             <span className={styles.articleInfo}>{pub_date2}</span>
           </div>
         </div>
-        <div className={`${styles.articleContent}`}>
+        <div className={styles.articleContent}>
           <span dangerouslySetInnerHTML={{ __html: article.body }} className={styles.articleInfo}></span>
         </div>
         <div className="d-flex gap-1">
           {tags.map((tag) => (
-            <span className={`${styles.articleInfo}`} style={{ fontWeight: '600' }} key={tag.name}>
+            <span className={styles.articleInfo} style={{ fontWeight: '600' }} key={tag.name}>
               #{tag.name}
             </span>
           ))}
         </div>
-        <div className="d-flex justify-content-between">
+        <div className={styles.articleBottom}>
           <div>
             <span className={styles.articleInfo}>조회수 {article.view_cnt} </span>
             <span className={styles.articleInfo}>댓글 {comments.length}</span>
           </div>
-          <div>
-            <div className="d-flex align-items-center gap-1">
-              <span id="like-icon" onClick={onLike} style={{ cursor: 'pointer' }}>
-                {isLiked ? <FaThumbsUp /> : <FaRegThumbsUp />}
-              </span>
-              <span className={styles.articleInfo}>{likeCnt} </span>
-              <span id="scrap-icon" onClick={onScrap} style={{ cursor: 'pointer' }}>
-                {isScraped ? <FaBookmark /> : <FaRegBookmark />}
-              </span>
-              <span className={styles.articleInfo}>{scrapCnt}</span>
-            </div>
+          <div className="d-flex gap-1">
+            <span id="like-icon" onClick={onLike} style={{ cursor: 'pointer' }}>
+              {isLiked ? <FaThumbsUp /> : <FaRegThumbsUp />}
+            </span>
+            <span>{likeCnt} </span>
+            <span id="scrap-icon" onClick={onScrap} style={{ cursor: 'pointer' }}>
+              {isScraped ? <FaBookmark /> : <FaRegBookmark />}
+            </span>
+            <span>{scrapCnt}</span>
           </div>
         </div>
       </div>

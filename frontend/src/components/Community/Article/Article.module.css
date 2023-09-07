@@ -32,27 +32,33 @@
   border-right: 1px solid var(--main-border-color);
   border-left: 1px solid var(--main-border-color);
   margin-left: -1px;
-  padding: 20px;
+  padding: 30px 20px 20px 20px;
 }
 
 .articleTitle {
   font-family: Inter;
-  font-size: 30px;
-  font-weight: 00;
+  font-size: 24px;
+  font-weight: bold;
   text-align: left;
   color: black;
 }
 
 .articleContent {
   min-height: 300px;
-  margin: 20px 0;
+  padding: 20px 0;
 }
 
-.artcleInfo {
+.articleInfo {
   font-family: Inter;
   font-weight: 500;
   line-height: 24px;
   text-align: left;
+}
+
+.articleBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .commentContainer {
@@ -64,15 +70,28 @@
   margin-left: -1px;
 }
 
+.commentInput {
+  padding: 20px 20px;
+}
+
 .comment {
   border-top: 1px solid var(--main-border-color);
+  padding: 10px 20px;
 }
 
 .commentContent {
   font-family: Inter;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
   line-height: 24px;
   text-align: right;
   color: #454545;
+}
+
+.commentLine1 {
+  padding: 10px 0px 0px 0px;
+}
+
+.commentLine2 {
+  padding: 10px 0px;
 }

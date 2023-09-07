@@ -16,19 +16,23 @@ function Comment(props) {
   const post_url = server_url + '/community/api/comment/create/';
 
   const postComment = async () => {
-    const response = await axios.post(
-      post_url,
-      { article_id: data.article.id, content: comment, anonymous_writer: isAnonymous },
-      getAuthConfig()
-    );
-    setData({ ...data, comments: [...data.comments, response.data.data.comment] });
-    setComment('');
-    setIsAnonymous(false);
+    if (comment !== '') {
+      const response = await axios.post(
+        post_url,
+        { article_id: data.article.id, content: comment, anonymous_writer: isAnonymous },
+        getAuthConfig()
+      );
+      setData({ ...data, comments: [...data.comments, response.data.data.comment] });
+      setComment('');
+      setIsAnonymous(false);
+    } else {
+      alert('댓글을 입력하세요');
+    }
   };
 
   return (
     <div className={styles.commentContainer}>
-      <div className="d-flex align-items-center justify-content-between m-2">
+      <div className={`${styles.commentInput} d-flex align-items-center justify-content-between`}>
         <Form.Check
           type="checkbox"
           label="익명"

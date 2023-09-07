@@ -1116,3 +1116,7 @@
   display: block;
   max-width: 200px;
 }
+
+.commentUserDrop button {
+  padding: 0px;
+}
