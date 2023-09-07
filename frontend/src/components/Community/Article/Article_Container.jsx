@@ -54,7 +54,7 @@ function Article_Container() {
   return (
     <>
       {data ? (
-        <Article_Presenter username={username} data={data} canView={canView} />
+        <Article_Presenter data={data} canView={canView} setData={setData} username={username} />
       ) : (
         <div className="col-9">
           <LoaderIcon style={{ marginTop: '50px' }} />
