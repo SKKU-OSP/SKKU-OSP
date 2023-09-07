@@ -27,6 +27,8 @@ function CommentItem(props) {
     if (res.status === 'success') {
       setLikeCnt(res.data.like_cnt);
       setIsLiked(!isLiked);
+    } else {
+      alert(res.message);
     }
   };
 
@@ -41,34 +43,34 @@ function CommentItem(props) {
 
   return (
     <div className={styles.comment}>
-      <div className="d-flex justify-content-between align-items-end m-2">
-        <span className={`${styles.commentContent} d-flex align-items-center`}>
+      <div className={`${styles.commentLine1} d-flex justify-content-between align-items-end`}>
+        <div className={`${styles.commentContent} d-flex align-items-center`}>
           {comment.anonymous_writer ? (
-            <>익명</>
+            <span style={{ paddingRight: '10px' }}>익명</span>
           ) : (
-            <div>
+            <div className="commentUserDrop">
               <DropdownButton
                 title={comment.writer.user.username}
                 variant="link"
-                style={{ marginTop: '10px', textDecoration: 'none' }}
+                style={{ paddingRight: '10px', textDecoration: 'none' }}
               >
                 <Dropdown.Item onClick={() => onMyProfile(comment.writer.user.username)}>프로필</Dropdown.Item>
                 <Dropdown.Item>메세지</Dropdown.Item>
               </DropdownButton>
             </div>
-          )}{' '}
+          )}
           {comment.writer.user.username === username && (
-            <span style={{ cursor: 'pointer' }} onClick={() => deleteComment()}>
+            <span style={{ cursor: 'pointer', color: 'grey' }} onClick={() => deleteComment()}>
               삭제
             </span>
           )}
-        </span>
+        </div>
         <div>
           <span className={styles.commentContent}>{pub_date1} </span>
           <span className={styles.commentContent}>{pub_date2}</span>
         </div>
       </div>
-      <div className="d-flex justify-content-between align-items-center m-2">
+      <div className={`${styles.commentLine2} d-flex justify-content-between align-items-center`}>
         <span className={styles.commentContent}>{comment.body} </span>
         <div className="d-flex align-items-center gap-1">
           {isLiked ? (
