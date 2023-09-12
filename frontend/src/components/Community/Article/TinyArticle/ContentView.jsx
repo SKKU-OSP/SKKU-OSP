@@ -1,10 +1,11 @@
 import styles from '../Article.module.css';
 import Button from 'react-bootstrap/Button';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icons/fa';
 import axios from 'axios';
 import AuthContext from '../../../../utils/auth-context';
+import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
 
 function ContentView(props) {
@@ -17,6 +18,7 @@ function ContentView(props) {
   const [isScraped, setIsScraped] = useState(article.marked_scrap);
   const [likeCnt, setLikeCnt] = useState(article.like_cnt);
   const [scrapCnt, setScrapCnt] = useState(article.scrap_cnt);
+  const [show, setShow] = useState(false);
 
   const domain_url = import.meta.env.VITE_SERVER_URL;
   const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
@@ -182,9 +184,20 @@ function ContentView(props) {
               모집 전
             </button>
           ) : now < recruit_end_date ? (
-            <button type="button" className="btn btn-outline-primary">
-              지원하기
-            </button>
+            <>
+              <button type="button" className="btn btn-outline-primary" onClick={() => setShow(true)}>
+                지원하기
+              </button>
+              {/* () => openApplyModal(team.name, team.description, username, show, setShow, article.id) */}
+              <ApplyTeamModal
+                teamName={team.name}
+                teamDesc={team.description}
+                username={username}
+                show={show}
+                onShowTeamApplyModal={setShow}
+                articleId={article.id}
+              />
+            </>
           ) : (
             <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
               모집 마감
