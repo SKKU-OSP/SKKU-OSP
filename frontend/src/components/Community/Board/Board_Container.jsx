@@ -36,21 +36,23 @@ export default function Board_Container() {
         setArticles(res.data.articles);
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);
+        setNowPage(page);
       } else {
         alert('해당 게시판이 존재하지 않습니다.');
       }
     } catch (error) {
       setError(true);
+      setIsLoadedArticles(true);
+      setArticles([]);
     }
   };
 
   const onPageChange = (page) => {
-    setNowPage(page);
     getArticles(page);
   };
 
   useEffect(() => {
-    getArticles(nowPage);
+    getArticles(1);
   }, [tabName]);
 
   return (
@@ -61,7 +63,6 @@ export default function Board_Container() {
       tabName={tabName}
       maxPageNumber={maxPageNumber}
       nowPage={nowPage}
-      setNowPage={setNowPage}
       onPageChange={onPageChange}
     />
   );

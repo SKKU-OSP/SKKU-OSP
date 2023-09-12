@@ -21,6 +21,8 @@ export function getAuthConfig() {
   const token = localStorage.getItem('access_token');
 
   if (!token) return undefined;
+  const duration = getTokenDuration();
+  if (!duration || duration < 0) return undefined;
 
   const config = {
     headers: {
