@@ -29,3 +29,37 @@
   display: inline-block;
   margin-right: 15px;
 }
+
+#PeriodPickerStart .form-control {
+  display: flex;
+  width: 200px;
+  height: 35px;
+  padding: 10px 0px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+#PeriodPickerEnd .form-control {
+  display: flex;
+  width: 200px;
+  height: 35px;
+  padding: 10px 0px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+.select-team {
+  z-index: 200;
+}

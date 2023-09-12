@@ -252,8 +252,10 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     // TODO 팀 게시판의 경우를 고려해서 navigate(`/community/team/${boardName}/`) 을 사용해야함
     if (boardName === '팀 모집') {
       navigate(`/community/recruit/${boardName}/`);
-    } else {
+    } else if (boardName === '자유' || boardName === '정보' || boardName === '질문' || boardName === '홍보') {
       navigate(`/community/board/${boardName}/`);
+    } else {
+      navigate(`/community/team/${boardName}/`);
     }
   };
 

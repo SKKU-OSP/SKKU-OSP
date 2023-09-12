@@ -3,11 +3,14 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import UserArticle from './UserArticle';
+import UserComment from './UserComment';
+import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function UserActivity() {
   const { tabName } = useParams();
+  const [isLoadedArticles, setIsLoadedArticles] = useState(false);
   const [articles, setArticles] = useState([]);
   const [comments, setComments] = useState([]);
   const [scraps, setScraps] = useState([]);
@@ -29,6 +32,9 @@ function UserActivity() {
             (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
           );
           setArticles(sortedArticles);
+          setIsLoadedArticles(true);
+        } else {
+          alert('해당 게시판이 존재하지 않습니다.');
         }
       } catch (error) {
         setError(true);
@@ -39,7 +45,13 @@ function UserActivity() {
         const responseComments = await axios.get(server_url + `/community/api/user-comments/`, getAuthConfig());
         const resComments = responseComments.data;
         if (resComments.status === 'success') {
-          setComments(resComments.data.artclecomments);
+          const sortedComments = resComments.data.artclecomments.sort(
+            (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
+          );
+          setComments(sortedComments);
+          setIsLoadedArticles(true);
+        } else {
+          alert('해당 게시판이 존재하지 않습니다.');
         }
       } catch (error) {
         setError(true);
@@ -54,6 +66,9 @@ function UserActivity() {
             (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
           );
           setScraps(sortedScraps);
+          setIsLoadedArticles(true);
+        } else {
+          alert('해당 게시판이 존재하지 않습니다.');
         }
       } catch (error) {
         setError(true);
@@ -75,11 +90,11 @@ function UserActivity() {
 
   return (
     <div className="col-9">
-      <div className="community-nav d-flex">
+      <div className="community-team-nav d-flex">
         <div></div>
-        <div className="nav nav-fill community-nav-items">
+        <div className="nav nav-fill community-team-nav-items">
           {activityNames.includes(tabName) && (
-            <li className="nav-item selected-nav-item">
+            <li className="community-team-nav-items">
               <div>{activityNavMap[tabName]}</div>
             </li>
           )}
@@ -87,15 +102,21 @@ function UserActivity() {
         <div></div>
       </div>
 
-      {tabName === 'article' && articles && articles.length > 0
-        ? articles.map((a) => <UserArticle key={a.id} article={a} />)
-        : null}
-      {tabName === 'comment' && comments && comments.length > 0
-        ? comments.map((a) => <UserArticle key={a.id} article={a} />)
-        : null}
-      {tabName === 'scrap' && scraps && scraps.length > 0
-        ? scraps.map((a) => <UserArticle key={a.id} article={a} />)
-        : null}
+      {isLoadedArticles ? (
+        <>
+          {tabName === 'article' && articles && articles.length > 0
+            ? articles.map((a) => <UserArticle key={a.id} article={a} />)
+            : null}
+          {tabName === 'comment' && comments && comments.length > 0
+            ? comments.map((a) => <UserComment key={a.id} article={a} />)
+            : null}
+          {tabName === 'scrap' && scraps && scraps.length > 0
+            ? scraps.map((a) => <UserArticle key={a.id} article={a} />)
+            : null}
+        </>
+      ) : (
+        <LoaderIcon style={{ marginTop: '20px' }} />
+      )}
     </div>
   );
 }
