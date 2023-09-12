@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SideBar_Presenter from './SideBar_Presenter';
 import AuthContext from '../../../utils/auth-context';
+import { tokenRemover } from '../../../utils/auth';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
 const logout_url = `${domain_url}/accounts/logout/`;
@@ -18,10 +19,7 @@ export default function SideBar_Container() {
     try {
       const response = await axios.get(logout_url);
       const res = response.data;
-
-      localStorage.setItem('access_token', null);
-      localStorage.setItem('refresh_token', null);
-
+      tokenRemover();
       unsetUser();
       navigate('/accounts/login');
     } catch (error) {

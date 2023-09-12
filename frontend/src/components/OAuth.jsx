@@ -4,6 +4,7 @@ import LoaderIcon from 'react-loader-icon';
 
 import axios from 'axios';
 import AuthContext from '../utils/auth-context';
+import { setExpiration } from '../utils/auth';
 
 function OAuth() {
   const location = useLocation();
@@ -29,6 +30,7 @@ function OAuth() {
               console.log(res.message);
               localStorage.setItem('access_token', res.data.access_token);
               localStorage.setItem('refresh_token', res.data.refresh_token);
+              setExpiration(); // 로컬스토리지에 expiration 저장
               setUser();
               navigate('/community');
             } else {

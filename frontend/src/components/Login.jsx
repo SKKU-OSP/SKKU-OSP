@@ -1,10 +1,11 @@
 import { useContext, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BsGithub } from 'react-icons/bs';
-import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 import classes from './Login.module.css';
-import axios from 'axios';
 import AuthContext from '../utils/auth-context';
+import { setExpiration } from '../utils/auth';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
 const github_login_url = `oauth/authorize?client_id=${client_id}`;
@@ -12,7 +13,8 @@ const domain_url = import.meta.env.VITE_SERVER_URL;
 const login_url = `${domain_url}/accounts/login/user/`;
 
 function Login() {
-  const [error, setError] = useState(false);
+  const location = useLocation();
+  const [error, setError] = useState(location.state?.error);
   const navigate = useNavigate();
   const usernameInputRef = useRef();
   const passwordInputRef = useRef();
@@ -28,6 +30,7 @@ function Login() {
 
       localStorage.setItem('access_token', res.data.access_token);
       localStorage.setItem('refresh_token', res.data.refresh_token);
+      setExpiration(); // 로컬스토리지에 expiration 저장
       setUser();
       navigate('/community');
     } catch (error) {
