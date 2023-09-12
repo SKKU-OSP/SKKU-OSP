@@ -15,7 +15,6 @@ const ApplyTeamModal = (props) => {
   const onChangeCheckBox = () => {
     checkBox === 0 ? setCheckBox(1) : setCheckBox(0);
   };
-
   //AXIOS POST
   const sendApplyTeam = async () => {
     console.log(message);
@@ -46,6 +45,7 @@ const ApplyTeamModal = (props) => {
   };
 
   const handleClose = () => onShowTeamApplyModal(false);
+  const handleOpen = () => onShowTeamApplyModal(true);
 
   const onChangeMessage = (e) => {
     const value = e.target.value;
@@ -54,42 +54,44 @@ const ApplyTeamModal = (props) => {
   };
 
   return (
-    <Form>
-      <Modal size="lg" show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <h5>지원하기</h5>
-          </Modal.Title>
-        </Modal.Header>
+    <>
+      <Form>
+        <Modal size="lg" show={show} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <h5>지원하기</h5>
+            </Modal.Title>
+          </Modal.Header>
 
-        <Modal.Body>
-          <div className="mb-2">지원하는 팀: {teamName}</div>
-          <div className="mb-2">{teamDesc}</div>
-          <div className="mb-2">지원자 정보: {username}</div>
+          <Modal.Body>
+            <div className="mb-2">지원하는 팀: {teamName}</div>
+            <div className="mb-2">{teamDesc}</div>
+            <div className="mb-2">지원자 정보: {username}</div>
 
-          <Form.Group className="mb-3" controlId="InviteMessage">
-            <Form.Label>지원 동기</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              style={{ display: 'block' }}
-              placeholder="지원 동기를 작성해주세요."
-              onChange={onChangeMessage}
-            />
-          </Form.Group>
-          <div className="mb-2 d-flex flex-row">
-            <div className="me-1">지원 시 지원한 팀의 사용자 프로필 열람에 동의합니다.</div>
-            <input type="checkbox" onChange={onChangeCheckBox} />
-          </div>
-        </Modal.Body>
+            <Form.Group className="mb-3" controlId="InviteMessage">
+              <Form.Label>지원 동기</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                style={{ display: 'block' }}
+                placeholder="지원 동기를 작성해주세요."
+                onChange={onChangeMessage}
+              />
+            </Form.Group>
+            <div className="mb-2 d-flex flex-row">
+              <div className="me-1">지원 시 지원한 팀의 사용자 프로필 열람에 동의합니다.</div>
+              <input type="checkbox" onChange={onChangeCheckBox} />
+            </div>
+          </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="outline-dark" onClick={handleSubmit} type="submit">
-            지원하기
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Form>
+          <Modal.Footer>
+            <Button variant="outline-dark" onClick={handleSubmit} type="submit">
+              지원하기
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </Form>
+    </>
   );
 };
 
