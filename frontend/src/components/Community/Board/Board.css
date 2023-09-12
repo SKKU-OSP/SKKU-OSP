@@ -24,70 +24,6 @@
   align-items: center;
 }
 
-#community-title {
-  font-size: 30px;
-}
-
-#community-title > a {
-  width: 150px;
-  color: #06f;
-  text-align: center;
-  font-family: Inter;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  text-decoration: none;
-}
-
-#community-others {
-  font-size: 30px;
-}
-
-#community-others > a {
-  width: 150px;
-  color: #454545;
-  text-align: center;
-  font-family: Inter;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-  text-decoration: none;
-}
-
-#btn-content-edit {
-  display: flex;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 10px;
-  background: #06f;
-  color: #fff;
-  text-align: center;
-  font-family: Inter;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  letter-spacing: -1px;
-}
-
-#btn-content-back {
-  display: flex;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 10px;
-  background: #b0b0b0;
-  color: #fff;
-  text-align: center;
-  font-family: Inter;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  letter-spacing: -1px;
-}
-
 .board-article {
   width: 100%;
   padding: 20px;
@@ -96,20 +32,52 @@
   margin-left: -1px;
 }
 
-.board-article-title {
+.board-article-title,
+.board-team-title {
   color: var(--main-black);
   text-decoration: none;
   margin: 15px 0;
+  font-weight: 600;
+}
+
+.dropdown-button .dropdown-toggle {
+  display: inline;
+  text-decoration: none;
+  color: #000000;
+  padding-left: 3px;
+}
+
+.dropdown-button .dropdown-toggle::after {
+  display: none;
 }
 
 .board-article-title:hover,
-.board-article-writer:hover {
+.dropdown-button .dropdown-toggle:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.board-article-meta-type {
+  float: right;
+  color: #454545;
+  text-align: right;
+  font-family: Inter;
+  font-weight: 500;
+  margin-left: 7px;
+  margin-bottom: 3px;
+}
+
+.board-article-meta-type:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
 .board-article-meta-list {
   float: right;
+  color: #454545;
+  text-align: right;
+  font-family: Inter;
+  font-weight: 500;
 }
 
 .board-article-meta {
@@ -119,6 +87,99 @@
 
 .inline {
   display: inline;
+  align-items: center;
+  word-break: break-word;
+  white-space: pre-line;
+  color: #454545;
+  font-family: Inter;
+  flex-grow: 1;
+}
+
+.community-team-nav {
+  background-color: var(--main-white);
+  padding: 0 20px 0 20px;
+  border-right: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
+  height: 50px;
+  line-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 85px;
+  z-index: 500;
+}
+
+.community-team-nav-items {
+  justify-content: center;
+}
+
+.community-team-nav-items > div {
+  font-size: 20px;
+  height: 50px;
+  font-weight: bolder;
+  text-decoration: none;
+  color: var(--main-selected-color);
+}
+
+.team {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid var(--main-border-color);
+  margin-top: -1px;
+  margin-left: -1px;
+}
+
+.team::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 1px;
+  background-color: var(--main-border-color);
+  z-index: -1;
+}
+
+.team-left {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.team-right {
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+.team-description,
+.team-members {
+  color: #000;
+  font-family: Inter;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -1.5px;
+}
+.team-members {
+  display: flex;
+  gap: 4px;
+}
+
+.team-members-list {
+  display: inline;
+  word-break: break-word;
+  color: #454545;
+  font-family: Inter;
+  flex-grow: 1;
+  margin-left: 5px;
+  text-decoration: underline;
 }
 
 .inline-block {
@@ -131,4 +192,40 @@
 
 .float-clear {
   clear: both;
+}
+
+.admin-star {
+  margin-left: 5px;
+}
+
+.team-profile-img {
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid #b0b0b0;
+  object-fit: cover;
+  margin: 0px 20px 0px -10px;
+}
+
+.team-recommend-button {
+  display: inline-flex;
+  width: 100px;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 2px solid #b0b0b0;
+  background: #fff;
+  margin-left: 5px;
+}
+
+.multi-line-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
