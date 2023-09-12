@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import axios from 'axios';
@@ -7,6 +7,7 @@ import TeamArticle from './TeamArticle';
 import InviteTeamModal from '../InviteTeamModal';
 import EditTeamModal from '../EditTeamModal';
 import { BsStarFill } from 'react-icons/bs';
+import AuthContext from '../../../../utils/auth-context';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -14,7 +15,9 @@ function TeamBoard() {
   const navigate = useNavigate();
   const { team_name } = useParams();
   const [thisTeam, setThisTeam] = useState({ team: {}, articles: [] });
+  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState(false);
+  const { username } = useContext(AuthContext);
 
   const onMyTeamList = () => {
     navigate(`/community/myteam`);
@@ -28,6 +31,10 @@ function TeamBoard() {
     navigate(`/user/${member.member.user.username}`);
   };
 
+  const onRecommender = () => {
+    navigate(`/community/recommender`);
+  };
+
   useEffect(() => {
     const getTeamInfo = async () => {
       try {
@@ -35,16 +42,15 @@ function TeamBoard() {
         const res = response.data;
         if (res.status === 'success') {
           setThisTeam(res.data);
+          const userMemberInfo = res.data.team_members.find((ele) => ele.member.user.username === username);
+          setIsAdmin(userMemberInfo?.is_admin);
         }
       } catch (error) {
         setError(true);
       }
     };
-    getTeamInfo();
+    if (username !== null) getTeamInfo();
   }, [team_name]);
-
-  console.log('team', thisTeam);
-  console.log('img', thisTeam.team?.image);
 
   return (
     <>
@@ -63,7 +69,7 @@ function TeamBoard() {
         <div className="team">
           <div className="team-left">
             <img
-              src={thisTeam.team?.image}
+              src={thisTeam.team.image}
               className="team-profile-img"
               alt="profile-image"
               data-bs-hover="tooltip"
@@ -71,26 +77,21 @@ function TeamBoard() {
               data-bs-title="프로필 페이지"
             />
             <div>
-              <h4 className="team-description">
-                {team_name}{' '}
-                <EditTeamModal
-                  team_name={thisTeam.team.name}
-                  team_desc={thisTeam.team.description}
-                  team_img={thisTeam.team.image}
-                  team_members={thisTeam.team_members}
-                  team_tags={thisTeam.team_tags}
-                />
-              </h4>
+              <div className="team-description fs-4">
+                {team_name}
+                {isAdmin ? <EditTeamModal team_name={team_name} /> : null}
+              </div>
               <div>
-                <h6 className="inline">{thisTeam.team.description}</h6>
+                <div className="inline fs-6">{thisTeam.team.description}</div>
               </div>
             </div>
           </div>
           <div className="team-right">
             <div>
-              <h4 className="team-members">
-                Members <InviteTeamModal />
-              </h4>
+              <div className="team-members fs-4">
+                Members
+                <InviteTeamModal />
+              </div>
               <div>
                 {thisTeam.team_members
                   ? thisTeam.team_members.map((member) =>
@@ -111,7 +112,7 @@ function TeamBoard() {
               </div>
             </div>
             <div>
-              <button className="team-recommend-button multi-line-button">
+              <button className="team-recommend-button multi-line-button" onClick={onRecommender}>
                 <span>팀 맞춤</span>
                 <span>유저 추천</span>
               </button>
