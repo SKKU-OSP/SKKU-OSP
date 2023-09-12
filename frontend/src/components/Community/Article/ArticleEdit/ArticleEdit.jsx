@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
 import Select from 'react-select';
-import { BsXLg } from 'react-icons/bs';
+import { BsXLg, BsCalendar } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import DatePicker from 'react-datepicker';
 import AuthContext from '../../../../utils/auth-context';
@@ -28,6 +28,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [isAuthNotice, setIsAuthNotice] = useState(true);
   const [anonymousWriter, setAnonymousWriter] = useState(true);
   const [team, setTeam] = useState([]);
+  const [selectTeam, setSelectTeam] = useState({});
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [articleFile, setArticleFile] = useState([]);
@@ -63,23 +64,44 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         console.log(resTag.message);
       }
     };
+    const getTeam = async () => {
+      const urlTeam = domainUrl + '/team/api/teams-of-user-list/';
+      const responseTeam = await axios.get(urlTeam, getAuthConfig());
+
+      const resTeam = responseTeam.data;
+      if (resTeam.status === 'success') {
+        setTeam(
+          resTeam.data.teams_of_user.map((t) => {
+            return {
+              value: t.id,
+              label: t.name
+            };
+          })
+        );
+      } else {
+        console.log(resTeam.message);
+      }
+    };
     const getArticle = async () => {
       const urlArticle = domainUrl + '/community/api/article/' + articleID;
       const responseArticle = await axios.get(urlArticle);
       const resArticle = responseArticle.data;
       if (resArticle.status === 'success') {
-        console.log('vs', username, resArticle.data.article.writer.user.username);
         if (resArticle.data.article.writer.user.username !== username) {
           alert('본인의 게시글만 수정할 수 있습니다.');
           navigate(`/community/article/${articleID}`);
         } else {
           setBoard(resArticle.data.article.board);
-          // setBoard((prev) => { //여기 수정! Normal/QnA/Recruit/Notice
-          //   prev['board_type'] = "Notice"
-          //   return prev
-          // });
           setTitle(resArticle.data.article.title);
           setBodyText(resArticle.data.article.body);
+          if (resArticle.data.article.board.board_type === 'Recruit') {
+            const start = new Date(resArticle.data.article.period_start);
+            const end = new Date(resArticle.data.article.period_end);
+
+            setStartDate(start);
+            setEndDate(end);
+            setSelectTeam(resArticle.data.team);
+          }
 
           setSelectTags(
             resArticle.data.tags.map((t) => {
@@ -111,6 +133,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     if (username !== null) {
       getArticle();
       getTag();
+      getTeam();
     }
   }, [username, articleID, navigate]);
 
@@ -134,12 +157,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     } else if (window.confirm('글을 수정하시겠습니까?')) {
       // 수정한 글 저장
       if (editorRef.current) {
-        console.log('title', title);
-        console.log('bodyText', bodyText);
-        console.log('tags', selectTags);
-        console.log('ano', anonymousWriter);
-        console.log('file', articleFile);
-
         const response = await axios.post(
           urlEditArticle,
           {
@@ -151,18 +168,18 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
             article_file: articleFile,
             ...(board.board_type === 'Recruit' && {
               period_start: startDate,
-              period_end: endDate
+              period_end: endDate,
+              team_id: selectTeam.value
             })
           },
           getAuthConfig()
         );
         const res = response.data;
+        console.log(res);
         if (res['status'] === 'success') {
           window.alert('수정이 완료되었습니다!');
           window.location.href = `/community/article/` + articleID + `/`;
         }
-
-        console.log(res);
       }
     }
   };
@@ -172,7 +189,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   };
 
   const handleBodyChange = (e) => {
-    console.log(e.target.getContent());
     setBodyText(e.target.getContent());
   };
 
@@ -195,9 +211,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     console.log(numFile);
     console.log(nextNum + 'v');
   };
-  console.log(Object.keys({ temp: 1 }));
-  console.log(fileObj);
-  console.log(articleFile);
 
   const inputRef = useRef < HTMLInputElement > null;
 
@@ -234,13 +247,8 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }
   };
 
-  const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }
-  ];
   const handleOption = (team) => {
-    setTeam(team);
+    setSelectTeam(team);
   };
   const customStyle = {
     control: (provided) => ({
@@ -275,20 +283,11 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           {renderConsentMessage}
           <div id="community-main" className="col-9">
             <div className="community-nav d-flex">
-              {board.name === '질문' ? (
-                <div>
-                  <button type="button" className="btn btn-secondary" onClick={onBack}>
-                    뒤로가기
-                  </button>
-                  <div className="anonymous-btn align-middle hidden">
-                    <input type="checkbox" /> <label>익명</label>
-                  </div>
-                </div>
-              ) : (
+              <div>
                 <button type="button" className="btn btn-secondary" onClick={onBack}>
                   뒤로가기
                 </button>
-              )}
+              </div>
               <div className="board-name">{board.name} 게시판</div>
               {board.name === '질문' ? (
                 <div>
@@ -329,18 +328,19 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                 autoFocus
                 onChange={handleTitleChange}
               />
-              {board.board_type === 'Recruit' && ( //여기 수정
+              {board.board_type === 'Recruit' && (
                 <>
                   {team ? (
                     <Select
-                      placeholder="팀 선택"
-                      options={options}
+                      placeholder={'팀 선택'}
+                      options={team}
                       menuPlacement="auto"
-                      value={team}
+                      value={selectTeam.name}
                       onChange={handleOption}
-                      closeMenuOnSelect={false}
+                      closeMenuOnSelect={true}
                       hideSelectedOptions={false}
                       styles={customStyle}
+                      className="select-team"
                     />
                   ) : type === 'register' ? (
                     <Select id="team-option" name="team-option" className="form-select pointer">
@@ -355,13 +355,9 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                   )}
                 </>
               )}
-              {/* <div id="article-body" className="form-control block-article" contentEditable="true" onChange={handleBodyChange}>
-                {bodyText}
-              </div> */}
               <Editor
                 initialValue={bodyText}
                 onInit={handleEditorInit}
-                apiKey={'0g27ik0o894gdcxk2zb3wtiou6dep9z8of1jaga5qawhw9fx'}
                 onChange={handleBodyChange}
                 init={{
                   selector: board,
@@ -382,6 +378,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                     'bold italic underline strikethrough forecolor backcolor align | ' +
                     'removeformat help| image'
                 }}
+                style={{ zIndex: 1 }}
               />
               <Select
                 placeholder={'Tag'}
@@ -394,6 +391,72 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                 hideSelectedOptions={false}
                 styles={customStyles}
               />
+              {board.board_type === 'Recruit' && (
+                <div id="period-setting">
+                  <div className="d-flex">
+                    <div id="date-label" className="p-date-label d-flex">
+                      모집 기간
+                    </div>
+                    <div className="row flex-fill">
+                      <div className="col-sm-6 d-flex">
+                        <div id="date-label" className="p-date-label d-flex">
+                          <a>From</a>
+                        </div>
+                        <div
+                          id="PeriodPickerStart"
+                          className="log-event input-group select-team"
+                          data-td-target-input="nearest"
+                          data-td-target-toggle="nearest"
+                        >
+                          <div className="mt-1 d-flex">
+                            <DatePicker
+                              selected={startDate}
+                              onChange={(date) => setStartDate(date)}
+                              selectsStart
+                              fixedHeight
+                              dateFormat="MM/dd/yyyy, hh:mm aa"
+                              showTimeInput
+                              className="form-control"
+                            ></DatePicker>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-sm-6 d-flex">
+                        <div id="date-label" className="p-date-label d-flex">
+                          <a>To</a>
+                        </div>
+                        <div
+                          id="PeriodPickerEnd"
+                          className="log-event input-group select-team"
+                          data-td-target-input="nearest"
+                          data-td-target-toggle="nearest"
+                        >
+                          <div className="mt-1">
+                            <DatePicker
+                              selected={endDate}
+                              onChange={(date) => setEndDate(date)}
+                              selectsEnd
+                              fixedHeight
+                              dateFormat="MM/dd/yyyy, hh:mm aa"
+                              minDate={new Date()}
+                              showTimeInput
+                              className="form-control"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      id="end-button"
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setEndDate(getCurrentDateTime())}
+                    >
+                      마감
+                    </button>
+                  </div>
+                </div>
+              )}
               <div id="article-helper" className="mt-2">
                 <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>
                   파일 추가
@@ -442,72 +505,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                     )
                   )}
               </div>
-              {board.board_type === 'Recruit' && (
-                <div id="period-setting" className="mt-3">
-                  <div className="d-flex">
-                    <div id="date-label" className="p-date-label d-flex">
-                      모집 기간
-                    </div>
-                    <div className="row flex-fill">
-                      <div className="col-sm-6 d-flex">
-                        <div id="date-label" className="p-date-label d-flex">
-                          <a>From</a>
-                        </div>
-                        <div
-                          id="PeriodPickerStart"
-                          className="log-event"
-                          data-td-target-input="nearest"
-                          data-td-target-toggle="nearest"
-                        >
-                          <div className="mt-1">
-                            <DatePicker
-                              selected={startDate}
-                              onChange={(date) => setStartDate(date)}
-                              selectsStart
-                              fixedHeight
-                              dateFormat="MM/dd/yyyy, hh:mm aa"
-                              showTimeInput
-                              className="form-control"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-sm-6 d-flex">
-                        <div id="date-label" className="p-date-label d-flex">
-                          <a>To</a>
-                        </div>
-                        <div
-                          id="PeriodPickerEnd"
-                          className="log-event"
-                          data-td-target-input="nearest"
-                          data-td-target-toggle="nearest"
-                        >
-                          <div className="mt-1">
-                            <DatePicker
-                              selected={endDate}
-                              onChange={(date) => setEndDate(date)}
-                              selectsEnd
-                              fixedHeight
-                              dateFormat="MM/dd/yyyy, hh:mm aa"
-                              minDate={new Date()}
-                              showTimeInput
-                              className="form-control"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      id="end-button"
-                      type="button"
-                      className="btn btn-outline-light"
-                      onClick={() => setEndDate(getCurrentDateTime())}
-                    >
-                      마감
-                    </button>
-                  </div>
-                </div>
-              )}
             </form>
           </div>
         </>
