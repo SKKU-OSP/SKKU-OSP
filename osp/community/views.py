@@ -7,6 +7,9 @@ from django.db.models import F, Q, Count
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction, DatabaseError
 
+from django.core.paginator import Paginator
+
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -123,6 +126,7 @@ class TableBoardView(APIView):
 
         user = request.user
         board_name = kwargs.get('board_name')
+        page_number = request.GET.get('page_number')
         try:
             board = Board.objects.get(name=board_name)
             valid_data['board'] = board
@@ -146,6 +150,11 @@ class TableBoardView(APIView):
                 status = 'fail'
             elif board.board_type == 'User':
                 errors["invalid_url"] = "유저추천 게시판 api 접근 url 은 /community/api/recommender/user/ 입니다."
+                status = 'fail'
+            if not page_number:
+                pass
+            elif int(page_number) < 0:
+                errors["invalid_page_number"] = "잘못된 page_number 입니다."
                 status = 'fail'
 
         except Board.DoesNotExist:
@@ -187,7 +196,17 @@ class TableBoardView(APIView):
 
             article_list = Article.objects.filter(board=board).annotate(writer_name=F(
                 "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-            article_list = get_article_metas(article_list)
+
+            page_size = 10
+            paginator = Paginator(article_list, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+            # article_list = get_article_metas(article_list)
+            article_list = get_article_metas(page)
+            data['max_page_number'] = max_page_number
             data['articles'] = BoardArticleSerializer(
                 article_list, many=True).data
 
