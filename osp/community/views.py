@@ -161,7 +161,7 @@ class TableBoardView(APIView):
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(f'TableBoardView validation error')
+            logging.debug(f'TableBoardView validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 

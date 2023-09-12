@@ -12,7 +12,7 @@ from team.serializers import TeamSerializer
 from datetime import datetime, timedelta
 
 import logging
-
+import json
 
 class ArticleAPIView(APIView):
     '''
@@ -209,6 +209,8 @@ class ArticleCreateView(APIView):
 
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
+            if isinstance(article_tags, str):
+                article_tags = json.loads(article_tags)
             for article_tag in article_tags:
                 tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
@@ -237,7 +239,7 @@ class ArticleCreateView(APIView):
             res['data'] = {'article_id': article.id}
 
         except Exception as e:
-            print("게시글 쓰기 Exception:", e)
+            logging.exception(f"게시글 쓰기 Exception:{e}")
             res['message'] = f"게시글 쓰기 Exception {e}"
             return Response(res)
 
@@ -298,7 +300,7 @@ class ArticleUpdateView(APIView):
                     article = updated_article['article']
                     article.save()
                 except Exception as e:
-                    print("기간 업데이트 Exception:", e)
+                    logging.exception(f"기간 업데이트 Exception:{e}")
                     res['message'] = '기간을 업데이트할 수 없습니다.'
                     return Response(res)
                 # 팀 게시글
@@ -309,8 +311,9 @@ class ArticleUpdateView(APIView):
                         article=article)
                     team_recruit_article.team = team
                     team_recruit_article.save()
-                except:
+                except Exception as e:
                     res['message'] = '해당 모집글의 팀을 수정할 수 없습니다.'
+                    logging.exception(f"{res['message']} {e}")
                     print(res['message'])
                     return Response(res)
 
@@ -441,23 +444,20 @@ class ArticleLikeView(APIView):
         try:
             article = Article.objects.get(id=article_id)
             account = Account.objects.get(user=request.user)
+            article_like, created = ArticleLike.objects.get_or_create(
+                article=article, account=account)
 
             if article.writer.user_id == request.user.id:
                 # 작성자가 추천한 경우
                 res['message'] = "자신의 게시글은 추천할 수 없습니다."
                 return Response(res)
-
-            article_like, created = ArticleLike.objects.get_or_create(article=article, account=account)
-
             if not created:
                 # 이미 추천한 게시글인 경우
                 article_like.delete()
                 res['message'] = "추천 취소"
-
             like_cnt = len(ArticleLike.objects.filter(article=article))
             data['marked_like'] = created
             data['like_cnt'] = like_cnt
-
             res['data'] = data
             res['status'] = 'success'
             return Response(res)
@@ -490,12 +490,9 @@ class ArticleScrapView(APIView):
             # 이미 스크랩한 게시글인 경우
             article_scrap.delete()
             res['message'] = "스크랩 취소"
-        
-
         scrap_cnt = len(ArticleScrap.objects.filter(article=article))
         data['marked_scrap'] = created
         data['scrap_cnt'] = scrap_cnt
-
         res['data'] = data
         res['status'] = 'success'
         return Response(res)
@@ -665,7 +662,6 @@ class CommentLikeView(APIView):
 
 def set_article_period(article: Article, period_start: str, period_end: str):
     ret = {"article": article}
-    message = ""
     datetime_start = datetime.strptime(
         period_start, "%Y-%m-%dT%H:%M:%S.%fZ")
     datetime_end = datetime.strptime(
@@ -675,7 +671,7 @@ def set_article_period(article: Article, period_start: str, period_end: str):
     condition_hours = 1
     if datetime_end-datetime_start < timedelta(hours=condition_hours):
         ret['error'] = f'모집기간이 너무 짧습니다. {condition_hours} 시간 이상으로 설정해주세요.'
-        return message
+        return ret
 
     # 'T' and 'Z' 문자삭제, %Y-%m-%d %H:%M:%S.%f 꼴로 데이터 변환
     period_start = datetime_start.replace(tzinfo=None)
@@ -686,7 +682,7 @@ def set_article_period(article: Article, period_start: str, period_end: str):
         article.period_end = period_end
     else:
         ret['error'] = '입력값에 오류가 있어 기간을 업데이트할 수 없습니다.'
-        return message
+        return ret
 
     # 게시 기간 설정된 Article 객체 반환
-    return article
+    return ret
