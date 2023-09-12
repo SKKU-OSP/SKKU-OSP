@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CreateTeamModal from '../CreateTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import { BsStarFill, BsPeopleFill } from 'react-icons/bs';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function MyTeamList() {
+  const navigate = useNavigate();
   const [myTeams, setMyTeams] = useState([]);
   const [error, setError] = useState(false);
   const [modalShow, setModalShow] = useState(false);
@@ -33,10 +37,10 @@ function MyTeamList() {
 
   return (
     <div className="col-9">
-      <div className="community-nav d-flex">
+      <div className="community-team-nav d-flex">
         <div style={{ width: btnWidth }}></div>
-        <ul className="nav nav-fill community-nav-items">
-          <li className="nav-item selected-nav-item">
+        <ul className="nav nav-fill community-team-nav-items">
+          <li className="community-team-nav-items">
             <div>내 팀 목록</div>
           </li>
         </ul>
@@ -56,7 +60,25 @@ function MyTeamList() {
               </div>
               <div>
                 <div className="inline-block">{team.description}</div>
-                <div className="text-end">익명 외 몇 명</div>
+                <div className="text-end">
+                  {team.leader && (
+                    <span className="dropdown-button">
+                      <BsStarFill />
+                      <DropdownButton title={team.leader} variant="link" className="dropdown-toggle">
+                        <Dropdown.Item
+                          onClick={() => {
+                            navigate(`/user/${team.leader}`);
+                          }}
+                        >
+                          프로필
+                        </Dropdown.Item>
+                        <Dropdown.Item>메세지</Dropdown.Item>
+                      </DropdownButton>
+                    </span>
+                  )}
+                  <BsPeopleFill />
+                  {` ${team.member_cnt}명`}
+                </div>
               </div>
             </div>
           ))
