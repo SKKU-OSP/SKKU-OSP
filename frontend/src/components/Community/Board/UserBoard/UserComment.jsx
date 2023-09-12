@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { BsHandThumbsUp } from 'react-icons/bs';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
-export default function UserArticle(props) {
+export default function UserComment(props) {
   const { article } = props;
   const navigate = useNavigate();
   const [pubDate, setPubDate] = useState('');
 
   const onArticle = () => {
-    navigate(`/community/article/${article.id}/`);
+    navigate(`/community/article/${article.article_id}/`);
   };
 
   const onWriter = () => {
@@ -47,7 +47,7 @@ export default function UserArticle(props) {
         <h6>
           {article.writer ? (
             article.anonymous_writer ? (
-              <span>익명 </span>
+              <span>익명</span>
             ) : (
               <span className="dropdown-button">
                 <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
@@ -57,7 +57,7 @@ export default function UserArticle(props) {
               </span>
             )
           ) : (
-            <span>탈퇴한 이용자 </span>
+            <span>탈퇴한 이용자</span>
           )}
           · {pubDate}
           <div
@@ -70,27 +70,13 @@ export default function UserArticle(props) {
           </div>
         </h6>
         <h4 className="board-article-title" onClick={onArticle}>
-          {article.title}
+          {article.body}
         </h4>
         <div>
-          {article.tags && article.tags.length > 0 ? (
-            article.tags.map((tag) => (
-              <h6 className="inline" key={tag.name}>
-                #{tag.name.replace(' ', '_')}&nbsp;
-              </h6>
-            ))
-          ) : (
-            <h6 className="inline">{'\u00A0'}</h6>
-          )}
+          <h6 className="inline">{'\u00A0'}</h6>
           <div className="board-article-meta-list">
             <>
               <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
-            </>
-            <>
-              <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
-            </>
-            <>
-              <BsEyeFill size={13} className="board-article-meta" /> {article.view_cnt}
             </>
           </div>
         </div>
