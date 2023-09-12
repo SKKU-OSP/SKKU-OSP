@@ -12,6 +12,8 @@ export default function Board_Container() {
   const { tabName } = useParams();
   const [isLoadedArticles, setIsLoadedArticles] = useState(false);
   const [articles, setArticles] = useState([]);
+  const [maxPageNumber, setMaxPageNumber] = useState(0);
+  const [nowPage, setNowPage] = useState(1);
   const [error, setError] = useState(false);
   const { username } = useContext(AuthContext);
 
@@ -25,25 +27,42 @@ export default function Board_Container() {
     }
   };
 
-  useEffect(() => {
-    const getArticle = async () => {
-      try {
-        const response = await axios.get(server_url + `/community/api/board/${tabName}`);
-        const res = response.data;
-        if (res.status === 'success') {
-          setArticles(res.data.articles);
-          setIsLoadedArticles(true);
-        } else {
-          alert('해당 게시판이 존재하지 않습니다.');
-        }
-      } catch (error) {
-        setError(true);
+  const getArticles = async (page) => {
+    try {
+      const response = await axios.get(server_url + `/community/api/board/${tabName}/?page_number=${page}`);
+      const res = response.data;
+      if (res.status === 'success') {
+        console.log(res.data);
+        setArticles(res.data.articles);
+        setMaxPageNumber(res.data.max_page_number);
+        setIsLoadedArticles(true);
+      } else {
+        alert('해당 게시판이 존재하지 않습니다.');
       }
-    };
-    getArticle();
+    } catch (error) {
+      setError(true);
+    }
+  };
+
+  const onPageChange = (page) => {
+    setNowPage(page);
+    getArticles(page);
+  };
+
+  useEffect(() => {
+    getArticles(nowPage);
   }, [tabName]);
 
   return (
-    <Board_Presenter isLoadedArticles={isLoadedArticles} articles={articles} onWrite={onWrite} tabName={tabName} />
+    <Board_Presenter
+      isLoadedArticles={isLoadedArticles}
+      articles={articles}
+      onWrite={onWrite}
+      tabName={tabName}
+      maxPageNumber={maxPageNumber}
+      nowPage={nowPage}
+      setNowPage={setNowPage}
+      onPageChange={onPageChange}
+    />
   );
 }

@@ -206,7 +206,7 @@ class ArticleCreateView(APIView):
                     res['message'] = '해당 팀의 모집글을 작성할 수 없습니다.'
                     print(res['message'])
                     return Response(res)
-
+            print('before tag')
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
             if isinstance(article_tags, str):
@@ -215,11 +215,11 @@ class ArticleCreateView(APIView):
                 tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
-
+            print('before file')
             # 게시글 파일 생성
             files = request.FILES
             print(files)
-
+            
             # 파일 게시자 추적: created_user를 username과 user_id를 연결한 이유
             # username은 변경가능하기 때문에 id로 추적하고자함
             # user가 삭제되면 user_id를 이용해 이용자를 특정하기 어렵기 때문에 username도 사용
