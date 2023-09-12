@@ -1,6 +1,8 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../../../../utils/auth-context';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 export default function RecruitArticle(props) {
   const { article } = props;
@@ -52,15 +54,18 @@ export default function RecruitArticle(props) {
       <h6>
         {article.writer ? (
           article.anonymous_writer ? (
-            <span>익명</span>
+            <span>익명 </span>
           ) : (
-            <span className="board-article-writer" onClick={onWriter}>
-              {article.writer.user.username}
+            <span className="dropdown-button">
+              <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
+                <Dropdown.Item>메세지</Dropdown.Item>
+              </DropdownButton>
             </span>
           )
         ) : (
-          <span>탈퇴한 이용자</span>
-        )}{' '}
+          <span>탈퇴한 이용자 </span>
+        )}
         · {pubDate}
       </h6>
       <h4 className="board-article-title" onClick={onArticle}>
