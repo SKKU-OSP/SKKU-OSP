@@ -371,7 +371,7 @@
 
 #date-label {
   font-size: 20px;
-  color: var(--main-white);
+  color: var(--main-font-color);
 }
 .p-date-label {
   padding: 6px;
@@ -1076,8 +1076,10 @@
 #period-setting {
   padding: 10px 20px 10px 20px;
   color: white;
-  border-radius: 0.625rem;
-  background-color: #002743;
+  border: solid var(--main-border-color);
+  border-width: 0 1px 1px 1px;
+  border-radius: 0;
+  margin-left: -1px;
 }
 
 .period-label {
@@ -1086,10 +1088,10 @@
 }
 
 #end-button {
-  margin-left: 20px;
+  margin: 4px 4px 4px 20px;
   font-size: 16px;
-
   align-items: center;
+  border-radius: 10px;
 }
 
 .article-dropdown {

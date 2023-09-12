@@ -11,7 +11,7 @@ export default function TeamOverview(props) {
   return (
     <div className="board-article">
       <div>
-        <h4 className="board-article-title2">{team.name}</h4>
+        <h4 className="board-team-title">{team.name}</h4>
         <div className="board-article-modal">
           <ApplyTeamModal />
         </div>

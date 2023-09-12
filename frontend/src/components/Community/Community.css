@@ -200,6 +200,7 @@
   justify-content: space-between;
   position: sticky;
   top: 85px;
+  z-index: 500;
 }
 
 .community-nav-items {
