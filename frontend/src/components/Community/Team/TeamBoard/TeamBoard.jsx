@@ -69,9 +69,8 @@ function TeamBoard() {
         <div className="team">
           <div className="team-left">
             <img
-              src={thisTeam.team.image}
+              src={server_url + thisTeam.team.image}
               className="team-profile-img"
-              alt="profile-image"
               data-bs-hover="tooltip"
               data-bs-placement="top"
               data-bs-title="프로필 페이지"
