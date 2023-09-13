@@ -1,5 +1,7 @@
 import '../Board.css';
 import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 export default function BoardArticle_Presenter(props) {
   const { username, article, pubDate, onArticle, onWriter } = props;
@@ -13,8 +15,11 @@ export default function BoardArticle_Presenter(props) {
               article.anonymous_writer ? (
                 <span>익명</span>
               ) : (
-                <span className={username && 'board-article-writer'} onClick={username && onWriter}>
-                  {article.writer.user.username}
+                <span className="dropdown-button">
+                  <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                    <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
+                    <Dropdown.Item>메세지</Dropdown.Item>
+                  </DropdownButton>
                 </span>
               )
             ) : (
