@@ -38,7 +38,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [selectTags, setSelectTags] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [teamID, setTeamID] = useState('');
   const getCurrentDateTime = () => new Date();
   const editorRef = useRef(null);
   const navigate = useNavigate();
@@ -74,7 +73,8 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           resTeam.data.teams_of_user.map((t) => {
             return {
               value: t.id,
-              label: t.name
+              label: t.name,
+              color: t.color
             };
           })
         );
@@ -240,13 +240,43 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }),
     multiValue: (provided, state) => {
       const tagColor = state.data.color;
-      return {
-        ...provided,
-        backgroundColor: tagColor
-      };
+
+      if (tagColor) {
+        const hexColor = tagColor.substring(1);
+        const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+        const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+        const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const fontColor = luma < 127.5 ? 'white' : 'black';
+
+        return {
+          ...provided,
+          backgroundColor: tagColor,
+          color: fontColor
+        };
+      }
+    },
+    multiValueLabel: (provided, state) => {
+      const tagColor = state.data.color;
+
+      if (tagColor) {
+        const hexColor = tagColor.substring(1);
+        const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+        const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+        const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const fontColor = luma < 127.5 ? 'white' : 'black';
+
+        return {
+          ...provided,
+          backgroundColor: tagColor,
+          color: fontColor
+        };
+      }
     }
   };
 
+  // Team
   const handleOption = (team) => {
     setSelectTeam(team);
   };
