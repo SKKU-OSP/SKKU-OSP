@@ -23,7 +23,8 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const article = {};
   const [isAuthNotice, setIsAuthNotice] = useState(false);
   const [anonymousWriter, setAnonymousWriter] = useState(false);
-  const [team, setTeam] = useState(null);
+  const [team, setTeam] = useState([]);
+  const [selectTeam, setSelectTeam] = useState({});
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [articleFile, setArticleFile] = useState({});
@@ -39,6 +40,24 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
   useEffect(() => {
     //axios 사용
+    const getTeam = async () => {
+      const urlTeam = domainUrl + '/team/api/teams-of-user-list/';
+      const responseTeam = await axios.get(urlTeam, getAuthConfig());
+
+      const resTeam = responseTeam.data;
+      if (resTeam.status === 'success') {
+        setTeam(
+          resTeam.data.teams_of_user.map((t) => {
+            return {
+              value: t.id,
+              label: t.name
+            };
+          })
+        );
+      } else {
+        console.log(resTeam.message);
+      }
+    };
     const getArticle = async () => {
       try {
         const responseTag = await axios.get(urlTag);
@@ -60,6 +79,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       }
     };
     getArticle();
+    getTeam();
   }, []);
 
   // 익명 체크 여부 확인
@@ -129,7 +149,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         ...(boardName === '팀 모집' && {
           period_start: startDate,
           period_end: endDate,
-          team_id: team
+          team_id: selectTeam.value
         })
       };
 
@@ -230,6 +250,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   };
 
   // Tag
+  // Tag
   const handleOptionSelect = (selectedTags) => {
     setSelectTags(selectedTags);
   };
@@ -241,30 +262,43 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     }),
     multiValue: (provided, state) => {
       const tagColor = state.data.color;
-      return {
-        ...provided,
-        backgroundColor: tagColor
-      };
-    }
-  };
 
-  const onBack = () => {
-    // TODO 팀 게시판의 경우를 고려해서 navigate(`/community/team/${boardName}/`) 을 사용해야함
-    if (boardName === '팀 모집') {
-      navigate(`/community/recruit/${boardName}/`);
-    } else if (boardName === '자유' || boardName === '정보' || boardName === '질문' || boardName === '홍보') {
-      navigate(`/community/board/${boardName}/`);
-    } else {
-      navigate(`/community/team/${boardName}/`);
+      if (tagColor) {
+        const hexColor = tagColor.substring(1);
+        const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+        const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+        const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const fontColor = luma < 127.5 ? 'white' : 'black';
+
+        return {
+          ...provided,
+          backgroundColor: tagColor,
+          color: fontColor
+        };
+      }
+    },
+    multiValueLabel: (provided, state) => {
+      const tagColor = state.data.color;
+
+      if (tagColor) {
+        const hexColor = tagColor.substring(1);
+        const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+        const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+        const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const fontColor = luma < 127.5 ? 'white' : 'black';
+
+        return {
+          ...provided,
+          backgroundColor: tagColor,
+          color: fontColor
+        };
+      }
     }
   };
 
   // Team
-  const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }
-  ];
   const handleOption = (team) => {
     setTeam(team);
   };
@@ -278,6 +312,17 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       color: state.isSelected ? 'lightgray' : 'black',
       background: 'none'
     })
+  };
+
+  const onBack = () => {
+    // TODO 팀 게시판의 경우를 고려해서 navigate(`/community/team/${boardName}/`) 을 사용해야함
+    if (boardName === '팀 모집') {
+      navigate(`/community/recruit/${boardName}/`);
+    } else if (boardName === '자유' || boardName === '정보' || boardName === '질문' || boardName === '홍보') {
+      navigate(`/community/board/${boardName}/`);
+    } else {
+      navigate(`/community/team/${boardName}/`);
+    }
   };
 
   //정보공개 미동의 시 뜨는 창
@@ -346,14 +391,15 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             <>
               {team ? (
                 <Select
-                  placeholder={team}
-                  options={options}
+                  placeholder={'팀 선택'}
+                  options={team}
                   menuPlacement="auto"
                   value={team}
                   onChange={handleOption}
                   closeMenuOnSelect={false}
                   hideSelectedOptions={false}
                   styles={customStyle}
+                  className="select-team"
                 />
               ) : (
                 <>
@@ -399,7 +445,9 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                 'removeformat help| image',
               forced_root_block: 'div'
             }}
+            style={{ zIndex: 1 }}
           />
+
           <Select
             placeholder={'Tag'}
             options={tags}
@@ -411,32 +459,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             hideSelectedOptions={false}
             styles={customStyles}
           />
-          <div id="article-helper" className="mt-2">
-            <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>
-              파일 추가
-            </button>
-          </div>
-          <div id="article-file-container">
-            {fileObj &&
-              Object.keys(fileObj).map(
-                (
-                  id //파일 추가 input
-                ) => (
-                  <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
-                    <input
-                      type="file"
-                      id={`article-file-${id}`}
-                      name={`article_file_${id}`}
-                      className="form-control article-file"
-                      onChange={handleFileChange}
-                    />
-                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}>
-                      <BsXLg />
-                    </button>
-                  </div>
-                )
-              )}
-          </div>
           {boardName === '팀 모집' && (
             <div id="period-setting" className="mt-3">
               <div className="d-flex">
@@ -505,6 +527,32 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               </div>
             </div>
           )}
+          <div id="article-helper" className="mt-2">
+            <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>
+              파일 추가
+            </button>
+          </div>
+          <div id="article-file-container">
+            {fileObj &&
+              Object.keys(fileObj).map(
+                (
+                  id //파일 추가 input
+                ) => (
+                  <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
+                    <input
+                      type="file"
+                      id={`article-file-${id}`}
+                      name={`article_file_${id}`}
+                      className="form-control article-file"
+                      onChange={handleFileChange}
+                    />
+                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}>
+                      <BsXLg />
+                    </button>
+                  </div>
+                )
+              )}
+          </div>
         </form>
       </div>
     </>
