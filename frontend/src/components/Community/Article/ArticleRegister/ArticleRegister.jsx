@@ -155,7 +155,12 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
-        formData.append(key, value);
+        console.log('keyvalue', key, typeof value);
+        if (key === 'article_tags') {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value);
+        }
       });
 
       console.log('postData', postData);
