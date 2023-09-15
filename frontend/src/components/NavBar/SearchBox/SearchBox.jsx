@@ -23,12 +23,15 @@ function SearcherBox() {
 
   const searchArticle = () => {
     if (keyword !== '') {
+      console.log('search', keyword);
       navigate('/community/search', {
         state: {
           keyword: keyword
         }
       });
       setKeyword('');
+    } else {
+      alert('검색어를 입력해주세요');
     }
   };
 
@@ -53,6 +56,11 @@ function SearcherBox() {
     console.log('handleKeyword', e.target.value);
     setKeyword(e.target.value);
   };
+  const handleEnter = (e) => {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+      searchArticle();
+    }
+  };
 
   return (
     <div className="searchBox">
@@ -65,6 +73,7 @@ function SearcherBox() {
           placeholder="검색"
           aria-describedby="search-btn"
           onChange={(e) => handleKeyword(e)}
+          onKeyDown={(e) => handleEnter(e)}
         />
         <BsHash className="hash-icon" size="24" />
         <BsSearch className="search-icon" onClick={() => searchArticle()} />
