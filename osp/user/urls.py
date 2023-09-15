@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from user import views, views_edit, views_profile
+from user import views, views_edit, views_profile, views_dashboard
 
 app_name = 'user'
 urlpatterns = [
@@ -53,6 +53,8 @@ urlpatterns = [
          views_profile.ProfileInfoView.as_view(), name='profile-info'),
     path('api/profile-intro/<username>/',
          views_profile.ProfileMainView.as_view(), name='profile-main'),
+    path('api/dashboard/<username>/',
+         views_dashboard.UserDashboardView.as_view(), name="UserDashboardView"),
 
     path('api/guideline/<username>/',
          views.GuidelineView.as_view(), name='guideline')
