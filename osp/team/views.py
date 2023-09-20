@@ -866,15 +866,14 @@ class TeamApplyView(APIView):
             return Response(res)
 
         # Transactions
-
         try:
             article_id = kwargs.get('article_id')
             article = Article.objects.get(id=article_id)
-            team_recruit_article = TeamRecruitArticle.objects.get(
-                article_id=article.id)
-            team = team_recruit_article.team
-            data['team'] = TeamSerializer(team).data
-
+            with transaction.atomic():
+                team_recruit_article = TeamRecruitArticle.objects.get(
+                    article_id=article.id)
+                team = team_recruit_article.team
+                data['team'] = TeamSerializer(team).data
         except DatabaseError:
             errors['DB'] = 'DB Error'
             status = 'fail'
@@ -935,8 +934,8 @@ class TeamApplyView(APIView):
         data = {}
 
         # Request Validation
-        status, message, errors, valid_data = self.post_validation(
-            request, status, *args, **kwargs)
+        status, errors, valid_data = self.post_validation(
+            request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -955,14 +954,22 @@ class TeamApplyView(APIView):
             team = team_recruit_article.team
             with transaction.atomic():
                 message = request.data.get('message')
-                TeamApplyMessage.objects.create(
-                    team=team,
-                    account=account,
-                    message=message,
-                    status=0,  # 대기 중
-                    direction=False,  # FROM ACCOUNT TO_TEAM
-                    send_date=datetime.now(),
-                )
+                remain = TeamApplyMessage.objects.filter(
+                    team=team, account=account, status=0)
+                if remain.exists():
+                    msg = remain.first()
+                    msg.message = message
+                    msg.send_date = datetime.now()
+                    msg.save()
+                else:
+                    TeamApplyMessage.objects.create(
+                        team=team,
+                        account=account,
+                        message=message,
+                        status=0,  # 대기 중
+                        direction=False,  # FROM ACCOUNT TO_TEAM
+                        send_date=datetime.now(),
+                    )
 
         except DatabaseError as e:
             logging.error(f'TeamApplyView post error: {e}')
@@ -1219,8 +1226,10 @@ class TeamInviteDeleteView(APIView):
 
 class TeamApplyUpdateView(APIView):
 
-    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def post_validation(self, request, *args, **kwargs):
         user = request.user
+        status = 'success'
+        errors, valid_data = {}, {}
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
 
@@ -1232,41 +1241,36 @@ class TeamApplyUpdateView(APIView):
             try:
                 teamapplymessage = TeamApplyMessage.objects.get(
                     id=target_teamapplymessage_id)
-                if teamapplymessage.account_id != request.user.id:
-                    errors["teamapplymessage_user_missmatch"] = "잘못된 접근입니다. 메세지의 주인이 아닙니다."
-                    status = 'fail'
-            except TeamApplyMessage.DoesNotExist:
-                errors["teamapplymessage_not_found"] = "해당 초대메세지를 찾을 수 없습니다. "
+            except TeamApplyMessage.DoesNotExist as e:
+                errors["teamapplymessage_not_found"] = "해당 지원 메시지를 찾을 수 없습니다. "
                 status = 'fail'
+                logging.exception(
+                    f'TeamApplyUpdateView 해당 지원 메시지를 찾을 수 없습니다 : {e}')
+            except Exception as e:
+                status = 'fail'
+                logging.exception(f'TeamApplyUpdateView validation error: {e}')
 
-        return status, message, errors, valid_data
+        return status, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
         status = 'success'
         message = ''
         data = {}
-        errors = {}
-        valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.post_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, errors, valid_data = self.post_validation(
+            request, *args, **kwargs)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplyUpdateView validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
         # Transactions
-
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
+        target_user_id = request.data.get('user_id')
         account = Account.objects.get(user=request.user)
         try:
             teamapplymessage = TeamApplyMessage.objects.get(
@@ -1275,18 +1279,20 @@ class TeamApplyUpdateView(APIView):
                 if request.data.get('is_okay') == "true":
                     status = 1  # 승인
                     TeamMember.objects.create(
-                        team=teamapplymessage.team, member=account)
+                        team=teamapplymessage.team, member_id=target_user_id)
                 else:
                     status = 2  # 거절
                 teamapplymessage.status = status
                 teamapplymessage.save()
 
-        except DatabaseError:
+        except DatabaseError as e:
             errors['DB'] = 'DB Error'
             status = 'fail'
-        except:
+            logging.exception(f"TeamApplyUpdateView: {e}")
+        except Exception as e:
             errors['undefined_exception'] = 'undefined_exception'
             status = 'fail'
+            logging.exception(f"TeamApplyUpdateView: {e}")
 
         # Response
         if status == 'success':
