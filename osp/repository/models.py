@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class GithubRepoCommits(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)
     repo_name = models.CharField(max_length=100)
@@ -55,27 +56,27 @@ class GithubRepoStats(models.Model):
         managed = False
         db_table = 'github_repo_stats'
         unique_together = (('github_id', 'repo_name'),)
-        
+
     def get_guideline(self):
-        return{
-            "owner_id":self.github_id,
-            "repo_name":self.repo_name,
-            "create_date":self.create_date,
-            "update_date":self.update_date,
-            "contributors_count":self.contributors_count,
-            "release_ver":self.release_ver,
-            "release_count":self.release_count,
-            "readme":self.readme,
-            "license":self.license,
-            "proj_short_desc":self.proj_short_desc,
-            "star_count":self.stargazers_count,
-            "commit_count":self.commits_count,
-            "watcher_count":self.watchers_count,
-            "fork_count":self.forks_count,
-            "pr_count":self.prs_count,
-            "open_issue_count":self.open_issue_count,
-            "close_issue_count":self.close_issue_count,
-            "dependency_count":self.dependencies
+        return {
+            "owner_id": self.github_id,
+            "repo_name": self.repo_name,
+            "create_date": self.create_date,
+            "update_date": self.update_date,
+            "contributors_count": self.contributors_count,
+            "release_ver": self.release_ver,
+            "release_count": self.release_count,
+            "readme": self.readme,
+            "license": self.license,
+            "proj_short_desc": self.proj_short_desc,
+            "star_count": self.stargazers_count,
+            "commit_count": self.commits_count,
+            "watcher_count": self.watchers_count,
+            "fork_count": self.forks_count,
+            "pr_count": self.prs_count,
+            "open_issue_count": self.open_issue_count,
+            "close_issue_count": self.close_issue_count,
+            "dependency_count": self.dependencies
         }
 
 
