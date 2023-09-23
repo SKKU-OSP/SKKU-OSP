@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
 import Select from 'react-select';
 import { BsXLg, BsCalendar } from 'react-icons/bs';
@@ -8,6 +7,11 @@ import LoaderIcon from 'react-loader-icon';
 import DatePicker from 'react-datepicker';
 import AuthContext from '../../../../utils/auth-context';
 import { getAuthConfig } from '../../../../utils/auth';
+
+import ReactQuill, { Quill } from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import ImageResize from 'quill-image-resize';
+Quill.register('modules/ImageResize', ImageResize);
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './ArticleEdit.css';
@@ -39,7 +43,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const getCurrentDateTime = () => new Date();
-  const editorRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -155,31 +158,28 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       window.alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 수정하시겠습니까?')) {
-      // 수정한 글 저장
-      if (editorRef.current) {
-        const response = await axios.post(
-          urlEditArticle,
-          {
-            title: title,
-            content: bodyText,
-            is_notice: false,
-            anonymous_writer: false,
-            article_tags: selectTags,
-            article_file: articleFile,
-            ...(board.board_type === 'Recruit' && {
-              period_start: startDate,
-              period_end: endDate,
-              team_id: selectTeam.value
-            })
-          },
-          getAuthConfig()
-        );
-        const res = response.data;
-        console.log(res);
-        if (res['status'] === 'success') {
-          window.alert('수정이 완료되었습니다!');
-          window.location.href = `/community/article/` + articleID + `/`;
-        }
+      const response = await axios.post(
+        urlEditArticle,
+        {
+          title: title,
+          content: bodyText,
+          is_notice: false,
+          anonymous_writer: false,
+          article_tags: selectTags,
+          article_file: articleFile,
+          ...(board.board_type === 'Recruit' && {
+            period_start: startDate,
+            period_end: endDate,
+            team_id: selectTeam.value
+          })
+        },
+        getAuthConfig()
+      );
+      const res = response.data;
+      console.log(res);
+      if (res['status'] === 'success') {
+        window.alert('수정이 완료되었습니다!');
+        window.location.href = `/community/article/` + articleID + `/`;
       }
     }
   };
@@ -189,11 +189,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   };
 
   const handleBodyChange = (e) => {
-    setBodyText(e.target.getContent());
-  };
-
-  const handleEditorInit = (editor) => {
-    editorRef.current = editor;
+    setBodyText(e);
   };
 
   // File
@@ -306,6 +302,66 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     </div>
   );
 
+  const modules = {
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ font: [] }],
+        [{ align: [] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{ list: 'ordered' }, { list: 'bullet' }, 'link'],
+        [
+          {
+            color: [
+              '#000000',
+              '#e60000',
+              '#ff9900',
+              '#ffff00',
+              '#008a00',
+              '#0066cc',
+              '#9933ff',
+              '#ffffff',
+              '#facccc',
+              '#ffebcc',
+              '#ffffcc',
+              '#cce8cc',
+              '#cce0f5',
+              '#ebd6ff',
+              '#bbbbbb',
+              '#f06666',
+              '#ffc266',
+              '#ffff66',
+              '#66b966',
+              '#66a3e0',
+              '#c285ff',
+              '#888888',
+              '#a10000',
+              '#b26b00',
+              '#b2b200',
+              '#006100',
+              '#0047b2',
+              '#6b24b2',
+              '#444444',
+              '#5c0000',
+              '#663d00',
+              '#666600',
+              '#003700',
+              '#002966',
+              '#3d1466',
+              'custom-color'
+            ]
+          },
+          { background: [] }
+        ],
+        ['image', 'video'],
+        ['clean']
+      ]
+    },
+    ImageResize: {
+      parchment: Quill.import('parchment')
+    }
+  };
+
   return (
     <>
       {myArticle ? (
@@ -385,30 +441,11 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                   )}
                 </>
               )}
-              <Editor
-                initialValue={bodyText}
-                onInit={handleEditorInit}
+              <ReactQuill
+                value={bodyText}
                 onChange={handleBodyChange}
-                init={{
-                  selector: board,
-                  custom_undo_redo_levels: 10,
-                  height: 350,
-                  branding: false,
-                  statusbar: false,
-                  paste_data_images: true,
-                  plugins: [
-                    'advlist autolink lists link image charmap print preview anchor',
-                    'searchreplace visualblocks code fullscreen',
-                    'insertdatetime media table paste code help wordcount',
-                    'undo',
-                    'redo'
-                  ],
-                  toolbar:
-                    'undo redo | fontfamily ' +
-                    'bold italic underline strikethrough forecolor backcolor align | ' +
-                    'removeformat help| image'
-                }}
-                style={{ zIndex: 1 }}
+                modules={modules}
+                style={{ minHeight: '350px', zIndex: '1' }}
               />
               <Select
                 placeholder={'Tag'}
