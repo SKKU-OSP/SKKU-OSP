@@ -23,6 +23,7 @@
     "bootstrap-icons": "^1.10.5",
     "chart.js": "^4.3.3",
     "chartjs-chart-error-bars": "^4.3.0",
+    "quill-image-resize": "^3.0.9",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
     "react-datepicker": "^4.16.0",
@@ -30,6 +31,7 @@
     "react-icons": "^4.10.1",
     "react-js-pagination": "^3.0.3",
     "react-loader-icon": "^1.0.1",
+    "react-quill": "^2.0.0",
     "react-router": "^6.14.1",
     "react-router-dom": "^6.14.0",
     "react-select": "^5.7.3"

@@ -270,3 +270,12 @@ ul.pagination li a:hover,
 ul.pagination li a.active {
   color: var(--main-black);
 }
+
+.ql-snow {
+  border-top: 0 !important;
+  margin-left: -1px;
+}
+
+.ql-editor {
+  height: 400px;
+}
