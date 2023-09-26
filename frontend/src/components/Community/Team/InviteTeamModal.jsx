@@ -9,11 +9,10 @@ import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
-const InviteTeamModal = () => {
+const InviteTeamModal = (props) => {
   const postUrl = serverUrl + '/team/api/team-invite-on-teamboard';
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const [show, setShow] = useState(false);
+  const handleClose = () => props.setShow(false);
+  const handleShow = () => props.setShow(true);
 
   //AXIOS GET
   const [teams, setTeams] = useState([]);
@@ -91,8 +90,8 @@ const InviteTeamModal = () => {
   };
   return (
     <Form>
-      <BsFillPersonPlusFill onClick={handleShow} />
-      <Modal show={show} onHide={handleClose}>
+      {/* <BsFillPersonPlusFill onClick={handleShow} /> */}
+      <Modal show={props.show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
             <h5>팀 초대하기</h5>
@@ -102,7 +101,7 @@ const InviteTeamModal = () => {
         <Modal.Body>
           <Form.Group className="mb-4" controlId="MemberName">
             <Form.Label>팀원</Form.Label>
-            <Form.Control type="text" style={{ display: 'block' }} />
+            <Form.Control type="text" style={{ display: 'block' }} placeholder={props.username} readOnly />
           </Form.Group>
 
           <div className="mb-4">

@@ -20,6 +20,8 @@ const TeamApplication = ({ handleClose, show }) => {
 
   const [received, setReceived] = useState([]);
   const [sent, setSent] = useState([]);
+  const [receivedLength, setReceivedLength] = useState(0);
+  const [sentLength, setSentLength] = useState(0);
 
   useEffect(() => {
     const getApplications = async () => {
@@ -33,7 +35,8 @@ const TeamApplication = ({ handleClose, show }) => {
         } else {
           setReceived(res.data.received);
           setSent(res.data.sent);
-          console.log(res.data.sent);
+          setReceivedLength(res.data.received.length);
+          setSentLength(res.data.sent.length);
         }
       } catch (error) {
         console.log(error);
@@ -107,7 +110,9 @@ const TeamApplication = ({ handleClose, show }) => {
       ),
       tabCont: (
         <>
-          {received &&
+          {receivedLength === 0 ? (
+            <div className="EmptyApp">받은 지원서가 없습니다!</div>
+          ) : (
             received.map((application) => (
               <div
                 key={`recv-${application.id}`}
@@ -145,7 +150,8 @@ const TeamApplication = ({ handleClose, show }) => {
                   </Button>
                 </div>
               </div>
-            ))}
+            ))
+          )}
         </>
       )
     },
@@ -161,7 +167,9 @@ const TeamApplication = ({ handleClose, show }) => {
       ),
       tabCont: (
         <>
-          {sent &&
+          {sentLength === 0 ? (
+            <div className="EmptyApp">보낸 지원서가 없습니다!</div>
+          ) : (
             sent.map((application) => (
               <div
                 key={`sent-${application.id}`}
@@ -189,7 +197,8 @@ const TeamApplication = ({ handleClose, show }) => {
                   </Button>
                 </div>
               </div>
-            ))}
+            ))
+          )}
         </>
       )
     }
@@ -213,7 +222,8 @@ const TeamApplication = ({ handleClose, show }) => {
                 })}
               </Container>
             </Navbar>
-            <div>{tabContArr[activeIndex].tabCont}</div>
+
+            <div className="AppBody">{tabContArr[activeIndex].tabCont}</div>
           </div>
         </Modal.Body>
       </Modal>
