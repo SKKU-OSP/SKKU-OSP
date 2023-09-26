@@ -1,39 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import classes from './ChallengePage.module.css';
 import { FaTrophy } from 'react-icons/fa';
-import { IoEllipseOutline } from 'react-icons/io5';
-import ApplyTeamModal from '../components/Community/Team/ApplyTeamModal';
+import AuthContext from '../utils/auth-context';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 const ChallengePage = () => {
   const [achievements, setAchievements] = useState([]);
   const [total, setTotal] = useState(1);
-  const [show, setShow] = useState(false);
+  const { userId } = useContext(AuthContext);
 
   useEffect(() => {
-    try {
-      const url = serverUrl + '/challenge/api/list/72';
-
-      const getAchievements = async () => {
-        const response = await axios.get(url);
-        const res = response.data;
-        if (res.status === 'success') {
-          setTotal(res.data.total_accounts);
-          setAchievements(res.data.achievements);
-        } else {
-          console.log(res.message);
-        }
-      };
-      getAchievements();
-    } catch (error) {
-      console.log('error', error);
+    if (userId) {
+      try {
+        const url = serverUrl + `/challenge/api/list/${userId}`;
+        const getAchievements = async () => {
+          const response = await axios.get(url);
+          const res = response.data;
+          if (res.status === 'success') {
+            setTotal(res.data.total_accounts);
+            setAchievements(res.data.achievements);
+            console.log(res.data.achievements);
+          } else {
+            console.log(res.message);
+          }
+        };
+        getAchievements();
+      } catch (error) {
+        console.log('error', error);
+      }
     }
-  }, []);
+  }, [userId]);
 
   let numAchieved = achievements.filter((obj) => obj.acheive_date !== null).length;
-  let totalnum = achievements.length;
+  let totalnum = Math.max(achievements.length, 1);
 
   const progressWidth = Math.round((numAchieved / totalnum) * 100);
   const colorMap = { 1: '#DB944B', 2: '#D9D9D9', 3: '#F9D978' };
@@ -121,8 +122,11 @@ const ChallengePage = () => {
                         <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
                       </div>
                       <div className={classes.Progress}>
-                        <div className={classes.ProgressBar} style={{ width: `${prog.achieve}%` }}>
-                          {prog.achieve}%
+                        <div
+                          className={classes.ProgressBar}
+                          style={{ width: `${(prog.progress / prog.challenge.max_progress) * 100}%` }}
+                        >
+                          {(prog.progress / prog.challenge.max_progress) * 100}%
                         </div>
                       </div>
                     </div>
