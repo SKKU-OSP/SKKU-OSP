@@ -13,6 +13,7 @@ class ChallengeSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "tier",
+            "max_progress"
         )
 
 
