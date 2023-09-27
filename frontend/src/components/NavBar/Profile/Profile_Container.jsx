@@ -29,5 +29,12 @@ export default function Profile_Container({ iconSize }) {
     }
   };
 
-  return <Profile_Presenter iconSize={iconSize} photo={domain_url + photo} sendLogoutRequest={sendLogoutRequest} />;
+  return (
+    <Profile_Presenter
+      username={username}
+      iconSize={iconSize}
+      photo={domain_url + photo}
+      sendLogoutRequest={sendLogoutRequest}
+    />
+  );
 }
