@@ -2,6 +2,13 @@
   .articleButton {
     margin-right: 0 !important;
   }
+  .articleTeam {
+    flex-direction: column !important;
+  }
+  .articleTeamDivide {
+    max-width: 100% !important;
+    justify-content: space-between !important;
+  }
 }
 
 .articleBar {
@@ -25,25 +32,36 @@
   color: var(--main-selected-color);
 }
 
-.articleTeam > div {
-  max-width: 40%;
+.articleTeam {
+  justify-content: space-between;
+  gap: 20px;
 }
 
-.articleTeam {
+.articleTeamDivide > div {
+  overflow: hidden;
+  word-wrap: break-word;
+  min-width: 100px;
+}
+
+.articleTeamDivide {
   gap: 20px;
-  justify-content: space-between;
+  display: flex;
   flex-direction: row !important;
+  max-width: 50%;
 }
 
 .articleBody,
 .articleTeam {
   display: flex;
-  flex-direction: column;
   border-bottom: 1px solid var(--main-border-color);
   border-right: 1px solid var(--main-border-color);
   border-left: 1px solid var(--main-border-color);
   margin-left: -1px;
   padding: 30px 20px 20px 20px;
+}
+
+.articleBody {
+  flex-direction: column;
 }
 
 .articleTitle {

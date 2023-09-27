@@ -162,47 +162,50 @@ function ContentView(props) {
 
       {article.board.board_type == 'Recruit' && (
         <div className={styles.articleTeam}>
-          <div>
-            <img
-              src={`${domain_url}${team.image}`}
-              style={{ borderRadius: '50%', width: '100px', height: '100px' }}
-            ></img>
-          </div>
-          <div>
-            <div className="article-info-name">{team.name}</div>
-            <div style={{ wordWrap: 'break-word' }}>{team.description}</div>
-          </div>
-          <div>
+          <span className={styles.articleTeamDivide}>
             <div>
-              <div className="article-info-name">모집 기간</div>
-              <div>시작: {recruit_start_date.toLocaleString()}</div>
-              <div>마감: {recruit_end_date.toLocaleString()}</div>
+              <img
+                src={`${domain_url}${team.image}`}
+                style={{ borderRadius: '50%', width: '100px', height: '100px' }}
+              ></img>
             </div>
-          </div>
-          {now < recruit_start_date ? (
-            <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-              모집 전
-            </button>
-          ) : now < recruit_end_date ? (
-            <>
-              <button type="button" className="btn btn-outline-primary" onClick={() => setShow(true)}>
-                지원하기
+            <div>
+              <div className="article-info-name">{team.name}</div>
+              <div>{team.description}</div>
+            </div>
+          </span>
+          <span className={styles.articleTeamDivide}>
+            <span>
+              <div>
+                <div className="article-info-name">모집 기간</div>
+                <div>시작: {recruit_start_date.toLocaleString()}</div>
+                <div>마감: {recruit_end_date.toLocaleString()}</div>
+              </div>
+            </span>
+            {now < recruit_start_date ? (
+              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                모집 전
               </button>
-              {/* () => openApplyModal(team.name, team.description, username, show, setShow, article.id) */}
-              <ApplyTeamModal
-                teamName={team.name}
-                teamDesc={team.description}
-                username={username}
-                show={show}
-                onShowTeamApplyModal={setShow}
-                articleId={article.id}
-              />
-            </>
-          ) : (
-            <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-              모집 마감
-            </button>
-          )}
+            ) : now < recruit_end_date ? (
+              <>
+                <button type="button" className="btn btn-outline-primary" onClick={() => setShow(true)}>
+                  지원하기
+                </button>
+              </>
+            ) : (
+              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                모집 마감
+              </button>
+            )}
+          </span>
+          <ApplyTeamModal
+            teamName={team.name}
+            teamDesc={team.description}
+            username={username}
+            show={show}
+            onShowTeamApplyModal={setShow}
+            articleId={article.id}
+          />
         </div>
       )}
     </div>
