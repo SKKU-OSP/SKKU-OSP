@@ -36,9 +36,13 @@
   }
   .nav-item {
     text-align: start !important;
+    margin-right: 10px;
+  }
+  .community-nav-items {
+    width: auto !important;
   }
   .hidden {
-    display: none;
+    display: none !important;
   }
 }
 

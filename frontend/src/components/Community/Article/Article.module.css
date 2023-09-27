@@ -1,3 +1,9 @@
+@media screen and (max-width: 767px) {
+  .articleButton {
+    margin-right: 0 !important;
+  }
+}
+
 .articleBar {
   height: 50px;
   display: flex;
@@ -6,6 +12,11 @@
   padding: 0px 20px;
   border-bottom: 1px solid var(--main-border-color);
   border-right: 1px solid var(--main-border-color);
+}
+
+.articleButton {
+  width: 80px;
+  margin-right: 50px;
 }
 
 .articleBoard {
