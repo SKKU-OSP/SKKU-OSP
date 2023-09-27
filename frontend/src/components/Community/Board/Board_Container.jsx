@@ -29,7 +29,7 @@ export default function Board_Container() {
 
   const getArticles = async (page) => {
     try {
-      const response = await axios.get(server_url + `/community/board/${tabName}/?page_number=${page}`);
+      const response = await axios.get(server_url + `/community/api/board/${tabName}/?page_number=${page}`);
       const res = response.data;
       if (res.status === 'success') {
         console.log(res.data);
