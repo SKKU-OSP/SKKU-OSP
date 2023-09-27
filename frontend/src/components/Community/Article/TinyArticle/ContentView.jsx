@@ -101,7 +101,7 @@ function ContentView(props) {
   return (
     <div className="d-flex flex-column">
       <div className={styles.articleBar}>
-        <Button variant="secondary" style={{ width: '80px', marginRight: '50px' }} onClick={() => backToBoard(board)}>
+        <Button variant="secondary" className={styles.articleButton} onClick={() => backToBoard(board)}>
           글 목록
         </Button>
         <span className={styles.articleBoard}> {board.name} 게시판</span>
