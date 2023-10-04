@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import { getAuthConfig } from '../../../utils/auth';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function ProfileInfo(props) {
   const info = props.userInfo;
@@ -14,6 +14,15 @@ function ProfileInfo(props) {
   const [editUserInfo, setEditUserInfo] = useState();
   const server_url = import.meta.env.VITE_SERVER_URL;
   const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
+  const navigate = useNavigate();
+
+  const moveDashBoard = () => {
+    navigate('dashboard', {
+      state: {
+        username: username
+      }
+    });
+  };
 
   useEffect(() => setUserInfo(info), [info]);
 
@@ -53,7 +62,7 @@ function ProfileInfo(props) {
                 </button>
               ) : (
                 <>
-                  <button className="info_btn-1">
+                  <button className="info_btn-1" onClick={moveDashBoard}>
                     <span className="info_btn-1-text">대시보드</span>
                   </button>
                   <button className="info_btn-2" onClick={handleEditClick}>

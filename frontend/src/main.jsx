@@ -5,6 +5,7 @@ import RootLayout from './routes/RootLayout';
 import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
 import UserPage from './routes/UserPage';
+import DashBoard from './components/User/DashBoard/DashBoard';
 import ChallengePage from './routes/ChallengePage';
 import CommunityLayout from './routes/CommunityLayout';
 import AccountsLayout from './routes/AccountsLayout';
@@ -114,6 +115,10 @@ const router = createBrowserRouter([
       {
         path: 'user/:username',
         element: <UserPage />
+      },
+      {
+        path: 'user/:username/dashboard',
+        element: <DashBoard />
       },
       {
         path: 'repository/:username',
