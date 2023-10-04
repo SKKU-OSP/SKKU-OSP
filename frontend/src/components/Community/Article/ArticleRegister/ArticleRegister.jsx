@@ -173,7 +173,13 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       console.log(res);
       if (res['status'] === 'success') {
         window.alert('등록이 완료되었습니다!');
-        navigate(`/community/board/${boardName}/`);
+        if (boardName === '팀 모집') {
+          navigate(`/community/recruit/${boardName}/`);
+        } else if (boardName === '자유' || boardName === '정보' || boardName === '질문' || boardName === '홍보') {
+          navigate(`/community/board/${boardName}/`);
+        } else {
+          navigate(`/community/team/${boardName}/`);
+        }
       } else {
         window.alert(res['message']);
         return;
@@ -203,7 +209,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       prevObj[nextNum] = nextNum;
       return prevObj;
     });
-    // setArticleFile((prev) => [...prev, prev.length + 1]);//키 값 줄일 때 주의점 numFile 줄이면 안돼!!
     if (inputRef.current && inputRef.current.files && inputRef.current.files.length > 0) {
       const newFileObj = { ...fileObj };
       const newArticleFiles = [...articleFile];
@@ -216,13 +221,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       setArticleFile(newArticleFiles);
     }
     setNumFile(nextNum);
-
-    // console.log(numFile);
-    // console.log(nextNum + "v");
   };
-  // console.log(Object.keys({temp:1}))
-  // console.log("file", articleFile);
-  // console.log("Obj", fileObj);
 
   const inputRef = useRef < HTMLInputElement > null;
 
@@ -233,11 +232,18 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     const newFileObj = setFileObj(updatedFileObj);
 
     const store = new DataTransfer();
-    Object.values(newFileObj).forEach((file) => store.items.add(file));
+    Object.values(newFileObj).forEach((file) => {
+      if (file instanceof File) {
+        store.items.add(file);
+      }
+    });
 
     if (inputRef.current) {
       inputRef.current.files = store.files;
     }
+    const updatedArticleFiles = { ...articleFile };
+    delete updatedArticleFiles[id];
+    setArticleFile(updatedArticleFiles);
   };
 
   const handleFileChange = (event) => {
@@ -250,7 +256,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     console.log('fileObj', fileObjs);
   };
 
-  // Tag
   // Tag
   const handleOptionSelect = (selectedTags) => {
     setSelectTags(selectedTags);
@@ -315,6 +320,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     })
   };
 
+  // 뒤로가기 버튼
   const onBack = () => {
     // TODO 팀 게시판의 경우를 고려해서 navigate(`/community/team/${boardName}/`) 을 사용해야함
     if (boardName === '팀 모집') {
@@ -577,24 +583,20 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
           </div>
           <div id="article-file-container">
             {fileObj &&
-              Object.keys(fileObj).map(
-                (
-                  id //파일 추가 input
-                ) => (
-                  <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
-                    <input
-                      type="file"
-                      id={`article-file-${id}`}
-                      name={`article_file_${id}`}
-                      className="form-control article-file"
-                      onChange={handleFileChange}
-                    />
-                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}>
-                      <BsXLg />
-                    </button>
-                  </div>
-                )
-              )}
+              Object.keys(fileObj).map((id) => (
+                <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
+                  <input
+                    type="file"
+                    id={`article-file-${id}`}
+                    name={`article_file_${id}`}
+                    className="form-control article-file"
+                    onChange={handleFileChange}
+                  />
+                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}>
+                    <BsXLg />
+                  </button>
+                </div>
+              ))}
           </div>
         </form>
       </div>
