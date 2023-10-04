@@ -273,6 +273,7 @@ class NotificationListView(APIView):
         notifications = NotificationSerializer(notifications, many=True).data
         try:
             for noti in notifications:
+                print(noti["type"], noti["route_id"])
                 if noti['type'] == 'comment':
                     noti['icon'] = 'comment'
                     noti['feedback'] = noti['route_id']
@@ -296,15 +297,21 @@ class NotificationListView(APIView):
                     noti['feedback'] = BoardSerializer(board).data
                 elif noti['type'] == 'team_invite_result':
                     noti['icon'] = 'group_add'
-                    board = Board.objects.get(team__id=noti['route_id'])
-                    noti['feedback'] = BoardSerializer(board).data
+                    # board = Board.objects.get(team__id=noti['route_id'])
+                    # noti['feedback'] = BoardSerializer(board).data
+                    noti['feedback'] = "team_invite_result"
+
         except Exception as e:
             print("Exception get_notifications", e)
+            res['status'] = 'fail'
+            return Response(res)
+
         data['show_new_noti'] = show_new_noti
         data['show_new_app'] = show_new_app
         data['show_new_app_result'] = show_new_app_result
         data["notifications"] = notifications
         res['data'] = data
+        res['status'] = 'success'
         return Response(res)
 
 
