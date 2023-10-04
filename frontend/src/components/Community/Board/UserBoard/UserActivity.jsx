@@ -23,6 +23,8 @@ function UserActivity() {
   };
 
   useEffect(() => {
+    setIsLoadedArticles(false);
+
     const getWrittenArticle = async () => {
       try {
         const responseArticles = await axios.get(server_url + `/community/api/user-articles/`, getAuthConfig());
@@ -44,8 +46,9 @@ function UserActivity() {
       try {
         const responseComments = await axios.get(server_url + `/community/api/user-comments/`, getAuthConfig());
         const resComments = responseComments.data;
+        console.log('comment', resComments);
         if (resComments.status === 'success') {
-          const sortedComments = resComments.data.artclecomments.sort(
+          const sortedComments = resComments.data.articlecomments.sort(
             (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
           );
           setComments(sortedComments);
@@ -104,15 +107,21 @@ function UserActivity() {
 
       {isLoadedArticles ? (
         <>
-          {tabName === 'article' && articles && articles.length > 0
-            ? articles.map((a) => <UserArticle key={a.id} article={a} />)
-            : null}
-          {tabName === 'comment' && comments && comments.length > 0
-            ? comments.map((a) => <UserComment key={a.id} article={a} />)
-            : null}
-          {tabName === 'scrap' && scraps && scraps.length > 0
-            ? scraps.map((a) => <UserArticle key={a.id} article={a} />)
-            : null}
+          {tabName === 'article' && articles && articles.length > 0 ? (
+            articles.map((a) => <UserArticle key={a.id} article={a} />)
+          ) : (
+            <UserArticle article={{}} />
+          )}
+          {tabName === 'comment' && comments && comments.length > 0 ? (
+            comments.map((a) => <UserComment key={a.id} article={a} />)
+          ) : (
+            <UserComment article={{}} />
+          )}
+          {tabName === 'scrap' && scraps && scraps.length > 0 ? (
+            scraps.map((a) => <UserArticle key={a.id} article={a} />)
+          ) : (
+            <UserArticle article={{}} />
+          )}
         </>
       ) : (
         <LoaderIcon style={{ marginTop: '20px' }} />
