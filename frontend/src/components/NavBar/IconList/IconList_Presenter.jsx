@@ -1,10 +1,9 @@
+import { useState } from 'react';
 import ChatMessage_Container from '../Chat/ChatMessage_Container';
 import Notification_Container from '../Notification/Notification_Container';
 import TeamApplication_Container from '../TeamApplication/TeamApplication_Container';
 import Profile_Container from '../Profile/Profile_Container';
-import AdminDropDown from '../adminNav/adminDropDown';
-import { useScrollTrigger } from '@mui/material';
-import { useState } from 'react';
+import AdminDropDown from '../adminNav/AdminDropDown';
 
 function IconList_Presenter({ iconSize, username }) {
   const [showTeamApp, setShowTeamApp] = useState(false);
