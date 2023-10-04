@@ -5,7 +5,8 @@ import CreateTeamModal from '../CreateTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
-import { BsStarFill, BsPeopleFill } from 'react-icons/bs';
+import { BsAwardFill, BsPeopleFill } from 'react-icons/bs';
+import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -50,39 +51,41 @@ function MyTeamList() {
         <CreateTeamModal show={modalShow} onClose={handleClose} />
       </div>
 
-      {myTeams && myTeams.length > 0
-        ? myTeams.map((team) => (
-            <div className="board-article" key={team.id}>
-              <div>
-                <Link className="board-article-title" to={`/community/team/${team.name}`}>
-                  <h4 className="board-article-title">{team.name}</h4>
-                </Link>
-              </div>
-              <div>
-                <div className="inline-block">{team.description}</div>
-                <div className="text-end">
-                  {team.leader && (
-                    <span className="dropdown-button">
-                      <BsStarFill />
-                      <DropdownButton title={team.leader} variant="link" className="dropdown-toggle">
-                        <Dropdown.Item
-                          onClick={() => {
-                            navigate(`/user/${team.leader}`);
-                          }}
-                        >
-                          프로필
-                        </Dropdown.Item>
-                        <Dropdown.Item>메세지</Dropdown.Item>
-                      </DropdownButton>
-                    </span>
-                  )}
-                  <BsPeopleFill />
-                  {` ${team.member_cnt}명`}
-                </div>
+      {myTeams && myTeams.length > 0 ? (
+        myTeams.map((team) => (
+          <div className="board-article" key={team.id}>
+            <div>
+              <Link className="board-article-title" to={`/community/team/${team.name}`}>
+                <h4 className="board-article-title">{team.name}</h4>
+              </Link>
+            </div>
+            <div>
+              <div className="inline-block">{team.description}</div>
+              <div className="text-end">
+                {team.leader && (
+                  <span className="dropdown-button">
+                    <BsAwardFill />
+                    <DropdownButton title={team.leader} variant="link" className="dropdown-toggle">
+                      <Dropdown.Item
+                        onClick={() => {
+                          navigate(`/user/${team.leader}`);
+                        }}
+                      >
+                        프로필
+                      </Dropdown.Item>
+                      <Dropdown.Item>메세지</Dropdown.Item>
+                    </DropdownButton>
+                  </span>
+                )}
+                <BsPeopleFill />
+                {` ${team.member_cnt}명`}
               </div>
             </div>
-          ))
-        : null}
+          </div>
+        ))
+      ) : (
+        <LoaderIcon style={{ marginTop: '20px' }} />
+      )}
     </div>
   );
 }
