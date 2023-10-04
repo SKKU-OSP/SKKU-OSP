@@ -53,7 +53,7 @@ function MainHeader_Presenter(props) {
           <SearchBox />
           {username && (
             <div className="on-desktop p-2">
-              <IconList_Container />
+              <IconList_Container username={username} />
             </div>
           )}
         </div>
