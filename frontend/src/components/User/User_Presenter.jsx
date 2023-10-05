@@ -1,21 +1,21 @@
-import './User.css';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import ProfileInfo from './TinyUser/ProfileInfo';
 import ProfileTab from './TinyUser/ProfileTab';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useState } from 'react';
-import axios from 'axios';
 import { getAuthConfig } from '../../utils/auth';
 import Spinner from 'react-bootstrap/Spinner';
+import './User.css';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 function User_Presenter() {
   const [userInfo, setUserInfo] = useState();
   const [error_occur, setError] = useState(false);
   const { username } = useParams();
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const getUrl = server_url + '/user/api/profile-intro/' + username;
   useEffect(() => {
     const getProfileInfo = async () => {
+      const getUrl = server_url + '/user/api/profile-intro/' + username;
       try {
         const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;
@@ -27,7 +27,8 @@ function User_Presenter() {
       }
     };
     getProfileInfo();
-  }, []);
+  }, [username]);
+
   return (
     <>
       {error_occur ? (
