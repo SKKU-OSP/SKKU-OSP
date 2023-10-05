@@ -55,6 +55,8 @@ urlpatterns = [
          views_profile.ProfileMainView.as_view(), name='profile-main'),
     path('api/dashboard/<username>/',
          views_dashboard.UserDashboardView.as_view(), name="UserDashboardView"),
+    path('api/testresult/<username>/',
+         views_dashboard.DevTypeTestSaveView.as_view(), name='DevTypeTestSaveView'),
 
     path('api/guideline/<username>/',
          views.GuidelineView.as_view(), name='guideline')
