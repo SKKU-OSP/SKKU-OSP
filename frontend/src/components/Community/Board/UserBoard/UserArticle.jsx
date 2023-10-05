@@ -35,6 +35,14 @@ export default function UserArticle(props) {
     }
   };
 
+  const onBoard = () => {
+    if (article.board.board_type === 'Team') {
+      navigate(`/community/team/${article.board.name}`);
+    } else if (article.board.board_type === 'General') {
+      navigate(`/community/board/${article.board.name}`);
+    }
+  };
+
   useEffect(() => {
     if (article?.pub_date) {
       getDate(article.pub_date);
@@ -60,12 +68,7 @@ export default function UserArticle(props) {
             <span>탈퇴한 이용자 </span>
           )}
           · {pubDate}
-          <div
-            className="board-article-meta-type"
-            onClick={() => {
-              navigate(`/community/board/${article.board.name}`);
-            }}
-          >
+          <div className="board-article-meta-type" onClick={onBoard}>
             {article.board.name} 게시판
           </div>
         </h6>
