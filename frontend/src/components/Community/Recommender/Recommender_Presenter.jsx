@@ -2,12 +2,17 @@ import Spinner from 'react-bootstrap/Spinner';
 import styles from './Recommender.module.css';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+
+const serverUrl = import.meta.env.VITE_SERVER_URL;
 function Recommender_Presenter(props) {
   const teams = props.teams;
   const teamMembers = props.teamMembers;
   const selectedTeam = props.selectedTeam;
   const onMyProfile = props.onMyProfile;
   const handleItemClick = props.handleItemClick;
+  const isReady = props.isReady;
+  const error = props.error;
+
   return (
     <div className="col-9">
       <div className={styles.recommendBar}>
@@ -18,7 +23,7 @@ function Recommender_Presenter(props) {
             </Dropdown.Item>
           ))}
         </DropdownButton>
-        <span className={styles.recommendTitle}>'{selectedTeam.name}'팀 맞춤 유저 추천</span>
+        <span className={styles.recommendTitle}>&apos;{selectedTeam.name}&apos;팀 맞춤 유저 추천</span>
         <DropdownButton
           id="dropdown-basic-button"
           title={selectedTeam.name}
@@ -33,13 +38,15 @@ function Recommender_Presenter(props) {
         </DropdownButton>
       </div>
       <div className={styles.recommendBoard}>
-        {teamMembers ? (
+        {!isReady && <Spinner animation="border" className="mx-auto mt-5" />}
+        {isReady && error && <div className="mx-auto mt-5">{error}</div>}
+        {isReady && !error && teamMembers && (
           <>
             {teamMembers.length > 0 ? (
               teamMembers.map((member) => (
                 <div key={member.user.id} className={`col-6 d-flex flex-row ${styles.recommendMember}`}>
                   <div className="col-4 d-flex justify-content-center align-items-center">
-                    <img src={member.photo} alt={member.name} className={styles.memberImage} />
+                    <img src={serverUrl + member.photo} alt={member.name} className={styles.memberImage} />
                   </div>
                   <div className="teamMemberInfo col-8 d-flex flex-column gap-2">
                     <DropdownButton
@@ -53,7 +60,7 @@ function Recommender_Presenter(props) {
                     </DropdownButton>
                     <span className={styles.memberIntro}>{member.introduction}</span>
                     <div className="d-flex flex-row flex-wrap gap-1">
-                      {member.interests.slice(0, 5).map((interest, index) => (
+                      {member.interests.slice(0, 5).map((interest) => (
                         <span className={styles.memberTag} key={interest.id}>
                           #{interest.tag.name}
                         </span>
@@ -64,11 +71,9 @@ function Recommender_Presenter(props) {
                 </div>
               ))
             ) : (
-              <>팀원이 없습니다.</>
+              <div className="mx-auto mt-5">팀원이 없습니다.</div>
             )}
           </>
-        ) : (
-          <Spinner animation="border" style={{ position: 'absolute', top: '50%', left: '50%' }} />
         )}
       </div>
     </div>

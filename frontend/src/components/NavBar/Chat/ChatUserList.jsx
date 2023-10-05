@@ -50,16 +50,12 @@ const ChatUserList = (props) => {
               >
                 <div className="d-flex">
                   <div className="opponent-account me-2">
-                    <img src={`${member.account.photo}`} className="opponent-profile" />
+                    <img src={`${serverUrl + member.account.photo}`} className="opponent-profile" />
                   </div>
                   <div className="my-auto">
                     <div className="opponent-name">{member.account.user.username}</div>
                   </div>
-                  {member.unread === 0 ? (
-                    <div />
-                  ) : (
-                    <div className="ms-auto my-auto me-2 unread-count">{member.unread}</div>
-                  )}
+                  {member.unread > 0 && <div className="ms-auto my-auto me-2 unread-count">{member.unread}</div>}
                 </div>
               </li>
             ))}
