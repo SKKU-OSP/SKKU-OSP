@@ -273,7 +273,6 @@ class NotificationListView(APIView):
         notifications = NotificationSerializer(notifications, many=True).data
         try:
             for noti in notifications:
-                print(noti["type"], noti["route_id"])
                 if noti['type'] == 'comment':
                     noti['icon'] = 'comment'
                     noti['feedback'] = noti['route_id']

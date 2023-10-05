@@ -1,17 +1,19 @@
 from django.contrib.auth.models import User
-from django.db.models import Avg, Sum, Subquery
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
+from django.db.models import Sum, Subquery
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from repository.models import GithubRepoStats
 from user.serializers_dashboard import GithubScoreResultSerializer
-from user.models import StudentTab, GithubScore, Account, GithubStatsYymm, AccountPrivacy
+from user.models import StudentTab, GithubScore, Account, GithubStatsYymm, AccountPrivacy, DevType
 
 from home.models import DistScore, DistFactor, AnnualOverview, Student
 from home.serializers import DistScoreDashboardSerializer, DistFactorDashboardSerializer, AnnualOverviewDashboardSerializer
 
-from handle_error import get_fail_res
+from handle_error import get_fail_res, get_missing_data_msg
 
 import time
 import logging
@@ -177,3 +179,50 @@ def get_nested_dict(keys):
     for key in keys:
         ret[key] = {}
     return ret
+
+
+class DevTypeTestSaveView(APIView):
+    def post(self, request, username):
+        dev_type = request.data.get('type')
+        if dev_type is None:
+            appended_msg = get_missing_data_msg('type')
+            return Response(get_fail_res('missing_required_data', appended_msg))
+        type_factors = request.data.get('factor')
+        if type_factors is None:
+            appended_msg = get_missing_data_msg('factor')
+            return Response(get_fail_res('missing_required_data', appended_msg))
+        try:
+            account = Account.objects.get(user__username=username)
+        except ObjectDoesNotExist:
+            logging.error("account DoesNotExist", e)
+            return Response(get_fail_res('user_not_found'))
+        if request.user.username != username:
+            return Response(get_fail_res('access_permission_denied'))
+
+        try:
+            devtype_objs = DevType.objects.filter(account=account)
+            if len(devtype_objs) == 0:
+                devtype = DevType(
+                    account=account,
+                    typeA=type_factors[0],
+                    typeB=type_factors[1],
+                    typeC=type_factors[2],
+                    typeD=type_factors[3],
+                    typeE=0, typeF=0, typeG=0
+                )
+                devtype.save()
+            else:
+                devtype = devtype_objs.first()
+                devtype.typeA = type_factors[0]
+                devtype.typeB = type_factors[1]
+                devtype.typeC = type_factors[2]
+                devtype.typeD = type_factors[3]
+                devtype.save()
+        except DatabaseError as e:
+            logging.error(f"DevTypeTestSaveView DatabaseError: {e}")
+            return Response(get_fail_res('db_exception'))
+        except Exception as e:
+            logging.exception(f"DevTypeTestSaveView Exception: {e}")
+            return Response(get_fail_res('undefined_exception'))
+
+        return Response({'status': 'success', 'message': '저장했습니다.'})
