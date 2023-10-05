@@ -52,37 +52,48 @@ export default function UserComment(props) {
   return (
     <>
       <div className="board-article">
-        <h6>
-          {article.writer ? (
-            article.anonymous_writer ? (
-              <span>익명</span>
-            ) : (
-              <span className="dropdown-button">
-                <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                  <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                  <Dropdown.Item>메세지</Dropdown.Item>
-                </DropdownButton>
-              </span>
-            )
-          ) : (
-            <span>탈퇴한 이용자</span>
-          )}
-          · {pubDate}
-          <div className="board-article-meta-type" onClick={onBoard}>
-            {article.board.name} 게시판
-          </div>
-        </h6>
-        <h4 className="board-article-title" onClick={onArticle}>
-          {article.body}
-        </h4>
-        <div>
-          <h6 className="inline">{'\u00A0'}</h6>
-          <div className="board-article-meta-list">
-            <>
-              <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
-            </>
-          </div>
-        </div>
+        {article.body ? (
+          <>
+            <h6>
+              {article.writer ? (
+                article.anonymous_writer ? (
+                  <span>익명</span>
+                ) : (
+                  <span className="dropdown-button">
+                    <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                      <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
+                      <Dropdown.Item>메세지</Dropdown.Item>
+                    </DropdownButton>
+                  </span>
+                )
+              ) : (
+                <span>탈퇴한 이용자</span>
+              )}
+              · {pubDate}
+              <div
+                className="board-article-meta-type"
+                onClick={() => {
+                  navigate(`/community/board/${article.board.name}`);
+                }}
+              >
+                {article.board.name} 게시판
+              </div>
+            </h6>
+            <h4 className="board-article-title" onClick={onArticle}>
+              {article.body}
+            </h4>
+            <div>
+              <h6 className="inline">{'\u00A0'}</h6>
+              <div className="board-article-meta-list">
+                <>
+                  <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
+                </>
+              </div>
+            </div>
+          </>
+        ) : (
+          <h5>작성된 글이 없습니다.</h5>
+        )}
       </div>
     </>
   );
