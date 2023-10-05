@@ -45,7 +45,7 @@ function UserActivity() {
         const responseComments = await axios.get(server_url + `/community/api/user-comments/`, getAuthConfig());
         const resComments = responseComments.data;
         if (resComments.status === 'success') {
-          const sortedComments = resComments.data.artclecomments.sort(
+          const sortedComments = resComments.data.articlecomments.sort(
             (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
           );
           setComments(sortedComments);
