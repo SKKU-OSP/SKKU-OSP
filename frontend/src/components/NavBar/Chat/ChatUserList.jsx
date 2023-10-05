@@ -68,7 +68,7 @@ const ChatUserList = (props) => {
             >
               <div className="d-flex">
                 <div className="opponent-account me-2">
-                  <img src={props.targetMember.photo} className="opponent-profile" />
+                  <img src={serverUrl + props.targetMember.photo} className="opponent-profile" />
                 </div>
                 <div className="my-auto">
                   <div className="opponent-name">{props.targetMember.user.username}</div>
