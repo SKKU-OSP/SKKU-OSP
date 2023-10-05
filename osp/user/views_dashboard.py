@@ -8,7 +8,7 @@ from repository.models import GithubRepoStats
 from user.serializers_dashboard import GithubScoreResultSerializer
 from user.models import StudentTab, GithubScore, Account, GithubStatsYymm, AccountPrivacy
 
-from home.models import DistScore, DistFactor, AnnualOverview
+from home.models import DistScore, DistFactor, AnnualOverview, Student
 from home.serializers import DistScoreDashboardSerializer, DistFactorDashboardSerializer, AnnualOverviewDashboardSerializer
 
 from handle_error import get_fail_res
@@ -117,10 +117,7 @@ class UserDashboardView(APIView):
         dist_factor_data = DistFactorDashboardSerializer(
             dist_factor, many=True).data
 
-        factor_dist = {}
-        # 연도별 dictionary 할당
-        for year in years:
-            factor_dist[year] = {}
+        factor_dist = get_nested_dict(years)
         # 연도별 score 데이터 할당
         for obj in dist_score_data:
             year = obj["year"]
@@ -134,7 +131,14 @@ class UserDashboardView(APIView):
         data['factor_dist'] = factor_dist
         data["factors"] = ["score", "commit", "star", "pr", "issue"]
 
-        # TODO 유저의 factor 기여내역
+        # 유저의 factor 기여내역
+        annual_user_factor = get_nested_dict(years)
+        students = Student.objects.filter(github_id=github_id)
+        for student in students:
+            # year, score, commit, star, pr, issue 값 가져옴
+            user_factors = student.get_factors()
+            annual_user_factor[user_factors['year']] = user_factors
+        data['annual_user_factor'] = annual_user_factor
 
         # 전체 유저의 factor 기여내역 평균
         annual_overview = AnnualOverview.objects.get(case_num=0)
@@ -153,9 +157,7 @@ class UserDashboardView(APIView):
         data['dist_setting'] = dist_setting
 
         # 연도별 유저의 기여 factor 평균값
-        annual_factor_avg = {}
-        for year in years:
-            annual_factor_avg[year] = {}
+        annual_factor_avg = get_nested_dict(years)
         for factor in data["factors"]:
             for idx, val in enumerate(annual_overview_data[factor]):
                 annual_factor_avg[idx+start_year][factor] = val
@@ -165,3 +167,13 @@ class UserDashboardView(APIView):
 
         print("UserDashboardView:", time.time() - start)
         return Response({"status": "success", "data": data})
+
+
+def get_nested_dict(keys):
+    '''
+    딕셔너리를 중첩하여 할당하여 반환하는 함수 
+    '''
+    ret = {}
+    for key in keys:
+        ret[key] = {}
+    return ret
