@@ -35,6 +35,14 @@ export default function UserComment(props) {
     }
   };
 
+  const onBoard = () => {
+    if (article.board.board_type === 'Team') {
+      navigate(`/community/team/${article.board.name}`);
+    } else if (article.board.board_type === 'General') {
+      navigate(`/community/board/${article.board.name}`);
+    }
+  };
+
   useEffect(() => {
     if (article?.pub_date) {
       getDate(article.pub_date);
