@@ -7,6 +7,10 @@ from rest_framework.views import APIView
 from repository.models import GithubRepoStats
 from user.serializers_dashboard import GithubScoreResultSerializer
 from user.models import StudentTab, GithubScore, Account, GithubStatsYymm, AccountPrivacy
+
+from home.models import DistScore, DistFactor, AnnualOverview, Student
+from home.serializers import DistScoreDashboardSerializer, DistFactorDashboardSerializer, AnnualOverviewDashboardSerializer
+
 from handle_error import get_fail_res
 
 import time
@@ -85,7 +89,7 @@ class UserDashboardView(APIView):
         years = score.values_list("year", flat=True)
         num_year = len(years)
         start_year, end_year = min(years), max(years)
-        data['year'] = years
+        data['years'] = years
         github_score_result = GithubScoreResultSerializer(
             score, many=True).data
         data['score'] = github_score_result
@@ -104,11 +108,72 @@ class UserDashboardView(APIView):
             monthly_contr[row_json["year"]].append(row_json)
         data['monthly_contr'] = monthly_contr
 
-        # TODO factor 별 히스토그램
+        # 기여내역 factor 별 히스토그램을 위한 분포 데이터 처리
+        dist_score = DistScore.objects.filter(
+            case_num=0).order_by('case_num', 'year')
+        dist_score_data = DistScoreDashboardSerializer(
+            dist_score, many=True).data
+        dist_factor = DistFactor.objects.filter(case_num=0).order_by('year')
+        dist_factor_data = DistFactorDashboardSerializer(
+            dist_factor, many=True).data
 
-        # TODO 유저의 factor 기여내역
+        factor_dist = get_nested_dict(years)
+        # 연도별 score 데이터 할당
+        for obj in dist_score_data:
+            year = obj["year"]
+            factor_dist[year]["score"] = obj["score"]
+        # 연도별 각 factor 데이터 할당
+        for obj in dist_factor_data:
+            year = obj["year"]
+            factor = obj["factor"]
+            factor_dist[year][factor] = obj["value"]
 
-        # TODO 전체 유저의 factor 기여내역 평균
+        data['factor_dist'] = factor_dist
+        data["factors"] = ["score", "commit", "star", "pr", "issue"]
+
+        # 유저의 factor 기여내역
+        annual_user_factor = get_nested_dict(years)
+        students = Student.objects.filter(github_id=github_id)
+        for student in students:
+            # year, score, commit, star, pr, issue 값 가져옴
+            user_factors = student.get_factors()
+            annual_user_factor[user_factors['year']] = user_factors
+        data['annual_user_factor'] = annual_user_factor
+
+        # 전체 유저의 factor 기여내역 평균
+        annual_overview = AnnualOverview.objects.get(case_num=0)
+        annual_overview_data = AnnualOverviewDashboardSerializer(
+            annual_overview).data
+
+        # 히스토그램 세팅값(bar 개수, 구간 사이즈)
+        dist_setting = {}
+        class_nums = annual_overview_data['class_num']
+        level_steps = annual_overview_data['level_step']
+        for vals in zip(data["factors"], class_nums,  level_steps):
+            factor, class_size, step_size = vals
+            dist_setting[factor] = {}
+            dist_setting[factor]['class_num'] = class_size
+            dist_setting[factor]['level_step'] = step_size
+        data['dist_setting'] = dist_setting
+
+        # 연도별 유저의 기여 factor 평균값
+        annual_factor_avg = get_nested_dict(years)
+        for factor in data["factors"]:
+            for idx, val in enumerate(annual_overview_data[factor]):
+                annual_factor_avg[idx+start_year][factor] = val
+
+        data['annual_factor_avg'] = annual_factor_avg
+        data['annual_overview'] = annual_overview_data
 
         print("UserDashboardView:", time.time() - start)
         return Response({"status": "success", "data": data})
+
+
+def get_nested_dict(keys):
+    '''
+    딕셔너리를 중첩하여 할당하여 반환하는 함수 
+    '''
+    ret = {}
+    for key in keys:
+        ret[key] = {}
+    return ret

@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from home import models
 
-from tag.serializers import TagIndependentSerializer
-
 import json
 
 
@@ -92,5 +90,59 @@ class DistFactorSerializer(serializers.ModelSerializer):
         for field in fields_to_parse:
             if isinstance(ret[field], str):
                 ret[field] = json.loads(ret[field])
+
+        return ret
+
+
+class AnnualOverviewDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AnnualOverview
+        fields = ("id", "score", "commit", "star", "pr",
+                  "issue", "class_num", "level_step")
+
+    def to_representation(self, instance):
+        # Get the original representation of the model data
+        ret = super().to_representation(instance)
+
+        # Json 파싱해야할 필드 목록
+        fields_to_parse = ["score", "commit", "star",
+                           "pr", "issue",  "class_num", "level_step"]
+
+        # Parse the string fields and convert them to lists
+        for field in fields_to_parse:
+            if isinstance(ret[field], str):
+                ret[field] = json.loads(ret[field])
+
+        return ret
+
+
+class DistScoreDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+
+        model = models.DistScore
+        fields = ("id", "year", "score")
+
+    def to_representation(self, instance):
+        # Get the original representation of the model data
+        ret = super().to_representation(instance)
+
+        if isinstance(ret["score"], str):
+            ret["score"] = json.loads(ret["score"])
+
+        return ret
+
+
+class DistFactorDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+
+        model = models.DistFactor
+        fields = ("id", "year", "factor", "value")
+
+    def to_representation(self, instance):
+        # Get the original representation of the model data
+        ret = super().to_representation(instance)
+
+        if isinstance(ret["value"], str):
+            ret["value"] = json.loads(ret["value"])
 
         return ret

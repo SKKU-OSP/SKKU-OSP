@@ -184,6 +184,16 @@ class Student(models.Model):
             "issue": self.issue,
         }
 
+    def get_factors(self):
+        return {
+            "year": self.year,
+            "score": self.score,
+            "commit": self.commit,
+            "star": self.star,
+            "pr": self.pr,
+            "issue": self.issue,
+        }
+
     def __str__(self) -> str:
         return f'{self.year}:{self.github_id}'
 
