@@ -6,7 +6,6 @@ import { getAuthConfig } from '../../../utils/auth';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Chart from './Charts/Chart';
-import { noLegendOption } from '../../../utils/chartOption';
 import { Chart as ChartJS } from 'chart.js';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
@@ -17,10 +16,6 @@ function Dashboard() {
   const [years, setYears] = useState([]);
   const [targetYear, setTargetYear] = useState(2023);
 
-  const [isReady, setIsReady] = useState(false);
-  const [scoreDetailChartData, setScoreDetailChartData] = useState();
-
-  const [scoreChartData, setScoreChartData] = useState();
   const [mainScoreChartConfig, setMainScoreChartConfig] = useState({});
   const [detailScoreChartConfigs, setDetailScoreChartConfigs] = useState([]);
 
@@ -31,7 +26,7 @@ function Dashboard() {
       const response = await axios.get(`${dashboardDataUrl}${username}/`, getAuthConfig());
       const res = response.data;
       if (res.status === 'success') {
-        setYears(res.data.year);
+        setYears(res.data.years);
         setChartData(res.data);
       } else {
         console.log(res);

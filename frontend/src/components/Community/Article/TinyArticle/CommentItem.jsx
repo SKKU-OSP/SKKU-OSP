@@ -33,8 +33,10 @@ function CommentItem(props) {
   };
 
   const deleteComment = async () => {
-    const response = await axios.post(delete_url, {}, getAuthConfig());
-    setData({ ...data, comments: response.data.data.comments });
+    if (window.confirm('댓글을 삭제하시겠습니까?')) {
+      const response = await axios.post(delete_url, {}, getAuthConfig());
+      setData({ ...data, comments: response.data.data.comments });
+    }
   };
   const navigate = useNavigate();
   const onMyProfile = (username) => {
