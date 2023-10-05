@@ -6,6 +6,8 @@ import CommunityNavItem from '../../Board/CommunityNavItem/index';
 import TeamOverview from './TeamOverview';
 import RecruitArticle from './RecruitArticle';
 import AuthContext from '../../../../utils/auth-context';
+import LoaderIcon from 'react-loader-icon';
+import Pagination from 'react-js-pagination';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -14,43 +16,59 @@ function TeamRecruit() {
   const { tabName } = useParams();
   const { username } = useContext(AuthContext);
 
+  const [isLoadedArticles, setIsLoadedArticles] = useState(false);
   const [teams, setTeams] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [maxRecruitPage, setMaxRecruitPage] = useState(0);
+  const [nowRecruitPage, setNowRecruitPage] = useState(1);
+  const [maxTeamPage, setMaxTeamPage] = useState(0);
+  const [nowTeamPage, setNowTeamPage] = useState(1);
   const [error, setError] = useState(false);
 
   const isRecruitTab = tabName === '팀 모집';
   const isTeamListTab = tabName === '전체 팀 목록';
 
+  const getRecruit = async (page) => {
+    try {
+      const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/?page_number=${page}`);
+      const resRecruit = responseRecruit.data;
+      if (resRecruit.status === 'success') {
+        setArticles(resRecruit.data.articles);
+        setMaxRecruitPage(resRecruit.data.max_page_number);
+        setIsLoadedArticles(true);
+        setNowRecruitPage(page);
+      }
+    } catch (error) {
+      setError(true);
+      setIsLoadedArticles(true);
+      setArticles([]);
+      console.log('getRecruit error', error);
+    }
+  };
+  const getTeamList = async (page) => {
+    try {
+      const responseTeamList = await axios.get(server_url + `/team/api/teams-list/?page_number=${page}`);
+      const resTeamList = responseTeamList.data;
+      if (resTeamList.status === 'success') {
+        setTeams(resTeamList.data.teams);
+        setMaxTeamPage(resTeamList.data.max_page_number);
+        setIsLoadedArticles(true);
+        setNowTeamPage(page);
+      }
+    } catch (error) {
+      setError(true);
+      setIsLoadedArticles(true);
+      setArticles([]);
+      console.log('getTeamList error', error);
+    }
+  };
+
   useEffect(() => {
-    const getRecruit = async () => {
-      try {
-        const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/`);
-        const resRecruit = responseRecruit.data;
-        if (resRecruit.status === 'success') {
-          setArticles(resRecruit.data.articles);
-        }
-      } catch (error) {
-        setError(true);
-        console.log('getRecruit error', error);
-      }
-    };
-    const getTeamList = async () => {
-      try {
-        const responseTeamList = await axios.get(server_url + `/team/api/teams-list/`);
-        const resTeamList = responseTeamList.data;
-        if (resTeamList.status === 'success') {
-          setTeams(resTeamList.data.teams);
-        }
-      } catch (error) {
-        setError(true);
-        console.log('getTeamList error', error);
-      }
-    };
     // 존재하는 게시판인지 확인
     if (isRecruitTab) {
-      getRecruit();
+      getRecruit(1);
     } else if (isTeamListTab) {
-      getTeamList();
+      getTeamList(1);
     } else {
       alert('존재하지 않는 게시판입니다.');
     }
@@ -63,6 +81,18 @@ function TeamRecruit() {
       if (confirm('로그인이 필요합니다. 로그인 화면으로 이동하시겠습니까?')) {
         navigate(`/accounts/login`);
       }
+    }
+  };
+
+  const onRecruitPageChange = (page) => {
+    if (isRecruitTab) {
+      getRecruit(page);
+    }
+  };
+
+  const onTeamListPageChange = (page) => {
+    if (isTeamListTab) {
+      getTeamList(page);
     }
   };
 
@@ -86,8 +116,40 @@ function TeamRecruit() {
               작성하기
             </button>
           </div>
-          {isRecruitTab && articles.map((article) => <RecruitArticle key={article.id} article={article} />)}
-          {isTeamListTab && teams.map((team) => <TeamOverview key={team.id} team={team} />)}
+          {isLoadedArticles ? (
+            <>
+              {isRecruitTab && (
+                <>
+                  {articles.map((article) => (
+                    <RecruitArticle key={article.id} article={article} />
+                  ))}
+                  <Pagination
+                    activePage={nowRecruitPage}
+                    itemsCountPerPage={10}
+                    totalItemsCount={maxRecruitPage * 10}
+                    pageRangeDisplayed={5}
+                    onChange={onRecruitPageChange}
+                  />
+                </>
+              )}
+              {isTeamListTab && (
+                <>
+                  {teams.map((team) => (
+                    <TeamOverview key={team.id} team={team} />
+                  ))}
+                  <Pagination
+                    activePage={nowTeamPage}
+                    itemsCountPerPage={10}
+                    totalItemsCount={maxTeamPage * 10}
+                    pageRangeDisplayed={5}
+                    onChange={onTeamListPageChange}
+                  />
+                </>
+              )}
+            </>
+          ) : (
+            <LoaderIcon style={{ marginTop: '20px' }} />
+          )}
         </>
       )}
       {error && <div>문제가 발생했습니다</div>}
