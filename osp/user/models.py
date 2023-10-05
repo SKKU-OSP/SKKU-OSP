@@ -200,7 +200,7 @@ class GithubUserStarred(models.Model):
 
 class DevType(models.Model):
     id = models.AutoField(primary_key=True)
-    account = models.ForeignKey(Account, models.CASCADE)
+    account = models.OneToOneField(Account, models.CASCADE)
     # GBTI
     typeA = models.IntegerField()
     typeB = models.IntegerField()
