@@ -52,7 +52,7 @@ function ProfileInfo(props) {
       {userInfo ? (
         <div className="d-flex flex-row profile_info">
           <div className="d-flex align-items-center justify-content-center info_left">
-            <div className="info_img" style={{ backgroundImage: `url(${userInfo.photo})` }} />
+            <img src={server_url + userInfo.photo} className="info_img" />
           </div>
           <div className="d-flex flex-column info_right">
             <div className="d-flex flex-row justify-content-end info_button">
