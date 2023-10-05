@@ -39,6 +39,7 @@ export default function Board_Container() {
         setNowPage(page);
       } else {
         alert('해당 게시판이 존재하지 않습니다.');
+        navigate('/community');
       }
     } catch (error) {
       setError(true);
