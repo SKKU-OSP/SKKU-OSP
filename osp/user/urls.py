@@ -1,6 +1,5 @@
-from django.urls import path, include
-
-from user import views, views_edit, views_profile, views_dashboard
+from django.urls import path
+from user import views, views_dashboard, views_edit, views_profile
 
 app_name = 'user'
 urlpatterns = [

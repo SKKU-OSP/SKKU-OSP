@@ -1,22 +1,24 @@
+import logging
+import time
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
-from django.db.models import Sum, Subquery
-
+from django.db.models import Subquery, Sum
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from repository.models import GithubRepoStats
-from user.serializers_dashboard import GithubScoreResultSerializer
-from user.models import StudentTab, GithubScore, Account, GithubStatsYymm, AccountPrivacy, DevType
-
-from home.models import DistScore, DistFactor, AnnualOverview, Student
-from home.serializers import DistScoreDashboardSerializer, DistFactorDashboardSerializer, AnnualOverviewDashboardSerializer
-
 from handle_error import get_fail_res, get_missing_data_msg
-
-import time
-import logging
+from home.models import AnnualOverview, DistFactor, DistScore, Student
+from home.serializers import (AnnualOverviewDashboardSerializer,
+                              DistFactorDashboardSerializer,
+                              DistScoreDashboardSerializer)
+from repository.models import GithubRepoStats
+from user import update_act
+from user.gbti import get_type_analysis, get_type_test
+from user.models import (Account, AccountPrivacy, DevType, GithubScore,
+                         GithubStatsYymm, StudentTab)
+from user.serializers_dashboard import GithubScoreResultSerializer
 
 
 def get_user_star(github_id: str):
@@ -163,12 +165,86 @@ class UserDashboardView(APIView):
         for factor in data["factors"]:
             for idx, val in enumerate(annual_overview_data[factor]):
                 annual_factor_avg[idx+start_year][factor] = val
-
         data['annual_factor_avg'] = annual_factor_avg
-        data['annual_overview'] = annual_overview_data
+
+        # 개발자 유형, 성향 데이터
+        devtype = get_developer_type(target_account, github_id)
+        data.update(devtype)
 
         print("UserDashboardView:", time.time() - start)
         return Response({"status": "success", "data": data})
+
+
+def get_developer_type(account, github_id):
+    data = {'gbti': None, 'dev_tendency': None, 'dev_tendency_data': None}
+
+    # GitHub 활동 분석 내용 읽기
+    hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(
+        github_id)
+    major_act, indi_num, group_num = update_act.read_major_act(github_id)
+    commit_freq, commit_freq_dist = update_act.read_frequency(github_id)
+
+    # 분석 내용 업데이트
+    typeE = -1 if daytime > night else 1
+    typeF = commit_freq
+    typeG = 1 if major_act == 'individual' else -1
+    devtype, created = DevType.objects.get_or_create(account=account)
+    if created:
+        # 만약 개발자 유형이 없는 경우 생성 후 디폴트 값 추가
+        devtype.typeA = 0
+        devtype.typeB = 0
+        devtype.typeC = 0
+        devtype.typeD = 0
+    devtype.typeE = typeE
+    devtype.typeF = typeF
+    devtype.typeG = typeG
+    devtype.save()
+
+    dev_tendency = {'typeE': typeE, 'typeF': typeF,
+                    'typeG': typeG, "details": []}
+    # 개발자 성향 문구 표시를 위한 데이터 가져오기
+    tndcy_desc, tndcy_descKR, tndcy_icon = get_type_analysis(
+        list(dev_tendency.values()))
+    for desc, descKR, icon in list(zip(tndcy_desc, tndcy_descKR, tndcy_icon)):
+        dev_tendency['details'].append(
+            {'desc': desc, 'descKR': descKR, 'icon': icon})
+    data["dev_tendency"] = dev_tendency
+
+    try:
+        # 개발자 성향 차트를 그리기 위한 데이터 추가
+        dev_tendency_data = {}
+        dev_tendency_data["typeE_data"] = hour_dist
+        dev_tendency_data["typeE_sector"] = [
+            int(daytime_min/3600), int(daytime_max/3600)]
+        dev_tendency_data["typeF_data"] = commit_freq_dist
+        dev_tendency_data["typeG_data"] = [indi_num, group_num]
+        print("dev_tendency_data", dev_tendency_data)
+        data["dev_tendency_data"] = dev_tendency_data
+    except Exception as e:
+        logging.exception(f"Get Type data error: {e}")
+
+    # 개발자 유형
+    dev_type = {"typeA": devtype.typeA, "typeB": devtype.typeB,
+                "typeC": devtype.typeC, "typeD": devtype.typeD}
+    if not all(val == 0 for val in dev_type.values()):
+        # 모든 값이 0인 경우 개발자 유형 검사를 진행하지 않은 것으로 간주
+        dev_type.update(get_type_test(
+            devtype.typeA, devtype.typeB, devtype.typeC, devtype.typeD))
+
+        def get_type_len(type_val):
+            return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val) % 2 - 3)
+        # 개발자 ID 카드 렌더링을 위한 길이 데이터
+        dev_type["typeAl"], dev_type["typeAr"] = get_type_len(
+            dev_type["typeA"])
+        dev_type["typeBl"], dev_type["typeBr"] = get_type_len(
+            dev_type["typeB"])
+        dev_type["typeCl"], dev_type["typeCr"] = get_type_len(
+            dev_type["typeC"])
+        dev_type["typeDl"], dev_type["typeDr"] = get_type_len(
+            dev_type["typeD"])
+        data['gbti'] = dev_type
+
+    return data
 
 
 def get_nested_dict(keys):
