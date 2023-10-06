@@ -87,7 +87,7 @@ function Dashboard() {
       const labels = ['main_repo_score', 'other_repo_score', 'reputation_score'];
       const mainConfig = getDoughnutConfig(scoreChartData, labels);
       setMainScoreChartConfig(mainConfig);
-      const labelToMaxVaule = { main_repo_score: 3, other_repo_score: 1, reputation_score: 1 };
+      const labelToMaxVaule = { main_repo_score: 3, other_repo_score: 1, reputation_score: 5 };
       const labelToColor = { main_repo_score: '#36A2EB', other_repo_score: '#FF6384', reputation_score: '#4BC0C0' };
 
       const detailConfigs = labels.map((label) =>
@@ -106,7 +106,7 @@ function Dashboard() {
         </div>
         <div>
           <div className="d-flex justify-content-between">
-            <div className="github-username">SeoJeongYeop</div>
+            <div className="github-username">{username}</div>
             <DropdownButton id="dropdown-basic-button" variant="light" title={targetYear}>
               {years.map((year) => {
                 return (

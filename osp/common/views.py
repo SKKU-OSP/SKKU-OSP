@@ -55,12 +55,10 @@ class JWTLoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        print("username", username)
-        print("password", password)
         try:
             user = authenticate(request, username=username, password=password)
-        except:
-            print("인증 실패")
+        except Exception as e:
+            logging.exception(f"JWTLoginView 인증 실패: {e}")
             return Response(get_fail_res("인증에 실패했습니다. Username과 password를 다시 확인해주세요."))
 
         if user is not None:
@@ -68,7 +66,6 @@ class JWTLoginView(APIView):
             login(request, user)
 
             token = RefreshToken.for_user(user)  # simple jwt로 토큰 발급
-            print("token", token)
             print("access_token", token.access_token)
 
             account = Account.objects.filter(user=user)
@@ -83,9 +80,7 @@ class JWTLoginView(APIView):
                 'refresh_token': str(token),
             }
             return Response({"message": "로그인 성공", "data": data}, status=status.HTTP_200_OK)
-        else:
-            print("username", username)
-            print("password", password)
+
         return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
 
 
