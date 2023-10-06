@@ -53,9 +53,13 @@ urlpatterns = [
     path('api/profile-intro/<username>/',
          views_profile.ProfileMainView.as_view(), name='profile-main'),
     path('api/dashboard/<username>/',
-         views_dashboard.UserDashboardView.as_view(), name="UserDashboardView"),
-    path('api/testresult/<username>/',
-         views_dashboard.DevTypeTestSaveView.as_view(), name='DevTypeTestSaveView'),
+         views_dashboard.UserDashboardView.as_view(), name="UserDashboard"),
+    path('api/dashboard/<username>/dev-tendency/',
+         views_dashboard.UserDevTendencyView.as_view(), name="UserDevTendency"),
+    path('api/dashboard/<username>/dev-type/',
+         views_dashboard.UserDevTypeView.as_view(), name="UserDevType"),
+    path('api/dashboard/<username>/dev-type/save/',
+         views_dashboard.DevTypeTestSaveView.as_view(), name='DevTypeTestSave'),
 
     path('api/guideline/<username>/',
          views.GuidelineView.as_view(), name='guideline')
