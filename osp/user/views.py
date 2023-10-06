@@ -1,32 +1,30 @@
+import datetime
+import json
+import logging
+import math
+import time
+
+from django.contrib.auth.models import User
+from django.db import DatabaseError
+from django.db.models import Avg, Subquery, Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.contrib.auth.models import User
-from django.db.models import Avg, Sum, Subquery
-from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
-from django.db import transaction, DatabaseError
-
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.views.generic import TemplateView
 
 from home.models import DistFactor, DistScore
-from tag.models import TagIndependent, DomainLayer
+from repository.models import GithubRepoCommits, GithubRepoStats
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from tag.models import DomainLayer, TagIndependent
 from team.models import TeamMember
-from repository.models import GithubRepoStats, GithubRepoCommits
-
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
-from user.serializers import AccountSerializer
-from user.templatetags.gbti import get_type_test, get_type_analysis
 from user import update_act
-
-from tag.serializers import TagIndependentSerializer
-
-import time
-import datetime
-import json
-import math
-import logging
+from user.gbti import get_type_analysis, get_type_test
+from user.models import (Account, AccountInterest, AccountPrivacy, DevType,
+                         GithubScore, GitHubScoreTable, GithubStatsYymm,
+                         StudentTab)
+from user.serializers import AccountSerializer
 
 
 class UserAccountView(APIView):
