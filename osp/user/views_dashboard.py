@@ -278,7 +278,7 @@ def get_dev_tendency(account, github_id):
 
 
 def get_dev_type(account, github_id):
-    data = {'gbti': None}
+    data = {'dev_type': None}
     try:
         devtype = DevType.objects.get(account=account)
     except ObjectDoesNotExist as e:
@@ -304,7 +304,7 @@ def get_dev_type(account, github_id):
             dev_type["typeC"])
         dev_type["typeDl"], dev_type["typeDr"] = get_type_len(
             dev_type["typeD"])
-        data['gbti'] = dev_type
+        data['dev_type'] = dev_type
 
     return data
 

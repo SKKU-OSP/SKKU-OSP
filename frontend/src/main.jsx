@@ -31,6 +31,7 @@ import TeamApplication from './components/NavBar/TeamApplication/TeamApplication
 import RecommenderPage from './routes/RecommenderPage';
 import SearchPage from './routes/SearchPage';
 import HomePage from './routes/HomePage';
+import DevAnalysis from './components/User/DashBoard/DevAnalysis';
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -119,6 +120,10 @@ const router = createBrowserRouter([
       {
         path: 'user/:username/dashboard',
         element: <DashBoard />
+      },
+      {
+        path: 'user/:username/dashboard/dev',
+        element: <DevAnalysis />
       },
       {
         path: 'repository/:username',
