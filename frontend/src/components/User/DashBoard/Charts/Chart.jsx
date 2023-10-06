@@ -35,7 +35,7 @@ const Chart = (props) => {
     }
   };
 
-  return <canvas ref={chartRef} width="200" />;
+  return <canvas ref={chartRef} />;
 };
 
 export default Chart;
