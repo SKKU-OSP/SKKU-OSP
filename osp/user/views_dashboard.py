@@ -47,7 +47,7 @@ def get_user_star(github_id: str):
 class UserDashboardView(APIView):
     '''
     유저 대시보드
-    url     : /user/<username>
+    url     : /user/api/dashboard/<username>/
     '''
 
     def get(self, request, username):
@@ -55,45 +55,20 @@ class UserDashboardView(APIView):
         start = time.time()
         data = {}
 
-        # 익명 체크
-        if request.user.is_anonymous:
-            return Response(get_fail_res("require_login"))
+        target_account, error = get_account_valid(request, username)
+        if error:
+            return Response(get_fail_res(error_code=error))
+        github_id = target_account.github_id
 
-        # 해당 유저의 대시보드 접근 권한 체크
-        try:
-            target_user = User.objects.get(username=username)
-            if target_user.is_superuser:
-                return Response(get_fail_res("access_denied"))
-            target_account = Account.objects.get(user=target_user)
-            acc_pp = AccountPrivacy.objects.get(account=target_account)
-            print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
-
-            # 권한 체크
-            print("request.user.username", request.user.username)
-            print("username", username)
-
-            is_own = request.user.username.lower() == username.lower()
-            is_superuser = request.user.is_superuser
-            is_open = acc_pp.open_lvl == 2
-            # 팀원여부 확인 (잠정 보류)
-            # target_team = TeamMember.objects.filter(
-            #     member=target_account).values('team')
-            # coworkers = TeamMember.objects.filter(
-            #     member=request.user.account, team__in=target_team)
-            # is_member = coworkers.exists()
-            permission = is_own or is_superuser or is_open
-            if not permission:
-                return Response(get_fail_res("access_permission_denied"))
-        except Exception as e:
-            logging.exception(f"UserDashboardView Exception: {e}")
         # 최신 점수 가져옴
         github_id = target_account.github_id
         score = GithubScore.objects.filter(
             github_id=github_id).order_by("-year")
+        # 연도 계산
         years = score.values_list("year", flat=True)
-        num_year = len(years)
         start_year, end_year = min(years), max(years)
         data['years'] = years
+
         github_score_result = GithubScoreResultSerializer(
             score, many=True).data
         data['score'] = github_score_result
@@ -109,6 +84,9 @@ class UserDashboardView(APIView):
         for row in gitstat_year:
             row_json = row.to_json()
             row_json['star'] = user_star["star"]
+            row_json['total'] = 0
+            for key in ['star', 'repo_cr', 'repo_co', 'commit', 'pr', 'issue']:
+                row_json['total'] += row_json[key]
             monthly_contr[row_json["year"]].append(row_json)
         data['monthly_contr'] = monthly_contr
 
@@ -168,19 +146,92 @@ class UserDashboardView(APIView):
         data['annual_factor_avg'] = annual_factor_avg
 
         # 개발자 유형, 성향 데이터
-        devtype = get_developer_type(target_account, github_id)
+        devtype = get_dev_type(target_account, github_id)
+        devtendency = get_dev_tendency(target_account, github_id)
         data.update(devtype)
+        data.update(devtendency)
 
         print("UserDashboardView:", time.time() - start)
         return Response({"status": "success", "data": data})
 
 
-def get_developer_type(account, github_id):
-    data = {'gbti': None, 'dev_tendency': None, 'dev_tendency_data': None}
+class UserDevTendencyView(APIView):
+    '''
+    유저 개발자 성향분석 조회
+    url     : /user/api/dashboard/<username>/dev-tendency/
+    '''
+
+    def get(self, request, username):
+        target_account, error = get_account_valid(request, username)
+        if error:
+            return Response(get_fail_res(error_code=error))
+        github_id = target_account.github_id
+        data = get_dev_tendency(target_account, github_id)
+        return Response({'status': 'success', 'data': data})
+
+
+class UserDevTypeView(APIView):
+    '''
+    유저 개발자 유형 조회
+    url     : /user/api/dashboard/<username>/dev-type/
+    '''
+
+    def get(self, request, username):
+
+        target_account, error = get_account_valid(request, username)
+        if error:
+            return Response(get_fail_res(error_code=error))
+        github_id = target_account.github_id
+
+        # 개발자 유형, 성향 데이터
+        data = get_dev_type(target_account, github_id)
+
+        return Response({"status": "success", "data": data})
+
+
+def get_account_valid(request, username):
+    # 익명 체크
+    if request.user.is_anonymous:
+        return None, "require_login"
+
+    # 해당 유저의 대시보드 접근 권한 체크
+    try:
+        target_user = User.objects.get(username=username)
+        if target_user.is_superuser:
+            return None, "access_denied"
+        target_account = Account.objects.get(user=target_user)
+        acc_pp = AccountPrivacy.objects.get(account=target_account)
+        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+
+        # 권한 체크
+        print("request.user.username", request.user.username)
+        print("username", username)
+
+        is_own = request.user.username.lower() == username.lower()
+        is_superuser = request.user.is_superuser
+        is_open = acc_pp.open_lvl == 2
+        # 팀원여부 확인 (잠정 보류)
+        # target_team = TeamMember.objects.filter(
+        #     member=target_account).values('team')
+        # coworkers = TeamMember.objects.filter(
+        #     member=request.user.account, team__in=target_team)
+        # is_member = coworkers.exists()
+        permission = is_own or is_superuser or is_open
+        if not permission:
+            return None, "access_permission_denied"
+    except Exception as e:
+        logging.exception(f"UserDashboardView Exception: {e}")
+        return None, 'undefined_exception'
+
+    return target_account, None
+
+
+def get_dev_tendency(account, github_id):
+    data = {'dev_tendency': None, 'dev_tendency_data': None}
 
     # GitHub 활동 분석 내용 읽기
-    hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(
-        github_id)
+    commit_time = update_act.read_commit_time(github_id)
+    hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = commit_time
     major_act, indi_num, group_num = update_act.read_major_act(github_id)
     commit_freq, commit_freq_dist = update_act.read_frequency(github_id)
 
@@ -223,6 +274,17 @@ def get_developer_type(account, github_id):
     except Exception as e:
         logging.exception(f"Get Type data error: {e}")
 
+    return data
+
+
+def get_dev_type(account, github_id):
+    data = {'gbti': None}
+    try:
+        devtype = DevType.objects.get(account=account)
+    except ObjectDoesNotExist as e:
+        logging.error(f"{github_id} DevType No Data: {e}")
+        return data
+
     # 개발자 유형
     dev_type = {"typeA": devtype.typeA, "typeB": devtype.typeB,
                 "typeC": devtype.typeC, "typeD": devtype.typeD}
@@ -258,7 +320,12 @@ def get_nested_dict(keys):
 
 
 class DevTypeTestSaveView(APIView):
+
     def post(self, request, username):
+        '''
+        유저 개발자 유형 결과 저장
+        url     : /user/api/dashboard/<username>/dev-type/save/
+        '''
         dev_type = request.data.get('type')
         if dev_type is None:
             appended_msg = get_missing_data_msg('type')

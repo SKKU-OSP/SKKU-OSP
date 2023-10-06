@@ -68,8 +68,7 @@ class GithubStatsYymm(models.Model):
             "repo_co": self.num_of_co_repos,
             "commit": self.num_of_commits,
             "pr": self.num_of_prs,
-            "issue": self.num_of_issues,
-            "total": self.stars+self.num_of_cr_repos+self.num_of_co_repos+self.num_of_commits+self.num_of_prs+self.num_of_issues,
+            "issue": self.num_of_issues
         }
 
 
