@@ -41,21 +41,16 @@ section .abox {
 
   width: 200px;
 }
-#gbti-test-start {
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
+.btn-test-start {
   padding: 10px 20px;
-  gap: 15px;
-  cursor: pointer;
-  height: auto;
   color: black;
   border: 1px solid var(--developer-border-color);
   background: var(--developer-bg-color);
   border-radius: 10px;
   width: 200px;
 }
-#gbti-test-start:hover {
+.btn-test-start:hover {
+  border: 1px solid var(--developer-border-color);
   background: none;
 }
 .board {
@@ -66,7 +61,6 @@ section .abox {
   gap: 15px;
   height: auto;
   color: black;
-  background-image: url('http://127.0.0.1:8000/static/images/back.png');
   background-size: cover;
   border-radius: 20px;
   width: auto;
@@ -154,4 +148,21 @@ section .abox {
 }
 .progress-bar {
   background-color: rgb(0, 39, 67);
+}
+
+.endpoint {
+  height: 6px !important;
+  width: 6px !important;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.endpoint.left {
+  justify-content: end;
+}
+
+.endpoint.right {
+  justify-content: start;
 }
