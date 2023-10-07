@@ -5,6 +5,7 @@ import { getAuthConfig } from '../../../utils/auth';
 
 import DevType from './DevType';
 import DevTendency from './DevTendency';
+import './DevAnalysis.css';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 const dashboardDataUrl = `${serverDomain}/user/api/dashboard/`;
@@ -44,12 +45,8 @@ function DevAnalysis() {
 
   return (
     <div className="container my-4">
-      <div>
-        <DevTendency data={devTendency} chartData={devTendencyData} />
-      </div>
-      <div>
-        <DevType data={devType} />
-      </div>
+      <div>{devTendency && <DevTendency data={devTendency} chartData={devTendencyData} />}</div>
+      <div>{devType && <DevType data={devType} />}</div>
     </div>
   );
 }
