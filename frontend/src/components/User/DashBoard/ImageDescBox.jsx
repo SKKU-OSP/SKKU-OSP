@@ -10,17 +10,22 @@ function ImageDescBox(props) {
   };
 
   return (
-    <div class="desc-box" style={bgImgStyle}>
-      <div class="text-center mt-5">
-        <span class="badge text-bg-light fs-5 bold">{title}</span>
+    <div className="desc-box" style={bgImgStyle}>
+      <div className="text-center mt-5">
+        <span className="badge text-bg-light fs-5 bold">{title}</span>
       </div>
 
-      <div class="desc-textbox">
-        <div class="desc-img">
+      <div className="desc-textbox">
+        <div className="desc-img">
           <img src={src} className="desc-center-img" />
         </div>
-        {attrs && attrs.map((attr) => <span class="badge text-bg-light fs-7">#{attr}</span>)}
-        <p class="fs-6">{desc}</p>
+        {attrs &&
+          attrs.map((attr) => (
+            <span key={attr} className="badge text-bg-light fs-7">
+              #{attr}
+            </span>
+          ))}
+        <p className="fs-6">{desc}</p>
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ function DevType(props) {
   const pos = data.pos;
   const neg = data.neg;
 
-  console.log('DevType', data);
   return (
     <div>
       <DevTypeCard
@@ -20,7 +19,7 @@ function DevType(props) {
         typeKr={data.nicknameKR}
         factors={factors}
       />
-      <div className="d-flex justify-content-around">
+      <div className="d-flex justify-content-around flex-wrap">
         <div>
           <div className="fs-5">상생 파트너</div>
           <ImageDescBox
