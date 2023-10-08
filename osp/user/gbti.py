@@ -32,27 +32,28 @@ def get_type_test(type1, type2, type3, type4):
         "ENTP": {"code": "ENTP", "nickname": "Blinking Star", "nicknameKR": "깜박이별", "desc": " ".join([desc4[1], desc3[0], desc2[1], desc1[0]]), "descKR": " ".join([descKR4[1], descKR3[0], descKR2[1], descKR1[0]])},
     }
     gbti_combi_dict = {
-        "ENFJ": {"pos": ["INFP"], "neg": ["ISTJ"]},
-        "INTJ": {"pos": ["ENTP"], "neg": ["ESFJ"]},
-        "ESFJ": {"pos": ["ISFP"], "neg": ["INTJ"]},
-        "ISTJ": {"pos": ["ESTP"], "neg": ["ENFJ"]},
-        "ISTP": {"pos": ["ESTJ"], "neg": ["ENFP"]},
-        "INFP": {"pos": ["ENFJ"], "neg": ["ESTP"]},
-        "ENFP": {"pos": ["INFJ"], "neg": ["ISTP"]},
-        "ISFJ": {"pos": ["ESFP"], "neg": ["ENTJ"]},
-        "INFJ": {"pos": ["ENFP"], "neg": ["ESTJ"]},
-        "ESFP": {"pos": ["ISFJ"], "neg": ["INTP"]},
-        "ISFP": {"pos": ["ESFJ"], "neg": ["ENTP"]},
-        "ENTJ": {"pos": ["INTP"], "neg": ["ISFJ"]},
-        "INTP": {"pos": ["ENTJ"], "neg": ["ESFP"]},
-        "ESTJ": {"pos": ["ISTP"], "neg": ["INFJ"]},
-        "ESTP": {"pos": ["ISTJ"], "neg": ["INFP"]},
-        "ENTP": {"pos": ["INTJ"], "neg": ["ISFP"]},
+        "ENFJ": {"pos": "INFP", "neg": "ISTJ"},
+        "INTJ": {"pos": "ENTP", "neg": "ESFJ"},
+        "ESFJ": {"pos": "ISFP", "neg": "INTJ"},
+        "ISTJ": {"pos": "ESTP", "neg": "ENFJ"},
+        "ISTP": {"pos": "ESTJ", "neg": "ENFP"},
+        "INFP": {"pos": "ENFJ", "neg": "ESTP"},
+        "ENFP": {"pos": "INFJ", "neg": "ISTP"},
+        "ISFJ": {"pos": "ESFP", "neg": "ENTJ"},
+        "INFJ": {"pos": "ENFP", "neg": "ESTJ"},
+        "ESFP": {"pos": "ISFJ", "neg": "INTP"},
+        "ISFP": {"pos": "ESFJ", "neg": "ENTP"},
+        "ENTJ": {"pos": "INTP", "neg": "ISFJ"},
+        "INTP": {"pos": "ENTJ", "neg": "ESFP"},
+        "ESTJ": {"pos": "ISTP", "neg": "INFJ"},
+        "ESTP": {"pos": "ISTJ", "neg": "INFP"},
+        "ENTP": {"pos": "INTJ", "neg": "ISFP"},
     }
-    gbti_dict[code]["pos"] = [gbti_dict[pos_code]
-                              for pos_code in gbti_combi_dict[code]["pos"]]
-    gbti_dict[code]["neg"] = [gbti_dict[neg_code]
-                              for neg_code in gbti_combi_dict[code]["neg"]]
+    pos_code = gbti_combi_dict[code]["pos"]
+    neg_code = gbti_combi_dict[code]["neg"]
+
+    gbti_dict[code]["pos"] = gbti_dict[pos_code]
+    gbti_dict[code]["neg"] = gbti_dict[neg_code]
     return gbti_dict[code]
 
 
