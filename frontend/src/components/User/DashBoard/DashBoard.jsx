@@ -11,6 +11,8 @@ import { Chart as ChartJS } from 'chart.js';
 import Nav from 'react-bootstrap/Nav';
 
 import { noLegendOption } from '../../../utils/chartOption';
+import Sidebar from './Sidebar';
+import './DashBoard.css';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 const dashboardDataUrl = `${serverDomain}/user/api/dashboard/`;
@@ -31,6 +33,7 @@ function Dashboard() {
   const [chartTab, setChartTab] = useState(); // {score, commit, star, pr, issue}
   const [selectTab, setSelectTab] = useState(); // 선택된 tab
   const [tabInfo, setTabInfo] = useState(); // tab 정보
+  const [isSideClosed, setIsSideClosed] = useState(false); // 사이드바 열림 여부
 
   const handleTabSelect = (selectedKey) => {
     setSelectTab(selectedKey);
@@ -106,12 +109,12 @@ function Dashboard() {
       datasets: [
         {
           data: value,
-          pointRadius: 10,
-          pointHoverRadius: 15,
+          pointRadius: 4,
+          pointHoverRadius: 8,
           pointBackgroundColor: 'rgba(150, 130, 230, 1)',
           borderColor: 'rgba(150, 130, 230, 1)',
           tension: 0.01,
-          borderWidth: 5
+          borderWidth: 3
         }
       ]
     };
@@ -191,74 +194,82 @@ function Dashboard() {
     }
   }, [targetYear, selectTab]);
 
+  const onToggle = () => {
+    setIsSideClosed((prev) => !prev);
+  };
+  const wrapperClass = isSideClosed ? 'fold' : '';
+
   return (
-    <>
-      {chartData && (
-        <div className="container my-4">
-          <div className="d-flex justify-content-between">
-            <div className="big doughnut">
-              <Chart {...mainScoreChartConfig} />
-            </div>
-            <div>
-              <div className="d-flex justify-content-between">
-                <div className="github-username">{username}</div>
-                <DropdownButton id="dropdown-basic-button" variant="light" title={targetYear}>
-                  {years.map((year) => {
+    <div className="container">
+      <div id="wrapper" className={wrapperClass}>
+        <Sidebar onToggle={onToggle} />
+        {chartData && (
+          <div id="content-wrapper" className="px-3 py-5">
+            <div className="d-flex justify-content-between">
+              <div className="big doughnut">
+                <Chart {...mainScoreChartConfig} />
+              </div>
+              <div>
+                <div className="d-flex justify-content-between">
+                  <div className="github-username">{username}</div>
+                  <DropdownButton id="dropdown-basic-button" variant="light" title={targetYear}>
+                    {years.map((year) => {
+                      return (
+                        <Dropdown.Item
+                          key={year}
+                          eventKey={year}
+                          onClick={() => {
+                            setTargetYear(year);
+                          }}
+                          active={year === targetYear}
+                        >
+                          {year}
+                        </Dropdown.Item>
+                      );
+                    })}
+                  </DropdownButton>
+                </div>
+                <div className="d-flex justify-content-between">
+                  {detailScoreChartConfigs.map((config) => {
                     return (
-                      <Dropdown.Item
-                        key={year}
-                        eventKey={year}
-                        onClick={() => {
-                          setTargetYear(year);
-                        }}
-                        active={year === targetYear}
-                      >
-                        {year}
-                      </Dropdown.Item>
+                      <div key={config.data.labels} style={{ width: '200px' }}>
+                        <Chart {...config} />
+                      </div>
                     );
                   })}
-                </DropdownButton>
+                </div>
               </div>
-              <div className="d-flex justify-content-between">
-                {detailScoreChartConfigs.map((config) => {
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <Chart {...lineChart} />
+              </div>
+            </div>
+            <div className="row">
+              <Nav justify variant="underline" activeKey={selectTab} onSelect={handleTabSelect}>
+                {chartTab.map((factor) => {
                   return (
-                    <div key={config.data.labels} style={{ width: '200px' }}>
-                      <Chart {...config} />
-                    </div>
+                    <Nav.Item key={factor}>
+                      <Nav.Link eventKey={factor}>
+                        {factor} <br /> {tabInfo[factor]}
+                      </Nav.Link>
+                    </Nav.Item>
                   );
                 })}
+              </Nav>
+            </div>
+            <div className="row justify-content-center">
+              <div className="col-6">
+                <Chart {...histogramBarChart} />
+              </div>
+              <div className="col-6">
+                <Chart {...compareBarChart} />
               </div>
             </div>
           </div>
-          <div className="row">
-            <div className="col-12">
-              <Chart {...lineChart} />
-            </div>
-          </div>
-          <div className="row">
-            <Nav justify variant="underline" activeKey={selectTab} onSelect={handleTabSelect}>
-              {chartTab.map((factor) => {
-                return (
-                  <Nav.Item key={factor}>
-                    <Nav.Link eventKey={factor}>
-                      {factor} <br /> {tabInfo[factor]}
-                    </Nav.Link>
-                  </Nav.Item>
-                );
-              })}
-            </Nav>
-          </div>
-          <div className="row justify-content-center">
-            <div className="col-6">
-              <Chart {...histogramBarChart} />
-            </div>
-            <div className="col-6">
-              <Chart {...compareBarChart} />
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 }
 
