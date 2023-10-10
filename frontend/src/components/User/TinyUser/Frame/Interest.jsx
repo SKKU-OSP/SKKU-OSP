@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
-import '../../User.css';
-import { BsFillStarFill, BsXLg } from 'react-icons/bs';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import SkillModal from './SkillModal';
-import InterestModal from './InterestModal';
+
 import axios from 'axios';
-import Spinner from 'react-bootstrap/Spinner';
-import { getAuthConfig } from '../../../../utils/auth';
 import { useParams } from 'react-router-dom';
 
+import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
+import { BsFillStarFill } from 'react-icons/bs';
+
+import SkillModal from './SkillModal';
+import InterestModal from './InterestModal';
+import { getAuthConfig } from '../../../../utils/auth';
+
+import '../../User.css';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
+const tagsUrl = server_url + '/tag/api/list/';
+const profileInterestPostUrl = server_url + '/user/api/interests/update/';
+const profileSkillPostUrl = server_url + '/user/api/langs/update/';
 function Interest() {
   // Interest 훅
   const [interestShow, setInterestShow] = useState(false);
@@ -24,11 +31,6 @@ function Interest() {
   const [error_occur, setError] = useState(false);
   // 서버와 연동
   const { username } = useParams();
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const profileTagsUrl = server_url + '/user/api/tag/' + username;
-  const tagsUrl = server_url + '/tag/api/list/';
-  const profileInterestPostUrl = server_url + '/user/api/interests/update/';
-  const profileSkillPostUrl = server_url + '/user/api/langs/update/';
 
   // 서버에서 데이터 받아오기
   useEffect(() => {
@@ -51,10 +53,14 @@ function Interest() {
           setInterest(interest);
           setSkill(skill);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log('getTags error', error);
+        setError(true);
+      }
     };
     const getProfileTags = async () => {
       try {
+        const profileTagsUrl = server_url + '/user/api/tag/' + username;
         const response = await axios.get(profileTagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -76,6 +82,7 @@ function Interest() {
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
         } else {
+          console.log('getProfileTags error', res.errors);
         }
       } catch (error) {
         setError(true);
@@ -83,7 +90,7 @@ function Interest() {
     };
     getTags();
     getProfileTags();
-  }, []);
+  }, [username]);
 
   // 서버에 데이터 저장
   const updatePostProfileInterest = async (updateInterest) => {
@@ -143,7 +150,7 @@ function Interest() {
                     OnHandleInterestSaveClose={OnHandleInterestSaveClose}
                   />
                 </div>
-                <div className="d-flex flex-row category-icon">
+                <div className="d-flex flex-row flex-wrap category-icon">
                   {myInterest.map((interest) => (
                     <div className="icon" key={interest.value}>
                       <span className="icon-text">{interest.value}</span>

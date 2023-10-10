@@ -1,17 +1,17 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getAuthConfig } from '../../../utils/auth';
 
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Chart from './Charts/Chart';
+import axios from 'axios';
 import { Chart as ChartJS } from 'chart.js';
+import { useParams } from 'react-router-dom';
 
 import Nav from 'react-bootstrap/Nav';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
+import Chart from './Charts/Chart';
+import { getAuthConfig } from '../../../utils/auth';
 import { noLegendOption } from '../../../utils/chartOption';
-import Sidebar from './Sidebar';
+
 import './DashBoard.css';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
@@ -33,7 +33,6 @@ function Dashboard() {
   const [chartTab, setChartTab] = useState(); // {score, commit, star, pr, issue}
   const [selectTab, setSelectTab] = useState(); // 선택된 tab
   const [tabInfo, setTabInfo] = useState(); // tab 정보
-  const [isSideClosed, setIsSideClosed] = useState(false); // 사이드바 열림 여부
 
   const handleTabSelect = (selectedKey) => {
     setSelectTab(selectedKey);
@@ -194,82 +193,74 @@ function Dashboard() {
     }
   }, [targetYear, selectTab]);
 
-  const onToggle = () => {
-    setIsSideClosed((prev) => !prev);
-  };
-  const wrapperClass = isSideClosed ? 'fold' : '';
-
   return (
-    <div className="container">
-      <div id="wrapper" className={wrapperClass}>
-        <Sidebar onToggle={onToggle} />
-        {chartData && (
-          <div id="content-wrapper" className="px-3 py-5">
-            <div className="d-flex justify-content-between">
-              <div className="big doughnut">
-                <Chart {...mainScoreChartConfig} />
-              </div>
-              <div>
-                <div className="d-flex justify-content-between">
-                  <div className="github-username">{username}</div>
-                  <DropdownButton id="dropdown-basic-button" variant="light" title={targetYear}>
-                    {years.map((year) => {
-                      return (
-                        <Dropdown.Item
-                          key={year}
-                          eventKey={year}
-                          onClick={() => {
-                            setTargetYear(year);
-                          }}
-                          active={year === targetYear}
-                        >
-                          {year}
-                        </Dropdown.Item>
-                      );
-                    })}
-                  </DropdownButton>
-                </div>
-                <div className="d-flex justify-content-between">
-                  {detailScoreChartConfigs.map((config) => {
+    <>
+      {chartData && (
+        <>
+          <div className="d-flex justify-content-between">
+            <div className="big doughnut">
+              <Chart {...mainScoreChartConfig} />
+            </div>
+            <div>
+              <div className="d-flex justify-content-between">
+                <div className="github-username">{username}</div>
+                <DropdownButton id="dropdown-basic-button" variant="light" title={targetYear}>
+                  {years.map((year) => {
                     return (
-                      <div key={config.data.labels} style={{ width: '200px' }}>
-                        <Chart {...config} />
-                      </div>
+                      <Dropdown.Item
+                        key={year}
+                        eventKey={year}
+                        onClick={() => {
+                          setTargetYear(year);
+                        }}
+                        active={year === targetYear}
+                      >
+                        {year}
+                      </Dropdown.Item>
                     );
                   })}
-                </div>
+                </DropdownButton>
               </div>
-            </div>
-            <div className="row">
-              <div className="col-12">
-                <Chart {...lineChart} />
-              </div>
-            </div>
-            <div className="row">
-              <Nav justify variant="underline" activeKey={selectTab} onSelect={handleTabSelect}>
-                {chartTab.map((factor) => {
+              <div className="d-flex justify-content-between">
+                {detailScoreChartConfigs.map((config) => {
                   return (
-                    <Nav.Item key={factor}>
-                      <Nav.Link eventKey={factor}>
-                        {factor} <br /> {tabInfo[factor]}
-                      </Nav.Link>
-                    </Nav.Item>
+                    <div key={config.data.labels} style={{ width: '200px' }}>
+                      <Chart {...config} />
+                    </div>
                   );
                 })}
-              </Nav>
-            </div>
-            <div className="row justify-content-center">
-              <div className="col-6">
-                <Chart {...histogramBarChart} />
-              </div>
-              <div className="col-6">
-                <Chart {...compareBarChart} />
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+          <div className="row">
+            <div className="col-12">
+              <Chart {...lineChart} />
+            </div>
+          </div>
+          <div className="row">
+            <Nav justify variant="underline" activeKey={selectTab} onSelect={handleTabSelect}>
+              {chartTab.map((factor) => {
+                return (
+                  <Nav.Item key={factor}>
+                    <Nav.Link eventKey={factor}>
+                      {factor} <br /> {tabInfo[factor]}
+                    </Nav.Link>
+                  </Nav.Item>
+                );
+              })}
+            </Nav>
+          </div>
+          <div className="row justify-content-center">
+            <div className="col-6">
+              <Chart {...histogramBarChart} />
+            </div>
+            <div className="col-6">
+              <Chart {...compareBarChart} />
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
