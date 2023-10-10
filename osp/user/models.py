@@ -201,14 +201,14 @@ class DevType(models.Model):
     id = models.AutoField(primary_key=True)
     account = models.OneToOneField(Account, models.CASCADE)
     # GBTI
-    typeA = models.IntegerField()
-    typeB = models.IntegerField()
-    typeC = models.IntegerField()
-    typeD = models.IntegerField()
+    typeA = models.IntegerField(default=0)
+    typeB = models.IntegerField(default=0)
+    typeC = models.IntegerField(default=0)
+    typeD = models.IntegerField(default=0)
     # Analysis Type
-    typeE = models.IntegerField()
-    typeF = models.IntegerField()
-    typeG = models.IntegerField()
+    typeE = models.IntegerField(default=0)
+    typeF = models.IntegerField(default=0)
+    typeG = models.IntegerField(default=0)
 
 
 class GitHubScoreTable(models.Model):
