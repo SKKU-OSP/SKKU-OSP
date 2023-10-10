@@ -4,7 +4,8 @@ import time
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
-from django.db.models import Subquery, Sum, Q
+from django.db.models import Subquery, Sum, Q, F, Value
+from django.db.models.functions import Concat
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,11 +14,11 @@ from home.models import AnnualOverview, DistFactor, DistScore, Student
 from home.serializers import (AnnualOverviewDashboardSerializer,
                               DistFactorDashboardSerializer,
                               DistScoreDashboardSerializer)
-from repository.models import GithubRepoStats, GithubRepoContributor
+from repository.models import GithubRepoCommits, GithubIssues, GithubPulls, GithubRepoStats, GithubRepoContributor
 from user import update_act
 from user.gbti import get_type_analysis, get_type_test
 from user.models import (Account, AccountPrivacy, DevType, GithubScore,
-                         GithubStatsYymm, StudentTab)
+                         GithubStatsYymm, StudentTab, GitHubScoreTable)
 from user.serializers import AccountSerializer
 from user.serializers_dashboard import GithubScoreResultSerializer
 
@@ -69,6 +70,8 @@ class UserDashboardView(APIView):
         years = score.values_list("year", flat=True)
         start_year, end_year = min(years), max(years)
         data['years'] = years
+
+        # TODO score.best_repo 이용해서 best repo 정보 넣기
 
         github_score_result = GithubScoreResultSerializer(
             score, many=True).data
@@ -163,6 +166,7 @@ class UserDevTendencyView(APIView):
     '''
 
     def get(self, request, username):
+        start = time.time()
         target_account, error = get_account_valid(request, username)
         if error:
             return Response(get_fail_res(error_code=error))
@@ -171,6 +175,13 @@ class UserDevTendencyView(APIView):
 
         coworkers = get_coworkers(github_id)
         data['coworkers'] = coworkers
+
+        contr_repos = get_contr_repos(github_id)
+        print(len(contr_repos))
+        total_contrs = get_total_contrs(github_id)
+        print("total_contrs", total_contrs)
+
+        print("UserDevTendencyView elapsed time", time.time() - start)
 
         return Response({'status': 'success', 'data': data})
 
@@ -333,6 +344,33 @@ def get_dev_type(account, github_id):
         data['dev_type'] = dev_type
 
     return data
+
+
+def get_total_contrs(github_id):
+    total_contrs = GitHubScoreTable.objects.filter(github_id=github_id).aggregate(commits=Sum(
+        'commit_cnt'), commit_lines=Sum('commit_line'), issues=Sum('issue_cnt'), prs=Sum('pr_cnt'))
+    return total_contrs
+
+
+def get_contr_repos(github_id):
+    student = StudentTab.objects.get(github_id=github_id)
+    pri_email = student.primary_email
+    sec_email = student.secondary_email
+
+    commit_data = GithubRepoCommits.objects.filter(
+        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email))
+    ).values_list('github_id', 'repo_name').distinct()
+
+    issue_data = GithubIssues.objects.filter(
+        github_id=github_id).values_list('owner_id', 'repo_name').distinct()
+
+    pull_data = GithubPulls.objects.filter(
+        github_id=github_id).values_list('owner_id', 'repo_name').distinct()
+
+    contr_repos = set(commit_data).union(issue_data).union(pull_data)
+    contr_repos = [f'{x[0]}/{x[1]}' for x in contr_repos]
+
+    return contr_repos
 
 
 def get_nested_dict(keys):
