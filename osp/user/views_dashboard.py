@@ -254,11 +254,7 @@ def get_dev_tendency(account, github_id):
     dev_tendency = {'typeE': typeE, 'typeF': typeF,
                     'typeG': typeG, "details": []}
     # 개발자 성향 문구 표시를 위한 데이터 가져오기
-    tndcy_desc, tndcy_descKR, tndcy_icon = get_type_analysis(
-        list(dev_tendency.values()))
-    for desc, descKR, icon in list(zip(tndcy_desc, tndcy_descKR, tndcy_icon)):
-        dev_tendency['details'].append(
-            {'desc': desc, 'descKR': descKR, 'icon': icon})
+    dev_tendency['details'] = get_type_analysis(list(dev_tendency.values()))
     data["dev_tendency"] = dev_tendency
 
     try:

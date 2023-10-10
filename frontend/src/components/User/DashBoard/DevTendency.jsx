@@ -1,8 +1,29 @@
 import Chart from './Charts/Chart';
+import {
+  BsFillSunFill,
+  BsFillMoonFill,
+  BsFillLightningFill,
+  BsTreeFill,
+  BsFire,
+  BsFillPeopleFill,
+  BsFillPersonFill
+} from 'react-icons/bs';
+import BadgeInfo from './BadgeInfo';
 
 function DevTendency(props) {
-  const data = props.data;
+  const data = props.data.details;
   const chartData = props.chartData;
+  const iconSize = 40;
+  const iconColor = '#FFFFFF';
+  const labelIconMap = {
+    Sunflower: <BsFillSunFill size={iconSize} color={iconColor} />,
+    'Night Owl': <BsFillMoonFill size={iconSize} color={iconColor} />,
+    Initiator: <BsFillLightningFill size={iconSize} color={iconColor} />,
+    Evergreen: <BsTreeFill size={iconSize} color={iconColor} />,
+    Burning: <BsFire size={iconSize} color={iconColor} />,
+    Together: <BsFillPeopleFill size={iconSize} color={iconColor} />,
+    Independent: <BsFillPersonFill size={iconSize} color={iconColor} />
+  };
 
   const commitOption = (titleText) => {
     return {
@@ -79,16 +100,20 @@ function DevTendency(props) {
   const cooperateChartConfig = { type: 'bar', data: cooperateData, options: commitOption('리포지토리') };
 
   return (
-    <div>
-      <div>
+    <div className="row">
+      <div className="col-lg-6 col-12 p-2">
+        <BadgeInfo {...data[0]} icon={labelIconMap[data[0].label]} />
         <Chart {...timeSeriesChartConfig} />
       </div>
-      <div>
+      <div className="col-lg-6 col-12 p-2">
+        <BadgeInfo {...data[1]} icon={labelIconMap[data[1].label]} />
         <Chart {...freqChartConfig} />
       </div>
-      <div>
+      <div className="col-lg-6 col-12 p-2">
+        <BadgeInfo {...data[2]} icon={labelIconMap[data[2].label]} />
         <Chart {...cooperateChartConfig} />
       </div>
+      <div className="col-lg-6 col-12">Coworkers</div>
     </div>
   );
 }
