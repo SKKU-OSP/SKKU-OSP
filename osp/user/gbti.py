@@ -58,50 +58,45 @@ def get_type_test(type1, type2, type3, type4):
 
 
 def get_type_analysis(type_list):
-    icon = {
-        "icon0": ["bi-sun-fill", "bi-moon-fill"],
-        "icon1": ["bi-lightning-fill", "bi-tree-fill", "bi-fire"],
-        "icon2": ["bi-people-fill", "bi-person-fill"]
-    }
-    msg = {
-        "msg0": ["Sunflower", "Night Owl"],
-        "msg1": ["Initiator", "Evergreen", "Burning"],
-        "msg2": ["Together", "Independent"]
-    }
-    msgKR = {
-        "msgKR0": ["주로 낮에 활동합니다.", "주로 밤에 활동합니다."],
-        "msgKR1": ["프로젝트 초반에 주로 활약합니다.", "프로젝트에 전반적으로 활약합니다.", "프로젝트 후반에 주로 활약합니다."],
-        "msgKR2": ["함께 작업하는 편입니다.", "혼자서 작업하는 편입니다."]
-    }
+    label = [
+        ["Sunflower", "Night Owl"],
+        ["Initiator", "Evergreen", "Burning"],
+        ["Together", "Independent"]
+    ]
+    desc = [
+        ["주로 낮에 활동합니다.", "주로 밤에 활동합니다."],
+        ["프로젝트 초반에 주로 활약합니다.", "프로젝트에 전반적으로 활약합니다.", "프로젝트 후반에 주로 활약합니다."],
+        ["함께 작업하는 편입니다.", "혼자서 작업하는 편입니다."]
+    ]
+    color = [
+        ["#FFA500", "#2B2B52", ],
+        ["#FFD700", "#228B22 ", "#FF4500"],
+        ["#7184E4", "#F5DEB3"]
+    ]
 
-    result, resultKR, result_icon = [], [], []
-
-    def split_type(k, n, crtr=[0]):
+    def get_type(idx:int, n:int, crtr=[0]):
         if n == 2:
-            if type_list[int(k)] < crtr[0]:
-                result.append(msg["msg"+k][0])
-                resultKR.append(msgKR["msgKR"+k][0])
-                result_icon.append(icon["icon"+k][0])
+            if type_list[idx] < crtr[0]:
+                obj = {'label': label[idx][0],
+                       'desc': desc[idx][0], 'color': color[idx][0]}
             else:
-                result.append(msg["msg"+k][1])
-                resultKR.append(msgKR["msgKR"+k][1])
-                result_icon.append(icon["icon"+k][1])
+                obj = {'label': label[idx][1],
+                       'desc': desc[idx][1], 'color': color[idx][1]}
         elif n == 3:
-            if type_list[int(k)] < crtr[0]:
-                result.append(msg["msg"+k][0])
-                resultKR.append(msgKR["msgKR"+k][0])
-                result_icon.append(icon["icon"+k][0])
-            elif type_list[int(k)] < crtr[1]:
-                result.append(msg["msg"+k][1])
-                resultKR.append(msgKR["msgKR"+k][1])
-                result_icon.append(icon["icon"+k][1])
+            if type_list[idx] < crtr[0]:
+                obj = {'label': label[idx][0],
+                       'desc': desc[idx][0], 'color': color[idx][0]}
+            elif type_list[idx] < crtr[1]:
+                obj = {'label': label[idx][1],
+                       'desc': desc[idx][1], 'color': color[idx][1]}
             else:
-                result.append(msg["msg"+k][2])
-                resultKR.append(msgKR["msgKR"+k][2])
-                result_icon.append(icon["icon"+k][2])
+                obj = {'label': label[idx][2],
+                       'desc': desc[idx][2], 'color': color[idx][2]}
+        return obj
 
-    split_type("0", 2, [0])
-    split_type("1", 3, [-0.4, 0.4])
-    split_type("2", 2, [0])
+    results = []
+    results.append(get_type(0, 2, [0]))
+    results.append(get_type(1, 3, [-0.4, 0.4]))
+    results.append(get_type(2, 2, [0]))
 
-    return result, resultKR, result_icon
+    return results

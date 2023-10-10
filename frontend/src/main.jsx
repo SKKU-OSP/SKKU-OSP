@@ -122,7 +122,7 @@ const router = createBrowserRouter([
         element: <DashBoard />
       },
       {
-        path: 'user/:username/dashboard/dev',
+        path: 'user/:username/dev-type',
         element: <DevAnalysis />
       },
       {
