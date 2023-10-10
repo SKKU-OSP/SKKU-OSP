@@ -32,6 +32,7 @@ import RecommenderPage from './routes/RecommenderPage';
 import SearchPage from './routes/SearchPage';
 import HomePage from './routes/HomePage';
 import DevAnalysis from './components/User/DashBoard/DevAnalysis';
+import UserLayout from './components/User/UserLayout';
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -115,15 +116,22 @@ const router = createBrowserRouter([
       },
       {
         path: 'user/:username',
-        element: <UserPage />
-      },
-      {
-        path: 'user/:username/dashboard',
-        element: <DashBoard />
-      },
-      {
-        path: 'user/:username/dashboard/dev',
-        element: <DevAnalysis />
+        element: <UserLayout />,
+        children: [
+          { path: '', element: <UserPage /> },
+          {
+            path: 'profile',
+            element: <UserPage />
+          },
+          {
+            path: 'dashboard',
+            element: <DashBoard />
+          },
+          {
+            path: 'dev-type',
+            element: <DevAnalysis />
+          }
+        ]
       },
       {
         path: 'repository/:username',

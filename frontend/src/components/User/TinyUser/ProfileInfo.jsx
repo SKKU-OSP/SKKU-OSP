@@ -1,32 +1,27 @@
-import '../User.css';
-import { BsGithub } from 'react-icons/bs';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
-import Spinner from 'react-bootstrap/Spinner';
-import { getAuthConfig } from '../../../utils/auth';
-import { useNavigate, useParams } from 'react-router-dom';
 
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
+
+import { BsGithub } from 'react-icons/bs';
+import Spinner from 'react-bootstrap/Spinner';
+
+import { getAuthConfig } from '../../../utils/auth';
+
+import '../User.css';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 function ProfileInfo(props) {
   const info = props.userInfo;
   const { username } = useParams();
   const [userInfo, setUserInfo] = useState();
   const [editing, setEditing] = useState(false);
   const [editUserInfo, setEditUserInfo] = useState();
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
-  const navigate = useNavigate();
-
-  const moveDashBoard = () => {
-    navigate('dashboard', {
-      state: {
-        username: username
-      }
-    });
-  };
 
   useEffect(() => setUserInfo(info), [info]);
 
   const updatePostProfileInfo = async (editIntroduction) => {
+    const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
     if (userInfo.introduction !== editIntroduction) {
       await axios.post(postUrl, { introduction: editIntroduction }, getAuthConfig());
     }
@@ -61,14 +56,9 @@ function ProfileInfo(props) {
                   <span className="info_btn-1-text">프로필 저장</span>
                 </button>
               ) : (
-                <>
-                  <button className="info_btn-1" onClick={moveDashBoard}>
-                    <span className="info_btn-1-text">대시보드</span>
-                  </button>
-                  <button className="info_btn-2" onClick={handleEditClick}>
-                    <span className="info_btn-2-text">프로필 수정</span>
-                  </button>
-                </>
+                <button className="info_btn-2" onClick={handleEditClick}>
+                  <span className="info_btn-2-text">프로필 수정</span>
+                </button>
               )}
             </div>
             <div className="info_username">
@@ -76,7 +66,6 @@ function ProfileInfo(props) {
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />
-
               <span className="github_username">{userInfo.github_id}</span>
             </div>
             {editing ? (

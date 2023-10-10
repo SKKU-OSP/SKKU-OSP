@@ -1,16 +1,18 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getAuthConfig } from '../../../utils/auth';
 
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Chart from './Charts/Chart';
+import axios from 'axios';
 import { Chart as ChartJS } from 'chart.js';
+import { useParams } from 'react-router-dom';
 
 import Nav from 'react-bootstrap/Nav';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
+import Chart from './Charts/Chart';
+import { getAuthConfig } from '../../../utils/auth';
 import { noLegendOption } from '../../../utils/chartOption';
+
+import './DashBoard.css';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 const dashboardDataUrl = `${serverDomain}/user/api/dashboard/`;
@@ -106,12 +108,12 @@ function Dashboard() {
       datasets: [
         {
           data: value,
-          pointRadius: 10,
-          pointHoverRadius: 15,
+          pointRadius: 4,
+          pointHoverRadius: 8,
           pointBackgroundColor: 'rgba(150, 130, 230, 1)',
           borderColor: 'rgba(150, 130, 230, 1)',
           tension: 0.01,
-          borderWidth: 5
+          borderWidth: 3
         }
       ]
     };
@@ -194,7 +196,7 @@ function Dashboard() {
   return (
     <>
       {chartData && (
-        <div className="container my-4">
+        <>
           <div className="d-flex justify-content-between">
             <div className="big doughnut">
               <Chart {...mainScoreChartConfig} />
@@ -256,7 +258,7 @@ function Dashboard() {
               <Chart {...compareBarChart} />
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
