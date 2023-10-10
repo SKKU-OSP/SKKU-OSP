@@ -18,6 +18,7 @@ from user import update_act
 from user.gbti import get_type_analysis, get_type_test
 from user.models import (Account, AccountPrivacy, DevType, GithubScore,
                          GithubStatsYymm, StudentTab)
+from user.serializers import AccountSerializer
 from user.serializers_dashboard import GithubScoreResultSerializer
 
 
@@ -297,7 +298,7 @@ def get_coworkers(github_id):
 
     coworkers = Account.objects.filter(
         student_data__github_id__in=coworker_github_ids)
-    coworkers = [account.to_json() for account in coworkers]
+    coworkers = AccountSerializer(coworkers, many=True).data
 
     return coworkers
 

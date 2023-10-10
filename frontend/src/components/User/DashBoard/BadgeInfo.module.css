@@ -11,5 +11,5 @@
 }
 .badgeDesc {
   font-size: 16px;
-  color: #696969;
+  color: var(--gray-700);
 }

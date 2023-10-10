@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import Chart from './Charts/Chart';
 import {
   BsFillSunFill,
@@ -6,13 +8,16 @@ import {
   BsTreeFill,
   BsFire,
   BsFillPeopleFill,
-  BsFillPersonFill
+  BsFillPersonFill,
+  BsGithub
 } from 'react-icons/bs';
 import BadgeInfo from './BadgeInfo';
 
+const serverDomain = import.meta.env.VITE_SERVER_URL;
 function DevTendency(props) {
   const data = props.data.details;
   const chartData = props.chartData;
+  const coworkers = props.coworkers;
   const iconSize = 40;
   const iconColor = '#FFFFFF';
   const labelIconMap = {
@@ -100,7 +105,7 @@ function DevTendency(props) {
   const cooperateChartConfig = { type: 'bar', data: cooperateData, options: commitOption('리포지토리') };
 
   return (
-    <div className="row">
+    <div className="row dashboard-box">
       <div className="col-lg-6 col-12 p-2">
         <BadgeInfo {...data[0]} icon={labelIconMap[data[0].label]} />
         <Chart {...timeSeriesChartConfig} />
@@ -113,7 +118,40 @@ function DevTendency(props) {
         <BadgeInfo {...data[2]} icon={labelIconMap[data[2].label]} />
         <Chart {...cooperateChartConfig} />
       </div>
-      <div className="col-lg-6 col-12">Coworkers</div>
+      <div className="col-lg-6 col-12">
+        <div className="h-100">
+          <div className="fs-5 bold">Coworkers</div>
+          <div className="text-body">같이 활동한 유저 목록</div>
+          <div className="coworker-container">
+            {coworkers.map((acc) => (
+              <div key={acc.user.username} className="d-flex gap-3 my-2 coworker-box">
+                <div className="border border-1 rounded-circle coworker-img-container">
+                  <img src={serverDomain + acc.photo} alt={acc.user.username} className="coworker-img" />
+                </div>
+                <div>
+                  <Link
+                    to={`/user/${acc.user.username}`}
+                    className="fs-4 bold text-decoration-none"
+                    title="프로필페이지 이동"
+                  >
+                    {acc.user.username}
+                  </Link>
+                  <a
+                    href={`https://github.com/${acc.github_id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="coworker-link"
+                    title="GitHub 페이지 이동"
+                  >
+                    <BsGithub size={20} />
+                    <span>{acc.github_id}</span>
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
