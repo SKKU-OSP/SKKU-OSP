@@ -1,12 +1,11 @@
 .weakText {
-  color: var(--main-icon-color);
+  color: var(--gray-600);
   font-size: 14px;
 }
 .weakText a {
-  color: var(--main-icon-color);
+  color: var(--gray-600);
   text-decoration: none;
 }
-
 .weakText a:hover {
   color: var(--main-selected-color);
 }

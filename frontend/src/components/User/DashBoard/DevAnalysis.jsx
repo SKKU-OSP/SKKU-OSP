@@ -15,28 +15,40 @@ function DevAnalysis() {
   const [devType, setDevType] = useState(null);
   const [devTendency, setDevTendency] = useState(null);
   const [devTendencyData, setDevTendencyData] = useState(null);
+  const [coworkers, setCoworkers] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getDevTendency = async () => {
-      const response = await axios.get(`${dashboardDataUrl}${username}/dev-tendency/`, getAuthConfig());
-      const res = response.data;
-      console.log('dev_tendency', res.data.dev_tendency);
-      console.log('dev_tendency_data', res.data.dev_tendency_data);
-      if (res.status === 'success') {
-        setDevTendency(res.data.dev_tendency);
-        setDevTendencyData(res.data.dev_tendency_data);
-      } else {
-        console.log(res);
+      try {
+        const response = await axios.get(`${dashboardDataUrl}${username}/dev-tendency/`, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          setDevTendency(res.data.dev_tendency);
+          setDevTendencyData(res.data.dev_tendency_data);
+          setCoworkers(res.data.coworkers);
+        } else {
+          console.log(res.message);
+          setError(res.message);
+        }
+      } catch (error) {
+        console.log('getDevTendency error', error);
+        setError('개발성향 데이터를 가져오는데 실패했습니다.');
       }
     };
     const getDevType = async () => {
-      const response = await axios.get(`${dashboardDataUrl}${username}/dev-type/`, getAuthConfig());
-      const res = response.data;
-      console.log('dev_type', res.data.dev_type);
-      if (res.status === 'success') {
-        setDevType(res.data.dev_type);
-      } else {
-        console.log(res);
+      try {
+        const response = await axios.get(`${dashboardDataUrl}${username}/dev-type/`, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          setDevType(res.data.dev_type);
+        } else {
+          console.log(res.message);
+          setError(res.message);
+        }
+      } catch (error) {
+        console.log('getDevType error', error);
+        setError('개발유형 데이터를 가져오는데 실패했습니다.');
       }
     };
     getDevTendency();
@@ -45,7 +57,8 @@ function DevAnalysis() {
 
   return (
     <div className="container my-4">
-      <div>{devTendency && <DevTendency data={devTendency} chartData={devTendencyData} />}</div>
+      {error && <div>{error}</div>}
+      <div>{devTendency && <DevTendency data={devTendency} chartData={devTendencyData} coworkers={coworkers} />}</div>
       <div>{devType && <DevType data={devType} />}</div>
     </div>
   );

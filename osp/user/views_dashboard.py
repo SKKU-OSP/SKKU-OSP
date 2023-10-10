@@ -4,7 +4,7 @@ import time
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
-from django.db.models import Subquery, Sum
+from django.db.models import Subquery, Sum, Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,11 +13,12 @@ from home.models import AnnualOverview, DistFactor, DistScore, Student
 from home.serializers import (AnnualOverviewDashboardSerializer,
                               DistFactorDashboardSerializer,
                               DistScoreDashboardSerializer)
-from repository.models import GithubRepoStats
+from repository.models import GithubRepoStats, GithubRepoContributor
 from user import update_act
 from user.gbti import get_type_analysis, get_type_test
 from user.models import (Account, AccountPrivacy, DevType, GithubScore,
                          GithubStatsYymm, StudentTab)
+from user.serializers import AccountSerializer
 from user.serializers_dashboard import GithubScoreResultSerializer
 
 
@@ -167,6 +168,10 @@ class UserDevTendencyView(APIView):
             return Response(get_fail_res(error_code=error))
         github_id = target_account.github_id
         data = get_dev_tendency(target_account, github_id)
+
+        coworkers = get_coworkers(github_id)
+        data['coworkers'] = coworkers
+
         return Response({'status': 'success', 'data': data})
 
 
@@ -254,11 +259,7 @@ def get_dev_tendency(account, github_id):
     dev_tendency = {'typeE': typeE, 'typeF': typeF,
                     'typeG': typeG, "details": []}
     # 개발자 성향 문구 표시를 위한 데이터 가져오기
-    tndcy_desc, tndcy_descKR, tndcy_icon = get_type_analysis(
-        list(dev_tendency.values()))
-    for desc, descKR, icon in list(zip(tndcy_desc, tndcy_descKR, tndcy_icon)):
-        dev_tendency['details'].append(
-            {'desc': desc, 'descKR': descKR, 'icon': icon})
+    dev_tendency['details'] = get_type_analysis(list(dev_tendency.values()))
     data["dev_tendency"] = dev_tendency
 
     try:
@@ -275,6 +276,31 @@ def get_dev_tendency(account, github_id):
         logging.exception(f"Get Type data error: {e}")
 
     return data
+
+
+def get_coworkers(github_id):
+    '''
+    GitHub ID를 이용해 리포지토리에서 협업한 유저를 찾는 함수
+    '''
+    # 기여한 리포지토리의 목록 조회
+    subquery = GithubRepoContributor.objects.filter(
+        github_id=github_id).values_list('repo_name', 'owner_id')
+
+    # 기여 리포지토리에 존재하는 기여자 목록 쿼리
+    coworker_github_ids = GithubRepoContributor.objects.filter(
+        (Q(repo_name__in=[item[0] for item in subquery]) &
+         Q(owner_id__in=[item[1] for item in subquery]))
+    ).values_list('github_id', flat=True).distinct()
+
+    # 자기자신 삭제
+    coworker_github_ids = list(coworker_github_ids)
+    coworker_github_ids.remove(github_id)
+
+    coworkers = Account.objects.filter(
+        student_data__github_id__in=coworker_github_ids)
+    coworkers = AccountSerializer(coworkers, many=True).data
+
+    return coworkers
 
 
 def get_dev_type(account, github_id):

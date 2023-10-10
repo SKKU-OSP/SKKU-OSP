@@ -1,0 +1,15 @@
+.badgeContainer {
+  border: 2px #1111114d solid;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  padding: 6px;
+}
+.badgeLabel {
+  font-size: 24px;
+  font-weight: bold;
+}
+.badgeDesc {
+  font-size: 16px;
+  color: var(--gray-700);
+}
