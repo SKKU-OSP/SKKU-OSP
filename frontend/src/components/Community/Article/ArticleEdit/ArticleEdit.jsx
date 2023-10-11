@@ -30,10 +30,8 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [anonymousWriter, setAnonymousWriter] = useState(true);
   const [team, setTeam] = useState([]);
   const [selectTeam, setSelectTeam] = useState({});
-  const [numFile, setNumFile] = useState(0);
-  const [fileObj, setFileObj] = useState({});
-  const [newlySelectedFiles, setNewlySelectedFiles] = useState([]);
-  const [articleFile, setArticleFile] = useState({});
+  const [existFiles, setExistFiles] = useState({});
+  const [articleFiles, setArticleFiles] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
@@ -117,9 +115,9 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           setAnonymousWriter(resArticle.data.article.anonymous_writer);
           const exist_files = {};
           resArticle.data.files.map((t) => {
-            exist_files[t.name] = t;
+            exist_files[t.id] = t;
           });
-          setArticleFile(exist_files);
+          setExistFiles(exist_files);
           setMyArticle(true);
         }
       } else {
@@ -135,7 +133,8 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   }, [username, articleID, navigate]);
 
   // 수정 버튼 클릭 시
-  const onModify = async () => {
+  const handleShow = (event) => {
+    event.preventDefault();
     if (board.board_type === 'Recruit') {
       const offset = new Date().getTimezoneOffset() * 60000;
       const period_start_date = startDate.getTime() - offset;
@@ -152,15 +151,24 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       window.alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 수정하시겠습니까?')) {
-      setNewlySelectedFiles([]);
-      console.log(articleFile);
+      postArticle();
+    }
+  };
+
+  const postArticle = async () => {
+    try {
+      const config = getAuthConfig();
+      config.headers['Content-Type'] = 'multipart/form-data';
+
+      console.log(articleFiles);
       const postData = {
         title: title,
         content: bodyText,
         is_notice: false,
         anonymous_writer: false,
         article_tags: selectTags,
-        ...articleFile,
+        file_id_list: Object.keys(existFiles),
+        ...articleFiles,
         ...(board.board_type === 'Recruit' && {
           period_start: startDate,
           period_end: endDate,
@@ -168,15 +176,28 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         })
       };
 
-      console.log('postData', postData);
-      const response = await axios.post(urlEditArticle, postData, getAuthConfig());
+      const formData = new FormData();
+      Object.entries(postData).forEach(([key, value]) => {
+        if (key === 'article_tags') {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value);
+        }
+      });
+      console.log(formData);
+      const response = await axios.post(urlEditArticle, formData, getAuthConfig());
 
       const res = response.data;
-      console.log(res);
       if (res['status'] === 'success') {
         window.alert('수정이 완료되었습니다!');
         navigate(`/community/article/${articleID}/`);
+      } else {
+        window.alert(res['message']);
+        return;
       }
+    } catch (error) {
+      console.error('에러:', error);
+      window.alert('Error Occured');
     }
   };
 
@@ -193,11 +214,16 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   // File
   const handleFileChange = (event) => {
     const files = event.target.files;
-    const all_files = articleFile;
+    const all_files = articleFiles;
     var already_exist_files = '';
 
     for (let i = 0; i < files.length; i++) {
-      if (all_files[files[i].name]) {
+      var isExist = false;
+      Object.entries(existFiles).map(([key, file]) => {
+        if (file.name == files[i].name) isExist = true;
+      });
+
+      if (all_files[files[i].name] || isExist) {
         if (already_exist_files.length) already_exist_files += ', ' + files[i].name;
         else already_exist_files += files[i].name;
       } else {
@@ -213,9 +239,9 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         delete_button.append('X');
         delete_button.setAttribute('type', 'button');
         delete_button.onclick = function () {
-          const all_files2 = articleFile;
+          const all_files2 = articleFiles;
           delete all_files2[files[i].name];
-          setArticleFile(all_files2);
+          setArticleFiles(all_files2);
           this.parentElement.parentElement.removeChild(this.parentElement);
         };
 
@@ -225,7 +251,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         document.getElementById('file-list').appendChild(file);
       }
     }
-    setArticleFile(all_files);
+    setArticleFiles(all_files);
 
     if (already_exist_files.length) {
       window.alert(already_exist_files + ' 파일은 이미 존재합니다.');
@@ -317,35 +343,41 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
         <>
           {renderConsentMessage}
           <div id="community-main" className="col-9">
-            <div className="community-nav d-flex">
-              <div>
-                <button type="button" className="btn btn-secondary" onClick={onBack}>
-                  뒤로가기
-                </button>
-              </div>
-              <div className="board-name">{board.name} 게시판</div>
-              {board.name === '질문' ? (
+            <form
+              id="article-form"
+              method="post"
+              data-edit-type={type}
+              encType="multipart/form-data"
+              onSubmit={handleShow}
+            >
+              <div className="community-nav d-flex">
                 <div>
-                  <div className="anonymous-btn align-middle">
-                    <input
-                      type="checkbox"
-                      id="is-anonymous"
-                      checked={anonymousWriter}
-                      onChange={() => setAnonymousWriter(!anonymousWriter)}
-                    />{' '}
-                    <label htmlFor="is-anonymous">익명</label>
-                  </div>
-                  <button type="button" className="btn btn-primary" onClick={onModify}>
-                    수정하기
+                  <button type="button" className="btn btn-secondary" onClick={onBack}>
+                    뒤로가기
                   </button>
                 </div>
-              ) : (
-                <button type="button" className="btn btn-primary" onClick={onModify}>
-                  수정하기
-                </button>
-              )}
-            </div>
-            <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data">
+                <div className="board-name">{board.name} 게시판</div>
+                {board.name === '질문' ? (
+                  <div>
+                    <div className="anonymous-btn align-middle">
+                      <input
+                        type="checkbox"
+                        id="is-anonymous"
+                        checked={anonymousWriter}
+                        onChange={() => setAnonymousWriter(!anonymousWriter)}
+                      />{' '}
+                      <label htmlFor="is-anonymous">익명</label>
+                    </div>
+                    <button type="button" className="btn btn-primary" onClick={onModify}>
+                      수정하기
+                    </button>
+                  </div>
+                ) : (
+                  <button type="submit" className="btn btn-primary">
+                    수정하기
+                  </button>
+                )}
+              </div>
               <input type="hidden" id="board-type" className="board_type" value={board.board_type} />
               <input type="hidden" id="board-name" className="board_name" value={board.name} />
               <input type="hidden" id="board-id" className="board_id" value={board.id} />
@@ -483,21 +515,19 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                   multiple
                 />
                 <div id="file-list">
-                  {Object.entries(articleFile).map(([key, file]) => {
+                  {Object.entries(existFiles).map(([key, file]) => {
                     return (
-                      <div id={file.name} key={file.name} className="article-file d-flex">
+                      <div id={file.name} key={file.id} className="article-file d-flex">
                         {file.name}
                         <button
                           type="button"
                           className="article-file-delete-btn"
                           onClick={function () {
-                            console.log(articleFile);
-                            const all_files = articleFile;
-                            delete all_files[file.name];
-                            setArticleFile(all_files);
+                            const all_files = existFiles;
+                            delete all_files[file.id];
+                            setExistFiles(all_files);
                             var this_element = document.getElementById(file.name);
                             document.getElementById('file-list').removeChild(this_element);
-                            console.log(all_files);
                           }}
                         >
                           X

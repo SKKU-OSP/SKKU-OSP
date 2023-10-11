@@ -26,9 +26,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const [anonymousWriter, setAnonymousWriter] = useState(false);
   const [team, setTeam] = useState([]);
   const [selectTeam, setSelectTeam] = useState({});
-  const [numFile, setNumFile] = useState(0);
-  const [fileObj, setFileObj] = useState({});
-  const [articleFile, setArticleFile] = useState({});
+  const [articleFiles, setArticleFiles] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
@@ -84,7 +82,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
   // 익명 체크 여부 확인
   const anonymousCheck = () => {
-    console.log(anonymousWriter);
     return anonymousWriter;
   };
 
@@ -123,8 +120,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     try {
       const config = getAuthConfig();
       config.headers['Content-Type'] = 'multipart/form-data';
-      console.log('config', config);
-      console.log(articleFile);
+
       const postData = {
         board_name: boardName,
         title: title,
@@ -132,7 +128,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         is_notice: isAuthNotice,
         anonymous_writer: anonymousWriter,
         article_tags: selectTags,
-        ...articleFile,
+        ...articleFiles,
         ...(boardName === '팀 모집' && {
           period_start: startDate,
           period_end: endDate,
@@ -148,12 +144,10 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
           formData.append(key, value);
         }
       });
-
-      console.log('postData', postData);
+      console.log(formData);
       const response = await axios.post(urlRegistArticle, formData, getAuthConfig());
 
       const res = response.data;
-      console.log(res);
       if (res['status'] === 'success') {
         window.alert('등록이 완료되었습니다!');
         navigate(`/community/article/${res.data.article_id}`);
@@ -180,7 +174,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // File
   const handleFileChange = (event) => {
     const files = event.target.files;
-    const all_files = articleFile;
+    const all_files = articleFiles;
     var already_exist_files = '';
 
     for (let i = 0; i < files.length; i++) {
@@ -200,9 +194,9 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         delete_button.append('X');
         delete_button.setAttribute('type', 'button');
         delete_button.onclick = function () {
-          const all_files2 = articleFile;
+          const all_files2 = articleFiles;
           delete all_files2[files[i].name];
-          setArticleFile(all_files2);
+          setArticleFiles(all_files2);
           this.parentElement.parentElement.removeChild(this.parentElement);
         };
 
@@ -212,8 +206,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         document.getElementById('file-list').appendChild(file);
       }
     }
-    console.log(all_files);
-    setArticleFile(all_files);
+    setArticleFiles(all_files);
 
     if (already_exist_files.length) {
       window.alert(already_exist_files + ' 파일은 이미 존재합니다.');
