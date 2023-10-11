@@ -1,23 +1,24 @@
 import { Link } from 'react-router-dom';
 
-import Chart from './Charts/Chart';
 import {
-  BsFillSunFill,
-  BsFillMoonFill,
   BsFillLightningFill,
-  BsTreeFill,
-  BsFire,
+  BsFillMoonFill,
   BsFillPeopleFill,
   BsFillPersonFill,
-  BsGithub
+  BsFillSunFill,
+  BsFire,
+  BsGithub,
+  BsTreeFill
 } from 'react-icons/bs';
-import BadgeInfo from './BadgeInfo';
+
+import Chart from './Chart';
+import BadgeInfo from '../BadgeInfo';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 function DevTendency(props) {
-  const data = props.data.details;
-  const chartData = props.chartData;
-  const coworkers = props.coworkers;
+  const data = props.data.dev_tendency.details;
+  const chartData = props.data.dev_tendency_data;
+  const coworkers = props.data.coworkers;
   const iconSize = 40;
   const iconColor = '#FFFFFF';
   const labelIconMap = {
