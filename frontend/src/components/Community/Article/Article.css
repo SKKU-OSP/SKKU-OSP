@@ -33,6 +33,10 @@
   }
 }
 
+.ql-snow {
+  border-color: var(--main-border-color) !important;
+}
+
 #profile-tab {
   width: 100%;
   background: var(--main-point-color);
