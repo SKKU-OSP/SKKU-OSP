@@ -4,8 +4,7 @@ import time
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
-from django.db.models import Subquery, Sum, Q, F, Value
-from django.db.models.functions import Concat
+from django.db.models import Subquery, Sum, Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -71,10 +70,31 @@ class UserDashboardView(APIView):
         start_year, end_year = min(years), max(years)
         data['years'] = years
 
-        # TODO score.best_repo 이용해서 best repo 정보 넣기
-
+        # github_score_result의 best_repo를 객체로 변경
+        # best_repo를 이용해 repo stat과 repo commit line을 구함
         github_score_result = GithubScoreResultSerializer(
             score, many=True).data
+        for obj in github_score_result:
+            year, repo = obj['year'], obj['best_repo']
+            if '/' in repo:
+                [owner_id, repo_name] = repo.split('/')
+                try:
+                    # GithubRepoStats에 커밋 라인 수 데이터가 없어 따로 계산
+                    commit_data = GithubRepoCommits.objects.filter(
+                        github_id=owner_id, repo_name=repo_name).aggregate(
+                        commit_lines=Sum('additions')+Sum('deletions')
+                    )
+                    repo_stat = GithubRepoStats.objects.get(
+                        github_id=owner_id, repo_name=repo_name)
+                    repo_stat = repo_stat.get_factors()
+                    repo_stat['commit_lines'] = commit_data['commit_lines']
+                    print("repo_stat", repo_stat)
+                    obj['best_repo'] = repo_stat
+
+                except ObjectDoesNotExist as e:
+                    logging.exception(f'repo {repo} is not exist: {e}')
+                    obj['best_repo'] = None
+
         data['score'] = github_score_result
 
         # star 데이터 따로 처리
