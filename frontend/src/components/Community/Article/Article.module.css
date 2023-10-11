@@ -21,6 +21,28 @@
   border-right: 1px solid var(--main-border-color);
 }
 
+.articleFile {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+
+.articleFileList {
+  min-height: 50px;
+  align-items: center;
+  padding: 0px 20px;
+  border: 1px solid var(--main-border-color);
+  margin: -1px 0 0 -1px;
+}
+
+.articleFileName {
+  cursor: pointer;
+}
+.articleFileName:hover {
+  text-decoration: underline;
+}
+
 .articleButton {
   width: 80px;
   margin-right: 50px;

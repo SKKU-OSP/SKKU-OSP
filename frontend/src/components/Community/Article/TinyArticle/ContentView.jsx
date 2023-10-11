@@ -8,9 +8,11 @@ import AuthContext from '../../../../utils/auth-context';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
 
+const domain_url = import.meta.env.VITE_SERVER_URL;
+
 function ContentView(props) {
   const { data } = props;
-  const { board, tags, comments, article, team } = data;
+  const { board, tags, comments, article, team, files } = data;
   const { username } = useContext(AuthContext);
   console.log(team);
 
@@ -159,6 +161,22 @@ function ContentView(props) {
           </div>
         </div>
       </div>
+      {files.length != 0 && (
+        <div className={styles.articleFileList}>
+          {files.map((file) => {
+            return (
+              <div
+                key={file.name}
+                className={styles.articleFile}
+                onClick={() => window.open(domain_url + '/data/media/' + file.file)}
+              >
+                <span className={styles.articleFileName}>{file.name}</span>
+                <span>{file.size}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {article.board.board_type == 'Recruit' && (
         <div className={styles.articleTeam}>
