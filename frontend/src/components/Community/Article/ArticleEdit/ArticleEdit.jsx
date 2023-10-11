@@ -33,7 +33,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [numFile, setNumFile] = useState(0);
   const [fileObj, setFileObj] = useState({});
   const [newlySelectedFiles, setNewlySelectedFiles] = useState([]);
-  const [articleFile, setArticleFile] = useState([]);
+  const [articleFile, setArticleFile] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
@@ -115,15 +115,11 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           );
           setIsAuthNotice(resArticle.data.article.is_notice);
           setAnonymousWriter(resArticle.data.article.anonymous_writer);
-          setArticleFile(
-            resArticle.data.files.map((t) => {
-              return {
-                id: t.id,
-                name: t.name,
-                file: t.file.name
-              };
-            })
-          );
+          const exist_files = {};
+          resArticle.data.files.map((t) => {
+            exist_files[t.name] = t;
+          });
+          setArticleFile(exist_files);
           setMyArticle(true);
         }
       } else {
@@ -156,30 +152,30 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       window.alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 수정하시겠습니까?')) {
-      setArticleFile((prevArticleFiles) => [...prevArticleFiles, ...newlySelectedFiles]);
       setNewlySelectedFiles([]);
-      const response = await axios.post(
-        urlEditArticle,
-        {
-          title: title,
-          content: bodyText,
-          is_notice: false,
-          anonymous_writer: false,
-          article_tags: selectTags,
-          ...articleFile,
-          ...(board.board_type === 'Recruit' && {
-            period_start: startDate,
-            period_end: endDate,
-            team_id: selectTeam.value
-          })
-        },
-        getAuthConfig()
-      );
+      console.log(articleFile);
+      const postData = {
+        title: title,
+        content: bodyText,
+        is_notice: false,
+        anonymous_writer: false,
+        article_tags: selectTags,
+        ...articleFile,
+        ...(board.board_type === 'Recruit' && {
+          period_start: startDate,
+          period_end: endDate,
+          team_id: selectTeam.value
+        })
+      };
+
+      console.log('postData', postData);
+      const response = await axios.post(urlEditArticle, postData, getAuthConfig());
+
       const res = response.data;
       console.log(res);
       if (res['status'] === 'success') {
         window.alert('수정이 완료되었습니다!');
-        window.location.href = `/community/article/` + articleID + `/`;
+        navigate(`/community/article/${articleID}/`);
       }
     }
   };
@@ -195,57 +191,45 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   };
 
   // File
-  const handleFile = () => {
-    const nextNum = numFile + 1;
-
-    setFileObj((prev) => {
-      const prevObj = { ...prev };
-      prevObj[nextNum] = nextNum;
-      return prevObj;
-    });
-    if (inputRef.current && inputRef.current.files && inputRef.current.files.length > 0) {
-      const newFileObj = { ...fileObj };
-      const newArticleFiles = [...articleFile];
-      for (let i = 0; i < inputRef.current.files.length; i++) {
-        const file = inputRef.current.files[i];
-        newFileObj[nextNum + i] = file;
-        newArticleFiles.push(file);
-      }
-      setFileObj(newFileObj);
-      setArticleFile(newArticleFiles);
-    }
-    // setArticleFile((prev) => [...prev, prev.length + 1]); //키 값 줄일 때 주의점 numFile 줄이면 안돼!!
-    setNumFile(nextNum);
-
-    console.log(numFile);
-    console.log(nextNum + 'v');
-    console.log('file', articleFile, fileObj);
-  };
-
-  const inputRef = useRef < HTMLInputElement > null;
-
-  const deleteInput = (id) => {
-    const updatedFileObj = { ...fileObj };
-
-    if (updatedFileObj.hasOwnProperty(id)) {
-      delete updatedFileObj[id];
-      const newFileObj = setFileObj(updatedFileObj);
-      const store = new DataTransfer();
-      Object.values(newFileObj).forEach((file) => {
-        console.log('delete', file);
-        store.items.add(file);
-      });
-
-      if (inputRef.current) {
-        inputRef.current.files = store.files;
-      }
-    }
-  };
-
   const handleFileChange = (event) => {
-    const newFiles = event.target.files;
-    setNewlySelectedFiles(Array.from(newFiles));
-    console.log('newfiles', newlySelectedFiles);
+    const files = event.target.files;
+    const all_files = articleFile;
+    var already_exist_files = '';
+
+    for (let i = 0; i < files.length; i++) {
+      if (all_files[files[i].name]) {
+        if (already_exist_files.length) already_exist_files += ', ' + files[i].name;
+        else already_exist_files += files[i].name;
+      } else {
+        all_files[files[i].name] = files[i];
+
+        var file = document.createElement('div');
+        file.id = files[i].name;
+        file.classList.add('article-file');
+        file.classList.add('d-flex');
+
+        var delete_button = document.createElement('button');
+        delete_button.classList.add('article-file-delete-btn');
+        delete_button.append('X');
+        delete_button.setAttribute('type', 'button');
+        delete_button.onclick = function () {
+          const all_files2 = articleFile;
+          delete all_files2[files[i].name];
+          setArticleFile(all_files2);
+          this.parentElement.parentElement.removeChild(this.parentElement);
+        };
+
+        file.append(files[i].name);
+        file.appendChild(delete_button);
+
+        document.getElementById('file-list').appendChild(file);
+      }
+    }
+    setArticleFile(all_files);
+
+    if (already_exist_files.length) {
+      window.alert(already_exist_files + ' 파일은 이미 존재합니다.');
+    }
   };
 
   // Tag
@@ -489,93 +473,39 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                   </div>
                 </div>
               )}
-              <div id="article-helper" className="mt-2">
-                <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>
-                  파일 추가
-                </button>
-              </div>
-              <div id="article-file-container">
-                {articleFile.map(
-                  (
-                    file,
-                    index // 기존 게시글의 파일 목록 불러오기
-                  ) => (
-                    <div id={`input-group-saved${index + 1}`} className="input-group my-1" key={index}>
-                      <input
-                        type="text"
-                        name={`article_file_${file.id}`}
-                        className="form-control article-file"
-                        value={file.name}
-                        readOnly
-                      />
-                      <button
-                        type="button"
-                        className="input-group-text default-btn"
-                        onClick={() => deleteInput(`article-file-${file.id}`)}
-                      >
-                        <BsXLg />
-                      </button>
-                    </div>
-                  )
-                )}
-                {/* {fileObj &&
-                  Object.keys(fileObj).map(
-                    (
-                      file,
-                      id //파일 추가 input form으로 작성해서 제출할 때 console
-                    ) => (
-                      <div id={`input-group-${file.id}`} className="input-group my-1" key={`${id}`}>
-                        <input
-                          type="file"
-                          id={`article-file-${file.id}`}
-                          name={`article_file_${file.id}`}
-                          className="form-control article-file"
-                          onChange={handleFileChange}
-                        />
+              <div className="community-file">
+                <input
+                  type="file"
+                  id="article-files"
+                  name="article_files"
+                  className="article-files"
+                  onChange={handleFileChange}
+                  multiple
+                />
+                <div id="file-list">
+                  {Object.entries(articleFile).map(([key, file]) => {
+                    return (
+                      <div id={file.name} key={file.name} className="article-file d-flex">
+                        {file.name}
                         <button
                           type="button"
-                          className="input-group-text default-btn"
-                          onClick={() => deleteInput(file.id)}
+                          className="article-file-delete-btn"
+                          onClick={function () {
+                            console.log(articleFile);
+                            const all_files = articleFile;
+                            delete all_files[file.name];
+                            setArticleFile(all_files);
+                            var this_element = document.getElementById(file.name);
+                            document.getElementById('file-list').removeChild(this_element);
+                            console.log(all_files);
+                          }}
                         >
-                          <BsXLg />
+                          X
                         </button>
                       </div>
-                    )
-                  )} */}
-                {/* {articleFile.map((file) => (
-                  <div id={`input-group-saved${file.id}`} className="input-group my-1" key={file.id}>
-                    <input
-                      type="text"
-                      name={`article_file_${file.id}`}
-                      className="form-control article-file"
-                      value={file.name}
-                      readOnly
-                    />
-                    <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(file.id)}>
-                      <BsXLg />
-                    </button>
-                  </div>
-                ))} */}
-
-                {fileObj &&
-                  Object.keys(fileObj).map((fileId) => (
-                    <div id={`input-group-${fileId}`} className="input-group my-1" key={fileId}>
-                      <input
-                        type="file"
-                        id={`article-file-${fileId}`}
-                        name={`article_file_${fileId}`}
-                        className="form-control article-file"
-                        onChange={handleFileChange}
-                      />
-                      <button
-                        type="button"
-                        className="input-group-text default-btn"
-                        onClick={() => deleteInput(fileId)}
-                      >
-                        <BsXLg />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
+                </div>
               </div>
             </form>
           </div>

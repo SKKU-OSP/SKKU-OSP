@@ -115,16 +115,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       window.alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 등록하시겠습니까?')) {
-      console.log('title', title);
-      console.log('bodyText', bodyText);
-      console.log('tags', selectTags);
-      console.log('ano', anonymousWriter);
-      console.log('isn', isAuthNotice);
-      console.log('ps', startDate);
-      console.log('pe', endDate);
-      console.log('team', team);
-      console.log('articleFile', articleFile);
-
       postArticle();
     }
   };
@@ -134,7 +124,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       const config = getAuthConfig();
       config.headers['Content-Type'] = 'multipart/form-data';
       console.log('config', config);
-
+      console.log(articleFile);
       const postData = {
         board_name: boardName,
         title: title,
@@ -152,7 +142,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
-        console.log('keyvalue', key, typeof value);
         if (key === 'article_tags') {
           formData.append(key, JSON.stringify(value));
         } else {
@@ -161,9 +150,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       });
 
       console.log('postData', postData);
-      for (let key of formData) {
-        console.log('key', key, formData[key]);
-      }
       const response = await axios.post(urlRegistArticle, formData, getAuthConfig());
 
       const res = response.data;
@@ -192,59 +178,46 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   };
 
   // File
-  const handleFile = () => {
-    const nextNum = numFile + 1;
-
-    setFileObj((prev) => {
-      const prevObj = { ...prev };
-      prevObj[nextNum] = nextNum;
-      return prevObj;
-    });
-    if (inputRef.current && inputRef.current.files && inputRef.current.files.length > 0) {
-      const newFileObj = { ...fileObj };
-      const newArticleFiles = [...articleFile];
-      for (let i = 0; i < inputRef.current.files.length; i++) {
-        const file = inputRef.current.files[i];
-        newFileObj[nextNum + i] = file;
-        newArticleFiles.push(file);
-      }
-      setFileObj(newFileObj);
-      setArticleFile(newArticleFiles);
-    }
-    setNumFile(nextNum);
-  };
-
-  const inputRef = useRef < HTMLInputElement > null;
-
-  const deleteInput = (id) => {
-    const updatedFileObj = { ...fileObj };
-    delete updatedFileObj[id];
-
-    const newFileObj = setFileObj(updatedFileObj);
-
-    const store = new DataTransfer();
-    Object.values(newFileObj).forEach((file) => {
-      if (file instanceof File) {
-        store.items.add(file);
-      }
-    });
-
-    if (inputRef.current) {
-      inputRef.current.files = store.files;
-    }
-    const updatedArticleFiles = { ...articleFile };
-    delete updatedArticleFiles[id];
-    setArticleFile(updatedArticleFiles);
-  };
-
   const handleFileChange = (event) => {
-    const fileName = event.target.name;
-    const fileObjs = { ...articleFile };
-    fileObjs[fileName] = event.target.files[0];
+    const files = event.target.files;
+    const all_files = articleFile;
+    var already_exist_files = '';
 
-    setArticleFile(fileObjs);
+    for (let i = 0; i < files.length; i++) {
+      if (all_files[files[i].name]) {
+        if (already_exist_files.length) already_exist_files += ', ' + files[i].name;
+        else already_exist_files += files[i].name;
+      } else {
+        all_files[files[i].name] = files[i];
 
-    console.log('fileObj', fileObjs);
+        var file = document.createElement('div');
+        file.id = files[i].name;
+        file.classList.add('article-file');
+        file.classList.add('d-flex');
+
+        var delete_button = document.createElement('button');
+        delete_button.classList.add('article-file-delete-btn');
+        delete_button.append('X');
+        delete_button.setAttribute('type', 'button');
+        delete_button.onclick = function () {
+          const all_files2 = articleFile;
+          delete all_files2[files[i].name];
+          setArticleFile(all_files2);
+          this.parentElement.parentElement.removeChild(this.parentElement);
+        };
+
+        file.append(files[i].name);
+        file.appendChild(delete_button);
+
+        document.getElementById('file-list').appendChild(file);
+      }
+    }
+    console.log(all_files);
+    setArticleFile(all_files);
+
+    if (already_exist_files.length) {
+      window.alert(already_exist_files + ' 파일은 이미 존재합니다.');
+    }
   };
 
   // Tag
@@ -507,27 +480,16 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               </div>
             </div>
           )}
-          <div id="article-helper" className="mt-2">
-            <button type="button" id="add-file" className="btn btn-secondary" onClick={handleFile}>
-              파일 추가
-            </button>
-          </div>
-          <div id="article-file-container">
-            {fileObj &&
-              Object.keys(fileObj).map((id) => (
-                <div key={`${id}`} id={`input-group-${id}`} className="input-group my-1">
-                  <input
-                    type="file"
-                    id={`article-file-${id}`}
-                    name={`article_file_${id}`}
-                    className="form-control article-file"
-                    onChange={handleFileChange}
-                  />
-                  <button type="button" className="input-group-text default-btn" onClick={() => deleteInput(id)}>
-                    <BsXLg />
-                  </button>
-                </div>
-              ))}
+          <div className="community-file">
+            <input
+              type="file"
+              id="article-files"
+              name="article_files"
+              className="article-files"
+              onChange={handleFileChange}
+              multiple
+            />
+            <div id="file-list"></div>
           </div>
         </form>
       </div>
