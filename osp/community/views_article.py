@@ -207,7 +207,7 @@ class ArticleCreateView(APIView):
                     res['message'] = '해당 팀의 모집글을 작성할 수 없습니다.'
                     print(res['message'])
                     return Response(res)
-            print('before tag')
+            
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
             if isinstance(article_tags, str):
@@ -216,7 +216,7 @@ class ArticleCreateView(APIView):
                 tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
-            print('before file')
+            
             # 게시글 파일 생성
             files = request.FILES
 
@@ -269,6 +269,7 @@ class ArticleUpdateView(APIView):
                 res['message'] = '수정 권한이 없습니다.'
                 return Response(res)
             # data 파싱
+            print('update', request.data)
             title = request.data.get('title', '').strip()
             content = request.data.get('content', '').strip()
             anonymous_writer = request.data.get('anonymous_writer', False)
@@ -324,6 +325,8 @@ class ArticleUpdateView(APIView):
                 old_article_tag.delete()
 
             article_tags = request.data.get('article_tags', [])
+            if isinstance(article_tags, str):
+                article_tags = json.loads(article_tags)
             for article_tag in article_tags:
                 tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
@@ -338,7 +341,6 @@ class ArticleUpdateView(APIView):
 
             # 제거한 파일을 DELETE 상태로 변경
             existing_files = []
-            print(file_id_list)
             for obj in article_files:
                 # 기존 등록한 파일은 id 값으로 request를 받아 체크할 수 있음
                 # 기존 등록한 파일의 id 값이 오지 않은 경우 삭제된 것으로 간주하고 삭제 처리
