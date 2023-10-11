@@ -196,11 +196,6 @@ class UserDevTendencyView(APIView):
         coworkers = get_coworkers(github_id)
         data['coworkers'] = coworkers
 
-        contr_repos = get_contr_repos(github_id)
-        print(len(contr_repos))
-        total_contrs = get_total_contrs(github_id)
-        print("total_contrs", total_contrs)
-
         print("UserDevTendencyView elapsed time", time.time() - start)
 
         return Response({'status': 'success', 'data': data})
@@ -223,6 +218,30 @@ class UserDevTypeView(APIView):
         data = get_dev_type(target_account, github_id)
 
         return Response({"status": "success", "data": data})
+
+
+class TotalContrView(APIView):
+    def get(self, request, username):
+        res = {'status': 'success', 'data': None}
+        try:
+            target_account, error = get_account_valid(request, username)
+            if error:
+                return Response(get_fail_res(error_code=error))
+            github_id = target_account.github_id
+            contr_repo = get_contr_repos(github_id)
+            data = {'repo_num': len(contr_repo)}
+
+            contrs = get_total_contrs(github_id)
+            data.update(contrs)
+            res['data'] = data
+        except ObjectDoesNotExist as e:
+            logging.exception(f'{e}')
+            return Response(get_fail_res('object_not_found'))
+        except Exception as e:
+            logging.exception(f'TotalContrView Exception: {e}')
+            return Response(get_fail_res('undefined_exception'))
+
+        return Response(res)
 
 
 def get_account_valid(request, username):
