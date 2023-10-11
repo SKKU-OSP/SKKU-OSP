@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import logging
 import json
 
+
 class ArticleAPIView(APIView):
     '''
     GET : 게시글 읽기 API
@@ -218,8 +219,7 @@ class ArticleCreateView(APIView):
             print('before file')
             # 게시글 파일 생성
             files = request.FILES
-            print(files)
-            
+
             # 파일 게시자 추적: created_user를 username과 user_id를 연결한 이유
             # username은 변경가능하기 때문에 id로 추적하고자함
             # user가 삭제되면 user_id를 이용해 이용자를 특정하기 어렵기 때문에 username도 사용
@@ -332,29 +332,31 @@ class ArticleUpdateView(APIView):
             article_files = ArticleFile.objects.filter(
                 article_id=article.id, status="POST")
             files = request.FILES
+            file_id_list = request.data.get('file_id_list', None)
             created_user = str(request.user.username) + \
                 "_" + str(request.user.id)
 
             # 제거한 파일을 DELETE 상태로 변경
             existing_files = []
+            print(file_id_list)
             for obj in article_files:
                 # 기존 등록한 파일은 id 값으로 request를 받아 체크할 수 있음
                 # 기존 등록한 파일의 id 값이 오지 않은 경우 삭제된 것으로 간주하고 삭제 처리
-                if str(obj.id) not in files:
+                if str(obj.id) not in file_id_list:
                     ArticleFile.objects.filter(id=obj.id).update(
                         status='DELETE', updated_date=datetime.now())
-                else:
-                    existing_files.append(str(obj.id))
+                # else:
+                #    existing_files.append(str(obj.id))
 
             # 새로 업로드한 파일을 POST상태로 create
             for key in files:
-                if key not in existing_files:
-                    ArticleFile.objects.create(
-                        file=files[key],
-                        filename=files[key],
-                        created_user=created_user,
-                        status="POST",
-                        article_id=article.id)
+                # if key not in existing_files:
+                ArticleFile.objects.create(
+                    file=files[key],
+                    filename=files[key],
+                    created_user=created_user,
+                    status="POST",
+                    article_id=article.id)
 
             res['status'] = 'success'
             res['message'] = '게시글을 수정했습니다.'
