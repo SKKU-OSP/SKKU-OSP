@@ -12,7 +12,7 @@ import {
 } from 'react-icons/bs';
 
 import Chart from './Chart';
-import BadgeInfo from '../BadgeInfo';
+import BadgeInfo from '../Item/BadgeInfo';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 function DevTendency(props) {

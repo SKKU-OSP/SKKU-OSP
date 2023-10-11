@@ -31,7 +31,7 @@ import TeamApplication from './components/NavBar/TeamApplication/TeamApplication
 import RecommenderPage from './routes/RecommenderPage';
 import SearchPage from './routes/SearchPage';
 import HomePage from './routes/HomePage';
-import DevAnalysis from './components/User/DashBoard/DevAnalysis';
+import DevAnalysis from './components/User/TypeTest/DevAnalysis';
 import UserLayout from './components/User/UserLayout';
 
 const router = createBrowserRouter([

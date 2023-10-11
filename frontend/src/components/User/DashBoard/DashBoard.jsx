@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import DevTendency from './Charts/DevTendency';
 import ChartsByYear from './Charts/ChartsByYear';
 import { getAuthConfig } from '../../../utils/auth';
+import SimpleBox from './Item/SimpleBox';
 
 import './DashBoard.css';
 
@@ -14,10 +15,26 @@ const dashboardDataUrl = `${serverDomain}/user/api/dashboard/`;
 
 function Dashboard() {
   const { username } = useParams();
+  const [contr, setContr] = useState(null);
+  const [contrError, setContrError] = useState(null);
   const [devTendency, setDevTendency] = useState(null);
   const [devTendencyError, setDevTendencyError] = useState(null);
 
   useEffect(() => {
+    const getContr = async () => {
+      try {
+        const contrUrl = `${serverDomain}/user/api/dashboard/${username}/contr/`;
+        const response = await axios.get(contrUrl, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          setContr(res.data);
+        } else {
+          setContrError(res.message);
+        }
+      } catch (error) {
+        setContrError(error);
+      }
+    };
     const getDevTendency = async () => {
       try {
         const response = await axios.get(`${dashboardDataUrl}${username}/dev-tendency/`, getAuthConfig());
@@ -35,10 +52,29 @@ function Dashboard() {
         setDevTendencyError('개발성향 데이터를 가져오는데 실패했습니다.');
       }
     };
+    getContr();
     getDevTendency();
   }, [username]);
+
+  const factorKorMap = {
+    repo_num: '기여 리포지토리',
+    commits: '커밋',
+    commit_lines: '커밋 라인',
+    issues: '이슈',
+    prs: '풀 리퀘스트'
+  };
+
   return (
     <>
+      {contrError && <div>{contrError}</div>}
+      {contr && (
+        <div className="row d-flex justify-content-between">
+          {Object.entries(contr).map(([label, value]) => (
+            <SimpleBox key={label} label={factorKorMap[label]} value={value} />
+          ))}
+        </div>
+      )}
+
       {devTendencyError && <div>{devTendencyError}</div>}
       {devTendency && <DevTendency data={devTendency} />}
       <ChartsByYear />
