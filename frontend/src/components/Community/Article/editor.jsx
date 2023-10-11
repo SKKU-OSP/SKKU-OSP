@@ -1,6 +1,8 @@
 import { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import './Article.css';
 import ImageResize from 'quill-image-resize';
+
 Quill.register('modules/ImageResize', ImageResize);
 
 export const EditorModules = {
