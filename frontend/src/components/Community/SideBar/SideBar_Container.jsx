@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import SideBar_Presenter from './SideBar_Presenter';
 import AuthContext from '../../../utils/auth-context';
@@ -11,6 +11,7 @@ const logout_url = `${domain_url}/accounts/logout/`;
 export default function SideBar_Container() {
   const { name, username, githubUsername, photo } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation().pathname;
 
   const { unsetUser } = useContext(AuthContext);
   const [error, setError] = useState(false);
@@ -52,6 +53,7 @@ export default function SideBar_Container() {
       onMyGithub={onMyGithub}
       onLogin={onLogin}
       sendLogoutRequest={sendLogoutRequest}
+      location={location}
     />
   );
 }

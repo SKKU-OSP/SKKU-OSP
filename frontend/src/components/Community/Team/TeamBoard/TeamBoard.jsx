@@ -46,7 +46,7 @@ function TeamBoard() {
   };
 
   const onMyTeamList = () => {
-    navigate(`/community/myteam`);
+    navigate(`/community/team`);
   };
 
   const onWrite = () => {

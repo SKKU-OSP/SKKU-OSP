@@ -60,7 +60,7 @@ const router = createBrowserRouter([
             element: <TeamRecruit />
           },
           {
-            path: 'myteam',
+            path: 'team',
             element: <MyTeamList />
           },
           {

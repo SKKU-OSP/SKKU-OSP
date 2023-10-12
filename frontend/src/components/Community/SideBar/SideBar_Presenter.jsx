@@ -3,7 +3,7 @@ import { BsGithub } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 
 export default function SideBar_Presenter(props) {
-  const { name, username, githubUsername, photo, onMyProfile, onMyGithub, onLogin, onSignUp, sendLogoutRequest } =
+  const { name, username, githubUsername, photo, onMyProfile, onMyGithub, onLogin, sendLogoutRequest, location } =
     props;
 
   return (
@@ -35,14 +35,26 @@ export default function SideBar_Presenter(props) {
           </div>
           <div className="sidebar-content">
             <Link to="/community/activity/article">
-              <div className="sidebar-activity hover-opacity">내가 작성한 글</div>
+              <div
+                className={location == '/community/activity/article' ? 'sidebar-selected-activity' : 'sidebar-activity'}
+              >
+                내가 작성한 글
+              </div>
             </Link>
 
             <Link to="/community/activity/comment">
-              <div className="sidebar-activity hover-opacity">내가 작성한 댓글</div>
+              <div
+                className={location == '/community/activity/comment' ? 'sidebar-selected-activity' : 'sidebar-activity'}
+              >
+                내가 작성한 댓글
+              </div>
             </Link>
             <Link to="/community/activity/scrap">
-              <div className="sidebar-activity hover-opacity">내가 스크랩한 글</div>
+              <div
+                className={location == '/community/activity/scrap' ? 'sidebar-selected-activity' : 'sidebar-activity'}
+              >
+                내가 스크랩한 글
+              </div>
             </Link>
           </div>
         </>
