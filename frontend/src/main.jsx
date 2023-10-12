@@ -32,6 +32,7 @@ import RecommenderPage from './routes/RecommenderPage';
 import SearchPage from './routes/SearchPage';
 import HomePage from './routes/HomePage';
 import DevAnalysis from './components/User/TypeTest/DevAnalysis';
+import TestType from './components/User/TypeTest/TestType';
 import UserLayout from './components/User/UserLayout';
 
 const router = createBrowserRouter([
@@ -130,6 +131,10 @@ const router = createBrowserRouter([
           {
             path: 'dev-type',
             element: <DevAnalysis />
+          },
+          {
+            path: 'dev-type/test',
+            element: <TestType />
           }
         ]
       },

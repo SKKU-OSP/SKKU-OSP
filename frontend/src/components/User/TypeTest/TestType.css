@@ -53,6 +53,18 @@ section .abox {
   border: 1px solid var(--developer-border-color);
   background: none;
 }
+.btn-test-back {
+  padding: 10px 20px;
+  color: black;
+  border: 1px solid var(--developer-border-color);
+  background: var(--developer-bg-color);
+  border-radius: 10px;
+  width: 200px;
+}
+.btn-test-back:hover {
+  border: 1px solid var(--developer-border-color);
+  background: none;
+}
 .board {
   flex-direction: row;
   justify-content: center;
@@ -112,11 +124,6 @@ section .abox {
   margin-top: 2.25px;
   background-color: black;
   display: inline-block;
-}
-
-#gbti-id-card {
-  margin: 4% 4% 2%;
-  padding: 1px 5px;
 }
 
 .modal-gbti-card {

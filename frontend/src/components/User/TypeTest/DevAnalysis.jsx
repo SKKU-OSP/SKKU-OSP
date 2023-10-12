@@ -37,10 +37,10 @@ function DevAnalysis() {
   }, [username]);
 
   return (
-    <div className="container my-4">
+    <>
       {error && <div>{error}</div>}
-      <div>{devType && <DevType data={devType} />}</div>
-    </div>
+      {devType && <DevType data={devType} />}
+    </>
   );
 }
 
