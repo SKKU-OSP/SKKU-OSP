@@ -91,10 +91,16 @@ header {
 
 .header-navbar-menu {
   font-weight: 300;
-  letter-spacing: -1px;
   margin: 15px;
   text-decoration: none;
   color: var(--main-font-color);
+}
+
+.header-navbar-selected-menu {
+  font-weight: 600;
+  margin: 15px;
+  text-decoration: none;
+  color: var(--main-selected-color);
 }
 
 .head-of-header {

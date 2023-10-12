@@ -1,12 +1,13 @@
 import MainHeader_Presenter from './MainHeader_Presenter';
 import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../../utils/auth-context';
 
 export default function MainHeader_Container(props) {
   const [isToggled, setIsToggled] = useState(false);
   const { username } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation().pathname.split('/')[2];
 
   function onClickToggle() {
     if (isToggled) {
@@ -25,6 +26,12 @@ export default function MainHeader_Container(props) {
   };
 
   return (
-    <MainHeader_Presenter username={username} isToggled={isToggled} onClickToggle={onClickToggle} onLogin={onLogin} />
+    <MainHeader_Presenter
+      username={username}
+      isToggled={isToggled}
+      onClickToggle={onClickToggle}
+      onLogin={onLogin}
+      location={location}
+    />
   );
 }

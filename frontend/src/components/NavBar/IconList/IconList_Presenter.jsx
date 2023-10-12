@@ -8,7 +8,7 @@ import AdminDropDown from '../adminNav/AdminDropDown';
 function IconList_Presenter({ iconSize, username }) {
   const [showTeamApp, setShowTeamApp] = useState(false);
   const [showNoti, setShowNoti] = useState(false);
-  console.log(typeof username);
+
   return (
     <div className="nav-bar-icon-list">
       {username === 'admin' ? <AdminDropDown iconSize={iconSize} /> : <></>}

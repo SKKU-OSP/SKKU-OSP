@@ -62,22 +62,26 @@
   border-bottom: 1px solid var(--main-border-color);
   letter-spacing: -1px;
 }
+
 .sidebar-activity {
   font-size: 16px !important;
   padding: 0.625rem;
+  cursor: pointer;
+}
+.sidebar-activity:hover {
+  opacity: 0.5;
+}
+
+.sidebar-selected-activity {
+  font-size: 16px !important;
+  padding: 0.625rem;
+  color: var(--main-selected-color);
+  font-weight: 700;
 }
 
 .sidebar-boardgroup-item.selected > a {
   color: var(--sub-point-color);
   font-weight: 600;
-}
-
-.hover-opacity {
-  cursor: pointer;
-}
-
-.hover-opacity:hover {
-  opacity: 0.5;
 }
 
 .btn-login,

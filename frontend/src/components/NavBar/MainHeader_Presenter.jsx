@@ -9,7 +9,7 @@ import './MainHeader.css';
  * TARGET: header.html
  */
 function MainHeader_Presenter(props) {
-  const { username, isToggled, onClickToggle, onLogin } = props;
+  const { username, isToggled, onClickToggle, onLogin, location } = props;
 
   return (
     <header>
@@ -37,16 +37,28 @@ function MainHeader_Presenter(props) {
 
         <div className={isToggled ? 'body-of-header' : 'toggle-display-none body-of-header'}>
           <div className="header-navbar">
-            <Link to="/community/board/자유" className="header-navbar-menu">
+            <Link
+              to="/community/board/자유"
+              className={location == 'board' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+            >
               커뮤니티
             </Link>
-            <Link to="/community/recruit/팀 모집" className="header-navbar-menu">
+            <Link
+              to="/community/recruit/팀 모집"
+              className={location == 'recruit' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+            >
               팀 모집
             </Link>
-            <Link to="/community/myteam" className="header-navbar-menu">
+            <Link
+              to="/community/team"
+              className={location == 'team' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+            >
               팀 게시판
             </Link>
-            <Link to="/community/challenge" className="header-navbar-menu">
+            <Link
+              to="/community/challenge"
+              className={location == 'challenge' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+            >
               챌린지
             </Link>
           </div>
