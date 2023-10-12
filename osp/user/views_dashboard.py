@@ -424,10 +424,6 @@ class DevTypeTestSaveView(APIView):
         유저 개발자 유형 결과 저장
         url     : /user/api/dashboard/<username>/dev-type/save/
         '''
-        dev_type = request.data.get('type')
-        if dev_type is None:
-            appended_msg = get_missing_data_msg('type')
-            return Response(get_fail_res('missing_required_data', appended_msg))
         type_factors = request.data.get('factor')
         if type_factors is None:
             appended_msg = get_missing_data_msg('factor')
@@ -435,7 +431,7 @@ class DevTypeTestSaveView(APIView):
         try:
             account = Account.objects.get(user__username=username)
         except ObjectDoesNotExist:
-            logging.error("account DoesNotExist", e)
+            logging.error(f"account DoesNotExist {e}")
             return Response(get_fail_res('user_not_found'))
         if request.user.username != username:
             return Response(get_fail_res('access_permission_denied'))
