@@ -8,7 +8,6 @@ import { useState } from 'react';
 
 function Comment(props) {
   const { data, setData, username } = props;
-  console.log('Comment data', data);
   const [comment, setComment] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
 
@@ -32,25 +31,27 @@ function Comment(props) {
 
   return (
     <div className={styles.commentContainer}>
-      <div className={`${styles.commentInput} d-flex align-items-center justify-content-between`}>
-        <Form.Check
-          type="checkbox"
-          label="익명"
-          checked={isAnonymous}
-          onChange={(e) => setIsAnonymous(e.target.checked)}
-        />
-        <div className="col-10">
-          <Form.Control
-            type="text"
-            placeholder="댓글을 입력하세요"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
+      {username && (
+        <div className={`${styles.commentInput} d-flex align-items-center justify-content-between`}>
+          <Form.Check
+            type="checkbox"
+            label="익명"
+            checked={isAnonymous}
+            onChange={(e) => setIsAnonymous(e.target.checked)}
           />
+          <div className="col-10">
+            <Form.Control
+              type="text"
+              placeholder="댓글을 입력하세요"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+          <Button variant="secondary" onClick={() => postComment()}>
+            댓글 쓰기
+          </Button>
         </div>
-        <Button variant="secondary" onClick={() => postComment()}>
-          댓글 쓰기
-        </Button>
-      </div>
+      )}
       {data.comments.map((comment) => (
         <CommentItem key={comment.id} comment={comment} data={data} setData={setData} username={username} />
       ))}
