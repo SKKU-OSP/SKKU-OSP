@@ -11,7 +11,8 @@ err_to_msg = {
     "access_permission_denied": "접근 권한이 없습니다.",
     "missing_required_data": "필수 데이터가 없습니다.",
     "db_exception": "DB에 에러가 발생했습니다.",
-    "undefined_exception": "정의되지 않은 오류가 발생했습니다."
+    "undefined_exception": "정의되지 않은 오류가 발생했습니다.",
+    "object_not_found": "데이터를 찾을 수 없습니다."
 }
 
 

@@ -60,6 +60,8 @@ urlpatterns = [
          views_dashboard.UserDevTypeView.as_view(), name="UserDevType"),
     path('api/dashboard/<username>/dev-type/save/',
          views_dashboard.DevTypeTestSaveView.as_view(), name='DevTypeTestSave'),
+    path('api/dashboard/<username>/contr/',
+         views_dashboard.TotalContrView.as_view(), name='TotalContr'),
 
     path('api/guideline/<username>/',
          views.GuidelineView.as_view(), name='guideline')
