@@ -1,13 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import AuthContext from '../../../../utils/auth-context';
 
 export default function UserArticle(props) {
   const { article } = props;
   const navigate = useNavigate();
   const [pubDate, setPubDate] = useState('');
+  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
+  const { username } = useContext(AuthContext);
+
+  const onCloseChatModal = () => {
+    setShowChatMessageModal(false);
+  };
+
+  const onChatMessage = () => {
+    setShowChatMessageModal(true);
+  };
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
@@ -51,8 +63,8 @@ export default function UserArticle(props) {
 
   return (
     <>
-      <div className="board-article">
-        {article.title ? (
+      {article.body && (
+        <div className="board-article">
           <>
             <h6>
               {article.writer ? (
@@ -62,7 +74,16 @@ export default function UserArticle(props) {
                   <span className="dropdown-button">
                     <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
                       <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                      <Dropdown.Item>메세지</Dropdown.Item>
+                      {username != article.writer.user.username && (
+                        <>
+                          <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
+                          <ChatMessageModal_Container
+                            show={showChatMessageModal}
+                            onCloseChatModal={onCloseChatModal}
+                            targetId={article.writer.user.id}
+                          />
+                        </>
+                      )}
                     </DropdownButton>
                   </span>
                 )
@@ -105,10 +126,8 @@ export default function UserArticle(props) {
               </div>
             </div>
           </>
-        ) : (
-          <h5>작성된 글이 없습니다.</h5>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }

@@ -17,7 +17,7 @@ export default function ChatMessage_Presenter({ newAlert, show, onOpenChatModal,
       )}
 
       <MdOutlineEmail size={iconSize} onClick={onOpenChatModal} className="nav-bar-icons" />
-      <ChatMessageModal_Container show={show} onCloseChatModal={onCloseChatModal} />
+      <ChatMessageModal_Container show={show} onCloseChatModal={onCloseChatModal} targetId={0} />
     </>
   );
 }

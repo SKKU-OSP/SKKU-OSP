@@ -3,12 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import AuthContext from '../../../../utils/auth-context';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
 
 export default function RecruitArticle(props) {
   const { article } = props;
   const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
   const { username } = useContext(AuthContext);
+  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
+
+  const onCloseChatModal = () => {
+    setShowChatMessageModal(false);
+  };
+
+  const onChatMessage = () => {
+    setShowChatMessageModal(true);
+  };
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
@@ -61,7 +71,16 @@ export default function RecruitArticle(props) {
                 <span className="dropdown-button">
                   <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
                     <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                    <Dropdown.Item>메세지</Dropdown.Item>
+                    {username != article.writer.user.username && (
+                      <>
+                        <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
+                        <ChatMessageModal_Container
+                          show={showChatMessageModal}
+                          onCloseChatModal={onCloseChatModal}
+                          targetId={article.writer.user.id}
+                        />
+                      </>
+                    )}
                   </DropdownButton>
                 </span>
               )

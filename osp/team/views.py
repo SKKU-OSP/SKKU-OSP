@@ -1406,9 +1406,12 @@ class TeamsListView(APIView):
                 members = TeamMember.objects.filter(
                     team_id=team['id'])
                 team['member_cnt'] = len(members)
-                leader = members.filter(is_admin=True).values_list(
+                leader_username = members.filter(is_admin=True).values_list(
                     'member__user__username', flat=True).order_by('id').first()
-                team['leader'] = leader
+                team['leader_username'] = leader_username
+                leader_id = members.filter(is_admin=True).values_list(
+                    'member__user__id', flat=True).order_by('id').first()
+                team['leader_id'] = leader_id
 
         except DatabaseError as e:
             # Database Exception handling
@@ -1472,9 +1475,12 @@ class TeamsOfUserListView(APIView):
                 members = TeamMember.objects.filter(
                     team_id=team['id'])
                 team['member_cnt'] = len(members)
-                leader = members.filter(is_admin=True).values_list(
+                leader_username = members.filter(is_admin=True).values_list(
                     'member__user__username', flat=True).order_by('id').first()
-                team['leader'] = leader
+                team['leader_username'] = leader_username
+                leader_id = members.filter(is_admin=True).values_list(
+                    'member__user__id', flat=True).order_by('id').first()
+                team['leader_id'] = leader_id
 
         except DatabaseError as e:
             # Database Exception handling

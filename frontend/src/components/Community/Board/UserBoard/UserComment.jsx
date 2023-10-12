@@ -35,24 +35,19 @@ export default function UserComment(props) {
     }
   };
 
-  const onBoard = () => {
-    if (article.board.board_type === 'Team') {
-      navigate(`/community/team/${article.board.name}`);
-    } else if (article.board.board_type === 'General') {
-      navigate(`/community/board/${article.board.name}`);
-    }
-  };
-
   useEffect(() => {
     if (article?.pub_date) {
       getDate(article.pub_date);
+    }
+    if (!article.body) {
+      console.log(article);
     }
   }, [article]);
 
   return (
     <>
-      <div className="board-article">
-        {article.body ? (
+      {article.body && (
+        <div className="board-article">
           <>
             <h6>
               {article.writer ? (
@@ -62,7 +57,6 @@ export default function UserComment(props) {
                   <span className="dropdown-button">
                     <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
                       <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                      <Dropdown.Item>메세지</Dropdown.Item>
                     </DropdownButton>
                   </span>
                 )
@@ -91,10 +85,8 @@ export default function UserComment(props) {
               </div>
             </div>
           </>
-        ) : (
-          <h5>작성된 글이 없습니다.</h5>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }
