@@ -59,7 +59,7 @@ function UserActivity() {
         getAuthConfig()
       );
       const resComments = responseComments.data;
-      console.log('comment', resComments);
+
       if (resComments.status === 'success') {
         const sortedComments = resComments.data.articlecomments.sort(
           (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
