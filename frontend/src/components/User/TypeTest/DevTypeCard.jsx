@@ -11,7 +11,7 @@ function DevTypeCard(props) {
   return (
     <div id="gbti-id-card" style={{ position: 'relative' }}>
       <div id="gbti-id-card-content" className="modal-gbti-card">
-        <p className="weak-text ms-3 my-2 text-start">OSS ID CARD</p>
+        <div className="weak-text ms-3 text-start">SOSD ID CARD</div>
         <div className="d-flex justify-content-center">
           <div className="gbti-content d-flex justify-content-center" style={{ padding: '1% 4%', width: '50%' }}>
             <img src={devType} className="gbti-img" />
@@ -58,7 +58,7 @@ function DevTypeCard(props) {
             <ResultProgress factor={factors[3]} />
           </div>
         </div>
-        <p className="weak-text me-3 my-2 text-end">2023 &#9426; SKKU-OSP</p>
+        <div className="weak-text me-3 text-end">2023 &#9426; SKKU-OSP</div>
       </div>
     </div>
   );

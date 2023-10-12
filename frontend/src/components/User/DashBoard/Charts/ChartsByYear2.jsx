@@ -12,7 +12,7 @@ import Chart from './Chart';
 import RepoBox from '../Item/RepoBox';
 import ChartBox from '../Item/ChartBox';
 import { getAuthConfig } from '../../../../utils/auth';
-import { noLegendOption } from '../../../../utils/chartOption';
+import { noLegendOption, histogramOption, makeHistogramJson } from '../../../../utils/chartOption';
 
 import { BiSolidCrown } from 'react-icons/bi';
 
@@ -89,7 +89,7 @@ function ChartsByYear2() {
     if (chartData) {
       const meanValue = chartData.annual_factor_avg[targetYear][selectTab];
       const userValue = chartData.annual_user_factor[targetYear][selectTab];
-      setCompareBarChart(getCompareBarConfig(meanValue, userValue));
+      setCompareBarChart(getCompareBarConfig(meanValue, userValue, selectTab));
       const distValue = chartData.factor_dist[targetYear][selectTab];
       const distSetting = chartData.dist_setting[selectTab];
       setHistogramBarChart(getHistogramBarConfig(distSetting, distValue, userValue));
@@ -151,6 +151,8 @@ function ChartsByYear2() {
     '활동 다양성': '여러 리포지토리에 기여했는지에 대한 점수 (최대 1점)',
     '활동 영향성': '오픈소스 생태계에 영향을 미쳤는지에 대한 점수 (최대 5점 보너스)'
   };
+  const mainBarColor = '#36A2EB';
+  const focusBarColor = '#ffa500';
 
   const getLineConfig = (value) => {
     const labels = value.map((_, idx) => {
@@ -163,8 +165,7 @@ function ChartsByYear2() {
           data: value,
           pointRadius: 4,
           pointHoverRadius: 8,
-          pointBackgroundColor: 'rgba(150, 130, 230, 1)',
-          borderColor: 'rgba(150, 130, 230, 1)',
+          pointBackgroundColor: mainBarColor,
           tension: 0.01,
           borderWidth: 3
         }
@@ -173,44 +174,58 @@ function ChartsByYear2() {
     return { type: 'line', data, options: noLegendOption };
   };
 
-  const getCompareBarConfig = (mean, user) => {
+  const getCompareBarConfig = (mean, user, label = 'value') => {
     const data = {
-      labels: ['평균', '유저'],
+      labels: ['평균', 'You'],
       datasets: [
         {
-          label: '비교 차트',
+          label: label,
           data: [mean, user],
-          backgroundColor: ['rgba(0, 0, 255, 0.7)', 'rgba(255, 165, 0, 0.8)']
+          barPercentage: 0.4,
+          backgroundColor: [mainBarColor, focusBarColor]
         }
       ]
     };
-    return { type: 'bar', data };
+    return {
+      type: 'bar',
+      data,
+      options: {
+        plugins: { legend: { display: false } }
+      }
+    };
   };
 
   const getHistogramBarConfig = (setting, dist, user) => {
-    const labels = Array.from({ length: setting.class_num }, (_, i) => (i + 1) * setting.level_step);
+    const labels = Array.from({ length: setting.class_num }, (_, i) => i * setting.level_step);
     const backgroundColors = labels.map((label, idx) => {
-      if (idx == 0 && user < label) return 'rgba(255, 165, 0, 0.8)';
-      if (idx + 1 == setting.class_num) {
-        if (user >= label) return 'rgba(255, 165, 0, 0.8)';
-        else return 'rgba(0, 0, 255, 0.7)';
+      if (idx === 0 && user < label) return focusBarColor;
+      if (idx + 1 === setting.class_num) {
+        if (user >= label) return focusBarColor;
+        else return mainBarColor;
       }
       if (user >= label && user < labels[idx + 1]) {
-        return 'rgba(255, 165, 0, 0.8)';
+        return focusBarColor;
       }
-      return 'rgba(0, 0, 255, 0.7)';
+      return mainBarColor;
     });
+
+    const histogramJsonData = makeHistogramJson(labels, dist, setting.level_step);
+    const histogramDatasets = [
+      {
+        type: 'bar',
+        label: 'num',
+        data: histogramJsonData,
+        backgroundColor: backgroundColors,
+        borderWidth: 1,
+        barPercentage: 1,
+        categoryPercentage: 1
+      }
+    ];
     const data = {
       labels: labels,
-      datasets: [
-        {
-          label: 'Histogram',
-          data: dist,
-          backgroundColor: backgroundColors // 색상 배열을 backgroundColor에 할당
-        }
-      ]
+      datasets: histogramDatasets
     };
-    return { type: 'bar', data };
+    return { type: 'bar', data, options: histogramOption(setting.level_step / 2) };
   };
 
   return (
@@ -247,14 +262,13 @@ function ChartsByYear2() {
               <div className="col-7 col-lg-5 p-2 mb-2">
                 {detailScoreChartConfigs.map((config) => {
                   return (
-                    <div key={config.data.labels}>
-                      <ChartBox
-                        label={config.data.labels}
-                        desc={labelDescMap[config.data.labels]}
-                        color={config.data.datasets[1].backgroundColor}
-                        chart={<Chart {...config} />}
-                      />
-                    </div>
+                    <ChartBox
+                      key={config.data.labels}
+                      label={config.data.labels}
+                      desc={labelDescMap[config.data.labels]}
+                      color={config.data.datasets[1].backgroundColor}
+                      chart={<Chart {...config} />}
+                    />
                   );
                 })}
               </div>
@@ -297,10 +311,10 @@ function ChartsByYear2() {
               })}
             </Nav>
             <div className="d-flex flex-wrap">
-              <div className="col-12 col-lg-6 mb-2">
+              <div className="col-12 col-lg-6 mb-2 p-2">
                 <Chart {...histogramBarChart} />
               </div>
-              <div className="col-12 col-lg-6 mb-2">
+              <div className="col-12 col-lg-6 mb-2 p-2">
                 <Chart {...compareBarChart} />
               </div>
             </div>

@@ -4,7 +4,14 @@ import FactorSelectors from './FactorSelectors';
 import Histogram from './Charts/Histogram';
 import DistChart from './Charts/DistChart';
 
-import { makeErrorJson, getChartConfig, scoreOption, noLegendOption, histogramOption } from '../../utils/chartOption';
+import {
+  makeErrorJson,
+  getChartConfig,
+  scoreOption,
+  noLegendOption,
+  histogramOption,
+  makeHistogramJson
+} from '../../utils/chartOption';
 
 const category10 = [
   '#1f77b4',
@@ -92,25 +99,7 @@ function FactorDists(props) {
     return scatterData;
   }
 
-  /**
-   * @param {Array} labels
-   * @param {Array} dist
-   * @returns
-   */
-  const makeHistogramJson = (labels, dist) => {
-    let offset = levelStep / 2;
-    if (dist) {
-      return dist.map((val, idx) => {
-        return {
-          x: Number(labels[idx]) + offset,
-          y: val
-        };
-      });
-    }
-    return [];
-  };
-
-  const histogramJsonData = makeHistogramJson(histogramLabels, histogramRawData);
+  const histogramJsonData = makeHistogramJson(histogramLabels, histogramRawData, levelStep);
   const histogramData = getChartConfig(histogramLabels, getHistogramDatasets(histogramJsonData));
 
   const distChartOption = targetFactor === 'score' ? scoreOption : noLegendOption;

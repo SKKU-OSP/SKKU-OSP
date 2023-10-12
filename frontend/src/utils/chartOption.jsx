@@ -101,3 +101,21 @@ const _getScatterScale = (yMax = null) => {
   if (yMax) scale.y['max'] = yMax;
   return scale;
 };
+
+/**
+ * @param {Array} labels
+ * @param {Array} dist
+ * @returns
+ */
+export function makeHistogramJson(labels, dist, levelStep) {
+  let offset = levelStep / 2;
+  if (dist) {
+    return dist.map((val, idx) => {
+      return {
+        x: Number(labels[idx]) + offset,
+        y: val
+      };
+    });
+  }
+  return [];
+}
