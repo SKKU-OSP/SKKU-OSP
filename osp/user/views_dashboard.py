@@ -88,7 +88,6 @@ class UserDashboardView(APIView):
                         github_id=owner_id, repo_name=repo_name)
                     repo_stat = repo_stat.get_factors()
                     repo_stat['commit_lines'] = commit_data['commit_lines']
-                    print("repo_stat", repo_stat)
                     obj['best_repo'] = repo_stat
 
                 except ObjectDoesNotExist as e:
@@ -259,9 +258,6 @@ def get_account_valid(request, username):
         print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
 
         # 권한 체크
-        print("request.user.username", request.user.username)
-        print("username", username)
-
         is_own = request.user.username.lower() == username.lower()
         is_superuser = request.user.is_superuser
         is_open = acc_pp.open_lvl == 2
@@ -320,7 +316,6 @@ def get_dev_tendency(account, github_id):
             int(daytime_min/3600), int(daytime_max/3600)]
         dev_tendency_data["typeF_data"] = commit_freq_dist
         dev_tendency_data["typeG_data"] = [indi_num, group_num]
-        print("dev_tendency_data", dev_tendency_data)
         data["dev_tendency_data"] = dev_tendency_data
     except Exception as e:
         logging.exception(f"Get Type data error: {e}")
@@ -429,10 +424,6 @@ class DevTypeTestSaveView(APIView):
         유저 개발자 유형 결과 저장
         url     : /user/api/dashboard/<username>/dev-type/save/
         '''
-        dev_type = request.data.get('type')
-        if dev_type is None:
-            appended_msg = get_missing_data_msg('type')
-            return Response(get_fail_res('missing_required_data', appended_msg))
         type_factors = request.data.get('factor')
         if type_factors is None:
             appended_msg = get_missing_data_msg('factor')
@@ -440,7 +431,7 @@ class DevTypeTestSaveView(APIView):
         try:
             account = Account.objects.get(user__username=username)
         except ObjectDoesNotExist:
-            logging.error("account DoesNotExist", e)
+            logging.error(f"account DoesNotExist {e}")
             return Response(get_fail_res('user_not_found'))
         if request.user.username != username:
             return Response(get_fail_res('access_permission_denied'))

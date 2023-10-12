@@ -4,6 +4,9 @@ import { ProgressBar } from 'react-bootstrap';
 import DevTypeCard from './DevTypeCard';
 import { qnaList, descList, resultList } from './TypeData';
 import './TestType.css';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 const TestType = () => {
@@ -14,13 +17,27 @@ const TestType = () => {
   const [descEng, setDescEng] = useState('');
   const [factor, setFactor] = useState([0, 0, 0, 0]);
   const [resultIdx, setResultIdx] = useState(0);
+
+  const [mainStyle, setMainStyle] = useState(null);
+  const [qnaStyle, setQnaStyle] = useState(null);
+  const [resultStyle, setResultStyle] = useState(null);
+  const username = useParams().username;
+  const navigate = useNavigate();
   const numQuestion = 15;
 
   let P, N, T, E;
 
   const begin = () => {
-    main.style.display = 'none';
-    qna.style.display = 'inline-block';
+    // main.style.display = 'none';
+    // qna.style.display = 'inline-block';
+    setIdx(0);
+    setProgressLen(0);
+    setFactor([0, 0, 0, 0]);
+    setResultIdx(0);
+
+    setMainStyle({ display: 'none' });
+    setQnaStyle({ display: 'inline-block' });
+    setResultStyle({ display: 'none' });
   };
 
   const clickAnswer = (btnNum) => {
@@ -30,8 +47,10 @@ const TestType = () => {
       setProgressLen(((idx + 1) / numQuestion) * 100);
     } else {
       getResult(idx, btnNum);
-      qna.style.display = 'none';
-      result.style.display = 'inline-block';
+      //   qna.style.display = 'none';
+      //   result.style.display = 'inline-block';
+      setQnaStyle({ display: 'none' });
+      setResultStyle({ display: 'inline-block' });
       setResult();
     }
   };
@@ -75,8 +94,16 @@ const TestType = () => {
       setFactor([factor[0] - qnaList[idx].answer[btnNum].val[0], factor[1], factor[2], factor[3]]);
     }
   };
-
+  const saveType = async () => {
+    const saveUrl = `${serverUrl}/user/api/dashboard/${username}/dev-type/save/`;
+    const response = await axios.post(saveUrl, { factor }, getAuthConfig());
+    const res = response.data;
+    if (res.status === 'success') {
+      console.log(res.message);
+    }
+  };
   const setResult = () => {
+    saveType();
     P = factor[0] > 0 ? 0 : 1;
     T = factor[1] > 0 ? 0 : 1;
     N = factor[2] > 0 ? 0 : 1;
@@ -104,7 +131,7 @@ const TestType = () => {
 
   return (
     <div className="container">
-      <section id="main">
+      <section id="main" style={mainStyle}>
         <div className="board mx-0 mt-5" style={bgImgStyle}>
           <div className="my-3">
             <h3>개발자 유형 검사</h3>
@@ -114,21 +141,24 @@ const TestType = () => {
             <span className="line-connect"></span>
             <span className="endpoint right"></span>
           </div>
-          <div className="my-2">
+          <div className="my-3">
             위 검사는 개발자 성향 지표를 자가 진단을 통해 분석합니다
             <br />
             과학적인 조사와 통계를 기반으로 하지 않습니다
             <br />
             결과는 추천 시스템과 무관하니 참고용으로 즐겨주시길 바랍니다
           </div>
-          <div className="my-2">
+          <div className="d-flex flex-column align-items-center gap-2 my-2">
             <button className="btn btn-test-start" onClick={begin}>
               시작하기
+            </button>
+            <button className="btn btn-test-back" onClick={() => navigate('../dev-type')}>
+              돌아가기
             </button>
           </div>
         </div>
       </section>
-      <section id="qna" className="m-0">
+      <section id="qna" className="m-0" style={qnaStyle}>
         <div className="qbox my-5 py-3">{qnaList[idx].q}</div>
         <div className="abox">
           <button className="answerbtn mb-2" onClick={() => clickAnswer(0)}>
@@ -140,7 +170,7 @@ const TestType = () => {
         </div>
         <ProgressBar className="progress mt-5" now={progressLen}></ProgressBar>
       </section>
-      <section id="result" className="mx-auto mt-5">
+      <section id="result" className="mx-auto mt-5" style={resultStyle}>
         <h3>개발자 유형 검사 결과</h3>
         <div className="d-flex justify-content-center">
           <span className="endpoint left"></span>
@@ -155,6 +185,14 @@ const TestType = () => {
           typeKr={resultList[resultIdx].typeKr}
           factors={factor}
         />
+        <div className="d-flex justify-content-between gap-3 my-3">
+          <button className="btn btn-test-start" onClick={begin}>
+            다시하기
+          </button>
+          <button className="btn btn-test-back" onClick={() => navigate('../dev-type')}>
+            완료
+          </button>
+        </div>
       </section>
     </div>
   );

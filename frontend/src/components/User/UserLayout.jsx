@@ -19,7 +19,9 @@ export default function UserLayout() {
           </div>
         </div>
       ) : (
-        <Outlet />
+        <div id="content-wrapper" className="px-3 py-5">
+          <Outlet />
+        </div>
       )}
     </div>
   );
