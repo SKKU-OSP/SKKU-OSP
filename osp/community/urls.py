@@ -48,6 +48,9 @@ urlpatterns = [
          views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
     path('api/article/<int:article_id>/comments/',
          views_article.ArticleCommentsView.as_view(), name='ArticleComments'),
+    path('api/article/<int:article_id>/file/<int:articlefile_id>',
+         views_article.ArticleFileView.as_view(), name='ArticleFile'),
+
     path('api/comment/create/',
          views_article.CommentCreateView.as_view(), name='CommentCreate'),
     path('api/comment/<int:comment_id>/delete/',
