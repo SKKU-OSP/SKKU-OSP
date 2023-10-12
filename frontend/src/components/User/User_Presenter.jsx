@@ -34,7 +34,7 @@ function User_Presenter() {
       {error_occur ? (
         <>잘못된 페이지입니다.</>
       ) : userInfo ? (
-        <div className="d-flex flex-column col-md-9 col-12 user-container">
+        <div className="d-flex flex-column col-12 user-container">
           <ProfileInfo userInfo={userInfo} />
           <ProfileTab githubId={userInfo.github_id} />
         </div>

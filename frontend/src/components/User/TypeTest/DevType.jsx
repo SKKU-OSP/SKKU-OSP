@@ -1,4 +1,4 @@
-import DevTypeCard from '../TypeTest/DevTypeCard';
+import DevTypeCard from './DevTypeCard';
 import ImageDescBox from './ImageDescBox';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -31,7 +31,6 @@ function DevType(props) {
         </div>
         <div>
           <div className="fs-5">상극 파트너</div>
-
           <ImageDescBox
             src={`${serverUrl}/static/images/${neg.code}.png`}
             title={neg.nicknameKR}

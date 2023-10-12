@@ -13,11 +13,11 @@ from home.models import AnnualOverview, DistFactor, DistScore, Student
 from home.serializers import (AnnualOverviewDashboardSerializer,
                               DistFactorDashboardSerializer,
                               DistScoreDashboardSerializer)
-from repository.models import GithubRepoStats, GithubRepoContributor
+from repository.models import GithubRepoCommits, GithubIssues, GithubPulls, GithubRepoStats, GithubRepoContributor
 from user import update_act
 from user.gbti import get_type_analysis, get_type_test
 from user.models import (Account, AccountPrivacy, DevType, GithubScore,
-                         GithubStatsYymm, StudentTab)
+                         GithubStatsYymm, StudentTab, GitHubScoreTable)
 from user.serializers import AccountSerializer
 from user.serializers_dashboard import GithubScoreResultSerializer
 
@@ -70,8 +70,31 @@ class UserDashboardView(APIView):
         start_year, end_year = min(years), max(years)
         data['years'] = years
 
+        # github_score_result의 best_repo를 객체로 변경
+        # best_repo를 이용해 repo stat과 repo commit line을 구함
         github_score_result = GithubScoreResultSerializer(
             score, many=True).data
+        for obj in github_score_result:
+            year, repo = obj['year'], obj['best_repo']
+            if '/' in repo:
+                [owner_id, repo_name] = repo.split('/')
+                try:
+                    # GithubRepoStats에 커밋 라인 수 데이터가 없어 따로 계산
+                    commit_data = GithubRepoCommits.objects.filter(
+                        github_id=owner_id, repo_name=repo_name).aggregate(
+                        commit_lines=Sum('additions')+Sum('deletions')
+                    )
+                    repo_stat = GithubRepoStats.objects.get(
+                        github_id=owner_id, repo_name=repo_name)
+                    repo_stat = repo_stat.get_factors()
+                    repo_stat['commit_lines'] = commit_data['commit_lines']
+                    print("repo_stat", repo_stat)
+                    obj['best_repo'] = repo_stat
+
+                except ObjectDoesNotExist as e:
+                    logging.exception(f'repo {repo} is not exist: {e}')
+                    obj['best_repo'] = None
+
         data['score'] = github_score_result
 
         # star 데이터 따로 처리
@@ -163,6 +186,7 @@ class UserDevTendencyView(APIView):
     '''
 
     def get(self, request, username):
+        start = time.time()
         target_account, error = get_account_valid(request, username)
         if error:
             return Response(get_fail_res(error_code=error))
@@ -171,6 +195,8 @@ class UserDevTendencyView(APIView):
 
         coworkers = get_coworkers(github_id)
         data['coworkers'] = coworkers
+
+        print("UserDevTendencyView elapsed time", time.time() - start)
 
         return Response({'status': 'success', 'data': data})
 
@@ -192,6 +218,30 @@ class UserDevTypeView(APIView):
         data = get_dev_type(target_account, github_id)
 
         return Response({"status": "success", "data": data})
+
+
+class TotalContrView(APIView):
+    def get(self, request, username):
+        res = {'status': 'success', 'data': None}
+        try:
+            target_account, error = get_account_valid(request, username)
+            if error:
+                return Response(get_fail_res(error_code=error))
+            github_id = target_account.github_id
+            contr_repo = get_contr_repos(github_id)
+            data = {'repo_num': len(contr_repo)}
+
+            contrs = get_total_contrs(github_id)
+            data.update(contrs)
+            res['data'] = data
+        except ObjectDoesNotExist as e:
+            logging.exception(f'{e}')
+            return Response(get_fail_res('object_not_found'))
+        except Exception as e:
+            logging.exception(f'TotalContrView Exception: {e}')
+            return Response(get_fail_res('undefined_exception'))
+
+        return Response(res)
 
 
 def get_account_valid(request, username):
@@ -333,6 +383,33 @@ def get_dev_type(account, github_id):
         data['dev_type'] = dev_type
 
     return data
+
+
+def get_total_contrs(github_id):
+    total_contrs = GitHubScoreTable.objects.filter(github_id=github_id).aggregate(commits=Sum(
+        'commit_cnt'), commit_lines=Sum('commit_line'), issues=Sum('issue_cnt'), prs=Sum('pr_cnt'))
+    return total_contrs
+
+
+def get_contr_repos(github_id):
+    student = StudentTab.objects.get(github_id=github_id)
+    pri_email = student.primary_email
+    sec_email = student.secondary_email
+
+    commit_data = GithubRepoCommits.objects.filter(
+        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email))
+    ).values_list('github_id', 'repo_name').distinct()
+
+    issue_data = GithubIssues.objects.filter(
+        github_id=github_id).values_list('owner_id', 'repo_name').distinct()
+
+    pull_data = GithubPulls.objects.filter(
+        github_id=github_id).values_list('owner_id', 'repo_name').distinct()
+
+    contr_repos = set(commit_data).union(issue_data).union(pull_data)
+    contr_repos = [f'{x[0]}/{x[1]}' for x in contr_repos]
+
+    return contr_repos
 
 
 def get_nested_dict(keys):

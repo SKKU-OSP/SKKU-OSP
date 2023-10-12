@@ -79,6 +79,19 @@ class GithubRepoStats(models.Model):
             "dependency_count": self.dependencies
         }
 
+    def get_factors(self):
+        return {
+            "owner_id": self.github_id,
+            "repo_name": self.repo_name,
+            "star_count": self.stargazers_count,
+            "commit_count": self.commits_count,
+            "pr_count": self.prs_count,
+            "issue_count": self.open_issue_count + self.close_issue_count,
+        }
+
+    def __str__(self):
+        return f'{self.github_id}/{self.repo_name}'
+
 
 class GithubIssues(models.Model):
     owner_id = models.CharField(primary_key=True, max_length=40)
