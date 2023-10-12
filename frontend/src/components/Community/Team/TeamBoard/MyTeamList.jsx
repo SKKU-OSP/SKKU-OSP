@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CreateTeamModal from '../CreateTeamModal';
@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { BsAwardFill, BsPeopleFill } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
+import AuthContext from '../../../../utils/auth-context';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -16,7 +17,23 @@ function MyTeamList() {
   const [error, setError] = useState(false);
   const [modalShow, setModalShow] = useState(false);
 
+  const { username } = useContext(AuthContext);
+
+  const handleLogin = async () => {
+    if (!username) {
+      const shouldNavigate = await new Promise((resolve) => {
+        const confirmation = window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?');
+        resolve(confirmation);
+      });
+
+      if (shouldNavigate) {
+        navigate('/accounts/login');
+      }
+    }
+  };
+
   useEffect(() => {
+    handleLogin();
     const getMyTeamList = async () => {
       try {
         const responseTeamList = await axios.get(server_url + `/team/api/teams-of-user-list/`, getAuthConfig());
