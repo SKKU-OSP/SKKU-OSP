@@ -114,7 +114,7 @@ class CommunityMainView(APIView):
 class TableBoardView(APIView):
     '''
     GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
-    URL : /community/api/board/<board_name>/
+    URL : /community/api/board/<board_name>/?page_number=
 
     '''
 
@@ -892,6 +892,8 @@ class ArticleView(TemplateView):
 
 
 class UserArticlesView(APIView):
+    '내가 작성한 글'
+
     def get_validation(self, request, *args, **kwargs):
         status = 'success'
         message = ''
@@ -921,8 +923,21 @@ class UserArticlesView(APIView):
         try:
             user = request.user
             account = Account.objects.get(user=user)
-            user_articles = Article.objects.filter(writer=account)
+            user_articles = Article.objects.filter(
+                writer=account).order_by('-pub_date')
             user_articles = get_article_metas(user_articles)
+
+            page_size = 10
+            paginator = Paginator(user_articles, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+            # article_list = get_article_metas(article_list)
+
+            user_articles = get_article_metas(page)
+            data['max_page_number'] = max_page_number
             data['user_articles'] = BoardArticleSerializer(
                 user_articles, many=True).data
 
@@ -975,7 +990,19 @@ class UserCommentsView(APIView):
         try:
             user = request.user
             account = Account.objects.get(user=user)
-            articlecomments = ArticleComment.objects.filter(writer=account)
+            articlecomments = ArticleComment.objects.filter(
+                writer=account).order_by('-pub_date')
+
+            page_size = 10
+            paginator = Paginator(articlecomments, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+
+            articlecomments = page
+            data['max_page_number'] = max_page_number
             data['articlecomments'] = ArticleCommentSerializer(
                 articlecomments, many=True).data
 
@@ -1030,8 +1057,21 @@ class UserScrapArticlesView(APIView):
             account = Account.objects.get(user=user)
             article_scraps = ArticleScrap.objects.filter(
                 account=account).values_list('article')
-            user_scrap_articles = Article.objects.filter(id__in=article_scraps)
-            user_scrap_articles = get_article_metas(user_scrap_articles)
+
+            user_scrap_articles = Article.objects.filter(
+                id__in=article_scraps).order_by('-pub_date')
+
+            page_size = 10
+            paginator = Paginator(user_scrap_articles, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+
+            user_scrap_articles = get_article_metas(page)
+
+            data['max_page_number'] = max_page_number
             data['userscraparticles'] = BoardArticleSerializer(
                 user_scrap_articles, many=True).data
         except DatabaseError as e:
