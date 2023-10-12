@@ -24,11 +24,17 @@ function CommentItem(props) {
   const likeComment = async () => {
     const response = await axios.post(like_url, {}, getAuthConfig());
     const res = response.data;
-    if (res.status === 'success') {
-      setLikeCnt(res.data.like_cnt);
-      setIsLiked(!isLiked);
+    if (!username) {
+      if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
+      }
     } else {
-      alert(res.message);
+      if (res.status === 'success') {
+        setLikeCnt(res.data.like_cnt);
+        setIsLiked(!isLiked);
+      } else {
+        alert(res.message);
+      }
     }
   };
 
@@ -43,6 +49,10 @@ function CommentItem(props) {
     navigate('/user/' + username);
   };
 
+  const onWriter = () => {
+    navigate(`/user/${comment.writer.user.username}`);
+  };
+
   return (
     <div className={styles.comment}>
       <div className={`${styles.commentLine1} d-flex justify-content-between align-items-end`}>
@@ -50,16 +60,12 @@ function CommentItem(props) {
           {comment.anonymous_writer ? (
             <span style={{ paddingRight: '10px' }}>익명</span>
           ) : (
-            <div className="commentUserDrop">
-              <DropdownButton
-                title={comment.writer.user.username}
-                variant="link"
-                style={{ paddingRight: '10px', textDecoration: 'none' }}
-              >
-                <Dropdown.Item onClick={() => onMyProfile(comment.writer.user.username)}>프로필</Dropdown.Item>
+            <span className="dropdown-button">
+              <DropdownButton title={comment.writer.user.username} variant="link" className="dropdown-toggle">
+                <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
                 <Dropdown.Item>메세지</Dropdown.Item>
               </DropdownButton>
-            </div>
+            </span>
           )}
           {comment.writer.user.username === username && (
             <span style={{ cursor: 'pointer', color: 'grey' }} onClick={() => deleteComment()}>

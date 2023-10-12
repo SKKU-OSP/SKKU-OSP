@@ -7,6 +7,8 @@ import axios from 'axios';
 import AuthContext from '../../../../utils/auth-context';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
 
@@ -14,7 +16,6 @@ function ContentView(props) {
   const { data } = props;
   const { board, tags, comments, article, team, files } = data;
   const { username } = useContext(AuthContext);
-  console.log(team);
 
   const [isLiked, setIsLiked] = useState(article.marked_like);
   const [isScraped, setIsScraped] = useState(article.marked_scrap);
@@ -50,6 +51,19 @@ function ContentView(props) {
     }
   };
 
+  const logIn = () => {
+    if (!username) {
+      if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
+      }
+      return;
+    }
+  };
+
+  const onWriter = () => {
+    navigate(`/user/${article.writer.user.username}`);
+  };
+
   const onEdit = () => {
     navigate(`/community/article/${article.id}/edit`);
   };
@@ -71,32 +85,48 @@ function ContentView(props) {
   };
 
   const onLike = async () => {
-    try {
-      const response = await axios.post(like_url, { article_id: article.id }, getAuthConfig());
-      const res = response.data;
-      if (res.status === 'fail') {
-        alert(res.message);
-      } else {
-        setIsLiked(res.data.marked_like);
-        setLikeCnt(res.data.like_cnt);
+    if (!username) {
+      if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
       }
-    } catch (error) {
-      console.log('error', error);
+      return;
+    } else {
+      try {
+        const response = await axios.post(like_url, { article_id: article.id }, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'fail') {
+          alert(res.message);
+        } else {
+          setIsLiked(res.data.marked_like);
+          setLikeCnt(res.data.like_cnt);
+        }
+      } catch (error) {
+        console.log('error', error);
+      }
     }
   };
 
   const onScrap = async () => {
-    try {
-      const response = await axios.post(scrap_url, { article_id: article.id }, getAuthConfig());
-      const res = response.data;
-      if (res.status === 'fail') {
-        alert(res.message);
-      } else {
-        setIsScraped(res.data.marked_scrap);
-        setScrapCnt(res.data.scrap_cnt);
+    if (!username) {
+      if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
       }
-    } catch (error) {
-      console.log('error', error);
+      return;
+    } else if (username === article.writer.user.username) {
+      window.alert('자신의 게시글은 스크랩할 수 없습니다.');
+    } else {
+      try {
+        const response = await axios.post(scrap_url, { article_id: article.id }, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'fail') {
+          alert(res.message);
+        } else {
+          setIsScraped(res.data.marked_scrap);
+          setScrapCnt(res.data.scrap_cnt);
+        }
+      } catch (error) {
+        console.log('error', error);
+      }
     }
   };
 
@@ -127,7 +157,20 @@ function ContentView(props) {
           <span className={`col-md-9 ${styles.articleTitle}`}>{article.title}</span>
           <div>
             <span className={styles.articleInfo}>
-              {article.anonymous_writer ? '익명' : <>{article.writer.user.username}</>}
+              {article.writer ? (
+                article.anonymous_writer ? (
+                  <span>익명 </span>
+                ) : (
+                  <span className="dropdown-button">
+                    <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                      <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
+                      <Dropdown.Item>메세지</Dropdown.Item>
+                    </DropdownButton>
+                  </span>
+                )
+              ) : (
+                <span>탈퇴한 이용자 </span>
+              )}
             </span>
             <br></br>
             <span className={styles.articleInfo}>{pub_date1} </span>
@@ -150,11 +193,11 @@ function ContentView(props) {
             <span className={styles.articleInfo}>댓글 {comments.length}</span>
           </div>
           <div className="d-flex gap-1">
-            <span id="like-icon" onClick={onLike} style={{ cursor: 'pointer' }}>
+            <span id="like-icon" onClick={() => onLike()} style={{ cursor: 'pointer' }}>
               {isLiked ? <FaThumbsUp /> : <FaRegThumbsUp />}
             </span>
             <span>{likeCnt} </span>
-            <span id="scrap-icon" onClick={onScrap} style={{ cursor: 'pointer' }}>
+            <span id="scrap-icon" onClick={() => onScrap()} style={{ cursor: 'pointer' }}>
               {isScraped ? <FaBookmark /> : <FaRegBookmark />}
             </span>
             <span>{scrapCnt}</span>
@@ -206,9 +249,15 @@ function ContentView(props) {
               </button>
             ) : now < recruit_end_date ? (
               <>
-                <button type="button" className="btn btn-outline-primary" onClick={() => setShow(true)}>
-                  지원하기
-                </button>
+                {username ? (
+                  <button type="button" className="btn btn-outline-primary" onClick={() => setShow(true)}>
+                    지원하기
+                  </button>
+                ) : (
+                  <button type="button" className="btn btn-outline-secondary" onClick={() => logIn()}>
+                    지원하기
+                  </button>
+                )}
               </>
             ) : (
               <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>

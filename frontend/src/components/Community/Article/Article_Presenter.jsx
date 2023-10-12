@@ -17,9 +17,13 @@ function Article_Presenter(props) {
           <div className="article-content">
             <ContentView data={data} />
           </div>
-          {username && (
+          {username ? (
             <div id="comment-content">
               <Comment data={data} setData={setData} username={username} />
+            </div>
+          ) : (
+            <div id="comment-content">
+              <Comment data={data} setData={setData} username={null} />
             </div>
           )}
         </>
