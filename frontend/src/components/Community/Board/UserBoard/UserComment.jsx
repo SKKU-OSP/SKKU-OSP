@@ -39,9 +39,6 @@ export default function UserComment(props) {
     if (article?.pub_date) {
       getDate(article.pub_date);
     }
-    if (!article.body) {
-      console.log(article);
-    }
   }, [article]);
 
   return (
