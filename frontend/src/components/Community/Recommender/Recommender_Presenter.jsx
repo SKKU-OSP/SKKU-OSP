@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import styles from './Recommender.module.css';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+
+import ChatMessageModal_Container from '../../NavBar/Chat/ChatMessageModal_Container';
+import InviteTeamModal from '../Team/InviteTeamModal';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 function Recommender_Presenter(props) {
@@ -13,8 +17,13 @@ function Recommender_Presenter(props) {
   const isReady = props.isReady;
   const error = props.error;
 
+  const [showMessage, setShowMessage] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+
   return (
     <div className="col-9">
+      <ChatMessageModal_Container show={showMessage} onCloseChatModal={setShowMessage} />
+      <InviteTeamModal show={showInvite} setShow={setShowInvite} />
       <div className={styles.recommendBar}>
         <DropdownButton id="dropdown-basic-button" title={selectedTeam.name} variant="secondary">
           {teams.map((team) => (
@@ -55,8 +64,8 @@ function Recommender_Presenter(props) {
                       style={{ marginTop: '10px', textDecoration: 'none' }}
                     >
                       <Dropdown.Item onClick={() => onMyProfile(member.user.username)}>프로필</Dropdown.Item>
-                      <Dropdown.Item>메세지</Dropdown.Item>
-                      <Dropdown.Item>팀 초대하기</Dropdown.Item>
+                      <Dropdown.Item onClick={() => setShowMessage(true)}>메세지</Dropdown.Item>
+                      <Dropdown.Item onClick={() => setShowInvite(true)}>팀 초대하기</Dropdown.Item>
                     </DropdownButton>
                     <span className={styles.memberIntro}>{member.introduction}</span>
                     <div className="d-flex flex-row flex-wrap gap-1">
