@@ -3,12 +3,13 @@ import Button from 'react-bootstrap/Button';
 import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icons/fa';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 import axios from 'axios';
 import AuthContext from '../../../../utils/auth-context';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
+import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
 
@@ -21,7 +22,8 @@ function ContentView(props) {
   const [isScraped, setIsScraped] = useState(article.marked_scrap);
   const [likeCnt, setLikeCnt] = useState(article.like_cnt);
   const [scrapCnt, setScrapCnt] = useState(article.scrap_cnt);
-  const [show, setShow] = useState(false);
+  const [showApplyTeamModal, setShowApplyTeamModal] = useState(false);
+  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
 
   const domain_url = import.meta.env.VITE_SERVER_URL;
   const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
@@ -58,6 +60,14 @@ function ContentView(props) {
       }
       return;
     }
+  };
+
+  const onCloseChatModal = () => {
+    setShowChatMessageModal(false);
+  };
+
+  const onChatMessage = () => {
+    setShowChatMessageModal(true);
   };
 
   const onWriter = () => {
@@ -157,19 +167,24 @@ function ContentView(props) {
           <span className={`col-md-9 ${styles.articleTitle}`}>{article.title}</span>
           <div>
             <span className={styles.articleInfo}>
-              {article.writer ? (
-                article.anonymous_writer ? (
-                  <span>익명 </span>
-                ) : (
-                  <span className="dropdown-button">
-                    <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                      <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                      <Dropdown.Item>메세지</Dropdown.Item>
-                    </DropdownButton>
-                  </span>
-                )
+              {article.anonymous_writer ? (
+                '익명'
               ) : (
-                <span>탈퇴한 이용자 </span>
+                <span className="dropdown-button">
+                  <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                    <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
+                    {username != article.writer.user.username && (
+                      <>
+                        <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
+                        <ChatMessageModal_Container
+                          show={showChatMessageModal}
+                          onCloseChatModal={onCloseChatModal}
+                          targetId={article.writer.user.id}
+                        />
+                      </>
+                    )}
+                  </DropdownButton>
+                </span>
               )}
             </span>
             <br></br>
@@ -250,7 +265,7 @@ function ContentView(props) {
             ) : now < recruit_end_date ? (
               <>
                 {username ? (
-                  <button type="button" className="btn btn-outline-primary" onClick={() => setShow(true)}>
+                  <button type="button" className="btn btn-outline-primary" onClick={() => setShowApplyTeamModal(true)}>
                     지원하기
                   </button>
                 ) : (
@@ -269,8 +284,8 @@ function ContentView(props) {
             teamName={team.name}
             teamDesc={team.description}
             username={username}
-            show={show}
-            onShowTeamApplyModal={setShow}
+            show={showApplyTeamModal}
+            onShowTeamApplyModal={setShowApplyTeamModal}
             articleId={article.id}
           />
         </div>

@@ -28,9 +28,9 @@ const ChatMessageLogs = (props) => {
 
     const response = await axios.post(url, chatData, getAuthConfig());
     if (response.status === 200) {
-      console.log(response);
       alert(response.data.message);
       props.setLogs(response.data.data.messages);
+      document.getElementById('chat-input').value = null;
     }
   };
 
@@ -44,6 +44,12 @@ const ChatMessageLogs = (props) => {
 
   const ChatTextBodyClasses = (senderId) => {
     return props.opponentId === senderId ? classes.chatTextBodyRecieve : classes.chatTextBodySend;
+  };
+
+  const onEnterKeyPostChat = (event) => {
+    if (event.keyCode == 13) {
+      handlePostChat();
+    }
   };
 
   const messageLogView = () => {
@@ -67,6 +73,7 @@ const ChatMessageLogs = (props) => {
       <div>사용자를 선택하세요.</div>;
     }
   };
+
   return (
     <>
       <div id="chat-view-tab" className="justify-content-between rounded-2">
@@ -78,7 +85,7 @@ const ChatMessageLogs = (props) => {
             {props.opponentId === 0 ? (
               <input type="text" id="chat-input" name="chat-input" disabled />
             ) : (
-              <input type="text" id="chat-input" name="chat-input" ref={inputRef} />
+              <input type="text" id="chat-input" name="chat-input" onKeyDown={onEnterKeyPostChat} ref={inputRef} />
             )}
 
             <button id="chat-submit" type="button" onClick={handlePostChat}>

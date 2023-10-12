@@ -1,7 +1,14 @@
 import Modal from 'react-bootstrap/Modal';
 import ChatUserList from './ChatUserList';
 
-function ChatMessageModal_Presenter({ show, onCloseChatModal, loading, chatRoomMembers, targetMember }) {
+function ChatMessageModal_Presenter({
+  show,
+  onCloseChatModal,
+  loading,
+  chatRoomMembers,
+  chatRoomMembersId,
+  targetMember
+}) {
   return (
     <Modal show={show} onHide={onCloseChatModal} size="lg" scrollable={true}>
       <Modal.Header closeButton>
@@ -15,7 +22,11 @@ function ChatMessageModal_Presenter({ show, onCloseChatModal, loading, chatRoomM
             </div>
           )}
           {!loading && chatRoomMembers.length !== 0 && (
-            <ChatUserList chatRoomMembers={chatRoomMembers} targetMember={targetMember} />
+            <ChatUserList
+              chatRoomMembers={chatRoomMembers}
+              chatRoomMembersId={chatRoomMembersId}
+              targetMember={targetMember}
+            />
           )}
         </div>
       </Modal.Body>
