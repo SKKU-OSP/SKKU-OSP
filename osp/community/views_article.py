@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Count
+from django.http import FileResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction, DatabaseError
@@ -8,11 +9,13 @@ from community.utils import convert_size, convert_to_boolean
 from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
 from tag.serializers import TagIndependentSerializer
 from team.serializers import TeamSerializer
-
+from team.models import TeamMember
+from team.utils import is_teammember
 from datetime import datetime, timedelta
-
+from osp.settings import MEDIA_URL, MEDIA_ROOT
 import logging
 import json
+import os
 
 
 class ArticleAPIView(APIView):
@@ -207,7 +210,7 @@ class ArticleCreateView(APIView):
                     res['message'] = '해당 팀의 모집글을 작성할 수 없습니다.'
                     print(res['message'])
                     return Response(res)
-            
+
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
             if isinstance(article_tags, str):
@@ -216,7 +219,7 @@ class ArticleCreateView(APIView):
                 tag = TagIndependent.objects.filter(name=article_tag['value'])
                 if tag.exists():
                     ArticleTag.objects.create(article=article, tag=tag.first())
-            
+
             # 게시글 파일 생성
             files = request.FILES
 
@@ -525,6 +528,86 @@ class ArticleCommentsView(APIView):
             comment['marked_like'] = like.exists()
         res['data'] = data
         return Response(res)
+
+
+class ArticleFileView(APIView):
+    '''
+    GET : 
+    article_id 와 file_id를 받아서 파일을반환하는 API
+    article_id 와 file_id가 서로 매치가 안되면 fail
+    team_article 인데 팀원이 아니면 fail
+    URL : api/article/<int:article_id>/file/<int:articlefile_id>
+    '''
+
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        article_id = kwargs.get('article_id')
+        articlefile_id = kwargs.get('articlefile_id')
+
+        try:
+            article = Article.objects.get(id=article_id)
+            if article.board.board_type == 'Team':
+                if not request.user.is_authenticated:
+                    errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
+                    status = 'fail'
+                    return status, message, errors, valid_data
+                if not is_teammember(article.board.team.id, user.id):
+                    errors["user_is_not_teammember"] = "해당 팀의 멤버가 아닙니다. "
+                    status = 'fail'
+                    return status, message, errors, valid_data
+
+            articlefile = ArticleFile.objects.get(id=articlefile_id)
+
+            valid_data['articlefile'] = articlefile
+
+        except Article.DoesNotExist:
+            errors["article_not_found"] = "해당 게시글이 존재하지않습니다."
+            status = 'fail'
+        except ArticleFile.DoesNotExist:
+            errors["articlefile_not_found"] = "해당 게시글파일이 존재하지않습니다."
+            status = 'fail'
+        except Board.DoesNotExist:
+            errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.debug(f'ArticleFielView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            articlefile = valid_data['articlefile']
+            file_path = os.path.join(MEDIA_ROOT, str(articlefile.file))
+            data['articlefile'] = open(file_path, 'rb')
+
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'ArticleFileView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + \
+                str(e)
+            logging.exception(f'ArticleFileView undefined ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        return FileResponse(data['articlefile'])
 
 
 class CommentCreateView(APIView):
