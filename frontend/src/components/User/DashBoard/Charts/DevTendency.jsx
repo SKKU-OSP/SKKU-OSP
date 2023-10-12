@@ -106,7 +106,7 @@ function DevTendency(props) {
   const cooperateChartConfig = { type: 'bar', data: cooperateData, options: commitOption('리포지토리') };
 
   return (
-    <div className="row dashboard-box">
+    <div className="row dashboard-box mb-4">
       <div className="col-lg-6 col-12 p-2">
         <BadgeInfo {...data[0]} icon={labelIconMap[data[0].label]} />
         <Chart {...timeSeriesChartConfig} />
