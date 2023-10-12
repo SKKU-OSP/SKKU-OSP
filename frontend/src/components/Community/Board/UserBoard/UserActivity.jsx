@@ -51,6 +51,7 @@ function UserActivity() {
       setError(true);
     }
   };
+
   const getWrittenComment = async (page) => {
     try {
       const responseComments = await axios.get(
@@ -74,6 +75,7 @@ function UserActivity() {
       setError(true);
     }
   };
+
   const getScrapArticle = async (page) => {
     try {
       const responseScraps = await axios.get(
@@ -99,59 +101,6 @@ function UserActivity() {
 
   useEffect(() => {
     setIsLoadedArticles(false);
-
-    const getWrittenArticle = async () => {
-      try {
-        const responseArticles = await axios.get(server_url + `/community/api/user-articles/`, getAuthConfig());
-        const resArticles = responseArticles.data;
-        if (resArticles.status === 'success') {
-          const sortedArticles = resArticles.data.user_articles.sort(
-            (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
-          );
-          setArticles(sortedArticles);
-          setIsLoadedArticles(true);
-        } else {
-          alert('해당 게시판이 존재하지 않습니다.');
-        }
-      } catch (error) {
-        setError(true);
-      }
-    };
-    const getWrittenComment = async () => {
-      try {
-        const responseComments = await axios.get(server_url + `/community/api/user-comments/`, getAuthConfig());
-        const resComments = responseComments.data;
-
-        if (resComments.status === 'success') {
-          const sortedComments = resComments.data.articlecomments.sort(
-            (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
-          );
-          setComments(sortedComments);
-          setIsLoadedArticles(true);
-        } else {
-          alert('해당 게시판이 존재하지 않습니다.');
-        }
-      } catch (error) {
-        setError(true);
-      }
-    };
-    const getScrapArticle = async () => {
-      try {
-        const responseScraps = await axios.get(server_url + `/community/api/user-scrap-articles/`, getAuthConfig());
-        const resScraps = responseScraps.data;
-        if (resScraps.status === 'success') {
-          const sortedScraps = resScraps.data.userscraparticles.sort(
-            (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
-          );
-          setScraps(sortedScraps);
-          setIsLoadedArticles(true);
-        } else {
-          alert('해당 게시판이 존재하지 않습니다.');
-        }
-      } catch (error) {
-        setError(true);
-      }
-    };
     // 존재하는 게시판인지 확인
     if (!activityNames.includes(tabName)) {
       alert('존재하지 않는 게시판입니다.');
