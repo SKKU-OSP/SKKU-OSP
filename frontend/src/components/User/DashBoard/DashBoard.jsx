@@ -25,7 +25,7 @@ function Dashboard() {
   useEffect(() => {
     const getContr = async () => {
       try {
-        const contrUrl = `${serverDomain}/user/api/dashboard/${username}/contr/`;
+        const contrUrl = `${dashboardDataUrl}${username}/contr/`;
         const response = await axios.get(contrUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -34,7 +34,8 @@ function Dashboard() {
           setContrError(res.message);
         }
       } catch (error) {
-        setContrError(error);
+        console.log('getContr error', error);
+        setContrError('기여내역 데이터를 가져오는데 실패했습니다.');
       }
     };
     const getDevTendency = async () => {

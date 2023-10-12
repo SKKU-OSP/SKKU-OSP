@@ -88,7 +88,6 @@ class UserDashboardView(APIView):
                         github_id=owner_id, repo_name=repo_name)
                     repo_stat = repo_stat.get_factors()
                     repo_stat['commit_lines'] = commit_data['commit_lines']
-                    print("repo_stat", repo_stat)
                     obj['best_repo'] = repo_stat
 
                 except ObjectDoesNotExist as e:
@@ -259,9 +258,6 @@ def get_account_valid(request, username):
         print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
 
         # 권한 체크
-        print("request.user.username", request.user.username)
-        print("username", username)
-
         is_own = request.user.username.lower() == username.lower()
         is_superuser = request.user.is_superuser
         is_open = acc_pp.open_lvl == 2
@@ -320,7 +316,6 @@ def get_dev_tendency(account, github_id):
             int(daytime_min/3600), int(daytime_max/3600)]
         dev_tendency_data["typeF_data"] = commit_freq_dist
         dev_tendency_data["typeG_data"] = [indi_num, group_num]
-        print("dev_tendency_data", dev_tendency_data)
         data["dev_tendency_data"] = dev_tendency_data
     except Exception as e:
         logging.exception(f"Get Type data error: {e}")
