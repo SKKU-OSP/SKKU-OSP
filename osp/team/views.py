@@ -5,7 +5,7 @@ from tag.models import Tag
 from user.models import Account, User, AccountPrivacy, AccountInterest
 from community.models import Board, Article, TeamRecruitArticle
 from message.models import Message
-
+from django.core.paginator import Paginator
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -1401,6 +1401,16 @@ class TeamsListView(APIView):
         # Transactions
         try:
             teams = Team.objects.all()
+
+            page_size = 10
+            paginator = Paginator(teams, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+            teams = page
+            data['max_page_number'] = max_page_number
             data['teams'] = TeamSerializer(teams, many=True).data
             for team in data['teams']:
                 members = TeamMember.objects.filter(
@@ -1468,6 +1478,16 @@ class TeamsOfUserListView(APIView):
                 member=user.id).values_list('team_id')
             teams_of_user = Team.objects.filter(
                 id__in=team_id_include_user)
+
+            page_size = 10
+            paginator = Paginator(teams_of_user, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+            teams_of_user = page
+            data['max_page_number'] = max_page_number
 
             data['teams_of_user'] = TeamSerializer(
                 teams_of_user, many=True).data
