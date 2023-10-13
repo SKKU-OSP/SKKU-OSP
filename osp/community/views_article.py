@@ -424,6 +424,11 @@ class ArticleDeleteView(APIView):
                     status="DELETE", updated_date=datetime.now())
                 article.delete()
 
+                # 게시글 스크랩 삭제처리
+                article_scraps = ArticleScrap.objects.filter(article=article)
+                for article_scrap in article_scraps:
+                    article_scrap.delete()
+
                 res['status'] = 'success'
                 res['message'] = '게시글을 삭제했습니다.'
                 res['data'] = {'article_id': article.id}
