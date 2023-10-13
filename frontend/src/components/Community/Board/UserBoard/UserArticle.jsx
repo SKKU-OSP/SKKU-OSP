@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { BsHandThumbsUp, BsBookmark, BsEyeFill, BsFillChatLeftTextFill } from 'react-icons/bs';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
@@ -116,6 +116,9 @@ export default function UserArticle(props) {
               <div className="board-article-meta-list">
                 <>
                   <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
+                </>
+                <>
+                  <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
                 </>
                 <>
                   <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}

@@ -55,6 +55,7 @@ class BoardArticleSerializer(serializers.ModelSerializer):
     writer = AccountSerializer()
     like_cnt = serializers.SerializerMethodField()
     scrap_cnt = serializers.SerializerMethodField()
+    comment_cnt = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
 
     class Meta:
@@ -74,6 +75,7 @@ class BoardArticleSerializer(serializers.ModelSerializer):
             "period_end",
             "like_cnt",
             "scrap_cnt",
+            "comment_cnt",
             "tags"
         )
 
@@ -82,6 +84,9 @@ class BoardArticleSerializer(serializers.ModelSerializer):
 
     def get_scrap_cnt(self, article):
         return article.articlescrap_set.count()
+    
+    def get_comment_cnt(self, article):
+        return article.articlecomment_set.count()
 
     def get_tags(self, article):
         return article.tags
