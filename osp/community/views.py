@@ -991,7 +991,7 @@ class UserCommentsView(APIView):
             user = request.user
             account = Account.objects.get(user=user)
             articlecomments = ArticleComment.objects.filter(
-                writer=account).order_by('-pub_date')
+                writer=account).exclude(is_deleted=1).order_by('-pub_date')
 
             page_size = 10
             paginator = Paginator(articlecomments, page_size)
