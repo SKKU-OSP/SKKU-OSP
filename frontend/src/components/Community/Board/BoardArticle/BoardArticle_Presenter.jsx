@@ -60,9 +60,9 @@ export default function BoardArticle_Presenter(props) {
               <>
                 <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
               </>
-              {/* <>
+              <>
                 <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
-              </> */}
+              </>
               <>
                 <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
               </>
