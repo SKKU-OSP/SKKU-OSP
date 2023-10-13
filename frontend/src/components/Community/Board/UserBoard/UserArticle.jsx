@@ -62,70 +62,66 @@ export default function UserArticle(props) {
   }, [article]);
 
   return (
-    <>
-      {article.body && (
-        <div className="board-article">
-          <>
-            <h6>
-              {article.writer ? (
-                article.anonymous_writer ? (
-                  <span>익명 </span>
-                ) : (
-                  <span className="dropdown-button">
-                    <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                      <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                      {username != article.writer.user.username && (
-                        <>
-                          <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                          <ChatMessageModal_Container
-                            show={showChatMessageModal}
-                            onCloseChatModal={onCloseChatModal}
-                            targetId={article.writer.user.id}
-                          />
-                        </>
-                      )}
-                    </DropdownButton>
-                  </span>
-                )
-              ) : (
-                <span>탈퇴한 이용자 </span>
-              )}
-              · {pubDate}
-              <div className="board-article-meta-type" onClick={onBoard}>
-                {article.board.name} 게시판
-              </div>
-            </h6>
-            <h4 className="board-article-title" onClick={onArticle}>
-              {article.title}
-            </h4>
-            <div>
-              {article.tags && article.tags.length > 0 ? (
-                article.tags.map((tag) => (
-                  <h6 className="inline" key={tag.name}>
-                    #{tag.name.replace(' ', '_')}&nbsp;
-                  </h6>
-                ))
-              ) : (
-                <h6 className="inline">{'\u00A0'}</h6>
-              )}
-              <div className="board-article-meta-list">
-                <>
-                  <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
-                </>
-                <>
-                  <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
-                </>
-                <>
-                  <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
-                </>
-                <>
-                  <BsEyeFill size={13} className="board-article-meta" /> {article.view_cnt}
-                </>
-              </div>
-            </div>
-          </>
+    <div className="board-article">
+      <>
+        <h6>
+          {article.writer ? (
+            article.anonymous_writer ? (
+              <span>익명 </span>
+            ) : (
+              <span className="dropdown-button">
+                <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                  <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
+                  {username != article.writer.user.username && (
+                    <>
+                      <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
+                      <ChatMessageModal_Container
+                        show={showChatMessageModal}
+                        onCloseChatModal={onCloseChatModal}
+                        targetId={article.writer.user.id}
+                      />
+                    </>
+                  )}
+                </DropdownButton>
+              </span>
+            )
+          ) : (
+            <span>탈퇴한 이용자 </span>
+          )}
+          · {pubDate}
+          <div className="board-article-meta-type" onClick={onBoard}>
+            {article.board.name} 게시판
+          </div>
+        </h6>
+        <h4 className="board-article-title" onClick={onArticle}>
+          {article.title}
+        </h4>
+        <div>
+          {article.tags && article.tags.length > 0 ? (
+            article.tags.map((tag) => (
+              <h6 className="inline" key={tag.name}>
+                #{tag.name.replace(' ', '_')}&nbsp;
+              </h6>
+            ))
+          ) : (
+            <h6 className="inline">{'\u00A0'}</h6>
+          )}
+          <div className="board-article-meta-list">
+            <>
+              <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
+            </>
+            <>
+              <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
+            </>
+            <>
+              <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
+            </>
+            <>
+              <BsEyeFill size={13} className="board-article-meta" /> {article.view_cnt}
+            </>
+          </div>
         </div>
-      )}
-    </>
+      </>
+    </div>
   );
 }
