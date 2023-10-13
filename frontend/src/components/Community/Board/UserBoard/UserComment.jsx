@@ -58,7 +58,12 @@ export default function UserComment(props) {
               <span>익명</span>
             ) : (
               <span className="dropdown-button">
-                <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
+                <DropdownButton
+                  title={article.writer.user.username}
+                  variant="link"
+                  className="dropdown-toggle"
+                  style={{ marginRight: '5px' }}
+                >
                   <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
                 </DropdownButton>
               </span>

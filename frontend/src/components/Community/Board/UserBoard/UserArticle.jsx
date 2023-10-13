@@ -1,25 +1,12 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsHandThumbsUp, BsBookmark, BsEyeFill, BsFillChatLeftTextFill } from 'react-icons/bs';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
-import AuthContext from '../../../../utils/auth-context';
+import ProfileDropdown_Container from '../../ProfileDropdown';
 
 export default function UserArticle(props) {
   const { article } = props;
   const navigate = useNavigate();
   const [pubDate, setPubDate] = useState('');
-  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
-  const { username } = useContext(AuthContext);
-
-  const onCloseChatModal = () => {
-    setShowChatMessageModal(false);
-  };
-
-  const onChatMessage = () => {
-    setShowChatMessageModal(true);
-  };
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
@@ -64,26 +51,12 @@ export default function UserArticle(props) {
   return (
     <div className="board-article">
       <>
-        <h6>
+        <div>
           {article.writer ? (
             article.anonymous_writer ? (
               <span>익명 </span>
             ) : (
-              <span className="dropdown-button">
-                <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                  <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                  {username != article.writer.user.username && (
-                    <>
-                      <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                      <ChatMessageModal_Container
-                        show={showChatMessageModal}
-                        onCloseChatModal={onCloseChatModal}
-                        targetId={article.writer.user.id}
-                      />
-                    </>
-                  )}
-                </DropdownButton>
-              </span>
+              <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
             )
           ) : (
             <span>탈퇴한 이용자 </span>
@@ -92,7 +65,7 @@ export default function UserArticle(props) {
           <div className="board-article-meta-type" onClick={onBoard}>
             {article.board.name} 게시판
           </div>
-        </h6>
+        </div>
         <h4 className="board-article-title" onClick={onArticle}>
           {article.title}
         </h4>

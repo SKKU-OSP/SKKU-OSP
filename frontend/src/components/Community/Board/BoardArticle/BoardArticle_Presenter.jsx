@@ -1,52 +1,27 @@
 import { useState } from 'react';
 import '../Board.css';
 import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import ProfileDropdown_Container from '../../ProfileDropdown';
 
 export default function BoardArticle_Presenter(props) {
-  const { username, article, pubDate, onArticle, onWriter } = props;
-  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
-
-  const onCloseChatModal = () => {
-    setShowChatMessageModal(false);
-  };
-
-  const onChatMessage = () => {
-    setShowChatMessageModal(true);
-  };
+  const { article, pubDate, onArticle } = props;
 
   return (
     <div className="board-article">
       {article.title ? (
         <>
-          <h6>
+          <div>
             {article.writer ? (
               article.anonymous_writer ? (
                 <span>익명</span>
               ) : (
-                <span className="dropdown-button">
-                  <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                    <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                    {username != article.writer.user.username && (
-                      <>
-                        <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                        <ChatMessageModal_Container
-                          show={showChatMessageModal}
-                          onCloseChatModal={onCloseChatModal}
-                          targetId={article.writer.user.id}
-                        />
-                      </>
-                    )}
-                  </DropdownButton>
-                </span>
+                <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
               )
             ) : (
               <span>탈퇴한 이용자</span>
-            )}{' '}
+            )}
             · {pubDate}
-          </h6>
+          </div>
           <h4 className="board-article-title" onClick={onArticle}>
             {article.title}
           </h4>
