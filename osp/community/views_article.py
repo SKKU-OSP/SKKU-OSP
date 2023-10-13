@@ -456,13 +456,15 @@ class ArticleLikeView(APIView):
         try:
             article = Article.objects.get(id=article_id)
             account = Account.objects.get(user=request.user)
-            article_like, created = ArticleLike.objects.get_or_create(
-                article=article, account=account)
 
             if article.writer.user_id == request.user.id:
                 # 작성자가 추천한 경우
                 res['message'] = "자신의 게시글은 추천할 수 없습니다."
                 return Response(res)
+            
+            article_like, created = ArticleLike.objects.get_or_create(
+                article=article, account=account)
+            
             if not created:
                 # 이미 추천한 게시글인 경우
                 article_like.delete()
