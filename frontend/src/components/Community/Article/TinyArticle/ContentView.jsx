@@ -59,8 +59,21 @@ function ContentView(props) {
     }
   };
 
-  const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`);
+  const onDownloadFile = async (file) => {
+    try {
+      const url = `${domain_url}/community/api/article/${article.id}/file/${file.id}`;
+      const response = await axios.get(url, { responseType: 'blob' });
+      console.log(response);
+      const fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+
+      const a = document.createElement('a');
+      a.href = fileUrl;
+      a.download = file.name;
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onEdit = () => {
@@ -196,11 +209,7 @@ function ContentView(props) {
         <div className={styles.articleFileList}>
           {files.map((file) => {
             return (
-              <div
-                key={file.name}
-                className={styles.articleFile}
-                onClick={() => window.open(domain_url + '/data/media/' + file.file)}
-              >
+              <div key={file.name} className={styles.articleFile} onClick={() => onDownloadFile(file)}>
                 <span className={styles.articleFileName}>{file.name}</span>
                 <span>{file.size}</span>
               </div>
