@@ -1,18 +1,15 @@
 import styles from '../Article.module.css';
 import axios from 'axios';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getAuthConfig } from '../../../../utils/auth';
 import { FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import ProfileDropdown_Container from '../../ProfileDropdown';
 
 function CommentItem(props) {
   const { comment, data, setData, username } = props;
   const [isLiked, setIsLiked] = useState(comment.marked_like);
   const [likeCnt, setLikeCnt] = useState(comment.like_cnt);
-  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
 
   const dateObject = new Date(comment.pub_date);
   const pub_date1 = dateObject.toISOString().slice(0, 10);
@@ -23,14 +20,6 @@ function CommentItem(props) {
   const server_url = import.meta.env.VITE_SERVER_URL;
   const like_url = server_url + `/community/api/comment/${comment.id}/like/`;
   const delete_url = server_url + `/community/api/comment/${comment.id}/delete/`;
-
-  const onCloseChatModal = () => {
-    setShowChatMessageModal(false);
-  };
-
-  const onChatMessage = () => {
-    setShowChatMessageModal(true);
-  };
 
   const likeComment = async () => {
     const response = await axios.post(like_url, {}, getAuthConfig());
@@ -56,13 +45,6 @@ function CommentItem(props) {
     }
   };
   const navigate = useNavigate();
-  const onMyProfile = (username) => {
-    navigate('/user/' + username);
-  };
-
-  const onWriter = () => {
-    navigate(`/user/${comment.writer.user.username}`);
-  };
 
   return (
     <div className={styles.comment}>
@@ -71,21 +53,7 @@ function CommentItem(props) {
           {comment.anonymous_writer ? (
             <span style={{ paddingRight: '10px' }}>익명</span>
           ) : (
-            <span className="dropdown-button">
-              <DropdownButton title={comment.writer.user.username} variant="link">
-                <Dropdown.Item onClick={() => onMyProfile(comment.writer.user.username)}>프로필</Dropdown.Item>
-                {username != comment.writer.user.username && (
-                  <>
-                    <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                    <ChatMessageModal_Container
-                      show={showChatMessageModal}
-                      onCloseChatModal={onCloseChatModal}
-                      targetId={comment.writer.user.id}
-                    />
-                  </>
-                )}
-              </DropdownButton>
-            </span>
+            <ProfileDropdown_Container userName={comment.writer.user.username} userId={comment.writer.user.id} />
           )}
           {comment.writer.user.username === username && (
             <span style={{ cursor: 'pointer', color: 'grey' }} onClick={() => deleteComment()}>

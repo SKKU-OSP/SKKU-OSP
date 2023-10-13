@@ -7,14 +7,9 @@ export default function BoardArticle_Container(props) {
   const { article } = props;
   const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
-  const { username } = useContext(AuthContext);
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}`);
-  };
-
-  const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`);
   };
 
   const getDate = (date) => {
@@ -41,13 +36,5 @@ export default function BoardArticle_Container(props) {
     }
   });
 
-  return (
-    <BoardArticle_Presenter
-      username={username}
-      article={article}
-      pubDate={pubDate}
-      onArticle={onArticle}
-      onWriter={onWriter}
-    />
-  );
+  return <BoardArticle_Presenter article={article} pubDate={pubDate} onArticle={onArticle} />;
 }

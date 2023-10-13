@@ -3,12 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CreateTeamModal from '../CreateTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import { BsAwardFill, BsPeopleFill } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import AuthContext from '../../../../utils/auth-context';
-import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import ProfileDropdown_Container from '../../ProfileDropdown';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -17,17 +15,7 @@ function MyTeamList() {
   const [myTeams, setMyTeams] = useState([]);
   const [error, setError] = useState(false);
   const [modalShow, setModalShow] = useState(false);
-
   const { username } = useContext(AuthContext);
-  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
-
-  const onCloseChatModal = () => {
-    setShowChatMessageModal(false);
-  };
-
-  const onChatMessage = () => {
-    setShowChatMessageModal(true);
-  };
 
   const handleLogin = async () => {
     if (!username) {
@@ -90,33 +78,10 @@ function MyTeamList() {
               <div className="inline-block">{team.description}</div>
               <div className="text-end">
                 {team.leader_username && (
-                  <span className="dropdown-button">
+                  <>
                     <BsAwardFill />
-                    <DropdownButton
-                      title={team.leader_username}
-                      variant="link"
-                      className="dropdown-toggle"
-                      style={{ marginRight: '10px' }}
-                    >
-                      <Dropdown.Item
-                        onClick={() => {
-                          navigate(`/user/${team.leader_username}`);
-                        }}
-                      >
-                        프로필
-                      </Dropdown.Item>
-                      {username != team.leader_username && (
-                        <>
-                          <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                          <ChatMessageModal_Container
-                            show={showChatMessageModal}
-                            onCloseChatModal={onCloseChatModal}
-                            targetId={team.leader_id}
-                          />
-                        </>
-                      )}
-                    </DropdownButton>
-                  </span>
+                    <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
+                  </>
                 )}
                 <BsPeopleFill />
                 {` ${team.member_cnt}명`}

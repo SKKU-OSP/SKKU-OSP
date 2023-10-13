@@ -1,32 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import AuthContext from '../../../../utils/auth-context';
-import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import ProfileDropdown_Container from '../../ProfileDropdown';
+ProfileDropdown_Container;
 
 export default function TeamArticle(props) {
   const navigate = useNavigate();
   const { article } = props;
   const [pubDate, setPubDate] = useState('');
-  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
-  const { username } = useContext(AuthContext);
-
-  const onCloseChatModal = () => {
-    setShowChatMessageModal(false);
-  };
-
-  const onChatMessage = () => {
-    setShowChatMessageModal(true);
-  };
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}/`);
-  };
-
-  const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`);
   };
 
   const getDate = (date) => {
@@ -63,21 +47,7 @@ export default function TeamArticle(props) {
               article.anonymous_writer ? (
                 <span>익명 </span>
               ) : (
-                <span className="dropdown-button">
-                  <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                    <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                    {username != article.writer.user.username && (
-                      <>
-                        <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                        <ChatMessageModal_Container
-                          show={showChatMessageModal}
-                          onCloseChatModal={onCloseChatModal}
-                          targetId={article.writer.user.id}
-                        />
-                      </>
-                    )}
-                  </DropdownButton>
-                </span>
+                <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
               )
             ) : (
               <span>탈퇴한 이용자 </span>

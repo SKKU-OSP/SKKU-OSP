@@ -3,13 +3,11 @@ import Button from 'react-bootstrap/Button';
 import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icons/fa';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import axios from 'axios';
 import AuthContext from '../../../../utils/auth-context';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
-import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import ProfileDropdown_Container from '../../ProfileDropdown';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
 
@@ -23,7 +21,6 @@ function ContentView(props) {
   const [likeCnt, setLikeCnt] = useState(article.like_cnt);
   const [scrapCnt, setScrapCnt] = useState(article.scrap_cnt);
   const [showApplyTeamModal, setShowApplyTeamModal] = useState(false);
-  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
 
   const domain_url = import.meta.env.VITE_SERVER_URL;
   const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
@@ -60,14 +57,6 @@ function ContentView(props) {
       }
       return;
     }
-  };
-
-  const onCloseChatModal = () => {
-    setShowChatMessageModal(false);
-  };
-
-  const onChatMessage = () => {
-    setShowChatMessageModal(true);
   };
 
   const onWriter = () => {
@@ -170,21 +159,7 @@ function ContentView(props) {
               {article.anonymous_writer ? (
                 '익명'
               ) : (
-                <span className="dropdown-button">
-                  <DropdownButton title={article.writer.user.username} variant="link" className="dropdown-toggle">
-                    <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                    {username != article.writer.user.username && (
-                      <>
-                        <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
-                        <ChatMessageModal_Container
-                          show={showChatMessageModal}
-                          onCloseChatModal={onCloseChatModal}
-                          targetId={article.writer.user.id}
-                        />
-                      </>
-                    )}
-                  </DropdownButton>
-                </span>
+                <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
               )}
             </span>
             <br></br>
