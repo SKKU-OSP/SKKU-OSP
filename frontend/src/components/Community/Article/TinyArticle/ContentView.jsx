@@ -111,8 +111,6 @@ function ContentView(props) {
         navigate('/accounts/login');
       }
       return;
-    } else if (username === article.writer.user.username) {
-      window.alert('자신의 게시글은 스크랩할 수 없습니다.');
     } else {
       try {
         const response = await axios.post(scrap_url, { article_id: article.id }, getAuthConfig());
