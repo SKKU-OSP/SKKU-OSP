@@ -91,12 +91,7 @@ export default function UserArticle(props) {
                 <span>탈퇴한 이용자 </span>
               )}
               · {pubDate}
-              <div
-                className="board-article-meta-type"
-                onClick={() => {
-                  navigate(`/community/board/${article.board.name}`);
-                }}
-              >
+              <div className="board-article-meta-type" onClick={onBoard}>
                 {article.board.name} 게시판
               </div>
             </h6>
