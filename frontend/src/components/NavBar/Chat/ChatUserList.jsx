@@ -43,7 +43,7 @@ const ChatUserList = (props) => {
     <>
       <div id="oppo-list">
         <ul id="opponent-list" className="opponent-list">
-          {!props.chatRoomMembersId.includes(props.targetMember.user.id) && (
+          {targetMember && !props.chatRoomMembersId.includes(targetMember.user.id) && (
             <li
               id={`opo-id-${props.targetMember.user.id}`}
               className="opponent-item selected hover-opacity"
