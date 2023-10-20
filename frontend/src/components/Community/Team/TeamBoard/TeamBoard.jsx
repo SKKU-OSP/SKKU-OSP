@@ -58,7 +58,7 @@ function TeamBoard() {
   };
 
   const onRecommender = () => {
-    navigate(`/community/recommender`);
+    navigate(`/community/recommender`, { state: { team_name } });
   };
 
   const onPageChange = (page) => {
