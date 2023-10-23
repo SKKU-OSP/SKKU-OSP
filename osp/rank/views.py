@@ -5,10 +5,12 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db import DatabaseError
 from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
 from repository.serializers import GithubRepoContributorSerializer, GithubRepoStatsSerializer
 from user.models import GitHubScoreTable, StudentTab, Account
 from user.serializers import GithubScoreTableSerializer
+from handle_error import get_fail_res, get_missing_data_msg
 
 import logging
 import time
@@ -17,32 +19,31 @@ import time
 class UserRanking(APIView):
     def get_validation(self, request):
         status = 'fail'
-        errors = {}
-
+        error = None
         user = request.user
 
         try:
             if not user.is_superuser:
-                errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있습니다."
+                error = "access_permission_denied"
             else:
                 user = User.objects.get(id=user.id)
                 status = 'success'
         except User.DoesNotExist:
             logging.exception(f'UserRanking user_not_found: {e}')
-            errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            error = "user_not_found"
         except Exception as e:
             logging.exception(f'UserRanking undefined_exception: {e}')
-            errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+            error = "undefined_exception"
 
-        return status, errors
+        return status, error
 
     def get(self, request):
         res = {"status": "fail", "errors": None, "data": None}
         data = {}
-        status, errors = self.get_validation(request)
+        status, error = self.get_validation(request)
         if status == 'fail':
-            res['errors'] = errors
-            return Response(res)
+            print(get_fail_res(error_code=error))
+            return Response(get_fail_res(error_code=error))
 
         distinct_years = list(GitHubScoreTable.objects.values_list(
             'year', flat=True).distinct())
@@ -63,10 +64,7 @@ class UserRanking(APIView):
             score_table = GitHubScoreTable.objects.all()
 
         if not score_table.exists():
-            errors["data_not_found"] = "데이터가 존재하지 않습니다."
-            res['status'] = 'fail'
-            res['errors'] = errors
-            return Response(res)
+            return Response(get_fail_res(error_code="data_not_found"))
         score_table_data = GithubScoreTableSerializer(
             score_table, many=True).data
         sorted_score_by_year = sorted(
@@ -95,33 +93,32 @@ class UserRanking(APIView):
 class RepoRanking(APIView):
     def get_validation(self, request):
         status = 'fail'
-        errors = {}
+        error = {}
 
         user = request.user
 
         try:
             if not user.is_superuser:
-                errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있습니다."
+                error = "access_permission_denied"
             else:
                 user = User.objects.get(id=user.id)
                 status = 'success'
         except User.DoesNotExist:
             logging.exception(f'UserRanking user_not_found: {e}')
-            errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            error = "user_not_found"
         except Exception as e:
             logging.exception(f'UserRanking undefined_exception: {e}')
-            errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+            error = "undefined_exception"
 
-        return status, errors
+        return status, error
 
     def get(self, request):
         start = time.time()
         res = {"status": "fail", "errors": None, "data": None}
         data = {}
-        status, errors = self.get_validation(request)
+        status, error = self.get_validation(request)
         if status == 'fail':
-            res['errors'] = errors
-            return Response(res)
+            return Response(get_fail_res(error))
 
         # repo와 contributor의 관계 모델에서 repo 별 contributor의 리스트를 구함
         repo_contrib_collections = {}
@@ -196,9 +193,13 @@ class RepoContrib(APIView):
                     'issue_cnt': issue_cnt,
                     'pull_cnt': pull_cnt
                 })
+        except DatabaseError as e:
+            logging.error(f"RepoContrib DatabaseError {e}")
+            return Response(get_fail_res('db_exception'))
         except Exception as e:
             logging.exception(f"RepoContrib Exception {e}")
-            res['stauts'] = 'fail'
+            return Response(get_fail_res('undefined_exception'))
+
         res['data'] = result
 
         return Response(res)
