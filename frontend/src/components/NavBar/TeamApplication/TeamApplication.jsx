@@ -58,7 +58,6 @@ const TeamApplication = ({ handleClose, show }) => {
         console.log(res.status, res.errors);
       } else {
         console.log(res.data);
-        alert('정말 하겠습니까');
       }
     } catch (error) {
       console.log(error);
@@ -86,15 +85,22 @@ const TeamApplication = ({ handleClose, show }) => {
 
   const handleApproveClick = (applyId, userId) => {
     sendTeamApplication(applyId, userId, 'true');
+    setReceived((prev) => prev.filter((app) => app.id !== applyId));
   };
 
   const handleRefuseClick = (applyId, userId) => {
     sendTeamApplication(applyId, userId, 'false');
+    setReceived((prev) => prev.filter((app) => app.id !== applyId));
   };
 
   const handleDeleteClick = (applyId) => {
     sendDeleteApplication(applyId);
     setSent((prev) => prev.filter((app) => app.id !== applyId));
+  };
+
+  const clickUsername = (name) => {
+    window.open(`/user/${name}`, '_blank');
+    handleClose();
   };
 
   const tabContArr = [
@@ -123,7 +129,9 @@ const TeamApplication = ({ handleClose, show }) => {
                     {' '}
                     {application.team.name} {application.team.id}{' '}
                   </div>
-                  <Link>{application.account.user.username}</Link>
+                  <Link onClick={() => clickUsername(application.account.user.username)}>
+                    {application.account.user.username}
+                  </Link>
                 </div>
                 <div>
                   <Button
