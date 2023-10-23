@@ -28,7 +28,6 @@ const ChatMessageLogs = (props) => {
 
     const response = await axios.post(url, chatData, getAuthConfig());
     if (response.status === 200) {
-      alert(response.data.message);
       props.setLogs(response.data.data.messages);
       document.getElementById('chat-input').value = null;
     }
