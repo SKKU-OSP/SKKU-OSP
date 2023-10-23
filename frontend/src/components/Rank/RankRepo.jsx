@@ -1,15 +1,18 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
-
-import { AgGridReact } from 'ag-grid-react'; // the AG Grid React Component
-import { BsSearch } from 'react-icons/bs';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import axios from 'axios';
+import { AgGridReact } from 'ag-grid-react';
 
-import { getAuthConfig } from '../../utils/auth';
-import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
-import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
-import './Rank.css';
+import { BsSearch } from 'react-icons/bs';
+
 import ContribModal from './ContribModal';
+import PageJump from './PageJump';
+import { getAuthConfig } from '../../utils/auth';
+
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+
+import './Rank.css';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 function RankRepo() {
@@ -18,6 +21,7 @@ function RankRepo() {
   const [rowData, setRowData] = useState();
   const [contribData, setContribData] = useState([]);
   const [show, setShow] = useState(false);
+  const [error, setError] = useState(false);
 
   const cellRenderer = () => {
     return <BsSearch />;
@@ -61,13 +65,18 @@ function RankRepo() {
 
   useEffect(() => {
     const getUserRank = async () => {
-      const url = serverDomain + '/rank/api/repo/';
-      const response = await axios.get(url, getAuthConfig());
-      const res = response.data;
-      if (res.status === 'success') {
-        setRowData(res.data.repos);
-      } else {
-        console.log(res.errors);
+      try {
+        const url = serverDomain + '/rank/api/repo/';
+        const response = await axios.get(url, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          setRowData(res.data.repos);
+        } else {
+          console.log(res.message);
+          setError(res.message);
+        }
+      } catch (err) {
+        setError(err.message);
       }
     };
     getUserRank();
@@ -85,10 +94,15 @@ function RankRepo() {
     const url = serverDomain + '/rank/api/contrib/' + `?github_id=${github_id}&repo_name=${repo_name}`;
     const response = await axios.get(url, getAuthConfig());
     const res = response.data;
+    res.status = 'fail';
     if (res.status === 'success') {
+      // throw error
       setContribData(res.data);
+      setShow(true);
     } else {
       console.log('fail');
+      setShow(false);
+      alert(res.message);
     }
   };
 
@@ -99,37 +113,42 @@ function RankRepo() {
     }
     if (event.colDef.field === 'contrib') {
       getRepoContrib(event.data.github_id, event.data.repo_name);
-      setShow(true);
     }
   };
 
   return (
     <>
-      <div className="m-auto" style={{ maxWidth: 1000 }}>
-        <div className="d-flex justify-content-end gap-2 mb-2">
-          <button className="btn btn-success" onClick={onBtnExport}>
-            Export CSV
-          </button>
-          <button className="btn btn-success" onClick={clearFilters}>
-            Clear Filter
-          </button>
-        </div>
+      {error && <div>{error}</div>}
+      {!error && (
+        <>
+          <div className="m-auto" style={{ maxWidth: 1000 }}>
+            <div className="d-flex justify-content-end gap-2 mb-2">
+              <button className="btn btn-success" onClick={onBtnExport}>
+                Export CSV
+              </button>
+              <button className="btn btn-success" onClick={clearFilters}>
+                Clear Filter
+              </button>
+            </div>
 
-        <div className="ag-theme-alpine" style={{ width: '100%', height: 520 }}>
-          <AgGridReact
-            ref={gridRef}
-            rowData={rowData}
-            columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
-            animateRows={true}
-            rowSelection="multiple"
-            pagination={true}
-            paginationPageSize={10}
-            onCellClicked={onCellClicked}
-          />
-        </div>
-      </div>
-      {contribData.length > 0 && <ContribModal show={show} setShow={setShow} contribData={contribData} />}
+            <div className="ag-theme-alpine" style={{ width: '100%', height: 520 }}>
+              <AgGridReact
+                ref={gridRef}
+                rowData={rowData}
+                columnDefs={columnDefs}
+                defaultColDef={defaultColDef}
+                animateRows={true}
+                rowSelection="multiple"
+                pagination={true}
+                paginationPageSize={10}
+                onCellClicked={onCellClicked}
+              />
+            </div>
+            <PageJump gridRef={gridRef} />
+          </div>
+          {contribData.length > 0 && <ContribModal show={show} setShow={setShow} contribData={contribData} />}
+        </>
+      )}
     </>
   );
 }
