@@ -13,10 +13,21 @@ function Recommender_Presenter(props) {
   const [showMessage, setShowMessage] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
 
+  const [targetMemberId, setTargetMemberId] = useState(0);
+  const [targetMembername, setTargetMembername] = useState('');
+  const handleMessage = (id) => {
+    setTargetMemberId(id);
+    setShowMessage(true);
+  };
+
+  const handleInvite = (targetName) => {
+    setTargetMembername(targetName);
+    setShowInvite(true);
+  };
   return (
     <div className={styles.recommendBoard}>
-      <ChatMessageModal_Container show={showMessage} onCloseChatModal={setShowMessage} />
-      <InviteTeamModal show={showInvite} setShow={setShowInvite} />
+      <ChatMessageModal_Container show={showMessage} onCloseChatModal={setShowMessage} targetId={targetMemberId} />
+      <InviteTeamModal show={showInvite} setShow={setShowInvite} username={targetMembername} />
       {teamMembers.length > 0 ? (
         teamMembers.map((member) => (
           <div key={member.user.id} className={`col-6 d-flex flex-row ${styles.recommendMember}`}>
@@ -30,8 +41,8 @@ function Recommender_Presenter(props) {
                 style={{ marginTop: '10px', textDecoration: 'none' }}
               >
                 <Dropdown.Item onClick={() => onMyProfile(member.user.username)}>프로필</Dropdown.Item>
-                <Dropdown.Item onClick={() => setShowMessage(true)}>메세지</Dropdown.Item>
-                <Dropdown.Item onClick={() => setShowInvite(true)}>팀 초대하기</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleMessage(member.user.id)}>메세지</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleInvite(member.user.username)}>팀 초대하기</Dropdown.Item>
               </DropdownButton>
               <span className={styles.memberIntro}>{member.introduction}</span>
               <div className="d-flex flex-row flex-wrap gap-1">
