@@ -91,18 +91,20 @@ function RankRepo() {
   }, []);
 
   const getRepoContrib = async (github_id, repo_name) => {
-    const url = serverDomain + '/rank/api/contrib/' + `?github_id=${github_id}&repo_name=${repo_name}`;
-    const response = await axios.get(url, getAuthConfig());
-    const res = response.data;
-    res.status = 'fail';
-    if (res.status === 'success') {
-      // throw error
-      setContribData(res.data);
-      setShow(true);
-    } else {
-      console.log('fail');
+    try {
+      const url = serverDomain + '/rank/api/contrib/' + `?github_id=${github_id}&repo_name=${repo_name}`;
+      const response = await axios.get(url, getAuthConfig());
+      const res = response.data;
+      if (res.status === 'success') {
+        setContribData(res.data);
+        setShow(true);
+      } else {
+        setShow(false);
+        alert(res.message);
+      }
+    } catch (err) {
       setShow(false);
-      alert(res.message);
+      alert(err.message);
     }
   };
 
