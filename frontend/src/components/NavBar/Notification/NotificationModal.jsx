@@ -16,6 +16,7 @@ const serverUrl = import.meta.env.VITE_SERVER_URL;
 const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
   const [notiList, setNotiList] = useState([]);
   const [length, setLength] = useState(0);
+  const [readAll, setReadAll] = useState(0);
 
   const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -85,6 +86,13 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
 
   const handleReadAll = (user_id) => {
     sendReadAll(user_id);
+    setReadAll(readAll + 1);
+    setNotiList((prev) =>
+      prev.map((noti) => {
+        noti.receiver_read = true;
+        return noti;
+      })
+    );
   };
   //   AXIOS POST
   const sendReadAll = async (user_id) => {
