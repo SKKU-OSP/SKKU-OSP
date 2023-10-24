@@ -10,10 +10,10 @@ function User_Container() {
   const [isEdit, setIsEdit] = useState(false);
   const { username } = useParams();
   const loginname = useContext(AuthContext).username;
+  const navigate = useNavigate();
 
   const handleError = (message, url) => {
     alert(message);
-    const navigate = useNavigate();
     navigate(url);
   };
 
