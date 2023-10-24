@@ -110,8 +110,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     if (title.trim() === '') {
       window.alert('제목을 입력해 주세요');
       return;
-    }
-    if (bodyText.trim() === '' || bodyText.trim() === '<p><br></p>') {
+    } else if (bodyText.trim() === '' || bodyText.trim() === '<p><br></p>') {
       alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 등록하시겠습니까?')) {
@@ -153,7 +152,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       const res = response.data;
       if (res['status'] === 'success') {
         window.alert('등록이 완료되었습니다!');
-        navigate(`/community/article/${res.data.article_id}`);
+        navigate(`/community/article/${res.data.article_id}/`);
       } else {
         window.alert(res['message']);
         return;
