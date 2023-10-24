@@ -17,7 +17,7 @@ function Activity(props) {
   useEffect(() => {
     const getProfileActivity = async () => {
       try {
-        const getUrl = server_url + '/user/api/profile-activity/' + username;
+        const getUrl = server_url + '/user/api/profile-activity/' + username + '/';
         const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {

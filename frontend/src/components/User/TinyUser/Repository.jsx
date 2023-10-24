@@ -15,17 +15,18 @@ import { PiGitForkBold, PiGitPullRequestBold } from 'react-icons/pi';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
-import Spinner from 'react-bootstrap/Spinner';
+import LoaderIcon from 'react-loader-icon';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 function Repository() {
   const { username } = useParams();
   const [guideline, setGuideline] = useState();
   const [error_occur, setError] = useState(false);
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const url = server_url + '/user/api/guideline/' + username;
   useEffect(() => {
     const getGuideLine = async () => {
       try {
+        const url = server_url + '/user/api/guideline/' + username + '/';
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -231,7 +232,7 @@ function Repository() {
           )}
         </div>
       ) : (
-        <Spinner animation="border" style={{ position: 'absolute', top: '50%', left: '50%' }} />
+        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
     </>
   );

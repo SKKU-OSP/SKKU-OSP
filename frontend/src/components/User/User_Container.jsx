@@ -20,7 +20,7 @@ function User_Container() {
   useEffect(() => {
     const getProfileInfo = async () => {
       const server_url = import.meta.env.VITE_SERVER_URL;
-      const getUrl = server_url + '/user/api/profile-intro/' + username;
+      const getUrl = server_url + '/user/api/profile-intro/' + username + '/';
       try {
         const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;

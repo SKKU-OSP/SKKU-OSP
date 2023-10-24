@@ -55,7 +55,7 @@ function Interest(props) {
     };
     const getProfileTags = async () => {
       try {
-        const profileTagsUrl = server_url + '/user/api/tag/' + username;
+        const profileTagsUrl = server_url + '/user/api/tag/' + username + '/';
         const response = await axios.get(profileTagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
