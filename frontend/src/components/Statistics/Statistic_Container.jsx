@@ -19,8 +19,8 @@ function Statistic_Container() {
   const [factorsClassNum, setFactorsClassNum] = useState([]);
   const [factorLevelStep, setFactorLevelStep] = useState([]);
   const [userData, setUserData] = useState([]);
-
   const [years, setYears] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getStatisticData = async () => {
@@ -32,9 +32,10 @@ function Statistic_Container() {
           setChartData(res.data);
         } else {
           console.log(res.status, res.message);
+          setError(res.message);
         }
-      } catch (error) {
-        console.log(error);
+      } catch (err) {
+        setError(err.message);
       }
     };
     getStatisticData();
@@ -65,17 +66,22 @@ function Statistic_Container() {
 
   return (
     <>
-      <CaseSelectors onSetCaseNum={handleCaseNum} />
-      <AnnualOverviews overviewData={overviewData} isReady={isReady} years={years} />
-      <StatisticMain
-        detailData={detailData}
-        distData={distData}
-        userData={userData}
-        factorsClassNum={factorsClassNum}
-        factorLevelStep={factorLevelStep}
-        isReady={isReady}
-        years={years}
-      />
+      {error && <div>{error}</div>}
+      {!error && (
+        <>
+          <CaseSelectors onSetCaseNum={handleCaseNum} />
+          <AnnualOverviews overviewData={overviewData} isReady={isReady} years={years} />
+          <StatisticMain
+            detailData={detailData}
+            distData={distData}
+            userData={userData}
+            factorsClassNum={factorsClassNum}
+            factorLevelStep={factorLevelStep}
+            isReady={isReady}
+            years={years}
+          />
+        </>
+      )}
     </>
   );
 }

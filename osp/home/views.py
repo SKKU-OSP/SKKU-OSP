@@ -2,21 +2,20 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Subquery, OuterRef
-from django.http import JsonResponse
+from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
-from user.models import GitHubScoreTable
-from user.models import Account
-from challenge.models import Challenge
 from home.serializers import AnnualOverviewSerializer, AnnualTotalSerializer, DistScoreSerializer, DistFactorSerializer
-
 from home.updateScore import user_score_update
 from home.updateChart import update_chart
-from challenge.views import achievement_check
+from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
+from user.models import Account, GitHubScoreTable
 from user.update_act import update_commmit_time, update_individual, update_frequency
+from challenge.models import Challenge
+from challenge.views import achievement_check
+from handle_error import get_fail_res
 
 import json
 import time
@@ -27,6 +26,26 @@ from datetime import datetime
 class StatisticView(APIView):
     start_year = 2019
 
+    def get_validation(self, request):
+        status = 'fail'
+        error = None
+        user = request.user
+
+        try:
+            if not user.is_superuser:
+                error = "access_permission_denied"
+            else:
+                user = User.objects.get(id=user.id)
+                status = 'success'
+        except User.DoesNotExist:
+            logging.exception(f'StatisticView user_not_found: {e}')
+            error = "user_not_found"
+        except Exception as e:
+            logging.exception(f'StatisticView undefined_exception: {e}')
+            error = "undefined_exception"
+
+        return status, error
+
     def get(self, request):
         res = {'status': 'fail', 'message': '', 'data': None}
 
@@ -34,14 +53,17 @@ class StatisticView(APIView):
             start = time.time()
             data = {'annual_overview': None,
                     'annual_total': None, 'annual_data': None}
+
+            status, error = self.get_validation(request)
+            if status == 'fail':
+                return Response(get_fail_res(error_code=error))
+
             annual_data = {}
             dept_set = GitHubScoreTable.objects.values(
                 "dept").annotate(Count("dept"))
-            print("dept_set", type(dept_set), dept_set)
 
             dept_list = json.dumps(
                 [dept["dept"] for dept in dept_set], ensure_ascii=False)
-            print("dept_list", type(dept_list), dept_list)
 
             # Factor의 연도별 평균 분포
             annual_overview = AnnualOverview.objects.order_by("case_num")
@@ -128,7 +150,7 @@ class StatisticView(APIView):
             print("소요시간", time.time() - start)
         except Exception as e:
             logging.exception(e)
-            return Response(res)
+            return Response(get_fail_res('undefined_exception'))
 
         return Response(res)
 
