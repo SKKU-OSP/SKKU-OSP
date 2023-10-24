@@ -25,7 +25,8 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const [isAuthNotice, setIsAuthNotice] = useState(false);
   const [anonymousWriter, setAnonymousWriter] = useState(false);
   const [team, setTeam] = useState([]);
-  const [selectTeam, setSelectTeam] = useState({});
+  const [selectTeam, setSelectTeam] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [articleFiles, setArticleFiles] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
@@ -89,12 +90,12 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const handleShow = (event) => {
     event.preventDefault();
     if (boardName === '팀 모집') {
-      if (team === null) {
+      if (selectTeam === '') {
         window.alert('모집할 팀을 선택해 주세요');
         return;
       }
       if (!startDate || !endDate) {
-        window.alert('모집 기간을 입력해 주세요');
+        alert('모집 기간을 입력해 주세요');
         return;
       }
       const offset = new Date().getTimezoneOffset() * 60000;
@@ -108,8 +109,10 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     }
     if (title.trim() === '') {
       window.alert('제목을 입력해 주세요');
-    } else if (bodyText.trim() === '') {
-      window.alert('본문을 입력해 주세요');
+      return;
+    }
+    if (bodyText.trim() === '' || bodyText.trim() === '<p><br></p>') {
+      alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 등록하시겠습니까?')) {
       postArticle();
@@ -130,8 +133,8 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         article_tags: selectTags,
         ...articleFiles,
         ...(boardName === '팀 모집' && {
-          period_start: startDate,
-          period_end: endDate,
+          period_start: startDate.toISOString(),
+          period_end: endDate.toISOString(),
           team_id: selectTeam.value
         })
       };
@@ -263,7 +266,8 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
   // Team
   const handleOption = (team) => {
-    setTeam(team);
+    setSelectTeam(team);
+    setIsMenuOpen(false);
   };
   const customStyle = {
     control: (provided) => ({
@@ -358,12 +362,15 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                   placeholder={'팀 선택'}
                   options={team}
                   menuPlacement="auto"
-                  value={team}
+                  value={selectTeam}
                   onChange={handleOption}
                   closeMenuOnSelect={false}
                   hideSelectedOptions={false}
                   styles={customStyle}
                   className="select-team"
+                  onMenuOpen={() => setIsMenuOpen(true)}
+                  onMenuClose={() => setIsMenuOpen(false)}
+                  menuIsOpen={isMenuOpen}
                 />
               ) : (
                 <>
