@@ -1,8 +1,7 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BsHandThumbsUp, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs';
 import ProfileDropdown_Container from '../../ProfileDropdown';
-ProfileDropdown_Container;
 
 export default function TeamArticle(props) {
   const navigate = useNavigate();
@@ -71,7 +70,9 @@ export default function TeamArticle(props) {
               <>
                 <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
               </>
-              {/* <><BsFillChatLeftTextFill size={13} className='board-article-meta' /> {article.comment_cnt}</> */}
+              <>
+                <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
+              </>
               <>
                 <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
               </>
