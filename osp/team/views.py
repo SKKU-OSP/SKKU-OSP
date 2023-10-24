@@ -19,6 +19,7 @@ from handle_error import get_fail_res
 from datetime import datetime
 import logging
 import time
+from handle_error import get_fail_res
 
 
 class TeamInviteOnTeamboardView(APIView):
@@ -1589,24 +1590,25 @@ class UserRecommenderView(APIView):
 
     def get_validation(self, request):
         status = 'success'
-        errors = {}
+        errors = None
         user = request.user
 
         try:
             if not user.is_authenticated:
-                errors["require_login"] = "로그인이 필요합니다."
+                errors = "require_login"
                 status = 'fail'
+                return status, errors
             else:
                 User.objects.get(id=user.id)
         except User.DoesNotExist:
             logging.exception(f'UserRecommender user_not_found: {e}')
-            errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            errors = "user_not_found"
             status = 'fail'
         try:
             acc_pp = AccountPrivacy.objects.get(account=request.user.id)
         except Exception as e:
             logging.exception(f'UserRecommender user_privacy_not_found: {e}')
-            errors["user_privacy_not_found"] = "해당 유저가 존재하지 않습니다."
+            errors = "user_privacy_not_found"
             status = 'fail'
 
         return status, errors
@@ -1617,8 +1619,7 @@ class UserRecommenderView(APIView):
         data = {}
         status, errors = self.get_validation(request)
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
-            return Response(res)
+            return Response(get_fail_res(errors))
 
         try:
             # acc_pp = AccountPrivacy.objects.get(account=request.user.id)

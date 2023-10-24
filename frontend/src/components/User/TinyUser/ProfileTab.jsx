@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import '../User.css';
 import Nav from 'react-bootstrap/Nav';
-import ProfileActivity from './ProfileActivity';
+import ProfileDetail from './ProfileDetail';
 
 function ProfileTab(props) {
   const [activeTab, setActiveTab] = useState('관심분야');
   const [githubId, setGithubId] = useState();
-  const github_id = props.githubId;
+  const { github_id, isEdit } = props;
   useEffect(() => setGithubId(github_id), [github_id]);
   const handleTabSelect = (selectedKey) => {
     setActiveTab(selectedKey);
@@ -27,7 +26,7 @@ function ProfileTab(props) {
           </Nav.Item>
         </Nav>
       </div>
-      <ProfileActivity Tab={activeTab} githubId={githubId} />
+      <ProfileDetail Tab={activeTab} githubId={githubId} isEdit={isEdit} />
     </>
   );
 }

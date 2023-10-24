@@ -5,11 +5,11 @@ import axios from 'axios';
 
 const AuthContext = React.createContext({
   isLoggedIn: false,
-  userId: null,
-  username: null,
-  githubUsername: null,
-  name: null,
-  photo: null,
+  userId: undefined,
+  username: undefined,
+  githubUsername: undefined,
+  name: undefined,
+  photo: undefined,
   isSuperuser: false,
   setUser: () => {},
   unsetUser: () => {}
@@ -47,9 +47,21 @@ export const AuthContextProvider = (props) => {
           setName(res.data.name);
         } else {
           console.log(res.errors);
+          setUserId(null);
+          setUsername(null);
+          setIsSuperuser(null);
+          setPhoto(null);
+          setGithubUsername(null);
+          setName(null);
         }
       } catch (error) {
         console.log('setUserInfo error', error);
+        setUserId(null);
+        setUsername(null);
+        setIsSuperuser(null);
+        setPhoto(null);
+        setGithubUsername(null);
+        setName(null);
       }
     };
     if (token) {
