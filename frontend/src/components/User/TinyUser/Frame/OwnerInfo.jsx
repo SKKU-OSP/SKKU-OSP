@@ -1,21 +1,22 @@
-import '../../User.css';
-import { FaUniversity } from 'react-icons/fa';
-import { BsFillCheckCircleFill, BsGithub } from 'react-icons/bs';
-import { MdAlternateEmail } from 'react-icons/md';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
-import Spinner from 'react-bootstrap/Spinner';
 
+import { FaUniversity } from 'react-icons/fa';
+import { BsFillCheckCircleFill, BsGithub } from 'react-icons/bs';
+import { MdAlternateEmail } from 'react-icons/md';
+
+import LoaderIcon from 'react-loader-icon';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 function OwnerInfo() {
   const { username } = useParams();
   const [ownerInfo, setOwnerInfo] = useState();
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const infoUrl = server_url + '/user/api/profile-info/' + username;
   useEffect(() => {
     const getOwnerInfo = async () => {
       try {
+        const infoUrl = server_url + '/user/api/profile-info/' + username;
         const response = await axios.get(infoUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -25,6 +26,7 @@ function OwnerInfo() {
     };
     getOwnerInfo();
   }, []);
+
   return (
     <>
       {ownerInfo ? (
@@ -54,7 +56,7 @@ function OwnerInfo() {
           </div>
         </div>
       ) : (
-        <Spinner animation="border" style={{ position: 'absolute', top: '50%', left: '50%' }} />
+        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
     </>
   );
