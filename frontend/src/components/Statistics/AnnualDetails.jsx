@@ -24,7 +24,6 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     const getPercentageData = (data, totalNum = 0) => {
       let total = totalNum ? totalNum : data.reduce((acc, currentValue) => acc + currentValue, 0);
       let target = data[yid];
-      console.log(target);
       if (!isTotal && !totalNum) {
         // 개별 스위치일 때 유저당 평균값을 구함
         target /= detailData.student_total[yid];
