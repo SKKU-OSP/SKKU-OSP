@@ -16,7 +16,7 @@ function OwnerInfo() {
   useEffect(() => {
     const getOwnerInfo = async () => {
       try {
-        const infoUrl = server_url + '/user/api/profile-info/' + username;
+        const infoUrl = server_url + '/user/api/profile-info/' + username + '/';
         const response = await axios.get(infoUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
