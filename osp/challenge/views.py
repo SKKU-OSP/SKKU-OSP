@@ -74,7 +74,11 @@ class ChallengeAchieveView(APIView):
         # achieve에 달성한 계정 개수 넣기
         for achievement in achievements:
             ch_id = achieve_cnt[achievement['id']]
-            achievement['total_achievement'] = achieve_id_cnt[ch_id]
+            # 달성한 사람이 없는 경우 핸들링
+            if ch_id in achieve_id_cnt:
+                achievement['total_achievement'] = achieve_id_cnt[ch_id]
+            else:
+                achievement['total_achievement'] = 0
         data['achievements'] = achievements
         res['data'] = data
 
