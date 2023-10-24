@@ -14,6 +14,7 @@ from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerial
 
 from team.recommend import get_team_recommendation_list, get_team_recommendation
 from team.utils import *
+from handle_error import get_fail_res
 
 from datetime import datetime
 import logging
@@ -1440,35 +1441,26 @@ class TeamsListView(APIView):
 
 
 class TeamsOfUserListView(APIView):
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def get_validation(self, request):
         user = request.user
+        status = 'success'
+        error = None
         if not user.is_authenticated:
-            errors["require_login"] = "로그인이 필요합니다."
+            error = "require_login"
             status = 'fail'
 
-        return status, message, errors, valid_data
+        return status, error
 
     def get(self, request, *args, **kwargs):
         # Declaration
-        status = 'success'
         message = ''
         data = {}
-        errors = {}
-        valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, error = self.get_validation(request)
 
         if status == 'fail':
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamsOfUserListView validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res)
+            return Response(get_fail_res(error))
 
         # Transactions
         user = request.user
@@ -1478,7 +1470,6 @@ class TeamsOfUserListView(APIView):
                 member=user.id).values_list('team_id')
             teams_of_user = Team.objects.filter(
                 id__in=team_id_include_user)
-
             page_size = 10
             paginator = Paginator(teams_of_user, page_size)
             page_number = request.GET.get('page_number')
@@ -1504,20 +1495,18 @@ class TeamsOfUserListView(APIView):
 
         except DatabaseError as e:
             # Database Exception handling
-            errors['DB_exception'] = 'DB Error'
+            error = 'db_exception'
             logging.exception(f'TeamsOfUserList DB ERROR: {e}')
             status = 'fail'
 
         except Exception as e:
-            errors['undefined_exception'] = 'undefined_exception'
+            error = 'undefined_exception'
             logging.exception(f'TeamsOfUserList ERROR: {e}')
             status = 'fail'
 
-        # Response
-        if status == 'success':
-            res = {'status': status, 'message': message, 'data': data}
-        else:
-            res = {'status': status, 'message': message, 'errors': errors}
+        if status == 'fail':
+            return Response(get_fail_res(error))
+        res = {'status': status, 'message': message, 'data': data}
         return Response(res)
 
 
