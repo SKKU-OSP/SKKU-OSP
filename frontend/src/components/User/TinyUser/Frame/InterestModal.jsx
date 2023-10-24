@@ -12,10 +12,15 @@ function InterestModal(props) {
   const interestShow = props.interestShow;
   const OnHandleInterestClose = props.OnHandleInterestClose;
   const OnHandleInterestSaveClose = props.OnHandleInterestSaveClose;
-  const [selectedInterest, setSelectedInterest] = useState();
+  const [selectedInterest, setSelectedInterest] = useState(null);
   const [modalInterest, setModalInterest] = useState(myInterest);
   const OnHandleInterestSelect = (selectedInterest) => setSelectedInterest(selectedInterest);
-  const OnHandleModalInterest = () => setModalInterest([...modalInterest, selectedInterest]);
+  const OnHandleModalInterest = () => {
+    if (selectedInterest) {
+      setModalInterest([...modalInterest, selectedInterest]);
+      setSelectedInterest(null);
+    }
+  };
   const OnHandleRemoveInterest = (removeLabel) => {
     setModalInterest(modalInterest.filter((interest) => interest.label !== removeLabel));
   };
@@ -35,6 +40,7 @@ function InterestModal(props) {
               className="modal-interest-select"
               size="lg"
               name="interest"
+              value={selectedInterest}
               onChange={OnHandleInterestSelect}
               options={interest.filter((item) => !modalInterest.some((mi) => item.value === mi.value))}
             />
@@ -42,13 +48,26 @@ function InterestModal(props) {
               <span className="btn-text">+</span>
             </button>
           </div>
-          <div className="d-flex flex-row modal-interest-result">
-            {modalInterest.map((interest) => (
-              <div className="d-flex flex-row align-items-center modal-input" key={`modal-interest-${interest.value}`}>
-                <span className="input-text">{interest.label}</span>
-                <BsXLg size={14} onClick={() => OnHandleRemoveInterest(interest.label)} style={{ cursor: 'pointer' }} />
-              </div>
-            ))}
+          <div className="d-flex flex-row flex-wrap modal-interest-result">
+            {modalInterest.length > 0 ? (
+              <>
+                {modalInterest.map((interest) => (
+                  <div
+                    className="d-flex flex-row align-items-center modal-input"
+                    key={`modal-interest-${interest.value}`}
+                  >
+                    <span className="input-text">{interest.label}</span>
+                    <BsXLg
+                      size={14}
+                      onClick={() => OnHandleRemoveInterest(interest.label)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </div>
+                ))}
+              </>
+            ) : (
+              '선택한 관심분야가 없습니다.'
+            )}
           </div>
         </div>
       </Modal.Body>

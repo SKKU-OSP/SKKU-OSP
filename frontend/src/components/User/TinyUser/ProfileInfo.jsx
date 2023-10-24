@@ -65,20 +65,34 @@ function ProfileInfo(props) {
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />
-              <span className="github_username">{userInfo.github_id}</span>
+              <a href={`https://github.com/${userInfo.github_id}`} target="_blank" className="github_username">
+                {userInfo.github_id}
+              </a>
             </div>
             {editing ? (
-              <textarea name="introduction" rows="5" value={editUserInfo.introduction} onChange={handleInputChange} />
+              <textarea
+                name="introduction"
+                rows="5"
+                style={{ width: '100%', whiteSpace: 'pre-wrap' }}
+                value={editUserInfo.introduction}
+                onChange={handleInputChange}
+              />
             ) : (
               <div className="info_introduction">
-                {userInfo.introduction.split('\n').map((line) => {
-                  return (
-                    <span>
-                      {line}
-                      <br />
-                    </span>
-                  );
-                })}
+                {userInfo.introduction.length > 0 ? (
+                  <>
+                    {userInfo.introduction.split('\n').map((line, idx) => {
+                      return (
+                        <span key={`introduction-${idx}`}>
+                          {line}
+                          <br />
+                        </span>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <>자기소개를 작성하지 않았습니다.</>
+                )}
               </div>
             )}
           </div>

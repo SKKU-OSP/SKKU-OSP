@@ -15,11 +15,16 @@ function SkillModal(props) {
   const OnHandleSkillSaveClose = props.OnHandleSkillSaveClose;
 
   const [modalSkill, setModalSkill] = useState(mySkill);
-  const [selectedSkill, setSelectedSkill] = useState([]);
+  const [selectedSkill, setSelectedSkill] = useState(null);
   const [undefinedSkill, setUndefinedSkill] = useState([]);
 
   const OnHandleSkillSelect = (selectedSkill) => setSelectedSkill(selectedSkill);
-  const OnHandleUndefinedSkill = () => setUndefinedSkill([...undefinedSkill, { tag: selectedSkill }]);
+  const OnHandleUndefinedSkill = () => {
+    if (selectedSkill) {
+      setUndefinedSkill([...undefinedSkill, { tag: selectedSkill }]);
+      setSelectedSkill(null);
+    }
+  };
   const OnHandleRemoveSkill = (removeSkill) => {
     setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.label !== removeSkill.label));
   };
@@ -78,6 +83,7 @@ function SkillModal(props) {
               className="modal-skill-select"
               size="lg"
               name="skill"
+              value={selectedSkill}
               onChange={OnHandleSkillSelect}
               options={skill
                 .filter(
@@ -97,44 +103,52 @@ function SkillModal(props) {
               <span className="btn-text">+</span>
             </button>
           </div>
-          <div className="d-flex flex-row modal-skill-result">
-            {undefinedSkill.map((element) => {
-              const color = element.tag.color;
-              const hexColor = color.substring(1);
-              const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
-              const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
-              const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
-              const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-              const fontColor = luma < 127.5 ? 'white' : 'black';
-              const logo = element.tag.logo;
-              return (
-                <div
-                  draggable
-                  onDragStart={(e) => OnHandleOnDrag(e, element)}
-                  className="d-flex flex-row align-items-center modal-input"
-                  style={{ backgroundColor: `${element.tag.color}` }}
-                  key={`modal-undefined-language-${element.tag.name}`}
-                >
-                  {logo !== 'default.svg' ? (
-                    <img
-                      className="modal-stack-icon"
-                      src={`${element.tag.logo}`}
-                      style={{
-                        WebkitFilter:
-                          fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
-                        filter: fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
-                      }}
-                    />
-                  ) : (
-                    <></>
-                  )}
-                  <span className="input-text" style={{ color: fontColor }}>
-                    {element.tag.name}
-                  </span>
-                  <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
-                </div>
-              );
-            })}
+          <div className="d-flex flex-row flex-wrap modal-skill-result">
+            {undefinedSkill.length > 0 ? (
+              <>
+                {undefinedSkill.map((element) => {
+                  const color = element.tag.color;
+                  const hexColor = color.substring(1);
+                  const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+                  const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+                  const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+                  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                  const fontColor = luma < 127.5 ? 'white' : 'black';
+                  const logo = element.tag.logo;
+                  return (
+                    <div
+                      draggable
+                      onDragStart={(e) => OnHandleOnDrag(e, element)}
+                      className="d-flex flex-row align-items-center modal-input"
+                      style={{ backgroundColor: `${element.tag.color}` }}
+                      key={`modal-undefined-language-${element.tag.name}`}
+                    >
+                      {logo !== 'default.svg' ? (
+                        <img
+                          className="modal-stack-icon"
+                          src={`${element.tag.logo}`}
+                          style={{
+                            WebkitFilter:
+                              fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
+                            filter: fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
+                          }}
+                        />
+                      ) : (
+                        <></>
+                      )}
+                      <span className="input-text" style={{ color: fontColor }}>
+                        {element.tag.name}
+                      </span>
+                      <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
+                    </div>
+                  );
+                })}
+              </>
+            ) : (
+              <div className="d-flex align-items-center modal-text">
+                사용언어/기술스택을 선택하고 + 버튼을 눌러주세요.
+              </div>
+            )}
           </div>
           {Object.entries(modalSkill)
             .reverse()
@@ -156,52 +170,64 @@ function SkillModal(props) {
                       })}
                   </div>
                   <div
-                    className="d-flex flex-row gap-1 modal-level"
+                    className="d-flex flex-row flex-wrap gap-1 modal-level"
                     onDrop={(e) => OnHandleOnDrop(e, level)}
                     onDragOver={OnHandleDragOver}
                   >
-                    {tags.map((element) => {
-                      const color = element.tag.color;
-                      const hexColor = color.substring(1);
-                      const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
-                      const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
-                      const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
-                      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                      const fontColor = luma < 127.5 ? 'white' : 'black';
-                      const logo = element.tag.logo;
-                      return (
-                        <div
-                          draggable
-                          onDragStart={(e) => OnHandleOnDrag(e, element)}
-                          className="d-flex flex-row gap-1 align-items-center modal-language"
-                          style={{ backgroundColor: `${element.tag.color}` }}
-                          key={`modal-language-level-${level}-${element.tag.name}`}
-                        >
-                          {logo !== 'default.svg' ? (
-                            <img
-                              className="modal-stack-icon"
-                              src={`${element.tag.logo}`}
-                              style={{
-                                WebkitFilter:
-                                  fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)',
-                                filter:
-                                  fontColor === 'white' ? 'brightness(0) invert(1)' : 'grayscale(100%) brightness(0)'
-                              }}
-                            />
-                          ) : (
-                            <></>
-                          )}
-                          <span className="modal-language-text" style={{ color: fontColor }}>
-                            {element.tag.name}
-                          </span>
-                          <BsXLg
-                            size={14}
-                            onClick={() => OnHandleRemoveModalSkill(element, level)}
-                            style={{ cursor: 'pointer' }}
-                          />
-                        </div>
-                      );
-                    })}
+                    {tags.length > 0 ? (
+                      <>
+                        {tags.map((element) => {
+                          const color = element.tag.color;
+                          const hexColor = color.substring(1);
+                          const r = parseInt(hexColor.substring(0, 2), 16) & 0xff;
+                          const g = parseInt(hexColor.substring(2, 4), 16) & 0xff;
+                          const b = parseInt(hexColor.substring(4, 6), 16) & 0xff;
+                          const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                          const fontColor = luma < 127.5 ? 'white' : 'black';
+                          const logo = element.tag.logo;
+                          return (
+                            <div
+                              draggable
+                              onDragStart={(e) => OnHandleOnDrag(e, element)}
+                              className="d-flex flex-row gap-1 align-items-center modal-language"
+                              style={{ backgroundColor: `${element.tag.color}` }}
+                              key={`modal-language-level-${level}-${element.tag.name}`}
+                            >
+                              {logo !== 'default.svg' ? (
+                                <img
+                                  className="modal-stack-icon"
+                                  src={`${element.tag.logo}`}
+                                  style={{
+                                    WebkitFilter:
+                                      fontColor === 'white'
+                                        ? 'brightness(0) invert(1)'
+                                        : 'grayscale(100%) brightness(0)',
+                                    filter:
+                                      fontColor === 'white'
+                                        ? 'brightness(0) invert(1)'
+                                        : 'grayscale(100%) brightness(0)'
+                                  }}
+                                />
+                              ) : (
+                                <></>
+                              )}
+                              <span className="modal-language-text" style={{ color: fontColor }}>
+                                {element.tag.name}
+                              </span>
+                              <BsXLg
+                                size={14}
+                                onClick={() => OnHandleRemoveModalSkill(element, level)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      <div className="d-flex align-items-center modal-text">
+                        해당 레벨의 사용언어/기술스택이 없습니다.
+                      </div>
+                    )}
                   </div>
                 </div>
               );
