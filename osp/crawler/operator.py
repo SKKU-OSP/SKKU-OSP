@@ -15,35 +15,42 @@ from challenge.views import achievement_check
 from user.update_act import update_commmit_time, update_individual, update_frequency
 from django.contrib.auth.models import User
 
+
 def start():
     envmode = os.getenv('ENV_MODE')
-    if(envmode == "PRODUCT"):
+    if (envmode == "PRODUCT"):
         crawl_time = ''
-    elif(envmode == "CRAWL"):
+    elif (envmode == "CRAWL"):
         crawl_time = '10, 22'
-    elif(envmode == "DEV"):
+    elif (envmode == "DEV"):
         crawl_time = ''
     else:
         crawl_time = '4, 16'
-    
-    scheduler=BackgroundScheduler(timezone='Asia/Seoul')
+
+    scheduler = BackgroundScheduler(timezone='Asia/Seoul')
+
     @scheduler.scheduled_job('cron', hour=crawl_time, misfire_grace_time=60, id='crawling_overview')
     def crawl_overview_job():
         print('crawl_overview_job Start!', datetime.now())
         try:
-            auth_user_ids = User.objects.filter(is_superuser=False).values_list("id", flat=True)
+            auth_user_ids = User.objects.filter(
+                is_superuser=False).values_list("id", flat=True)
             print("auth_user_ids", auth_user_ids)
-            github_id_list = Account.objects.filter(user_id__in=auth_user_ids).values_list('student_data__github_id', flat=True)
-        except :
+            github_id_list = Account.objects.filter(user_id__in=auth_user_ids).values_list(
+                'student_data__github_id', flat=True)
+        except:
             print("try close_old_connections")
             django.db.close_old_connections()
-            auth_user_ids = User.objects.filter(is_superuser=False).values_list("id", flat=True)
-            github_id_list = Account.objects.filter(user_id__in=auth_user_ids).values_list('student_data__github_id', flat=True)
+            auth_user_ids = User.objects.filter(
+                is_superuser=False).values_list("id", flat=True)
+            github_id_list = Account.objects.filter(user_id__in=auth_user_ids).values_list(
+                'student_data__github_id', flat=True)
         print(f"crawl_job: Get Target Account {len(github_id_list)}")
         github_id_list = ','.join(github_id_list)
         log_file = datetime.now().strftime("%y%m%d_%H%M_crawl_overview.log")
         log_path = os.path.join(CRAWLING_LOG_PATH, f'{log_file}')
-        print(f'scrapy crawl github_overview -a ids={github_id_list} --loglevel=INFO --logfile={log_path}')
+        print(
+            f'scrapy crawl github_overview -a ids={github_id_list} --loglevel=INFO --logfile={log_path}')
         subprocess.Popen(
             f'scrapy crawl github_overview -a ids="{github_id_list}" --loglevel=INFO --logfile={log_path}',
             shell=True,
@@ -57,19 +64,24 @@ def start():
         print('crawl_job Start!', datetime.now())
         try:
             # 크롤링 날짜 이후에 Github 업데이트 내용이 있으면 크롤링 대상에 포함
-            pre_crawled_list = GithubOverview.objects.filter(github_updated_date__lt=F("crawled_date")).values_list("github_id", flat=True)
+            pre_crawled_list = GithubOverview.objects.filter(
+                github_updated_date__lt=F("crawled_date")).values_list("github_id", flat=True)
             print("pre_crawled_list", len(pre_crawled_list))
-            github_id_list = Account.objects.filter(user__is_superuser=False).exclude(student_data__github_id__in=pre_crawled_list).values_list('student_data__github_id', flat=True)
-        except :
+            github_id_list = Account.objects.filter(user__is_superuser=False).exclude(
+                student_data__github_id__in=pre_crawled_list).values_list('student_data__github_id', flat=True)
+        except:
             print("try close_old_connections")
             django.db.close_old_connections()
-            pre_crawled_list = GithubOverview.objects.filter(github_updated_date__lt=F("crawled_date")).values_list("github_id", flat=True)
-            github_id_list = Account.objects.filter(user__is_superuser=False).exclude(student_data__github_id=pre_crawled_list).values_list('student_data__github_id', flat=True)
+            pre_crawled_list = GithubOverview.objects.filter(
+                github_updated_date__lt=F("crawled_date")).values_list("github_id", flat=True)
+            github_id_list = Account.objects.filter(user__is_superuser=False).exclude(
+                student_data__github_id=pre_crawled_list).values_list('student_data__github_id', flat=True)
         print(f"crawl_job: Get Target Account {len(github_id_list)}")
         github_id_list = ','.join(github_id_list)
         log_file = datetime.now().strftime("%y%m%d_%H%M_crawl.log")
         log_path = os.path.join(CRAWLING_LOG_PATH, f'{log_file}')
-        print(f'scrapy crawl github -a ids={github_id_list} --loglevel=INFO --logfile={log_path}')
+        print(
+            f'scrapy crawl github -a ids={github_id_list} --loglevel=INFO --logfile={log_path}')
         subprocess.Popen(
             f'scrapy crawl github -a ids="{github_id_list}" --loglevel=INFO --logfile={log_path}',
             shell=True,
@@ -96,5 +108,5 @@ def start():
         print('update_score:django.db.close_old_connections()')
         django.db.close_old_connections()
         print('Done!')
-    
+
     scheduler.start()

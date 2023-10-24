@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import circmean
 
-from django.db.models import Case, IntegerField, When
+from django.db.models import Case, IntegerField, When, Q
 from repository.models import GithubRepoCommits, GithubRepoStats
 from user.models import StudentTab
 from osp.settings import BASE_DIR
@@ -22,6 +22,29 @@ commmit_time_path2 = "committer_time_circmean.csv"
 commmit_time_path3 = "time_sector.csv"
 major_act_path1 = "major_act.csv"
 frequency_path1 = "commit_intv.csv"
+
+
+def _get_commit_df():
+    # StudentTab Query
+    st_queryset = StudentTab.objects.values('github_id')
+    st_set = set(st_query["github_id"] for st_query in st_queryset)
+    # GithubRepoCommits Query
+    github_repo_commits = GithubRepoCommits.objects.filter(
+        additions__lt=commit_lines_limit, deletions__lt=commit_lines_limit)
+    # author나 committer가 학생인 경우 쿼리
+    target_commits = github_repo_commits.filter(
+        Q(author_github__in=st_set) | Q(committer_github__in=st_set)
+    ).values('github_id', 'repo_name', 'committer_date', 'author_github',
+             'committer_github')
+    # Make Commit DataFrame
+    commit_df = pd.DataFrame(target_commits)
+    commit_df['contr_id'] = commit_df.apply(
+        lambda row: row['author_github'] if pd.notnull(row['author_github']) else row['committer_github'], axis=1
+    )
+    commit_df.drop('author_github', axis=1, inplace=True)
+    commit_df.drop('committer_github', axis=1, inplace=True)
+
+    return commit_df
 
 
 def update_commmit_time():
@@ -43,51 +66,33 @@ def update_commmit_time():
             df['committer_time'], high=86399, low=0, axis=None, nan_policy='propagate')
         return (circular_mean)
 
-    # StudentTab Query
-    st_queryset = StudentTab.objects.values('github_id')
-    st_set = set(st_query["github_id"] for st_query in st_queryset)
-    # GithubRepoCommits Query
-    github_repo_commits = GithubRepoCommits.objects.filter(
-        additions__lt=commit_lines_limit, deletions__lt=commit_lines_limit)
+    # Make Commit DataFrame
+    commit_df = _get_commit_df()
 
-    target_committer = github_repo_commits.filter(committer_github__in=st_set).exclude(
-        author_github__in=st_set) | github_repo_commits.filter(committer_github__in=st_set, author_github__isnull=True)
-    target_author = github_repo_commits.filter(author_github__in=st_set).exclude(
-        committer_github__in=st_set) | github_repo_commits.filter(author_github__in=st_set, committer_github__isnull=True)
-    target_bi = github_repo_commits.filter(
-        author_github__in=st_set, committer_github__in=st_set)
-
-    # Make Commit DataFrame and concat
-    sc_1 = pd.DataFrame(target_committer.values())
-    sc_1['student_github'] = sc_1["committer_github"]
-    sc_2 = pd.DataFrame(target_author.values())
-    sc_2['student_github'] = sc_2["author_github"]
-    sc_3 = pd.DataFrame(target_bi.values())
-    sc_3['student_github'] = sc_3["author_github"]
-    student_commits_time = pd.concat([sc_1, sc_2, sc_3], ignore_index=True)
-    student_commits_time['committer_time'] = student_commits_time['committer_date'].map(
+    commit_df['committer_time'] = commit_df['committer_date'].map(
         time_to_seconds)
-    stdnt_cmt_time = student_commits_time.loc[:, [
-        'student_github',  'committer_time']].sort_values(by='student_github')
-    stdnt_cmt_hour = {}
+    st_commits_time = commit_df.loc[:, [
+        'contr_id', 'committer_time']].sort_values(by='contr_id')
+    st_commits_hour = {}
     total_hour_dist = [0] * 24
     daytime_min = 9
     daytime_max = 18
-    for i in range(len(stdnt_cmt_time.index)):
-        row = stdnt_cmt_time.iloc[i]
-        if row.student_github not in stdnt_cmt_hour:
-            stdnt_cmt_hour[row.student_github] = {
-                "student_github": row.student_github, "hour_dist": [0]*24, "daytime": 0, "night": 0}
-        cmt_hour = int(row.committer_time/3600)
-        stdnt_cmt_hour[row.student_github]["hour_dist"][cmt_hour] += 1
-        if daytime_min <= cmt_hour and cmt_hour < daytime_max:
-            stdnt_cmt_hour[row.student_github]["daytime"] += 1
+    for i in range(len(st_commits_time.index)):
+        row = st_commits_time.iloc[i]
+        github_id = row.contr_id
+        if github_id not in st_commits_hour:
+            st_commits_hour[github_id] = {
+                "contr_id": github_id, "hour_dist": [0]*24, "daytime": 0, "night": 0}
+        commit_hour = int(row.committer_time/3600)
+        st_commits_hour[github_id]["hour_dist"][commit_hour] += 1
+        if daytime_min <= commit_hour < daytime_max:
+            st_commits_hour[github_id]["daytime"] += 1
         else:
-            stdnt_cmt_hour[row.student_github]["night"] += 1
-        total_hour_dist[cmt_hour] += 1
+            st_commits_hour[github_id]["night"] += 1
+        total_hour_dist[commit_hour] += 1
 
-    stdnt_cmt_hour = pd.DataFrame.from_dict(stdnt_cmt_hour, orient='index')
-    stdnt_cmt_hour.to_csv(DATA_DIR + commmit_time_path1, index=False)
+    st_commits_hour = pd.DataFrame.from_dict(st_commits_hour, orient='index')
+    st_commits_hour.to_csv(DATA_DIR + commmit_time_path1, index=False)
 
     circmean_src = []
     for i in range(len(total_hour_dist)):
@@ -96,25 +101,22 @@ def update_commmit_time():
                               low=0, axis=None, nan_policy='propagate')
     max_total_index = np.argmax(total_hour_dist)
 
-    student_commits_time = student_commits_time.groupby(
-        ['student_github']).apply(cal_circmean)
-    student_commits_time = pd.DataFrame(student_commits_time)
-    student_commits_time.columns = ['committer_time_circmean']
-    student_commits_time['committer_time_circmean'] = student_commits_time['committer_time_circmean'].map(
-        int)
-    student_commits_time['committer_hour_circmean'] = student_commits_time['committer_time_circmean'].map(
+    commit_time_df = commit_df.groupby(['contr_id']).apply(cal_circmean)
+    commit_time_df = pd.DataFrame(commit_time_df)
+    commit_time_df.columns = ['time_circmean']
+    commit_time_df['time_circmean'] = commit_time_df['time_circmean'].map(int)
+    commit_time_df['hour_circmean'] = commit_time_df['time_circmean'].map(
         lambda x: int(x/3600))
 
-    student_commits_time.reset_index().to_csv(
-        DATA_DIR + commmit_time_path2, index=False)
+    commit_time_df.reset_index().to_csv(DATA_DIR + commmit_time_path2, index=False)
 
     # Calculate time_sector
     sectors = [i*3600 for i in range(24)]
     commit_times = [0]*24
-    for time_t in student_commits_time['committer_time_circmean']:
+    for time_t in commit_time_df['time_circmean']:
         hour = int(time_t/3600)
         commit_times[hour] += 1
-    entire_user_count = len(student_commits_time)
+    entire_user_count = len(commit_time_df)
     max_index = np.argmax(commit_times)
     current_user_count = commit_times[max_index]
     radius = 0
@@ -133,6 +135,8 @@ def update_commmit_time():
 def update_individual():
 
     start = time.time()
+    commit_df = _get_commit_df()
+
     # GithubRepoStats Query
     repo_stat_queryset = GithubRepoStats.objects.values('github_id', 'repo_name').annotate(
         individual=Case(When(contributors_count=1, then=1),
@@ -141,31 +145,8 @@ def update_individual():
     # Make Dataframe
     repo_stat_ind = pd.DataFrame(repo_stat_queryset)
 
-    # StudentTab Query
-    st_queryset = StudentTab.objects.values('github_id')
-    st_set = set(st_query["github_id"] for st_query in st_queryset)
-    # GithubRepoCommits Query
-    github_repo_commits = GithubRepoCommits.objects.filter(
-        additions__lt=commit_lines_limit, deletions__lt=commit_lines_limit)
-
-    target_committer = github_repo_commits.filter(committer_github__in=st_set).exclude(
-        author_github__in=st_set) | github_repo_commits.filter(committer_github__in=st_set, author_github__isnull=True)
-    target_author = github_repo_commits.filter(author_github__in=st_set).exclude(
-        committer_github__in=st_set) | github_repo_commits.filter(author_github__in=st_set, committer_github__isnull=True)
-    target_bi = github_repo_commits.filter(
-        author_github__in=st_set, committer_github__in=st_set)
-
-    # Make Commit DataFrame and concat
-    sc_1 = pd.DataFrame(target_committer.values())
-    sc_1['student_github'] = sc_1["committer_github"]
-    sc_2 = pd.DataFrame(target_author.values())
-    sc_2['student_github'] = sc_2["author_github"]
-    sc_3 = pd.DataFrame(target_bi.values())
-    sc_3['student_github'] = sc_3["author_github"]
-    student_commits_ind = pd.concat([sc_1, sc_2, sc_3], ignore_index=True)
-
     # Merge Dataframe Repo stats and Commit
-    student_merge = pd.merge(left=student_commits_ind, right=repo_stat_ind, how="left", on=[
+    student_merge = pd.merge(left=commit_df, right=repo_stat_ind, how="left", on=[
                              "github_id", "repo_name"])
 
     # Calculate Result
@@ -176,9 +157,9 @@ def update_individual():
             return 'group'
 
     count_df = student_merge.loc[:, [
-        'student_github', 'individual', 'group']].copy()
+        'contr_id', 'individual', 'group']].copy()
     count_df.dropna(inplace=True)
-    result_df = count_df.groupby('student_github').sum()
+    result_df = count_df.groupby('contr_id').sum()
     result_df['group/individual'] = result_df['group'] / \
         (result_df['individual'] + 1)
     result_df['individual/group'] = result_df['individual'] / \
@@ -199,38 +180,18 @@ def update_individual():
 def update_frequency():
 
     start = time.time()
-    # StudentTab Query
-    st_queryset = StudentTab.objects.values('github_id')
-    st_set = set(st_query["github_id"] for st_query in st_queryset)
-    # GithubRepoCommits Query
-    github_repo_commits = GithubRepoCommits.objects.filter(
-        additions__lt=commit_lines_limit, deletions__lt=commit_lines_limit)
-    target_committer = github_repo_commits.filter(committer_github__in=st_set).exclude(
-        author_github__in=st_set) | github_repo_commits.filter(committer_github__in=st_set, author_github__isnull=True)
-    target_author = github_repo_commits.filter(author_github__in=st_set).exclude(
-        committer_github__in=st_set) | github_repo_commits.filter(author_github__in=st_set, committer_github__isnull=True)
-    target_bi = github_repo_commits.filter(
-        author_github__in=st_set, committer_github__in=st_set)
 
-    # Make DataFrame
-    sc_1 = pd.DataFrame(target_committer.values())
-    sc_1['student_github'] = sc_1["committer_github"]
-    sc_2 = pd.DataFrame(target_author.values())
-    sc_2['student_github'] = sc_2["author_github"]
-    sc_3 = pd.DataFrame(target_bi.values())
-    sc_3['student_github'] = sc_3["author_github"]
-    student_commits = pd.concat([sc_1, sc_2, sc_3], ignore_index=True)
-
-    df_commit = student_commits.loc[:, [
-        'student_github', 'repo_name', 'committer_date']].copy()
-    df_commit.rename(columns={'student_github': 'id',
+    commit_df = _get_commit_df()
+    commit_df = commit_df.loc[:, [
+        'contr_id', 'repo_name', 'committer_date']].copy()
+    commit_df.rename(columns={'contr_id': 'id',
                      'repo_name': 'rname', 'committer_date': 'cdate'}, inplace=True)
-    df_commit.sort_values(by=['cdate'], inplace=True, ignore_index=True)
+    commit_df.sort_values(by=['cdate'], inplace=True, ignore_index=True)
 
     # Analysis
     id_repo = {}
-    for i in range(len(df_commit.index)):
-        row = df_commit.iloc[i]
+    for i in range(len(commit_df.index)):
+        row = commit_df.iloc[i]
         if row.id not in id_repo:
             id_repo[row.id] = {}
         if row.rname not in id_repo[row.id]:
@@ -344,9 +305,8 @@ def read_commit_time(username):
         logging.exception(f"Read Hour_dist exception: {e}")
         daytime, night, hour_dist = 0, 0, [0]*24
     try:
-        committer_time_circmean = pd.read_csv(filepath2, index_col=0)
-        time_circmean = committer_time_circmean.at[username,
-                                                   "committer_time_circmean"]
+        time_circmean_df = pd.read_csv(filepath2, index_col=0)
+        time_circmean = time_circmean_df.at[username, "time_circmean"]
     except Exception as e:
         logging.exception(f"Read Circmean exception", e)
         time_circmean = 0
