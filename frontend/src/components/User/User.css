@@ -192,6 +192,7 @@
       min-height: 47.93px;
       .star-container {
         width: 100px;
+        min-width: 100px;
         position: relative;
       }
       .language {
@@ -547,6 +548,7 @@
     gap: 10px;
     .modal-star-container {
       width: 100px;
+      min-width: 100px;
       position: relative;
     }
     .modal-level {

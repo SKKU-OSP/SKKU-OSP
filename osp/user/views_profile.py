@@ -12,26 +12,25 @@ from repository.models import GithubRepoStats, GithubRepoCommits
 from tag.models import TagIndependent
 
 import logging
+from handle_error import get_fail_res
 
 
 class ProfileMainView(APIView):
-    def get_validation(self, request, status, errors, username):
+    def get_validation(self, request, username):
         user = request.user
+        status = "fail"
+        errors = None
         if not user.is_authenticated:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
-
+            errors = "require_login"
         else:
             try:
                 user = User.objects.get(username=username)
+                status = "success"
             except User.DoesNotExist:
-                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
-                status = 'fail'
+                errors = "user_not_found"
             except Exception as e:
                 logging.exception(f'ProfileMainView undefined_exception: {e}')
-                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
-                status = 'fail'
-
+                errors = "undefined_exception"
         return status, errors
 
     def get(self, request, username):
@@ -41,12 +40,10 @@ class ProfileMainView(APIView):
         status = 'success'
 
         # Request Validation
-        status, errors \
-            = self.get_validation(request, status, errors, username)
+        status, errors = self.get_validation(request, username)
 
         if status == 'fail':
-            res = {'status': status, 'errors': errors}
-            return Response(res)
+            return Response(get_fail_res(errors))
 
         # Transactions
         try:

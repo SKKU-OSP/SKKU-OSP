@@ -4,6 +4,7 @@ def get_missing_data_msg(name):
 
 err_to_msg = {
     "require_login": "로그인이 필요합니다.",
+    "user_privacy_not_found": "권한이 없습니다.",
     "user_not_found": "대상 유저를 찾을 수 없습니다.",
     "user_is_not_teammember": "유저가 팀 멤버가 아닙니다.",
     "user_already_teammember": "유저가 이미 팀 멤버입니다.",
@@ -24,5 +25,6 @@ def get_fail_res(error_code: str, appended_msg=""):
     return {
         'status': "fail",
         'message': msg + appended_msg,
-        'data': None
+        'data': None,
+        "error_code": error_code
     }

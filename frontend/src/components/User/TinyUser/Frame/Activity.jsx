@@ -1,23 +1,35 @@
-import { useParams } from 'react-router-dom';
-import '../../User.css';
-import { BsStar, BsCheck2, BsArrow90DegLeft } from 'react-icons/bs';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
-import Spinner from 'react-bootstrap/Spinner';
+import { BsStar, BsCheck2, BsArrow90DegLeft } from 'react-icons/bs';
+import LoaderIcon from 'react-loader-icon';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
 function Activity(props) {
-  const githubId = props.githubId;
+  const { githubId, isEdit } = props;
   const { username } = useParams();
   const [profileActivity, setProfileActivity] = useState();
   const [editProfileActivity, setEditProfileActivity] = useState();
   const [editing, setEditing] = useState(false);
-  const server_url = import.meta.env.VITE_SERVER_URL;
-  const getUrl = server_url + '/user/api/profile-activity/' + username;
-  const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
+
+  useEffect(() => {
+    const getProfileActivity = async () => {
+      try {
+        const getUrl = server_url + '/user/api/profile-activity/' + username;
+        const response = await axios.get(getUrl, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          setProfileActivity(res.data);
+        }
+      } catch (error) {}
+    };
+    getProfileActivity();
+  }, []);
 
   const updatePostProfileActivity = async (editPortfolio) => {
     if (profileActivity.portfolio !== editPortfolio) {
+      const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
       await axios.post(postUrl, { portfolio: editPortfolio }, getAuthConfig());
     }
   };
@@ -38,19 +50,6 @@ function Activity(props) {
     });
   };
 
-  useEffect(() => {
-    const getProfileActivity = async () => {
-      try {
-        const response = await axios.get(getUrl, getAuthConfig());
-        const res = response.data;
-        if (res.status === 'success') {
-          setProfileActivity(res.data);
-        }
-      } catch (error) {}
-    };
-    getProfileActivity();
-  }, []);
-
   return (
     <>
       {profileActivity ? (
@@ -58,15 +57,16 @@ function Activity(props) {
           <div className="d-flex flex-column justify-content-start profile-portfolio">
             <div className="d-flex flex-row justify-content-between portfolio-intro">
               <span className="intro">포트폴리오</span>
-              {editing ? (
-                <button className="btn" onClick={handleSaveClick}>
-                  <span className="btn-text">저장</span>
-                </button>
-              ) : (
-                <button className="btn" onClick={handleEditClick}>
-                  <span className="btn-text">수정</span>
-                </button>
-              )}
+              {isEdit &&
+                (editing ? (
+                  <button className="btn" onClick={handleSaveClick}>
+                    <span className="btn-text">저장</span>
+                  </button>
+                ) : (
+                  <button className="btn" onClick={handleEditClick}>
+                    <span className="btn-text">수정</span>
+                  </button>
+                ))}
             </div>
             <div className="portfolio-text">
               {editing ? (
@@ -78,7 +78,16 @@ function Activity(props) {
                   onChange={handleInputChange}
                 />
               ) : (
-                <span className="text">{profileActivity.portfolio}</span>
+                <div className="text">
+                  {profileActivity.portfolio.split('\n').map((line) => {
+                    return (
+                      <span>
+                        {line}
+                        <br />
+                      </span>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
@@ -117,7 +126,7 @@ function Activity(props) {
           </div>
         </div>
       ) : (
-        <Spinner animation="border" style={{ position: 'absolute', top: '50%', left: '50%' }} />
+        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
     </>
   );

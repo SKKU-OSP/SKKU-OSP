@@ -1,23 +1,18 @@
 import { useEffect, useState } from 'react';
-
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
-
-import Button from 'react-bootstrap/Button';
-import Spinner from 'react-bootstrap/Spinner';
-import { BsFillStarFill } from 'react-icons/bs';
+import axios from 'axios';
+import { getAuthConfig } from '../../../../utils/auth';
 
 import SkillModal from './SkillModal';
 import InterestModal from './InterestModal';
-import { getAuthConfig } from '../../../../utils/auth';
 
-import '../../User.css';
+import Button from 'react-bootstrap/Button';
+import { BsFillStarFill } from 'react-icons/bs';
+import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
-const tagsUrl = server_url + '/tag/api/list/';
-const profileInterestPostUrl = server_url + '/user/api/interests/update/';
-const profileSkillPostUrl = server_url + '/user/api/langs/update/';
-function Interest() {
+function Interest(props) {
+  const { isEdit } = props;
   // Interest 훅
   const [interestShow, setInterestShow] = useState(false);
   const [interest, setInterest] = useState([]);
@@ -36,6 +31,7 @@ function Interest() {
   useEffect(() => {
     const getTags = async () => {
       try {
+        const tagsUrl = server_url + '/tag/api/list/';
         const response = await axios.get(tagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -54,7 +50,6 @@ function Interest() {
           setSkill(skill);
         }
       } catch (error) {
-        console.log('getTags error', error);
         setError(true);
       }
     };
@@ -82,7 +77,7 @@ function Interest() {
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
         } else {
-          console.log('getProfileTags error', res.errors);
+          setError(true);
         }
       } catch (error) {
         setError(true);
@@ -94,9 +89,11 @@ function Interest() {
 
   // 서버에 데이터 저장
   const updatePostProfileInterest = async (updateInterest) => {
+    const profileInterestPostUrl = server_url + '/user/api/interests/update/';
     await axios.post(profileInterestPostUrl, { user_interests: updateInterest }, getAuthConfig());
   };
   const updatePostProfileSkill = async (updateSkill) => {
+    const profileSkillPostUrl = server_url + '/user/api/langs/update/';
     await axios.post(profileSkillPostUrl, { user_langs: updateSkill }, getAuthConfig());
   };
 
@@ -139,16 +136,20 @@ function Interest() {
               <div className="d-flex flex-column profile-category">
                 <div className="d-flex flex-row justify-content-between category-intro">
                   <span className="intro">관심분야</span>
-                  <Button className="btn" onClick={OnHandleInterestShow} style={{ backgroundColor: 'white' }}>
-                    <span className="btn-text">수정</span>
-                  </Button>
-                  <InterestModal
-                    interest={interest}
-                    myInterest={myInterest}
-                    interestShow={interestShow}
-                    OnHandleInterestClose={OnHandleInterestClose}
-                    OnHandleInterestSaveClose={OnHandleInterestSaveClose}
-                  />
+                  {isEdit && (
+                    <>
+                      <Button className="btn" onClick={OnHandleInterestShow} style={{ backgroundColor: 'white' }}>
+                        <span className="btn-text">수정</span>
+                      </Button>
+                      <InterestModal
+                        interest={interest}
+                        myInterest={myInterest}
+                        interestShow={interestShow}
+                        OnHandleInterestClose={OnHandleInterestClose}
+                        OnHandleInterestSaveClose={OnHandleInterestSaveClose}
+                      />
+                    </>
+                  )}
                 </div>
                 <div className="d-flex flex-row flex-wrap category-icon">
                   {myInterest.map((interest) => (
@@ -161,17 +162,21 @@ function Interest() {
               <div className="d-flex flex-column profile-language">
                 <div className="d-flex flex-row justify-content-between language-intro">
                   <span className="intro">사용언어/기술스택</span>
-                  <Button className="btn" onClick={OnHandleSkillShow} style={{ backgroundColor: 'white' }}>
-                    <span className="btn-text">수정</span>
-                  </Button>
-                  <SkillModal
-                    mySkill={mySkill}
-                    skill={skill}
-                    skillShow={skillShow}
-                    OnHandleSkillClose={OnHandleSkillClose}
-                    OnHandleSkillSaveClose={OnHandleSkillSaveClose}
-                    starColor={starColor}
-                  />
+                  {isEdit && (
+                    <>
+                      <Button className="btn" onClick={OnHandleSkillShow} style={{ backgroundColor: 'white' }}>
+                        <span className="btn-text">수정</span>
+                      </Button>
+                      <SkillModal
+                        mySkill={mySkill}
+                        skill={skill}
+                        skillShow={skillShow}
+                        OnHandleSkillClose={OnHandleSkillClose}
+                        OnHandleSkillSaveClose={OnHandleSkillSaveClose}
+                        starColor={starColor}
+                      />
+                    </>
+                  )}
                 </div>
                 {Object.entries(mySkill)
                   .reverse()
@@ -237,7 +242,7 @@ function Interest() {
               </div>
             </div>
           ) : (
-            <Spinner animation="border" style={{ position: 'absolute', top: '50%', left: '50%' }} />
+            <LoaderIcon style={{ marginTop: '20px' }} />
           )}
         </>
       )}
