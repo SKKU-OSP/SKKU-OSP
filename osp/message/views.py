@@ -157,6 +157,11 @@ class MessageChatView(APIView):
             & Q(send_date__lt=before_date)
         ).order_by('-send_date')[:10]
 
+        for msg in messages:
+            if msg.receiver == user_account:
+                msg.receiver_read = True
+                msg.save()
+
         return MessageSerializer(messages, many=True).data
 
 
