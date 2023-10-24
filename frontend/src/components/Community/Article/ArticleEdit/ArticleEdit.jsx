@@ -18,7 +18,7 @@ import './ArticleEdit.css';
  */
 const domainUrl = import.meta.env.VITE_SERVER_URL;
 
-function ArticleEdit({ isWrite, type, consentWriteOpen }) {
+function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id;
   const urlEditArticle = domainUrl + '/community/api/article/' + articleID + '/update/';
 
@@ -29,7 +29,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const [isAuthNotice, setIsAuthNotice] = useState(true);
   const [anonymousWriter, setAnonymousWriter] = useState(true);
   const [team, setTeam] = useState([]);
-  const [selectTeam, setSelectTeam] = useState({});
+  const [selectTeam, setSelectTeam] = useState('');
   const [existFiles, setExistFiles] = useState({});
   const [articleFiles, setArticleFiles] = useState({});
   const [title, setTitle] = useState('');
@@ -84,6 +84,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       const urlArticle = domainUrl + '/community/api/article/' + articleID;
       const responseArticle = await axios.get(urlArticle);
       const resArticle = responseArticle.data;
+      console.log('arti', resArticle);
       if (resArticle.status === 'success') {
         if (resArticle.data.article.writer.user.username !== username) {
           alert('본인의 게시글만 수정할 수 있습니다.');
@@ -98,8 +99,14 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
 
             setStartDate(start);
             setEndDate(end);
-            setSelectTeam(resArticle.data.team);
-            console.log('team', selectTeam);
+            setSelectTeam(
+              resArticle.data.team
+                ? {
+                    value: resArticle.data.team.id,
+                    label: resArticle.data.team.name
+                  }
+                : null
+            );
           }
 
           setSelectTags(
@@ -147,7 +154,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     }
     if (title.trim() === '') {
       window.alert('제목을 입력해 주세요');
-    } else if (bodyText.trim() === '') {
+    } else if (bodyText.trim() === '' || bodyText.trim() === '<p><br></p>') {
       window.alert('본문을 입력해 주세요');
       return;
     } else if (window.confirm('글을 수정하시겠습니까?')) {
@@ -164,14 +171,14 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       const postData = {
         title: title,
         content: bodyText,
-        is_notice: false,
-        anonymous_writer: false,
+        is_notice: isAuthNotice,
+        anonymous_writer: anonymousWriter,
         article_tags: selectTags,
         file_id_list: Object.keys(existFiles),
         ...articleFiles,
         ...(board.board_type === 'Recruit' && {
-          period_start: startDate,
-          period_end: endDate,
+          period_start: startDate.toISOString(),
+          period_end: endDate.toISOString(),
           team_id: selectTeam.value
         })
       };
@@ -368,13 +375,13 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                       />{' '}
                       <label htmlFor="is-anonymous">익명</label>
                     </div>
-                    <button type="button" className="btn btn-primary" onClick={onModify}>
-                      수정하기
+                    <button type="button" className="btn btn-primary">
+                      저장하기
                     </button>
                   </div>
                 ) : (
                   <button type="submit" className="btn btn-primary">
-                    수정하기
+                    저장하기
                   </button>
                 )}
               </div>
@@ -402,7 +409,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                       placeholder={'팀 선택'}
                       options={team}
                       menuPlacement="auto"
-                      value={selectTeam.name}
+                      value={selectTeam}
                       onChange={handleOption}
                       closeMenuOnSelect={true}
                       hideSelectedOptions={false}
