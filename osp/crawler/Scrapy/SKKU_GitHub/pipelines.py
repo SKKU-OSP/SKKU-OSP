@@ -15,6 +15,7 @@ from pydispatch import dispatcher
 from .items import *
 from .settings import *
 
+
 class SkkuGithubPipeline:
     def deEmoji(self, data):
         for key in data:
@@ -22,24 +23,25 @@ class SkkuGithubPipeline:
                 data[key] = self.emoji_pattern.sub(r'', data[key])
 
     def __init__(self) -> None:
-        
+
         self.crawlDB = None
         self.cursor = None
-        try :
+        try:
             dispatcher.connect(self.spider_opened, signals.spider_opened)
             dispatcher.connect(self.spider_closed, signals.spider_closed)
-        except :
-            print('ERROR: dispatcher connection failed')
+        except Exception as e:
+            logging.exception(f'ERROR: dispatcher connection failed: {e}')
             sys.exit(1)
-        
+
         self.wait = {}
         self.lost = {}
-        self.emoji_pattern = re.compile("["u"\U00010000-\U0010FFFF""]+", flags=re.UNICODE)
-        
+        self.emoji_pattern = re.compile(
+            "["u"\U00010000-\U0010FFFF""]+", flags=re.UNICODE)
+
     def spider_opened(self, spider):
-        
+
         logging.info("spider_opened")
-        try :
+        try:
             self.crawlDB = pymysql.connect(
                 user=SQL_USER,
                 passwd=SQL_PW,
@@ -48,30 +50,30 @@ class SkkuGithubPipeline:
                 db=SQL_DB
             )
             self.cursor = self.crawlDB.cursor()
-        except :
-            print('ERROR: DB connection failed')
+        except Exception as e:
+            logging.exception(f'ERROR: DB connection failed: {e}')
             sys.exit(1)
-    
+
     def spider_closed(self, spider):
-        
+
         logging.info("spider_closed")
-        try :
+        try:
             self.cursor.close()
             self.crawlDB.close()
-        except :
-            print('ERROR: DB close failed')
+        except Exception as e:
+            logging.exception(f'ERROR: DB close failed: {e}')
             sys.exit(1)
-    
+
     def reconn(self):
-        
+
         logging.info("DB reconnect")
-        try :
+        try:
             self.cursor.close()
             self.crawlDB.close()
-        except :
-            print('ERROR: DB close failed')
+        except Exception as e:
+            logging.exception(f'ERROR: DB close failed {e}')
             sys.exit(1)
-        try :
+        try:
             self.crawlDB = pymysql.connect(
                 user=SQL_USER,
                 passwd=SQL_PW,
@@ -80,8 +82,8 @@ class SkkuGithubPipeline:
                 db=SQL_DB
             )
             self.cursor = self.crawlDB.cursor()
-        except :
-            print('ERROR: DB reconnection failed')
+        except:
+            logging.exception(f'ERROR: DB reconnection failed: {e}')
             sys.exit(1)
 
     def process_item(self, item, spider):
@@ -106,7 +108,7 @@ class SkkuGithubPipeline:
                 prev['stars'] += item['stars']
             prev['request_cnt'] -= 1
             self.wait[item['github_id']] = prev
-            if prev['request_cnt'] == 0 :
+            if prev['request_cnt'] == 0:
                 self.wait.pop(item['github_id'])
                 insert = True
                 data = prev
@@ -114,7 +116,7 @@ class SkkuGithubPipeline:
         else:
             insert = True
             data = item
-        
+
         if insert:
             self.deEmoji(data)
             if type(data) == User:
@@ -127,7 +129,8 @@ class SkkuGithubPipeline:
                 data_col = list(set(data.keys()) - set(key_col))
             if type(data) == UserStarred:
                 table_name = 'github_user_starred'
-                key_col = ['github_id', 'starred_repo_owner', 'starred_repo_name']
+                key_col = ['github_id', 'starred_repo_owner',
+                           'starred_repo_name']
                 data_col = list(set(data.keys()) - set(key_col))
             if type(data) == UserPeriod:
                 table_name = 'github_stats_yymm'
@@ -135,14 +138,14 @@ class SkkuGithubPipeline:
                 data_col = list(set(data.keys()) - set(key_col))
             if type(data) == Repo:
                 table_name = 'github_repo_stats'
-                del(data['path'])
+                del (data['path'])
                 key_col = ['github_id', 'repo_name']
                 data_col = list(set(data.keys()) - set(key_col))
             if type(data) == RepoUpdate:
                 table_name = 'github_repo_stats'
                 data['github_id'] = data['path'].split('/')[0]
                 data['repo_name'] = data['path'].split('/')[1]
-                del(data['path'])
+                del (data['path'])
                 key_col = ['github_id', 'repo_name']
                 data_col = list(set(data.keys()) - set(key_col))
             if type(data) == RepoContribute:
@@ -169,13 +172,13 @@ class SkkuGithubPipeline:
                 table_name = 'github_stars'
                 key_col = ['github_id', 'repo_name', 'stargazer']
                 data_col = list(set(data.keys()) - set(key_col))
-            
+
             select_sql = f'SELECT * FROM {table_name} WHERE {" AND ".join([f"{x} = %s" for x in key_col])}'
             select_data = [data[x] for x in key_col]
             update_sql = f'UPDATE {table_name} SET {", ".join([f"{x} = %s" for x in data_col])} WHERE {" AND ".join([f"{x} = %s" for x in key_col])}'
             update_data = [data[x] for x in data_col + key_col]
             insert_sql = f'INSERT INTO {table_name}({", ".join(key_col + data_col)}) '
-            insert_sql+= f'VALUES({", ".join(["%s"]*len(data))})'
+            insert_sql += f'VALUES({", ".join(["%s"]*len(data))})'
             insert_data = [data[x] for x in key_col + data_col]
             try:
                 self.crawlDB.ping(reconnect=True)
@@ -184,11 +187,12 @@ class SkkuGithubPipeline:
                 elif len(update_data) != len(key_col):
                     self.cursor.execute(update_sql, update_data)
                 self.crawlDB.commit()
-            except:
-                print(self.cursor.mogrify(select_sql, select_data))
-                print(self.cursor.mogrify(insert_sql, insert_data))
+            except Exception as e:
+                logging.exception(f"sql execute exception {e}")
+                logging.info(self.cursor.mogrify(select_sql, select_data))
+                logging.info(self.cursor.mogrify(insert_sql, insert_data))
                 if len(update_data) != 0:
-                    print(self.cursor.mogrify(update_sql, update_data))
-                print('\n')
+                    logging.info(self.cursor.mogrify(update_sql, update_data))
+                logging.info('\n')
                 self.reconn()
         return item

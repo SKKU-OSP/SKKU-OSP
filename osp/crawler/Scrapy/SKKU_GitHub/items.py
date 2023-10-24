@@ -1,6 +1,7 @@
 import scrapy
 
-class User(scrapy.Item) :
+
+class User(scrapy.Item):
     github_id = scrapy.Field()
     stars = scrapy.Field()
     followers = scrapy.Field()
@@ -15,8 +16,11 @@ class User(scrapy.Item) :
     request_cnt = scrapy.Field()
     github_updated_date = scrapy.Field()
     crawled_date = scrapy.Field()
+    created_date = scrapy.Field()
     updated_date = scrapy.Field()
-class UserUpdate(scrapy.Item) :
+
+
+class UserUpdate(scrapy.Item):
     github_id = scrapy.Field()
     target = scrapy.Field()
     total_commits = scrapy.Field()
@@ -25,6 +29,7 @@ class UserUpdate(scrapy.Item) :
     achievements = scrapy.Field()
     highlights = scrapy.Field()
     stars = scrapy.Field()
+
 
 class UserPeriod(scrapy.Item):
     github_id = scrapy.Field()
@@ -37,14 +42,17 @@ class UserPeriod(scrapy.Item):
     num_of_PRs = scrapy.Field()
     num_of_issues = scrapy.Field()
 
+
 class UserFollowing(scrapy.Item):
     github_id = scrapy.Field()
     following_id = scrapy.Field()
-    
+
+
 class UserStarred(scrapy.Item):
     github_id = scrapy.Field()
     starred_repo_owner = scrapy.Field()
     starred_repo_name = scrapy.Field()
+
 
 class Repo(scrapy.Item):
     github_id = scrapy.Field()
@@ -62,13 +70,14 @@ class Repo(scrapy.Item):
     release_ver = scrapy.Field()        # Main Page
     release_count = scrapy.Field()      # Main Page
     dependencies = scrapy.Field()
-    contributors_count = scrapy.Field() # Main Page
+    contributors_count = scrapy.Field()  # Main Page
     readme = scrapy.Field()             # Main Page
     commits_count = scrapy.Field()      # Main Page
     prs_count = scrapy.Field()          # PR Page
     open_issue_count = scrapy.Field()   # Issue Page
     close_issue_count = scrapy.Field()  # Issue Page
     request_cnt = scrapy.Field()
+
 
 class RepoUpdate(scrapy.Item):
     path = scrapy.Field()
@@ -85,10 +94,12 @@ class RepoUpdate(scrapy.Item):
     dependencies = scrapy.Field()
     request_cnt = scrapy.Field()
 
+
 class RepoContribute(scrapy.Item):
     github_id = scrapy.Field()
     owner_id = scrapy.Field()
     repo_name = scrapy.Field()
+
 
 class RepoCommit(scrapy.Item):
     github_id = scrapy.Field()
@@ -103,6 +114,7 @@ class RepoCommit(scrapy.Item):
     additions = scrapy.Field()
     deletions = scrapy.Field()
 
+
 class RepoCommitFile(scrapy.Item):
     github_id = scrapy.Field()
     repo_name = scrapy.Field()
@@ -112,6 +124,7 @@ class RepoCommitFile(scrapy.Item):
     additions = scrapy.Field()
     deletions = scrapy.Field()
 
+
 class Issue(scrapy.Item):
     github_id = scrapy.Field()
     owner_id = scrapy.Field()
@@ -120,6 +133,7 @@ class Issue(scrapy.Item):
     title = scrapy.Field()
     date = scrapy.Field()
 
+
 class PullRequest(scrapy.Item):
     github_id = scrapy.Field()
     owner_id = scrapy.Field()
@@ -127,6 +141,7 @@ class PullRequest(scrapy.Item):
     number = scrapy.Field()
     title = scrapy.Field()
     date = scrapy.Field()
+
 
 class Star(scrapy.Item):
     github_id = scrapy.Field()
