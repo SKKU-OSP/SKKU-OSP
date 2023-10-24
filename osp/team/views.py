@@ -14,6 +14,7 @@ from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerial
 
 from team.recommend import get_team_recommendation_list, get_team_recommendation
 from team.utils import *
+from tag.models import TagIndependent
 from handle_error import get_fail_res
 
 from datetime import datetime
@@ -500,6 +501,7 @@ class TeamCreateView(APIView):
         team_description = request.data.get('team_description', False)
         team_description = ' '.join(team_description.split())
         team_image = request.FILES.get('team_image', False)
+        team_tag = request.data.get('team_tag', None)
 
         try:
             with transaction.atomic():
@@ -523,7 +525,14 @@ class TeamCreateView(APIView):
 
                 # 생성한 team 객체 DB 저장
                 new_team.save()
-
+                if team_tag:
+                    team_tag = team_tag.split(",")
+                    tags = TagIndependent.objects.filter(name__in=team_tag)
+                    for tag in tags:
+                        TeamTag.objects.create(
+                            team=new_team,
+                            tag=tag
+                        )
                 # 팀 생성한 유저 Account 객체 ( request.user 로 쿼리 )
                 account = Account.objects.get(user=request.user.id)
 
@@ -1471,7 +1480,7 @@ class TeamsOfUserListView(APIView):
                 member=user.id).values_list('team_id')
             teams_of_user = Team.objects.filter(
                 id__in=team_id_include_user)
-            page_size = 10
+            page_size = 30
             paginator = Paginator(teams_of_user, page_size)
             page_number = request.GET.get('page_number')
             if not page_number:
