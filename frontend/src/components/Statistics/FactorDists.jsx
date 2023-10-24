@@ -8,7 +8,6 @@ import {
   makeErrorJson,
   getChartConfig,
   scoreOption,
-  noLegendOption,
   histogramOption,
   makeHistogramJson
 } from '../../utils/chartOption';
@@ -101,8 +100,18 @@ function FactorDists(props) {
 
   const histogramJsonData = makeHistogramJson(histogramLabels, histogramRawData, levelStep);
   const histogramData = getChartConfig(histogramLabels, getHistogramDatasets(histogramJsonData));
-
-  const distChartOption = targetFactor === 'score' ? scoreOption : noLegendOption;
+  // 옵션을 변수로 할당하면 bar 차트 모양이 깨지는 오류 발생함
+  const distChartOption =
+    targetFactor === 'score'
+      ? scoreOption
+      : {
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        };
   const sidErrorJsonData = makeErrorJson(sidRawData, sidStdData);
   const sidDistChartData = getChartConfig(
     sids,
