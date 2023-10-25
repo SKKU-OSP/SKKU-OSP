@@ -365,6 +365,70 @@ def github_login_callback(request):
         return render(request, 'common/register.html', context)
 
 
+class AccountFinderView(APIView):
+    def post(self, request):
+        try:
+            print("AccountFinderView", request.get_host())
+            email = request.data.get('email', None)
+            print(email)
+            user = User.objects.get(email=email)
+            print(user)
+            current_site = get_current_site(request=request)
+            print("current_site", current_site.name,
+                  " domain: ", current_site.domain)
+            context = {'user': user, 'site_name': current_site.name,
+                       'domain': current_site.domain}
+            send_mail(subject_template_name="registration/subject_find_username.txt",
+                      email_template_name="registration/email_find_username.txt",
+                      context=context,
+                      from_email=EMAIL_HOST_USER,
+                      to_email=user.email)
+            return Response({'status': 'success', 'message': '메일이 발송되었습니다.'})
+        except User.DoesNotExist as de:
+            logging.exception(f"valid_check DoesNotExist: {de}")
+            return Response({'status': 'fail', 'message': '이메일을 찾을 수 없습니다. 이메일을 확인해주세요.'})
+        except smtplib.SMTPServerDisconnected as disconn:
+            logging.exception(f"valid_check SMTPServerDisconnected: {disconn}")
+            return Response({'status': 'fail', 'message': '죄송합니다. 서비스에 문제가 있어 이메일을 발송할 수 없습니다.'})
+        except Exception as e:
+            logging.exception(
+                f"valid_check error: {e}, {type(e).__name__}, {e.args}")
+            return Response({'status': 'fail', 'message': '이메일 발송에 실패했습니다.'})
+
+
+def valid_check(request):
+    if request.method == 'POST':
+        print("valid_check")
+        # 폼을 이용해서 계정정보에 이메일이 포함되어있다면 이메일을 보내도록 한다.
+        if request.POST['email']:
+            try:
+                print(request.POST['email'])
+
+                user = User.objects.get(email=request.POST['email'])
+                print(user)
+                current_site = get_current_site(request=request)
+                print("current_site", current_site.name,
+                      " domain: ", current_site.domain)
+                context = {'user': user, 'site_name': current_site.name,
+                           'domain': current_site.domain}
+                send_mail(subject_template_name="registration/subject_find_username.txt",
+                          email_template_name="registration/email_find_username.txt",
+                          context=context,
+                          from_email=EMAIL_HOST_USER,
+                          to_email=user.email)
+                return JsonResponse({'status': 'success'})
+            except User.DoesNotExist as de:
+                print("valid_check DoesNotExist: ", de)
+                return JsonResponse({'status': 'fail', 'message': '이메일을 찾을 수 없습니다. 이메일을 확인해주세요.'})
+            except smtplib.SMTPServerDisconnected as disconn:
+                print("valid_check SMTPServerDisconnected: ", disconn)
+                return JsonResponse({'status': 'fail', 'message': '죄송합니다. 서비스에 문제가 있어 이메일을 발송할 수 없습니다.'})
+            except Exception as e:
+                print("valid_check error: ", e, type(e).__name__, e.args)
+                return JsonResponse({'status': 'fail', 'message': '이메일 발송에 실패했습니다.'})
+    return JsonResponse({'status': 'fail', 'message': '이메일을 찾을 수 없습니다.'})
+
+
 class PasswordResetView(auth_views.PasswordResetView):
     template_name = 'common/password_reset.html'
     email_template_name = "registration/email_reset_password.html"

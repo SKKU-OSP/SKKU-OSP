@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import LoaderIcon from 'react-loader-icon';
 
 import axios from 'axios';
-import AuthContext from '../utils/auth-context';
-import { setExpiration } from '../utils/auth';
+import AuthContext from '../../utils/auth-context';
+import { setExpiration } from '../../utils/auth';
 
 function OAuth() {
   const location = useLocation();
