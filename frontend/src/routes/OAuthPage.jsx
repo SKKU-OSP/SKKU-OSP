@@ -1,4 +1,4 @@
-import OAuth from '../components/OAuth';
+import OAuth from '../components/Account/OAuth';
 
 function OAuthPage() {
   return (

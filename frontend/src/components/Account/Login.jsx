@@ -4,8 +4,8 @@ import { BsGithub } from 'react-icons/bs';
 import axios from 'axios';
 
 import classes from './Login.module.css';
-import AuthContext from '../utils/auth-context';
-import { setExpiration } from '../utils/auth';
+import AuthContext from '../../utils/auth-context';
+import { setExpiration } from '../../utils/auth';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
 const github_login_url = `oauth/authorize?client_id=${client_id}`;
@@ -101,7 +101,7 @@ function Login() {
       </form>
       <div className="d-flex justify-content-between flex-wrap">
         <div className={classes.weakText}>
-          <Link to="/accounts/find-account">계정 찾기</Link>
+          <Link to="/accounts/find">계정 찾기</Link>
           <span>|</span>
           <Link to="/accounts/password-reset">비밀번호 재설정</Link>
         </div>

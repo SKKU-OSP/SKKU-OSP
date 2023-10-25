@@ -34,6 +34,8 @@ import HomePage from './routes/HomePage';
 import DevAnalysis from './components/User/TypeTest/DevAnalysis';
 import TestType from './components/User/TypeTest/TestType';
 import UserLayout from './components/User/UserLayout';
+import AccountFind from './components/Account/AccountFind';
+import AccountFindDone from './components/Account/AccountFindDone';
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -112,6 +114,14 @@ const router = createBrowserRouter([
           {
             path: 'signup',
             element: <SignUpPage />
+          },
+          {
+            path: 'find',
+            element: <AccountFind />
+          },
+          {
+            path: 'find/done',
+            element: <AccountFindDone />
           }
         ]
       },
