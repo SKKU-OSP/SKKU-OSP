@@ -55,7 +55,6 @@ function Recommender_Container() {
         const res = response.data;
         if (res.status === 'success') {
           setTeamMembers(res.data.recommend.sort((a, b) => b.value - a.value));
-          setIsReady(true);
         }
       } catch (error) {
         handleError(error.message + ' 홈 화면으로 이동합니다.', '/');
