@@ -6,10 +6,13 @@ import { getAuthConfig } from '../../../../utils/auth';
 import TeamArticle from './TeamArticle';
 import InviteTeamModal from '../InviteTeamModal';
 import EditTeamModal from '../EditTeamModal';
-import { BsAwardFill } from 'react-icons/bs';
+import { BsAwardFill, BsBoxArrowRight } from 'react-icons/bs';
 import AuthContext from '../../../../utils/auth-context';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -20,9 +23,11 @@ function TeamBoard() {
   const [maxPageNumber, setMaxPageNumber] = useState(0);
   const [nowPage, setNowPage] = useState(1);
   const [thisTeam, setThisTeam] = useState({ team: {}, articles: [] });
+  const [teamMembers, setTeamMembers] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState(false);
   const { username } = useContext(AuthContext);
+  const [showChatMessageModal, setShowChatMessageModal] = useState(false);
 
   const getTeamInfo = async (page) => {
     try {
@@ -33,10 +38,10 @@ function TeamBoard() {
       const res = response.data;
       if (res.status === 'success') {
         setThisTeam(res.data);
+        setTeamMembers(res.data.team_members);
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);
         setNowPage(page);
-        console.log('page', maxPageNumber, nowPage);
         const userMemberInfo = res.data.team_members.find((ele) => ele.member.user.username === username);
         setIsAdmin(userMemberInfo?.is_admin);
       }
@@ -44,6 +49,8 @@ function TeamBoard() {
       setError(true);
     }
   };
+  // console.log('team', thisTeam);
+  // console.log('teammem', teamMembers);
 
   const onMyTeamList = () => {
     navigate(`/community/team`);
@@ -53,16 +60,46 @@ function TeamBoard() {
     navigate(`/community/board/${thisTeam.board.name}/register/`);
   };
 
-  const onWriter = (member) => {
-    navigate(`/user/${member.member.user.username}`);
-  };
-
   const onRecommender = () => {
     navigate(`/community/recommender`, { state: { team_name } });
   };
 
   const onPageChange = (page) => {
     getTeamInfo(page);
+  };
+
+  const onCloseChatModal = () => {
+    setShowChatMessageModal(false);
+  };
+
+  const onChatMessage = () => {
+    setShowChatMessageModal(true);
+  };
+
+  const teamOut = (event) => {
+    const currentUser = username;
+    console.log('current', currentUser);
+
+    if (teamMembers.length < 2) {
+      if (window.confirm('팀을 탈퇴하면 팀이 삭제됩니다. 그래도 진행하시겠습니까?')) {
+      }
+    } else {
+      if (window.confirm('팀을 탈퇴하시겠습니까?')) {
+        const updatedTeamMembers = teamMembers.filter((member) => member.user !== currentUser);
+        console.log('update', updatedTeamMembers);
+        setTeamMembers(updatedTeamMembers);
+        console.log('teammem', teamMembers);
+      }
+
+      // if (window.confirm('팀을 탈퇴하시겠습니까?')) {
+      //   for (let i = 0; i < teamMembers.length; i++) {
+      //     const all_members2 = teamMembers;
+      //     delete all_members2[i];
+      //     setTeamMembers(all_members2);
+      //     this.parentElement.parentElement.removeChild(this.parentElement);
+      //   }
+      // }
+    }
   };
 
   useEffect(() => {
@@ -100,6 +137,7 @@ function TeamBoard() {
                   <div className="team-description fs-4">
                     {team_name}
                     {isAdmin ? <EditTeamModal team_name={team_name} /> : null}
+                    <BsBoxArrowRight className="team-out" onClick={() => teamOut()} />
                     {/* <EditTeamModal team_name={team_name} /> */}
                   </div>
                   <div>
@@ -117,19 +155,65 @@ function TeamBoard() {
                     {thisTeam.team_members
                       ? thisTeam.team_members.map((member) =>
                           member.is_admin ? (
-                            <div key={member.member.user.id}>
-                              <h6 className="team-members-list" onClick={() => onWriter(member)}>
-                                <span>{member.member.user.username}</span>
-                                <BsAwardFill className="admin-star" />
-                              </h6>
-                            </div>
+                            <span key={member.member.user.id} className="dropdown-button">
+                              <DropdownButton
+                                title={member.member.user.username}
+                                variant="link"
+                                className="team-members-list"
+                              >
+                                <Dropdown.Item
+                                  onClick={() => {
+                                    navigate(`/user/${member.member.user.username}`);
+                                  }}
+                                >
+                                  프로필
+                                </Dropdown.Item>
+                                {username != member.member.user.username && (
+                                  <>
+                                    <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
+                                    <ChatMessageModal_Container
+                                      show={showChatMessageModal}
+                                      onCloseChatModal={onCloseChatModal}
+                                      targetId={member.member.user.id}
+                                    />
+                                  </>
+                                )}
+                              </DropdownButton>
+                              <BsAwardFill className="admin-star" />
+                            </span>
                           ) : (
-                            <h6
-                              className="team-members-list"
-                              onClick={() => onWriter(member)}
-                              key={member.member.user.id}
-                            >
-                              {member.member.user.username}
+                            // <h6
+                            //   className="team-members-list"
+                            //   onClick={() => onWriter(member)}
+                            //   key={member.member.user.id}
+                            // >
+                            //   {member.member.user.username}
+                            // </h6>
+                            <h6 key={member.member.user.id} className="dropdown-button">
+                              <DropdownButton
+                                title={member.member.user.username}
+                                variant="link"
+                                className="team-members-list"
+                                style={{ color: 'grey' }}
+                              >
+                                <Dropdown.Item
+                                  onClick={() => {
+                                    navigate(`/user/${member.member.user.username}`);
+                                  }}
+                                >
+                                  프로필
+                                </Dropdown.Item>
+                                {username != member.member.user.username && (
+                                  <>
+                                    <Dropdown.Item onClick={onChatMessage}>메시지</Dropdown.Item>
+                                    <ChatMessageModal_Container
+                                      show={showChatMessageModal}
+                                      onCloseChatModal={onCloseChatModal}
+                                      targetId={member.member.user.id}
+                                    />
+                                  </>
+                                )}
+                              </DropdownButton>
                             </h6>
                           )
                         )
