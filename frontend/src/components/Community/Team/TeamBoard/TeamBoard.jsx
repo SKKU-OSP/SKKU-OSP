@@ -6,13 +6,14 @@ import { getAuthConfig } from '../../../../utils/auth';
 import TeamArticle from './TeamArticle';
 import InviteTeamModal from '../InviteTeamModal';
 import EditTeamModal from '../EditTeamModal';
-import { BsAwardFill, BsBoxArrowRight } from 'react-icons/bs';
+import { BsAwardFill, BsBoxArrowRight, BsPersonPlusFill } from 'react-icons/bs';
 import AuthContext from '../../../../utils/auth-context';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
+import InviteTeamModalInBoard from '../InviteTeamModalInBoard';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -28,6 +29,8 @@ function TeamBoard() {
   const [error, setError] = useState(false);
   const { username } = useContext(AuthContext);
   const [showChatMessageModal, setShowChatMessageModal] = useState(false);
+
+  const [showInvite, setShowInvite] = useState(false);
 
   const getTeamInfo = async (page) => {
     try {
@@ -102,6 +105,10 @@ function TeamBoard() {
     }
   };
 
+  const handleClickInvite = () => {
+    setShowInvite(true);
+  };
+
   useEffect(() => {
     if (username !== null) {
       getTeamInfo(1);
@@ -149,7 +156,13 @@ function TeamBoard() {
                 <div>
                   <div className="team-members fs-4">
                     Members
-                    <InviteTeamModal />
+                    <BsPersonPlusFill onClick={handleClickInvite} style={{ cursor: 'pointer' }} />
+                    <InviteTeamModalInBoard
+                      show={showInvite}
+                      setShow={setShowInvite}
+                      team_name={team_name}
+                      id={thisTeam.team.id}
+                    />
                   </div>
                   <div>
                     {thisTeam.team_members

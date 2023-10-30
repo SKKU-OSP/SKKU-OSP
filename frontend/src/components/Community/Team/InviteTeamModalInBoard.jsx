@@ -8,22 +8,24 @@ import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
-const InviteTeamModal = (props) => {
+const InviteTeamModalInBoard = (props) => {
   const postUrl = serverUrl + '/team/api/team-invite-on-teamboard';
   const handleClose = () => props.setShow(false);
   const handleShow = () => props.setShow(true);
+  const team__id = props.id;
   //AXIOS GET
-  const [teams, setTeams] = useState([]);
+  const [users, setUsers] = useState([]);
+
   useEffect(() => {
     try {
       const getData = async () => {
-        const teamListUrl = serverUrl + '/team/api/team-invite-on-recommend';
-        const response = await axios.get(teamListUrl, getAuthConfig());
+        const teamMemList = serverUrl + '/team/api/team-invite-on-teamboard' + '?team_id=' + `${team__id}`;
+        const response = await axios.get(teamMemList, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
-          setTeams(
-            res.data.teams_of_user.map((team) => {
-              return { value: team.id, label: team.name };
+          setUsers(
+            res.data.usernames_exclude_members.map((user) => {
+              return { value: user.id, label: user.username };
             })
           );
         }
@@ -34,7 +36,7 @@ const InviteTeamModal = (props) => {
     }
   }, []);
 
-  const [teamId, setTeamId] = useState(0);
+  const [userId, setUserId] = useState(0);
   const [message, setMessage] = useState('');
 
   const onChangeMessage = (e) => {
@@ -48,17 +50,18 @@ const InviteTeamModal = (props) => {
     invite_msg: ''
   });
 
-  const handleInviteTeam = (target) => {
-    setTeamId(target.value);
+  const handleChooseUser = (target) => {
+    setUserId(target.value);
     setFormData((prev) => {
       const newData = prev;
-      newData['target_user_id'] = props.targetId;
-      newData['target_team_id'] = target.value;
+      newData['target_team_id'] = props.id;
+      newData['target_user_id'] = target.value;
       return newData;
     });
   };
 
   const sendInvitation = async () => {
+    console.log(formData);
     try {
       const response = await axios.post(postUrl, formData, getAuthConfig());
       const res = response.data;
@@ -76,7 +79,7 @@ const InviteTeamModal = (props) => {
     e.preventDefault();
     setFormData((prev) => {
       const newData = prev;
-      newData['target_team_id'] = teamId;
+      newData['target_user_id'] = userId;
       newData['invite_msg'] = message;
       console.log(newData);
       return newData;
@@ -86,7 +89,6 @@ const InviteTeamModal = (props) => {
   };
   return (
     <Form>
-      {/* <BsFillPersonPlusFill onClick={handleShow} /> */}
       <Modal show={props.show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
@@ -96,19 +98,19 @@ const InviteTeamModal = (props) => {
 
         <Modal.Body>
           <Form.Group className="mb-4" controlId="MemberName">
-            <Form.Label>팀원</Form.Label>
-            <Form.Control type="text" style={{ display: 'block' }} placeholder={props.username} readOnly />
+            <Form.Label>팀 이름: {props.team_name}</Form.Label>
           </Form.Group>
 
           <div className="mb-4">
-            <span style={{ display: 'block' }}>초대할 팀 선택</span>
+            <span style={{ display: 'block' }}>초대할 팀원 선택</span>
+            {users.map((u) => u.labels)}
             <Select
               placeholder="팀 선택"
-              options={teams}
+              options={users}
               id="team_id"
               name="team_id"
-              value={teams.filter((team) => team.value === teamId)}
-              onChange={handleInviteTeam}
+              value={users.filter((user) => user.value === userId)}
+              onChange={handleChooseUser}
             />
           </div>
 
@@ -134,4 +136,4 @@ const InviteTeamModal = (props) => {
   );
 };
 
-export default InviteTeamModal;
+export default InviteTeamModalInBoard;
