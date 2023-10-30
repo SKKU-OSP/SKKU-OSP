@@ -38,6 +38,8 @@ import AccountFind from './components/Account/AccountFind';
 import AccountFindDone from './components/Account/AccountFindDone';
 import PasswordResetSend from './components/Account/PasswordResetSend';
 import PasswordResetSendDone from './components/Account/PasswordResetSendDone';
+import PasswordResetConfirm from './components/Account/PasswordResetConfirm';
+import PasswordResetComplete from './components/Account/PasswordResetComplete';
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -132,6 +134,14 @@ const router = createBrowserRouter([
           {
             path: 'password-reset/done',
             element: <PasswordResetSendDone />
+          },
+          {
+            path: 'reset/:uidb64/:token',
+            element: <PasswordResetConfirm />
+          },
+          {
+            path: 'reset/done',
+            element: <PasswordResetComplete />
           }
         ]
       },

@@ -15,15 +15,12 @@ function PasswordResetSend() {
       if (UsernameRef.current.value === '') return;
       if (emailRef.current.value === '') return;
       const data = { username: UsernameRef.current.value, email: emailRef.current.value };
-      console.log(data);
-
       const postUrl = serverUrl + '/accounts/password-reset/';
       const response = await axios.post(postUrl, data);
       const res = response.data;
       if (res.status === 'success') {
-        navigate('done');
+        navigate('done', { state: res.status });
       } else {
-        console.log(res.message);
         setError(res.message);
       }
     } catch (err) {
