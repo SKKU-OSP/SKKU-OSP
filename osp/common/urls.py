@@ -14,6 +14,9 @@ urlpatterns = [
     path('login/user/', views.JWTLoginView.as_view(), name="JWTLogin"),
     path('signup/', views.SignUpView.as_view(), name="SignUp"),
     path('find-account/', views.AccountFinderView.as_view(), name="AccountFinder"),
+    path('password-reset/', views.PasswordResetSendView.as_view(),
+         name="PasswordResetSend"),
+
 
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register_page, name='signup'),
