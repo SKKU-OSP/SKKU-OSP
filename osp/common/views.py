@@ -3,11 +3,15 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import views as auth_views, login, authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse_lazy, reverse
 from django.views.generic.base import TemplateView
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -396,6 +400,79 @@ class AccountFinderView(APIView):
             logging.exception(
                 f"valid_check error: {e}, {type(e).__name__}, {e.args}")
             return Response({'status': 'fail', 'message': '이메일 발송에 실패했습니다.'})
+
+
+class PasswordResetSendView(APIView):
+    def post(self, request):
+        try:
+            print("PasswordResetSendView", request.get_host())
+            email = request.data.get('email', None)
+            username = request.data.get('username', None)
+            user = User.objects.get(username=username, email=email)
+
+            self.save(
+                user=user,
+                subject_template_name="registration/password_reset_subject.txt",
+                email_template_name="registration/password_reset_email.html",
+                use_https=request.is_secure(),
+                token_generator=default_token_generator,
+                from_email=EMAIL_HOST_USER,
+                request=request,
+                html_email_template_name=None,
+                extra_email_context=None
+            )
+
+            return Response({'status': 'success', 'message': '메일이 발송되었습니다.'})
+        except User.DoesNotExist as de:
+            logging.exception(f"valid_check DoesNotExist: {de}")
+            return Response({'status': 'fail', 'message': '계정을 찾을 수 없습니다. 계정명과 이메일을 확인해주세요.'})
+        except smtplib.SMTPServerDisconnected as disconn:
+            logging.exception(f"valid_check SMTPServerDisconnected: {disconn}")
+            return Response({'status': 'fail', 'message': '죄송합니다. 서비스에 문제가 있어 이메일을 발송할 수 없습니다.'})
+        except Exception as e:
+            logging.exception(
+                f"valid_check error: {e}, {type(e).__name__}, {e.args}")
+            return Response({'status': 'fail', 'message': '이메일 발송에 실패했습니다.'})
+
+    def save(
+        self,
+        user,
+        subject_template_name="registration/password_reset_subject.txt",
+        email_template_name="registration/password_reset_email.html",
+        use_https=False,
+        token_generator=default_token_generator,
+        from_email=None,
+        request=None,
+        html_email_template_name=None,
+        extra_email_context=None,
+
+    ):
+        '''
+        django.contrib.auth.forms.PasswordResetForm.save 메소드를 참고
+        '''
+        current_site = get_current_site(request)
+
+        site_name = current_site.name
+        domain = current_site.domain
+
+        context = {
+            "email": user.email,
+            "domain": domain,
+            "site_name": site_name,
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "user": user,
+            "token": token_generator.make_token(user),
+            "protocol": "https" if use_https else "http",
+            **(extra_email_context or {}),
+        }
+        send_mail(
+            subject_template_name,
+            email_template_name,
+            context,
+            from_email,
+            user.email
+        )
+        print("send_mail")
 
 
 class PasswordResetView(auth_views.PasswordResetView):

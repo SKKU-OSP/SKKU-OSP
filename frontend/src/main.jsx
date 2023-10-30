@@ -36,6 +36,8 @@ import TestType from './components/User/TypeTest/TestType';
 import UserLayout from './components/User/UserLayout';
 import AccountFind from './components/Account/AccountFind';
 import AccountFindDone from './components/Account/AccountFindDone';
+import PasswordResetSend from './components/Account/PasswordResetSend';
+import PasswordResetSendDone from './components/Account/PasswordResetSendDone';
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -122,6 +124,14 @@ const router = createBrowserRouter([
           {
             path: 'find/done',
             element: <AccountFindDone />
+          },
+          {
+            path: 'password-reset',
+            element: <PasswordResetSend />
+          },
+          {
+            path: 'password-reset/done',
+            element: <PasswordResetSendDone />
           }
         ]
       },
