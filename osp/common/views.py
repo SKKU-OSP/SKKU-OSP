@@ -1,7 +1,7 @@
 from django.db import DatabaseError, transaction
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import views as auth_views, login, authenticate
+from django.contrib.auth import views as auth_views, login, authenticate, get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
@@ -9,7 +9,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic.base import TemplateView
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 
 
@@ -83,9 +83,9 @@ class JWTLoginView(APIView):
                 'access_token': str(token.access_token),
                 'refresh_token': str(token),
             }
-            return Response({"message": "로그인 성공", "data": data}, status=status.HTTP_200_OK)
+            return Response({"status": "success", "message": "로그인 성공", "data": data})
 
-        return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(get_fail_res("인증에 실패했습니다. Username과 password를 다시 확인해주세요."),)
 
 
 class GitHubLoginView(APIView):
@@ -475,6 +475,55 @@ class PasswordResetSendView(APIView):
         print("send_mail")
 
 
+class PasswordResetConfirmView(APIView):
+    # 비밀번호 재설정
+
+    def get(self, request, uidb64, token):
+        if not uidb64 or not token:
+            return Response({'stauts': 'fail', 'message': '링크가 올바르지 않습니다'})
+        user = self.get_user(uidb64)
+        token_valid = default_token_generator.check_token(user, token)
+
+        if token_valid:
+            return Response({'status': 'success'})
+        return Response({'stauts': 'fail', 'message': '유효하지 않은 링크입니다. 이미 사용했거나 만료되었습니다. 비밀번호 재설정을 다시 진행해주세요.'})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context.update({"type": 'sign'})
+        return context
+
+    def post(self, request, uidb64, token):
+        if not uidb64 or not token:
+            return Response({'stauts': 'fail', 'message': '링크가 올바르지 않습니다'})
+
+        user = self.get_user(uidb64)
+        token_valid = default_token_generator.check_token(user, token)
+        if token_valid:
+            try:
+                password = request.data.get('password')
+                user.set_password(password)
+                user.save()
+                return Response({'status': 'success', 'message': f'비밀번호를 변경했습니다.'})
+
+            except Exception as e:
+                logging.exception(f'{e}')
+                return Response({'status': 'fail', 'message': f'비밀번호를 변경하는데 실패했습니다. {e}'})
+
+        return Response({'status': 'fail', 'message': '유효하지 않은 링크입니다. 이미 사용했거나 만료되었습니다. 비밀번호 재설정을 다시 진행해주세요.'})
+
+    def get_user(self, uidb64):
+        '''
+        uid를 이용해 User 객체를 받아오는 메소드
+        '''
+        uid = urlsafe_base64_decode(uidb64).decode()
+        UserModel = get_user_model()
+        user = UserModel._default_manager.get(pk=uid)
+
+        return user
+
+
 class PasswordResetView(auth_views.PasswordResetView):
     template_name = 'common/password_reset.html'
     email_template_name = "registration/email_reset_password.html"
@@ -503,16 +552,6 @@ class PasswordResetDoneView(auth_views.PasswordResetDoneView):
     # 비밀번호 초기화 메일 전송 완료창
     template_name = 'common/password_reset_done.html'
     success_url = reverse_lazy('common:password_reset_done')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({"type": 'sign'})
-        return context
-
-
-class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-    # 비밀번호 재설정창
-    template_name = 'common/password_reset_confirm.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

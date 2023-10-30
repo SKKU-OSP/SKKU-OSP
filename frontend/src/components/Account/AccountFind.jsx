@@ -13,13 +13,11 @@ function AccountFind() {
     try {
       if (emailRef.current.value === '') return;
       const data = { email: emailRef.current.value };
-      console.log(data);
-
       const postUrl = serverUrl + '/accounts/find-account/';
       const response = await axios.post(postUrl, data);
       const res = response.data;
       if (res.status === 'success') {
-        navigate('done');
+        navigate('done', { state: res.status });
       } else {
         console.log(res.message);
         setError(res.message);

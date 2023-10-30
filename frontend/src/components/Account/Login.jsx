@@ -27,12 +27,15 @@ function Login() {
       const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
       const response = await axios.post(login_url, data);
       const res = response.data;
-
-      localStorage.setItem('access_token', res.data.access_token);
-      localStorage.setItem('refresh_token', res.data.refresh_token);
-      setExpiration(); // 로컬스토리지에 expiration 저장
-      setUser();
-      navigate('/community');
+      if (res.status == 'success') {
+        localStorage.setItem('access_token', res.data.access_token);
+        localStorage.setItem('refresh_token', res.data.refresh_token);
+        setExpiration(); // 로컬스토리지에 expiration 저장
+        setUser();
+        navigate('/community');
+      } else {
+        setError(res.message);
+      }
     } catch (error) {
       console.log('error', error);
       setError(error.message);
@@ -55,7 +58,7 @@ function Login() {
         <img src="/images/logo.svg" alt="Logo" className="w-50" />
       </div>
       {error && (
-        <div className="text-center mb-3">
+        <div className="text-start mb-3">
           <strong>{error}</strong>
         </div>
       )}
