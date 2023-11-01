@@ -65,6 +65,7 @@ function UserActivity() {
           (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
         );
         setComments(sortedComments);
+        console.log('hi', sortedComments);
         setIsLoadedArticles(true);
         setMaxCommentPage(resComments.data.max_page_number);
         setNowCommentPage(page);
@@ -165,8 +166,8 @@ function UserActivity() {
           ) : null}
           {tabName === 'comment' && comments && comments.length > 0 ? (
             <>
-              {comments.map((a) => (
-                <UserComment key={a.id} comment={a} />
+              {comments.map((c) => (
+                <UserComment key={c.id} comment={c} />
               ))}
               <Pagination
                 activePage={nowCommentPage}
