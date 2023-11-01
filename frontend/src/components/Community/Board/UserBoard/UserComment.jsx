@@ -10,7 +10,7 @@ export default function UserComment(props) {
   const [pubDate, setPubDate] = useState('');
 
   const onArticle = () => {
-    navigate(`/community/article/${comment.article_id}/`);
+    navigate(`/community/article/${comment.article.id}/`);
   };
 
   const onWriter = () => {
@@ -79,6 +79,7 @@ export default function UserComment(props) {
         <h4 className="board-article-title" onClick={onArticle}>
           {comment.body}
         </h4>
+        <h6 style={{ color: 'gray' }}>{comment.article.title}</h6>
         <div>
           {comment.article_title.length > 40 ? (
             <h6 className="inline">{`${comment.article_title.substring(0, 40)}...`}</h6>

@@ -17,6 +17,14 @@ class BoardSerializer(serializers.ModelSerializer):
             "team_id"
         )
 
+class ArticleOfCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Article
+        fields = (
+            "id",
+            "title",
+        )
+
 
 class ArticleSerializer(serializers.ModelSerializer):
     board = BoardSerializer()
@@ -94,13 +102,14 @@ class BoardArticleSerializer(serializers.ModelSerializer):
 
 class ArticleCommentSerializer(serializers.ModelSerializer):
     writer = AccountSerializer()
+    article = ArticleOfCommentSerializer()
     like_cnt = serializers.SerializerMethodField()
     board = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ArticleComment
         fields = ("id",
-                  "article_id",  # article에서 article Comment 불러오므로 ID 값만 추가
+                  "article",
                   "body",
                   "pub_date",
                   "del_date",
