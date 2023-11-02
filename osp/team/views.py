@@ -1005,7 +1005,7 @@ class TeamOutView(APIView):
     def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
         account = Account.objects.get(user=user)
-        target_team_id = request.data.get('target_team_id')
+        team_name = request.data.get('team_name')
 
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
@@ -1013,7 +1013,7 @@ class TeamOutView(APIView):
         else:
             if status == 'success':
                 try:
-                    team = Team.objects.get(id=target_team_id)
+                    team = Team.objects.get(name=team_name)
                 except Team.DoesNotExist:
                     errors['team_not_found'] = '존재하지 않는 팀 입니다.'
                     status = 'fail'
@@ -1058,8 +1058,8 @@ class TeamOutView(APIView):
         # Transactions
 
         try:
-            team_id = request.data.get('team_id')
-            team = Team.objects.get(id=team_id)
+            team_name = request.data.get('team_name')
+            team = Team.objects.get(name=team_name)
             user = request.user
             account = Account.objects.get(user=user)
             teammember = TeamMember.objects.get(team=team, member=account)
