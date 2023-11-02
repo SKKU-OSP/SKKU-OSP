@@ -435,7 +435,7 @@ class SearchView(APIView):
                 account = None
                 data['privacy'] = {'is_write': 0, 'is_open': 0}
             result = search_article(request, board)
-            data['articles'] = ArticleSerializer(
+            data['articles'] = BoardArticleSerializer(
                 result['articles'], many=True).data
             data['max_page'] = result['max-page']
 
@@ -469,7 +469,7 @@ def search_article(request, board):
     # url ex) /community/search/?page=1&keyword=abcd&tag=&board=0
 
     keyword = request.GET.get('keyword', '')
-    tags = request.GET.get('tag', False)
+    tags = request.GET.get('tag', None)
     sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
     page = request.GET.get('page', "1")
     page = int(page) if page.isdigit() else 1
@@ -502,10 +502,7 @@ def search_article(request, board):
         result = {'article': None, 'max-page': 0}
         return result
 
-    if board['board_type'] == 'Recruit':
-        PAGE_SIZE = 5
-    else:
-        PAGE_SIZE = 10
+    PAGE_SIZE = 5 if board['board_type'] == 'Recruit' else 10
 
     data = {}
     data['board'] = board
@@ -1246,7 +1243,7 @@ def filter_keyword_tag(article_list, keyword, tags):
     # Filter Keyword
     if keyword != '':
         article_list = article_list.filter(
-            Q(title__icontains=keyword) | Q(body__icontains=keyword))
+            Q(title__icontains=keyword) | Q(body__icontains=keyword) | Q(writer__user__username__icontains=keyword, anonymous_writer=False))
     # Filter Tag
     if tags:
         tag_list = tags.split(',')
