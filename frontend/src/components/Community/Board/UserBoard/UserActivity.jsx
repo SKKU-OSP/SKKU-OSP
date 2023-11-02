@@ -166,7 +166,7 @@ function UserActivity() {
           {tabName === 'comment' && comments && comments.length > 0 ? (
             <>
               {comments.map((a) => (
-                <UserComment key={a.id} article={a} />
+                <UserComment key={a.id} comment={a} />
               ))}
               <Pagination
                 activePage={nowCommentPage}
