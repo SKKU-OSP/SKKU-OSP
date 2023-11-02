@@ -40,6 +40,9 @@ function ContentView(props) {
   const recruit_start_date = new Date(article.period_start);
   const recruit_end_date = new Date(article.period_end);
 
+  recruit_start_date.setHours(recruit_start_date.getHours() - 9);
+  recruit_end_date.setHours(recruit_end_date.getHours() - 9);
+
   const backToBoard = (board) => {
     if (board.board_type === 'Recruit') {
       navigate('/community/recruit/' + board.name);

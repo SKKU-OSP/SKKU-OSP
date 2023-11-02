@@ -132,8 +132,8 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         article_tags: selectTags,
         ...articleFiles,
         ...(boardName === '팀 모집' && {
-          period_start: startDate.toISOString(),
-          period_end: endDate.toISOString(),
+          period_start: toKST(startDate).toISOString(),
+          period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
         })
       };
@@ -278,6 +278,13 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       color: state.isSelected ? 'lightgray' : 'black',
       background: 'none'
     })
+  };
+
+  //Team 모집 기간
+  const toKST = (date) => {
+    const koreaTimezoneOffset = 9 * 60; // KST is UTC+9
+    const diff = koreaTimezoneOffset - date.getTimezoneOffset();
+    return new Date(date.getTime() + diff * 60 * 1000);
   };
 
   // 뒤로가기 버튼
