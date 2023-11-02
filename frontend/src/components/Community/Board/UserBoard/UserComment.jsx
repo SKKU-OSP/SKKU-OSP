@@ -5,22 +5,22 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
 export default function UserComment(props) {
-  const { article } = props;
+  const { comment } = props;
   const navigate = useNavigate();
   const [pubDate, setPubDate] = useState('');
 
   const onArticle = () => {
-    navigate(`/community/article/${article.article_id}/`);
+    navigate(`/community/article/${comment.article_id}/`);
   };
 
   const onWriter = () => {
-    navigate(`/user/${article.writer.user.username}`);
+    navigate(`/user/${comment.writer.user.username}`);
   };
 
   const getDate = (date) => {
     const now = new Date();
-    const article_date = new Date(date);
-    const delta = now.getTime() - article_date.getTime();
+    const comment_date = new Date(date);
+    const delta = now.getTime() - comment_date.getTime();
 
     if (delta / (60 * 1000) < 1) {
       setPubDate('방금');
@@ -36,30 +36,30 @@ export default function UserComment(props) {
   };
 
   const onBoard = () => {
-    if (article.board.board_type === 'Team') {
-      navigate(`/community/team/${article.board.name}`);
-    } else if (article.board.board_type === 'General') {
-      navigate(`/community/board/${article.board.name}`);
+    if (comment.board.board_type === 'Team') {
+      navigate(`/community/team/${comment.board.name}`);
+    } else if (comment.board.board_type === 'General') {
+      navigate(`/community/board/${comment.board.name}`);
     }
   };
 
   useEffect(() => {
-    if (article?.pub_date) {
-      getDate(article.pub_date);
+    if (comment?.pub_date) {
+      getDate(comment.pub_date);
     }
-  }, [article]);
+  }, [comment]);
 
   return (
     <div className="board-article">
       <>
         <h6>
-          {article.writer ? (
-            article.anonymous_writer ? (
+          {comment.writer ? (
+            comment.anonymous_writer ? (
               <span>익명</span>
             ) : (
               <span className="dropdown-button">
                 <DropdownButton
-                  title={article.writer.user.username}
+                  title={comment.writer.user.username}
                   variant="link"
                   className="dropdown-toggle"
                   style={{ marginRight: '5px' }}
@@ -73,17 +73,21 @@ export default function UserComment(props) {
           )}
           · {pubDate}
           <div className="board-article-meta-type" onClick={onBoard}>
-            {article.board.name} 게시판
+            {comment.board.name} 게시판
           </div>
         </h6>
         <h4 className="board-article-title" onClick={onArticle}>
-          {article.body}
+          {comment.body}
         </h4>
         <div>
-          <h6 className="inline">{'\u00A0'}</h6>
+          {comment.article_title.length > 40 ? (
+            <h6 className="inline">{`${comment.article_title.substring(0, 40)}...`}</h6>
+          ) : (
+            <h6 className="inline">{`${comment.article_title}`}</h6>
+          )}
           <div className="board-article-meta-list">
             <>
-              <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
+              <BsHandThumbsUp size={13} className="board-article-meta" /> {comment.like_cnt}
             </>
           </div>
         </div>
