@@ -53,7 +53,6 @@ function SearcherBox() {
   };
 
   const handleKeyword = (e) => {
-    console.log('handleKeyword', e.target.value);
     setKeyword(e.target.value);
   };
   const handleEnter = (e) => {
