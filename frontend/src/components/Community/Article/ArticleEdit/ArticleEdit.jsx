@@ -97,6 +97,9 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
             const start = new Date(resArticle.data.article.period_start);
             const end = new Date(resArticle.data.article.period_end);
 
+            start.setHours(start.getHours() - 9);
+            end.setHours(end.getHours() - 9);
+
             setStartDate(start);
             setEndDate(end);
             setSelectTeam(
@@ -177,8 +180,8 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
         file_id_list: Object.keys(existFiles),
         ...articleFiles,
         ...(board.board_type === 'Recruit' && {
-          period_start: startDate.toISOString(),
-          period_end: endDate.toISOString(),
+          period_start: toKST(startDate).toISOString(),
+          period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
         })
       };
@@ -327,6 +330,13 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       color: state.isSelected ? 'lightgray' : 'black',
       background: 'none'
     })
+  };
+
+  //Team 모집 기간
+  const toKST = (date) => {
+    const koreaTimezoneOffset = 9 * 60; // KST is UTC+9
+    const diff = koreaTimezoneOffset - date.getTimezoneOffset();
+    return new Date(date.getTime() + diff * 60 * 1000);
   };
 
   // 뒤로가기 버튼
