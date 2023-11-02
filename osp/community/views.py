@@ -1005,6 +1005,14 @@ class UserCommentsView(APIView):
             data['max_page_number'] = max_page_number
             data['articlecomments'] = ArticleCommentSerializer(
                 articlecomments, many=True).data
+            article_titles = []
+
+            for articlecomment in articlecomments:
+                article = articlecomment.article
+                article_titles.append(article.title)
+
+            for index, articlecomment in enumerate(data['articlecomments']):
+                articlecomment['article_title'] = article_titles[index]
 
         except DatabaseError as e:
             # Database Exception handling
