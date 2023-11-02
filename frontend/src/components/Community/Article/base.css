@@ -50,11 +50,11 @@ div > ::-webkit-scrollbar {
   height: 0.25rem;
 }
 div > ::-webkit-scrollbar-track {
-  background: var(--main-border-color);
+  background: var(--profile-btn-inactive);
   border-radius: 0.625rem;
 }
 div > ::-webkit-scrollbar-thumb {
-  background: var(--profile-btn-inactive);
+  background: var(--main-border-color);
   border-radius: 0.625rem;
 }
 div > ::-webkit-scrollbar-thumb:hover {
