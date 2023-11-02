@@ -79,29 +79,30 @@ function TeamBoard() {
     setShowChatMessageModal(true);
   };
 
-  const teamOut = (event) => {
+  const teamOut = async (event) => {
     const currentUser = username;
     console.log('current', currentUser);
 
     if (teamMembers.length < 2) {
       if (window.confirm('팀을 탈퇴하면 팀이 삭제됩니다. 그래도 진행하시겠습니까?')) {
+        postTeamOut();
       }
     } else {
       if (window.confirm('팀을 탈퇴하시겠습니까?')) {
-        const updatedTeamMembers = teamMembers.filter((member) => member.user !== currentUser);
-        console.log('update', updatedTeamMembers);
-        setTeamMembers(updatedTeamMembers);
-        console.log('teammem', teamMembers);
+        postTeamOut();
       }
+    }
+  };
 
-      // if (window.confirm('팀을 탈퇴하시겠습니까?')) {
-      //   for (let i = 0; i < teamMembers.length; i++) {
-      //     const all_members2 = teamMembers;
-      //     delete all_members2[i];
-      //     setTeamMembers(all_members2);
-      //     this.parentElement.parentElement.removeChild(this.parentElement);
-      //   }
-      // }
+  const postTeamOut = async () => {
+    try {
+      const data = { team_name: team_name };
+      const response = await axios.post(server_url + `/team/api/team-out/`, data, getAuthConfig());
+      const res = response.data;
+      alert(`${team_name}팀 탈퇴가 완료되었습니다`);
+      navigate('/community/team');
+    } catch (error) {
+      setError(true);
     }
   };
 
