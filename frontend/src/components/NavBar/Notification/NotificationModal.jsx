@@ -1,16 +1,18 @@
-import { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
-import Modal from 'react-bootstrap/Modal';
+import { useContext, useEffect, useState } from 'react';
 
-import { getAuthConfig } from '../../../utils/auth';
-import { AiOutlineCheckSquare, AiOutlineLike } from 'react-icons/ai';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+import Modal from 'react-bootstrap/Modal';
 import { BiCommentDetail } from 'react-icons/bi';
 import { MdOutlinePortrait } from 'react-icons/md';
+import { AiOutlineCheckSquare, AiOutlineLike } from 'react-icons/ai';
 import { BsBoxArrowUpRight, BsFillCircleFill } from 'react-icons/bs';
-import { MdOutlineNotificationsNone, MdOutlineGroupAdd } from 'react-icons/md';
-import AuthContext from '../../../utils/auth-context';
+import { MdOutlineGroupAdd } from 'react-icons/md';
+
+import { getAuthConfig } from '../../../utils/auth';
 import classes from './NotificationModal.module.css';
+import AuthContext from '../../../utils/auth-context';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
@@ -30,7 +32,6 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
   useEffect(() => {
     try {
       const url = serverUrl + '/message/api/noti/list';
-
       const getNotifications = async () => {
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
@@ -68,7 +69,7 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
       );
     else return <div />;
   };
-  //   setSent((prev) => prev.filter((app) => app.id !== applyId));
+
   const handleClickEvent = (type, route_id, team_name, noti_id) => {
     sendReadNoti(noti_id);
     if (type === 'team_apply_result' || type === 'team_apply') {

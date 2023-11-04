@@ -1,7 +1,10 @@
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 768px) {
   header {
     padding-top: 20px !important;
     padding-bottom: 20px !important;
+  }
+  header.extended {
+    height: 180px !important;
   }
   .logo {
     margin-right: auto;
@@ -15,7 +18,9 @@
   .toggle-display-none {
     display: none !important;
   }
-
+  .toggle-display-none.on-mobile {
+    display: none !important;
+  }
   .header-navbar {
     justify-content: space-between;
   }
@@ -67,6 +72,9 @@ header {
   top: 0px;
   z-index: 1000;
 }
+header.extended {
+  height: 85px;
+}
 
 .header {
   justify-content: space-between;
@@ -87,6 +95,7 @@ header {
 
 .header-navbar {
   display: flex;
+  text-wrap: nowrap;
 }
 
 .header-navbar-menu {

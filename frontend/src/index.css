@@ -133,9 +133,9 @@ footer {
   text-align: center;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 768px) {
   .container {
-    max-width: 767px !important;
+    max-width: 768px !important;
     --bs-gutter-x: 0 !important;
   }
 }
