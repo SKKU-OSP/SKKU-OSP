@@ -81,10 +81,10 @@ export default function UserComment(props) {
         </h4>
         <h6 style={{ color: 'gray' }}>{comment.article.title}</h6>
         <div>
-          {comment.article_title.length > 40 ? (
-            <h6 className="inline">{`${comment.article_title.substring(0, 40)}...`}</h6>
+          {comment.article.title.length > 40 ? (
+            <h6 className="inline">{`${comment.article.title.substring(0, 40)}...`}</h6>
           ) : (
-            <h6 className="inline">{`${comment.article_title}`}</h6>
+            <h6 className="inline">{`${comment.article.title}`}</h6>
           )}
           <div className="board-article-meta-list">
             <>
