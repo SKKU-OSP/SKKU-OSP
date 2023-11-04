@@ -180,12 +180,6 @@ button {
   cursor: default;
   height: 0px;
 }
-#board-searcher {
-  flex-grow: 2;
-}
-#search-word {
-  flex-grow: 7;
-}
 #search-field {
   flex-wrap: nowrap;
 }
@@ -204,14 +198,6 @@ button {
 .noti-item.read {
   background-color: var(--main-bg-color);
   color: var(--main-border-color);
-}
-.badge-new {
-  height: 0.5rem;
-  width: 0.5rem;
-  position: absolute;
-  background-color: var(--alert-color);
-  border-radius: 50%;
-  padding: 0.25rem;
 }
 #noti-list {
   position: absolute;

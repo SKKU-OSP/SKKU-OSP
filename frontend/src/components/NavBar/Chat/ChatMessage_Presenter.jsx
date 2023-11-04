@@ -7,11 +7,7 @@ export default function ChatMessage_Presenter({ newAlert, show, onOpenChatModal,
   return (
     <>
       {newAlert && (
-        <span
-          className="badge-new"
-          data-new-send="{{ notifications.has_new_app_result }}"
-          data-new-recv="{{ notifications.has_new_app }}"
-        >
+        <span className="badge-new">
           <span className="visually-hidden">New Application</span>
         </span>
       )}

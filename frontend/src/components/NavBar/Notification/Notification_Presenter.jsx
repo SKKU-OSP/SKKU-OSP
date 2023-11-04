@@ -1,7 +1,5 @@
-import { useState } from 'react';
-
 import { MdOutlineNotificationsNone } from 'react-icons/md';
-import NotificationDropDown from './NotificationDropDown';
+
 import NotificationModal from './NotificationModal';
 
 export default function Notification_Presenter({ iconSize, showNoti, setShowNoti, setShowTeamApp }) {
@@ -22,5 +20,4 @@ export default function Notification_Presenter({ iconSize, showNoti, setShowNoti
       />
     </>
   );
-  //   return <NotificationDropDown iconSize={iconSize} />;
 }

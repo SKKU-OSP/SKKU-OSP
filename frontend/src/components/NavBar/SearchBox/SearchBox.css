@@ -1,4 +1,4 @@
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 768px) {
   .searchBox {
     width: 100% !important;
   }
@@ -6,7 +6,7 @@
 
 .search {
   position: relative;
-  width: 300px;
+  width: 100%;
 }
 
 .search > input {
@@ -38,6 +38,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  flex-grow: 1;
 }
 
 .tagFilter {
