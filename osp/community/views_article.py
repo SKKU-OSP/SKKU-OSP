@@ -461,10 +461,10 @@ class ArticleLikeView(APIView):
                 # 작성자가 추천한 경우
                 res['message'] = "자신의 게시글은 추천할 수 없습니다."
                 return Response(res)
-            
+
             article_like, created = ArticleLike.objects.get_or_create(
                 article=article, account=account)
-            
+
             if not created:
                 # 이미 추천한 게시글인 경우
                 article_like.delete()
@@ -509,31 +509,6 @@ class ArticleScrapView(APIView):
         data['scrap_cnt'] = scrap_cnt
         res['data'] = data
         res['status'] = 'success'
-        return Response(res)
-
-
-class ArticleCommentsView(APIView):
-    '''
-    GET: 게시글의 댓글 리스트 API
-    URL: api/article/<int:article_id>/comments/
-    '''
-
-    def get(self, request, article_id):
-        res = {'status': 'success', 'message': '', 'data': None}
-        data = {'comments': None}
-        # 게시글 댓글 정보
-        comments = ArticleComment.objects.filter(
-            article_id=article_id, is_deleted=False)
-
-        data['comments'] = ArticleCommentSerializer(
-            comments, many=True).data
-
-        # 유저의 좋아요 여부 확인
-        for comment in data['comments']:
-            like = ArticleCommentLike.objects.filter(
-                comment=comment['id'], account__user=request.user)
-            comment['marked_like'] = like.exists()
-        res['data'] = data
         return Response(res)
 
 
@@ -751,6 +726,31 @@ class CommentLikeView(APIView):
             res['message'] = '댓글을 추천할 수 없습니다.'
             print("CommentLikeView error", e)
 
+        return Response(res)
+
+
+class ArticleCommentsView(APIView):
+    '''
+    GET: 게시글의 댓글 리스트 API
+    URL: api/article/<int:article_id>/comments/
+    '''
+
+    def get(self, request, article_id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {'comments': None}
+        # 게시글 댓글 정보
+        comments = ArticleComment.objects.filter(
+            article_id=article_id, is_deleted=False)
+
+        data['comments'] = ArticleCommentSerializer(
+            comments, many=True).data
+
+        # 유저의 좋아요 여부 확인
+        for comment in data['comments']:
+            like = ArticleCommentLike.objects.filter(
+                comment=comment['id'], account__user=request.user)
+            comment['marked_like'] = like.exists()
+        res['data'] = data
         return Response(res)
 
 

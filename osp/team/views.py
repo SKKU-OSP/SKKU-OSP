@@ -1409,10 +1409,11 @@ class TeamsListView(APIView):
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
+        sort_field = request.GET.get('sort', '-id')
+        sort_field = sort_field.split(",")
         # Transactions
         try:
-            teams = Team.objects.all()
-
+            teams = Team.objects.order_by(*sort_field)
             page_size = 10
             paginator = Paginator(teams, page_size)
             page_number = request.GET.get('page_number')
@@ -1474,12 +1475,13 @@ class TeamsOfUserListView(APIView):
 
         # Transactions
         user = request.user
+        sort_field = request.GET.get('sort', '-id')
+        sort_field = sort_field.split(",")
         try:
-
             team_id_include_user = TeamMember.objects.filter(
                 member=user.id).values_list('team_id')
             teams_of_user = Team.objects.filter(
-                id__in=team_id_include_user)
+                id__in=team_id_include_user).order_by(*sort_field)
             page_size = 30
             paginator = Paginator(teams_of_user, page_size)
             page_number = request.GET.get('page_number')
