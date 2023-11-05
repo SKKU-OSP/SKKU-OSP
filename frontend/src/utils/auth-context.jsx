@@ -21,7 +21,7 @@ const url = `${server_url}/user/api/info`;
 export const AuthContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState(localStorage.getItem('username'));
   const [isSuperuser, setIsSuperuser] = useState(false);
 
   const [githubUsername, setGithubUsername] = useState(null);
@@ -45,6 +45,7 @@ export const AuthContextProvider = (props) => {
           setPhoto(account.photo);
           setGithubUsername(account.github_id);
           setName(res.data.name);
+          localStorage.setItem('username', account.user.username);
         } else {
           console.log(res.errors);
           setUserId(null);
