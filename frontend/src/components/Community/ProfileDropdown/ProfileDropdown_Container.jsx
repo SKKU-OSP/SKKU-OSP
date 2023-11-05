@@ -1,10 +1,9 @@
-import ProfileDropdown_Presenter from './ProfileDropdown_Presenter';
-import axios from 'axios';
-import { useEffect, useState, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import AuthContext from '../../../utils/auth-context';
+import { useContext, useEffect, useState } from 'react';
 
-const server_url = import.meta.env.VITE_SERVER_URL;
+import { useNavigate } from 'react-router-dom';
+
+import AuthContext from '../../../utils/auth-context';
+import ProfileDropdown_Presenter from './ProfileDropdown_Presenter';
 
 export default function ProfileDropdown_Container(props) {
   const { userName, userId } = props;
@@ -29,7 +28,7 @@ export default function ProfileDropdown_Container(props) {
   useEffect(() => {
     if (username == userName) setIsMine(true);
     if (username != null) setIsLogin(true);
-  });
+  }, [username]);
 
   return (
     <ProfileDropdown_Presenter
