@@ -5,6 +5,7 @@ from datetime import datetime
 from django.core.files.images import get_image_dimensions
 from django.core.paginator import Paginator
 from django.db import DatabaseError, transaction
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -1384,88 +1385,59 @@ class TeamApplyDeleteView(APIView):
 
 
 class TeamsListView(APIView):
-    def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
-
-        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
+        start = time.time()
         # Declaration
-        status = 'success'
-        message = ''
         data = {}
-        errors = {}
-        valid_data = {}
-
-        # Request Validation
-        status, message, errors, valid_data \
-            = self.get_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
-
-        if status == 'fail':
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamsListView validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res)
+        # Request Validation: PASS
 
         sort_field = request.GET.get('sort', '-id')
         sort_field = sort_field.split(",")
-        # Transactions
         try:
-            teams = Team.objects.order_by(*sort_field)
+            teams = Team.objects.annotate(
+                member_cnt=Count('teammember')).order_by(*sort_field)
+
             page_size = 10
             paginator = Paginator(teams, page_size)
-            page_number = request.GET.get('page_number')
-            if not page_number:
-                page_number = 1
-            page = paginator.get_page(page_number)
-            max_page_number = paginator.num_pages
-            teams = page
-            data['max_page_number'] = max_page_number
+            page_number = request.GET.get('page_number', 1)
+            teams = paginator.get_page(page_number)
+            data['max_page_number'] = paginator.num_pages
             data['teams'] = TeamSerializer(teams, many=True).data
             for team in data['teams']:
-                members = TeamMember.objects.filter(
-                    team_id=team['id'])
-                team['member_cnt'] = len(members)
-                leader_username = members.filter(is_admin=True).values_list(
-                    'member__user__username', flat=True).order_by('id').first()
-                team['leader_username'] = leader_username
-                leader_id = members.filter(is_admin=True).values_list(
-                    'member__user__id', flat=True).order_by('id').first()
-                team['leader_id'] = leader_id
-
+                # 팀의 관리자 계정의 id와 username 쿼리
+                leader = Account.objects.filter(
+                    teammember__is_admin=True, teammember__team_id=team['id']).values('user__id', 'user__username').first()
+                if leader is None:
+                    logging.warn(f'Team {team.get("name")} has no leader')
+                    continue
+                team['leader_username'] = leader['user__username']
+                team['leader_id'] = leader['user__id']
         except DatabaseError as e:
-            # Database Exception handling
-            status = 'fail'
-            errors['DB_exception'] = 'DB Error'
-        except:
-            status = 'fail'
-            errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(f'TeamsListView DatabaseError: {e}')
+            return Response(get_fail_res('db_exception'))
+        except Exception as e:
+            logging.exception(f'TeamsListView Exception: {e}')
+            return Response(get_fail_res('undefined_exception'))
 
         # Response
-        if status == 'success':
-            res = {'status': status, 'message': message, 'data': data}
-        else:
-            res = {'status': status, 'message': message, 'errors': errors}
+        res = {'status': 'success', 'message': '', 'data': data}
+        print("elapsed time", time.time() - start)
         return Response(res)
 
 
 class TeamsOfUserListView(APIView):
     def get_validation(self, request):
-        user = request.user
         status = 'success'
         error = None
-        if not user.is_authenticated:
-            error = "require_login"
+        if not request.user.is_authenticated:
             status = 'fail'
+            error = "require_login"
 
         return status, error
 
     def get(self, request, *args, **kwargs):
         # Declaration
-        message = ''
         data = {}
 
         # Request Validation
@@ -1474,7 +1446,6 @@ class TeamsOfUserListView(APIView):
         if status == 'fail':
             return Response(get_fail_res(error))
 
-        # Transactions
         user = request.user
         sort_field = request.GET.get('sort', '-id')
         sort_field = sort_field.split(",")
@@ -1482,44 +1453,34 @@ class TeamsOfUserListView(APIView):
             team_id_include_user = TeamMember.objects.filter(
                 member=user.id).values_list('team_id')
             teams_of_user = Team.objects.filter(
-                id__in=team_id_include_user).order_by(*sort_field)
+                id__in=team_id_include_user).annotate(
+                member_cnt=Count('teammember')).order_by(*sort_field)
             page_size = 30
             paginator = Paginator(teams_of_user, page_size)
-            page_number = request.GET.get('page_number')
-            if not page_number:
-                page_number = 1
-            page = paginator.get_page(page_number)
-            max_page_number = paginator.num_pages
-            teams_of_user = page
-            data['max_page_number'] = max_page_number
-
+            page_number = request.GET.get('page_number', 1)
+            teams_of_user = paginator.get_page(page_number)
+            data['max_page_number'] = paginator.num_pages
             data['teams_of_user'] = TeamSerializer(
                 teams_of_user, many=True).data
             for team in data['teams_of_user']:
-                members = TeamMember.objects.filter(
-                    team_id=team['id'])
-                team['member_cnt'] = len(members)
-                leader_username = members.filter(is_admin=True).values_list(
-                    'member__user__username', flat=True).order_by('id').first()
-                team['leader_username'] = leader_username
-                leader_id = members.filter(is_admin=True).values_list(
-                    'member__user__id', flat=True).order_by('id').first()
-                team['leader_id'] = leader_id
+                # 팀의 관리자 계정의 id와 username 쿼리
+                leader = Account.objects.filter(
+                    teammember__is_admin=True, teammember__team_id=team['id']).values('user__id', 'user__username').first()
+                if leader is None:
+                    logging.warn(f'Team {team.get("name")} has no leader')
+                    continue
+                team['leader_username'] = leader['user__username']
+                team['leader_id'] = leader['user__id']
 
         except DatabaseError as e:
-            # Database Exception handling
-            error = 'db_exception'
-            logging.exception(f'TeamsOfUserList DB ERROR: {e}')
-            status = 'fail'
+            logging.exception(f'TeamsOfUserListView DB Error: {e}')
+            return Response(get_fail_res('db_exception'))
 
         except Exception as e:
-            error = 'undefined_exception'
-            logging.exception(f'TeamsOfUserList ERROR: {e}')
-            status = 'fail'
+            logging.exception(f'TeamsOfUserListView Exception: {e}')
+            return Response(get_fail_res('undefined_exception'))
 
-        if status == 'fail':
-            return Response(get_fail_res(error))
-        res = {'status': status, 'message': message, 'data': data}
+        res = {'status': status, 'message': '', 'data': data}
         return Response(res)
 
 
