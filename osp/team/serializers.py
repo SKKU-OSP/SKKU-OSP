@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from team import models
 
-from user.serializers import AccountSerializer
 from tag.serializers import TagIndependentSerializer
+from team import models
+from user.serializers import AccountSerializer
 
 
 class TeamSerializer(serializers.ModelSerializer):

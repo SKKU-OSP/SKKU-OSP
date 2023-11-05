@@ -1,14 +1,14 @@
+import logging
+from datetime import datetime
+
+from django.db import DatabaseError, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.db import transaction, DatabaseError
 
 from community.models import ArticleComment
-from team.models import TeamInviteMessage, TeamApplyMessage, TeamMember
 from message.models import Notification
+from team.models import TeamApplyMessage, TeamInviteMessage, TeamMember
 from user.models import Account
-
-from datetime import datetime
-import logging
 
 
 @receiver(post_save, sender=ArticleComment)

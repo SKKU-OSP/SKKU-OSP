@@ -11,6 +11,10 @@ charset = utf-8
 trim_trailing_whitespace = false
 insert_final_newline = true
 
+[*.py]
+known_first_party = challenge, common, community, crawler, home, message, osp, rank, repository, tag, team, user, handle_error
+known_third_party = django, rest_framework
+
 [*.{html, css, js, json, jsx, ts, tsx}]
 indent_style = space
 indent_size = 2

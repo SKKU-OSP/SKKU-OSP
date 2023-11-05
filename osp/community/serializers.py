@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from community import models
 
-from user.serializers import AccountSerializer
+from community import models
 from tag.serializers import TagIndependentSerializer
+from user.serializers import AccountSerializer
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -16,6 +16,7 @@ class BoardSerializer(serializers.ModelSerializer):
             "anonymous_writer",
             "team_id"
         )
+
 
 class ArticleOfCommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -92,7 +93,7 @@ class BoardArticleSerializer(serializers.ModelSerializer):
 
     def get_scrap_cnt(self, article):
         return article.articlescrap_set.count()
-    
+
     def get_comment_cnt(self, article):
         return article.articlecomment_set.count()
 

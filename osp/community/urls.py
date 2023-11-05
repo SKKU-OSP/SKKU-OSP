@@ -1,5 +1,6 @@
-from community import views, views_article
 from django.urls import path
+
+from community import views, views_article
 
 app_name = 'community'
 

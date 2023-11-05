@@ -1,21 +1,21 @@
-from django.db import transaction
-from django.db.models import Count
+import json
+import logging
+import os
+from datetime import datetime, timedelta
+
+from django.db import DatabaseError, transaction
 from django.http import FileResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db import transaction, DatabaseError
+
 from community.models import *
+from community.serializers import (ArticleCommentSerializer, ArticleSerializer,
+                                   BoardSerializer)
 from community.utils import convert_size, convert_to_boolean
-from community.serializers import BoardSerializer, ArticleSerializer, ArticleCommentSerializer
+from osp.settings import MEDIA_ROOT
 from tag.serializers import TagIndependentSerializer
 from team.serializers import TeamSerializer
-from team.models import TeamMember
 from team.utils import is_teammember
-from datetime import datetime, timedelta
-from osp.settings import MEDIA_URL, MEDIA_ROOT
-import logging
-import json
-import os
 
 
 class ArticleAPIView(APIView):
