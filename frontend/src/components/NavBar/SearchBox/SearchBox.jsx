@@ -66,7 +66,6 @@ function SearcherBox() {
       <div className="search">
         <input
           type="text"
-          id="search-word"
           className="form-control"
           value={keyword}
           placeholder="검색"

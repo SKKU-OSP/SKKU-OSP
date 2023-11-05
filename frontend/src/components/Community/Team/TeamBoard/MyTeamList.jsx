@@ -51,7 +51,7 @@ function MyTeamList() {
   }, [username]);
 
   const onPageChange = (page) => {
-    getTeamList(page);
+    getMyTeamList(page);
   };
 
   const handleShow = () => setModalShow(true);
