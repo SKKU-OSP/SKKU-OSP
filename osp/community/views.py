@@ -18,8 +18,6 @@ from team.utils import is_teammember
 from user.models import Account, AccountPrivacy
 from user.serializers import AccountPrivacySerializer
 
-import time
-
 
 class TableBoardView(APIView):
     '''

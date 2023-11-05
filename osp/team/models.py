@@ -1,7 +1,6 @@
 from django.db import models
-from django.dispatch import receiver
+
 from tag.models import TagIndependent
-# from community.models import Article
 from user.models import Account
 
 

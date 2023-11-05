@@ -1,4 +1,4 @@
-from .models import Team, TeamMember, TeamTag, TeamInviteMessage
+from team.models import TeamMember
 
 
 def is_teammember(team_id, user_id):

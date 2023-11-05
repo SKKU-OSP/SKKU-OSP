@@ -1,26 +1,27 @@
-from django.db import transaction, DatabaseError
+import logging
+import time
+from datetime import datetime
+
 from django.core.files.images import get_image_dimensions
-from team.models import Team, TeamMember, TeamTag, TeamInviteMessage, TeamApplyMessage
-from tag.models import Tag
-from user.models import Account, User, AccountPrivacy, AccountInterest
-from community.models import Board, Article, TeamRecruitArticle
-from message.models import Message
 from django.core.paginator import Paginator
+from django.db import DatabaseError, transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from user.serializers import AccountSerializer, AccountPrivacySerializer, AccountWithInterestSerializer
-from team.serializers import TeamSerializer, TeamMemberSerializer, TeamTagSerializer, TeamInviteMessageSerializer, TeamApplyMessageSerializer
-
-from team.recommend import get_team_recommendation_list, get_team_recommendation
+from community.models import Article, Board, TeamRecruitArticle
+from handle_error import get_fail_res
+from message.models import Message
+from tag.models import Tag, TagIndependent
+from team.models import (Team, TeamApplyMessage, TeamInviteMessage, TeamMember,
+                         TeamTag)
+from team.recommend import get_team_recommendation
+from team.serializers import (TeamApplyMessageSerializer,
+                              TeamInviteMessageSerializer,
+                              TeamMemberSerializer, TeamSerializer,
+                              TeamTagSerializer)
 from team.utils import *
-from tag.models import TagIndependent
-from handle_error import get_fail_res
-
-from datetime import datetime
-import logging
-import time
-from handle_error import get_fail_res
+from user.models import Account, AccountPrivacy, User
+from user.serializers import AccountWithInterestSerializer
 
 
 class TeamInviteOnTeamboardView(APIView):

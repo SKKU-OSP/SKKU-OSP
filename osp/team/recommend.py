@@ -1,13 +1,14 @@
-from osp.settings import STATICFILES_DIRS
-from user.models import Account, GithubUserFollowing, GithubUserStarred
-from repository.models import GithubRepoContributor
-from .models import Team, TeamMember
-
-from sklearn.metrics.pairwise import cosine_similarity
-from datetime import datetime, timedelta
 import os
 import time
+from datetime import datetime, timedelta
+
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+
+from osp.settings import STATICFILES_DIRS
+from repository.models import GithubRepoContributor
+from team.models import Team, TeamMember
+from user.models import Account, GithubUserFollowing, GithubUserStarred
 
 
 def cossim_matrix(a, b):

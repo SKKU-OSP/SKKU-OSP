@@ -1,7 +1,8 @@
 from django.db import models
-from user.models import Account
+
 from tag.models import TagIndependent
 from team.models import Team
+from user.models import Account
 
 
 class Board(models.Model):
