@@ -20,6 +20,10 @@ class TeamRecruitArticleAdmin(admin.ModelAdmin):
 
 class TeamAdmin(admin.ModelAdmin):
     inlines = [TeamTagInline, TeamMemberInline]
+    list_display = ('id', 'name', 'get_member_cnt')
+
+    def get_member_cnt(self, obj):
+        return obj.teammember_set.count()
 
 
 admin.site.register(Team, TeamAdmin)

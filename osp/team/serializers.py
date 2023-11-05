@@ -6,6 +6,7 @@ from user.serializers import AccountSerializer
 
 
 class TeamSerializer(serializers.ModelSerializer):
+    member_cnt = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Team
@@ -14,8 +15,12 @@ class TeamSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "image",
-            "create_date"
+            "create_date",
+            "member_cnt"
         )
+
+    def get_member_cnt(self, obj):
+        return obj.member_cnt
 
 
 class TeamMemberSerializer(serializers.ModelSerializer):
