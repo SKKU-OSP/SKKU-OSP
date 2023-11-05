@@ -8,7 +8,7 @@ from user.models import Account
 class Board(models.Model):
     DEFAULT_BOARDNAME = ['QnA', 'User', '팀 모집', '정보', '홍보']
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=20, unique=True, db_index=True)
     board_type = models.CharField(max_length=10)
     anonymous_writer = models.BooleanField()
     team = models.ForeignKey(Team, models.CASCADE, blank=True, null=True)
