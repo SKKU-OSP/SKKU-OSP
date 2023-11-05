@@ -1,17 +1,17 @@
 import logging
 import math
-from datetime import datetime
 
 from django.core.paginator import Paginator
 from django.db import DatabaseError
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from community.models import *
 from community.serializers import (ArticleCommentSerializer, ArticleSerializer,
-                                   BoardArticleSerializer, BoardSerializer)
+                                   BoardArticleSerializer, BoardSerializer,
+                                   RecruitArticleSerializer)
 from team.models import Team, TeamInviteMessage, TeamMember, TeamTag
 from team.serializers import TeamMemberSerializer, TeamSerializer
 from team.utils import is_teammember
@@ -102,6 +102,10 @@ class TableBoardView(APIView):
                 account = None
                 data['privacy'] = None
 
+            if board.board_type == 'Recruit':
+                data = self.get_recruit_board(request)
+                return Response({'status': status, 'data': data})
+
             sort_field = request.GET.get('sort', '-id')
             sort_field = sort_field.split(",")
             article_list = Article.objects.filter(board=board).annotate(writer_name=F(
@@ -154,34 +158,6 @@ class TableBoardView(APIView):
                 data['team_members'] = TeamMemberSerializer(
                     team_members, many=True).data
 
-            # 팀 모집 게시판일 경우
-            if board.board_type == 'Recruit':
-                # 현재 모집 중인 게시글 데이터를 구성
-                active_article = Article.objects.filter(
-                    board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                active_article = get_article_board_data(active_article)
-                for article in active_article:
-                    article.tags = [
-                        art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-                    teamrecruitarticle = TeamRecruitArticle.objects.filter(
-                        article=article).first()
-                    if teamrecruitarticle:
-                        article.team = teamrecruitarticle.team
-                    else:
-                        article.team = None
-                data['active_article'] = ArticleSerializer(
-                    active_article, many=True).data
-
-                # 팀 모집 게시판의 글인 경우 팀 이름을 추가로 전달
-                for article in data['articles']:
-                    recruit_article = TeamRecruitArticle.objects.filter(
-                        article_id=article['id']).first()
-
-                    if recruit_article:
-                        article['team_name'] = recruit_article.team.name
-                    else:
-                        article['team_name'] = None
-
         except DatabaseError as e:
             errors['DB_exception'] = 'DB Error'
             logging.exception(f'TableBoardView DB ERROR: {e}')
@@ -199,6 +175,47 @@ class TableBoardView(APIView):
         else:
             res = {'status': status, 'errors': errors}
         return Response(res)
+
+    def get_recruit_board(self, request):
+        data = {}
+        page_number = request.GET.get('page_number', 1)
+        sort_field = request.GET.get('sort', '-id')
+        sort_field = sort_field.split(",")
+
+        team_recruit_subquery = TeamRecruitArticle.objects.filter(
+            article_id=OuterRef('pk')
+        ).annotate(
+            writer_name=Subquery(
+                Account.objects.filter(pk=OuterRef(
+                    'article__writer_id')).values('user__username')[:1]
+            ),
+            team_name=Subquery(
+                Team.objects.filter(pk=OuterRef('team_id')).values('name')[:1]
+            ),
+            member_cnt=Subquery(
+                TeamMember.objects.filter(team_id=OuterRef('team_id')).values(
+                    'team').annotate(cnt=Count('id')).values('cnt')
+            ),
+        )
+
+        articles = Article.objects.filter(
+            board__name='팀 모집'
+        ).annotate(
+            writer_name=Subquery(
+                team_recruit_subquery.values('writer_name')[:1]),
+            team_name=Subquery(team_recruit_subquery.values('team_name')[:1]),
+            member_cnt=Subquery(
+                team_recruit_subquery.values('member_cnt')[:1]),
+        ).prefetch_related(
+            'articletag_set'
+        ).order_by(*sort_field)
+
+        page_size = 10
+        paginator = Paginator(articles, page_size)
+        page = paginator.get_page(page_number)
+
+        data['articles'] = RecruitArticleSerializer(page, many=True).data
+        return data
 
 
 class SearchView(APIView):

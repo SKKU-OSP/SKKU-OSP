@@ -70,8 +70,8 @@ export default function RecruitArticle(props) {
           <div>
             {article.tags && article.tags.length > 0 ? (
               article.tags.map((tag) => (
-                <h6 className="inline" key={tag.name}>
-                  #{tag.name.replace(' ', '_')}&nbsp;
+                <h6 className="inline" key={tag}>
+                  #{tag.replace(' ', '_')}&nbsp;
                 </h6>
               ))
             ) : (
