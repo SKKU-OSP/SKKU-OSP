@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import Button from 'react-bootstrap/Button';
+
 import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 import Collapse from 'react-bootstrap/Collapse';
 
 const ConsentsModal = (props) => {
@@ -16,6 +17,7 @@ const ConsentsModal = (props) => {
         const newData = prev;
         newData['open_lvl'] = 1;
         props.changeMandatoryValue(true);
+        props.changeConsentBtn('btn-primary');
         return newData;
       });
     }
@@ -40,6 +42,7 @@ const ConsentsModal = (props) => {
         const newData = prev;
         newData['open_lvl'] = 0;
         props.changeMandatoryValue(false);
+        props.changeConsentBtn('btn-danger');
         return newData;
       });
     }
@@ -62,10 +65,7 @@ const ConsentsModal = (props) => {
   const [open, setOpen] = useState(true);
   return (
     <>
-      {/* <Button variant="secondary" onClick={handleShow}>
-        개인정보 이용내역 동의 <span className="text-danger">*</span>
-      </Button> */}
-      <Modal show={modalOpen} onHide={handleModalClose}>
+      <Modal show={modalOpen} onHide={handleModalClose} size="xl">
         <Modal.Header closeButton>
           <h5>개인정보 이용내역 동의 설정</h5>
           <br />

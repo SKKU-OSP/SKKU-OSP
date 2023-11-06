@@ -1,10 +1,13 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Select from 'react-select';
+import { useEffect, useState } from 'react';
+
 import axios from 'axios';
+import Select from 'react-select';
+import LoaderIcon from 'react-loader-icon';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 import ConsentsModal from './ConsentsModal';
 import classes from './SignUpForm.module.css';
@@ -45,16 +48,21 @@ const SignUpForm = () => {
     username: 'outline-secondary',
     student_id: 'outline-secondary'
   });
+  const [checkLoading, setCheckLoading] = useState({
+    github_id: false,
+    username: false,
+    student_id: false,
+    submit: false
+  });
 
-  const [clicked, setClicked] = useState(false);
-
+  const [consentBtnClass, setConsentBtnClass] = useState('btn-secondary');
   const [selectCollege, setSelectCollege] = useState('');
   const [selectAbsence, setSelectAbsence] = useState('0');
   const [selectPluralMajor, setSelectPluralMajor] = useState('0');
   const [personalDomain, setPersonalDomain] = useState('');
-  const [inputPersonalDomain, setInputPersonalDomain] = useState('');
+  const [inputPersonalDomain, setInputPersonalDomain] = useState(githubData?.personal_email_domain.value);
   const [primaryDomain, setPrimaryDomain] = useState('');
-  const [inputPrimaryDomain, setInputPrimaryDomain] = useState('');
+  const [inputPrimaryDomain, setInputPrimaryDomain] = useState(githubData?.github_email_domain.value);
   const [secondaryDomain, setSecondaryDomain] = useState('');
   const [inputSecondaryDomain, setInputSecondaryDomain] = useState('');
   const [selectConsent, setSelectConsent] = useState(false);
@@ -121,7 +129,6 @@ const SignUpForm = () => {
         }
       };
       if (githubData) {
-        console.log('githubData', githubData);
         getData();
       } else {
         alert('GitHub 로그인을 통해 가입해주세요');
@@ -145,18 +152,14 @@ const SignUpForm = () => {
     setPersonalDomain(obj.value);
     setInputPersonalDomain(obj.value);
     setFormData((prev) => {
-      const newData = prev;
-      newData['personal_email_domain'] = obj.value;
-      return newData;
+      return { ...prev, personal_email_domain: obj.value };
     });
   };
   const handleSelectPrimaryDomain = (obj) => {
     setPrimaryDomain(obj.value);
     setInputPrimaryDomain(obj.value);
     setFormData((prev) => {
-      const newData = prev;
-      newData['primary_email_domain'] = obj.value;
-      return newData;
+      return { ...prev, primary_email_domain: obj.value };
     });
   };
 
@@ -164,36 +167,31 @@ const SignUpForm = () => {
     setSecondaryDomain(obj.value);
     setInputSecondaryDomain(obj.value);
     setFormData((prev) => {
-      const newData = prev;
-      newData['secondary_email_domain'] = obj.value;
-      return newData;
+      return { ...prev, secondary_email_domain: obj.value };
     });
   };
 
   const handleAbsence = (e) => {
     setSelectAbsence(e.target.value);
     setFormData((prev) => {
-      const newData = prev;
-      newData['absence'] = e.target.value;
-      return newData;
+      return { ...prev, absence: e.target.value };
     });
   };
 
   const handlePluralMajor = (e) => {
     setSelectPluralMajor(e.target.value);
     setFormData((prev) => {
-      const newData = prev;
-      newData['plural_major'] = e.target.value;
-      return newData;
+      return { ...prev, plural_major: e.target.value };
     });
   };
 
   const sendSignUpForm = async () => {
     try {
+      setCheckLoading({ ...checkLoading, submit: true });
       const signUpFormUrl = serverUrl + '/accounts/signup/';
-
       const response = await axios.post(signUpFormUrl, formData);
       const res = response.data;
+      setCheckLoading({ ...checkLoading, submit: false });
       if (res.status === 'fail') {
         //feedback을 통해 에러정보 들어옴
         console.log(res.feedback);
@@ -212,20 +210,65 @@ const SignUpForm = () => {
             return { ...prev, student_id: { label: res.feedback.student_id, status: 'error' } };
           });
         }
+        if (res.feedback.name) {
+          setLabels((prev) => {
+            return { ...prev, name: { label: res.feedback.name, status: 'error' } };
+          });
+        }
+        if (res.feedback.dept) {
+          setLabels((prev) => {
+            return { ...prev, dept: { label: res.feedback.dept, status: 'error' } };
+          });
+        } else {
+          setLabels((prev) => {
+            return { ...prev, dept: { label: '', status: 'info' } };
+          });
+        }
         if (res.feedback.college) {
           setLabels((prev) => {
             return { ...prev, college: { label: res.feedback.college, status: 'error' } };
+          });
+        } else {
+          setLabels((prev) => {
+            return { ...prev, college: { label: '', status: 'info' } };
           });
         }
         if (res.feedback.personal_email) {
           setLabels((prev) => {
             return { ...prev, personal_email: { label: res.feedback.personal_email, status: 'error' } };
           });
+        } else {
+          setLabels((prev) => {
+            return { ...prev, personal_email: { label: '계정정보를 찾을 때 사용합니다.', status: 'info' } };
+          });
+        }
+        if (res.feedback.primary_email) {
+          setLabels((prev) => {
+            return { ...prev, primary_email: { label: res.feedback.primary_email, status: 'error' } };
+          });
+        } else {
+          setLabels((prev) => {
+            return { ...prev, primary_email: { label: 'GitHub Commit 기록을 추적하는데 사용합니다.', status: 'info' } };
+          });
         }
         if (res.feedback.secondary_email) {
           setLabels((prev) => {
             return { ...prev, secondary_email: { label: res.feedback.secondary_email, status: 'error' } };
           });
+        } else {
+          setLabels((prev) => {
+            return {
+              ...prev,
+              secondary_email: {
+                label: '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.',
+                status: 'info'
+              }
+            };
+          });
+        }
+        if (res.feedback.consent) {
+          alert(res.feedback.consent);
+          setConsentBtnClass('btn-danger');
         }
       } else {
         alert('회원가입에 성공했습니다.');
@@ -251,16 +294,12 @@ const SignUpForm = () => {
     if (personalDomain === '') {
       setInputPersonalDomain(e.target.value);
       setFormData((prev) => {
-        const newData = prev;
-        newData['personal_email_domain'] = e.target.value;
-        return newData;
+        return { ...prev, personal_email_domain: e.target.value };
       });
     } else {
       setInputPersonalDomain(personalDomain);
       setFormData((prev) => {
-        const newData = prev;
-        newData['personal_email_domain'] = personalDomain;
-        return newData;
+        return { ...prev, personal_email_domain: personalDomain };
       });
     }
   };
@@ -268,35 +307,25 @@ const SignUpForm = () => {
     if (primaryDomain === '') {
       setInputPrimaryDomain(e.target.value);
       setFormData((prev) => {
-        const newData = prev;
-        newData['primary_email_domain'] = e.target.value;
-        return newData;
+        return { ...prev, primary_email_domain: e.target.value };
       });
     } else {
       setInputPrimaryDomain(primaryDomain);
       setFormData((prev) => {
-        const newData = prev;
-        newData['primary_email_domain'] = primaryDomain;
-        return newData;
+        return { ...prev, primary_email_domain: primaryDomain };
       });
     }
   };
   const handleInputSecondaryDomain = (e) => {
     if (secondaryDomain === '') {
       setInputSecondaryDomain(e.target.value);
-      formData['secondary_email_domain'] = e.target.value;
       setFormData((prev) => {
-        const newData = prev;
-        newData['secondary_email_domain'] = e.target.value;
-        return newData;
+        return { ...prev, secondary_email_domain: e.target.value };
       });
     } else {
       setInputSecondaryDomain(secondaryDomain);
-      formData['secondary_email_domain'] = secondaryDomain;
       setFormData((prev) => {
-        const newData = prev;
-        newData['secondary_email_domain'] = secondaryDomain;
-        return newData;
+        return { ...prev, secondary_email_domain: secondaryDomain };
       });
     }
   };
@@ -304,57 +333,42 @@ const SignUpForm = () => {
   //가입하기 버튼을 눌렀을 때 실행되는 함수
   const onChangeUsername = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length < 5) {
       setLabels((prev) => {
-        prev['username'] = { label: 'Username은 5자 이상이여야 합니다.', status: 'error' };
-        return prev;
+        return { ...prev, username: { label: 'Username은 5자 이상이여야 합니다.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['username'] = { label: '로그인에 사용할 아이디입니다.', status: 'info' };
-        return prev;
+        return { ...prev, username: { label: '로그인에 사용할 아이디입니다.', status: 'info' } };
       });
     }
   };
 
   const onChangePassword = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length < 4) {
       setLabels((prev) => {
-        prev['password'] = { label: '비밀번호는 4자 이상이어야 합니다.', status: 'error' };
-        return prev;
+        return { ...prev, password: { label: '비밀번호는 4자 이상이어야 합니다.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['password'] = { label: '알맞은 형식의 비밀번호입니다.', status: 'info' };
-        return prev;
+        return { ...prev, password: { label: '알맞은 형식의 비밀번호입니다.', status: 'info' } };
       });
     }
   };
 
   const onChangeCheckPassword = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value === formData['password']) {
       setLabels((prev) => {
-        prev['checkPassword'] = { label: '비밀번호와 일치합니다.', status: 'info' };
-        return prev;
+        return { ...prev, checkPassword: { label: '비밀번호와 일치합니다.', status: 'info' } };
       });
     } else {
       setLabels((prev) => {
-        prev['checkPassword'] = { label: 'password가 일치하지 않습니다.', status: 'error' };
-        return prev;
+        return { ...prev, checkPassword: { label: 'password가 일치하지 않습니다.', status: 'error' } };
       });
     }
   };
@@ -362,122 +376,101 @@ const SignUpForm = () => {
   const onChangeStudentId = (e) => {
     const { name, value } = e.target;
     const regex = /^[0-9]{10}$/;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (!regex.test(e.target.value)) {
       setLabels((prev) => {
-        prev['student_id'] = { label: '학번 형식이 다릅니다.', status: 'error' };
-        return prev;
+        return { ...prev, student_id: { label: '학번 형식이 다릅니다.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['student_id'] = { label: '알맞은 학번 형식입니다.', status: 'success' };
-        return prev;
+        return { ...prev, student_id: { label: '알맞은 학번 형식입니다.', status: 'success' } };
       });
     }
   };
 
   const onChangeName = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length > 20) {
       setLabels((prev) => {
-        prev['name'] = { label: '이름은 20자를 넘을 수 없습니다.', status: 'error' };
-        return prev;
+        return { ...prev, name: { label: '이름은 20자를 넘을 수 없습니다.', status: 'error' } };
       });
     } else if (value.length < 1) {
       setLabels((prev) => {
-        prev['name'] = { label: '이름을 입력해주세요!', status: 'error' };
-        return prev;
+        return { ...prev, name: { label: '이름을 입력해주세요.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['name'] = { label: '', status: 'success' };
-        return prev;
+        return { ...prev, name: { label: '', status: 'success' } };
       });
     }
   };
 
   const onChangeDept = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length > 45) {
       setLabels((prev) => {
-        prev['dept'] = { label: '학과는 45자를 넘을 수 없습니다.', status: 'error' };
-        return prev;
+        return { ...prev, dept: { label: '학과는 45자를 넘을 수 없습니다.', status: 'error' } };
+      });
+    } else if (value.length < 1) {
+      setLabels((prev) => {
+        return { ...prev, dept: { label: '학과를 입력해주세요.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['dept'] = { label: '', status: 'info' };
-        return prev;
+        return { ...prev, dept: { label: '', status: 'info' } };
       });
     }
   };
 
   const onChangePersonalEmail = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length > 100) {
       setLabels((prev) => {
-        prev['personal_email'] = { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' };
-        return prev;
+        return { ...prev, personal_email: { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['personal_email'] = { label: '계정정보를 찾을 때 사용합니다.', status: 'info' };
-        return prev;
+        return { ...prev, personal_email: { label: '계정정보를 찾을 때 사용합니다.', status: 'info' } };
       });
     }
   };
 
   const onChangePrimaryEmail = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length > 100) {
       setLabels((prev) => {
-        prev['primary_email'] = { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' };
-        return prev;
+        return { ...prev, primary_email: { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['primary_email'] = { label: 'GitHub Commit 기록을 추적하는데 사용합니다.', status: 'info' };
-        return prev;
+        return {
+          ...prev,
+          primary_email: { label: 'GitHub Commit 기록을 추적하는데 사용합니다.', status: 'info' }
+        };
       });
     }
   };
 
   const onChangeSecondaryEmail = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
     if (value.length > 100) {
       setLabels((prev) => {
-        prev['secondary_email'] = { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' };
-        return prev;
+        return { ...prev, secondary_email: { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' } };
       });
     } else {
       setLabels((prev) => {
-        prev['secondary_email'] = {
-          label: '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.',
-          status: 'info'
+        return {
+          ...prev,
+          secondary_email: {
+            label: '로컬 Git 설정 이메일이 GitHub와 다른가요? 추가로 이메일을 연동할 수 있습니다.',
+            status: 'info'
+          }
         };
-        return prev;
       });
     }
   };
@@ -495,8 +488,6 @@ const SignUpForm = () => {
       newData['primary_email_domain'] = formData.primary_email_domain;
       newData['consent'] = selectConsent;
       newData['consent_mandatory'] = selectConsentMandatory;
-      console.log('newData');
-      console.log(newData);
       return newData;
     });
     sendSignUpForm();
@@ -508,34 +499,40 @@ const SignUpForm = () => {
     success: classes.SuccessText
   };
   const btnStatusMap = {
-    success: 'outline-primary',
-    fail: 'outline-danger'
+    success: 'primary',
+    fail: 'danger'
   };
   const CheckGithubId = async () => {
+    setCheckLoading({ ...checkLoading, github_id: true });
     const response = await axios.post(serverUrl + '/accounts/register/checkgithub/', {
       github_id: githubData?.github_username.value
     });
     const res = response.data;
+    setCheckLoading({ ...checkLoading, github_id: false });
     alert(res.message);
     setBtnCheckr((prev) => {
       return { ...prev, github_id: btnStatusMap[res.status] };
     });
   };
   const CheckStudent = async () => {
+    setCheckLoading({ ...checkLoading, student_id: true });
     const response = await axios.post(serverUrl + '/accounts/register/checkstudent/', {
       student_id: formData.student_id
     });
     const res = response.data;
+    setCheckLoading({ ...checkLoading, student_id: false });
     alert(res.message);
     setBtnCheckr((prev) => {
       return { ...prev, student_id: btnStatusMap[res.status] };
     });
   };
   const CheckUsername = async () => {
+    setCheckLoading({ ...checkLoading, username: true });
     const response = await axios.post(serverUrl + '/accounts/register/checkuser/', {
       username: formData.username
     });
     const res = response.data;
+    setCheckLoading({ ...checkLoading, username: false });
     alert(res.message);
     setBtnCheckr((prev) => {
       return { ...prev, username: btnStatusMap[res.status] };
@@ -568,8 +565,8 @@ const SignUpForm = () => {
               defaultValue={githubData?.github_username.value}
               disabled={githubData?.github_username.readonly}
             />
-            <Button variant={btnChecker.github_id} onClick={CheckGithubId}>
-              Check
+            <Button variant={btnChecker.github_id} onClick={CheckGithubId} disabled={checkLoading.github_id}>
+              {checkLoading.github_id ? <LoaderIcon type={'spin'} size={16} className={classes.btnLoader} /> : 'Check'}
             </Button>
           </InputGroup>
         </div>
@@ -588,9 +585,10 @@ const SignUpForm = () => {
               defaultValue={githubData?.username.value}
               disabled={githubData?.username.readonly}
               onChange={onChangeUsername}
+              autoComplete="username"
             />
-            <Button variant={btnChecker.username} onClick={CheckUsername}>
-              Check
+            <Button variant={btnChecker.username} onClick={CheckUsername} disabled={checkLoading.username}>
+              {checkLoading.username ? <LoaderIcon type={'spin'} size={16} className={classes.btnLoader} /> : 'Check'}
             </Button>
           </InputGroup>
         </div>
@@ -651,8 +649,8 @@ const SignUpForm = () => {
               name="student_id"
               onChange={onChangeStudentId}
             />
-            <Button variant={btnChecker.student_id} onClick={CheckStudent}>
-              Check
+            <Button variant={btnChecker.student_id} onClick={CheckStudent} disabled={checkLoading.student_id}>
+              {checkLoading.student_id ? <LoaderIcon type={'spin'} size={16} className={classes.btnLoader} /> : 'Check'}
             </Button>
           </InputGroup>
         </div>
@@ -673,7 +671,7 @@ const SignUpForm = () => {
             소속 대학<span className={classes.RequiredStar}>*</span>
           </Form.Label>
           <Form.Label className={labelClass[labels.college.status]}>{labels.college.label}</Form.Label>
-          <Select size="sm" options={colleges} id="college" name="college" onChange={handleSelectCollege}></Select>
+          <Select size="sm" options={colleges} id="college" name="college" onChange={handleSelectCollege} />
         </div>
         <div className={classes.FormControl}>
           <Form.Label htmlFor="dept" className="me-1">
@@ -799,7 +797,6 @@ const SignUpForm = () => {
             name="personal_email_domain"
             onChange={handleInputPersonalDomain}
             value={inputPersonalDomain}
-            defaultValue={githubData?.personal_email_domain.value}
             disabled={githubData?.personal_email_domain.readonly}
           />
           <Select
@@ -834,7 +831,6 @@ const SignUpForm = () => {
             name="primary_email_domain"
             onChange={handleInputPrimaryDomain}
             value={inputPrimaryDomain}
-            defaultValue={githubData?.github_email_domain.value}
             disabled={githubData?.github_email_domain.readonly}
           />
           <Select
@@ -890,10 +886,10 @@ const SignUpForm = () => {
         onClick={() => {
           setOpenModal(!openModal);
           setSelectConsent(true);
-          setClicked(true);
+          setConsentBtnClass('btn-danger');
         }}
         type="button"
-        className={`${clicked === true ? 'btn btn-primary ms-auto mb-1' : 'btn btn-secondary ms-auto mb-1'}`}
+        className={'btn ms-auto mb-1 ' + consentBtnClass}
       >
         개인정보 이용내역 동의<span className="text-danger">*</span>
       </button>
@@ -902,15 +898,15 @@ const SignUpForm = () => {
           consents={consents}
           show={openModal}
           changeModal={setOpenModal}
-          mandatory={setSelectConsentMandatory}
           radioValue={consentRadios}
           changeRadioValue={setConsentRadios}
           changeMandatoryValue={setSelectConsentMandatory}
+          changeConsentBtn={setConsentBtnClass}
         />
       ) : null}
       <div className="d-flex flex-row justify-content-end">
-        <Button variant="primary" type="submit">
-          가입하기
+        <Button variant="primary" type="submit" disabled={checkLoading.submit}>
+          {checkLoading.submit ? <LoaderIcon type={'spin'} size={24} className={classes.btnLoader} /> : '가입하기'}
         </Button>
       </div>
     </Form>

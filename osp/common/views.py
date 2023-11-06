@@ -183,6 +183,8 @@ class SignUpView(APIView):
         name = request.data.get('name', '').strip()
         if len(name) > 20:
             fail_reason['name'] = f'이름은 20자를 넘을 수 없습니다. 현재 {len(name)} 자'
+        if name.strip() == '':
+            fail_reason['name'] = f'이름을 입력해주세요.'
         # 소속대학 유효성 검사
         college = request.data.get('college', '')
         if not college:
@@ -194,6 +196,8 @@ class SignUpView(APIView):
         dept = request.data.get('dept', '').strip()
         if len(dept) > 45:
             fail_reason['dept'] = f'학과명은 45자를 넘을 수 없습니다. 현재 {len(dept)} 자'
+        if dept.strip() == '':
+            fail_reason['dept'] = f'학과를 입력해주세요.'
 
         # 이메일 유효성 검사
         personal_email = request.data.get('personal_email', '').strip()
@@ -219,7 +223,7 @@ class SignUpView(APIView):
                 fail_reason['personal_email'] = '이메일이 형식에 맞지 않습니다.'
             if check_email(primary_email):
                 fail_reason['primary_email'] = '이메일이 형식에 맞지 않습니다.'
-            if not secondary_email and check_email(secondary_email):
+            if secondary_email and check_email(secondary_email):
                 fail_reason['secondary_email'] = '이메일이 형식에 맞지 않습니다.'
         except Exception as e:
             logging.exception(f"SignUpView exception {e}")
