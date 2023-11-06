@@ -67,7 +67,9 @@ function CommentItem(props) {
         </div>
       </div>
       <div className={`${styles.commentLine2} d-flex justify-content-between align-items-center`}>
-        <span className={styles.commentContent}>{comment.body} </span>
+        <span className={styles.commentContent} style={{ marginRight: '20px' }}>
+          {comment.body}
+        </span>
         <div className="d-flex align-items-center gap-1">
           {isLiked ? (
             <FaThumbsUp onClick={() => likeComment()} style={{ cursor: 'pointer' }} />
