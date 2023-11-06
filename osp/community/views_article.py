@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from django.db import DatabaseError, transaction
 from django.http import FileResponse
+from django.db.models import Count, F, OuterRef, Q, Subquery
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -16,6 +17,7 @@ from osp.settings import MEDIA_ROOT
 from tag.serializers import TagIndependentSerializer
 from team.serializers import TeamSerializer
 from team.utils import is_teammember
+from team.models import Team, TeamInviteMessage, TeamMember, TeamTag
 
 
 class ArticleAPIView(APIView):
@@ -64,7 +66,11 @@ class ArticleAPIView(APIView):
             # 팀 모집 게시글 확인
             if article.board.board_type == "Recruit":
                 teamrecruit = TeamRecruitArticle.objects.filter(
-                    article=article).first()
+                    article=article).annotate(
+                    member_cnt=Count('team__teammember')
+                ).first()
+                print(teamrecruit)
+                setattr(teamrecruit.team, 'member_cnt', teamrecruit.member_cnt)
                 if teamrecruit:
                     data['team'] = TeamSerializer(teamrecruit.team).data
             article_data = ArticleSerializer(article).data
