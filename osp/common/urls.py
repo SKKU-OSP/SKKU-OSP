@@ -11,7 +11,7 @@ urlpatterns = [
     path('login/github/callback/', views.GitHubLoginView.as_view(),
          name='github_login_callback'),
     path('login/user/', views.JWTLoginView.as_view(), name="JWTLogin"),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
     path('signup/', views.SignUpView.as_view(), name="SignUp"),
     path('register/checkuser/', views.CheckUserView.as_view(), name='check_user'),
     path('register/checkgithub/', views.CheckGithubIdView.as_view(),
