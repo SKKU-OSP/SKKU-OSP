@@ -65,7 +65,6 @@ function UserActivity() {
           (a, b) => new Date(b.pub_date) - new Date(a.pub_date)
         );
         setComments(sortedComments);
-        console.log('hi', sortedComments);
         setIsLoadedArticles(true);
         setMaxCommentPage(resComments.data.max_page_number);
         setNowCommentPage(page);
