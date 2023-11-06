@@ -79,7 +79,6 @@ export default function UserComment(props) {
         <h4 className="board-article-title" onClick={onArticle}>
           {comment.body}
         </h4>
-        <h6 style={{ color: 'gray' }}>{comment.article.title}</h6>
         <div>
           {comment.article.title.length > 40 ? (
             <h6 className="inline">{`${comment.article.title.substring(0, 40)}...`}</h6>
