@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Profile_Presenter from './Profile_Presenter';
@@ -13,19 +13,18 @@ export default function Profile_Container({ iconSize }) {
   const navigate = useNavigate();
 
   const { unsetUser } = useContext(AuthContext);
-  const [error, setError] = useState(false);
 
   const sendLogoutRequest = async () => {
     try {
       const response = await axios.get(logout_url);
       const res = response.data;
-
+      console.log(res);
       unsetUser();
       tokenRemover();
+      localStorage.removeItem('username');
       navigate('/accounts/login');
     } catch (error) {
       console.log('error', error);
-      setError(error.message);
     }
   };
 
