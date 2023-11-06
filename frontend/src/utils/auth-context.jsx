@@ -54,6 +54,7 @@ export const AuthContextProvider = (props) => {
           setPhoto(null);
           setGithubUsername(null);
           setName(null);
+          localStorage.removeItem('username');
         }
       } catch (error) {
         console.log('setUserInfo error', error);
@@ -63,6 +64,7 @@ export const AuthContextProvider = (props) => {
         setPhoto(null);
         setGithubUsername(null);
         setName(null);
+        localStorage.removeItem('username');
       }
     };
     if (token) {

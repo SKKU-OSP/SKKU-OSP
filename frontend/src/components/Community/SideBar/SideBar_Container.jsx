@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import SideBar_Presenter from './SideBar_Presenter';
@@ -14,18 +14,18 @@ export default function SideBar_Container() {
   const location = useLocation().pathname;
 
   const { unsetUser } = useContext(AuthContext);
-  const [error, setError] = useState(false);
 
   const sendLogoutRequest = async () => {
     try {
       const response = await axios.get(logout_url);
       const res = response.data;
+      console.log(res);
       tokenRemover();
+      localStorage.removeItem('username');
       unsetUser();
       navigate('/accounts/login');
     } catch (error) {
       console.log('error', error);
-      setError(error.message);
     }
   };
 
