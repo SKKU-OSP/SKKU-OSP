@@ -20,3 +20,9 @@
 .FormControl {
   width: 48%;
 }
+
+.btnLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
