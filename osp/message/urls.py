@@ -8,7 +8,7 @@ urlpatterns = [
          views.MessageRoomListView.as_view(), name='MessageRoomList'),
     path('api/chat/<int:target_user_id>',
          views.MessageChatView.as_view(), name='MessageChat'),
-    path('api/chat/new', views.MessageCheckNewView.as_view(),
+    path('api/chat/new/', views.MessageCheckNewView.as_view(),
          name='MessageCheck'),
     path('api/noti-read/', views.NotificationReadAllView.as_view(),
          name='NotificationReadAll'),

@@ -1,20 +1,38 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import ChatMessage_Presenter from './ChatMessage_Presenter';
+import { getAuthConfig } from '../../../utils/auth';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function ChatMessage_Container({ iconSize }) {
-  const [newAlert, setNewAlert] = useState(false);
+  const [newMessage, setNewMessage] = useState(false);
   const [show, setShow] = useState(false);
 
   const handleClose = () => {
     setShow(false);
   };
+
   const handleShow = () => {
     setShow(true);
   };
 
+  const checkNewMessage = async () => {
+    try {
+      const url = server_url + '/message/api/chat/new/';
+      const response = await axios.get(url, getAuthConfig());
+      const res = response.data;
+      if (res.data.show_new_message) {
+        setNewMessage(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     // axios 요청으로 새로운 채팅 메시지 여부 확인
-    setNewAlert(true);
+    checkNewMessage();
   }, []);
 
   return (
@@ -22,7 +40,7 @@ export default function ChatMessage_Container({ iconSize }) {
       onOpenChatModal={handleShow}
       onCloseChatModal={handleClose}
       show={show}
-      newAlert={newAlert}
+      newMessage={newMessage}
       iconSize={iconSize}
     />
   );
