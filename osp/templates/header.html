@@ -109,7 +109,6 @@
                 <li><a class="dropdown-item" href="https://analytics.google.com/analytics/web/#/p375838293/reports/intelligenthome?params=_u..nav%3Dmaui&collectionId=user">Google Analytics</a></li>
                 {% endif %}
                 <li><a class="dropdown-item" href="{% url 'community:main' %}">커뮤니티</a></li>
-                <li><a class="dropdown-item" href="{% url 'community:notice-board' %}">공지사항</a></li>
                 <li>
                     <form method="post" action="{% url 'common:logout' %}" class="dropdown-item">
                         {% csrf_token %}
