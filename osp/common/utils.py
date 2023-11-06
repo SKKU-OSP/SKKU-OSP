@@ -17,9 +17,12 @@ def get_fail_res(msg):
 
 
 def check_email(email):
-    p = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
-    print(email, p.match(email) != None)
-    return p.match(email) == None
+    if email:
+        p = re.compile('^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+        print(email, p.match(email) != None)
+        return p.match(email) == None
+    else:
+        return False
 
 
 def get_college_list():

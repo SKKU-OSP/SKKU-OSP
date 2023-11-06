@@ -6,6 +6,19 @@ from user.serializers import AccountSerializer
 
 
 class TeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Team
+        fields = (
+            "id",
+            "name",
+            "description",
+            "image",
+            "create_date"
+        )
+
+
+class TeamListSerializer(serializers.ModelSerializer):
     member_cnt = serializers.SerializerMethodField()
 
     class Meta:

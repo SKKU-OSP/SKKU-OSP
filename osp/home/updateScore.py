@@ -1,10 +1,12 @@
 import math
-from django.db import connections, transaction, DatabaseError
-from django.db.models import Q, F, Value, Sum, Count
+
+from django.db import DatabaseError, connections, transaction
+from django.db.models import Count, F, Q, Sum, Value
 from django.db.models.functions import Concat
 
+from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
+                               GithubRepoStats)
 from user.models import Account, GithubScore, GitHubScoreTable
-from repository.models import GithubRepoCommits, GithubIssues, GithubPulls, GithubRepoStats
 
 
 def user_score_update(user: Account, year: int):

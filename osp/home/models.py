@@ -1,6 +1,6 @@
-from django.db import models
 import json
-# Create your models here.
+
+from django.db import models
 
 # case 휴학생 복전생
 #    0  포함   포함
@@ -50,9 +50,8 @@ class AnnualOverview(models.Model):
         }
 
 
-# 합계 3점 이상 인원, 총 Commit, Star, Repo 수
 class AnnualTotal(models.Model):
-
+    '합계 3점 이상 인원, 총 Commit, Star, Repo 수'
     id = models.BigAutoField(primary_key=True)
     case_num = models.IntegerField(null=False)
     # 기존 3점 이상 인원
@@ -76,11 +75,9 @@ class AnnualTotal(models.Model):
             "repo_total": self.repo_total
         }
 
-# 전체 Score 분포, 학번별 Score 분포, 학과별 Score 분포
-
 
 class DistScore(models.Model):
-
+    '전체 Score 분포, 학번별 Score 분포, 학과별 Score 분포'
     id = models.BigAutoField(primary_key=True)
     case_num = models.IntegerField(null=False)
     year = models.IntegerField(null=False)
@@ -116,11 +113,9 @@ class DistScore(models.Model):
             "score_dept_pct": json.loads(self.score_dept_pct),
         }
 
-# Factor: Commits, Stars, Pull Requests, Issues
-
 
 class DistFactor(models.Model):
-
+    'Factor: Commits, Stars, Pull Requests, Issues'
     id = models.BigAutoField(primary_key=True)
     case_num = models.IntegerField(null=False)
     year = models.IntegerField(null=False)

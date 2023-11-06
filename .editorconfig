@@ -14,6 +14,7 @@ insert_final_newline = true
 [*.py]
 known_first_party = challenge, common, community, crawler, home, message, osp, rank, repository, tag, team, user, handle_error
 known_third_party = django, rest_framework
+known_local_folder = data
 
 [*.{html, css, js, json, jsx, ts, tsx}]
 indent_style = space
