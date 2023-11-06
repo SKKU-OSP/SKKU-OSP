@@ -230,7 +230,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_REDIRECT_URL = '/home/statistic/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
-CSRF_FAILURE_VIEW = 'common.views.csrf_failure'
+CSRF_FAILURE_VIEW = 'common.views_legacy.csrf_failure'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

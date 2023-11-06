@@ -40,6 +40,12 @@ const SignUpForm = () => {
     }
   });
 
+  const [btnChecker, setBtnCheckr] = useState({
+    github_id: 'outline-secondary',
+    username: 'outline-secondary',
+    student_id: 'outline-secondary'
+  });
+
   const [clicked, setClicked] = useState(false);
 
   const [selectCollege, setSelectCollege] = useState('');
@@ -47,6 +53,8 @@ const SignUpForm = () => {
   const [selectPluralMajor, setSelectPluralMajor] = useState('0');
   const [personalDomain, setPersonalDomain] = useState('');
   const [inputPersonalDomain, setInputPersonalDomain] = useState('');
+  const [primaryDomain, setPrimaryDomain] = useState('');
+  const [inputPrimaryDomain, setInputPrimaryDomain] = useState('');
   const [secondaryDomain, setSecondaryDomain] = useState('');
   const [inputSecondaryDomain, setInputSecondaryDomain] = useState('');
   const [selectConsent, setSelectConsent] = useState(false);
@@ -61,8 +69,8 @@ const SignUpForm = () => {
 
   const [selectTags, setSelectTags] = useState([]);
   const [formData, setFormData] = useState({
-    github_id: '',
-    username: '',
+    github_id: githubData?.github_username.value,
+    username: githubData?.username.value,
     password: '',
     password_check: '',
     student_id: 0,
@@ -139,6 +147,15 @@ const SignUpForm = () => {
     setFormData((prev) => {
       const newData = prev;
       newData['personal_email_domain'] = obj.value;
+      return newData;
+    });
+  };
+  const handleSelectPrimaryDomain = (obj) => {
+    setPrimaryDomain(obj.value);
+    setInputPrimaryDomain(obj.value);
+    setFormData((prev) => {
+      const newData = prev;
+      newData['primary_email_domain'] = obj.value;
       return newData;
     });
   };
@@ -243,6 +260,23 @@ const SignUpForm = () => {
       setFormData((prev) => {
         const newData = prev;
         newData['personal_email_domain'] = personalDomain;
+        return newData;
+      });
+    }
+  };
+  const handleInputPrimaryDomain = (e) => {
+    if (primaryDomain === '') {
+      setInputPrimaryDomain(e.target.value);
+      setFormData((prev) => {
+        const newData = prev;
+        newData['primary_email_domain'] = e.target.value;
+        return newData;
+      });
+    } else {
+      setInputPrimaryDomain(primaryDomain);
+      setFormData((prev) => {
+        const newData = prev;
+        newData['primary_email_domain'] = primaryDomain;
         return newData;
       });
     }
@@ -407,6 +441,25 @@ const SignUpForm = () => {
     }
   };
 
+  const onChangePrimaryEmail = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    if (value.length > 100) {
+      setLabels((prev) => {
+        prev['primary_email'] = { label: '이메일 주소는 100자를 넘을 수 없습니다.', status: 'error' };
+        return prev;
+      });
+    } else {
+      setLabels((prev) => {
+        prev['primary_email'] = { label: 'GitHub Commit 기록을 추적하는데 사용합니다.', status: 'info' };
+        return prev;
+      });
+    }
+  };
+
   const onChangeSecondaryEmail = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -433,15 +486,14 @@ const SignUpForm = () => {
     e.preventDefault();
     setFormData((prev) => {
       const newData = prev;
-      newData['github_id'] = 'hsh200315';
+      newData['github_id'] = formData.github_id;
       newData['college'] = selectCollege;
       newData['absence'] = selectAbsence;
       newData['plural_major'] = selectPluralMajor;
       newData['account_interests'] = selectTags;
-      newData['primary_email'] = 'qq';
-      newData['primary_email_domain'] = 'naver.com';
+      newData['primary_email'] = formData.primary_email;
+      newData['primary_email_domain'] = formData.primary_email_domain;
       newData['consent'] = selectConsent;
-
       newData['consent_mandatory'] = selectConsentMandatory;
       console.log('newData');
       console.log(newData);
@@ -455,6 +507,40 @@ const SignUpForm = () => {
     error: classes.ErrorText,
     success: classes.SuccessText
   };
+  const btnStatusMap = {
+    success: 'outline-primary',
+    fail: 'outline-danger'
+  };
+  const CheckGithubId = async () => {
+    const response = await axios.post(serverUrl + '/accounts/register/checkgithub/', {
+      github_id: githubData?.github_username.value
+    });
+    const res = response.data;
+    alert(res.message);
+    setBtnCheckr((prev) => {
+      return { ...prev, github_id: btnStatusMap[res.status] };
+    });
+  };
+  const CheckStudent = async () => {
+    const response = await axios.post(serverUrl + '/accounts/register/checkstudent/', {
+      student_id: formData.student_id
+    });
+    const res = response.data;
+    alert(res.message);
+    setBtnCheckr((prev) => {
+      return { ...prev, student_id: btnStatusMap[res.status] };
+    });
+  };
+  const CheckUsername = async () => {
+    const response = await axios.post(serverUrl + '/accounts/register/checkuser/', {
+      username: formData.username
+    });
+    const res = response.data;
+    alert(res.message);
+    setBtnCheckr((prev) => {
+      return { ...prev, username: btnStatusMap[res.status] };
+    });
+  };
 
   return (
     <Form onSubmit={handleSubmit} method="post">
@@ -462,7 +548,7 @@ const SignUpForm = () => {
         <img src="/images/logo.svg" alt="Logo" className="w-25" />
       </div>
       <div className="my-3 fs-5">
-        <span>환영합니다! SOSD에 방문해주셔서 감사합니다. 필요한 추가 정보를 입력하고 가입을 완료해보세요.</span>
+        <span>환영합니다! GitHub 정보 수집을 위해 다음 정보를 입력해주세요.</span>
       </div>
       <hr />
 
@@ -482,7 +568,7 @@ const SignUpForm = () => {
               defaultValue={githubData?.github_username.value}
               disabled={githubData?.github_username.readonly}
             />
-            <Button variant="outline-secondary" id="GitHubIdCheck" disabled>
+            <Button variant={btnChecker.github_id} onClick={CheckGithubId}>
               Check
             </Button>
           </InputGroup>
@@ -503,7 +589,7 @@ const SignUpForm = () => {
               disabled={githubData?.username.readonly}
               onChange={onChangeUsername}
             />
-            <Button variant="outline-secondary" id="DuplicateCheck">
+            <Button variant={btnChecker.username} onClick={CheckUsername}>
               Check
             </Button>
           </InputGroup>
@@ -565,7 +651,7 @@ const SignUpForm = () => {
               name="student_id"
               onChange={onChangeStudentId}
             />
-            <Button variant="outline-secondary" id="StudentCheck">
+            <Button variant={btnChecker.student_id} onClick={CheckStudent}>
               Check
             </Button>
           </InputGroup>
@@ -737,6 +823,7 @@ const SignUpForm = () => {
             placeholder="깃헙 Email"
             id="primary_email"
             name="primary_email"
+            onChange={onChangePrimaryEmail}
             defaultValue={githubData?.github_email_id.value}
             disabled={githubData?.github_email_id.readonly}
           />
@@ -745,10 +832,17 @@ const SignUpForm = () => {
             placeholder="이메일 도메인"
             id="primary_email_domain"
             name="primary_email_domain"
+            onChange={handleInputPrimaryDomain}
+            value={inputPrimaryDomain}
             defaultValue={githubData?.github_email_domain.value}
             disabled={githubData?.github_email_domain.readonly}
           />
-          <Select options={domains} placeholder="직접입력" isDisabled={githubData?.github_email_domain.readonly} />
+          <Select
+            options={domains}
+            placeholder="직접입력"
+            onChange={handleSelectPrimaryDomain}
+            isDisabled={githubData?.github_email_domain.readonly}
+          />
         </InputGroup>
       </div>
 
