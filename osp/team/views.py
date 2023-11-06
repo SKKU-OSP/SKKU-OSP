@@ -358,7 +358,7 @@ class TeamInviteOnRecommendView(APIView):
                 # sender    : 발송자 Account 객체 ( request.user 로 쿼리 )
 
                 board = Board.objects.get(team=team)
-                url = f'/community/board{board.name}'
+                url = f'/community/board/{board.name}'
                 sender = Account.objects.get(user=request.user.id)
 
                 # 메세지 객체 생성
