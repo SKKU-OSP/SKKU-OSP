@@ -60,7 +60,16 @@ const ChatMessageLogs = (props) => {
               {log.receiver_read == false && props.opponentId !== log.sender.user.id && (
                 <div className={classes.chatUnread}></div>
               )}
-              <div className={ChatTextBodyClasses(log.sender.user.id)}>{log.body}</div>
+              {log.board_link ? (
+                <div className={ChatTextBodyClasses(log.sender.user.id)}>
+                  {log.format_body[0]}
+                  <a href={`/community/board/${log.board_link}`}>링크</a>
+
+                  {log.format_body[1]}
+                </div>
+              ) : (
+                <div className={ChatTextBodyClasses(log.sender.user.id)}>{log.body}</div>
+              )}
             </div>
             <div className={classes.chatDate}>{log.format_date}</div>
           </div>
