@@ -1,16 +1,17 @@
-import { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
+import { useEffect, useRef, useState } from 'react';
 
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
+import axios from 'axios';
 import Select from 'react-select';
+
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 import { getAuthConfig } from '../../../utils/auth';
 
+const domainUrl = import.meta.env.VITE_SERVER_URL;
 const CreateTeamModal = ({ show, onClose }) => {
-  const domainUrl = import.meta.env.VITE_SERVER_URL;
-  const postCreateUrl = domainUrl + '/team/api/team-create';
+  const postCreateUrl = domainUrl + '/team/api/team-create/';
 
   const [options, setOptions] = useState([]);
   const [imgFile, setImgFile] = useState('');
@@ -87,7 +88,7 @@ const CreateTeamModal = ({ show, onClose }) => {
   };
 
   return (
-    <Modal show={show} onHide={onClose}>
+    <Modal show={show} onHide={onClose} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>
           <h5>팀 만들기</h5>

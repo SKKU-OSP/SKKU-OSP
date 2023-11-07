@@ -1,23 +1,24 @@
 import { useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import Select from 'react-select';
+
 import axios from 'axios';
+import Select from 'react-select';
+
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 const InviteTeamModal = (props) => {
-  const postUrl = serverUrl + '/team/api/team-invite-on-teamboard';
+  const postUrl = serverUrl + '/team/api/team-invite-on-teamboard/';
   const handleClose = () => props.setShow(false);
-  const handleShow = () => props.setShow(true);
   //AXIOS GET
   const [teams, setTeams] = useState([]);
   useEffect(() => {
     try {
       const getData = async () => {
-        const teamListUrl = serverUrl + '/team/api/team-invite-on-recommend';
+        const teamListUrl = serverUrl + '/team/api/team-invite-on-recommend/';
         const response = await axios.get(teamListUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -87,7 +88,7 @@ const InviteTeamModal = (props) => {
   return (
     <Form>
       {/* <BsFillPersonPlusFill onClick={handleShow} /> */}
-      <Modal show={props.show} onHide={handleClose}>
+      <Modal show={props.show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
             <h5>팀 초대하기</h5>
