@@ -4,7 +4,7 @@ import time
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
-from django.db.models import Subquery, Sum, Q
+from django.db.models import Q, Subquery, Sum
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,11 +13,12 @@ from home.models import AnnualOverview, DistFactor, DistScore, Student
 from home.serializers import (AnnualOverviewDashboardSerializer,
                               DistFactorDashboardSerializer,
                               DistScoreDashboardSerializer)
-from repository.models import GithubRepoCommits, GithubIssues, GithubPulls, GithubRepoStats, GithubRepoContributor
+from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
+                               GithubRepoContributor, GithubRepoStats)
 from user import update_act
 from user.gbti import get_type_analysis, get_type_test
 from user.models import (Account, AccountPrivacy, DevType, GithubScore,
-                         GithubStatsYymm, StudentTab, GitHubScoreTable)
+                         GitHubScoreTable, GithubStatsYymm, StudentTab)
 from user.serializers import AccountSerializer
 from user.serializers_dashboard import GithubScoreResultSerializer
 

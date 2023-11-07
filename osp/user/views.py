@@ -12,11 +12,11 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from home.models import DistFactor, DistScore
 from repository.models import GithubRepoCommits, GithubRepoStats
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from tag.models import DomainLayer, TagIndependent
 from team.models import TeamMember
 from user import update_act
