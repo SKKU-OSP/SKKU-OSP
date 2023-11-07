@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-
 import axios from 'axios';
-
 import { getAuthConfig } from '../../../utils/auth';
 import ChatMessage_Presenter from './ChatMessage_Presenter';
 

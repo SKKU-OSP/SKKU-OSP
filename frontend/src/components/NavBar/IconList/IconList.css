@@ -7,7 +7,12 @@
   cursor: pointer;
 }
 
-.badge-new {
-  margin-left: 22px;
+.badge-new-message {
+  margin-left: 42px;
+  margin-bottom: 15px;
+}
+
+.badge-new-alert {
+  margin-left: 63px;
   margin-bottom: 15px;
 }
