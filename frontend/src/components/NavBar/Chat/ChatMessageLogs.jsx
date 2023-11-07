@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+
+import axios from 'axios';
+
 import Spinner from 'react-bootstrap/Spinner';
 import SendIcon from '@mui/icons-material/Send';
-import axios from 'axios';
 
 import classes from './ChatMessageLogs.module.css';
 import { getAuthConfig } from '../../../utils/auth';
@@ -24,7 +26,7 @@ const ChatMessageLogs = (props) => {
       return;
     }
     const chatData = { 'chat-input': inputRef.current.value };
-    const url = `${server_url}/message/api/chat/${props.opponentId}`;
+    const url = `${server_url}/message/api/chat/${props.opponentId}/`;
 
     const response = await axios.post(url, chatData, getAuthConfig());
     if (response.status === 200) {

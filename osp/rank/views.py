@@ -1,19 +1,21 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
+import logging
+import time
 
-from django.http import JsonResponse
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import DatabaseError
-from repository.models import GithubRepoStats, GithubRepoContributor, GithubRepoCommits, GithubIssues, GithubPulls
-from repository.serializers import GithubRepoContributorSerializer, GithubRepoStatsSerializer
-from user.models import GitHubScoreTable, StudentTab, Account
-from user.serializers import GithubScoreTableSerializer
-from handle_error import get_fail_res, get_missing_data_msg
+from django.http import JsonResponse
+from django.shortcuts import render
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-import logging
-import time
+from handle_error import get_fail_res
+from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
+                               GithubRepoContributor, GithubRepoStats)
+from repository.serializers import (GithubRepoContributorSerializer,
+                                    GithubRepoStatsSerializer)
+from user.models import Account, GitHubScoreTable, StudentTab
+from user.serializers import GithubScoreTableSerializer
 
 
 class UserRanking(APIView):

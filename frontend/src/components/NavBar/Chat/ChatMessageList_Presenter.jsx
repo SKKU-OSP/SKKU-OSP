@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import axios from 'axios';
 
 export default function ChatMessageList_Presenter() {
@@ -14,7 +15,7 @@ export default function ChatMessageList_Presenter() {
   const handlePostChat = async () => {
     const server_url = import.meta.env.VITE_SERVER_URL;
 
-    const url = `${server_url}/message/api/chat/${receiver}`;
+    const url = `${server_url}/message/api/chat/${receiver}/`;
     const response = await axios.post(url, chatData);
     if (response.status === 200) {
       alert(response.data.message);
