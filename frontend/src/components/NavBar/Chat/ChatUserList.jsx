@@ -18,7 +18,7 @@ const ChatUserList = (props) => {
   }, [targetMember]);
 
   const handleClickItem = (userId) => {
-    const getChatLogUrl = serverUrl + '/message/api/chat/' + `${userId}`;
+    const getChatLogUrl = serverUrl + `/message/api/chat/${userId}/`;
     setIsReady(false);
     const getChatLog = async () => {
       try {

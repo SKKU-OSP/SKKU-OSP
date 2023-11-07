@@ -296,7 +296,8 @@ class NotificationListView(APIView):
                     if not noti['receiver_read']:
                         show_new_app_result = True
                 elif noti['type'] == 'team_invite':
-                    print("noti['route_id']", noti['route_id'])
+                    if noti['route_id'] is None:
+                        continue
                     try:
                         board = Board.objects.get(team__id=noti['route_id'])
                         noti['feedback'] = BoardSerializer(board).data
