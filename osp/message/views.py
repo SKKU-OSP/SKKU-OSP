@@ -296,9 +296,15 @@ class NotificationListView(APIView):
                     if not noti['receiver_read']:
                         show_new_app_result = True
                 elif noti['type'] == 'team_invite':
+                    print("noti['route_id']", noti['route_id'])
+                    try:
+                        board = Board.objects.get(team__id=noti['route_id'])
+                        noti['feedback'] = BoardSerializer(board).data
+                    except Board.DoesNotExist as e:
+                        print(f'{noti["route_id"]} 팀의 게시판이 없습니다. {e}')
+                        continue
                     noti['icon'] = 'group_add'
-                    board = Board.objects.get(team__id=noti['route_id'])
-                    noti['feedback'] = BoardSerializer(board).data
+
                 elif noti['type'] == 'team_invite_result':
                     noti['icon'] = 'group_add'
                     # board = Board.objects.get(team__id=noti['route_id'])
@@ -306,7 +312,7 @@ class NotificationListView(APIView):
                     noti['feedback'] = "team_invite_result"
 
         except Exception as e:
-            print("Exception get_notifications", e)
+            logging.exception(f"Exception get_notifications: {e}")
             res['status'] = 'fail'
             return Response(res)
 

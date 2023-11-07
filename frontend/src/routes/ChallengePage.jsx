@@ -1,8 +1,11 @@
-import { useEffect, useState, useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+
 import axios from 'axios';
-import classes from './ChallengePage.module.css';
+
 import { FaTrophy } from 'react-icons/fa';
+
 import AuthContext from '../utils/auth-context';
+import classes from './ChallengePage.module.css';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
@@ -14,7 +17,7 @@ const ChallengePage = () => {
   useEffect(() => {
     if (userId) {
       try {
-        const url = serverUrl + `/challenge/api/list/${userId}`;
+        const url = serverUrl + `/challenge/api/list/${userId}/`;
         const getAchievements = async () => {
           const response = await axios.get(url);
           const res = response.data;
@@ -60,8 +63,6 @@ const ChallengePage = () => {
                 const year = prog.acheive_date.split('-')[0].substring(2, 4);
                 const month = prog.acheive_date.split('-')[1];
                 const day = prog.acheive_date.split('-')[2].split('T')[0];
-                const hour = Number(prog.acheive_date.split('-')[2].split('T')[1].split(':')[0]);
-                const minute = prog.acheive_date.split('-')[2].split('T')[1].split(':')[1];
                 return (
                   <div key={prog.id}>
                     <div className={classes.AchievedItem}>
@@ -79,15 +80,9 @@ const ChallengePage = () => {
                       </div>
 
                       <div className="d-flex flex-column">
-                        {hour < 12 ? (
-                          <span className={classes.ChallengeDate}>
-                            {year}.{month}.{day} 완료
-                          </span>
-                        ) : (
-                          <span className={classes.ChallengeDate}>
-                            {year}.{month}.{day} 완료
-                          </span>
-                        )}
+                        <span className={classes.ChallengeDate}>
+                          {year}.{month}.{day} 완료
+                        </span>
                         <div className={classes.Progress}>
                           <div className={classes.ProgressBar} style={{ width: `${100}%` }}>
                             {100}%

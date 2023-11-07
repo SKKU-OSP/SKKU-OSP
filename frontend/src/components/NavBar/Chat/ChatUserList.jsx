@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import axios from 'axios';
-import { getAuthConfig } from '../../../utils/auth';
+
 import ChatMessageLogs from './ChatMessageLogs';
+import { getAuthConfig } from '../../../utils/auth';
 
 const ChatUserList = (props) => {
   const [isReady, setIsReady] = useState(false);
@@ -12,7 +14,6 @@ const ChatUserList = (props) => {
   const targetMember = props.targetMember;
 
   useEffect(() => {
-    console.log(props.chatRoomMembers);
     if (targetMember) handleClickItem(targetMember.user.id);
   }, [targetMember]);
 

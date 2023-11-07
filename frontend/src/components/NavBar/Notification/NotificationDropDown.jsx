@@ -1,22 +1,23 @@
-import Dropdown from 'react-bootstrap/Dropdown';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import axios from 'axios';
-import { MdOutlineNotificationsNone, MdOutlineGroupAdd } from 'react-icons/md';
-import DropdownMenu from 'react-bootstrap/esm/DropdownMenu';
-import { AiOutlineCheckSquare, AiOutlineLike } from 'react-icons/ai';
+
+import Dropdown from 'react-bootstrap/Dropdown';
 import { BiCommentDetail } from 'react-icons/bi';
 import { MdOutlinePortrait } from 'react-icons/md';
 import { BsBoxArrowUpRight } from 'react-icons/bs';
+import DropdownMenu from 'react-bootstrap/esm/DropdownMenu';
+import { AiOutlineCheckSquare, AiOutlineLike } from 'react-icons/ai';
+import { MdOutlineGroupAdd, MdOutlineNotificationsNone } from 'react-icons/md';
 import { getAuthConfig } from '../../../utils/auth';
-import { Height, Padding } from '@mui/icons-material';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL;
 export default function NotificationDropDown({ iconSize }) {
   const [notiList, setNotiList] = useState([]);
 
-  const serverUrl = import.meta.env.VITE_SERVER_URL;
   useEffect(() => {
     try {
-      const url = serverUrl + '/message/api/noti/list';
+      const url = serverUrl + '/message/api/noti/list/';
 
       const getNotifications = async () => {
         const response = await axios.get(url, getAuthConfig());

@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import { BiCommentDetail } from 'react-icons/bi';
 import { MdOutlinePortrait } from 'react-icons/md';
+import { MdOutlineGroupAdd } from 'react-icons/md';
 import { AiOutlineCheckSquare, AiOutlineLike } from 'react-icons/ai';
 import { BsBoxArrowUpRight, BsFillCircleFill } from 'react-icons/bs';
-import { MdOutlineGroupAdd } from 'react-icons/md';
 
 import { getAuthConfig } from '../../../utils/auth';
 import classes from './NotificationModal.module.css';
@@ -23,15 +23,9 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
   const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleCloseTeamApp = () => {
-    setShowTeamApp(false);
-  };
-  const handleShowTeamApp = () => {
-    setShowTeamApp(true);
-  };
   useEffect(() => {
     try {
-      const url = serverUrl + '/message/api/noti/list';
+      const url = serverUrl + '/message/api/noti/list/';
       const getNotifications = async () => {
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
@@ -46,6 +40,10 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
       console.log('error', error);
     }
   }, [length]);
+
+  const handleShowTeamApp = () => {
+    setShowTeamApp(true);
+  };
 
   const TypeImage = (type, read) => {
     if (type === 'team_apply_result' || type === 'team_apply')
@@ -114,7 +112,7 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
 
   const sendReadNoti = async (noti_id) => {
     const data = { target_noti: noti_id };
-    const ReadNotiUrl = serverUrl + `/message/api/noti-read/${noti_id}`;
+    const ReadNotiUrl = serverUrl + `/message/api/noti-read/${noti_id}/`;
     try {
       const response = await axios.post(ReadNotiUrl, data, getAuthConfig());
       const res = response.data;

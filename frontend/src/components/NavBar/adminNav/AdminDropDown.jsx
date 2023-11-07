@@ -5,7 +5,6 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { useNavigate } from 'react-router-dom';
 
 import '../IconList/IconList.css';
-import classes from './AdminDropDown.module.css';
 
 const AdminDropDown = ({ iconSize }) => {
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
