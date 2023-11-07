@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
+import { useState } from 'react';
+
 import axios from 'axios';
+
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 const ApplyTeamModal = (props) => {
   const { teamName, teamDesc, username, show, onShowTeamApplyModal, articleId } = props;
-  const destinationUrl = `${serverUrl}/team/api/team-apply/${articleId}`;
+  const destinationUrl = `${serverUrl}/team/api/team-apply/${articleId}/`;
   const [checkBox, setCheckBox] = useState(0);
   const [message, setMessage] = useState('');
 
@@ -45,7 +48,6 @@ const ApplyTeamModal = (props) => {
   };
 
   const handleClose = () => onShowTeamApplyModal(false);
-  const handleOpen = () => onShowTeamApplyModal(true);
 
   const onChangeMessage = (e) => {
     const value = e.target.value;

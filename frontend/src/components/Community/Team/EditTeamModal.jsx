@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import Select from 'react-select';
+import { useEffect, useRef, useState } from 'react';
+
 import axios from 'axios';
-import { BsPencilFill, BsTrash, BsAwardFill } from 'react-icons/bs';
+import Select from 'react-select';
+
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import { BsAwardFill, BsPencilFill, BsTrash } from 'react-icons/bs';
+
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -99,14 +102,13 @@ const EditTeamModal = (props) => {
       };
       getTag();
       getData();
-      console.log('Mem', teamMembers);
     } catch (error) {
       console.log('error', error);
     }
-  }, []);
+  }, [team_name]);
 
   const handleSave = async () => {
-    const urlEditTeamInfo = serverUrl + '/team/api/team-update';
+    const urlEditTeamInfo = serverUrl + '/team/api/team-update/';
 
     if (editorRef.current) {
       try {
@@ -117,7 +119,6 @@ const EditTeamModal = (props) => {
 
           const postData = {
             target_team_id: teamID,
-            // : ,
             team_name: teamName,
             team_description: teamDesc,
             team_image: teamImg
@@ -219,7 +220,7 @@ const EditTeamModal = (props) => {
   return (
     <>
       <BsPencilFill onClick={handleShow} />
-      <Modal show={show} onHide={handleClose} ref={editorRef}>
+      <Modal show={show} onHide={handleClose} ref={editorRef} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
             <h5>팀 정보 수정</h5>

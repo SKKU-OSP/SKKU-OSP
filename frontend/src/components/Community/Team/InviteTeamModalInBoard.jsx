@@ -1,25 +1,26 @@
 import { useEffect, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import Select from 'react-select';
+
 import axios from 'axios';
+import Select from 'react-select';
+
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 const InviteTeamModalInBoard = (props) => {
-  const postUrl = serverUrl + '/team/api/team-invite-on-teamboard';
+  const postUrl = serverUrl + '/team/api/team-invite-on-teamboard/';
   const handleClose = () => props.setShow(false);
-  const handleShow = () => props.setShow(true);
-  const team__id = props.id;
+  const teamId = props.id;
   //AXIOS GET
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
     try {
       const getData = async () => {
-        const teamMemList = serverUrl + '/team/api/team-invite-on-teamboard' + '?team_id=' + `${team__id}`;
+        const teamMemList = serverUrl + '/team/api/team-invite-on-teamboard/' + '?team_id=' + `${teamId}`;
         const response = await axios.get(teamMemList, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -34,7 +35,7 @@ const InviteTeamModalInBoard = (props) => {
     } catch (error) {
       console.log('error', error);
     }
-  }, []);
+  }, [teamId]);
 
   const [userId, setUserId] = useState(0);
   const [message, setMessage] = useState('');

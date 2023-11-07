@@ -1,12 +1,15 @@
-import styles from '../Article.module.css';
-import Button from 'react-bootstrap/Button';
-import { useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaRegThumbsUp, FaThumbsUp, FaBookmark, FaRegBookmark } from 'react-icons/fa';
+import { useContext, useState } from 'react';
+
 import axios from 'axios';
-import AuthContext from '../../../../utils/auth-context';
+import { useNavigate } from 'react-router-dom';
+
+import Button from 'react-bootstrap/Button';
+import { FaBookmark, FaRegBookmark, FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
+
+import styles from '../Article.module.css';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
+import AuthContext from '../../../../utils/auth-context';
 import ProfileDropdown_Container from '../../ProfileDropdown';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
@@ -21,8 +24,8 @@ function ContentView(props) {
   const [likeCnt, setLikeCnt] = useState(article.like_cnt);
   const [scrapCnt, setScrapCnt] = useState(article.scrap_cnt);
   const [showApplyTeamModal, setShowApplyTeamModal] = useState(false);
+  const navigate = useNavigate();
 
-  const domain_url = import.meta.env.VITE_SERVER_URL;
   const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
   const like_url = `${domain_url}/community/api/article/${article.id}/like/`;
   const scrap_url = `${domain_url}/community/api/article/${article.id}/scrap/`;
@@ -31,10 +34,7 @@ function ContentView(props) {
   const pub_date1 = dateObject.toISOString().slice(0, 10);
   const hours = dateObject.getHours();
   const minutes = dateObject.getMinutes();
-  const period = hours >= 12 ? 'p.m.' : 'a.m.';
   const pub_date2 = `${hours}:${minutes.toString().padStart(2, '0')}`;
-
-  const navigate = useNavigate();
 
   const now = new Date();
   const recruit_start_date = new Date(article.period_start);
