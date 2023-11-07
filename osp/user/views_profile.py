@@ -1,18 +1,17 @@
-from django.db import transaction
+import logging
+
+from django.contrib.auth.models import User
+from django.db import DatabaseError, transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth.models import User
-from django.db import transaction, DatabaseError
 
-from user.models import Account, AccountInterest
-from user.serializers import AccountSerializer, AccountDetailSerializer, AccountInterestSerializer, StudentSerializer
-from user.models import StudentTab, Account, AccountInterest
-from repository.models import GithubRepoStats, GithubRepoCommits
-
-from tag.models import TagIndependent
-
-import logging
 from handle_error import get_fail_res
+from repository.models import GithubRepoCommits, GithubRepoStats
+from tag.models import TagIndependent
+from user.models import Account, AccountInterest, StudentTab
+from user.serializers import (AccountDetailSerializer,
+                              AccountInterestSerializer, AccountSerializer,
+                              StudentSerializer)
 
 
 class ProfileMainView(APIView):

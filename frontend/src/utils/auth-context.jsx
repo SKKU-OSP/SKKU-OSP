@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { tokenLoader, getAuthConfig } from './auth';
+import React, { useEffect, useState } from 'react';
 
 import axios from 'axios';
+
+import { getAuthConfig, tokenLoader } from './auth';
 
 const AuthContext = React.createContext({
   isLoggedIn: false,
@@ -16,7 +17,7 @@ const AuthContext = React.createContext({
 });
 
 const server_url = import.meta.env.VITE_SERVER_URL;
-const url = `${server_url}/user/api/info`;
+const url = `${server_url}/user/api/info/`;
 
 export const AuthContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
