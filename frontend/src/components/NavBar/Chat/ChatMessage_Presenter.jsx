@@ -9,7 +9,7 @@ export default function ChatMessage_Presenter({ newMessage, show, onOpenChatModa
   return (
     <>
       {newMessage && (
-        <span className="badge-new">
+        <span className="badge-new badge-new-message">
           <span className="visually-hidden">New Application</span>
         </span>
       )}
