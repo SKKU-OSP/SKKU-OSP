@@ -222,58 +222,68 @@ function ContentView(props) {
       )}
 
       {article.board.board_type == 'Recruit' && (
-        <div className={styles.articleTeam}>
-          <span className={styles.articleTeamDivide}>
-            <div>
-              <img
-                src={`${domain_url}${team.image}`}
-                style={{ borderRadius: '50%', width: '100px', height: '100px' }}
-              ></img>
-            </div>
-            <div>
-              <div className="article-info-name">{team.name}</div>
-              <div>{team.description}</div>
-            </div>
-          </span>
-          <span className={styles.articleTeamDivide}>
-            <span>
-              <div>
-                <div className="article-info-name">모집 기간</div>
-                <div>시작: {recruit_start_date.toLocaleString()}</div>
-                <div>마감: {recruit_end_date.toLocaleString()}</div>
-              </div>
-            </span>
-            {now < recruit_start_date ? (
-              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                모집 전
-              </button>
-            ) : now < recruit_end_date ? (
-              <>
-                {username ? (
-                  <button type="button" className="btn btn-outline-primary" onClick={() => setShowApplyTeamModal(true)}>
-                    지원하기
+        <>
+          {team && (
+            <div className={styles.articleTeam}>
+              <span className={styles.articleTeamDivide}>
+                <div>
+                  <img
+                    src={`${domain_url}${team.image}`}
+                    style={{ borderRadius: '50%', width: '100px', height: '100px' }}
+                  ></img>
+                </div>
+                <div>
+                  <div className="article-info-name">{team.name}</div>
+                  <div>{team.description}</div>
+                </div>
+              </span>
+              <span className={styles.articleTeamDivide}>
+                <span>
+                  <div>
+                    <div className="article-info-name">모집 기간</div>
+                    <div>시작: {recruit_start_date.toLocaleString()}</div>
+                    <div>마감: {recruit_end_date.toLocaleString()}</div>
+                  </div>
+                </span>
+                {now < recruit_start_date ? (
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                    모집 전
                   </button>
+                ) : now < recruit_end_date ? (
+                  <>
+                    {username ? (
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary"
+                        onClick={() => setShowApplyTeamModal(true)}
+                      >
+                        지원하기
+                      </button>
+                    ) : (
+                      <button type="button" className="btn btn-outline-secondary" onClick={() => logIn()}>
+                        지원하기
+                      </button>
+                    )}
+                  </>
                 ) : (
-                  <button type="button" className="btn btn-outline-secondary" onClick={() => logIn()}>
-                    지원하기
+                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                    모집 마감
                   </button>
                 )}
-              </>
-            ) : (
-              <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                모집 마감
-              </button>
-            )}
-          </span>
-          <ApplyTeamModal
-            teamName={team.name}
-            teamDesc={team.description}
-            username={username}
-            show={showApplyTeamModal}
-            onShowTeamApplyModal={setShowApplyTeamModal}
-            articleId={article.id}
-          />
-        </div>
+              </span>
+              <ApplyTeamModal
+                teamName={team.name}
+                teamDesc={team.description}
+                username={username}
+                show={showApplyTeamModal}
+                onShowTeamApplyModal={setShowApplyTeamModal}
+                articleId={article.id}
+              />
+            </div>
+          )}
+
+          {!team && <div className={styles.articleTeam}>팀 정보가 없습니다. 지원할 수 없습니다.</div>}
+        </>
       )}
     </div>
   );
