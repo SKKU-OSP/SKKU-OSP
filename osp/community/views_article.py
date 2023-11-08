@@ -66,11 +66,7 @@ class ArticleAPIView(APIView):
             # 팀 모집 게시글 확인
             if article.board.board_type == "Recruit":
                 teamrecruit = TeamRecruitArticle.objects.filter(
-                    article=article).annotate(
-                    member_cnt=Count('team__teammember')
-                ).first()
-                print(teamrecruit)
-                setattr(teamrecruit.team, 'member_cnt', teamrecruit.member_cnt)
+                    article=article).first()
                 if teamrecruit:
                     data['team'] = TeamSerializer(teamrecruit.team).data
             article_data = ArticleSerializer(article).data
