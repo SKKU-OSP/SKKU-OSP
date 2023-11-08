@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from tag import models
 
 
@@ -8,7 +9,7 @@ class LogoField(serializers.Field):
     '''
 
     def to_representation(self, value):
-        return str(value)  # 또는 value.url 등 적절한 직렬화 방식을 사용해야 합니다.
+        return str(value)
 
 
 class TagIndependentSerializer(serializers.ModelSerializer):

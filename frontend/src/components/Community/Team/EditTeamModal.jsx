@@ -13,7 +13,29 @@ import { getAuthConfig } from '../../../utils/auth';
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 const EditTeamModal = (props) => {
-  const { team_name } = props;
+  const team = props.team;
+  const [show, setShow] = useState(false);
+  const [teamName, setTeamName] = useState(team?.name);
+  const [teamDesc, setTeamDesc] = useState(team?.description);
+  const [teamImg, setTeamImg] = useState(team?.image);
+  const [teamMembers, setTeamMembers] = useState(() => {
+    if (props.teamMembers) {
+      return props.teamMembers.map((t) => {
+        return { id: t.member.user.id, name: t.member.user.username, isAdmin: t.is_admin };
+      });
+    } else return [];
+  });
+  const [selectedTags, setSelectedTags] = useState(() => {
+    if (props.teamTags) {
+      return props.teamTags.map((t) => {
+        return { value: t.name, label: t.name, color: t.color };
+      });
+    } else return [];
+  });
+
+  const [tags, setTags] = useState([]);
+  const editorRef = useRef(null);
+
   const [originalTeamName, setOriginalTeamName] = useState('');
   const [originalTeamDesc, setOriginalTeamDesc] = useState('');
   const [originalTeamImg, setOriginalTeamImg] = useState('');
@@ -37,15 +59,6 @@ const EditTeamModal = (props) => {
     setOriginalSelectedTags(selectedTags);
     setShow(true);
   };
-  const [show, setShow] = useState(false);
-  const [teamID, setTeamID] = useState('');
-  const [teamName, setTeamName] = useState('');
-  const [teamDesc, setTeamDesc] = useState('');
-  const [teamImg, setTeamImg] = useState('');
-  const [teamMembers, setTeamMembers] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const editorRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -68,81 +81,33 @@ const EditTeamModal = (props) => {
           console.log(resTag.message);
         }
       };
-      const getData = async () => {
-        const infoUrl = serverUrl + `/community/api/board/${team_name}`;
-        const response = await axios.get(infoUrl, getAuthConfig());
-        const res = response.data;
-        console.log(res);
-        if (res.status === 'success') {
-          setTeamID(res.data.team.id);
-          setTeamName(res.data.team.name);
-          setTeamDesc(res.data.team.description);
-          setTeamImg(res.data.team.image);
-          setTeamMembers(
-            res.data.team_members.map((t) => {
-              return {
-                id: t.member.user.id,
-                name: t.member.user.username,
-                isAdmin: t.is_admin
-              };
-            })
-          );
-          if (res.data.tags) {
-            setSelectedTags(
-              res.data.tags.map((t) => {
-                return {
-                  value: t.name,
-                  label: t.name,
-                  color: t.color
-                };
-              })
-            );
-          }
-        }
-      };
       getTag();
-      getData();
     } catch (error) {
       console.log('error', error);
     }
-  }, [team_name]);
+  }, []);
 
   const handleSave = async () => {
     const urlEditTeamInfo = serverUrl + '/team/api/team-update/';
 
     if (editorRef.current) {
       try {
-        if (window.confirm('글을 수정하시겠습니까?')) {
+        if (window.confirm('팀 정보를 수정하시겠습니까?')) {
           const config = getAuthConfig();
           config.headers['Content-Type'] = 'multipart/form-data';
           console.log('config', config);
 
           const postData = {
-            target_team_id: teamID,
+            target_team_id: team.id,
             team_name: teamName,
             team_description: teamDesc,
-            team_image: teamImg
-            // team_members: teamMembers,
-            // team_tags: selectedTags
-            // team_admin 정보도 넘길것
+            team_image: teamImg,
+            team_members: teamMembers.map((m) => m.name),
+            team_tags: selectedTags.map((t) => t.value),
+            team_admin: teamMembers.filter((m) => m.isAdmin).map((m) => m.name)
           };
 
-          const formData = new FormData();
-          Object.entries(postData).forEach(([key, value]) => {
-            console.log('keyvalue', key, typeof value);
-            if (key === 'team_tags') {
-              formData.append(key, JSON.stringify(value));
-            } else {
-              formData.append(key, value);
-            }
-          });
-
-          console.log('postData', postData);
-          for (let key of formData) {
-            console.log('key', key, formData[key]);
-          }
-          const response = await axios.post(urlEditTeamInfo, formData, getAuthConfig());
-
+          const response = await axios.post(urlEditTeamInfo, postData, getAuthConfig());
           const res = response.data;
           console.log(res);
 

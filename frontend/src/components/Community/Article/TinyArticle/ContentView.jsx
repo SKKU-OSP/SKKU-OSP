@@ -64,7 +64,7 @@ function ContentView(props) {
 
   const onDownloadFile = async (file) => {
     try {
-      const url = `${domain_url}/community/api/article/${article.id}/file/${file.id}`;
+      const url = `${domain_url}/community/api/article/${article.id}/file/${file.id}/`;
       const response = await axios.get(url, { responseType: 'blob' });
       console.log(response);
       const fileUrl = window.URL.createObjectURL(new Blob([response.data]));

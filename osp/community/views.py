@@ -12,6 +12,7 @@ from community.models import *
 from community.serializers import (ArticleCommentSerializer, ArticleSerializer,
                                    BoardArticleSerializer, BoardSerializer,
                                    RecruitArticleSerializer)
+from tag.serializers import TagIndependentSerializer
 from team.models import Team, TeamInviteMessage, TeamMember, TeamTag
 from team.serializers import TeamMemberSerializer, TeamSerializer
 from team.utils import is_teammember
@@ -139,12 +140,10 @@ class TableBoardView(APIView):
                     data['is_invited_user'] = True
 
                 team = board.team
-                team_tags = TeamTag.objects.filter(team=team).values(
-                    'team', 'tag__name', 'tag__type')
-                team_tags_list = []
-                for atg in team_tags:
-                    team_tags_list.append(
-                        {'name': atg["tag__name"], 'type': atg["tag__type"]})
+                team_tags = TagIndependent.objects.filter(
+                    teamtag__team_id=team)
+                data['team_tags'] = TagIndependentSerializer(
+                    team_tags, many=True).data
 
                 team_members = TeamMember.objects.filter(team=team).order_by(
                     '-is_admin').prefetch_related('member__user')
@@ -154,7 +153,6 @@ class TableBoardView(APIView):
                 if tm:
                     data['team_admin'] = tm.is_admin
                 data['team'] = TeamSerializer(team).data
-                data['team_tags'] = team_tags_list
                 data['team_members'] = TeamMemberSerializer(
                     team_members, many=True).data
 
