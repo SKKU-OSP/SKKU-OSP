@@ -114,7 +114,7 @@ const EditTeamModal = (props) => {
             props.updateTeamInfo(res.data.team, res.data.team_members, res.data.team_tags);
             setShow(false);
           } else {
-            alert('팀 업데이트에 실패했습니다.');
+            alert(res.message);
             console.log(res.message);
           }
         }
@@ -184,6 +184,33 @@ const EditTeamModal = (props) => {
     }
   };
 
+  const addAdmin = (id) => {
+    console.log('id', id);
+    setTeamMembers((prev) => {
+      return prev.map((member) => {
+        if (member.id === id) {
+          return { ...member, isAdmin: true };
+        }
+        return member;
+      });
+    });
+  };
+
+  const removeAdmin = (id) => {
+    if (teamMembers.filter((m) => m.isAdmin).length <= 1) {
+      alert('팀 관리자는 최소 1명이어야 합니다.');
+      return;
+    }
+    setTeamMembers((prev) => {
+      return prev.map((member) => {
+        if (member.id === id) {
+          return { ...member, isAdmin: false };
+        }
+        return member;
+      });
+    });
+  };
+
   return (
     <>
       <BsPencilFill className="btnIcon" onClick={handleShow} />
@@ -230,7 +257,7 @@ const EditTeamModal = (props) => {
             <img
               width="80px"
               height="80px"
-              src={teamImg instanceof File ? URL.createObjectURL(teamImg) : teamImg}
+              src={teamImg instanceof File ? URL.createObjectURL(teamImg) : `${serverUrl}${teamImg}`}
               alt="img"
             />
           </div>
@@ -241,7 +268,11 @@ const EditTeamModal = (props) => {
               {teamMembers.map((member) => (
                 <li key={member.id} className="d-flex justify-content-between align-items-center">
                   <div className="d-flex align-items-center">
-                    {member.isAdmin ? <BsAwardFill /> : <BsAwardFill style={{ color: 'lightgray' }} />}
+                    {member.isAdmin ? (
+                      <BsAwardFill onClick={() => removeAdmin(member.id)} />
+                    ) : (
+                      <BsAwardFill style={{ color: 'lightgray' }} onClick={() => addAdmin(member.id)} />
+                    )}
                     <span className="ml-2">{member.name}</span>
                   </div>
                   <button type="button" className="btn ml-2" onClick={() => handleRemoveMember(member.id)}>

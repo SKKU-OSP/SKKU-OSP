@@ -13,6 +13,7 @@ from community.models import Article, Board, TeamRecruitArticle
 from handle_error import get_fail_res
 from message.models import Message
 from tag.models import TagIndependent
+from tag.serializers import TagIndependentSerializer
 from team.models import (Team, TeamApplyMessage, TeamInviteMessage, TeamMember,
                          TeamTag)
 from team.recommend import get_team_recommendation
@@ -590,10 +591,10 @@ class TeamUpdateView(APIView):
             if status == 'success':
                 try:
                     team = Team.objects.get(id=target_team_id)
-
-                except Team.DoesNotExist:
+                except Team.DoesNotExist as e:
                     errors['team_not_found'] = "해당 팀이 존재하지 않습니다."
                     status = 'fail'
+                    logging.exception(f"team_not_found {e}")
 
             if status == 'success':
                 try:
@@ -601,6 +602,7 @@ class TeamUpdateView(APIView):
                 except TeamMember.DoesNotExist:
                     errors['user_is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
                     status = 'fail'
+                    logging.exception(f"user_is_not_teammember {e}")
 
             if status == 'success':
                 try:
@@ -609,6 +611,7 @@ class TeamUpdateView(APIView):
                 except TeamMember.DoesNotExist:
                     errors['user_is_not_teamadmin'] = '해당 팀의 관리자가 아닙니다.'
                     status = 'fail'
+                    logging.exception(f"user_is_not_teamadmin {e}")
 
         return status, message, errors, valid_data
 
@@ -664,7 +667,10 @@ class TeamUpdateView(APIView):
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
-    def post_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
+    def post_validation(self, request, *args, **kwargs):
+        status = 'success'
+        errors = {}
+        valid_data = {}
 
         target_team_id = request.data.get('target_team_id', False)
 
@@ -679,6 +685,7 @@ class TeamUpdateView(APIView):
         if not request.user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
+            return status, errors, valid_data
 
         # Team 존재 여부 체크
         try:
@@ -687,7 +694,7 @@ class TeamUpdateView(APIView):
             logging.exception(f'Team Id {target_team_id}이 없습니다. {e}')
             errors['team_not_found'] = "해당 팀이 존재하지 않습니다."
             status = 'fail'
-            return status, message, errors, valid_data
+            return status, errors, valid_data
 
         # Team Name Check
         if not team_name:
@@ -702,7 +709,7 @@ class TeamUpdateView(APIView):
         valid_data['team'] = target_team
 
         if not team_description:
-            errors['team_description_duplicate'] = '설명은 필수 입력값입니다.'
+            errors['team_description_empty'] = '설명은 필수 입력값입니다.'
             status = 'fail'
         else:
             if len(team_description) < 30 or len(team_description) > 150:
@@ -716,28 +723,27 @@ class TeamUpdateView(APIView):
                 # \u00d7 는 곱셈기호
                 errors['team_image_too_big'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
 
-        return status, message, errors, valid_data
+        return status, errors, valid_data
 
     def post(self, request, *args, **kwargs):
         # Declaration
         status = 'success'
         message = ''
         data = {}
-        errors = {}
         valid_data = {}
 
         # Request Validation
-        status, message, errors, valid_data \
-            = self.post_validation(
-                request,
-                status, message, errors, valid_data,
-                *args, **kwargs)
+        status, errors, valid_data = self.post_validation(
+            request, *args, **kwargs)
 
         if status == 'fail':
-            message = 'validation 과정 중 오류가 발생하였습니다.'
+            message = []
+            for _, msg in errors.items():
+                message.append(msg)
             logging.exception(
                 f'TeamUpdateView validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
+            res = {'status': status, 'message': " ".join(
+                message), 'errors': errors}
             return Response(res)
 
         # Transactions
@@ -807,6 +813,19 @@ class TeamUpdateView(APIView):
                 if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
                     raise Exception('팀 관리자는 0명이 될 수 없습니다.')
                 team.save()
+
+                # 변경된 팀 정보
+                data['team'] = TeamSerializer(team).data
+                # 변경된 팀 태그
+                team_tags = TagIndependent.objects.filter(
+                    teamtag__team_id=team)
+                data['team_tags'] = TagIndependentSerializer(
+                    team_tags, many=True).data
+                # 변경된 팀 멤버
+                team_members = TeamMember.objects.filter(team=team).order_by(
+                    '-is_admin').prefetch_related('member__user')
+                data['team_members'] = TeamMemberSerializer(
+                    team_members, many=True).data
 
         except DatabaseError as e:
             logging.error(f"TeamUpdateView: {e}")
