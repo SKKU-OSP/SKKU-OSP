@@ -45,6 +45,10 @@ function CommentItem(props) {
     }
   };
   const navigate = useNavigate();
+  console.log('comment.writer', comment, comment.writer);
+  if (comment.writer === null) {
+    comment.writer = { user: { username: '탈퇴계정', id: null } };
+  }
 
   return (
     <div className={styles.comment}>
