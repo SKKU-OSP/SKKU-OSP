@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/article/<int:article_id>/scrap/',
          views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
     # 게시글 파일
-    path('api/article/<int:article_id>/file/<int:articlefile_id>',
+    path('api/article/<int:article_id>/file/<int:articlefile_id>/',
          views_article.ArticleFileView.as_view(), name='ArticleFile'),
     # 댓글 생성
     path('api/comment/create/',

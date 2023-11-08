@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from community.models import Article, Board, TeamRecruitArticle
 from handle_error import get_fail_res
 from message.models import Message
-from tag.models import Tag, TagIndependent
+from tag.models import TagIndependent
 from team.models import (Team, TeamApplyMessage, TeamInviteMessage, TeamMember,
                          TeamTag)
 from team.recommend import get_team_recommendation
@@ -681,12 +681,13 @@ class TeamUpdateView(APIView):
             status = 'fail'
 
         # Team 존재 여부 체크
-        target_team = Team.objects.filter(id=target_team_id)
-        if not target_team.exists():
+        try:
+            target_team = Team.objects.get(id=target_team_id)
+        except Team.DoesNotExist as e:
+            logging.exception(f'Team Id {target_team_id}이 없습니다. {e}')
             errors['team_not_found'] = "해당 팀이 존재하지 않습니다."
             status = 'fail'
             return status, message, errors, valid_data
-        valid_data['team'] = target_team.first()
 
         # Team Name Check
         if not team_name:
@@ -698,6 +699,7 @@ class TeamUpdateView(APIView):
             if len(team_obj) > 0:
                 errors['team_name_duplicate'] = '팀 이름이 이미 존재합니다.'
                 status = 'fail'
+        valid_data['team'] = target_team
 
         if not team_description:
             errors['team_description_duplicate'] = '설명은 필수 입력값입니다.'
@@ -711,7 +713,6 @@ class TeamUpdateView(APIView):
         if team_image:
             img_width, img_height = get_image_dimensions(team_image)
             if img_width > 500 or img_height > 500:
-                is_valid = False
                 # \u00d7 는 곱셈기호
                 errors['team_image_too_big'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
 
@@ -744,6 +745,7 @@ class TeamUpdateView(APIView):
         team_name = request.data.get('team_name', False)
         team_name = team_name.strip() if isinstance(team_name, str) else team_name
         team_description = request.data.get('team_description', False)
+        print("team_description", type(team_description), team_description)
         team_description = ' '.join(team_description.split())
         team_image = request.FILES.get('team_image', False)
 
@@ -761,12 +763,12 @@ class TeamUpdateView(APIView):
                 team_board.name = team_name
                 team_board.save()
                 # teamMember create and update
-                admin_list = request.data.get('admin_list').split(',')
+                admin_list = request.data.get('team_admin', [])
                 for x in admin_list:
                     if not x:
                         admin_list = []
                         break
-                member_list = request.data.get('member_list').split(',')
+                member_list = request.data.get('team_members', [])
                 for x in member_list:
                     if not x:
                         member_list = []
@@ -787,7 +789,7 @@ class TeamUpdateView(APIView):
                     teammember.save()
 
                 # teamTag create and delete
-                tag_list = request.data.get('category_tag_list').split(',')
+                tag_list = request.data.get('team_tags', [])
                 tag_list_old = list(TeamTag.objects.filter(
                     team=team).values_list('tag__name', flat=True))
 
@@ -799,18 +801,19 @@ class TeamUpdateView(APIView):
                     TeamTag.objects.get(
                         team=team, tag__name=tag_name).delete()
                 for tag_name in list(set(tag_list) - set(tag_list_old)):
-                    tag = Tag.objects.get(name=tag_name)
+                    tag = TagIndependent.objects.get(name=tag_name)
                     TeamTag.objects.create(team=team, tag=tag)
 
                 if len(TeamMember.objects.filter(team=team, is_admin=True)) == 0:
                     raise Exception('팀 관리자는 0명이 될 수 없습니다.')
                 team.save()
 
-        except DatabaseError:
-            errors['DB'] = 'DB Error'
+        except DatabaseError as e:
+            logging.error(f"TeamUpdateView: {e}")
             status = 'fail'
-
-        except:
+            errors['DB'] = 'DB Error'
+        except Exception as e:
+            logging.error(f"TeamUpdateView: {e}")
             status = 'fail'
             errors['undefined_exception'] = 'undefined_exception'
 

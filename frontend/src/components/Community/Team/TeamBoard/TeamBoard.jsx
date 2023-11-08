@@ -144,9 +144,10 @@ function TeamBoard() {
                 <div>
                   <div className="team-description fs-4">
                     {team_name}
-                    {isAdmin ? <EditTeamModal team_name={team_name} /> : null}
+                    {isAdmin ? (
+                      <EditTeamModal team={thisTeam.team} teamMembers={teamMembers} teamTags={thisTeam.team_tags} />
+                    ) : null}
                     <BsBoxArrowRight className="team-out" onClick={() => teamOut()} />
-                    {/* <EditTeamModal team_name={team_name} /> */}
                   </div>
                   <div>
                     <div className="inline fs-6">{thisTeam.team.description}</div>
