@@ -13,7 +13,7 @@ from community.serializers import (ArticleCommentSerializer, ArticleSerializer,
                                    BoardArticleSerializer, BoardSerializer,
                                    RecruitArticleSerializer)
 from tag.serializers import TagIndependentSerializer
-from team.models import Team, TeamInviteMessage, TeamMember, TeamTag
+from team.models import Team, TeamInviteMessage, TeamMember
 from team.serializers import TeamMemberSerializer, TeamSerializer
 from team.utils import is_teammember
 from user.models import Account, AccountPrivacy

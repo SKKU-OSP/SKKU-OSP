@@ -95,7 +95,6 @@ const EditTeamModal = (props) => {
         if (window.confirm('팀 정보를 수정하시겠습니까?')) {
           const config = getAuthConfig();
           config.headers['Content-Type'] = 'multipart/form-data';
-          console.log('config', config);
 
           const postData = {
             target_team_id: team.id,
@@ -109,11 +108,11 @@ const EditTeamModal = (props) => {
 
           const response = await axios.post(urlEditTeamInfo, postData, getAuthConfig());
           const res = response.data;
-          console.log(res);
 
           if (res.status === 'success') {
             alert('수정이 완료되었습니다!');
-            handleClose();
+            props.updateTeamInfo(res.data.team, res.data.team_members, res.data.team_tags);
+            setShow(false);
           } else {
             alert('팀 업데이트에 실패했습니다.');
             console.log(res.message);

@@ -25,6 +25,7 @@ function TeamBoard() {
   const [nowPage, setNowPage] = useState(1);
   const [thisTeam, setThisTeam] = useState({ team: {}, articles: [] });
   const [teamMembers, setTeamMembers] = useState([]);
+  const [teamTags, setTeamTags] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState(false);
   const { username } = useContext(AuthContext);
@@ -42,6 +43,7 @@ function TeamBoard() {
       if (res.status === 'success') {
         setThisTeam(res.data);
         setTeamMembers(res.data.team_members);
+        setTeamTags(res.data.team_tags);
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);
         setNowPage(page);
@@ -108,6 +110,17 @@ function TeamBoard() {
     setShowInvite(true);
   };
 
+  const updateTeamInfo = (teamInfo, memberList, tagList) => {
+    setThisTeam((prev) => {
+      return { ...prev, team: teamInfo };
+    });
+    setTeamMembers(memberList);
+    setTeamTags(tagList);
+    if (teamInfo.name !== team_name) {
+      navigate(`/community/team/${teamInfo.name}`);
+    }
+  };
+
   useEffect(() => {
     if (username !== null) {
       getTeamInfo(1);
@@ -135,17 +148,29 @@ function TeamBoard() {
                 <div className="col-lg-6 col-12 p-2">
                   <img src={server_url + thisTeam.team.image} className="team-profile-img" />
                 </div>
-                <div className="col-lg-6 col-12">
+                <div className="col-lg-6 col-12 mb-2">
                   <div className="team-desc-header fs-4">
                     {team_name}
                     {isAdmin ? (
-                      <EditTeamModal team={thisTeam.team} teamMembers={teamMembers} teamTags={thisTeam.team_tags} />
+                      <EditTeamModal
+                        team={thisTeam.team}
+                        teamMembers={teamMembers}
+                        teamTags={thisTeam.team_tags}
+                        updateTeamInfo={updateTeamInfo}
+                      />
                     ) : null}
                     <BsBoxArrowRight className="btnIcon team-out" onClick={() => teamOut()} />
                   </div>
                   <div>
                     <div className="inline fs-6">{thisTeam.team.description}</div>
                   </div>
+                </div>
+                <div>
+                  {teamTags.map((t) => (
+                    <span key={t.name} className="badge me-2" style={{ backgroundColor: t.color }}>
+                      {t.name}
+                    </span>
+                  ))}
                 </div>
               </div>
               <div className="team-right">
@@ -161,8 +186,8 @@ function TeamBoard() {
                     />
                   </div>
                   <div className="team-members-box">
-                    {thisTeam.team_members
-                      ? thisTeam.team_members.map((member) =>
+                    {teamMembers
+                      ? teamMembers.map((member) =>
                           member.is_admin ? (
                             <div key={member.member.user.id} className="dropdown-button text-nowrap">
                               <DropdownButton
