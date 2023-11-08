@@ -112,8 +112,11 @@ const EditTeamModal = (props) => {
           console.log(res);
 
           if (res.status === 'success') {
-            window.alert('수정이 완료되었습니다!');
+            alert('수정이 완료되었습니다!');
             handleClose();
+          } else {
+            alert('팀 업데이트에 실패했습니다.');
+            console.log(res.message);
           }
         }
       } catch (error) {
@@ -184,7 +187,7 @@ const EditTeamModal = (props) => {
 
   return (
     <>
-      <BsPencilFill onClick={handleShow} />
+      <BsPencilFill className="btnIcon" onClick={handleShow} />
       <Modal show={show} onHide={handleClose} ref={editorRef} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>

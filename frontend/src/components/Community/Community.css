@@ -299,3 +299,10 @@
   padding-left: 0px;
   color: #000000;
 }
+
+.btnIcon {
+  cursor: pointer;
+}
+.btnIcon:hover {
+  opacity: 0.5;
+}

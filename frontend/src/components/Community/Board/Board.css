@@ -126,7 +126,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
   border: 1px solid var(--main-border-color);
   margin-top: -1px;
   margin-left: -1px;
@@ -147,6 +146,7 @@
 .team-left {
   width: 50%;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   padding: 20px;
 }
@@ -159,24 +159,27 @@
   padding: 20px;
 }
 
-.team-description,
+.team-desc-header,
 .team-members {
-  color: #000;
-  font-family: Inter;
+  color: var(--gray-900);
   font-weight: 600;
   line-height: normal;
   letter-spacing: -1.5px;
-}
-.team-members {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 4px;
+}
+.team-members-box {
+  overflow-y: scroll;
+  overflow-x: auto;
+  height: 120px;
 }
 
 .team-members-list {
   display: inline;
   word-break: break-word;
   color: #454545;
-  font-family: Inter;
   flex-grow: 1;
   margin-left: 5px;
   text-decoration: underline;
@@ -205,7 +208,6 @@
   border-radius: 50%;
   border: 1px solid #b0b0b0;
   object-fit: cover;
-  margin: 0px 20px 0px -10px;
 }
 
 .team-recommend-button {
@@ -220,6 +222,11 @@
   border: 2px solid #b0b0b0;
   background: #fff;
   margin-left: 5px;
+}
+.team-recommend-button:hover {
+  cursor: pointer;
+  background-color: var(--gray-200);
+  transition: background-color 0.3s ease;
 }
 
 .multi-line-button {

@@ -52,8 +52,6 @@ function TeamBoard() {
       setError(true);
     }
   };
-  // console.log('team', thisTeam);
-  // console.log('teammem', teamMembers);
 
   const onMyTeamList = () => {
     navigate(`/community/team`);
@@ -79,7 +77,7 @@ function TeamBoard() {
     setShowChatMessageModal(true);
   };
 
-  const teamOut = async (event) => {
+  const teamOut = async () => {
     const currentUser = username;
     console.log('current', currentUser);
 
@@ -134,20 +132,16 @@ function TeamBoard() {
           <>
             <div className="team">
               <div className="team-left">
-                <img
-                  src={server_url + thisTeam.team.image}
-                  className="team-profile-img"
-                  data-bs-hover="tooltip"
-                  data-bs-placement="top"
-                  data-bs-title="프로필 페이지"
-                />
-                <div>
-                  <div className="team-description fs-4">
+                <div className="col-lg-6 col-12 p-2">
+                  <img src={server_url + thisTeam.team.image} className="team-profile-img" />
+                </div>
+                <div className="col-lg-6 col-12">
+                  <div className="team-desc-header fs-4">
                     {team_name}
                     {isAdmin ? (
                       <EditTeamModal team={thisTeam.team} teamMembers={teamMembers} teamTags={thisTeam.team_tags} />
                     ) : null}
-                    <BsBoxArrowRight className="team-out" onClick={() => teamOut()} />
+                    <BsBoxArrowRight className="btnIcon team-out" onClick={() => teamOut()} />
                   </div>
                   <div>
                     <div className="inline fs-6">{thisTeam.team.description}</div>
@@ -155,10 +149,10 @@ function TeamBoard() {
                 </div>
               </div>
               <div className="team-right">
-                <div>
-                  <div className="team-members fs-4">
+                <div className="flex-grow-1">
+                  <div className="team-members fs-4 mb-2">
                     Members
-                    <BsPersonPlusFill onClick={handleClickInvite} style={{ cursor: 'pointer' }} />
+                    <BsPersonPlusFill className="btnIcon" onClick={handleClickInvite} />
                     <InviteTeamModalInBoard
                       show={showInvite}
                       setShow={setShowInvite}
@@ -166,11 +160,11 @@ function TeamBoard() {
                       id={thisTeam.team.id}
                     />
                   </div>
-                  <div>
+                  <div className="team-members-box">
                     {thisTeam.team_members
                       ? thisTeam.team_members.map((member) =>
                           member.is_admin ? (
-                            <span key={member.member.user.id} className="dropdown-button">
+                            <div key={member.member.user.id} className="dropdown-button text-nowrap">
                               <DropdownButton
                                 title={member.member.user.username}
                                 variant="link"
@@ -195,16 +189,9 @@ function TeamBoard() {
                                 )}
                               </DropdownButton>
                               <BsAwardFill className="admin-star" />
-                            </span>
+                            </div>
                           ) : (
-                            // <h6
-                            //   className="team-members-list"
-                            //   onClick={() => onWriter(member)}
-                            //   key={member.member.user.id}
-                            // >
-                            //   {member.member.user.username}
-                            // </h6>
-                            <h6 key={member.member.user.id} className="dropdown-button">
+                            <div key={member.member.user.id} className="dropdown-button text-nowrap">
                               <DropdownButton
                                 title={member.member.user.username}
                                 variant="link"
@@ -229,7 +216,7 @@ function TeamBoard() {
                                   </>
                                 )}
                               </DropdownButton>
-                            </h6>
+                            </div>
                           )
                         )
                       : null}
