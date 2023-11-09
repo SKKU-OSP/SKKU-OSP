@@ -13,6 +13,7 @@ export function tokenRemover() {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('expiration');
+  localStorage.removeItem('username');
 
   return null;
 }

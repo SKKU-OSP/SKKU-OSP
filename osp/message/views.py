@@ -332,12 +332,15 @@ class MessageCheckNewView(APIView):
     '''
 
     def get(self, request):
-        res = {'status': None, 'data': None}
         data = {'show_new_message': False}
+        res = {'status': 'fail', 'data': data}
+        if request.user.is_anonymous:
+            return Response(res)
+
         unread_messages = Message.objects.filter(
             receiver__user=request.user, receiver_read=False)
         data['show_new_message'] = unread_messages.exists()
-        res['data'] = data
+        res['status'] = 'success'
         return Response(res)
 
 

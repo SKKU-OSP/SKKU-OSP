@@ -56,6 +56,7 @@ function OAuth() {
       console.error('Callback code is missing');
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('username');
     }
   }, [location.search, navigate]);
 
