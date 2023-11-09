@@ -7,6 +7,7 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function Notification_Container({ iconSize, showNoti, setShowNoti, setShowTeamApp }) {
   const [newAlert, setNewAlert] = useState(false);
+  const [notiList, setNotiList] = useState([]);
 
   const handleClose = () => {
     setShowNoti(false);
@@ -24,6 +25,7 @@ export default function Notification_Container({ iconSize, showNoti, setShowNoti
       if (res.data.show_new_noti) {
         setNewAlert(true);
       }
+      setNotiList(res.data.notifications);
     } catch (error) {
       console.log(error);
     }
@@ -42,6 +44,8 @@ export default function Notification_Container({ iconSize, showNoti, setShowNoti
       setShowTeamApp={setShowTeamApp}
       handleClose={handleClose}
       handleShow={handleShow}
+      notiList={notiList}
+      setNotiList={setNotiList}
     />
   );
 }

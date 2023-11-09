@@ -15,36 +15,15 @@ import classes from './NotificationModal.module.css';
 import AuthContext from '../../../utils/auth-context';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
-const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
-  const [notiList, setNotiList] = useState([]);
+const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose, setShowTeamApp }) => {
   const [length, setLength] = useState(0);
   const [readAll, setReadAll] = useState(0);
-
   const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    try {
-      const url = serverUrl + '/message/api/noti/list/';
-      const getNotifications = async () => {
-        const response = await axios.get(url, getAuthConfig());
-        const res = response.data;
-        if (res.status === 'success') {
-          setNotiList(res.data.notifications);
-        } else {
-          console.log(res);
-        }
-      };
-      getNotifications();
-    } catch (error) {
-      console.log('error', error);
-    }
-  }, [length]);
 
   const handleShowTeamApp = () => {
     setShowTeamApp(true);
   };
-
   const TypeImage = (type, read) => {
     if (type === 'team_apply_result' || type === 'team_apply')
       return <MdOutlinePortrait size="24" style={read === true ? { color: 'gray' } : { color: 'black' }} />;
@@ -81,6 +60,14 @@ const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
       navigate(`/community/team/${team_name}`);
     }
     setLength(length - 1);
+    setNotiList((prev) =>
+      prev.map((noti) => {
+        if (noti.id == noti_id) {
+          noti.receiver_read = true;
+        }
+        return noti;
+      })
+    );
   };
 
   const handleReadAll = (user_id) => {

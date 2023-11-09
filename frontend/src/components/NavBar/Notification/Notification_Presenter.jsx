@@ -8,7 +8,9 @@ export default function Notification_Presenter({
   showNoti,
   setShowTeamApp,
   handleClose,
-  handleShow
+  handleShow,
+  notiList,
+  setNotiList
 }) {
   return (
     <>
@@ -24,6 +26,8 @@ export default function Notification_Presenter({
         show={showNoti}
         handleClose={handleClose}
         setShowTeamApp={setShowTeamApp}
+        notiList={notiList}
+        setNotiList={setNotiList}
       />
     </>
   );

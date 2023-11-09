@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 import { FaTrophy } from 'react-icons/fa';
 
@@ -10,29 +10,32 @@ import classes from './ChallengePage.module.css';
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 const ChallengePage = () => {
+  const navigate = useNavigate();
   const [achievements, setAchievements] = useState([]);
   const [total, setTotal] = useState(1);
   const { userId } = useContext(AuthContext);
 
+  const url = serverUrl + `/challenge/api/list/${userId}/`;
+  const getAchievements = async () => {
+    const response = await axios.get(url);
+    const res = response.data;
+    if (res.status === 'success') {
+      setTotal(res.data.total_accounts);
+      setAchievements(res.data.achievements);
+      console.log(res.data.achievements);
+    } else {
+      console.log(res.message);
+    }
+  };
+
   useEffect(() => {
-    if (userId) {
-      try {
-        const url = serverUrl + `/challenge/api/list/${userId}/`;
-        const getAchievements = async () => {
-          const response = await axios.get(url);
-          const res = response.data;
-          if (res.status === 'success') {
-            setTotal(res.data.total_accounts);
-            setAchievements(res.data.achievements);
-            console.log(res.data.achievements);
-          } else {
-            console.log(res.message);
-          }
-        };
-        getAchievements();
-      } catch (error) {
-        console.log('error', error);
+    if (userId !== null) {
+      getAchievements();
+    } else {
+      if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
       }
+      return;
     }
   }, [userId]);
 
