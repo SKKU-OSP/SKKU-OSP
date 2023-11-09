@@ -30,6 +30,8 @@ function MyTeamList() {
     { label: '팀원 많은 순', value: '-member_cnt' }
   ];
 
+  const [showDropDown, setShowDropDown] = useState(false);
+
   const getMyTeamList = async (page, sort = sortOrder) => {
     try {
       const responseTeamList = await axios.get(
@@ -67,7 +69,8 @@ function MyTeamList() {
 
   const handleSortChange = (sortOption) => {
     setSortOrder(sortOption.value);
-    getMyeamList(nowPage, sortOption.value);
+    getMyTeamList(nowPage, sortOption.value);
+    setShowDropDown(false);
   };
 
   const handleShow = () => setModalShow(true);
@@ -77,7 +80,7 @@ function MyTeamList() {
   return (
     <div className="col-9">
       <div className="community-team-nav d-flex">
-        <Dropdown>
+        <Dropdown show={showDropDown} onToggle={(isOpen) => setShowDropDown(isOpen)}>
           <Dropdown.Toggle variant="secondary" id="dropdown-sort">
             {sortOptions.find((option) => option.value === sortOrder).label}
           </Dropdown.Toggle>
