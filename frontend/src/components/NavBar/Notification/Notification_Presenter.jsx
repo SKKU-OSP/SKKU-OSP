@@ -13,7 +13,7 @@ export default function Notification_Presenter({
   return (
     <>
       {newAlert && (
-        <span className="badge-new badge-new-alert">
+        <span className="badge-new badge-new-alert-noti">
           <span className="visually-hidden">New Application</span>
         </span>
       )}
