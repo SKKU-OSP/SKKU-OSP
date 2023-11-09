@@ -8,6 +8,7 @@ import RecruitArticle from './RecruitArticle';
 import AuthContext from '../../../../utils/auth-context';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -28,7 +29,16 @@ function TeamRecruit() {
   const isRecruitTab = tabName === '팀 모집';
   const isTeamListTab = tabName === '전체 팀 목록';
 
-  const getRecruit = async (page) => {
+  const [sortOrder, setSortOrder] = useState('-id');
+
+  const sortOptions = [
+    { label: '최신순', value: '-id' },
+    { label: '오래된 순', value: 'id' },
+    { label: '이름 순', value: 'name' },
+    { label: '팀원 많은 순', value: '-member_cnt' }
+  ];
+
+  const getRecruit = async (page, sort = 'latest') => {
     try {
       const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/?page_number=${page}`);
       const resRecruit = responseRecruit.data;
@@ -45,9 +55,9 @@ function TeamRecruit() {
       console.log('getRecruit error', error);
     }
   };
-  const getTeamList = async (page) => {
+  const getTeamList = async (page, sort = sortOrder) => {
     try {
-      const responseTeamList = await axios.get(server_url + `/team/api/teams-list/?page_number=${page}`);
+      const responseTeamList = await axios.get(server_url + `/team/api/teams-list/?page_number=${page}&sort=${sort}`);
       const resTeamList = responseTeamList.data;
       if (resTeamList.status === 'success') {
         setTeams(resTeamList.data.teams);
@@ -68,11 +78,11 @@ function TeamRecruit() {
     if (isRecruitTab) {
       getRecruit(1);
     } else if (isTeamListTab) {
-      getTeamList(1);
+      getTeamList(1, sortOrder);
     } else {
       alert('존재하지 않는 게시판입니다.');
     }
-  }, [tabName, isRecruitTab, isTeamListTab]);
+  }, [tabName, isRecruitTab, isTeamListTab, sortOrder]);
 
   const onWrite = () => {
     if (username) {
@@ -92,7 +102,15 @@ function TeamRecruit() {
 
   const onTeamListPageChange = (page) => {
     if (isTeamListTab) {
-      getTeamList(page);
+      getTeamList(page, sortOrder);
+      setNowTeamPage(page);
+    }
+  };
+
+  const handleSortChange = (sortOption) => {
+    setSortOrder(sortOption.value);
+    if (isTeamListTab) {
+      getTeamList(nowTeamPage, sortOption.value);
     }
   };
 
@@ -101,9 +119,25 @@ function TeamRecruit() {
       {!error && (
         <>
           <div className="community-nav d-flex">
-            <button type="button" className="btn btn-primary hidden">
-              hidden
-            </button>
+            {isRecruitTab && (
+              <button type="button" className="btn btn-primary hidden">
+                hidden
+              </button>
+            )}
+            {isTeamListTab && (
+              <Dropdown>
+                <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+                  {sortOptions.find((option) => option.value === sortOrder).label}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {sortOptions.map((option) => (
+                    <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
+                      {option.label}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
             <ul className="nav nav-fill community-nav-items">
               <CommunityNavItem navName="팀 모집" tabName={tabName} />
               <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
