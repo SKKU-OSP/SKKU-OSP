@@ -12,7 +12,12 @@
   margin-bottom: 15px;
 }
 
-.badge-new-alert {
+.badge-new-alert-noti {
   margin-left: 63px;
+  margin-bottom: 15px;
+}
+
+.badge-new-alert-application {
+  margin-left: 17px;
   margin-bottom: 15px;
 }
