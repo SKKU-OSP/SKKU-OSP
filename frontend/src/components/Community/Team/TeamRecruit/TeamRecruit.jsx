@@ -29,18 +29,30 @@ function TeamRecruit() {
   const isRecruitTab = tabName === '팀 모집';
   const isTeamListTab = tabName === '전체 팀 목록';
 
-  const [sortOrder, setSortOrder] = useState('-id');
+  const [recruitSortOrders, setRecruitSortOrders] = useState('-id');
+  const [teamSortOrders, setTeamSortOrders] = useState('-id');
 
-  const sortOptions = [
+  const recruitSortOptions = [
+    { label: '최신순', value: '-id' },
+    { label: '오래된 순', value: 'id' },
+    { label: '팀 이름 순', value: 'team_name' },
+    { label: '멤버 많은 순', value: '-member_cnt' }
+  ];
+  const TeamSortOptions = [
     { label: '최신순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '이름 순', value: 'name' },
     { label: '팀원 많은 순', value: '-member_cnt' }
   ];
 
-  const getRecruit = async (page, sort = 'latest') => {
+  const [showRecruitDropdown, setShowRecruitDropdown] = useState(false);
+  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
+
+  const getRecruit = async (page, sort = recruitSortOrders) => {
     try {
-      const responseRecruit = await axios.get(server_url + `/community/api/board/${tabName}/?page_number=${page}`);
+      const responseRecruit = await axios.get(
+        server_url + `/community/api/board/${tabName}/?page_number=${page}&sort=${sort}`
+      );
       const resRecruit = responseRecruit.data;
       if (resRecruit.status === 'success') {
         setArticles(resRecruit.data.articles);
@@ -55,7 +67,7 @@ function TeamRecruit() {
       console.log('getRecruit error', error);
     }
   };
-  const getTeamList = async (page, sort = sortOrder) => {
+  const getTeamList = async (page, sort = teamSortOrders) => {
     try {
       const responseTeamList = await axios.get(server_url + `/team/api/teams-list/?page_number=${page}&sort=${sort}`);
       const resTeamList = responseTeamList.data;
@@ -76,13 +88,13 @@ function TeamRecruit() {
   useEffect(() => {
     // 존재하는 게시판인지 확인
     if (isRecruitTab) {
-      getRecruit(1);
+      getRecruit(1, recruitSortOrders);
     } else if (isTeamListTab) {
-      getTeamList(1, sortOrder);
+      getTeamList(1, teamSortOrders);
     } else {
       alert('존재하지 않는 게시판입니다.');
     }
-  }, [tabName, isRecruitTab, isTeamListTab, sortOrder]);
+  }, [tabName, isRecruitTab, isTeamListTab, recruitSortOrders, teamSortOrders]);
 
   const onWrite = () => {
     if (username) {
@@ -96,22 +108,30 @@ function TeamRecruit() {
 
   const onRecruitPageChange = (page) => {
     if (isRecruitTab) {
-      getRecruit(page);
+      getRecruit(page, recruitSortOrders);
+      setNowRecruitPage(page);
     }
   };
-
   const onTeamListPageChange = (page) => {
     if (isTeamListTab) {
-      getTeamList(page, sortOrder);
+      getTeamList(page, teamSortOrders);
       setNowTeamPage(page);
     }
   };
 
-  const handleSortChange = (sortOption) => {
-    setSortOrder(sortOption.value);
+  const handleRecruitSortChange = (sortOption) => {
+    setRecruitSortOrders(sortOption.value);
+    if (isRecruitTab) {
+      getRecruit(nowTeamPage, sortOption.value);
+    }
+    setShowRecruitDropdown(false);
+  };
+  const handleTeamSortChange = (sortOption) => {
+    setTeamSortOrders(sortOption.value);
     if (isTeamListTab) {
       getTeamList(nowTeamPage, sortOption.value);
     }
+    setShowTeamDropdown(false);
   };
 
   return (
@@ -120,18 +140,27 @@ function TeamRecruit() {
         <>
           <div className="community-nav d-flex">
             {isRecruitTab && (
-              <button type="button" className="btn btn-primary hidden">
-                hidden
-              </button>
-            )}
-            {isTeamListTab && (
-              <Dropdown>
+              <Dropdown show={showRecruitDropdown} onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}>
                 <Dropdown.Toggle variant="secondary" id="dropdown-sort">
-                  {sortOptions.find((option) => option.value === sortOrder).label}
+                  {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  {sortOptions.map((option) => (
-                    <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
+                  {recruitSortOptions.map((option) => (
+                    <Dropdown.Item key={option.value} onClick={() => handleRecruitSortChange(option)}>
+                      {option.label}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
+            {isTeamListTab && (
+              <Dropdown show={showTeamDropdown} onToggle={(isOpen) => setShowTeamDropdown(isOpen)}>
+                <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+                  {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {TeamSortOptions.map((option) => (
+                    <Dropdown.Item key={option.value} onClick={() => handleTeamSortChange(option)}>
                       {option.label}
                     </Dropdown.Item>
                   ))}
