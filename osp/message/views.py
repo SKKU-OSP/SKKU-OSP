@@ -261,7 +261,7 @@ class ApplicationReadView(APIView):
 # 기존 template_tags의 message_tag 영역에 대한 API 작업
 class NotificationListView(APIView):
     '''
-    알림 메시지 목록과 새로운 알림 배지 렌더링 유무 반환
+    알림 메시지 목록 반환
     '''
 
     def get(self, request):
@@ -273,7 +273,6 @@ class NotificationListView(APIView):
         user_id = request.user.id
         notifications = Notification.objects.filter(
             receiver__user_id=user_id).order_by('-send_date')
-        show_new_noti = len(notifications.filter(receiver_read=False)) > 0
 
         notifications = NotificationSerializer(notifications, many=True).data
         try:
@@ -317,12 +316,27 @@ class NotificationListView(APIView):
             res['status'] = 'fail'
             return Response(res)
 
-        data['show_new_noti'] = show_new_noti
         data['show_new_app'] = show_new_app
         data['show_new_app_result'] = show_new_app_result
         data["notifications"] = notifications
         res['data'] = data
         res['status'] = 'success'
+        return Response(res)
+    
+class NotificationCheckNewView(APIView):
+    '''
+    읽지 않은 알림이 있는지 확인하는 API
+    '''
+
+    def get(self, request):
+        res = {"status": None, "data": None}
+        data = {'show_new_noti': False}
+        user_id = request.user.id
+        notifications = Notification.objects.filter(
+            receiver__user_id=user_id).order_by('-send_date')
+        show_new_noti = len(notifications.filter(receiver_read=False)) > 0
+        data['show_new_noti'] = show_new_noti
+        res['data'] = data
         return Response(res)
 
 

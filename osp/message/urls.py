@@ -11,6 +11,8 @@ urlpatterns = [
          name='MessageCheck'),
     path('api/chat/<int:target_user_id>/',
          views.MessageChatView.as_view(), name='MessageChat'),
+    path('api/noti/new/', views.NotificationCheckNewView.as_view(),
+         name='NotiCheck'),
     path('api/noti-read/', views.NotificationReadAllView.as_view(),
          name='NotificationReadAll'),
     path('api/noti-read/<int:noti_id>/',

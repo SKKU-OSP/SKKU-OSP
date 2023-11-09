@@ -14,10 +14,12 @@ import { getAuthConfig } from '../../../utils/auth';
 import classes from './NotificationModal.module.css';
 import AuthContext from '../../../utils/auth-context';
 
-const serverUrl = import.meta.env.VITE_SERVER_URL;
-const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose, setShowTeamApp }) => {
+const server_url = import.meta.env.VITE_SERVER_URL;
+
+const NotificationModal = ({ iconSize, show, handleClose, setShowTeamApp }) => {
   const [length, setLength] = useState(0);
   const [readAll, setReadAll] = useState(0);
+  const [notiList, setNotiList] = useState([]);
   const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -35,6 +37,17 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
       );
     else if (type === 'articlelike')
       return <AiOutlineLike size="24" style={read === true ? { color: 'gray' } : { color: 'black' }} />;
+  };
+
+  const getNotiList = async () => {
+    try {
+      const url = server_url + '/message/api/noti/list/';
+      const response = await axios.get(url, getAuthConfig());
+      const res = response.data;
+      setNotiList(res.data.notifications);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const PrintUnread = (read) => {
@@ -83,7 +96,7 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
   //   AXIOS POST
   const sendReadAll = async (user_id) => {
     const data = { receiver__user: user_id };
-    const ReadAllUrl = serverUrl + '/message/api/noti-read/';
+    const ReadAllUrl = server_url + '/message/api/noti-read/';
     try {
       const response = await axios.post(ReadAllUrl, data, getAuthConfig());
       const res = response.data;
@@ -99,7 +112,7 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
 
   const sendReadNoti = async (noti_id) => {
     const data = { target_noti: noti_id };
-    const ReadNotiUrl = serverUrl + `/message/api/noti-read/${noti_id}/`;
+    const ReadNotiUrl = server_url + `/message/api/noti-read/${noti_id}/`;
     try {
       const response = await axios.post(ReadNotiUrl, data, getAuthConfig());
       const res = response.data;
@@ -112,6 +125,11 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    // axios 요청으로 새로운 채팅 메시지 여부 확인
+    getNotiList();
+  }, []);
 
   return (
     <>
