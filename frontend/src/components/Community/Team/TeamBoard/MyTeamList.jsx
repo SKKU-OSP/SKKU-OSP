@@ -6,6 +6,7 @@ import { getAuthConfig } from '../../../../utils/auth';
 import { BsAwardFill, BsPeopleFill } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
+import Dropdown from 'react-bootstrap/Dropdown';
 import AuthContext from '../../../../utils/auth-context';
 import ProfileDropdown_Container from '../../ProfileDropdown';
 
@@ -20,10 +21,19 @@ function MyTeamList() {
   const [modalShow, setModalShow] = useState(false);
   const { username } = useContext(AuthContext);
 
-  const getMyTeamList = async (page) => {
+  const [sortOrder, setSortOrder] = useState('-id');
+
+  const sortOptions = [
+    { label: '최신순', value: '-id' },
+    { label: '오래된 순', value: 'id' },
+    { label: '이름 순', value: 'name' },
+    { label: '팀원 많은 순', value: '-member_cnt' }
+  ];
+
+  const getMyTeamList = async (page, sort = sortOrder) => {
     try {
       const responseTeamList = await axios.get(
-        server_url + `/team/api/teams-of-user-list/?page_number=${page}`,
+        server_url + `/team/api/teams-of-user-list/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );
       const resTeamList = responseTeamList.data;
@@ -41,17 +51,23 @@ function MyTeamList() {
   useEffect(() => {
     console.log('username', username);
     if (username !== null) {
-      getMyTeamList(1);
+      getMyTeamList(1, sortOrder);
     } else {
       if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
         navigate('/accounts/login');
       }
       return;
     }
-  }, [username]);
+  }, [username, sortOrder]);
 
   const onPageChange = (page) => {
-    getMyTeamList(page);
+    getMyTeamList(page, sortOrder);
+    setNowPage(page);
+  };
+
+  const handleSortChange = (sortOption) => {
+    setSortOrder(sortOption.value);
+    getMyeamList(nowPage, sortOption.value);
   };
 
   const handleShow = () => setModalShow(true);
@@ -61,7 +77,18 @@ function MyTeamList() {
   return (
     <div className="col-9">
       <div className="community-team-nav d-flex">
-        <div style={{ width: btnWidth }}></div>
+        <Dropdown>
+          <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+            {sortOptions.find((option) => option.value === sortOrder).label}
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {sortOptions.map((option) => (
+              <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
+                {option.label}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
         <ul className="nav nav-fill community-team-nav-items">
           <li className="community-team-nav-items">
             <div>내 팀 목록</div>
