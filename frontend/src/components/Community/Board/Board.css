@@ -1,3 +1,9 @@
+@media screen and (max-width: 768px) {
+  .community-board {
+    padding-right: 30px;
+  }
+}
+
 .community-board {
   padding-left: 30px;
   border-left: 1px solid var(--main-border-color);
@@ -25,7 +31,7 @@
 .board-article {
   width: 100%;
   padding: 20px 0;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--sub-border-color);
 }
 
 .board-article-title,

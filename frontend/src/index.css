@@ -33,6 +33,7 @@ body::-webkit-scrollbar {
   --main-light-font-color: #696969;
   --main-border-color: #d8d8d8;
   --main-border-color-transparent: #9d9d9d80;
+  --sub-border-color: #eaeaea;
   --main-point-color: #002743;
   --main-point-color-transparent: #00274380;
   --sub-point-color: #0094ff;
@@ -103,6 +104,7 @@ body::-webkit-scrollbar {
   --color-bronze: #db944b;
   --color-silver: #d9d9d9;
   --color-gold: #f9d978;
+  --bs-border-radius: 10px;
 }
 
 html,

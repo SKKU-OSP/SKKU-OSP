@@ -224,8 +224,7 @@
 
 .community-nav {
   background-color: var(--main-white);
-  height: 50px;
-  line-height: 50px;
+  line-height: 40px;
   align-items: center;
   justify-content: space-between;
   position: sticky;
@@ -237,26 +236,26 @@
   width: 50%;
 }
 
+.selected-nav-item > div {
+  font-weight: bolder;
+  text-decoration: none;
+  background-color: var(--sub-border-color);
+}
+
 .unselected-nav-item > div {
   width: inherit;
   text-decoration: none;
   color: var(--main-font-color);
 }
 
-.nav-item > div {
-  font-size: 20px;
-  height: 50px;
-  cursor: pointer;
-}
-.nav-item > div:hover {
-  padding-bottom: 2px;
-  border-bottom: 3px solid var(--main-selected-color);
+.nav-item {
+  padding: 10px;
 }
 
-.selected-nav-item > div {
-  font-weight: bolder;
-  text-decoration: none;
-  color: var(--main-selected-color);
+.nav-item > div {
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: var(--bs-border-radius);
 }
 
 .hidden {
