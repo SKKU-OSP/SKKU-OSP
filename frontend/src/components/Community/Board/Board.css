@@ -1,8 +1,6 @@
-@media screen and (max-width: 768px) {
-  .board-article {
-    border-left: 0 !important;
-    border-right: 0 !important;
-  }
+.community-board {
+  padding-left: 30px;
+  border-left: 1px solid var(--main-border-color);
 }
 
 #community-bar {
@@ -26,10 +24,8 @@
 
 .board-article {
   width: 100%;
-  padding: 20px;
-  border: 1px solid var(--main-border-color);
-  margin-top: -1px;
-  margin-left: -1px;
+  padding: 20px 0;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .board-article-title,

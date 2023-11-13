@@ -8,7 +8,7 @@ export default function Board_Presenter(props) {
   const { isLoadedArticles, articles, onWrite, tabName, maxPageNumber, nowPage, onPageChange } = props;
 
   return (
-    <div className="col-9">
+    <div className="col-9 community-board">
       <div className="community-nav d-flex">
         <button className="hidden">hidden</button>
         <ul className="nav nav-fill community-nav-items">

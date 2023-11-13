@@ -27,10 +27,6 @@
   .community-main {
     width: calc(100% - 50px) !important;
   }
-  .community-nav {
-    border-left: 0 !important;
-    border-right: 0 !important;
-  }
   .nav-item > div {
     float: left !important;
   }
@@ -228,9 +224,6 @@
 
 .community-nav {
   background-color: var(--main-white);
-  padding: 0 20px 0 20px;
-  border-right: 1px solid var(--main-border-color);
-  border-bottom: 1px solid var(--main-border-color);
   height: 50px;
   line-height: 50px;
   align-items: center;
