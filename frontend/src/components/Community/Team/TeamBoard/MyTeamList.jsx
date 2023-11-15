@@ -79,7 +79,7 @@ function MyTeamList() {
 
   return (
     <div className="col-9">
-      <div className="community-team-nav d-flex">
+      <div className="community-nav d-flex">
         <Dropdown show={showDropDown} onToggle={(isOpen) => setShowDropDown(isOpen)}>
           <Dropdown.Toggle variant="secondary" id="dropdown-sort">
             {sortOptions.find((option) => option.value === sortOrder).label}
@@ -92,9 +92,9 @@ function MyTeamList() {
             ))}
           </Dropdown.Menu>
         </Dropdown>
-        <ul className="nav nav-fill community-team-nav-items">
-          <li className="community-team-nav-items">
-            <div>내 팀 목록</div>
+        <ul className="nav nav-fill community-nav-items">
+          <li className="nav-item selected-nav-item">
+            <div style={{ cursor: 'default' }}>내 팀 목록</div>
           </li>
         </ul>
         <button className="btn btn-primary" onClick={handleShow} style={{ width: btnWidth }}>

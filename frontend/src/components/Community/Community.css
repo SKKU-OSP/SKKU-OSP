@@ -20,6 +20,7 @@
 @media screen and (max-width: 768px) {
   .col-9 {
     width: 100% !important;
+    padding-right: 30px;
   }
   .community-container {
     display: block !important;
@@ -34,12 +35,14 @@
     text-align: start !important;
     margin-right: 10px;
   }
-  .community-nav-items {
-    width: auto !important;
-  }
   .hidden {
     display: none !important;
   }
+}
+
+.col-9 {
+  padding-left: 30px;
+  border-left: 1px solid var(--main-border-color);
 }
 
 .community-main {
@@ -210,7 +213,6 @@
   background-color: var(--main-white);
   padding: 10px;
   border: 1px solid var(--main-border-color);
-  margin: -1px 0 0 -1px;
 }
 
 .article-file-delete-btn {
@@ -224,16 +226,12 @@
 
 .community-nav {
   background-color: var(--main-white);
-  line-height: 40px;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 85px;
   z-index: 500;
-}
-
-.community-nav-items {
-  width: 50%;
+  height: 60px;
 }
 
 .selected-nav-item > div {
@@ -253,6 +251,7 @@
 }
 
 .nav-item > div {
+  padding: 5px 20px;
   font-size: 20px;
   cursor: pointer;
   border-radius: var(--bs-border-radius);
