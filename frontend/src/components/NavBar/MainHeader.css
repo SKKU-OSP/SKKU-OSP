@@ -51,6 +51,14 @@
 
 @media screen and (max-width: 450px) {
 }
+
+.logo {
+  display: flex;
+  flex-direction: row;
+  text-decoration: none;
+  align-items: center;
+}
+
 .search {
   flex: 1 1 auto;
 }
