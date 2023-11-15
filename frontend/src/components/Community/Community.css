@@ -51,6 +51,7 @@
 .col-9 {
   padding-left: 30px;
   border-left: 1px solid var(--main-border-color);
+  min-height: 90vh;
 }
 
 .community-main {
