@@ -130,12 +130,14 @@ function TeamBoard() {
   return (
     <>
       <div className="col-9">
-        <div className="community-team-nav d-flex">
+        <div className="community-nav d-flex">
           <Button type="button" onClick={onMyTeamList} id="btn-content-back">
             내 팀 목록
           </Button>
-          <ul className="nav nav-fill community-team-nav-items">
-            <div>{team_name}</div>
+          <ul className="nav nav-fill community-nav-items">
+            <li className="nav-item selected-nav-item">
+              <div>{team_name}</div>
+            </li>
           </ul>
           <Button type="button" onClick={onWrite} className="btn btn-primary">
             작성하기

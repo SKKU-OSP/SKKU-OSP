@@ -91,7 +91,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
   margin-top: -1px;
   margin-left: -1px;
 }
@@ -104,7 +104,6 @@
   transform: translateX(-50%);
   height: 100%;
   width: 1px;
-  background-color: var(--main-border-color);
   z-index: -1;
 }
 
