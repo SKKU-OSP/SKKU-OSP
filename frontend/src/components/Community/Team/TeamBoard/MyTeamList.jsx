@@ -80,7 +80,7 @@ function MyTeamList() {
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <Dropdown show={showDropDown} onToggle={(isOpen) => setShowDropDown(isOpen)}>
+        <Dropdown className="community-dropdown" show={showDropDown} onToggle={(isOpen) => setShowDropDown(isOpen)}>
           <Dropdown.Toggle variant="secondary" id="dropdown-sort">
             {sortOptions.find((option) => option.value === sortOrder).label}
           </Dropdown.Toggle>

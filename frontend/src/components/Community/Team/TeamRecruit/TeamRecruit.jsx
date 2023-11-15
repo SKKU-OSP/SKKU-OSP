@@ -140,7 +140,11 @@ function TeamRecruit() {
         <>
           <div className="community-nav d-flex">
             {isRecruitTab && (
-              <Dropdown show={showRecruitDropdown} onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}>
+              <Dropdown
+                className="community-dropdown"
+                show={showRecruitDropdown}
+                onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}
+              >
                 <Dropdown.Toggle variant="secondary" id="dropdown-sort">
                   {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
                 </Dropdown.Toggle>
@@ -154,7 +158,11 @@ function TeamRecruit() {
               </Dropdown>
             )}
             {isTeamListTab && (
-              <Dropdown show={showTeamDropdown} onToggle={(isOpen) => setShowTeamDropdown(isOpen)}>
+              <Dropdown
+                className="community-dropdown"
+                show={showTeamDropdown}
+                onToggle={(isOpen) => setShowTeamDropdown(isOpen)}
+              >
                 <Dropdown.Toggle variant="secondary" id="dropdown-sort">
                   {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
                 </Dropdown.Toggle>

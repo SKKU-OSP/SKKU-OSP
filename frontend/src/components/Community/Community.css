@@ -28,8 +28,13 @@
   .community-main {
     width: calc(100% - 50px) !important;
   }
+  .nav-item {
+    max-width: fit-content;
+    padding: 0 !important;
+  }
   .nav-item > div {
     float: left !important;
+    padding: 5px !important;
   }
   .nav-item {
     text-align: start !important;
@@ -37,6 +42,9 @@
   }
   .hidden {
     display: none !important;
+  }
+  .community-dropdown {
+    display: none;
   }
 }
 
