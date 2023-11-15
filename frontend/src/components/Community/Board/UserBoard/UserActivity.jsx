@@ -135,11 +135,11 @@ function UserActivity() {
 
   return (
     <div className="col-9">
-      <div className="community-team-nav d-flex">
+      <div className="community-nav d-flex">
         <div></div>
-        <div className="nav nav-fill community-team-nav-items">
+        <div className="nav nav-fill community-nav-items">
           {activityNames.includes(tabName) && (
-            <li className="community-team-nav-items">
+            <li className="nav-item selected-nav-item">
               <div>{activityNavMap[tabName]}</div>
             </li>
           )}
