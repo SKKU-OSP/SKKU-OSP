@@ -397,25 +397,11 @@
       }
     }
   }
-  .info-email {
+  .info {
     border-bottom: 1px solid #9d9d9d;
-    padding: 24px 54px;
+    padding: 24px;
     gap: 16px;
-    .email {
-      font-family: Inter;
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 29px;
-      letter-spacing: -0.05em;
-      text-align: center;
-      color: #696969;
-    }
-  }
-  .info-github {
-    border-bottom: 1px solid #9d9d9d;
-    padding: 24px 54px;
-    gap: 16px;
-    .name {
+    .title {
       font-family: Inter;
       font-size: 24px;
       font-weight: 700;
