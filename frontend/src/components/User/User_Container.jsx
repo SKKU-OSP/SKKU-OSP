@@ -25,7 +25,6 @@ function User_Container() {
         const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
-          console.log('response', res);
           setUserInfo(res.data.account);
         } else {
           handleError(res.message + ' 로그인 화면으로 이동합니다.', '/accounts/login');

@@ -1628,7 +1628,7 @@ class UserRecommenderView(APIView):
         except Exception as e:
             logging.exception(
                 f"UserRecommenderView account load exception: {e}")
-            errors["user_privacy_not_found"] = "해당 유저가 존재하지 않습니다."
+            errors = "해당 유저가 존재하지 않습니다."
             status = 'fail'
 
         # 팀 데이터 받기 전에 사용할 팀 목록 리스트를 위해 데이터를 가져온다.
@@ -1660,7 +1660,7 @@ class UserRecommenderView(APIView):
             except Exception as e:
                 logging.exception(f"target_team exception: {e}")
                 status = 'fail'
-                errors["recommend_not_found"] = "추천 목록을 불러오는데 실패했습니다."
+                errors = "추천 목록을 불러오는데 실패했습니다."
         else:
             recommends = AccountWithInterestSerializer(
                 account_list, many=True).data

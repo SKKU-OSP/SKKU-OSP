@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 import { BsGithub } from 'react-icons/bs';
+import { IoAddCircle, IoReloadCircle } from 'react-icons/io5';
 import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
@@ -14,8 +15,15 @@ function ProfileInfo(props) {
   const [userInfo, setUserInfo] = useState();
   const [editing, setEditing] = useState(false);
   const [editUserInfo, setEditUserInfo] = useState();
+  const [imagePreview, setImagePreview] = useState();
+  const [originalImage, setOriginalImage] = useState();
+  const fileInput = useRef(null);
 
-  useEffect(() => setUserInfo(info), [info]);
+  useEffect(() => {
+    setUserInfo(info);
+    setImagePreview(info.photo);
+    setOriginalImage(info.photo);
+  }, [info]);
 
   const updatePostProfileInfo = async (editIntroduction) => {
     const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
@@ -39,12 +47,55 @@ function ProfileInfo(props) {
       [name]: value
     });
   };
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClick = () => {
+    fileInput.current.click();
+  };
+
+  const handleReloadImage = () => {
+    console.log('before', imagePreview);
+    setImagePreview(originalImage);
+    console.log('after', originalImage);
+    fileInput.current.value = null;
+  };
+
   return (
     <>
       {userInfo ? (
         <div className="d-flex flex-row profile_info">
-          <div className="d-flex align-items-center justify-content-center info_left">
-            <img src={server_url + userInfo.photo} className="info_img" />
+          <div className="d-flex flex-column align-items-center justify-content-center info_left">
+            {isEdit ? (
+              editing ? (
+                <>
+                  {imagePreview && <img src={imagePreview} className="info_img" />}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    style={{ display: 'none' }}
+                    ref={fileInput}
+                  />
+                  <div className="d-flex justify-content-center">
+                    <IoReloadCircle size={30} onClick={handleReloadImage} style={{ marginRight: '70px' }} />
+                    <IoAddCircle size={30} onClick={handleClick} />
+                  </div>
+                </>
+              ) : (
+                <img src={server_url + userInfo.photo} className="info_img" />
+              )
+            ) : (
+              <img src={server_url + userInfo.photo} className="info_img" />
+            )}
           </div>
           <div className="d-flex flex-column info_right">
             {isEdit && (

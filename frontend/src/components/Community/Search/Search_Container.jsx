@@ -10,17 +10,20 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 function Search_Container() {
   const [articles, setArticles] = useState();
   const [keyword, setKeyword] = useState();
-  const searchUrl = server_url + '/community/search';
+  const [tag, setTag] = useState();
+  const searchUrl = server_url + '/community/search/';
   const location = useLocation();
 
   useEffect(() => {
     const getSearch = async () => {
       try {
         setKeyword(location.state?.keyword);
+        setTag(location.state?.tag);
         const response = await axios.get(searchUrl, {
           ...getAuthConfig(),
           params: {
-            keyword: location.state?.keyword
+            keyword: location.state?.keyword,
+            tag: location.state?.tag
           }
         });
         const res = response.data;
@@ -33,8 +36,8 @@ function Search_Container() {
   }, [location]);
   return (
     <>
-      {articles && keyword ? (
-        <Search_Presenter articles={articles} keyword={keyword} />
+      {articles && (keyword || tag) ? (
+        <Search_Presenter articles={articles} keyword={keyword} tag={tag} />
       ) : (
         <LoaderIcon style={{ marginTop: '20px' }} />
       )}
