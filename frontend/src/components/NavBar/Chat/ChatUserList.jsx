@@ -10,6 +10,7 @@ const ChatUserList = (props) => {
   const [messageLogs, setMessageLogs] = useState([]);
   const [opponetId, setOpponetId] = useState(0);
   const [isSelect, setIsSelect] = useState(false);
+  const [once, setOnce] = useState(0);
   const serverUrl = import.meta.env.VITE_SERVER_URL;
   const targetMember = props.targetMember;
 
@@ -20,6 +21,7 @@ const ChatUserList = (props) => {
   const handleClickItem = (userId) => {
     const getChatLogUrl = serverUrl + `/message/api/chat/${userId}/`;
     setIsReady(false);
+    setOnce(0);
     const getChatLog = async () => {
       try {
         const response = await axios.get(getChatLogUrl, getAuthConfig());
@@ -31,6 +33,24 @@ const ChatUserList = (props) => {
           setIsReady(true);
           setMessageLogs(res.data.messages);
           setIsSelect(true);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getChatLog();
+  };
+
+  const getAdditionalChat = (userId, oldest) => {
+    const getChatLogUrl = serverUrl + '/message/api/chat/' + `${userId}` + '?oldest=' + `${oldest}`;
+    const getChatLog = async () => {
+      try {
+        const response = await axios.get(getChatLogUrl, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'fail') {
+          console.log(res.status, res.errors);
+        } else {
+          setMessageLogs(messageLogs.concat(res.data.messages));
         }
       } catch (error) {
         console.log(error);
@@ -93,7 +113,10 @@ const ChatUserList = (props) => {
         isSelect={isSelect}
         isReady={isReady}
         opponentId={opponetId}
+        once={once}
         setLogs={setMessageLogs}
+        setOnce={setOnce}
+        getAddtionalChat={getAdditionalChat}
       />
     </>
   );

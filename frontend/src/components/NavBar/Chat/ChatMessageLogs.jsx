@@ -1,7 +1,4 @@
-import { useEffect, useRef } from 'react';
-
-import axios from 'axios';
-
+import { useEffect, useRef, useState } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import SendIcon from '@mui/icons-material/Send';
 
@@ -10,14 +7,21 @@ import { getAuthConfig } from '../../../utils/auth';
 
 const ChatMessageLogs = (props) => {
   const messageLogs = props.messageLogs;
+  const [maxScroll, setMaxScroll] = useState(0);
+  const [prevMaxScroll, setPrevMaxScroll] = useState(0);
 
   const inputRef = useRef();
   const scrollRef = useRef();
-
   useEffect(() => {
     // 채팅 메시지 리스트의 스크롤을 하단으로 이동
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (props.once == 0) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   }, [props.messageLogs]);
+
+  useEffect(() => {
+    scrollRef.current.scrollTop = maxScroll - prevMaxScroll;
+  }, [maxScroll]);
 
   const handlePostChat = async () => {
     const server_url = import.meta.env.VITE_SERVER_URL;
@@ -34,7 +38,6 @@ const ChatMessageLogs = (props) => {
       document.getElementById('chat-input').value = null;
     }
   };
-
   const chatBoxClasses = (senderId) => {
     return props.opponentId === senderId ? classes.ChatBoxRecieve : classes.ChatBoxSend;
   };
@@ -50,6 +53,18 @@ const ChatMessageLogs = (props) => {
   const onEnterKeyPostChat = (event) => {
     if (event.keyCode == 13) {
       handlePostChat();
+    }
+  };
+
+  const handleScroll = () => {
+    if (scrollRef.current.scrollTop === 0) {
+      if (Object.keys(messageLogs).length == (props.once + 1) * 10) {
+        props.setOnce(1);
+        // messageLogs.reverse();
+        setPrevMaxScroll(maxScroll);
+        props.getAddtionalChat(props.opponentId, messageLogs['0'].send_date);
+        setMaxScroll(scrollRef.current.scrollHeight - scrollRef.current.clientHeight);
+      }
     }
   };
 
@@ -87,7 +102,7 @@ const ChatMessageLogs = (props) => {
   return (
     <>
       <div id="chat-view-tab" className="justify-content-between rounded-2">
-        <div id="chat-view" ref={scrollRef}>
+        <div id="chat-view" ref={scrollRef} onScroll={handleScroll}>
           {messageLogView()}
         </div>
         <div id="chat-input-tab" className="mt-auto">
