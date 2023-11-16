@@ -1,5 +1,5 @@
 .nav-link.UnselectedNavItem {
-  width: 50%;
+  width: 100%;
   font-size: 18px;
   text-decoration: none;
   color: #454545;
@@ -8,7 +8,7 @@
 }
 
 .nav-link.UnselectedNavItem:hover {
-  width: 50%;
+  width: 100%;
   font-size: 18px;
   text-decoration: none;
   color: #454545;
@@ -18,7 +18,7 @@
 }
 
 .nav-link.SelectedNavItem {
-  width: 50%;
+  width: 100%;
   font-size: 18px;
   font-weight: bolder;
   text-decoration: none;
@@ -28,7 +28,7 @@
 }
 
 .nav-link.SelectedNavItem:link {
-  width: 50%;
+  width: 100%;
   font-size: 18px;
   text-decoration: none;
   color: #0066ff;
@@ -36,9 +36,18 @@
   justify-content: center;
 }
 
+.nav-new {
+  background-color: #ffc0cb;
+  border-radius: 7px;
+  font-size: 15px;
+  padding: 2px 5px 0px 5px;
+  color: white;
+  margin-right: 6px;
+}
+
 .nav-link.SelectedNavItem:hover,
 .nav-link.SelectedNavItem:active {
-  width: 50%;
+  width: 100%;
   font-size: 18px;
   text-decoration: none;
   color: #0066ff;

@@ -26,7 +26,7 @@ const TeamApplication = ({ handleClose, show }) => {
   useEffect(() => {
     const getApplications = async () => {
       try {
-        const url = serverUrl + '/team/api/applications';
+        const url = serverUrl + '/team/api/applications/';
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         console.log(res);
@@ -106,13 +106,16 @@ const TeamApplication = ({ handleClose, show }) => {
   const tabContArr = [
     {
       tabTitle: (
-        <Nav.Link
-          key="recv-tab"
-          className={activeIndex === 0 ? 'SelectedNavItem' : 'UnselectedNavItem'}
-          onClick={() => tabClickHandler(0)}
-        >
-          받은 지원서
-        </Nav.Link>
+        <div style={{ width: '50%' }}>
+          <Nav.Link
+            key="recv-tab"
+            className={activeIndex === 0 ? 'SelectedNavItem' : 'UnselectedNavItem'}
+            onClick={() => tabClickHandler(0)}
+          >
+            {receivedLength > 0 ? <div className="nav-new">New</div> : <div />}
+            받은 지원서
+          </Nav.Link>
+        </div>
       ),
       tabCont: (
         <>
@@ -165,13 +168,16 @@ const TeamApplication = ({ handleClose, show }) => {
     },
     {
       tabTitle: (
-        <Nav.Link
-          key="sent-tab"
-          className={activeIndex === 1 ? 'SelectedNavItem' : 'UnselectedNavItem'}
-          onClick={() => tabClickHandler(1)}
-        >
-          보낸 지원서
-        </Nav.Link>
+        <div style={{ width: '50%' }}>
+          <Nav.Link
+            key="sent-tab"
+            className={activeIndex === 1 ? 'SelectedNavItem' : 'UnselectedNavItem'}
+            onClick={() => tabClickHandler(1)}
+          >
+            {sentLength > 0 ? <div className="nav-new">New</div> : <div />}
+            보낸 지원서
+          </Nav.Link>
+        </div>
       ),
       tabCont: (
         <>
@@ -194,7 +200,6 @@ const TeamApplication = ({ handleClose, show }) => {
                       거절됨
                     </Badge>
                   )}
-
                   <Button
                     variant="outline-danger"
                     size="sm"
