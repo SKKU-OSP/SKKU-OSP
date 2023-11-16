@@ -14,17 +14,28 @@ function ProfileTab(props) {
   return (
     <>
       <div className="profile-tab">
-        <Nav justify variant="underline" activeKey={activeTab} onSelect={handleTabSelect}>
-          <Nav.Item>
-            <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link eventKey="활동">활동</Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link eventKey="정보">정보</Nav.Link>
-          </Nav.Item>
-        </Nav>
+        {isEdit ? (
+          <Nav justify variant="underline" activeKey={activeTab} onSelect={handleTabSelect}>
+            <Nav.Item>
+              <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="활동">활동</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="정보">정보</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        ) : (
+          <Nav justify variant="underline" activeKey={activeTab} onSelect={handleTabSelect}>
+            <Nav.Item>
+              <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="활동">활동</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        )}
       </div>
       <ProfileDetail Tab={activeTab} githubId={githubId} isEdit={isEdit} />
     </>

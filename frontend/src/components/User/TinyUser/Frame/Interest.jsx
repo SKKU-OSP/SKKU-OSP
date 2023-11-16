@@ -53,6 +53,9 @@ function Interest(props) {
         setError(true);
       }
     };
+    getTags();
+  }, []);
+  useEffect(() => {
     const getProfileTags = async () => {
       try {
         const profileTagsUrl = server_url + '/user/api/tag/' + username + '/';
@@ -83,7 +86,6 @@ function Interest(props) {
         setError(true);
       }
     };
-    getTags();
     getProfileTags();
   }, [username]);
 

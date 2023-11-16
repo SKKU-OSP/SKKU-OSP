@@ -31,7 +31,6 @@ function Repository() {
         const res = response.data;
         if (res.status === 'success') {
           setGuideline(res.data.guideline);
-          console.log(res.data.guideline);
         }
       } catch (error) {
         setError(true);

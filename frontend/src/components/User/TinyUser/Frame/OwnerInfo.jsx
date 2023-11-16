@@ -54,6 +54,35 @@ function OwnerInfo() {
             </div>
             <span className="name">{ownerInfo.github_id}</span>
           </div>
+          <div className="d-flex flex-column info-agree">
+            <div className="d-flex justify-content-center align-items-center">
+              <span>타임의 추천에 나를 노출</span>
+              <div>
+                <input type="radio" id="expose_yes" name="exposure" value="yes" checked />
+                <label htmlFor="expose_yes">허용</label>
+                <input type="radio" id="expose_no" name="exposure" value="no" />
+                <label htmlFor="expose_no">거부</label>
+              </div>
+            </div>
+            <div className="d-flex justify-content-center align-items-center">
+              <span>게시판에서 나를 공개</span>
+              <div>
+                <input type="radio" id="board_yes" name="board" value="yes" checked />
+                <label htmlFor="board_yes">허용</label>
+                <input type="radio" id="board_no" name="board" value="no" />
+                <label htmlFor="board_no">거부</label>
+              </div>
+            </div>
+            <div className="d-flex justify-content-center align-items-center">
+              <span>프로필 공개 범위 설정</span>
+              <div>
+                <input type="radio" id="profile_public" name="profile" value="public" checked />
+                <label htmlFor="profile_public">모두 공개</label>
+                <input type="radio" id="profile_private" name="profile" value="private" />
+                <label htmlFor="profile_private">일부 공개</label>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <LoaderIcon style={{ marginTop: '20px' }} />
