@@ -8,6 +8,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 import { getAuthConfig } from '../../../utils/auth';
+import { useNavigate } from 'react-router-dom';
 
 const domainUrl = import.meta.env.VITE_SERVER_URL;
 const CreateTeamModal = ({ show, onClose }) => {
@@ -20,6 +21,8 @@ const CreateTeamModal = ({ show, onClose }) => {
   const teamnameInputRef = useRef();
   const teamdescriptionInputRef = useRef();
   const teamImgRef = useRef();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getTag = async () => {
@@ -63,6 +66,7 @@ const CreateTeamModal = ({ show, onClose }) => {
         console.log(res.status, res.errors);
       } else {
         console.log(res.data);
+        navigate(`/community/team/${postData.team_name}`);
       }
     } catch (error) {
       console.log('error', error);
