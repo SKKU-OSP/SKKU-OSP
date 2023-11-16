@@ -64,12 +64,13 @@ function Interest(props) {
         if (res.status === 'success') {
           const profileTags = res.data.interest_tags;
           const profileInterest = profileTags
-            .filter((interest) => interest.tag.type === 'domain')
+            .filter((interest) => interest.tag && interest.tag.type === 'domain')
             .map((interest) => {
               return { ...interest, value: interest.tag.name, label: interest.tag.name };
             });
+
           const profileSkill = profileTags
-            .filter((skill) => skill.tag.type !== 'domain')
+            .filter((skill) => skill.tag && skill.tag.type !== 'domain')
             .map((skill) => {
               return { ...skill, value: skill.tag.name, label: skill.tag.name };
             });
