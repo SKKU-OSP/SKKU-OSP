@@ -6,13 +6,19 @@ import { getAuthConfig } from '../../../../utils/auth';
 import { FaUniversity } from 'react-icons/fa';
 import { BsFillCheckCircleFill, BsGithub } from 'react-icons/bs';
 import { MdAlternateEmail } from 'react-icons/md';
-
+import Form from 'react-bootstrap/Form';
 import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 function OwnerInfo() {
   const { username } = useParams();
   const [ownerInfo, setOwnerInfo] = useState();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isActivityOpen, setIsActivityOpen] = useState(true);
+  const handlePublicSwitchChange = (checked, type) => {
+    if (type === 0) setIsProfileOpen(checked);
+    else setIsActivityOpen(checked);
+  };
   useEffect(() => {
     const getOwnerInfo = async () => {
       try {
@@ -42,45 +48,38 @@ function OwnerInfo() {
               <BsFillCheckCircleFill size={16} />
             </div>
           </div>
-          <div className="d-flex flex-column info-email">
+          <div className="d-flex flex-column info">
             <div className="d-flex justify-content-center">
               <MdAlternateEmail size={24} />
             </div>
-            <span className="email">{ownerInfo.personal_email}</span>
+            <span className="title">{ownerInfo.personal_email}</span>
           </div>
-          <div className="d-flex flex-column info-github">
+          <div className="d-flex flex-column info">
             <div className="d-flex justify-content-center">
               <BsGithub size={24} />
             </div>
-            <span className="name">{ownerInfo.github_id}</span>
+            <span className="title">{ownerInfo.github_id}</span>
           </div>
-          <div className="d-flex flex-column info-agree">
+          <div className="d-flex flex-column info">
+            <span className="title">프로필 공개 범위 설정</span>
             <div className="d-flex justify-content-center align-items-center">
-              <span>타임의 추천에 나를 노출</span>
-              <div>
-                <input type="radio" id="expose_yes" name="exposure" value="yes" checked />
-                <label htmlFor="expose_yes">허용</label>
-                <input type="radio" id="expose_no" name="exposure" value="no" />
-                <label htmlFor="expose_no">거부</label>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center align-items-center">
-              <span>게시판에서 나를 공개</span>
-              <div>
-                <input type="radio" id="board_yes" name="board" value="yes" checked />
-                <label htmlFor="board_yes">허용</label>
-                <input type="radio" id="board_no" name="board" value="no" />
-                <label htmlFor="board_no">거부</label>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center align-items-center">
-              <span>프로필 공개 범위 설정</span>
-              <div>
-                <input type="radio" id="profile_public" name="profile" value="public" checked />
-                <label htmlFor="profile_public">모두 공개</label>
-                <input type="radio" id="profile_private" name="profile" value="private" />
-                <label htmlFor="profile_private">일부 공개</label>
-              </div>
+              <Form>
+                <Form.Check
+                  type="switch"
+                  id="isOpenProfile"
+                  label="프로필 공개 설정"
+                  onChange={(e) => handlePublicSwitchChange(e.target.checked, 0)}
+                  checked={isProfileOpen}
+                />
+                <Form.Check
+                  type="switch"
+                  id="isOpenActivity"
+                  label="활동 공개"
+                  disabled={!isProfileOpen}
+                  onChange={(e) => handlePublicSwitchChange(e.target.checked, 1)}
+                  checked={!isProfileOpen ? false : isActivityOpen}
+                />
+              </Form>
             </div>
           </div>
         </div>
