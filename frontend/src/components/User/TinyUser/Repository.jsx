@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import '../User.css';
 import {
   BsStar,
-  BsEyeFill,
+  BsEye,
   BsCheckLg,
   BsCheckCircle,
   BsRecordCircle,
@@ -80,7 +80,7 @@ function Repository() {
                         <BsStar /> Stars {repo.star_count}
                       </span>
                       <span>
-                        <BsEyeFill /> Watchers {repo.watcher_count}
+                        <BsEye /> Watchers {repo.watcher_count}
                       </span>
                       <span>
                         <PiGitForkBold /> Forks {repo.fork_count}

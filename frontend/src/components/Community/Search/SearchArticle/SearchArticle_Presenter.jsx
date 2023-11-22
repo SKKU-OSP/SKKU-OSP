@@ -1,4 +1,4 @@
-import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { BsHandThumbsUp, BsChatLeftText, BsBookmark, BsEye } from 'react-icons/bs';
 
 function SearchArticle_Presenter(props) {
   const { article, onArticle, onWriter } = props;
@@ -29,9 +29,9 @@ function SearchArticle_Presenter(props) {
         </div>
         <div className="board-article-meta-list">
           <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
-          <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
+          <BsChatLeftText size={13} className="board-article-meta" /> {article.comment_cnt}
           <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
-          <BsEyeFill size={13} className="board-article-meta" /> {article.view_cnt}
+          <BsEye size={13} className="board-article-meta" /> {article.view_cnt}
         </div>
       </div>
     </div>
