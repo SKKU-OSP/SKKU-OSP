@@ -300,6 +300,7 @@ class NotificationListView(APIView):
                         continue
                     try:
                         board = Board.objects.get(team__id=noti['route_id'])
+                        print(noti['route_id'])
                         noti['feedback'] = BoardSerializer(board).data
                     except Board.DoesNotExist as e:
                         print(f'{noti["route_id"]} 팀의 게시판이 없습니다. {e}')
@@ -543,9 +544,11 @@ class MessageSplitView(APIView):
                     type_txt = body_json['type']
                     sender_name = body_json.get('subject', '')
                     body_txt = body_json['body']
-                    route_id = body_json.get('article_id', None)
-                    route_id = body_json.get(
-                        'team_id', None) if route_id is None else route_id
+
+                    route_id = body_json.get('team_id', None)
+                    if route_id is None:
+                        route_id = body_json.get('article_id', None)
+
                     receiver = msg.receiver
                     send_date = msg.send_date
                     receiver_read = msg.receiver_read
