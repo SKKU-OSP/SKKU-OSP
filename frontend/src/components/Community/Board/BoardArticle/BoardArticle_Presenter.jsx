@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../Board.css';
-import { BsHandThumbsUp, BsFillChatLeftTextFill, BsBookmark, BsEyeFill } from 'react-icons/bs';
+import { BsHandThumbsUp, BsChatLeftText, BsBookmark, BsEye } from 'react-icons/bs';
 import ProfileDropdown_Container from '../../ProfileDropdown';
 
 export default function BoardArticle_Presenter(props) {
@@ -36,13 +36,13 @@ export default function BoardArticle_Presenter(props) {
                 <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
               </>
               <>
-                <BsFillChatLeftTextFill size={13} className="board-article-meta" /> {article.comment_cnt}
+                <BsChatLeftText size={13} className="board-article-meta" /> {article.comment_cnt}
               </>
               <>
                 <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
               </>
               <>
-                <BsEyeFill size={13} className="board-article-meta" /> {article.view_cnt}
+                <BsEye size={13} className="board-article-meta" /> {article.view_cnt}
               </>
             </div>
             <div className="float-clear"></div>
