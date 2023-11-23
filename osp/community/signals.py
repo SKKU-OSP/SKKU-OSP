@@ -107,11 +107,13 @@ def team_apply_create_alert(sender, instance, created, **kwargs):
         body = f"[{team_name}] 팀 지원 요청이 있습니다."
         # 지원한 팀의 admin권한을 가진 유저들에게 모두 메세지를 보낸다.
         receiver_li = list(Account.objects.filter(user__id__in=tm_admin_li))
+        route_id = instance.team.id
     else:
         # 팀 지원 수락 또는 거절
         noti_type = "team_apply_result"
         body = f"[{team_name}] 팀 지원이 {status} 되었습니다."
         receiver_li = [instance.account]
+        route_id = instance.team.id
 
     try:
         with transaction.atomic():
