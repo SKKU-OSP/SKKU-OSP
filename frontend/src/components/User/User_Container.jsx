@@ -8,6 +8,7 @@ import User_Presenter from './User_Presenter';
 function User_Container() {
   const [userInfo, setUserInfo] = useState();
   const [isEdit, setIsEdit] = useState(false);
+  const [isChange, setIsChange] = useState(false);
   const { username } = useParams();
   const loginname = useContext(AuthContext).username;
   const navigate = useNavigate();
@@ -35,9 +36,9 @@ function User_Container() {
     };
     setIsEdit(username === loginname);
     getProfileInfo();
-  }, [username]);
+  }, [username, isChange]);
 
-  return <User_Presenter userInfo={userInfo} isEdit={isEdit} />;
+  return <User_Presenter userInfo={userInfo} isEdit={isEdit} setIsChange={setIsChange} isChange={isChange} />;
 }
 
 export default User_Container;

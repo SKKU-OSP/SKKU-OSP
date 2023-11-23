@@ -3,27 +3,24 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 import { BsGithub } from 'react-icons/bs';
-import { IoAddCircle, IoReloadCircle } from 'react-icons/io5';
+import { IoAddCircle, IoReloadCircle, IoCloseCircle } from 'react-icons/io5';
 import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function ProfileInfo(props) {
-  const info = props.userInfo;
-  const isEdit = props.isEdit;
+  const { isEdit, isChange, setIsChange } = props;
   const { username } = useParams();
   const [userInfo, setUserInfo] = useState();
   const [editing, setEditing] = useState(false);
   const [editUserInfo, setEditUserInfo] = useState();
   const [imagePreview, setImagePreview] = useState();
-  const [originalImage, setOriginalImage] = useState();
+  const [imageFile, setImageFile] = useState(null);
   const fileInput = useRef(null);
 
   useEffect(() => {
-    setUserInfo(info);
-    setImagePreview(info.photo);
-    setOriginalImage(info.photo);
-  }, [info]);
+    setUserInfo(props.userInfo);
+  }, [props]);
 
   const updatePostProfileInfo = async (editIntroduction) => {
     const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
@@ -31,41 +28,80 @@ function ProfileInfo(props) {
       await axios.post(postUrl, { introduction: editIntroduction }, getAuthConfig());
     }
   };
+
+  const updatePostProfileImage = async (imageFile) => {
+    const postUrl = server_url + '/user/api/profile-image/' + username + '/';
+    const formData = new FormData();
+    formData.append('photo', imageFile);
+    try {
+      await axios.post(postUrl, formData, getAuthConfig());
+    } catch (error) {
+      console.error('Error during file upload', error);
+    }
+  };
+
+  const updatePostProfileDefaultImage = async () => {
+    const postUrl = server_url + '/user/api/profile-default-image/' + username + '/';
+    await axios.post(postUrl, getAuthConfig());
+  };
+
   const handleEditClick = () => {
     setEditUserInfo(userInfo);
+    setImagePreview(null);
+    setImageFile(null);
     setEditing(true);
   };
-  const handleSaveClick = () => {
-    updatePostProfileInfo(editUserInfo.introduction);
-    setUserInfo(editUserInfo);
+  const handleSaveClick = async () => {
+    if (editUserInfo.introduction !== userInfo.introduction) {
+      await updatePostProfileInfo(editUserInfo.introduction);
+    }
+    if (imageFile) {
+      await updatePostProfileImage(imageFile);
+    }
+    if (imagePreview === 'default') {
+      await updatePostProfileDefaultImage();
+    }
+    if (editUserInfo.introduction !== userInfo.introduction || imageFile || imagePreview === 'default') {
+      setIsChange(!isChange);
+    }
+    setImagePreview(null);
+    setImageFile(null);
     setEditing(false);
   };
-  const handleInputChange = (event) => {
+
+  const handleIntroChange = (event) => {
     const { name, value } = event.target;
     setEditUserInfo({
       ...editUserInfo,
       [name]: value
     });
   };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        setImageFile(file);
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleClick = () => {
+  const handleInputImage = () => {
     fileInput.current.click();
   };
 
   const handleReloadImage = () => {
-    console.log('before', imagePreview);
-    setImagePreview(originalImage);
-    console.log('after', originalImage);
+    setImagePreview(null);
+    setImageFile(null);
+    fileInput.current.value = null;
+  };
+
+  const handleDeleteImage = () => {
+    setImagePreview('default');
+    setImageFile(null);
     fileInput.current.value = null;
   };
 
@@ -77,7 +113,11 @@ function ProfileInfo(props) {
             {isEdit ? (
               editing ? (
                 <>
-                  {imagePreview && <img src={imagePreview} className="info_img" />}
+                  {imagePreview ? (
+                    <img src={imagePreview} className="info_img" />
+                  ) : (
+                    <img src={server_url + userInfo.photo} className="info_img" />
+                  )}
                   <input
                     type="file"
                     accept="image/*"
@@ -85,9 +125,10 @@ function ProfileInfo(props) {
                     style={{ display: 'none' }}
                     ref={fileInput}
                   />
-                  <div className="d-flex justify-content-center">
-                    <IoReloadCircle size={30} onClick={handleReloadImage} style={{ marginRight: '70px' }} />
-                    <IoAddCircle size={30} onClick={handleClick} />
+                  <div className="d-flex w-75 justify-content-between align-items-center pt-1">
+                    <IoReloadCircle size={30} onClick={() => handleReloadImage()} style={{ cursor: 'pointer' }} />
+                    <IoAddCircle size={30} onClick={() => handleInputImage()} style={{ cursor: 'pointer' }} />
+                    <IoCloseCircle size={30} onClick={() => handleDeleteImage()} style={{ cursor: 'pointer' }} />
                   </div>
                 </>
               ) : (
@@ -126,7 +167,7 @@ function ProfileInfo(props) {
                 rows="5"
                 style={{ width: '100%', whiteSpace: 'pre-wrap' }}
                 value={editUserInfo.introduction}
-                onChange={handleInputChange}
+                onChange={handleIntroChange}
               />
             ) : (
               <div className="info_introduction">
