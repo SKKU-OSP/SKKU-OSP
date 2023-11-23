@@ -13,6 +13,11 @@ from user.serializers import (AccountDetailSerializer,
                               AccountInterestSerializer, AccountSerializer,
                               StudentSerializer)
 
+from user.forms import ProfileImgUploadForm
+from django.core.files.images import get_image_dimensions
+from django.shortcuts import redirect
+import os
+
 
 class ProfileMainView(APIView):
     def get_validation(self, request, username):
@@ -502,4 +507,79 @@ class ProfileInfoView(APIView):
         else:
             res = {'status': status, 'message': message, 'errors': errors}
 
+        return Response(res)
+
+
+class ProfileImageView(APIView):
+    def post(self, request, username, *args, **kwargs):
+        # Declaration
+        status = 'success'
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+
+        pre_img = user_account.photo.path
+
+        field_check_list = {}
+
+        profile_img = request.FILES.get('photo', False)
+        print("profile_img", profile_img)
+        is_valid = True
+        print(request.POST.get('is_default'))
+
+        if request.POST.get('is_default') == 'true':
+            print("is true!!")
+
+        if profile_img:
+            img_width, img_height = get_image_dimensions(profile_img)
+            print(img_width, img_height)
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                field_check_list[
+                    'photo'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
+                print(
+                    f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px')
+
+        img_form = ProfileImgUploadForm(
+            request.POST, request.FILES, instance=user_account)
+        img_form.save()
+        print("img_form", img_form)
+        print("pre_img", pre_img)
+        if bool(img_form.is_valid()) and is_valid:
+            if 'photo' in request.FILES:  # 폼에 이미지가 있으면
+                print('form에 이미지 존재')
+                try:
+                    print(" path of pre_image is " + pre_img)
+                    if (pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
+                        pass
+                    else:
+                        print("기존이미지를 삭제합니다.")
+                        print(pre_img.split("/")[-1])
+                        os.remove(pre_img)  # 기존 이미지 삭제
+
+                except:                # 기존 이미지가 없을 경우에 pass
+                    pass
+
+            print('Image is valid form')
+
+            print(user_account.photo.path)
+
+            img_form.save()
+            user_account.save()
+            print("세이브 완료되면출력되는 문구")
+
+        else:
+            print("not vaild", field_check_list['photo'])
+        res = {"status": status}
+        return Response(res)
+
+
+class ProfileImageDefaultView(APIView):
+    def post(self, request, username, *args, **kwargs):
+        status = 'success'
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        user_account.photo = "img/profile_img/default.jpg"
+        user_account.save()
+        print("finish")
+        res = {"status": status}
         return Response(res)
