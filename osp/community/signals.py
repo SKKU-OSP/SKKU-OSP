@@ -62,11 +62,13 @@ def team_invite_create_alert(sender, instance, created, **kwargs):
         noti_type = "team_invite"
         body = f"[{team_name}] 팀 초대가 있습니다."
         receiver_li = [instance.account]
+        route_id = instance.team.id
     else:  # 팀원 초대 수락 또는 거절
         noti_type = "team_invite_result"
         sender_name = instance.account.user.username
         body = f"[{team_name}] {sender_name} 님이 팀 초대를 {status} 하셨습니다."
         receiver_li = list(Account.objects.filter(user__id__in=tm_admin_li))
+        route_id = instance.team.id
 
     try:
         with transaction.atomic():
