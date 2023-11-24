@@ -131,7 +131,7 @@ class TableBoardView(APIView):
                 account = Account.objects.get(user=request.user)
                 teaminvitemessage = valid_data['teaminvitemessage']
 
-                if teaminvitemessage.exists():
+                if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
                     # 팀 멤버라면 초대 상태 리셋
                     data['is_invited_user'] = False
 
