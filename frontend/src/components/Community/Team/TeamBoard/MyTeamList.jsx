@@ -14,6 +14,7 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 
 function MyTeamList() {
   const navigate = useNavigate();
+  const [isReady, setIsReady] = useState(false);
   const [myTeams, setMyTeams] = useState([]);
   const [maxPage, setMaxPage] = useState(0);
   const [nowPage, setNowPage] = useState(1);
@@ -43,8 +44,10 @@ function MyTeamList() {
         setMyTeams(resTeamList.data.teams_of_user);
         setMaxPage(resTeamList.data.max_page_number);
         setNowPage(page);
+        setIsReady(true);
       }
     } catch (error) {
+      setIsReady(true);
       setError(true);
       console.log('error', error);
     }
@@ -103,30 +106,34 @@ function MyTeamList() {
         <CreateTeamModal show={modalShow} onClose={handleClose} />
       </div>
 
-      {myTeams && myTeams.length > 0 ? (
+      {isReady ? (
         <>
-          {myTeams.map((team) => (
-            <div className="board-article" key={team.id}>
-              <div>
-                <Link className="board-article-title" to={`/community/team/${team.name}`}>
-                  <h4 className="board-article-title">{team.name}</h4>
-                </Link>
-              </div>
-              <div>
-                <div className="inline-block">{team.description}</div>
-                <div className="text-end">
-                  {team.leader_username && (
-                    <>
-                      <BsAwardFill />
-                      <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
-                    </>
-                  )}
-                  <BsPeopleFill />
-                  {` ${team.member_cnt}명`}
+          {myTeams.length > 0 ? (
+            myTeams.map((team) => (
+              <div className="board-article" key={team.id}>
+                <div>
+                  <Link className="board-article-title" to={`/community/team/${team.name}`}>
+                    <h4 className="board-article-title">{team.name}</h4>
+                  </Link>
+                </div>
+                <div>
+                  <div className="inline-block">{team.description}</div>
+                  <div className="text-end">
+                    {team.leader_username && (
+                      <>
+                        <BsAwardFill />
+                        <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
+                      </>
+                    )}
+                    <BsPeopleFill />
+                    {` ${team.member_cnt}명`}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div>소속된 팀이 없습니다.</div>
+          )}
           <Pagination
             activePage={nowPage}
             itemsCountPerPage={10}
