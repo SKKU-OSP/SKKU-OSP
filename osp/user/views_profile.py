@@ -511,10 +511,11 @@ class ProfileInfoView(APIView):
 
 
 class ProfileImageView(APIView):
-    def post(self, request, username, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         # Declaration
         status = 'success'
-        user = User.objects.get(username=username)
+
+        user = request.user
         user_account = Account.objects.get(user=user.id)
 
         pre_img = user_account.photo.path
@@ -580,6 +581,5 @@ class ProfileImageDefaultView(APIView):
         user_account = Account.objects.get(user=user.id)
         user_account.photo = "img/profile_img/default.jpg"
         user_account.save()
-        print("finish")
         res = {"status": status}
         return Response(res)
