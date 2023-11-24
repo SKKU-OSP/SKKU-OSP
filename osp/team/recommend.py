@@ -180,7 +180,7 @@ def get_team_recommendation(team_id):
                            ].sort_values(ascending=False)
 
     # 이미 팀 멤버인 경우 드랍
-    sim = sim.drop(labels=['!Team!']+member_list, axis=0)
+    sim = sim.drop(labels=['!Team!']+member_list, axis=0, errors='ignore')
     recomm_dict = sim.to_dict()
 
     print("elapsed time get_team_recommendation_list", time.time()-start)
