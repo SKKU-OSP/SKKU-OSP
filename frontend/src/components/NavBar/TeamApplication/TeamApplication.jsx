@@ -106,9 +106,8 @@ const TeamApplication = ({ handleClose, show }) => {
   const tabContArr = [
     {
       tabTitle: (
-        <div style={{ width: '50%' }}>
+        <div style={{ width: '50%' }} key="recv-tab">
           <Nav.Link
-            key="recv-tab"
             className={activeIndex === 0 ? 'SelectedNavItem' : 'UnselectedNavItem'}
             onClick={() => tabClickHandler(0)}
           >
@@ -168,9 +167,8 @@ const TeamApplication = ({ handleClose, show }) => {
     },
     {
       tabTitle: (
-        <div style={{ width: '50%' }}>
+        <div style={{ width: '50%' }} key="sent-tab">
           <Nav.Link
-            key="sent-tab"
             className={activeIndex === 1 ? 'SelectedNavItem' : 'UnselectedNavItem'}
             onClick={() => tabClickHandler(1)}
           >
