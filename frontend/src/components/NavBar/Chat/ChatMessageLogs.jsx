@@ -80,7 +80,7 @@ const ChatMessageLogs = (props) => {
               {log.board_link ? (
                 <div className={ChatTextBodyClasses(log.sender.user.id)}>
                   {log.format_body[0]}
-                  <a href={`/community/board/${log.board_link}`}>링크</a>
+                  <a href={`/community/team/${log.board_link}`}>링크</a>
 
                   {log.format_body[1]}
                 </div>
