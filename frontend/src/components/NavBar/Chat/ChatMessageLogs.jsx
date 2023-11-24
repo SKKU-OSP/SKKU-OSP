@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import SendIcon from '@mui/icons-material/Send';
+import axios from 'axios';
 
 import classes from './ChatMessageLogs.module.css';
 import { getAuthConfig } from '../../../utils/auth';
@@ -38,6 +39,7 @@ const ChatMessageLogs = (props) => {
       document.getElementById('chat-input').value = null;
     }
   };
+
   const chatBoxClasses = (senderId) => {
     return props.opponentId === senderId ? classes.ChatBoxRecieve : classes.ChatBoxSend;
   };
