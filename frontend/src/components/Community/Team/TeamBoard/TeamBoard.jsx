@@ -21,6 +21,7 @@ function TeamBoard() {
   const navigate = useNavigate();
   const { team_name } = useParams();
   const [isLoadedArticles, setIsLoadedArticles] = useState(false);
+  const [isInvitedUser, setIsInvitedUser] = useState(true);
   const [maxPageNumber, setMaxPageNumber] = useState(0);
   const [nowPage, setNowPage] = useState(1);
   const [thisTeam, setThisTeam] = useState({ team: {}, articles: [] });
@@ -47,6 +48,7 @@ function TeamBoard() {
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);
         setNowPage(page);
+        setIsInvitedUser(res.data.is_invited_user);
         const userMemberInfo = res.data.team_members.find((ele) => ele.member.user.username === username);
         setIsAdmin(userMemberInfo?.is_admin);
       }
@@ -177,13 +179,17 @@ function TeamBoard() {
                 <div className="flex-grow-1">
                   <div className="team-members fs-4 mb-2">
                     Members
-                    <BsPersonPlusFill className="btnIcon" onClick={handleClickInvite} />
-                    <InviteTeamModalInBoard
-                      show={showInvite}
-                      setShow={setShowInvite}
-                      team_name={team_name}
-                      id={thisTeam.team.id}
-                    />
+                    {!isInvitedUser && (
+                      <>
+                        <BsPersonPlusFill className="btnIcon" onClick={handleClickInvite} />
+                        <InviteTeamModalInBoard
+                          show={showInvite}
+                          setShow={setShowInvite}
+                          team_name={team_name}
+                          id={thisTeam.team.id}
+                        />
+                      </>
+                    )}
                   </div>
                   <div className="team-members-box">
                     {teamMembers
