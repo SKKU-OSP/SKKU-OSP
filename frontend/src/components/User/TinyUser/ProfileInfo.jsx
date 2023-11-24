@@ -42,7 +42,12 @@ function ProfileInfo(props) {
 
   const updatePostProfileDefaultImage = async () => {
     const postUrl = server_url + '/user/api/profile-default-image/' + username + '/';
-    await axios.post(postUrl, getAuthConfig());
+    const formData = new FormData();
+    try {
+      await axios.post(postUrl, formData, getAuthConfig());
+    } catch (error) {
+      console.error('Error during file upload', error);
+    }
   };
 
   const handleEditClick = () => {
