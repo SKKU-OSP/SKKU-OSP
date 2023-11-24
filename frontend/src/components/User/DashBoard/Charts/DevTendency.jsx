@@ -13,6 +13,7 @@ import {
 
 import Chart from './Chart';
 import BadgeInfo from '../Item/BadgeInfo';
+import { useEffect, useState } from 'react';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 function DevTendency(props) {
@@ -71,8 +72,6 @@ function DevTendency(props) {
     ]
   };
 
-  const timeSeriesChartConfig = { type: 'bar', data: timeSeriesData, options: commitOption('Time of Day') };
-
   // 프로젝트 주기 분석 차트
   const freqLabels = ['초반', '중반', '후반', '마무리'];
   const freqPalette = ['#ff68c3', '#7ec1d6', '#808ce5', '#9f5fd4'];
@@ -87,7 +86,6 @@ function DevTendency(props) {
       }
     ]
   };
-  const freqChartConfig = { type: 'bar', data: freqData, options: commitOption('프로젝트 기간') };
 
   // 협업 리포지토리 커밋
   const cooperateLabels = ['개인', '팀'];
@@ -103,7 +101,16 @@ function DevTendency(props) {
       }
     ]
   };
-  const cooperateChartConfig = { type: 'bar', data: cooperateData, options: commitOption('리포지토리') };
+
+  const [timeSeriesChartConfig, setTimeSeriesChartConfig] = useState({});
+  const [freqChartConfig, setFreqChartConfig] = useState({});
+  const [cooperateChartConfig, setCooperateChartConfig] = useState({});
+
+  useEffect(() => {
+    setTimeSeriesChartConfig({ type: 'bar', data: timeSeriesData, options: commitOption('Time of Day') });
+    setFreqChartConfig({ type: 'bar', data: freqData, options: commitOption('프로젝트 기간') });
+    setCooperateChartConfig({ type: 'bar', data: cooperateData, options: commitOption('리포지토리') });
+  }, [props.data]);
 
   return (
     <div className="row dashboard-box mb-4">
