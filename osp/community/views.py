@@ -78,8 +78,8 @@ class TableBoardView(APIView):
             = self.get_validation(request, *args, **kwargs)
 
         if status == 'fail':
-            message = 'validation 과정 중 오류가 발생하였습니다.'
             print(errors)
+            message = list(errors.values())[0]
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
 
@@ -133,11 +133,11 @@ class TableBoardView(APIView):
 
                 if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
                     # 팀 멤버라면 초대 상태 리셋
-                    data['is_invited_user'] = False
+                    data['invite_id'] = 0
 
                 elif teaminvitemessage.exists():
                     # 초대 상태로 설정
-                    data['is_invited_user'] = True
+                    data['invite_id'] = teaminvitemessage.last().id
 
                 team = board.team
                 team_tags = TagIndependent.objects.filter(
