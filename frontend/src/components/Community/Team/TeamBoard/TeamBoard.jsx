@@ -4,7 +4,6 @@ import { Button } from 'react-bootstrap';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import TeamArticle from './TeamArticle';
-import InviteTeamModal from '../InviteTeamModal';
 import EditTeamModal from '../EditTeamModal';
 import { BsAwardFill, BsBoxArrowRight, BsPersonPlusFill } from 'react-icons/bs';
 import AuthContext from '../../../../utils/auth-context';
@@ -21,7 +20,7 @@ function TeamBoard() {
   const navigate = useNavigate();
   const { team_name } = useParams();
   const [isLoadedArticles, setIsLoadedArticles] = useState(false);
-  const [isInvitedUser, setIsInvitedUser] = useState(true);
+  const [inviteId, setInviteId] = useState(0);
   const [maxPageNumber, setMaxPageNumber] = useState(0);
   const [nowPage, setNowPage] = useState(1);
   const [thisTeam, setThisTeam] = useState({ team: {}, articles: [] });
@@ -36,24 +35,30 @@ function TeamBoard() {
 
   const getTeamInfo = async (page) => {
     try {
+      setIsLoadedArticles(false);
       const response = await axios.get(
         server_url + `/community/api/board/${team_name}/?page_number=${page}`,
         getAuthConfig()
       );
       const res = response.data;
       if (res.status === 'success') {
+        console.log(res.data);
         setThisTeam(res.data);
         setTeamMembers(res.data.team_members);
         setTeamTags(res.data.team_tags);
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);
         setNowPage(page);
-        setIsInvitedUser(res.data.is_invited_user);
+        setInviteId(res.data.inviteId);
         const userMemberInfo = res.data.team_members.find((ele) => ele.member.user.username === username);
         setIsAdmin(userMemberInfo?.is_admin);
+      } else {
+        setError(res.message);
+        setIsLoadedArticles(true);
       }
     } catch (error) {
       setError(true);
+      setIsLoadedArticles(true);
     }
   };
 
@@ -143,7 +148,9 @@ function TeamBoard() {
             작성하기
           </Button>
         </div>
-        {isLoadedArticles ? (
+        {!isLoadedArticles && <LoaderIcon style={{ marginTop: '20px' }} />}
+        {error && <>{error}</>}
+        {isLoadedArticles && !error && (
           <>
             <div className="team">
               <div className="team-left">
@@ -179,7 +186,7 @@ function TeamBoard() {
                 <div className="flex-grow-1">
                   <div className="team-members fs-4 mb-2">
                     Members
-                    {!isInvitedUser && (
+                    {!inviteId && (
                       <>
                         <BsPersonPlusFill className="btnIcon" onClick={handleClickInvite} />
                         <InviteTeamModalInBoard
@@ -275,8 +282,6 @@ function TeamBoard() {
               onChange={onPageChange}
             ></Pagination>
           </>
-        ) : (
-          <LoaderIcon style={{ marginTop: '20px' }} />
         )}
       </div>
     </>

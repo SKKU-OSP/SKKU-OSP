@@ -20,8 +20,8 @@ const InviteTeamModalInBoard = (props) => {
   useEffect(() => {
     try {
       const getData = async () => {
-        const teamMemList = serverUrl + '/team/api/team-invite-on-teamboard/' + '?team_id=' + `${teamId}`;
-        const response = await axios.get(teamMemList, getAuthConfig());
+        const userListUrl = `${serverUrl}/team/api/team-invite-on-teamboard/?team_id=${teamId}`;
+        const response = await axios.get(userListUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setUsers(
@@ -37,7 +37,7 @@ const InviteTeamModalInBoard = (props) => {
     }
   }, [teamId]);
 
-  const [userId, setUserId] = useState(0);
+  const [targetUserId, setTargetUserId] = useState(0);
   const [message, setMessage] = useState('');
 
   const onChangeMessage = (e) => {
@@ -45,24 +45,17 @@ const InviteTeamModalInBoard = (props) => {
     setMessage(value);
   };
 
-  const [formData, setFormData] = useState({
-    target_user_id: 318,
-    target_team_id: 0,
-    invite_msg: ''
-  });
-
   const handleChooseUser = (target) => {
-    setUserId(target.value);
-    setFormData((prev) => {
-      const newData = prev;
-      newData['target_team_id'] = props.id;
-      newData['target_user_id'] = target.value;
-      return newData;
-    });
+    setTargetUserId(target.value);
   };
 
   const sendInvitation = async () => {
-    console.log(formData);
+    if (targetUserId === 0) {
+      alert('초대할 팀원을 선택해주세요');
+      return;
+    }
+    const formData = { target_user_id: targetUserId, target_team_id: teamId, invite_msg: message };
+
     try {
       const response = await axios.post(postUrl, formData, getAuthConfig());
       const res = response.data;
@@ -74,19 +67,12 @@ const InviteTeamModalInBoard = (props) => {
     } catch (error) {
       console.log(error);
     }
+    handleClose();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setFormData((prev) => {
-      const newData = prev;
-      newData['target_user_id'] = userId;
-      newData['invite_msg'] = message;
-      console.log(newData);
-      return newData;
-    });
     sendInvitation();
-    handleClose();
   };
   return (
     <Form>
@@ -103,14 +89,13 @@ const InviteTeamModalInBoard = (props) => {
           </Form.Group>
 
           <div className="mb-4">
-            <span style={{ display: 'block' }}>초대할 팀원 선택</span>
-            {users.map((u) => u.labels)}
+            <span style={{ display: 'block' }}>팀원</span>
             <Select
-              placeholder="팀 선택"
+              placeholder="초대할 팀원 선택"
               options={users}
               id="team_id"
               name="team_id"
-              value={users.filter((user) => user.value === userId)}
+              value={users.filter((user) => user.value === targetUserId)}
               onChange={handleChooseUser}
             />
           </div>

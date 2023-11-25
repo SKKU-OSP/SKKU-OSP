@@ -300,7 +300,6 @@ class NotificationListView(APIView):
                         continue
                     try:
                         board = Board.objects.get(team__id=noti['route_id'])
-                        print(noti['route_id'])
                         noti['feedback'] = BoardSerializer(board).data
                     except Board.DoesNotExist as e:
                         print(f'{noti["route_id"]} 팀의 게시판이 없습니다. {e}')

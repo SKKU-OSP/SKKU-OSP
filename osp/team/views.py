@@ -68,11 +68,9 @@ class TeamInviteOnTeamboardView(APIView):
         team_id = request.GET.get('team_id')
         try:
             teammembers = TeamMember.objects.filter(
-                team__id=team_id).values_list('id')
-
+                team__id=team_id).values_list('member__user__id')
             usernames_exclude_members = User.objects.exclude(
                 id__in=teammembers).exclude(is_staff=True).values('id', 'username')
-
             data['usernames_exclude_members'] = usernames_exclude_members
         except DatabaseError as e:
             # Database Exception handling
@@ -162,13 +160,26 @@ class TeamInviteOnTeamboardView(APIView):
                     user__id=target_user_id)
 
                 # 팀원 초대 메세지 객체 생성
-                TeamInviteMessage.objects.create(
-                    team=target_team,
-                    account=target_account,
-                    message=invite_msg,
-                    direction=True,
-                    send_date=datetime.now(),
-                )
+                pre_msg = TeamInviteMessage.objects.filter(team=target_team,
+                                                           account=target_account,
+                                                           direction=True, status=0)
+                if pre_msg.exists():
+                    pre_msg = pre_msg.last()
+                    pre_msg.message = invite_msg
+                    pre_msg.send_date = datetime.now()
+                    pre_msg.save()
+                    message = "초대 메시지를 수정했습니다."
+                    system_msg = "초대장이 수정되었습니다."
+                else:
+                    TeamInviteMessage.objects.create(
+                        team=target_team,
+                        account=target_account,
+                        message=invite_msg,
+                        direction=True,
+                        send_date=datetime.now(),
+                    )
+                    message = "초대 메시지를 작성했습니다."
+                    system_msg = "초대장이 있습니다."
 
                 # noti - 자동생성 (signals)
                 # msg
@@ -185,7 +196,7 @@ class TeamInviteOnTeamboardView(APIView):
                 Message.objects.create(
                     sender=sender,
                     receiver=target_account,
-                    body=f"[{target_team.name}] 초대장이 있습니다.<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
+                    body=f"[{target_team.name}] {system_msg}<br><a href='{url}'>링크</a>를 확인해주세요.<br> 초대 메세지:"+invite_msg,
                     send_date=datetime.now(),
                     receiver_read=False,
                     sender_delete=False,
