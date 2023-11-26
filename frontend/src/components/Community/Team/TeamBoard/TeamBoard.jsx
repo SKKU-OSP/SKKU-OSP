@@ -13,6 +13,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ChatMessageModal_Container from '../../../NavBar/Chat/ChatMessageModal_Container';
 import InviteTeamModalInBoard from '../InviteTeamModalInBoard';
+import classes from './TeamBoard.module.css';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -27,11 +28,14 @@ function TeamBoard() {
   const [teamMembers, setTeamMembers] = useState([]);
   const [teamTags, setTeamTags] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [myId, setMyId] = useState(0);
   const [error, setError] = useState(false);
   const { username } = useContext(AuthContext);
   const [showChatMessageModal, setShowChatMessageModal] = useState(false);
 
   const [showInvite, setShowInvite] = useState(false);
+
+  const inviteURL = server_url + '/team/api/team-invite-update/';
 
   const getTeamInfo = async (page) => {
     try {
@@ -49,7 +53,8 @@ function TeamBoard() {
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);
         setNowPage(page);
-        setInviteId(res.data.inviteId);
+        setInviteId(res.data.invite_id);
+        setMyId(res.data.privacy.account);
         const userMemberInfo = res.data.team_members.find((ele) => ele.member.user.username === username);
         setIsAdmin(userMemberInfo?.is_admin);
       } else {
@@ -61,7 +66,30 @@ function TeamBoard() {
       setIsLoadedArticles(true);
     }
   };
+  const sendInviteResult = async (id, userId, status) => {
+    try {
+      const data = { target_teaminvitemessage_id: id, is_okay: status, user_id: userId };
+      const response = await axios.post(inviteURL, data, getAuthConfig());
+      const res = response.data;
+      if (res.status === 'fail') {
+        console.log(res.status, res.errors);
+      } else {
+        console.log(res.data);
+        navigate(`/community/team`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleApproveClick = (InviteId, userId) => {
+    sendInviteResult(InviteId, userId, 'true');
+    alert('성공적으로 팀의 멤버가 되었습니다.');
+  };
 
+  const handleRefuseClick = (InviteId, userId) => {
+    sendInviteResult(InviteId, userId, 'false');
+    alert('성공적으로 초대를 거절하였습니다.');
+  };
   const onMyTeamList = () => {
     navigate(`/community/team`);
   };
@@ -133,6 +161,44 @@ function TeamBoard() {
       getTeamInfo(1);
     }
   }, [team_name, username]);
+
+  const ArticleList = (articles) => {
+    if (inviteId != 0) {
+      return (
+        <div className={classes.forInvite}>
+          <div>팀 게시판은 팀원 승인 후에 이용 가능합니다.</div>
+          <div className={classes.inviteMessageLargeBox}>
+            <div className={classes.inviteName}>팀 초대를 수락하시겠습니까?</div>
+            {/* <div className={classes.inviteMessageSmallBox}>
+              <div className={classes.inviteMessage}>ddd</div>
+            </div> */}
+            <div className={classes.twoButton}>
+              <Button
+                variant="outline-primary"
+                size="sm"
+                className="text-dark me-2"
+                onClick={() => handleApproveClick(inviteId, myId)}
+              >
+                수락
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                className="text-dark me-2"
+                onClick={() => handleRefuseClick(inviteId, myId)}
+              >
+                거절
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (articles && articles.articles.length > 0) {
+      return articles.articles.map((article) => <TeamArticle key={article.id} article={article} />);
+    } else {
+      return <h5>작성된 글이 없습니다.</h5>;
+    }
+  };
 
   return (
     <>
@@ -269,11 +335,7 @@ function TeamBoard() {
               </div>
             </div>
 
-            {thisTeam.articles && thisTeam.articles.length > 0 ? (
-              thisTeam.articles.map((article) => <TeamArticle key={article.id} article={article} />)
-            ) : (
-              <h5>작성된 글이 없습니다.</h5>
-            )}
+            <ArticleList articles={thisTeam.articles} />
             <Pagination
               activePage={nowPage}
               itemsCountPerPage={10}
