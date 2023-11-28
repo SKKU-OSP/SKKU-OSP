@@ -11,13 +11,13 @@ export default function TeamApplication_Presenter({ newAlert, iconSize, showTeam
   };
   return (
     <>
+      <MdOutlineAssignmentInd size={iconSize} color="white" onClick={handleShow} className="nav-bar-icons" />
+      <TeamApplication handleClose={handleClose} show={showTeamApp} />
       {newAlert && (
         <span className="badge-new badge-new-alert-application">
           <span className="visually-hidden">New Application</span>
         </span>
       )}
-      <MdOutlineAssignmentInd size={iconSize} onClick={handleShow} className="nav-bar-icons" />
-      <TeamApplication handleClose={handleClose} show={showTeamApp} />
     </>
   );
 }

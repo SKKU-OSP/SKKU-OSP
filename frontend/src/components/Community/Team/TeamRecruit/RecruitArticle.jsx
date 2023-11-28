@@ -1,11 +1,11 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../../../../utils/auth-context';
+import { BsHandThumbsUp, BsChatLeftText, BsBookmark, BsEye } from 'react-icons/bs';
 import ProfileDropdown_Container from '../../ProfileDropdown';
 
 export default function RecruitArticle(props) {
-  const { article } = props;
-  const [pubDate, setPubDate] = useState('');
+  const { article, pubDate } = props;
   const navigate = useNavigate();
   const { username } = useContext(AuthContext);
 
@@ -23,65 +23,60 @@ export default function RecruitArticle(props) {
     }
   };
 
-  const getDate = (date) => {
-    if (!date) return;
-    const now = new Date();
-    const article_date = new Date(date);
-    const delta = now.getTime() - article_date.getTime();
-
-    if (delta / (60 * 1000) < 1) {
-      setPubDate('방금');
-    } else if (delta / (60 * 1000) < 60) {
-      setPubDate((delta / (60 * 1000)).toFixed() + '분 전');
-    } else if (delta / (60 * 60 * 1000) < 24) {
-      setPubDate((delta / (60 * 60 * 1000)).toFixed() + '시간 전');
-    } else if (delta / (24 * 60 * 60 * 1000) < 31) {
-      setPubDate((delta / (24 * 60 * 60 * 1000)).toFixed() + '일 전');
-    } else {
-      setPubDate(date.substring(0, 10));
-    }
-  };
-
-  useEffect(() => {
-    if (article?.pub_date) {
-      getDate(article.pub_date);
-    }
-  }, [article]);
-
   return (
     <div className="board-article">
       {article.title ? (
         <>
-          <div>
-            {article.writer ? (
-              article.anonymous_writer ? (
-                <span>익명 </span>
+          <div className="board-article-header">
+            <div className="board-team">
+              {article.team_name ? (
+                <>
+                  <h5 className="board-team-name">{article.team_name}</h5>
+                  <div className="vertical-divider"></div>
+                  <h4 className="board-team-title" onClick={onArticle}>
+                    {article.title}
+                  </h4>
+                </>
               ) : (
-                <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
-              )
-            ) : (
-              <span>탈퇴한 이용자 </span>
-            )}
-            · {pubDate}
-          </div>
-          <h4 className="board-article-title" onClick={onArticle}>
-            [{article.team_name ? article.team_name : null}]&nbsp;{article.title}
-          </h4>
-          <div>
-            {article.tags && article.tags.length > 0 ? (
-              article.tags.map((tag) => (
-                <h6 className="inline" key={tag}>
-                  #{tag.replace(' ', '_')}&nbsp;
-                </h6>
-              ))
-            ) : (
-              <h6 className="inline">{'\u00A0'}</h6>
-            )}
-            <div className="board-article-meta-list">
+                <>
+                  <h5 className="board-team-name hidden-placeholder">No name</h5>
+                  <div className="vertical-divider"></div>
+                  <h4 className="board-team-title" onClick={onArticle}>
+                    {article.title}
+                  </h4>
+                </>
+              )}
+            </div>
+            <div className="board-article-info">
+              <div className="board-article-writer">
+                {article.writer ? (
+                  article.anonymous_writer ? (
+                    <span>익명</span>
+                  ) : (
+                    <ProfileDropdown_Container
+                      userName={article.writer.user.username}
+                      userId={article.writer.user.id}
+                    />
+                  )
+                ) : (
+                  <span>탈퇴한 이용자</span>
+                )}
+              </div>
+              <div className="board-article-list">
+                <div className="board-article-pubdate">{pubDate}</div>
+                <div className="board-article-meta-list">
+                  <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
+                  <BsChatLeftText size={13} className="board-article-meta" /> {article.comment_cnt}
+                  <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
+                  <BsEye size={13} className="board-article-meta" /> {article.view_cnt}
+                </div>
+              </div>
+            </div>
+            <div className="board-team-recruit">
               {article?.period_end && new Date(article.period_end) > new Date() ? (
-                <span className="text-primary">모집중</span>
+                <span className="board-team-recruit-on">모집중</span>
               ) : (
-                <span>모집 마감</span>
+                <span className="board-team-recruit-off">모집마감</span>
               )}
             </div>
           </div>

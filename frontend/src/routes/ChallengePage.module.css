@@ -79,7 +79,7 @@
   align-items: flex-start;
   padding: 2rem 3rem;
   background: #ffffff;
-  border-bottom: 1px solid #b0b0b0;
+  border-bottom: 1px solid var(--sub-border-color);
 }
 
 .ChallengeListWrapper {
@@ -109,7 +109,7 @@
   font-weight: 700;
   font-size: 24px;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #b0b0b0;
+  border-bottom: 1px solid var(--sub-border-color);
   z-index: 1;
   position: relative;
 }
@@ -120,7 +120,7 @@
   font-weight: 700;
   font-size: 24px;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #b0b0b0;
+  border-bottom: 1px solid var(--sub-border-color);
 
   z-index: 1;
   position: relative;
@@ -128,8 +128,8 @@
 
 .AchievedItem {
   padding: 1rem 1.5rem 1rem 1.5rem;
-  border-bottom: 1px solid #b0b0b0;
-  /* border-right: 1px solid #b0b0b0; */
+  border-bottom: 1px solid var(--sub-border-color);
+  /* border-right: 1px solid var(--sub-border-color); */
   background-color: #ffffff;
   min-height: 170px;
   display: flex;
@@ -139,7 +139,7 @@
 
 .UnachievedItem {
   padding: 1rem 1.5rem 1rem 1.5rem;
-  border-bottom: 1px solid #b0b0b0;
+  border-bottom: 1px solid var(--sub-border-color);
   background-color: #ffffff;
   min-height: 170px;
   display: flex;

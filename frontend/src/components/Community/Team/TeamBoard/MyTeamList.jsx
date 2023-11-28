@@ -82,28 +82,35 @@ function MyTeamList() {
 
   return (
     <div className="col-9">
-      <div className="community-team-nav d-flex">
-        <Dropdown show={showDropDown} onToggle={(isOpen) => setShowDropDown(isOpen)}>
-          <Dropdown.Toggle variant="secondary" id="dropdown-sort">
-            {sortOptions.find((option) => option.value === sortOrder).label}
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            {sortOptions.map((option) => (
-              <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
-                {option.label}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
-        <ul className="nav nav-fill community-team-nav-items">
-          <li className="community-team-nav-items">
-            <div>내 팀 목록</div>
+      <div className="community-nav d-flex">
+        <ul className="nav nav-fill community-nav-items">
+          <li className="nav-item selected-nav-item">
+            <div style={{ cursor: 'default' }}>내 팀 목록</div>
           </li>
         </ul>
-        <button className="btn btn-primary" onClick={handleShow} style={{ width: btnWidth }}>
-          팀 만들기
-        </button>
-        <CreateTeamModal show={modalShow} onClose={handleClose} />
+        <ul className="nav nav-fill">
+          <Dropdown
+            className="community-dropdown"
+            show={showDropDown}
+            onToggle={(isOpen) => setShowDropDown(isOpen)}
+            style={{ marginRight: '5px' }}
+          >
+            <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+              {sortOptions.find((option) => option.value === sortOrder).label}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {sortOptions.map((option) => (
+                <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
+                  {option.label}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+          <button className="btn btn-primary" onClick={handleShow}>
+            <BsPeopleFill style={{ marginRight: '7px', marginBottom: '5px' }} />팀 만들기
+          </button>
+          <CreateTeamModal show={modalShow} onClose={handleClose} />
+        </ul>
       </div>
 
       {isReady ? (

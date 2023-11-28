@@ -141,7 +141,7 @@ function Interest(props) {
                   <span className="intro">관심분야</span>
                   {isEdit && (
                     <>
-                      <Button className="btn" onClick={OnHandleInterestShow} style={{ backgroundColor: 'white' }}>
+                      <Button className="btn" onClick={OnHandleInterestShow}>
                         <span className="btn-text">수정</span>
                       </Button>
                       <InterestModal
@@ -169,7 +169,7 @@ function Interest(props) {
                   <span className="intro">사용언어/기술스택</span>
                   {isEdit && (
                     <>
-                      <Button className="btn" onClick={OnHandleSkillShow} style={{ backgroundColor: 'white' }}>
+                      <Button className="btn" onClick={OnHandleSkillShow}>
                         <span className="btn-text">수정</span>
                       </Button>
                       <SkillModal

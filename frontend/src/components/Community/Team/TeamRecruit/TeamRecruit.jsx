@@ -9,6 +9,7 @@ import AuthContext from '../../../../utils/auth-context';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
 import Dropdown from 'react-bootstrap/Dropdown';
+import { BsPencilFill } from 'react-icons/bs';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -27,7 +28,7 @@ function TeamRecruit() {
   const [error, setError] = useState(false);
 
   const isRecruitTab = tabName === '팀 모집';
-  const isTeamListTab = tabName === '전체 팀 목록';
+  const isTeamListTab = tabName === '전체 팀 보기';
 
   const [recruitSortOrders, setRecruitSortOrders] = useState('-id');
   const [teamSortOrders, setTeamSortOrders] = useState('-id');
@@ -36,7 +37,7 @@ function TeamRecruit() {
     { label: '최신순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '팀 이름 순', value: 'team_name' },
-    { label: '멤버 많은 순', value: '-member_cnt' }
+    { label: '팀원 많은 순', value: '-member_cnt' }
   ];
   const TeamSortOptions = [
     { label: '최신순', value: '-id' },
@@ -134,57 +135,77 @@ function TeamRecruit() {
     setShowTeamDropdown(false);
   };
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(dateString).toLocaleDateString('ko-KR', options).replace(/\.\s/g, '.').replace(/\.$/, '');
+  };
+
   return (
     <div className="col-9">
       {!error && (
         <>
           <div className="community-nav d-flex">
-            {isRecruitTab && (
-              <Dropdown show={showRecruitDropdown} onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}>
-                <Dropdown.Toggle variant="secondary" id="dropdown-sort">
-                  {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {recruitSortOptions.map((option) => (
-                    <Dropdown.Item key={option.value} onClick={() => handleRecruitSortChange(option)}>
-                      {option.label}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-            )}
-            {isTeamListTab && (
-              <Dropdown show={showTeamDropdown} onToggle={(isOpen) => setShowTeamDropdown(isOpen)}>
-                <Dropdown.Toggle variant="secondary" id="dropdown-sort">
-                  {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {TeamSortOptions.map((option) => (
-                    <Dropdown.Item key={option.value} onClick={() => handleTeamSortChange(option)}>
-                      {option.label}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-            )}
             <ul className="nav nav-fill community-nav-items">
               <CommunityNavItem navName="팀 모집" tabName={tabName} />
-              <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
+              <CommunityNavItem navName="전체 팀 보기" tabName={tabName} />
             </ul>
-            <button
-              type="button"
-              onClick={onWrite}
-              className={isRecruitTab ? 'btn btn-primary' : 'btn btn-primary hidden'}
-            >
-              작성하기
-            </button>
+
+            <ul className="nav nav-fill">
+              {isRecruitTab && (
+                <>
+                  <Dropdown
+                    className="community-dropdown"
+                    show={showRecruitDropdown}
+                    onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}
+                    style={{ marginRight: '5px' }}
+                  >
+                    <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+                      {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      {recruitSortOptions.map((option) => (
+                        <Dropdown.Item key={option.value} onClick={() => handleRecruitSortChange(option)}>
+                          {option.label}
+                        </Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                  <button
+                    type="button"
+                    onClick={onWrite}
+                    className={isRecruitTab ? 'btn btn-primary' : 'btn btn-primary hidden'}
+                  >
+                    <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
+                    작성하기
+                  </button>
+                </>
+              )}
+              {isTeamListTab && (
+                <Dropdown
+                  className="community-dropdown"
+                  show={showTeamDropdown}
+                  onToggle={(isOpen) => setShowTeamDropdown(isOpen)}
+                >
+                  <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+                    {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    {TeamSortOptions.map((option) => (
+                      <Dropdown.Item key={option.value} onClick={() => handleTeamSortChange(option)}>
+                        {option.label}
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              )}
+            </ul>
           </div>
           {isLoadedArticles ? (
             <>
               {isRecruitTab && (
                 <>
                   {articles.map((article) => (
-                    <RecruitArticle key={article.id} article={article} />
+                    <RecruitArticle key={article.id} article={article} pubDate={formatDate(article.pub_date)} />
                   ))}
                   <Pagination
                     activePage={nowRecruitPage}

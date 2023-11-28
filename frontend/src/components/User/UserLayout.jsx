@@ -13,7 +13,7 @@ export default function UserLayout() {
     <div className="container">
       {username === paramsUsername ? (
         <div id="wrapper" className={wrapperClass}>
-          <Sidebar onToggle={() => setIsSideClosed((prev) => !prev)} />
+          <Sidebar onToggle={() => setIsSideClosed((prev) => !prev)} isToggled={isSideClosed} />
           <div id="content-wrapper" className="px-3 py-5">
             <Outlet />
           </div>

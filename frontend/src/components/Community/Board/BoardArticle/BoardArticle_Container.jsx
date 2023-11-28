@@ -5,36 +5,16 @@ import AuthContext from '../../../../utils/auth-context';
 
 export default function BoardArticle_Container(props) {
   const { article } = props;
-  const [pubDate, setPubDate] = useState('');
   const navigate = useNavigate();
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}`);
   };
 
-  const getDate = (date) => {
-    const now = new Date();
-    const article_date = new Date(date);
-    const delta = now.getTime() - article_date.getTime();
-
-    if (delta / (60 * 1000) < 1) {
-      setPubDate('방금');
-    } else if (delta / (60 * 1000) < 60) {
-      setPubDate((delta / (60 * 1000)).toFixed() + '분 전');
-    } else if (delta / (60 * 60 * 1000) < 24) {
-      setPubDate((delta / (60 * 60 * 1000)).toFixed() + '시간 전');
-    } else if (delta / (24 * 60 * 60 * 1000) < 31) {
-      setPubDate((delta / (24 * 60 * 60 * 1000)).toFixed() + '일 전');
-    } else {
-      setPubDate(date.substring(0, 10));
-    }
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(dateString).toLocaleDateString('ko-KR', options).replace(/\.\s/g, '.').replace(/\.$/, '');
   };
 
-  useEffect(() => {
-    if (article.pub_date) {
-      getDate(article.pub_date);
-    }
-  });
-
-  return <BoardArticle_Presenter article={article} pubDate={pubDate} onArticle={onArticle} />;
+  return <BoardArticle_Presenter article={article} pubDate={formatDate(article.pub_date)} onArticle={onArticle} />;
 }

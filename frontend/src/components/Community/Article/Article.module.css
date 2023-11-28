@@ -16,9 +16,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 20px;
-  border-bottom: 1px solid var(--main-border-color);
-  border-right: 1px solid var(--main-border-color);
+  border: 1px solid var(--main-border-color);
+  border-top: 0 !important;
+  margin: -1px 0 0 -1px;
+  padding: 30px;
+  height: 60px;
 }
 
 .articleFile {
@@ -30,7 +32,7 @@
 
 .articleFileList {
   align-items: center;
-  padding: 0px 20px;
+  padding: 0px 30px;
   border: 1px solid var(--main-border-color);
   margin: -1px 0 0 -1px;
 }
@@ -55,7 +57,7 @@
 
 .articleTeam {
   justify-content: space-between;
-  gap: 20px;
+  gap: 30px;
 }
 
 .articleTeamDivide > div {
@@ -78,7 +80,7 @@
   border-right: 1px solid var(--main-border-color);
   border-left: 1px solid var(--main-border-color);
   margin-left: -1px;
-  padding: 30px 20px 20px 20px;
+  padding: 30px 30px 30px 30px;
 }
 
 .articleBody {
@@ -95,7 +97,7 @@
 
 .articleContent {
   min-height: 300px;
-  padding: 20px 0;
+  padding: 30px 0;
 }
 
 .articleInfo {
@@ -126,7 +128,7 @@
 
 .comment {
   border-top: 1px solid var(--main-border-color);
-  padding: 10px 20px;
+  padding: 10px 30px;
 }
 
 .commentContent {

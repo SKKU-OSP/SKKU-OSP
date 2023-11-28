@@ -17,12 +17,10 @@ function MainHeader_Presenter(props) {
     <header className={isToggled ? 'extended' : ''}>
       <div className="container d-flex position-relative header">
         <div className="head-of-header d-flex w-100">
-          <div className="col-lg-3 col-1 logo">
-            <Link to="/" className="fs-3 bold text-nowrap align-middle" style={{ textDecoration: 'none' }}>
-              <img width="42px" height="42px" src="/images/logo-simple.svg" alt="로고" />
-              <span className="siteTitle">SKKU SOSD</span>
-            </Link>
-          </div>
+          <Link className="logo">
+            <img className="invert-color" width="42px" height="42px" src="/images/logo-simple.svg" alt="로고" />
+            <div className="siteTitle fs-3">SKKU SOSD</div>
+          </Link>
           <div className="col-lg-9 col-11 d-flex justify-content-end">
             <div className="on-desktop justify-content-between flex-grow-1 gap-3">
               <HeaderNavBar />
