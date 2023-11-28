@@ -47,7 +47,7 @@ const ChallengePage = () => {
 
   return (
     <>
-      <div className="col-md-9">
+      <div className="col-9">
         <div className={classes.ChallengeList}>
           <div className={classes.ChallengeProgressTitle}>
             도전과제 진행률: {numAchieved}/{totalnum}
@@ -98,7 +98,7 @@ const ChallengePage = () => {
               }
             })}
           </div>
-          <div style={{ width: '1px', backgroundColor: '#b0b0b0' }}></div>
+          <div style={{ width: '1px', backgroundColor: 'var(--sub-border-color)' }}></div>
           <div className={classes.Unachieved}>
             <div className={classes.UnachievedTitle}>진행중인 도전과제</div>
             {achievements

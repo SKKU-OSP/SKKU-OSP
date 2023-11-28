@@ -8,7 +8,13 @@
   text-align: center;
   max-height: fit-content;
   position: sticky;
-  top: 85px;
+  top: 150px;
+  background-color: white;
+  box-shadow: 0 4px 4px var(--card-box-shadow);
+  border-radius: 10px;
+  padding: 20px 0px;
+  margin-left: -10px;
+  margin-right: 10px;
 }
 
 #sidebar-user-info {
@@ -18,17 +24,15 @@
   align-items: center;
   padding: 0.625rem;
   width: 100%;
-  border: 1px solid var(--main-border-color);
-  border-top: none !important;
 }
 .img-container {
-  width: 70%;
+  width: 100%;
   height: 100%;
   margin: 10px;
   display: block;
 }
 #sidebar-user-info .sidebar-profile-img {
-  width: 100%;
+  width: 70%;
   border: 1px solid var(--main-border-color);
   border-radius: 50%;
   object-fit: cover;
@@ -37,29 +41,26 @@
 #sidebar-profile-name {
   color: var(--main-light-font-color);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 25px;
   letter-spacing: -2px;
   cursor: pointer;
+  margin-bottom: 0.5rem;
 }
 
 #sidebar-profile-username {
   color: var(--main-light-font-color);
   font-weight: 500;
-  font-size: 20px;
+  font-size: 18px;
   text-decoration: underline;
   cursor: pointer;
+  margin-bottom: 0.5rem !important;
 }
-.sidebar-content {
-  border-left: 1px solid var(--main-border-color);
-  border-right: 1px solid var(--main-border-color);
-}
+
 .sidebar-content a {
-  border-bottom: 1px solid var(--main-border-color);
   color: var(--main-font-color);
   text-decoration: none;
 }
 .sidebar-content div {
-  border-bottom: 1px solid var(--main-border-color);
   letter-spacing: -1px;
 }
 
@@ -68,6 +69,9 @@
   padding: 0.625rem;
   cursor: pointer;
 }
+
+#sidebar-profile-name:hover,
+#sidebar-profile-username:hover,
 .sidebar-activity:hover {
   opacity: 0.5;
 }
@@ -90,5 +94,5 @@
 }
 
 .btn-logout {
-  margin: 10px;
+  margin: 10px 0px 7px;
 }

@@ -14,13 +14,7 @@ export default function Notification_Presenter({
 }) {
   return (
     <>
-      {newAlert && (
-        <span className="badge-new badge-new-alert-noti">
-          <span className="visually-hidden">New Application</span>
-        </span>
-      )}
-
-      <MdOutlineNotificationsNone size={iconSize} onClick={handleShow} className="nav-bar-icons" />
+      <MdOutlineNotificationsNone size={iconSize} color="white" onClick={handleShow} className="nav-bar-icons" />
       <NotificationModal
         iconSize={iconSize}
         show={showNoti}
@@ -29,6 +23,11 @@ export default function Notification_Presenter({
         notiList={notiList}
         setNotiList={setNotiList}
       />
+      {newAlert && (
+        <span className="badge-new badge-new-alert-noti">
+          <span className="visually-hidden">New Application</span>
+        </span>
+      )}
     </>
   );
 }
