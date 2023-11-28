@@ -27,17 +27,20 @@ body::-webkit-scrollbar {
   --sub-bg-color: #ffffff;
   --sub-bg-color-transparent: #ffffffff;
   --article-bg-color: #f5f5f5;
-  --header-bg-color: #e7edf1;
+  --header-bg-color: #072a60;
   --main-font-color: #454545;
-  --main-selected-color: #0066ff;
+  --main-selected-color: #072a60;
   --main-light-font-color: #696969;
-  --main-border-color: #b0b0b0;
+  --main-border-color: #d8d8d8;
   --main-border-color-transparent: #9d9d9d80;
+  --sub-border-color: #eaeaea;
+  --main-nav-btn-color: #eaeaea;
+  --nav-unselect-color: #c7c7c7;
   --main-point-color: #002743;
   --main-point-color-transparent: #00274380;
   --sub-point-color: #0094ff;
   --sub-point-color-transparent: #0094ff80;
-  --alert-color: #ff68c3;
+  --alert-color: #8dc63f;
   --alert-color-transparent: #ff68c380;
   --danger-color: #dc3545;
   --danger-color-transparent: #dc354580;
@@ -45,6 +48,7 @@ body::-webkit-scrollbar {
   --main-icon-color-transparent: #74747480;
   --profile-nav-font: #495057;
   --profile-nav-border: #9d9d9d9d;
+  --profile-tab-color: #06234d;
   --card-box-shadow: #00000040;
   --bootstrap-primary: #0d6efd;
   --bootstrap-active-primary: #0a53be;
@@ -53,6 +57,9 @@ body::-webkit-scrollbar {
   --chat-send-color: #9ad5ff;
   --chat-receive-color: #ffffff;
   --btn-default-color: #cdcdcd;
+  --btn-hover-color: #8dc63f;
+  --btn-primary-color: #575757;
+  --btn-primary-hover: #464646;
   --profile-btn-active: #d9d9d9;
   --profile-btn-border: #2f2f2f;
   --tag-bg-domain: #d3d3d3;
@@ -103,6 +110,52 @@ body::-webkit-scrollbar {
   --color-bronze: #db944b;
   --color-silver: #d9d9d9;
   --color-gold: #f9d978;
+  --bs-border-radius: 10px;
+}
+
+.btn-primary {
+  --bs-btn-border-color: var(--btn-primary-color);
+  --bs-btn-bg: var(--btn-primary-color);
+  height: 37px;
+  padding: 7px 15px;
+  border-radius: 17px;
+  gap: 10px;
+}
+.btn-primary:hover,
+.btn-primary:active {
+  border-color: var(--btn-primary-hover);
+  background-color: var(--btn-primary-hover);
+}
+
+.btn-secondary {
+  height: 37px;
+  padding: 7px;
+  border-radius: 17px;
+  gap: 10px;
+}
+
+.btn-third {
+  --bs-btn-border-color: var(--main-selected-color);
+  --bs-btn-bg: var(--main-white);
+  color: var(--main-selected-colork);
+}
+.btn-third:hover,
+.btn-third:active {
+  border-color: var(--main-selected-color);
+  background-color: var(--main-selected-color);
+  color: var(--main-white);
+}
+
+.btn-fourth {
+  --bs-btn-border-color: var(--btn-hover-color);
+  --bs-btn-bg: var(--main-white);
+  color: var(--btn-hover-color);
+}
+.btn-fourth:hover,
+.btn-fourth:active {
+  border-color: var(--btn-hover-color);
+  background-color: var(--btn-hover-color);
+  color: var(--main-white);
 }
 
 html,

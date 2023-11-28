@@ -15,7 +15,7 @@ function ProfileTab(props) {
     <>
       <div className="profile-tab">
         {isEdit ? (
-          <Nav justify variant="underline" activeKey={activeTab} onSelect={handleTabSelect}>
+          <Nav justify activeKey={activeTab} onSelect={handleTabSelect}>
             <Nav.Item>
               <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
             </Nav.Item>
@@ -27,7 +27,7 @@ function ProfileTab(props) {
             </Nav.Item>
           </Nav>
         ) : (
-          <Nav justify variant="underline" activeKey={activeTab} onSelect={handleTabSelect}>
+          <Nav justify activeKey={activeTab} onSelect={handleTabSelect}>
             <Nav.Item>
               <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
             </Nav.Item>

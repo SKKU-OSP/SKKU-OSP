@@ -7,10 +7,9 @@
 }
 
 #sidebar-wrapper {
-  width: 48px;
   z-index: 1000;
   position: fixed;
-  left: 250px;
+  left: 260px;
   height: 100%;
   margin-left: -250px;
   overflow-y: auto;
@@ -29,8 +28,8 @@
 }
 .sidebar-nav {
   position: absolute;
-  top: 0;
-  right: 12px;
+  top: 5px;
+  right: 17px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -50,7 +49,7 @@
   color: #000000;
 }
 .sidebar-menu {
-  margin-left: 12px;
+  margin-left: 8px;
   visibility: hidden;
   display: none;
 }
@@ -111,7 +110,7 @@
   padding: 12px;
 }
 .dashboard-box {
-  border: 1px var(--gray-500) solid;
+  border-top: 1px var(--sub-border-color) solid;
   padding: 12px;
 }
 .coworker-link {

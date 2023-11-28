@@ -6,6 +6,7 @@ import UserArticle from './UserArticle';
 import UserComment from './UserComment';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -29,10 +30,31 @@ function UserActivity() {
     scrap: '내가 스크랩한 글'
   };
 
-  const getWrittenArticle = async (page) => {
+  const [sortOrder, setSortOrder] = useState('-id');
+  const sortOptions = {
+    article: [
+      { label: '최신순', value: '-id' },
+      { label: '오래된 순', value: 'id' },
+      { label: '제목순', value: 'title' },
+      { label: '조회수 순', value: '-view_cnt' }
+    ],
+    comment: [
+      { label: '최신순', value: '-id' },
+      { label: '오래된 순', value: 'id' },
+      { label: '원 게시글 제목순', value: 'article__title' }
+    ],
+    scrap: [
+      { label: '최신순', value: '-id' },
+      { label: '오래된 순', value: 'id' },
+      { label: '제목순', value: 'title' },
+      { label: '조회수 순', value: '-view_cnt' }
+    ]
+  };
+
+  const getWrittenArticle = async (page, sort = sortOrder) => {
     try {
       const responseArticles = await axios.get(
-        server_url + `/community/api/user-articles/?page_number=${page}`,
+        server_url + `/community/api/user-articles/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );
       const resArticles = responseArticles.data;
@@ -52,10 +74,10 @@ function UserActivity() {
     }
   };
 
-  const getWrittenComment = async (page) => {
+  const getWrittenComment = async (page, sort = sortOrder) => {
     try {
       const responseComments = await axios.get(
-        server_url + `/community/api/user-comments/?page_number=${page}`,
+        server_url + `/community/api/user-comments/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );
       const resComments = responseComments.data;
@@ -76,10 +98,10 @@ function UserActivity() {
     }
   };
 
-  const getScrapArticle = async (page) => {
+  const getScrapArticle = async (page, sort = sortOrder) => {
     try {
       const responseScraps = await axios.get(
-        server_url + `/community/api/user-scrap-articles/?page_number=${page}`,
+        server_url + `/community/api/user-scrap-articles/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );
       const resScraps = responseScraps.data;
@@ -117,34 +139,57 @@ function UserActivity() {
 
   const onWrittenArticleChange = (page) => {
     if (tabName === 'article') {
-      getWrittenArticle(page);
+      getWrittenArticle(page, sortOrder);
+      // setNowArticlePage(page);
     }
   };
 
   const onCommentChange = (page) => {
     if (tabName === 'comment') {
-      getWrittenComment(page);
+      getWrittenComment(page, sortOrder);
     }
   };
 
   const onScrapChange = (page) => {
     if (tabName === 'scrap') {
-      getScrapArticle(page);
+      getScrapArticle(page, sortOrder);
+    }
+  };
+
+  const handleSortChange = (newSortOrder) => {
+    setSortOrder(newSortOrder);
+    if (tabName === 'article') {
+      getWrittenArticle(1, newSortOrder);
+    } else if (tabName === 'comment') {
+      getWrittenComment(1, newSortOrder);
+    } else if (tabName === 'scrap') {
+      getScrapArticle(1, newSortOrder);
     }
   };
 
   return (
     <div className="col-9">
-      <div className="community-team-nav d-flex">
-        <div></div>
-        <div className="nav nav-fill community-team-nav-items">
+      <div className="community-nav d-flex">
+        <Dropdown>
+          <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+            {sortOptions[tabName].find((option) => option.value === sortOrder).label}
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {sortOptions[tabName].map((option) => (
+              <Dropdown.Item key={option.value} onClick={() => handleSortChange(option.value)}>
+                {option.label}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+        <div className="nav nav-fill community-nav-items">
           {activityNames.includes(tabName) && (
-            <li className="community-team-nav-items">
+            <li className="nav-item selected-nav-item">
               <div>{activityNavMap[tabName]}</div>
             </li>
           )}
         </div>
-        <div></div>
+        <button className="hidden">hidden</button>
       </div>
 
       {isLoadedArticles ? (

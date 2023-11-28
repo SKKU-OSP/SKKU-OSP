@@ -1,14 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Select from 'react-select';
-import { BsXLg } from 'react-icons/bs';
-import { Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { getAuthConfig } from '../../../../utils/auth';
 import { EditorModules } from '../editor';
 import ReactQuill from 'react-quill';
+import { BsPencilFill } from 'react-icons/bs';
 
 import '../../Board/Board.css';
 
@@ -89,7 +88,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // 저장 버튼 클릭 시
   const handleShow = (event) => {
     event.preventDefault();
-    if (boardName === '팀 모집') {
+    if (boardName === '팀 모집 게시판') {
       if (selectTeam === '') {
         window.alert('모집할 팀을 선택해 주세요');
         return;
@@ -131,7 +130,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         anonymous_writer: anonymousWriter,
         article_tags: selectTags,
         ...articleFiles,
-        ...(boardName === '팀 모집' && {
+        ...(boardName === '팀 모집 게시판' && {
           period_start: toKST(startDate).toISOString(),
           period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
@@ -290,7 +289,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // 뒤로가기 버튼
   const onBack = () => {
     // TODO 팀 게시판의 경우를 고려해서 navigate(`/community/team/${boardName}/`) 을 사용해야함
-    if (boardName === '팀 모집') {
+    if (boardName === '팀 모집 게시판') {
       navigate(`/community/recruit/${boardName}/`);
     } else if (boardName === '자유' || boardName === '정보' || boardName === '질문' || boardName === '홍보') {
       navigate(`/community/board/${boardName}/`);
@@ -312,7 +311,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   return (
     <>
       {renderConsentMessage}
-      <div id="community-main" className="col-9">
+      <div id="community-main" className="col-md-9">
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
           <div className="community-nav d-flex">
             {boardName === '질문' ? (
@@ -342,11 +341,13 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                   <label htmlFor="is-anonymous">익명</label>
                 </div>
                 <button type="submit" className="btn btn-primary">
+                  <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
                   작성하기
                 </button>
               </div>
             ) : (
               <button type="submit" className="btn btn-primary">
+                <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
                 작성하기
               </button>
             )}
@@ -361,7 +362,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             autoFocus
             onChange={handleTitleChange}
           />
-          {boardName === '팀 모집' && ( //여기 수정
+          {boardName === '팀 모집 게시판' && ( //여기 수정
             <>
               {team ? (
                 <Select
@@ -418,7 +419,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
             hideSelectedOptions={false}
             styles={customStyles}
           />
-          {boardName === '팀 모집' && (
+          {boardName === '팀 모집 게시판' && (
             <div id="period-setting" className="mt-3">
               <div className="d-flex">
                 <div id="date-label" className="p-date-label d-flex">

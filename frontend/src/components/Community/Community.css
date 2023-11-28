@@ -20,6 +20,7 @@
 @media screen and (max-width: 768px) {
   .col-9 {
     width: 100% !important;
+    padding-right: 25px;
   }
   .community-container {
     display: block !important;
@@ -27,23 +28,31 @@
   .community-main {
     width: calc(100% - 50px) !important;
   }
-  .community-nav {
-    border-left: 0 !important;
-    border-right: 0 !important;
+  .nav-item {
+    max-width: fit-content;
+    padding: 0 !important;
   }
   .nav-item > div {
     float: left !important;
+    padding: 5px !important;
   }
   .nav-item {
     text-align: start !important;
     margin-right: 10px;
   }
-  .community-nav-items {
-    width: auto !important;
-  }
   .hidden {
     display: none !important;
   }
+  .community-dropdown {
+    display: none;
+  }
+}
+@media screen and (max-width: 991px) {
+}
+
+.col-9 {
+  padding-left: 25px;
+  min-height: 90vh;
 }
 
 .community-main {
@@ -214,7 +223,6 @@
   background-color: var(--main-white);
   padding: 10px;
   border: 1px solid var(--main-border-color);
-  margin: -1px 0 0 -1px;
 }
 
 .article-file-delete-btn {
@@ -228,42 +236,48 @@
 
 .community-nav {
   background-color: var(--main-white);
-  padding: 0 20px 0 20px;
-  border-right: 1px solid var(--main-border-color);
-  border-bottom: 1px solid var(--main-border-color);
-  height: 50px;
-  line-height: 50px;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 85px;
   z-index: 500;
-}
-
-.community-nav-items {
-  width: 50%;
-}
-
-.unselected-nav-item > div {
-  width: inherit;
-  text-decoration: none;
-  color: var(--main-font-color);
-}
-
-.nav-item > div {
-  font-size: 20px;
-  height: 50px;
-  cursor: pointer;
-}
-.nav-item > div:hover {
-  padding-bottom: 2px;
-  border-bottom: 3px solid var(--main-selected-color);
+  height: 85px;
+  padding-top: 10px;
 }
 
 .selected-nav-item > div {
   font-weight: bolder;
-  text-decoration: none;
-  color: var(--main-selected-color);
+  position: relative;
+}
+.selected-nav-item > div::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -1px;
+  width: 80%;
+  height: 1.5px;
+  background-color: var(--main-light-font-color);
+}
+
+.unselected-nav-item > div {
+  width: inherit;
+  font-weight: bolder;
+  color: var(--nav-unselect-color);
+}
+.unselected-nav-item > div:hover {
+  color: var(--main-light-font-color);
+}
+
+.nav-item {
+  padding: 5px;
+  margin-left: -10px;
+}
+
+.nav-item > div {
+  padding: 5px 20px;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 .hidden {
@@ -285,7 +299,6 @@
   line-height: 36px;
   letter-spacing: 0em;
   text-align: center;
-  color: #0066ff;
 }
 
 .teamMemberInfo > .dropdown button {

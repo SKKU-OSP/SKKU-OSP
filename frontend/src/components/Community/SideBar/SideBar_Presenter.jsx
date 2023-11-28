@@ -7,7 +7,7 @@ export default function SideBar_Presenter(props) {
     props;
 
   return (
-    <div className="col-lg-3 community-sidebar">
+    <div className="col-lg-2 community-sidebar">
       {/* is_authenticated 확인 & 프로필 이미지 src 교체 필요 */}
       {username ? (
         <>
@@ -70,10 +70,10 @@ export default function SideBar_Presenter(props) {
               data-bs-title="프로필 페이지"
             ></img>
           </div>
-          <button type="button" className="btn btn-outline-secondary btn-login" onClick={onLogin}>
+          <button type="button" className="btn btn-third btn-login" onClick={onLogin}>
             로그인
           </button>
-          <button type="button" className="btn btn-outline-primary btn-signup" onClick={onLogin}>
+          <button type="button" className="btn btn-fourth btn-signup" onClick={onLogin}>
             회원가입
           </button>
         </div>

@@ -1,16 +1,21 @@
 import { NavLink, useParams } from 'react-router-dom';
-import { BsList, BsFillPersonFill, BsFillBarChartFill } from 'react-icons/bs';
+import { BsUnindent, BsIndent, BsFillPersonFill, BsFillBarChartFill } from 'react-icons/bs';
 import { FaShapes } from 'react-icons/fa6';
 
 function Sidebar(props) {
-  const onToggle = props.onToggle;
+  const { onToggle, isToggled } = props;
   const username = useParams().username;
   const activeStyle = { color: 'black' };
+
   return (
     <div id="sidebar-wrapper">
       <ul className="sidebar-nav" style={{ marginLeft: 0 }}>
         <li className="sidebar-toggle pt-2">
-          <BsList size={24} id="menu-toggle" style={{ float: 'right' }} onClick={onToggle} />
+          {isToggled ? (
+            <BsIndent size={24} id="menu-toggle" style={{ float: 'right' }} onClick={onToggle} />
+          ) : (
+            <BsUnindent size={24} id="menu-toggle" style={{ float: 'right' }} onClick={onToggle} />
+          )}
         </li>
         <li>
           <NavLink

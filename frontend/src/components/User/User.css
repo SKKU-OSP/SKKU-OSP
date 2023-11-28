@@ -1,6 +1,7 @@
 .user-container {
-  background: #ffffff;
+  background: var(--main-white);
 }
+
 .profile_info {
   .info_left {
     width: 257px;
@@ -12,7 +13,7 @@
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
-      border: 1px solid black;
+      border: 1px solid var(--main-black);
     }
   }
   .info_right {
@@ -21,15 +22,15 @@
     .info_button {
       padding: 8px 16px;
       gap: 16px;
-      .info_btn-1 {
+      .info_btn {
         padding: 6px 12px;
         border-radius: 10px;
-        border: 1px solid black;
+        border: 1px solid var(--sub-border-color);
+        background-color: var(--sub-border-color);
         gap: 5px;
-        background: linear-gradient(0deg, #000000, #000000), linear-gradient(0deg, #002743, #002743);
       }
-      .info_btn-1-text {
-        color: #ffffff;
+      .info_btn-text {
+        color: var(--main-black);
         font-family: Inter;
         font-size: 18px;
         font-weight: 400;
@@ -37,24 +38,13 @@
         letter-spacing: 0em;
         text-align: left;
       }
-      .info_btn-2 {
-        padding: 6px 12px 6px 12px;
-        border-radius: 10px;
-        border: 1px solid #000000;
-        gap: 5px;
-        background: #ffffff;
-      }
-      .info_btn-2-text {
-        color: #000000;
-        font-family: Inter;
-        font-size: 18px;
-        font-weight: 400;
-        line-height: 21.78px;
-        letter-spacing: 0em;
-        text-align: left;
+      .info_btn:hover,
+      .info_btn:hover .info_btn-text {
+        background-color: var(--main-selected-color);
+        border: 1px solid var(--main-selected-color);
+        color: var(--main-white);
       }
     }
-
     .info_username {
       padding: 0px 10px;
       gap: 6px;
@@ -65,7 +55,7 @@
         line-height: 29.05px;
         letter-spacing: -0.05em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
     }
     .info_github {
@@ -81,6 +71,21 @@
         text-align: center;
         color: #696969;
       }
+    }
+    .info_editing-textarea {
+      padding: 7px 15px;
+      gap: 6px;
+      height: 150px;
+      width: 100%;
+      white-space: pre-wrap;
+      border-color: #a0a0a0;
+      font-family: Inter;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 19px;
+      letter-spacing: -0.05em;
+      text-align: left;
+      color: #0f171a;
     }
     .info_introduction {
       padding: 8px 16px;
@@ -99,9 +104,30 @@
     }
   }
 }
+
 .profile-tab {
   border-bottom: 2px solid #b0b0b0;
   padding: 0px 40px;
+  margin-top: 10px;
+}
+.profile-tab .nav {
+  margin-bottom: -10px;
+}
+.profile-tab .nav-link {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding-bottom: 10px;
+  color: var(--main-black);
+}
+.profile-tab .nav-link:hover {
+  opacity: 0.9;
+  color: var(--profile-tab-color);
+  font-weight: bold;
+}
+.profile-tab .nav-link.active {
+  background-color: var(--profile-tab-color);
+  color: var(--main-white);
+  font-weight: bold;
 }
 
 .profile-interest {
@@ -110,32 +136,41 @@
   .profile-category {
     padding: 24px 0px;
     gap: 10px;
-    border-bottom: 1px solid #9d9d9d;
+    border-bottom: 1px solid var(--sub-border-color);
     .category-intro {
       padding: 8px 16px;
       .intro {
         font-family: Inter;
-        font-size: 24px;
-        font-weight: 500;
+        font-size: 1.5rem !important;
+        font-weight: bold;
         line-height: 29px;
         letter-spacing: -0.05em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
       .btn {
         padding: 6px 12px;
         border-radius: 10px;
+        border: 1px solid var(--sub-border-color);
+        background-color: var(--sub-border-color);
         gap: 5px;
-        border: 1px solid #000000;
-        .btn-text {
-          font-family: Inter;
-          font-size: 18px;
-          font-weight: 400;
-          line-height: 22px;
-          letter-spacing: 0em;
-          text-align: left;
-          color: #000000;
-        }
+      }
+      .btn-text {
+        color: var(--main-black);
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: 0em;
+        text-align: left;
+      }
+      .btn:hover {
+        background-color: var(--main-selected-color);
+        border: 1px solid var(--main-selected-color);
+        opacity: 1;
+      }
+      .btn:hover .btn-text {
+        color: var(--main-white);
       }
     }
     .category-icon {
@@ -159,32 +194,41 @@
   .profile-language {
     padding: 24px 0px;
     gap: 10px;
-    border-bottom: 1px solid #9d9d9d;
+    border-bottom: 1px solid var(--sub-border-color);
     .language-intro {
       padding: 8px 16px;
       .intro {
         font-family: Inter;
-        font-size: 24px;
-        font-weight: 500;
+        font-size: 1.5rem !important;
+        font-weight: bold;
         line-height: 29px;
         letter-spacing: -0.05em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
       .btn {
         padding: 6px 12px;
         border-radius: 10px;
+        border: 1px solid var(--sub-border-color);
+        background-color: var(--sub-border-color);
         gap: 5px;
-        border: 1px solid #000000;
-        .btn-text {
-          font-family: Inter;
-          font-size: 18px;
-          font-weight: 400;
-          line-height: 22px;
-          letter-spacing: 0em;
-          text-align: left;
-          color: #000000;
-        }
+      }
+      .btn-text {
+        color: var(--main-black);
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: 0em;
+        text-align: left;
+      }
+      .btn:hover {
+        background-color: var(--main-selected-color);
+        border: 1px solid var(--main-selected-color);
+        opacity: 1;
+      }
+      .btn:hover .btn-text {
+        color: var(--main-white);
       }
     }
     .language-level {
@@ -226,37 +270,45 @@
 }
 
 .profile-activity {
+  padding: 10px 16px;
   gap: 16px;
-  padding: 24px 0px;
   .profile-portfolio {
     padding: 24px 0px;
     gap: 16px;
-    border-bottom: 1px solid #9d9d9d;
+    border-bottom: 1px solid var(--sub-border-color);
     .portfolio-intro {
-      padding: 7px 16px;
+      padding: 8px 16px;
       .intro {
         font-family: Inter;
-        font-size: 24px;
-        font-weight: 500;
+        font-size: 1.5rem !important;
+        font-weight: bold;
         line-height: 29px;
         letter-spacing: -0.05em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
       .btn {
         padding: 6px 12px;
         border-radius: 10px;
+        border: 1px solid var(--sub-border-color);
+        background-color: var(--sub-border-color);
         gap: 5px;
-        border: 1px solid #000000;
-        .btn-text {
-          font-family: Inter;
-          font-size: 18px;
-          font-weight: 400;
-          line-height: 22px;
-          letter-spacing: 0em;
-          text-align: left;
-          color: #000000;
-        }
+      }
+      .btn-text {
+        color: var(--main-black);
+        font-family: Inter;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: 0em;
+        text-align: left;
+      }
+      .btn:hover {
+        background-color: var(--main-selected-color);
+        border: 1px solid var(--main-selected-color);
+      }
+      .btn:hover .btn-text {
+        color: var(--main-white);
       }
     }
     .portfolio-text {
@@ -270,36 +322,55 @@
         line-height: 22px;
         letter-spacing: 0em;
         text-align: left;
-        color: #000000;
+        color: var(--main-black);
+      }
+      .editing-textarea {
+        padding: 7px 15px;
+        gap: 6px;
+        width: 100%;
+        white-space: pre-wrap;
+        border-color: #a0a0a0;
+        font-family: Inter;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 19px;
+        letter-spacing: -0.05em;
+        text-align: left;
+        color: #0f171a;
       }
     }
   }
   .profile-contribution {
     padding: 24px 0px;
     gap: 10px;
-    border-bottom: 1px solid #9d9d9d;
+    border-bottom: 1px solid var(--sub-border-color);
     .contribution-intro {
       padding: 7px 16px;
       .intro {
         font-family: Inter;
-        font-size: 24px;
-        font-weight: 500;
+        font-size: 1.5rem !important;
+        font-weight: bold;
         line-height: 29px;
         letter-spacing: -0.05em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
       .href {
         padding: 6px 12px;
         border-radius: 10px;
         gap: 5px;
         font-family: Inter;
-        font-size: 18px;
-        font-weight: 400;
+        font-size: 15px;
+        font-weight: bold;
         line-height: 22px;
-        letter-spacing: 0em;
         text-align: left;
-        color: '#0969DA';
+        text-decoration: none;
+        color: var(--main-selected-color);
+      }
+      .href:hover {
+        color: var(--alert-color);
+        text-decoration: underline;
+        text-decoration-thickness: 1.5px;
       }
     }
     .contribution-repo {
@@ -307,9 +378,11 @@
       gap: 10px;
       .repo {
         padding: 8px 16px;
-        border-radius: 10px;
         gap: 10px;
-        border: 1px solid #9d9d9d;
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: 0 4px 4px var(--card-box-shadow);
+        border-radius: 15px;
         .title {
           padding: 1px 11px;
           .title-text {
@@ -319,7 +392,7 @@
             line-height: 24px;
             letter-spacing: 0em;
             text-align: left;
-            color: #000000;
+            color: var(--main-black);
           }
           .commit-date {
             font-family: Inter;
@@ -328,7 +401,8 @@
             line-height: 19px;
             letter-spacing: 0em;
             text-align: left;
-            color: #000000;
+            color: var(--main-black);
+            /* color: var(--main-light-font-color); */
           }
         }
         .stat {
@@ -341,7 +415,7 @@
             line-height: 19px;
             letter-spacing: 0em;
             text-align: left;
-            color: #000000;
+            color: var(--main-black);
           }
         }
         .desc {
@@ -353,12 +427,13 @@
           line-height: 19px;
           letter-spacing: 0em;
           text-align: left;
-          color: #000000;
+          color: var(--main-black);
         }
       }
     }
   }
 }
+
 .profile-owner-info {
   padding: 1px 16px 1px 16px;
   border: 0px 0px 1px 0px;
@@ -366,7 +441,7 @@
   .info-university {
     padding: 24px 16px;
     gap: 16px;
-    border-bottom: 1px solid #9d9d9d;
+    border-bottom: 1px solid var(--sub-border-color);
     .info-uniName {
       font-family: Inter;
       font-size: 24px;
@@ -398,7 +473,7 @@
     }
   }
   .info {
-    border-bottom: 1px solid #9d9d9d;
+    border-bottom: 1px solid var(--sub-border-color);
     padding: 24px;
     gap: 16px;
     .title {
@@ -428,7 +503,7 @@
       padding: 6px 12px;
       border-radius: 10px;
       gap: 5px;
-      border: 1px solid #000000;
+      border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
         font-family: Inter;
@@ -437,7 +512,7 @@
         line-height: 10px;
         letter-spacing: 0em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
     }
   }
@@ -456,7 +531,7 @@
         line-height: 17px;
         letter-spacing: 0em;
         text-align: left;
-        color: #000000;
+        color: var(--main-black);
       }
     }
   }
@@ -477,7 +552,7 @@
       padding: 6px 12px;
       border-radius: 10px;
       gap: 5px;
-      border: 1px solid #000000;
+      border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
         font-family: Inter;
@@ -486,7 +561,7 @@
         line-height: 10px;
         letter-spacing: 0em;
         text-align: center;
-        color: #000000;
+        color: var(--main-black);
       }
     }
   }

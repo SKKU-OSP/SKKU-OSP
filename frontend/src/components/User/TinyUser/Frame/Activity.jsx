@@ -63,10 +63,8 @@ function Activity(props) {
               <span className="intro">포트폴리오</span>
               {isEdit &&
                 (editing ? (
-                  <button className="btn" onClick={handleSaveClick} style={{ backgroundColor: 'black' }}>
-                    <span className="btn-text" style={{ color: 'white' }}>
-                      저장
-                    </span>
+                  <button className="btn" onClick={handleSaveClick}>
+                    <span className="btn-text">저장</span>
                   </button>
                 ) : (
                   <button className="btn" onClick={handleEditClick}>
@@ -79,7 +77,7 @@ function Activity(props) {
                 <textarea
                   name="portfolio"
                   rows="4"
-                  style={{ width: '100%', whiteSpace: 'pre-wrap' }}
+                  className="editing-textarea"
                   value={editProfileActivity.portfolio}
                   onChange={handleInputChange}
                 />
@@ -111,7 +109,6 @@ function Activity(props) {
                   handleUrlClick(`/repository/${username}`);
                 }}
                 className="href"
-                style={{ cursor: 'pointer' }}
               >
                 자세히 알아보기 &gt;
               </a>
