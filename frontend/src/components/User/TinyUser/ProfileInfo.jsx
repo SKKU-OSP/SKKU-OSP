@@ -147,12 +147,12 @@ function ProfileInfo(props) {
             {isEdit && (
               <div className="d-flex flex-row justify-content-end info_button">
                 {editing ? (
-                  <button className="info_btn-1" onClick={handleSaveClick}>
-                    <span className="info_btn-1-text">프로필 저장</span>
+                  <button className="info_btn" onClick={handleSaveClick}>
+                    <span className="info_btn-text">프로필 저장</span>
                   </button>
                 ) : (
-                  <button className="info_btn-2" onClick={handleEditClick}>
-                    <span className="info_btn-2-text">프로필 수정</span>
+                  <button className="info_btn" onClick={handleEditClick}>
+                    <span className="info_btn-text">프로필 수정</span>
                   </button>
                 )}
               </div>
@@ -170,7 +170,7 @@ function ProfileInfo(props) {
               <textarea
                 name="introduction"
                 rows="5"
-                style={{ width: '100%', whiteSpace: 'pre-wrap' }}
+                className="info_editing-textarea"
                 value={editUserInfo.introduction}
                 onChange={handleIntroChange}
               />

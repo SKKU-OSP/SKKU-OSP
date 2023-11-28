@@ -5,7 +5,7 @@ import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import TeamArticle from './TeamArticle';
 import EditTeamModal from '../EditTeamModal';
-import { BsAwardFill, BsBoxArrowRight, BsPersonPlusFill } from 'react-icons/bs';
+import { BsAwardFill, BsBoxArrowRight, BsPersonPlusFill, BsPencilFill } from 'react-icons/bs';
 import AuthContext from '../../../../utils/auth-context';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
@@ -203,14 +203,17 @@ function TeamBoard() {
   return (
     <>
       <div className="col-9">
-        <div className="community-team-nav d-flex">
+        <div className="community-nav d-flex">
           <Button type="button" onClick={onMyTeamList} id="btn-content-back">
             내 팀 목록
           </Button>
-          <ul className="nav nav-fill community-team-nav-items">
-            <div>{team_name}</div>
+          <ul className="nav nav-fill community-nav-items">
+            <li className="nav-item selected-nav-item">
+              <div>{team_name}</div>
+            </li>
           </ul>
           <Button type="button" onClick={onWrite} className="btn btn-primary">
+            <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
             작성하기
           </Button>
         </div>

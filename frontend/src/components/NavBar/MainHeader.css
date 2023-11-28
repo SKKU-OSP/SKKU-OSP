@@ -51,15 +51,28 @@
 
 @media screen and (max-width: 450px) {
 }
+
+.logo {
+  display: flex;
+  flex-direction: row;
+  text-decoration: none;
+  align-items: center;
+}
+
 .search {
   flex: 1 1 auto;
+}
+
+.invert-color {
+  -webkit-filter: invert(100%); /* Safari/Chrome */
+  filter: invert(100%);
 }
 
 .siteTitle {
   margin-left: 10px;
   margin-right: 20px;
   font-weight: 700;
-  color: var(--main-black);
+  color: var(--main-white);
   letter-spacing: -2px;
 }
 
@@ -99,17 +112,21 @@ header.extended {
 }
 
 .header-navbar-menu {
-  font-weight: 300;
+  font-weight: 400;
   margin: 15px;
   text-decoration: none;
-  color: var(--main-font-color);
+  color: var(--main-white);
 }
 
 .header-navbar-selected-menu {
-  font-weight: 600;
+  font-weight: 900;
   margin: 15px;
   text-decoration: none;
-  color: var(--main-selected-color);
+  color: var(--alert-color);
+}
+
+.header-navbar-menu:hover {
+  opacity: 0.8;
 }
 
 .head-of-header {
