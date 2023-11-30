@@ -28,6 +28,7 @@ body::-webkit-scrollbar {
   --sub-bg-color-transparent: #ffffffff;
   --article-bg-color: #f5f5f5;
   --header-bg-color: #072a60;
+  --header-navbar-color: #d2d2d2;
   --main-font-color: #454545;
   --main-selected-color: #072a60;
   --main-light-font-color: #696969;
