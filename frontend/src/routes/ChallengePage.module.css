@@ -47,7 +47,7 @@
   --bs-progress-border-radius: 0.375rem;
   --bs-progress-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   --bs-progress-bar-color: #fff;
-  --bs-progress-bar-bg: #0d6efd;
+  --bs-progress-bar-bg: #104ca5;
   --bs-progress-bar-transition: width 0.6s ease;
   display: flex;
   height: var(--bs-progress-height);
@@ -105,7 +105,7 @@
 
 .AchievedTitle {
   text-align: center;
-  color: #0066ff;
+  color: #104ca5;
   font-weight: 700;
   font-size: 24px;
   padding: 1rem 1.25rem;
@@ -116,7 +116,7 @@
 
 .UnachievedTitle {
   text-align: center;
-  color: #0066ff;
+  color: #104ca5;
   font-weight: 700;
   font-size: 24px;
   padding: 1rem 1.25rem;
@@ -159,7 +159,7 @@
 }
 
 .ChallengeDate {
-  color: #0094ff;
+  color: #104ca5;
   font-size: 16px;
   font-weight: 400;
 }
