@@ -115,7 +115,7 @@ header.extended {
   font-weight: 400;
   margin: 15px;
   text-decoration: none;
-  color: var(--main-white);
+  color: var(--header-navbar-color);
 }
 
 .header-navbar-selected-menu {
