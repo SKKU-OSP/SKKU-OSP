@@ -1323,12 +1323,11 @@ class TeamApplyUpdateView(APIView):
                 id=target_teamapplymessage_id)
             with transaction.atomic():
                 if request.data.get('is_okay') == "true":
-                    status = 1  # 승인
+                    teamapplymessage.status = 1  # 승인
                     TeamMember.objects.create(
                         team=teamapplymessage.team, member_id=target_user_id)
                 else:
-                    status = 2  # 거절
-                teamapplymessage.status = status
+                    teamapplymessage.status = 2  # 거절
                 teamapplymessage.save()
 
         except DatabaseError as e:

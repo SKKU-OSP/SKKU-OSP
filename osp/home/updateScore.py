@@ -1,6 +1,6 @@
 import math
 
-from django.db import DatabaseError, connections, transaction
+from django.db import DatabaseError, transaction
 from django.db.models import Count, F, Q, Sum, Value
 from django.db.models.functions import Concat
 
@@ -60,14 +60,13 @@ def user_score_update(user: Account, year: int):
 
     commit_data = GithubRepoCommits.objects.filter(
         (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email))
-        & (Q(author_date__year__gte=year) & Q(author_date__year__lte=year))
+        & Q(author_date__year=year)
     )
     issue_data = GithubIssues.objects.filter(
-        Q(github_id=github_id) & Q(date__year__gte=year) & Q(date__year__lte=year)
-    )
+        github_id=github_id, date__year=year)
     pull_data = GithubPulls.objects.filter(
-        Q(github_id=github_id) & Q(date__year__gte=year) & Q(date__year__lte=year)
-    )
+        github_id=github_id, date__year=year)
+
     contr_repos = set(commit_data.values_list('github_id', 'repo_name'))
     contr_repos = contr_repos.union(
         set(issue_data.values_list('owner_id', 'repo_name')))
@@ -137,20 +136,17 @@ def user_score_update(user: Account, year: int):
                 id=user.student_data.id,
                 year=year
             )
+            total_score = github_score.repo_score_sum + github_score.score_other_repo_sum + \
+                github_score.score_star + github_score.score_fork
             if len(score_table) > 0:
                 score_table = score_table[0]
-                score_table
             else:
                 score_table = GitHubScoreTable.objects.create(
                     id=user.student_data.id,
                     year=year,
                     name=user.student_data.name,
                     github_id=github_id,
-                    total_score=min(
-                        github_score.repo_score_sum + github_score.score_other_repo_sum
-                        + github_score.score_star + github_score.score_fork,
-                        5.0
-                    ),
+                    total_score=min(total_score, 5.0),
                     commit_cnt=0,
                     commit_line=0,
                     issue_cnt=0,
@@ -161,11 +157,7 @@ def user_score_update(user: Account, year: int):
                     plural_major=user.student_data.plural_major,
                     personal_email=personal_email
                 )
-            score_table.total_score = min(
-                github_score.repo_score_sum + github_score.score_other_repo_sum
-                + github_score.score_star + github_score.score_fork,
-                5.0
-            )
+            score_table.total_score = min(total_score, 5.0)
             score_table.commit_cnt = len(commit_data)
             score_table.commit_line = commit_lines
             score_table.issue_cnt = len(issue_data)
