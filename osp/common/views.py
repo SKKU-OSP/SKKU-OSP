@@ -407,8 +407,8 @@ class PasswordResetSendView(APIView):
 
             self.save(
                 user=user,
-                subject_template_name="registration/password_reset_subject.txt",
-                email_template_name="registration/password_reset_email.html",
+                subject_template_name="registration/subject_reset_password.txt",
+                email_template_name="registration/email_reset_password.html",
                 use_https=request.is_secure(),
                 token_generator=default_token_generator,
                 from_email=EMAIL_HOST_USER,
