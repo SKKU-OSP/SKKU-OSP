@@ -28,7 +28,7 @@ const AdminDropDown = ({ iconSize }) => {
   return (
     <Dropdown>
       <Dropdown.Toggle as={CustomToggle}>
-        <MdOutlineStarOutline size={iconSize} className="text-dark" />
+        <MdOutlineStarOutline size={iconSize} className="nav-bar-icons" color="white" />
       </Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item onClick={() => navigate('/statistics')}>GitHub 통계</Dropdown.Item>
