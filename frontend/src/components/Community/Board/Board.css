@@ -313,6 +313,11 @@
   align-items: center;
   gap: 4px;
 }
+
+.team-desc-header-icon {
+  margin-right: 3px;
+}
+
 .team-members-box {
   overflow-y: scroll;
   overflow-x: auto;
