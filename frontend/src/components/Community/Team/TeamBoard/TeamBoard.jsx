@@ -227,16 +227,18 @@ function TeamBoard() {
                 </div>
                 <div className="col-lg-6 col-12 mb-2">
                   <div className="team-desc-header fs-4">
-                    {team_name}
-                    {isAdmin ? (
-                      <EditTeamModal
-                        team={thisTeam.team}
-                        teamMembers={teamMembers}
-                        teamTags={thisTeam.team_tags}
-                        updateTeamInfo={updateTeamInfo}
-                      />
-                    ) : null}
-                    <BsBoxArrowRight className="btnIcon team-out" onClick={() => teamOut()} />
+                    <div className="team-desc-header-icon">{team_name}</div>
+                    <div className="team-desc-header-icon">
+                      {isAdmin ? (
+                        <EditTeamModal
+                          team={thisTeam.team}
+                          teamMembers={teamMembers}
+                          teamTags={thisTeam.team_tags}
+                          updateTeamInfo={updateTeamInfo}
+                        />
+                      ) : null}
+                    </div>
+                    <BsBoxArrowRight className="team-desc-header-icon btnIcon team-out" onClick={() => teamOut()} sty />
                   </div>
                   <div>
                     <div className="inline fs-6">{thisTeam.team.description}</div>
