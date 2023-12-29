@@ -32,7 +32,6 @@ export default function Board_Container() {
       const response = await axios.get(server_url + `/community/api/board/${tabName}/?page_number=${page}`);
       const res = response.data;
       if (res.status === 'success') {
-        console.log(res.data);
         setArticles(res.data.articles);
         setMaxPageNumber(res.data.max_page_number);
         setIsLoadedArticles(true);

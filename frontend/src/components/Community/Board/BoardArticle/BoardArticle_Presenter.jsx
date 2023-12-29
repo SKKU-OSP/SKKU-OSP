@@ -11,21 +11,21 @@ export default function BoardArticle_Presenter(props) {
       {article.title ? (
         <>
           <div className="board-article-header">
-            <h4 className="board-article-title" onClick={onArticle}>
-              {article.title}
-            </h4>
-            <div className="board-article-tags">
-              {article.tags && article.tags.length > 0 ? (
-                <>
-                  {article.tags.map((tag) => (
-                    <h6 className="inline board-article-tag" key={tag.name}>
-                      #{tag.name.replace(' ', '_')}&nbsp;
-                    </h6>
-                  ))}
-                </>
-              ) : (
-                <span className="hidden-placeholder">No tags</span>
-              )}
+            <div className="board-article-main">
+              <h4 className="board-article-title" onClick={onArticle}>
+                {article.title}
+              </h4>
+              <div className="board-article-tags">
+                {article.tags && article.tags.length > 0 ? (
+                  <>
+                    {article.tags.map((tag) => (
+                      <h6 className="inline board-article-tag" key={tag.name}>
+                        #{tag.name.replace(' ', '_')}&nbsp;
+                      </h6>
+                    ))}
+                  </>
+                ) : null}
+              </div>
             </div>
             <div className="board-article-info">
               <div className="board-article-writer">
