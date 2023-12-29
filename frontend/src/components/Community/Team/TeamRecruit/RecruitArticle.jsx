@@ -28,22 +28,48 @@ export default function RecruitArticle(props) {
       {article.title ? (
         <>
           <div className="board-article-header">
-            <div className="board-team">
+            <div className="board-recruit">
               {article.team_name ? (
                 <>
                   <h5 className="board-team-name">{article.team_name}</h5>
                   <div className="vertical-divider"></div>
-                  <h4 className="board-team-title" onClick={onArticle}>
-                    {article.title}
-                  </h4>
+                  <div className="board-article-main">
+                    <h4 className="board-article-title" onClick={onArticle}>
+                      {article.title}
+                    </h4>
+                    <div className="board-article-tags">
+                      {article.tags && article.tags.length > 0 ? (
+                        <>
+                          {article.tags.map((tag) => (
+                            <h6 className="inline board-article-tag" key={tag}>
+                              #{tag.replace(' ', '_')}&nbsp;
+                            </h6>
+                          ))}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
                   <h5 className="board-team-name hidden-placeholder">No name</h5>
                   <div className="vertical-divider"></div>
-                  <h4 className="board-team-title" onClick={onArticle}>
-                    {article.title}
-                  </h4>
+                  <div className="board-article-main">
+                    <h4 className="board-article-title" onClick={onArticle}>
+                      {article.title}
+                    </h4>
+                    <div className="board-article-tags">
+                      {article.tags && article.tags.length > 0 ? (
+                        <>
+                          {article.tags.map((tag) => (
+                            <h6 className="inline board-article-tag" key={tag}>
+                              #{tag.replace(' ', '_')}&nbsp;
+                            </h6>
+                          ))}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
                 </>
               )}
             </div>

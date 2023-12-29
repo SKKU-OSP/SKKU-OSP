@@ -28,7 +28,7 @@ function TeamRecruit() {
   const [error, setError] = useState(false);
 
   const isRecruitTab = tabName === '팀 모집';
-  const isTeamListTab = tabName === '전체 팀 보기';
+  const isTeamListTab = tabName === '전체 팀 목록';
 
   const [recruitSortOrders, setRecruitSortOrders] = useState('-id');
   const [teamSortOrders, setTeamSortOrders] = useState('-id');
@@ -123,7 +123,7 @@ function TeamRecruit() {
   const handleRecruitSortChange = (sortOption) => {
     setRecruitSortOrders(sortOption.value);
     if (isRecruitTab) {
-      getRecruit(nowTeamPage, sortOption.value);
+      getRecruit(nowRecruitPage, sortOption.value);
     }
     setShowRecruitDropdown(false);
   };
@@ -147,7 +147,7 @@ function TeamRecruit() {
           <div className="community-nav d-flex">
             <ul className="nav nav-fill community-nav-items">
               <CommunityNavItem navName="팀 모집" tabName={tabName} />
-              <CommunityNavItem navName="전체 팀 보기" tabName={tabName} />
+              <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
             </ul>
 
             <ul className="nav nav-fill">

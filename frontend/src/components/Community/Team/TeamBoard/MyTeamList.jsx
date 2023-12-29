@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CreateTeamModal from '../CreateTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
-import { BsAwardFill, BsPeopleFill } from 'react-icons/bs';
+import { BsFillPatchCheckFill, BsPeopleFill } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -54,7 +54,6 @@ function MyTeamList() {
   };
 
   useEffect(() => {
-    console.log('username', username);
     if (username !== null) {
       getMyTeamList(1, sortOrder);
     } else {
@@ -117,23 +116,35 @@ function MyTeamList() {
         <>
           {myTeams.length > 0 ? (
             myTeams.map((team) => (
-              <div className="board-article" key={team.id}>
-                <div>
-                  <Link className="board-article-title" to={`/community/team/${team.name}`}>
-                    <h4 className="board-article-title">{team.name}</h4>
-                  </Link>
-                </div>
-                <div>
-                  <div className="inline-block">{team.description}</div>
-                  <div className="text-end">
-                    {team.leader_username && (
-                      <>
-                        <BsAwardFill />
-                        <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
-                      </>
-                    )}
-                    <BsPeopleFill />
-                    {` ${team.member_cnt}명`}
+              <div className="board-team-article" key={team.id}>
+                <div className="board-article-header">
+                  <div className="board-team">
+                    <img src={server_url + team.image} className="board-team-img" />
+                    <Link
+                      className="board-team-name link"
+                      style={{ fontWeight: 'bold' }}
+                      to={`/community/team/${team.name}`}
+                    >
+                      <h5 style={{ fontWeight: 'bold' }}>{team.name}</h5>
+                    </Link>
+                    <div className="vertical-divider"></div>
+                    <div className="board-team-desc">
+                      <h6 className="board-team-desc-text">{team.description}</h6>
+                    </div>
+                  </div>
+                  <div className="board-article-info" style={{ flexBasis: '30%' }}>
+                    <div className="board-team-leader">
+                      {team.leader_username && (
+                        <>
+                          <BsFillPatchCheckFill style={{ marginRight: '10px' }} />
+                          <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
+                        </>
+                      )}
+                    </div>
+                    <div className="board-team-member">
+                      <BsPeopleFill style={{ marginRight: '5px' }} />
+                      {` ${team.member_cnt}명`}
+                    </div>
                   </div>
                 </div>
               </div>
