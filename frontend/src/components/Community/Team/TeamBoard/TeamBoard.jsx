@@ -46,7 +46,6 @@ function TeamBoard() {
       );
       const res = response.data;
       if (res.status === 'success') {
-        console.log(res.data);
         setThisTeam(res.data);
         setTeamMembers(res.data.team_members);
         setTeamTags(res.data.team_tags);
