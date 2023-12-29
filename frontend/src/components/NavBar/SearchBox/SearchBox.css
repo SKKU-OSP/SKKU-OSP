@@ -7,8 +7,9 @@
 .search {
   position: relative;
   margin-left: 25%;
+  margin-right: 3%;
   width: 100%;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .search > input {
