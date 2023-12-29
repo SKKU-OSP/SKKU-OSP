@@ -1488,7 +1488,7 @@ class TeamsOfUserListView(APIView):
             teams_of_user = Team.objects.filter(
                 id__in=team_id_include_user).annotate(
                 member_cnt=Count('teammember')).order_by(*sort_field)
-            page_size = 30
+            page_size = 10
             paginator = Paginator(teams_of_user, page_size)
             page_number = request.GET.get('page_number', 1)
             teams_of_user = paginator.get_page(page_number)
