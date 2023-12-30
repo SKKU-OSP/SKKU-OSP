@@ -88,13 +88,13 @@ export default function RecruitArticle(props) {
                   <span>탈퇴한 이용자</span>
                 )}
               </div>
-              <div className="board-article-list">
+              <div style={{ flexBasis: '55%' }}>
                 <div className="board-article-pubdate">{pubDate}</div>
                 <div className="board-article-meta-list">
-                  <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
-                  <BsChatLeftText size={13} className="board-article-meta" /> {article.comment_cnt}
-                  <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
-                  <BsEye size={13} className="board-article-meta" /> {article.view_cnt}
+                  <BsHandThumbsUp size={12} className="board-article-meta" /> {article.like_cnt}
+                  <BsChatLeftText size={12} className="board-article-meta" /> {article.comment_cnt}
+                  <BsBookmark size={12} className="board-article-meta" /> {article.scrap_cnt}
+                  <BsEye size={12} className="board-article-meta" /> {article.view_cnt}
                 </div>
               </div>
             </div>

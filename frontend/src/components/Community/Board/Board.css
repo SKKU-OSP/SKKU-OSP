@@ -122,11 +122,17 @@
   text-align: center;
 }
 
+.board-article-writer2 {
+  flex-basis: 35%;
+  text-align: center;
+}
+
 .dropdown-button .dropdown-toggle {
   display: inline;
   text-decoration: none;
   color: #000000;
   padding: 0;
+  font-size: 15px;
 }
 .dropdown-button .dropdown-toggle:hover {
   color: var(--btn-hover-color);
@@ -139,14 +145,25 @@
   color: var(--btn-hover-color);
 }
 
-.board-article-list {
-  flex-basis: 55%;
-}
-
 .board-article-pubdate {
   text-align: right;
   margin-bottom: 1%;
   color: #454545;
+  font-size: 15px;
+}
+
+.board-sub-title {
+  color: #454545;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 15px;
+}
+
+.board-article-type {
+  flex-basis: 25%;
+  text-align: center;
+  font-size: 15px;
 }
 
 .board-article-meta-list {
@@ -154,7 +171,7 @@
   color: #454545;
   text-align: right;
   font-family: Inter;
-  font-weight: 500;
+  font-size: 15px;
 }
 .board-article-meta {
   margin-left: 8px;
