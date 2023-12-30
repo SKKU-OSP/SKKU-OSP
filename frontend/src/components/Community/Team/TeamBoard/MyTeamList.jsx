@@ -94,7 +94,7 @@ function MyTeamList() {
             onToggle={(isOpen) => setShowDropDown(isOpen)}
             style={{ marginRight: '5px' }}
           >
-            <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+            <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
               {sortOptions.find((option) => option.value === sortOrder).label}
             </Dropdown.Toggle>
             <Dropdown.Menu>
@@ -105,7 +105,7 @@ function MyTeamList() {
               ))}
             </Dropdown.Menu>
           </Dropdown>
-          <button className="btn btn-primary" onClick={handleShow}>
+          <button className="btn-write" onClick={handleShow}>
             <BsPeopleFill style={{ marginRight: '7px', marginBottom: '5px' }} />팀 만들기
           </button>
           <CreateTeamModal show={modalShow} onClose={handleClose} />

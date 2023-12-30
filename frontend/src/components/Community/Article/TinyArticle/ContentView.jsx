@@ -152,7 +152,7 @@ function ContentView(props) {
         <span className={styles.articleBoard}> {board.name} 게시판</span>
         {username === article.writer.user.username ? (
           <div>
-            <Button className="btn-primary" style={{ width: '60px', marginRight: '10px' }} onClick={onEdit}>
+            <Button className="btn-write" style={{ width: '60px', marginRight: '10px' }} onClick={onEdit}>
               수정
             </Button>
             <Button variant="secondary" style={{ width: '60px' }} onClick={onDelete}>
