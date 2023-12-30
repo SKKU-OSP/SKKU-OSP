@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsHandThumbsUp } from 'react-icons/bs';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
+import ProfileDropdown_Container from '../../ProfileDropdown';
 
 export default function UserComment(props) {
   const { comment } = props;
@@ -13,26 +12,9 @@ export default function UserComment(props) {
     navigate(`/community/article/${comment.article.id}/`);
   };
 
-  const onWriter = () => {
-    navigate(`/user/${comment.writer.user.username}`);
-  };
-
-  const getDate = (date) => {
-    const now = new Date();
-    const comment_date = new Date(date);
-    const delta = now.getTime() - comment_date.getTime();
-
-    if (delta / (60 * 1000) < 1) {
-      setPubDate('방금');
-    } else if (delta / (60 * 1000) < 60) {
-      setPubDate((delta / (60 * 1000)).toFixed() + '분 전');
-    } else if (delta / (60 * 60 * 1000) < 24) {
-      setPubDate((delta / (60 * 60 * 1000)).toFixed() + '시간 전');
-    } else if (delta / (24 * 60 * 60 * 1000) < 31) {
-      setPubDate((delta / (24 * 60 * 60 * 1000)).toFixed() + '일 전');
-    } else {
-      setPubDate(date.substring(0, 10));
-    }
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(dateString).toLocaleDateString('ko-KR', options).replace(/\.\s/g, '.').replace(/\.$/, '');
   };
 
   const onBoard = () => {
@@ -45,53 +27,53 @@ export default function UserComment(props) {
 
   useEffect(() => {
     if (comment?.pub_date) {
-      getDate(comment.pub_date);
+      setPubDate(formatDate(comment.pub_date));
     }
   }, [comment]);
 
   return (
     <div className="board-article">
-      <>
-        <h6>
-          {comment.writer ? (
-            comment.anonymous_writer ? (
-              <span>익명</span>
-            ) : (
-              <span className="dropdown-button">
-                <DropdownButton
-                  title={comment.writer.user.username}
-                  variant="link"
-                  className="dropdown-toggle"
-                  style={{ marginRight: '5px' }}
-                >
-                  <Dropdown.Item onClick={onWriter}>프로필</Dropdown.Item>
-                </DropdownButton>
-              </span>
-            )
-          ) : (
-            <span>탈퇴한 이용자</span>
-          )}
-          · {pubDate}
-          <div className="board-article-meta-type" onClick={onBoard}>
-            {comment.board.name} 게시판
+      {comment.body ? (
+        <>
+          <div className="board-article-header">
+            <div className="board-article-main" style={{ flexBasis: '55%' }}>
+              <h4 className="board-article-title" onClick={onArticle}>
+                {comment.body}
+              </h4>
+              <div className="board-article-tags">
+                <h6 className="board-sub-title">{`${comment.article.title}`}</h6>
+              </div>
+            </div>
+            <div className="board-article-info" style={{ flexBasis: '45%' }}>
+              <div className="board-article-writer2" style={{ flexBasis: '40%' }}>
+                {comment.writer ? (
+                  comment.anonymous_writer ? (
+                    <span>익명</span>
+                  ) : (
+                    <ProfileDropdown_Container
+                      userName={comment.writer.user.username}
+                      userId={comment.writer.user.id}
+                    />
+                  )
+                ) : (
+                  <span>탈퇴한 이용자 </span>
+                )}
+              </div>
+              <div className="board-article-type" style={{ flexBasis: '30%' }} onClick={onBoard}>
+                {comment.board.name} 게시판
+              </div>
+              <div style={{ flexBasis: '30%' }}>
+                <div className="board-article-pubdate">{pubDate}</div>
+                <div className="board-article-meta-list">
+                  <BsHandThumbsUp size={12} className="board-article-meta" /> {comment.like_cnt}
+                </div>
+              </div>
+            </div>
           </div>
-        </h6>
-        <h4 className="board-article-title" onClick={onArticle}>
-          {comment.body}
-        </h4>
-        <div>
-          {comment.article.title.length > 40 ? (
-            <h6 className="inline">{`${comment.article.title.substring(0, 40)}...`}</h6>
-          ) : (
-            <h6 className="inline">{`${comment.article.title}`}</h6>
-          )}
-          <div className="board-article-meta-list">
-            <>
-              <BsHandThumbsUp size={13} className="board-article-meta" /> {comment.like_cnt}
-            </>
-          </div>
-        </div>
-      </>
+        </>
+      ) : (
+        <h5>내가 작성한 댓글이 없습니다.</h5>
+      )}
     </div>
   );
 }
