@@ -1,17 +1,24 @@
-import '../Community.css';
 import SearchArticle from './SearchArticle/SearchArticle_Container';
+
 function Search_Presenter(props) {
   const articles = props.articles;
   const keyword = props.keyword;
   const tag = props.tag;
+
   return (
     <div className="col-9">
-      <div className="searchBar">
-        {keyword ? (
-          <span className="searchTitle">'{keyword}' 검색 결과</span>
-        ) : (
-          <span className="searchTitle">Tag 검색 결과</span>
-        )}
+      <div className="community-nav d-flex">
+        <div className="nav nav-fill community-nav-items">
+          {keyword ? (
+            <li className="nav-item selected-nav-item">
+              <div>'{keyword}' 검색 결과</div>
+            </li>
+          ) : (
+            <li className="nav-item selected-nav-item">
+              <div>'#{tag}' 검색 결과</div>
+            </li>
+          )}
+        </div>
       </div>
       {articles && articles.length > 0 ? (
         articles.map((article) => <SearchArticle key={article.id} article={article} />)
