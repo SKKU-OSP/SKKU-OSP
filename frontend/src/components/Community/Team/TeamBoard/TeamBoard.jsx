@@ -203,7 +203,7 @@ function TeamBoard() {
     <>
       <div className="col-9">
         <div className="community-nav d-flex">
-          <Button type="button" onClick={onMyTeamList} id="btn-content-back">
+          <Button type="button" onClick={onMyTeamList} className="btn-back">
             내 팀 목록
           </Button>
           <ul className="nav nav-fill community-nav-items">
@@ -211,7 +211,7 @@ function TeamBoard() {
               <div>{team_name}</div>
             </li>
           </ul>
-          <Button type="button" onClick={onWrite} className="btn btn-primary">
+          <Button type="button" onClick={onWrite} className="btn-write">
             <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
             작성하기
           </Button>

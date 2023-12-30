@@ -369,7 +369,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
             >
               <div className="community-nav d-flex">
                 <div>
-                  <button type="button" className="btn btn-secondary" onClick={onBack}>
+                  <button type="button" className="btn btn-back" onClick={onBack}>
                     뒤로가기
                   </button>
                 </div>
@@ -385,12 +385,12 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
                       />{' '}
                       <label htmlFor="is-anonymous">익명</label>
                     </div>
-                    <button type="button" className="btn btn-primary">
+                    <button type="button" className="btn-write">
                       저장하기
                     </button>
                   </div>
                 ) : (
-                  <button type="submit" className="btn btn-primary">
+                  <button type="submit" className="btn-write">
                     저장하기
                   </button>
                 )}
