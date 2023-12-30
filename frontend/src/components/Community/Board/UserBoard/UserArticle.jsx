@@ -22,6 +22,8 @@ export default function UserArticle(props) {
       navigate(`/community/team/${article.board.name}`);
     } else if (article.board.board_type === 'General') {
       navigate(`/community/board/${article.board.name}`);
+    } else if (article.board.board_type === 'Recruit') {
+      navigate(`/community/recruit/${article.board.name}`);
     }
   };
 
