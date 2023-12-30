@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { getAuthConfig } from '../../../../utils/auth';
 import { EditorModules } from '../editor';
 import ReactQuill from 'react-quill';
-import { BsPencilFill } from 'react-icons/bs';
+import { BsChevronLeft, BsPencilFill } from 'react-icons/bs';
 
 import '../../Board/Board.css';
 
@@ -219,6 +219,12 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     setSelectTags(selectedTags);
   };
   const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      height: '45px',
+      margin: '10px 0px',
+      borderRadius: '15px'
+    }),
     option: (provided, state) => ({
       ...provided,
       color: state.isSelected ? 'lightgray' : 'black',
@@ -270,7 +276,9 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const customStyle = {
     control: (provided) => ({
       ...provided,
-      height: '45px'
+      height: '45px',
+      margin: '2px 0px 10px',
+      borderRadius: '15px'
     }),
     option: (provided, state) => ({
       ...provided,
@@ -313,24 +321,15 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       <div id="community-main" className="col-md-9">
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
           <div className="community-nav d-flex">
-            {boardName === '질문' ? (
-              <div>
-                <button type="button" className="btn-back" onClick={onBack}>
-                  뒤로가기
-                </button>
-                <div className="anonymous-btn align-middle hidden">
-                  <input type="checkbox" /> <label>익명</label>
-                </div>
-              </div>
-            ) : (
+            <div>
               <button type="button" className="btn-back" onClick={onBack}>
-                뒤로가기
+                <BsChevronLeft style={{ marginRight: '7px', marginBottom: '5px' }} />글 목록
               </button>
-            )}
+            </div>
             <div className="board-name">{boardName} 게시판</div>
             {boardName === '질문' ? (
               <div>
-                <div className="anonymous-btn align-middle">
+                <div className="anonymous-btn">
                   <input
                     type="checkbox"
                     id="is-anonymous"
@@ -351,151 +350,154 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               </button>
             )}
           </div>
-          <input
-            type="text"
-            id="article-title"
-            name="title"
-            className="form-control"
-            value={title}
-            placeholder="제목을 입력해 주세요"
-            autoFocus
-            onChange={handleTitleChange}
-          />
-          {boardName === '팀 모집 게시판' && ( //여기 수정
-            <>
-              {team ? (
-                <Select
-                  placeholder={'팀 선택'}
-                  options={team}
-                  menuPlacement="auto"
-                  value={selectTeam}
-                  onChange={handleOption}
-                  closeMenuOnSelect={false}
-                  hideSelectedOptions={false}
-                  styles={customStyle}
-                  className="select-team"
-                  onMenuOpen={() => setIsMenuOpen(true)}
-                  onMenuClose={() => setIsMenuOpen(false)}
-                  menuIsOpen={isMenuOpen}
-                />
-              ) : (
-                <>
-                  {isTeamRegistration ? (
-                    <Select id="team-option" name="team-option" className="form-select pointer">
-                      {teamOptions(request.user)}
-                    </Select>
-                  ) : (
-                    <Select
-                      placeholder={'팀 선택'}
-                      options={options}
-                      menuPlacement="auto"
-                      value={team}
-                      onChange={handleOption}
-                      closeMenuOnSelect={false}
-                      hideSelectedOptions={false}
-                      styles={customStyle}
-                    />
-                  )}
-                </>
-              )}
-            </>
-          )}
-          <ReactQuill
-            value={bodyText}
-            onChange={handleBodyChange}
-            modules={EditorModules}
-            style={{ minHeight: '350px', zIndex: '1' }}
-          />
-
-          <Select
-            placeholder={'Tag'}
-            options={tags}
-            isMulti
-            menuPlacement="auto"
-            value={selectTags}
-            onChange={handleOptionSelect}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            styles={customStyles}
-          />
-          {boardName === '팀 모집 게시판' && (
-            <div id="period-setting" className="mt-3">
-              <div className="d-flex">
-                <div id="date-label" className="p-date-label d-flex">
-                  모집 기간
-                </div>
-                <div className="row flex-fill">
-                  <div className="col-sm-6 d-flex">
-                    <div id="date-label" className="p-date-label d-flex">
-                      <a>From</a>
-                    </div>
-                    <div
-                      id="PeriodPickerStart"
-                      InputGroup
-                      className="log-event"
-                      data-td-target-input="nearest"
-                      data-td-target-toggle="nearest"
-                    >
-                      <div className="mt-1">
-                        <DatePicker
-                          selected={startDate}
-                          onChange={(date) => setStartDate(date)}
-                          selectsStart
-                          fixedHeight
-                          dateFormat="MM/dd/yyyy, hh:mm aa"
-                          showTimeInput
-                          className="form-control"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-sm-6 d-flex">
-                    <div id="date-label" className="p-date-label d-flex">
-                      <a>To</a>
-                    </div>
-                    <div
-                      id="PeriodPickerEnd"
-                      InputGroup
-                      className="log-event"
-                      data-td-target-input="nearest"
-                      data-td-target-toggle="nearest"
-                    >
-                      <div className="mt-1">
-                        <DatePicker
-                          selected={endDate}
-                          onChange={(date) => setEndDate(date)}
-                          selectsEnd
-                          fixedHeight
-                          dateFormat="MM/dd/yyyy, hh:mm aa"
-                          minDate={new Date()}
-                          showTimeInput
-                          className="form-control"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  id="end-button"
-                  type="button"
-                  className="btn btn-outline-light"
-                  onClick={() => setEndDate(getCurrentDateTime())}
-                >
-                  마감
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="community-file">
+          <div className="article-design">
             <input
-              type="file"
-              id="article-files"
-              name="article_files"
-              className="article-files"
-              onChange={handleFileChange}
-              multiple
+              type="text"
+              id="article-title"
+              name="title"
+              className="form-control"
+              value={title}
+              placeholder="제목을 입력해 주세요"
+              autoFocus
+              onChange={handleTitleChange}
             />
-            <div id="file-list"></div>
+            <div className="divider hidden"></div>
+            {boardName === '팀 모집' && (
+              <>
+                {team ? (
+                  <Select
+                    placeholder={'팀 선택'}
+                    options={team}
+                    menuPlacement="auto"
+                    value={selectTeam}
+                    onChange={handleOption}
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                    styles={customStyle}
+                    className="select-team"
+                    onMenuOpen={() => setIsMenuOpen(true)}
+                    onMenuClose={() => setIsMenuOpen(false)}
+                    menuIsOpen={isMenuOpen}
+                  />
+                ) : (
+                  <>
+                    {isTeamRegistration ? (
+                      <Select id="team-option" name="team-option" className="form-select pointer">
+                        {teamOptions(request.user)}
+                      </Select>
+                    ) : (
+                      <Select
+                        placeholder={'팀 추가'}
+                        options={options}
+                        menuPlacement="auto"
+                        value={team}
+                        onChange={handleOption}
+                        closeMenuOnSelect={false}
+                        hideSelectedOptions={false}
+                        styles={customStyle}
+                      />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            <div className="divider"></div>
+            <ReactQuill
+              value={bodyText}
+              onChange={handleBodyChange}
+              modules={EditorModules}
+              className="article-body-edit"
+            />
+            <Select
+              placeholder={'Tag'}
+              options={tags}
+              isMulti
+              menuPlacement="auto"
+              value={selectTags}
+              onChange={handleOptionSelect}
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false}
+              styles={customStyles}
+            />
+            {boardName === '팀 모집' && (
+              <div id="period-setting">
+                <div className="d-flex">
+                  <div id="date-label" className="p-date-label d-flex">
+                    모집 기간
+                  </div>
+                  <div className="row flex-fill">
+                    <div className="col-sm-6 d-flex">
+                      <div id="date-label" className="p-date-label d-flex">
+                        <a>From</a>
+                      </div>
+                      <div
+                        id="PeriodPickerStart"
+                        InputGroup
+                        className="log-event input-group"
+                        data-td-target-input="nearest"
+                        data-td-target-toggle="nearest"
+                      >
+                        <div className="mt-1">
+                          <DatePicker
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            selectsStart
+                            fixedHeight
+                            dateFormat="MM/dd/yyyy, hh:mm aa"
+                            showTimeInput
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-sm-6 d-flex">
+                      <div id="date-label" className="p-date-label d-flex">
+                        <a>To</a>
+                      </div>
+                      <div
+                        id="PeriodPickerEnd"
+                        InputGroup
+                        className="log-event input-group"
+                        data-td-target-input="nearest"
+                        data-td-target-toggle="nearest"
+                      >
+                        <div className="mt-1">
+                          <DatePicker
+                            selected={endDate}
+                            onChange={(date) => setEndDate(date)}
+                            selectsEnd
+                            fixedHeight
+                            dateFormat="MM/dd/yyyy, hh:mm aa"
+                            minDate={new Date()}
+                            showTimeInput
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    id="end-button"
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setEndDate(getCurrentDateTime())}
+                  >
+                    마감
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="community-file">
+              <input
+                type="file"
+                id="article-files"
+                name="article_files"
+                className="article-files"
+                onChange={handleFileChange}
+                multiple
+              />
+              <div id="file-list"></div>
+            </div>
           </div>
         </form>
       </div>

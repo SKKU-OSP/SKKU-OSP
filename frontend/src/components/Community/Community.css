@@ -223,6 +223,7 @@
   background-color: var(--main-white);
   padding: 10px;
   border: 1px solid var(--main-border-color);
+  border-radius: 15px;
 }
 
 .article-file-delete-btn {

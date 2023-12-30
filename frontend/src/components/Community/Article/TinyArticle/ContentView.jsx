@@ -144,7 +144,7 @@ function ContentView(props) {
   };
 
   return (
-    <div className="d-flex flex-column">
+    <div id="community-main" className="d-flex flex-column">
       <div className={styles.articleBar}>
         <Button variant="secondary" className={styles.articleButton} onClick={() => backToBoard(board)}>
           글 목록
