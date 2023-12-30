@@ -1,11 +1,10 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import TeamArticle from './TeamArticle';
 import EditTeamModal from '../EditTeamModal';
-import { BsAwardFill, BsBoxArrowRight, BsPersonPlusFill, BsPencilFill } from 'react-icons/bs';
+import { BsChevronLeft, BsAwardFill, BsBoxArrowRight, BsPersonPlusFill, BsPencilFill } from 'react-icons/bs';
 import AuthContext from '../../../../utils/auth-context';
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
@@ -203,18 +202,18 @@ function TeamBoard() {
     <>
       <div className="col-9">
         <div className="community-nav d-flex">
-          <Button type="button" onClick={onMyTeamList} className="btn-back">
-            내 팀 목록
-          </Button>
+          <button type="button" onClick={onMyTeamList} className="btn-back">
+            <BsChevronLeft style={{ marginRight: '7px', marginBottom: '5px' }} />내 팀 목록
+          </button>
           <ul className="nav nav-fill community-nav-items">
             <li className="nav-item selected-nav-item">
               <div>{team_name}</div>
             </li>
           </ul>
-          <Button type="button" onClick={onWrite} className="btn-write">
+          <button type="button" onClick={onWrite} className="btn-write">
             <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
             작성하기
-          </Button>
+          </button>
         </div>
         {!isLoadedArticles && <LoaderIcon style={{ marginTop: '20px' }} />}
         {error && <>{error}</>}

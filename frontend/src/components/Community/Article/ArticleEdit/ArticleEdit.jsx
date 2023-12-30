@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Select from 'react-select';
-import { BsXLg, BsCalendar } from 'react-icons/bs';
+import { BsChevronLeft, BsPencilSquare } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import DatePicker from 'react-datepicker';
 import AuthContext from '../../../../utils/auth-context';
@@ -273,6 +273,12 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
     setSelectTags(selectedTags);
   };
   const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      height: '45px',
+      margin: '10px 0px',
+      borderRadius: '15px'
+    }),
     option: (provided, state) => ({
       ...provided,
       color: state.isSelected ? 'lightgray' : 'black',
@@ -323,7 +329,9 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const customStyle = {
     control: (provided) => ({
       ...provided,
-      height: '45px'
+      height: '45px',
+      margin: '2px 0px 10px',
+      borderRadius: '15px'
     }),
     option: (provided, state) => ({
       ...provided,
@@ -369,14 +377,15 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
             >
               <div className="community-nav d-flex">
                 <div>
-                  <button type="button" className="btn btn-back" onClick={onBack}>
+                  <button type="button" className="btn-back" onClick={onBack}>
+                    <BsChevronLeft style={{ marginRight: '7px', marginBottom: '5px' }} />
                     뒤로가기
                   </button>
                 </div>
                 <div className="board-name">{board.name} 게시판</div>
                 {board.name === '질문' ? (
                   <div>
-                    <div className="anonymous-btn align-middle">
+                    <div className="anonymous-btn">
                       <input
                         type="checkbox"
                         id="is-anonymous"
@@ -386,11 +395,13 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
                       <label htmlFor="is-anonymous">익명</label>
                     </div>
                     <button type="button" className="btn-write">
+                      <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
                       저장하기
                     </button>
                   </div>
                 ) : (
                   <button type="submit" className="btn-write">
+                    <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
                     저장하기
                   </button>
                 )}
@@ -402,156 +413,160 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
               {board.board_type === 'Recruit' && (
                 <input type="hidden" id="team-id" className="team_id" value={board.team_id} />
               )}
-              <input
-                type="text"
-                id="article-title"
-                name="title"
-                className="form-control"
-                value={title}
-                placeholder="제목을 입력해 주세요"
-                autoFocus
-                onChange={handleTitleChange}
-              />
-              {board.board_type === 'Recruit' && (
-                <>
-                  {team ? (
-                    <Select
-                      placeholder={'팀 선택'}
-                      options={team}
-                      menuPlacement="auto"
-                      value={selectTeam}
-                      onChange={handleOption}
-                      closeMenuOnSelect={true}
-                      hideSelectedOptions={false}
-                      styles={customStyle}
-                      className="select-team"
-                    />
-                  ) : type === 'register' ? (
-                    <Select id="team-option" name="team-option" className="form-select pointer">
-                      {teamOptions()}
-                    </Select>
-                  ) : (
-                    <Select id="team-option" name="team-option" className="form-select pointer" disabled>
-                      <option value={article.team.id} selected>
-                        {article.team.name}
-                      </option>
-                    </Select>
-                  )}
-                </>
-              )}
-              <ReactQuill
-                value={bodyText}
-                onChange={handleBodyChange}
-                modules={EditorModules}
-                style={{ minHeight: '350px', zIndex: '1' }}
-              />
-              <Select
-                placeholder={'Tag'}
-                options={tags}
-                isMulti
-                menuPlacement="auto"
-                value={selectTags}
-                onChange={handleOptionSelect}
-                closeMenuOnSelect={false}
-                hideSelectedOptions={false}
-                styles={customStyles}
-              />
-              {board.board_type === 'Recruit' && (
-                <div id="period-setting">
-                  <div className="d-flex">
-                    <div id="date-label" className="p-date-label d-flex">
-                      모집 기간
-                    </div>
-                    <div className="row flex-fill">
-                      <div className="col-sm-6 d-flex">
-                        <div id="date-label" className="p-date-label d-flex">
-                          <a>From</a>
-                        </div>
-                        <div
-                          id="PeriodPickerStart"
-                          className="log-event input-group select-team"
-                          data-td-target-input="nearest"
-                          data-td-target-toggle="nearest"
-                        >
-                          <div className="mt-1 d-flex">
-                            <DatePicker
-                              selected={startDate}
-                              onChange={(date) => setStartDate(date)}
-                              selectsStart
-                              fixedHeight
-                              dateFormat="MM/dd/yyyy, hh:mm aa"
-                              showTimeInput
-                              className="form-control"
-                            ></DatePicker>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-sm-6 d-flex">
-                        <div id="date-label" className="p-date-label d-flex">
-                          <a>To</a>
-                        </div>
-                        <div
-                          id="PeriodPickerEnd"
-                          className="log-event input-group select-team"
-                          data-td-target-input="nearest"
-                          data-td-target-toggle="nearest"
-                        >
-                          <div className="mt-1">
-                            <DatePicker
-                              selected={endDate}
-                              onChange={(date) => setEndDate(date)}
-                              selectsEnd
-                              fixedHeight
-                              dateFormat="MM/dd/yyyy, hh:mm aa"
-                              minDate={new Date()}
-                              showTimeInput
-                              className="form-control"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      id="end-button"
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setEndDate(getCurrentDateTime())}
-                    >
-                      마감
-                    </button>
-                  </div>
-                </div>
-              )}
-              <div className="community-file">
+              <div className="article-design">
                 <input
-                  type="file"
-                  id="article-files"
-                  name="article_files"
-                  className="article-files"
-                  onChange={handleFileChange}
-                  multiple
+                  type="text"
+                  id="article-title"
+                  name="title"
+                  className="form-control"
+                  value={title}
+                  placeholder="제목을 입력해 주세요"
+                  autoFocus
+                  onChange={handleTitleChange}
                 />
-                <div id="file-list">
-                  {Object.entries(existFiles).map(([key, file]) => {
-                    return (
-                      <div id={file.name} key={file.id} className="article-file d-flex">
-                        {file.name}
-                        <button
-                          type="button"
-                          className="article-file-delete-btn"
-                          onClick={function () {
-                            const all_files = existFiles;
-                            delete all_files[file.id];
-                            setExistFiles(all_files);
-                            var this_element = document.getElementById(file.name);
-                            document.getElementById('file-list').removeChild(this_element);
-                          }}
-                        >
-                          X
-                        </button>
+                <div className="divider hidden"></div>
+                {board.board_type === 'Recruit' && (
+                  <>
+                    {team ? (
+                      <Select
+                        placeholder={'팀 선택'}
+                        options={team}
+                        menuPlacement="auto"
+                        value={selectTeam}
+                        onChange={handleOption}
+                        closeMenuOnSelect={true}
+                        hideSelectedOptions={false}
+                        styles={customStyle}
+                        className="select-team"
+                      />
+                    ) : type === 'register' ? (
+                      <Select id="team-option" name="team-option" className="form-select pointer">
+                        {teamOptions()}
+                      </Select>
+                    ) : (
+                      <Select id="team-option" name="team-option" className="form-select pointer" disabled>
+                        <option value={article.team.id} selected>
+                          {article.team.name}
+                        </option>
+                      </Select>
+                    )}
+                  </>
+                )}
+                <div className="divider"></div>
+                <ReactQuill
+                  value={bodyText}
+                  onChange={handleBodyChange}
+                  modules={EditorModules}
+                  className="article-body-edit"
+                />
+                <Select
+                  placeholder={'Tag'}
+                  options={tags}
+                  isMulti
+                  menuPlacement="auto"
+                  value={selectTags}
+                  onChange={handleOptionSelect}
+                  closeMenuOnSelect={false}
+                  hideSelectedOptions={false}
+                  styles={customStyles}
+                />
+                {board.board_type === 'Recruit' && (
+                  <div id="period-setting">
+                    <div className="d-flex">
+                      <div id="date-label" className="p-date-label d-flex">
+                        모집 기간
                       </div>
-                    );
-                  })}
+                      <div className="row flex-fill">
+                        <div className="col-sm-6 d-flex">
+                          <div id="date-label" className="p-date-label d-flex">
+                            <a>From</a>
+                          </div>
+                          <div
+                            id="PeriodPickerStart"
+                            className="log-event input-group"
+                            data-td-target-input="nearest"
+                            data-td-target-toggle="nearest"
+                          >
+                            <div className="mt-1">
+                              <DatePicker
+                                selected={startDate}
+                                onChange={(date) => setStartDate(date)}
+                                selectsStart
+                                fixedHeight
+                                dateFormat="MM/dd/yyyy, hh:mm aa"
+                                showTimeInput
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-sm-6 d-flex">
+                          <div id="date-label" className="p-date-label d-flex">
+                            <a>To</a>
+                          </div>
+                          <div
+                            id="PeriodPickerEnd"
+                            className="log-event input-group"
+                            data-td-target-input="nearest"
+                            data-td-target-toggle="nearest"
+                          >
+                            <div className="mt-1">
+                              <DatePicker
+                                selected={endDate}
+                                onChange={(date) => setEndDate(date)}
+                                selectsEnd
+                                fixedHeight
+                                dateFormat="MM/dd/yyyy, hh:mm aa"
+                                minDate={new Date()}
+                                showTimeInput
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        id="end-button"
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setEndDate(getCurrentDateTime())}
+                      >
+                        마감
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <div className="community-file">
+                  <input
+                    type="file"
+                    id="article-files"
+                    name="article_files"
+                    className="article-files"
+                    onChange={handleFileChange}
+                    multiple
+                  />
+                  <div id="file-list">
+                    {Object.entries(existFiles).map(([key, file]) => {
+                      return (
+                        <div id={file.name} key={file.id} className="article-file d-flex">
+                          {file.name}
+                          <button
+                            type="button"
+                            className="article-file-delete-btn"
+                            onClick={function () {
+                              const all_files = existFiles;
+                              delete all_files[file.id];
+                              setExistFiles(all_files);
+                              var this_element = document.getElementById(file.name);
+                              document.getElementById('file-list').removeChild(this_element);
+                            }}
+                          >
+                            X
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </form>

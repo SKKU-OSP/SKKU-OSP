@@ -112,8 +112,8 @@ body::-webkit-scrollbar {
   --bs-border-radius: 10px;
   --btn-write-color: #575757;
   --btn-write-hover: #404040;
-  --btn-back-color: #6c757d;
-  --btn-back-hover: #5c636a;
+  --btn-back-color: #929292;
+  --btn-back-hover: #7d7d7d;
 }
 
 .btn-third {
