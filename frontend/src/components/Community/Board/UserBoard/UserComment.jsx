@@ -22,6 +22,8 @@ export default function UserComment(props) {
       navigate(`/community/team/${comment.board.name}`);
     } else if (comment.board.board_type === 'General') {
       navigate(`/community/board/${comment.board.name}`);
+    } else if (comment.board.board_type === 'Recruit') {
+      navigate(`/community/recruit/${comment.board.name}`);
     }
   };
 
