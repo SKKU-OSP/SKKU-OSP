@@ -2,16 +2,15 @@ import { useContext, useState } from 'react';
 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-import Dropdown from 'react-bootstrap/Dropdown';
 import { FaBookmark, FaRegBookmark, FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 import { BsThreeDotsVertical, BsChevronLeft, BsPencilFill, BsTrash } from 'react-icons/bs';
 
-import styles from '../Article.module.css';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
 import { getAuthConfig } from '../../../../utils/auth';
 import AuthContext from '../../../../utils/auth-context';
 import ProfileDropdown_Container from '../../ProfileDropdown';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
 
@@ -180,10 +179,23 @@ function ContentView(props) {
             </span>
           </div>
           {username === article.writer.user.username ? (
-            <Dropdown className="article-more">
-              <Dropdown.Toggle id="dropdown-button">
+            // <BsThreeDotsVertical className="dropdownbtn">
+            //   <DropdownButton className="article-more">
+            //     <Dropdown.Item onClick={onEdit}>
+            //       <BsPencilFill style={{ marginRight: '10px' }} />
+            //       수정
+            //     </Dropdown.Item>
+            //     <Dropdown.Item onClick={onDelete}>
+            //       <BsTrash style={{ marginRight: '10px' }} />
+            //       삭제
+            //     </Dropdown.Item>
+            //   </DropdownButton>
+            // </BsThreeDotsVertical>
+            <Dropdown className="article-more" style={{ display: 'inline-block' }}>
+              <Dropdown.Toggle as="span" id="dropdown-custom-component" className="dropdownbtn">
                 <BsThreeDotsVertical />
               </Dropdown.Toggle>
+
               <Dropdown.Menu>
                 <Dropdown.Item onClick={onEdit}>
                   <BsPencilFill style={{ marginRight: '10px' }} />
@@ -196,6 +208,22 @@ function ContentView(props) {
               </Dropdown.Menu>
             </Dropdown>
           ) : (
+            // <Dropdown className="article-more" style={{ display: 'inline-block' }}>
+            //   <Dropdown.Toggle as="span" id="dropdownbtn">
+            //     <BsThreeDotsVertical className="dropdown-toggle" />
+            //   </Dropdown.Toggle>
+
+            //   <Dropdown.Menu>
+            //     <Dropdown.Item onClick={onEdit}>
+            //       <BsPencilFill style={{ marginRight: '10px' }} />
+            //       수정
+            //     </Dropdown.Item>
+            //     <Dropdown.Item onClick={onDelete}>
+            //       <BsTrash style={{ marginRight: '10px' }} />
+            //       삭제
+            //     </Dropdown.Item>
+            //   </Dropdown.Menu>
+            // </Dropdown>
             <Dropdown className="article-more hidden">
               <Dropdown.Toggle id="dropdown-button">
                 <BsThreeDotsVertical />

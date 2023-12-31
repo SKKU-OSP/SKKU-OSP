@@ -197,3 +197,50 @@
 .dropdown-item-list {
   text-align: center;
 }
+
+.comment-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0px 20px;
+  margin-bottom: 10px;
+}
+
+.comment-input {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comment {
+  border-top: 1px solid var(--main-border-color);
+  padding: 10px 30px;
+}
+
+.comment-content {
+  font-family: Inter;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #454545;
+}
+
+.comment-line1 {
+  padding: 10px 0px 0px 0px;
+}
+
+.comment-line2 {
+  padding: 10px 0px;
+}
+
+.dropdownbtn {
+  display: inline-block;
+  color: var(--main-black);
+  margin: 20px 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.dropdown-toggle::after {
+  display: none !important;
+}
