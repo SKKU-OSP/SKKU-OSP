@@ -1,4 +1,3 @@
-import styles from '../Article.module.css';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import { FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
@@ -51,9 +50,9 @@ function CommentItem(props) {
   }
 
   return (
-    <div className={styles.comment}>
-      <div className={`${styles.commentLine1} d-flex justify-content-between align-items-end`}>
-        <div className={`${styles.commentContent} d-flex align-items-center`}>
+    <div className="comment">
+      <div className="comment-line1 d-flex justify-content-between align-items-end">
+        <div className="comment-content d-flex align-items-center">
           {comment.anonymous_writer ? (
             <span style={{ paddingRight: '10px' }}>익명</span>
           ) : (
@@ -66,12 +65,12 @@ function CommentItem(props) {
           )}
         </div>
         <div>
-          <span className={styles.commentContent}>{pub_date1} </span>
-          <span className={styles.commentContent}>{pub_date2}</span>
+          <span className="comment-content">{pub_date1} </span>
+          <span className="comment-content">{pub_date2}</span>
         </div>
       </div>
-      <div className={`${styles.commentLine2} d-flex justify-content-between align-items-center`}>
-        <span className={styles.commentContent} style={{ marginRight: '20px' }}>
+      <div className="comment-line2 d-flex justify-content-between align-items-center">
+        <span className="comment-content" style={{ marginRight: '20px' }}>
           {comment.body}
         </span>
         <div className="d-flex align-items-center gap-1">

@@ -1,10 +1,10 @@
-import styles from '../Article.module.css';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import CommentItem from './CommentItem';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import { useState } from 'react';
+import { BsChatLeft } from 'react-icons/bs';
 
 function Comment(props) {
   const { data, setData, username } = props;
@@ -30,29 +30,32 @@ function Comment(props) {
   };
 
   return (
-    <div className={styles.commentContainer}>
-      <div>
-        <span className="article-info">댓글 {data.comments.length}</span>
-      </div>
+    <div className="comment-container">
       {username && (
-        <div className={`${styles.commentInput} d-flex align-items-center justify-content-between`}>
+        <div className="comment-input">
+          <div>
+            <span className="article-info">
+              <BsChatLeft size={22} style={{ margin: '5px' }} />({data.comments.length})
+            </span>
+          </div>
           <Form.Check
             type="checkbox"
             label="익명"
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
           />
-          <div className="col-10">
+          <div className="col-8">
             <Form.Control
               type="text"
               placeholder="댓글을 입력하세요"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
+              style={{ backgroundColor: '#e7e7e7', borderRadius: '20px' }}
             />
           </div>
-          <Button variant="secondary" onClick={() => postComment()}>
-            댓글 쓰기
-          </Button>
+          <button className="btn-write" onClick={() => postComment()}>
+            작성
+          </button>
         </div>
       )}
       {data.comments.map((comment) => (
