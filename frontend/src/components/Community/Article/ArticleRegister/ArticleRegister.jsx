@@ -488,14 +488,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               </div>
             )}
             <div className="community-file">
-              <input
-                type="file"
-                id="article-files"
-                name="article_files"
-                className="article-files"
-                onChange={handleFileChange}
-                multiple
-              />
+              <input type="file" name="article_files" onChange={handleFileChange} multiple />
               <div id="file-list"></div>
             </div>
           </div>

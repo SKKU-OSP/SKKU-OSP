@@ -19,6 +19,7 @@
 }
 
 #article-title {
+  flex: 1;
   display: flex;
   width: 100%;
   padding: 20px;
@@ -27,6 +28,7 @@
   font-size: 20px;
   font-weight: 600;
   line-height: normal;
+  color: var(--main-black);
 }
 
 #article-form .tox-tinymce,
@@ -36,6 +38,18 @@
   border: none !important;
   margin-left: 0;
   background-color: transparent;
+}
+
+#article-writer {
+  flex: 0.1;
+  padding: 20px;
+  width: 100%;
+}
+
+.artice-pubdate {
+  font-size: 15px;
+  color: #595959;
+  line-height: 20px;
 }
 
 .anonymous-btn {
@@ -70,6 +84,116 @@
 
 .article-body-edit {
   min-height: 350px;
+  max-height: 500px;
   z-index: 1;
   /* margin: 5px 0; */
+}
+
+.article-body {
+  min-height: 350px;
+  max-height: 500px;
+  overflow: auto;
+  padding: 25px 40px 20px;
+}
+
+.article-body img {
+  max-width: 100%;
+}
+
+.article-info {
+  font-weight: 500;
+  line-height: 27px;
+  text-align: left;
+  color: #595959;
+}
+
+.article-view {
+  width: 100%;
+  padding: 10px 20px;
+  color: #595959;
+  font-size: 15px;
+  font-weight: 400;
+  display: flex;
+  justify-content: space-between;
+}
+
+.article-tags {
+  padding: 10px 20px;
+}
+
+.article-file-list {
+  align-items: center;
+  padding: 0px 20px;
+  border: none;
+  display: flex;
+  flex-direction: row;
+}
+
+.article-files {
+  min-width: fit-content;
+  max-width: fit-content;
+  margin: 5px 5px 10px 0;
+  padding: 5px 10px;
+  border: 1px solid var(--main-border-color);
+  border-radius: 15px;
+  color: #292929;
+  cursor: pointer;
+}
+.article-files:hover {
+  text-decoration: underline;
+}
+
+.article-file-name {
+  margin-right: 5px;
+}
+
+.article-bottom-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 10px 25px;
+}
+
+#like-icon,
+#scrap-icon {
+  color: var(--main-black);
+  background-color: #e7e7e7;
+  border-radius: 25px;
+  padding: 12px 17px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.article-team {
+  display: flex;
+  justify-content: space-between;
+  color: var(--main-black);
+  gap: 30px;
+  padding: 50px 20px 30px;
+}
+
+.article-team img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.article-team-divide {
+  gap: 20px;
+  display: flex;
+  flex-direction: row !important;
+  max-width: 50%;
+}
+
+.article-team-divide > div {
+  overflow: hidden;
+  word-wrap: break-word;
+  min-width: 100px;
+}
+
+.dropdown-item-list {
+  text-align: center;
 }

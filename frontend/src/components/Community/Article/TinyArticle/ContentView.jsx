@@ -3,8 +3,9 @@ import { useContext, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-import Button from 'react-bootstrap/Button';
+import Dropdown from 'react-bootstrap/Dropdown';
 import { FaBookmark, FaRegBookmark, FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
+import { BsThreeDotsVertical, BsChevronLeft, BsPencilFill, BsTrash } from 'react-icons/bs';
 
 import styles from '../Article.module.css';
 import ApplyTeamModal from '../../Team/ApplyTeamModal';
@@ -16,7 +17,7 @@ const domain_url = import.meta.env.VITE_SERVER_URL;
 
 function ContentView(props) {
   const { data } = props;
-  const { board, tags, comments, article, team, files } = data;
+  const { board, tags, article, team, files } = data;
   const { username } = useContext(AuthContext);
 
   const [isLiked, setIsLiked] = useState(article.marked_like);
@@ -145,146 +146,189 @@ function ContentView(props) {
 
   return (
     <div id="community-main" className="d-flex flex-column">
-      <div className={styles.articleBar}>
-        <Button variant="secondary" className={styles.articleButton} onClick={() => backToBoard(board)}>
-          글 목록
-        </Button>
-        <span className={styles.articleBoard}> {board.name} 게시판</span>
-        {username === article.writer.user.username ? (
-          <div>
-            <Button className="btn-write" style={{ width: '60px', marginRight: '10px' }} onClick={onEdit}>
-              수정
-            </Button>
-            <Button variant="secondary" style={{ width: '60px' }} onClick={onDelete}>
-              삭제
-            </Button>
-          </div>
-        ) : (
-          <Button variant="secondary" style={{ width: '80px', marginRight: '50px', visibility: 'hidden' }}>
-            글 목록
-          </Button>
-        )}
+      <div className="community-nav d-flex">
+        <div>
+          <button type="button" className="btn-back" onClick={() => backToBoard(board)}>
+            <BsChevronLeft style={{ marginRight: '7px', marginBottom: '5px' }} />글 목록
+          </button>
+        </div>
+        <div className="board-name"> {board.name} 게시판</div>
+        <div>
+          <button type="submit" className="btn-write" style={{ visibility: 'hidden' }}>
+            <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
+            작성하기
+          </button>
+        </div>
       </div>
-      <div className={styles.articleBody}>
+      <div className="article-design">
         <div className="d-flex justify-content-between align-items-end">
-          <span className={`col-md-9 ${styles.articleTitle}`}>{article.title}</span>
-          <div>
-            <span className={styles.articleInfo}>
+          <div id="article-title" className="col-md-9">
+            {article.title}
+          </div>
+          <div id="article-writer">
+            <span className="article-info">
               {article.anonymous_writer ? (
                 '익명'
               ) : (
                 <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
               )}
             </span>
-            <br></br>
-            <span className={styles.articleInfo}>{pub_date1} </span>
-            <span className={styles.articleInfo}>{pub_date2}</span>
           </div>
+          <div id="article-writer" style={{ flexGrow: '0.3' }}>
+            <span className="artice-pubdate">
+              {pub_date1} {pub_date2}
+            </span>
+          </div>
+          {username === article.writer.user.username ? (
+            <Dropdown className="article-more">
+              <Dropdown.Toggle id="dropdown-button">
+                <BsThreeDotsVertical />
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={onEdit}>
+                  <BsPencilFill style={{ marginRight: '10px' }} />
+                  수정
+                </Dropdown.Item>
+                <Dropdown.Item onClick={onDelete}>
+                  <BsTrash style={{ marginRight: '10px' }} />
+                  삭제
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : (
+            <Dropdown className="article-more hidden">
+              <Dropdown.Toggle id="dropdown-button">
+                <BsThreeDotsVertical />
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={onEdit}>
+                  <BsPencilFill style={{ marginRight: '10px' }} />
+                  수정
+                </Dropdown.Item>
+                <Dropdown.Item onClick={onDelete}>
+                  <BsTrash style={{ marginRight: '10px' }} />
+                  삭제
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
         </div>
-        <div className={styles.articleContent}>
-          <span dangerouslySetInnerHTML={{ __html: article.body }} className={styles.articleInfo}></span>
+        <div className="divider"></div>
+        <div className="article-info article-view">
+          <span className="hidden"></span>
+          <span>조회수 {article.view_cnt} </span>
         </div>
-        <div className="d-flex gap-1">
+        <div className="article-body">
+          <span dangerouslySetInnerHTML={{ __html: article.body }} className="article-info"></span>
+        </div>
+        <div className="d-flex gap-1 article-tags">
           {tags.map((tag) => (
-            <span className={styles.articleInfo} style={{ fontWeight: '600' }} key={tag.name}>
+            <span className="article-info" style={{ fontWeight: '600' }} key={tag.name}>
               #{tag.name}
             </span>
           ))}
         </div>
-        <div className={styles.articleBottom}>
-          <div>
-            <span className={styles.articleInfo}>조회수 {article.view_cnt} </span>
-            <span className={styles.articleInfo}>댓글 {comments.length}</span>
+        {files.length != 0 && (
+          <div className="article-file-list">
+            {files.map((file) => {
+              return (
+                <div key={file.name} className="article-files" onClick={() => onDownloadFile(file)}>
+                  <span className="article-file-name">{file.name}</span>
+                  <span>{file.size}</span>
+                </div>
+              );
+            })}
           </div>
-          <div className="d-flex gap-1">
-            <span id="like-icon" onClick={() => onLike()} style={{ cursor: 'pointer' }}>
-              {isLiked ? <FaThumbsUp /> : <FaRegThumbsUp />}
-            </span>
-            <span>{likeCnt} </span>
-            <span id="scrap-icon" onClick={() => onScrap()} style={{ cursor: 'pointer' }}>
-              {isScraped ? <FaBookmark /> : <FaRegBookmark />}
-            </span>
-            <span>{scrapCnt}</span>
+        )}
+        <div className="article-bottom-list">
+          <div className="d-flex gap-3">
+            <div id="like-icon" onClick={() => onLike()} style={{ cursor: 'pointer' }}>
+              <span>{isLiked ? <FaThumbsUp size={25} /> : <FaRegThumbsUp size={25} />}</span>
+              <span>{likeCnt}</span>
+            </div>
+            <div id="scrap-icon" onClick={() => onScrap()} style={{ cursor: 'pointer' }}>
+              <span>{isScraped ? <FaBookmark size={25} /> : <FaRegBookmark size={25} />}</span>
+              <span>{scrapCnt}</span>
+            </div>
           </div>
         </div>
-      </div>
-      {files.length != 0 && (
-        <div className={styles.articleFileList}>
-          {files.map((file) => {
-            return (
-              <div key={file.name} className={styles.articleFile} onClick={() => onDownloadFile(file)}>
-                <span className={styles.articleFileName}>{file.name}</span>
-                <span>{file.size}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {article.board.board_type == 'Recruit' && (
-        <>
-          {team && (
-            <div className={styles.articleTeam}>
-              <span className={styles.articleTeamDivide}>
-                <div>
-                  <img
-                    src={`${domain_url}${team.image}`}
-                    style={{ borderRadius: '50%', width: '100px', height: '100px' }}
-                  ></img>
-                </div>
-                <div>
-                  <div className="article-info-name">{team.name}</div>
-                  <div>{team.description}</div>
-                </div>
-              </span>
-              <span className={styles.articleTeamDivide}>
-                <span>
+        {article.board.board_type == 'Recruit' ? (
+          <div className="divider"></div>
+        ) : (
+          <div className="divider hidden"></div>
+        )}
+        {article.board.board_type == 'Recruit' && (
+          <>
+            {team && (
+              <div className="article-team">
+                <span className="article-team-divide">
                   <div>
-                    <div className="article-info-name">모집 기간</div>
-                    <div>시작: {recruit_start_date.toLocaleString()}</div>
-                    <div>마감: {recruit_end_date.toLocaleString()}</div>
+                    <img src={`${domain_url}${team.image}`}></img>
+                  </div>
+                  <div>
+                    <div className="article-info-name">{team.name}</div>
+                    <div>{team.description}</div>
                   </div>
                 </span>
-                {now < recruit_start_date ? (
-                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                    모집 전
-                  </button>
-                ) : now < recruit_end_date ? (
-                  <>
-                    {username ? (
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary"
-                        onClick={() => setShowApplyTeamModal(true)}
-                      >
-                        지원하기
-                      </button>
-                    ) : (
-                      <button type="button" className="btn btn-outline-secondary" onClick={() => logIn()}>
-                        지원하기
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <button className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                    모집 마감
-                  </button>
-                )}
-              </span>
-              <ApplyTeamModal
-                teamName={team.name}
-                teamDesc={team.description}
-                username={username}
-                show={showApplyTeamModal}
-                onShowTeamApplyModal={setShowApplyTeamModal}
-                articleId={article.id}
-              />
-            </div>
-          )}
+                <span className="article-team-divide">
+                  <span>
+                    <div>
+                      <div className="article-info-name" style={{ fontWeight: '500' }}>
+                        모집 기간
+                      </div>
+                      <div>{recruit_start_date.toLocaleString()}~</div>
+                      <div>{recruit_end_date.toLocaleString()}</div>
+                    </div>
+                  </span>
+                  {now < recruit_start_date ? (
+                    <button
+                      type="button"
+                      className="board-team-recruit-off"
+                      style={{ pointerEvents: 'none', padding: '10px 12px' }}
+                    >
+                      모집 전
+                    </button>
+                  ) : now < recruit_end_date ? (
+                    <>
+                      {username ? (
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary"
+                          onClick={() => setShowApplyTeamModal(true)}
+                        >
+                          지원하기
+                        </button>
+                      ) : (
+                        <button type="button" className="btn btn-outline-secondary" onClick={() => logIn()}>
+                          지원하기
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="board-team-recruit-off"
+                      style={{ pointerEvents: 'none', padding: '10px 12px' }}
+                    >
+                      모집 마감
+                    </button>
+                  )}
+                </span>
+                <ApplyTeamModal
+                  teamName={team.name}
+                  teamDesc={team.description}
+                  username={username}
+                  show={showApplyTeamModal}
+                  onShowTeamApplyModal={setShowApplyTeamModal}
+                  articleId={article.id}
+                />
+              </div>
+            )}
 
-          {!team && <div className={styles.articleTeam}>팀 정보가 없습니다. 지원할 수 없습니다.</div>}
-        </>
-      )}
+            {!team && <div className={styles.articleTeam}>팀 정보가 없습니다. 지원할 수 없습니다.</div>}
+          </>
+        )}
+      </div>
     </div>
   );
 }
