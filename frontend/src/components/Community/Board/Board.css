@@ -263,6 +263,7 @@
   padding: 10px;
   align-items: center;
   justify-content: center;
+  border: none;
   border-radius: 15px;
   background: #e0f0ff;
   color: #0085ff;
@@ -274,6 +275,7 @@
   padding: 10px 5px;
   align-items: center;
   justify-content: center;
+  border: none;
   border-radius: 15px;
   background: #e0e0e0;
   color: #929292;

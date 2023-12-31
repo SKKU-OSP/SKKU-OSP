@@ -31,6 +31,9 @@ function Comment(props) {
 
   return (
     <div className={styles.commentContainer}>
+      <div>
+        <span className="article-info">댓글 {data.comments.length}</span>
+      </div>
       {username && (
         <div className={`${styles.commentInput} d-flex align-items-center justify-content-between`}>
           <Form.Check
