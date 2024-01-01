@@ -48,9 +48,20 @@ const ChallengePage = () => {
   return (
     <>
       <div className="col-9">
+        <div className="community-nav d-flex">
+          <div className="nav nav-fill community-nav-items">
+            <li className="nav-item selected-nav-item">
+              <div>챌린지</div>
+            </li>
+          </div>
+        </div>
         <div className={classes.ChallengeList}>
-          <div className={classes.ChallengeProgressTitle}>
-            도전과제 진행률: {numAchieved}/{totalnum}
+          <div className={classes.ChallengeProgressTitle}>도전과제</div>
+          <div className={classes.ChallengeProgressDetail}>
+            <div>전체 도전과제: {totalnum}</div>
+            <div>
+              도전과제 진행률: {numAchieved}/{totalnum}
+            </div>
           </div>
           <div className={classes.Progress}>
             <div className={classes.ProgressBar} style={{ width: `${progressWidth}%` }}>
@@ -98,15 +109,14 @@ const ChallengePage = () => {
               }
             })}
           </div>
-          <div style={{ width: '1px', backgroundColor: 'var(--sub-border-color)' }}></div>
           <div className={classes.Unachieved}>
-            <div className={classes.UnachievedTitle}>진행중인 도전과제</div>
+            <div className={classes.AchievedTitle}>진행중인 도전과제</div>
             {achievements
               .filter((obj) => obj.acheive_date === null)
               .map((prog) => {
                 return (
                   <div key={prog.id}>
-                    <div className={classes.UnachievedItem}>
+                    <div className={classes.AchievedItem}>
                       <div>
                         <div className={classes.ImgName}>
                           <FaTrophy size="48" style={{ color: `${colorMap[prog.challenge.tier]}` }} className="me-3" />

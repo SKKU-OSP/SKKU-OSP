@@ -2,42 +2,28 @@
   box-sizing: border-box;
 }
 
-.ChallengeProgressTitle {
-  font-size: 30px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.ChallengeTitle {
-  max-width: 100%;
-  height: 60px;
-  border-radius: 0.625rem;
-  font-size: 24px;
-  font-weight: bold;
-  color: white;
-  background-color: #002743;
+.ChallengeList {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
+  margin: 10px;
+  padding: 2rem 3rem;
+  background-color: var(--main-white);
+  box-shadow: 0 4px 4px var(--card-box-shadow);
+  border-radius: 15px;
+}
+
+.ChallengeProgressTitle {
+  font-size: 24px;
+  font-weight: 700;
   margin-bottom: 10px;
-  padding: 0.55rem;
 }
 
-.ChallengeTitleContent {
-  padding: 6px 12px;
-  vertical-align: middle;
-  font-size: 20px;
-}
-
-.ChallengeName {
-  font-size: 20px;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
-.ChallengeRate {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  color: #9d9d9d;
+.ChallengeProgressDetail {
+  display: flex;
+  margin-bottom: 10px;
+  gap: 50px;
 }
 
 .Progress {
@@ -47,7 +33,7 @@
   --bs-progress-border-radius: 0.375rem;
   --bs-progress-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   --bs-progress-bar-color: #fff;
-  --bs-progress-bar-bg: #104ca5;
+  --bs-progress-bar-bg: #0e4392;
   --bs-progress-bar-transition: width 0.6s ease;
   display: flex;
   height: var(--bs-progress-height);
@@ -68,25 +54,6 @@
   white-space: nowrap;
   background-color: var(--bs-progress-bar-bg);
   transition: var(--bs-progress-bar-transition);
-  /* width: 100%; */
-}
-
-.ChallengeList {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 2rem 3rem;
-  background: #ffffff;
-  border-bottom: 1px solid var(--sub-border-color);
-}
-
-.ChallengeListWrapper {
-  display: flex;
-  gap: 3rem;
-  margin-bottom: 0.5rem;
-  box-sizing: border-box;
 }
 
 .AchievementList {
@@ -95,49 +62,33 @@
   justify-content: space-between;
 }
 
-.Achieved {
-  width: 50%;
-}
-
+.Achieved,
 .Unachieved {
   width: 50%;
+  padding: 12px;
+  background-color: var(--main-white);
+  box-shadow: 0 4px 4px var(--card-box-shadow);
+  border-radius: 15px;
+}
+.Achieved {
+  margin: 10px 15px 15px 10px;
+}
+.Unachieved {
+  margin: 10px 10px 15px 15px;
 }
 
 .AchievedTitle {
   text-align: center;
-  color: #104ca5;
+  color: var(--main-black);
   font-weight: 700;
   font-size: 24px;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--sub-border-color);
-  z-index: 1;
-  position: relative;
-}
-
-.UnachievedTitle {
-  text-align: center;
-  color: #104ca5;
-  font-weight: 700;
-  font-size: 24px;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--sub-border-color);
-
   z-index: 1;
   position: relative;
 }
 
 .AchievedItem {
-  padding: 1rem 1.5rem 1rem 1.5rem;
-  border-bottom: 1px solid var(--sub-border-color);
-  /* border-right: 1px solid var(--sub-border-color); */
-  background-color: #ffffff;
-  min-height: 170px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.UnachievedItem {
   padding: 1rem 1.5rem 1rem 1.5rem;
   border-bottom: 1px solid var(--sub-border-color);
   background-color: #ffffff;
@@ -152,6 +103,19 @@
   flex-direction: row;
 }
 
+.ChallengeName {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.ChallengeRate {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #9d9d9d;
+}
+
 .ChallengeInstruction {
   color: black;
   font-size: 16px;
@@ -159,7 +123,7 @@
 }
 
 .ChallengeDate {
-  color: #104ca5;
+  color: #0e4392;
   font-size: 16px;
   font-weight: 400;
 }

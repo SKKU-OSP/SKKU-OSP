@@ -212,6 +212,7 @@ class TableBoardView(APIView):
         paginator = Paginator(articles, page_size)
         page = paginator.get_page(page_number)
 
+        data['max_page_number'] = paginator.num_pages
         data['articles'] = RecruitArticleSerializer(page, many=True).data
         return data
 
@@ -469,6 +470,8 @@ class UserArticlesView(APIView):
 
 
 class UserCommentsView(APIView):
+    '내가 작성한 댓글'
+
     def get_validation(self, request, *args, **kwargs):
         status = 'success'
         message = ''
@@ -535,6 +538,8 @@ class UserCommentsView(APIView):
 
 
 class UserScrapArticlesView(APIView):
+    '내가 스크랩한 글'
+
     def get_validation(self, request, *args, **kwargs):
         status = 'success'
         message = ''

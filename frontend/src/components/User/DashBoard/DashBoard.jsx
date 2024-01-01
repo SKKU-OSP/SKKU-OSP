@@ -72,7 +72,7 @@ function Dashboard() {
       <div className="fs-4 mb-2 bold">전체 기여 내역</div>
       {contrError && <div>{contrError}</div>}
       {contr && (
-        <div className="row d-flex dashboard-box justify-content-between mb-2">
+        <div className="row d-flex dashboard-box justify-content-between mb-4">
           {Object.entries(contr).map(([label, value]) => (
             <SimpleBox key={label} label={factorKorMap[label]} value={value} />
           ))}
@@ -82,7 +82,6 @@ function Dashboard() {
       {devTendencyError && <div>{devTendencyError}</div>}
       {devTendency && <DevTendency data={devTendency} />}
       <ChartsByYear2 />
-      {/* <ChartsByYear /> */}
     </>
   );
 }

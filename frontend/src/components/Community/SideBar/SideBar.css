@@ -10,11 +10,11 @@
   position: sticky;
   top: 150px;
   background-color: white;
-  box-shadow: 0 4px 4px var(--card-box-shadow);
-  border-radius: 10px;
+  box-shadow: 0 4px 8px var(--card-box-shadow);
+  border-radius: 30px;
   padding: 20px 0px;
-  margin-left: -10px;
-  margin-right: 10px;
+  margin-left: -15px;
+  margin-right: 15px;
 }
 
 #sidebar-user-info {

@@ -223,6 +223,7 @@
   background-color: var(--main-white);
   padding: 10px;
   border: 1px solid var(--main-border-color);
+  border-radius: 15px;
 }
 
 .article-file-delete-btn {
@@ -318,4 +319,34 @@
 }
 .btnIcon:hover {
   opacity: 0.5;
+}
+
+.btn-write {
+  background-color: var(--btn-write-color);
+  border: 1px solid var(--btn-write-color);
+  color: var(--main-white);
+  height: 37px;
+  padding: 7px 15px;
+  border-radius: 17px;
+  gap: 10px;
+}
+.btn-write:hover,
+.btn-write:active {
+  background-color: var(--btn-write-hover);
+  border: 1px solid var(--btn-write-hover);
+}
+
+.btn-back {
+  background-color: var(--btn-back-color);
+  border: 1px solid var(--btn-back-color);
+  color: var(--main-white);
+  height: 37px;
+  padding: 7px 15px;
+  border-radius: 17px;
+  gap: 10px;
+}
+.btn-back:hover,
+.btn-back:active {
+  background-color: var(--btn-back-hover);
+  border: 1px solid var(--btn-back-hover);
 }

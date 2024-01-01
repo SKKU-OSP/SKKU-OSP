@@ -11,21 +11,21 @@ export default function BoardArticle_Presenter(props) {
       {article.title ? (
         <>
           <div className="board-article-header">
-            <h4 className="board-article-title" onClick={onArticle}>
-              {article.title}
-            </h4>
-            <div className="board-article-tags">
-              {article.tags && article.tags.length > 0 ? (
-                <>
-                  {article.tags.map((tag) => (
-                    <h6 className="inline board-article-tag" key={tag.name}>
-                      #{tag.name.replace(' ', '_')}&nbsp;
-                    </h6>
-                  ))}
-                </>
-              ) : (
-                <span className="hidden-placeholder">No tags</span>
-              )}
+            <div className="board-article-main">
+              <h4 className="board-article-title" onClick={onArticle}>
+                {article.title}
+              </h4>
+              <div className="board-article-tags">
+                {article.tags && article.tags.length > 0 ? (
+                  <>
+                    {article.tags.map((tag) => (
+                      <h6 className="inline board-article-tag" key={tag.name}>
+                        #{tag.name.replace(' ', '_')}&nbsp;
+                      </h6>
+                    ))}
+                  </>
+                ) : null}
+              </div>
             </div>
             <div className="board-article-info">
               <div className="board-article-writer">
@@ -42,13 +42,13 @@ export default function BoardArticle_Presenter(props) {
                   <span>탈퇴한 이용자</span>
                 )}
               </div>
-              <div className="board-article-list">
+              <div style={{ flexBasis: '55%' }}>
                 <div className="board-article-pubdate">{pubDate}</div>
                 <div className="board-article-meta-list">
-                  <BsHandThumbsUp size={13} className="board-article-meta" /> {article.like_cnt}
-                  <BsChatLeftText size={13} className="board-article-meta" /> {article.comment_cnt}
-                  <BsBookmark size={13} className="board-article-meta" /> {article.scrap_cnt}
-                  <BsEye size={13} className="board-article-meta" /> {article.view_cnt}
+                  <BsHandThumbsUp size={12} className="board-article-meta" /> {article.like_cnt}
+                  <BsChatLeftText size={12} className="board-article-meta" /> {article.comment_cnt}
+                  <BsBookmark size={12} className="board-article-meta" /> {article.scrap_cnt}
+                  <BsEye size={12} className="board-article-meta" /> {article.view_cnt}
                 </div>
               </div>
             </div>

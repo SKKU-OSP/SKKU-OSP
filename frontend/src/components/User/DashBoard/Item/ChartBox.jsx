@@ -2,7 +2,7 @@ import { BsFillSquareFill } from 'react-icons/bs';
 
 export default function ChartBox(props) {
   const borderStyle = {
-    border: '1px var(--gray-500) solid'
+    borderBottom: '1px var(--gray-300) solid'
   };
   const label = props.label;
   const desc = props.desc;

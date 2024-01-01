@@ -17,7 +17,7 @@ export default function Board_Presenter(props) {
           <CommunityNavItem navName="정보" tabName={tabName} />
           <CommunityNavItem navName="홍보" tabName={tabName} />
         </ul>
-        <button type="button" className="btn btn-primary" onClick={onWrite}>
+        <button type="button" className="btn-write" onClick={onWrite}>
           <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
           작성하기
         </button>
