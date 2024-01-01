@@ -2,7 +2,7 @@ import { LuCheck, LuPencil, LuCornerUpLeft, LuCircleDot } from 'react-icons/lu';
 
 export default function RepoBox(props) {
   const borderStyle = {
-    border: '1px var(--gray-500) solid'
+    borderTop: '1px var(--gray-300) solid'
   };
   const numberWithCommas = (x) => {
     if (typeof x === 'number') return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');

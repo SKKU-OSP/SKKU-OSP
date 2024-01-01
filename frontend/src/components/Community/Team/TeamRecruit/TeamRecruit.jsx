@@ -123,7 +123,7 @@ function TeamRecruit() {
   const handleRecruitSortChange = (sortOption) => {
     setRecruitSortOrders(sortOption.value);
     if (isRecruitTab) {
-      getRecruit(nowTeamPage, sortOption.value);
+      getRecruit(nowRecruitPage, sortOption.value);
     }
     setShowRecruitDropdown(false);
   };
@@ -159,7 +159,7 @@ function TeamRecruit() {
                     onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}
                     style={{ marginRight: '5px' }}
                   >
-                    <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+                    <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
                       {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
@@ -170,11 +170,7 @@ function TeamRecruit() {
                       ))}
                     </Dropdown.Menu>
                   </Dropdown>
-                  <button
-                    type="button"
-                    onClick={onWrite}
-                    className={isRecruitTab ? 'btn btn-primary' : 'btn btn-primary hidden'}
-                  >
+                  <button type="button" onClick={onWrite} className={isRecruitTab ? 'btn-write' : 'btn-write hidden'}>
                     <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
                     작성하기
                   </button>
@@ -186,7 +182,7 @@ function TeamRecruit() {
                   show={showTeamDropdown}
                   onToggle={(isOpen) => setShowTeamDropdown(isOpen)}
                 >
-                  <Dropdown.Toggle variant="secondary" id="dropdown-sort">
+                  <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
                     {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
                   </Dropdown.Toggle>
                   <Dropdown.Menu>

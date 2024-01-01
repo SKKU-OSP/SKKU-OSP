@@ -1,31 +1,46 @@
 import ApplyTeamModal from '../ApplyTeamModal';
-import { BsAwardFill, BsPeopleFill } from 'react-icons/bs';
+import { BsFillPatchCheckFill, BsPeopleFill } from 'react-icons/bs';
 import ProfileDropdown_Container from '../../ProfileDropdown';
+
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function TeamOverview(props) {
   const { team } = props;
 
   return (
-    <div className="board-article">
+    <div className="board-team-article">
       {team.name ? (
         <>
-          <div>
-            <h4 className="board-team-title">{team.name}</h4>
-            <div className="board-article-modal">
-              <ApplyTeamModal />
+          <div className="board-article-header">
+            <div className="board-team">
+              <img src={server_url + team.image} className="board-team-img" />
+              <h5 className="board-team-name" style={{ fontWeight: 'bold' }}>
+                {team.name}
+              </h5>
+              <div className="vertical-divider"></div>
+              <div className="board-team-desc">
+                <h6 className="board-team-desc-text">{team.description}</h6>
+              </div>
+            </div>
+            <div className="board-article-info" style={{ flexBasis: '30%' }}>
+              <div className="board-team-leader">
+                {team.leader_username && (
+                  <>
+                    <BsFillPatchCheckFill style={{ marginRight: '10px' }} />
+                    <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
+                  </>
+                )}
+              </div>
+              <div className="board-team-member">
+                <BsPeopleFill style={{ marginRight: '5px' }} />
+                {` ${team.member_cnt}명`}
+              </div>
             </div>
           </div>
-          <div>
-            <h6 className="inline-block">{team.description}</h6>
-            <div className="text-end">
-              {team.leader_username && (
-                <>
-                  <BsAwardFill />
-                  <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
-                </>
-              )}
-              <BsPeopleFill />
-              {` ${team.member_cnt}명`}
+
+          <div className="board-team-recruit">
+            <div className="board-article-modal">
+              <ApplyTeamModal />
             </div>
           </div>
         </>

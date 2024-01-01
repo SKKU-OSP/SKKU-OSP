@@ -169,77 +169,81 @@ function UserActivity() {
 
   return (
     <div className="col-9">
-      <div className="community-nav d-flex">
-        <Dropdown>
-          <Dropdown.Toggle variant="secondary" id="dropdown-sort">
-            {sortOptions[tabName].find((option) => option.value === sortOrder).label}
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            {sortOptions[tabName].map((option) => (
-              <Dropdown.Item key={option.value} onClick={() => handleSortChange(option.value)}>
-                {option.label}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
-        <div className="nav nav-fill community-nav-items">
-          {activityNames.includes(tabName) && (
-            <li className="nav-item selected-nav-item">
-              <div>{activityNavMap[tabName]}</div>
-            </li>
-          )}
-        </div>
-        <button className="hidden">hidden</button>
-      </div>
-
-      {isLoadedArticles ? (
+      {!error && (
         <>
-          {tabName === 'article' && articles && articles.length > 0 ? (
+          <div className="community-nav d-flex">
+            <div className="nav nav-fill community-nav-items">
+              {activityNames.includes(tabName) && (
+                <li className="nav-item selected-nav-item">
+                  <div>{activityNavMap[tabName]}</div>
+                </li>
+              )}
+            </div>
+            <Dropdown>
+              <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+                {sortOptions[tabName].find((option) => option.value === sortOrder).label}
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {sortOptions[tabName].map((option) => (
+                  <Dropdown.Item key={option.value} onClick={() => handleSortChange(option.value)}>
+                    {option.label}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>{' '}
+          </div>
+
+          {isLoadedArticles ? (
             <>
-              {articles.map((a) => (
-                <UserArticle key={a.id} article={a} />
-              ))}
-              <Pagination
-                activePage={nowArticlePage}
-                itemsCountPerPage={10}
-                totalItemsCount={maxArticlePage * 10}
-                pageRangeDisplayed={5}
-                onChange={onWrittenArticleChange}
-              />
+              {tabName === 'article' && articles && articles.length > 0 ? (
+                <>
+                  {articles.map((a) => (
+                    <UserArticle key={a.id} article={a} tabName={tabName} />
+                  ))}
+                  <Pagination
+                    activePage={nowArticlePage}
+                    itemsCountPerPage={10}
+                    totalItemsCount={maxArticlePage * 10}
+                    pageRangeDisplayed={5}
+                    onChange={onWrittenArticleChange}
+                  />
+                </>
+              ) : null}
+              {tabName === 'comment' && comments && comments.length > 0 ? (
+                <>
+                  {comments.map((c) => (
+                    <UserComment key={c.id} comment={c} />
+                  ))}
+                  <Pagination
+                    activePage={nowCommentPage}
+                    itemsCountPerPage={10}
+                    totalItemsCount={maxCommentPage * 10}
+                    pageRangeDisplayed={5}
+                    onChange={onCommentChange}
+                  />
+                </>
+              ) : null}
+              {tabName === 'scrap' && scraps && scraps.length > 0 ? (
+                <>
+                  {scraps.map((a) => (
+                    <UserArticle key={a.id} article={a} tabName={tabName} />
+                  ))}
+                  <Pagination
+                    activePage={nowScrapPage}
+                    itemsCountPerPage={10}
+                    totalItemsCount={maxScrapPage * 10}
+                    pageRangeDisplayed={5}
+                    onChange={onScrapChange}
+                  />
+                </>
+              ) : null}
             </>
-          ) : null}
-          {tabName === 'comment' && comments && comments.length > 0 ? (
-            <>
-              {comments.map((c) => (
-                <UserComment key={c.id} comment={c} />
-              ))}
-              <Pagination
-                activePage={nowCommentPage}
-                itemsCountPerPage={10}
-                totalItemsCount={maxCommentPage * 10}
-                pageRangeDisplayed={5}
-                onChange={onCommentChange}
-              />
-            </>
-          ) : null}
-          {tabName === 'scrap' && scraps && scraps.length > 0 ? (
-            <>
-              {scraps.map((a) => (
-                <UserArticle key={a.id} article={a} />
-              ))}
-              <Pagination
-                activePage={nowScrapPage}
-                itemsCountPerPage={10}
-                totalItemsCount={maxScrapPage * 10}
-                pageRangeDisplayed={5}
-                onChange={onScrapChange}
-              />
-            </>
-          ) : null}
+          ) : (
+            <LoaderIcon style={{ marginTop: '20px' }} />
+          )}
         </>
-      ) : (
-        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
+      {error && <div>문제가 발생했습니다</div>}
     </div>
   );
 }
