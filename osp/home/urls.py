@@ -1,10 +1,13 @@
 from django.urls import path
 
-from home.views import statistic, update_score
+from home import views
 
 app_name = 'home'
 
 urlpatterns = [
-  path('statistic/', statistic, name='statistic'),
-  path('update_score/', update_score, name='update_score'),
+    path('update_score/', views.update_score, name='update_score'),
+    path('api/statistic/', views.StatisticView.as_view(), name='Statistic'),
+
+    # Django만으로 열람이 가능하도록 Redundant하게 남겨둠
+    path('statistic/', views.statistic, name='statistic'),
 ]

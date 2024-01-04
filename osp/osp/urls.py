@@ -13,15 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include, re_path
-from django.shortcuts import redirect
+import debug_toolbar
+from django.conf import settings
 from django.conf.urls.static import static
-from .settings import DEBUG, MEDIA_URL, MEDIA_ROOT
+from django.contrib import admin
+from django.shortcuts import redirect
+from django.urls import include, path, re_path
+
+from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 
 urlpatterns = [
-    path('home/', include('home.urls')),
+    path('', lambda req: redirect('/admin/')),
     path('admin/', admin.site.urls),
+
+    path('home/', include('home.urls')),
     path('rank/', include('rank.urls')),
     path('accounts/', include('common.urls')),
     path('user/', include('user.urls')),
@@ -30,13 +35,9 @@ urlpatterns = [
     path('community/', include('community.urls')),
     path('message/', include('message.urls')),
     path('challenge/', include('challenge.urls')),
-    path('', lambda req: redirect('/community/')),
     path('accounts/', include('django.contrib.auth.urls'))
 ]
 
-from django.conf import settings
-
-import debug_toolbar
 if DEBUG:
     urlpatterns += [
         re_path(r'^__debug__/', include(debug_toolbar.urls)),

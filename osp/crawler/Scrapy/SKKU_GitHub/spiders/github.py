@@ -11,58 +11,59 @@ from ..settings import *
 
 API_URL = 'https://api.github.com'
 HTML_URL = 'https://github.com'
+
+
 class GithubSpider(scrapy.Spider):
     name = 'github'
 
     def __init__(self, ids='', **kwargs):
         self.ids = []
-        if ids != '' :
+        if ids != '':
             self.ids = ids.split(',')
 
     def start_requests(self):
-        for id in self.ids :
+        for id in self.ids:
             yield self.get_recent(f'users/{id}')
-    
-    def __end_of_month(self, now: datetime) :
+
+    def __end_of_month(self, now: datetime):
         next_month = now.month % 12 + 1
         next_year = now.year + now.month // 12
         return datetime(next_year, next_month, 1) - timedelta(seconds=1)
-    
-    def get_recent(self, endpoint) :
+
+    def get_recent(self, endpoint):
         # 타겟 유저의 최신 push 기록을 확인한다.
         try:
             GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=pushed"
-            return scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint":endpoint})
+            return scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint": endpoint})
         except Exception as e:
             logging.warning("recent pushed")
             return self.api_get(endpoint, self.parse_user)
-            
-    def find_recent(self, res) :
+
+    def find_recent(self, res):
         # push 기록을 저장한 후 api_get을 호출해 크롤링을 진행한다.
         try:
             endpoint = res.meta["endpoint"]
             recent_json = json.loads(res.body)
             recent_at = recent_json[0]["pushed_at"]
-            metadata = {"recent":recent_at[:10]}
+            metadata = {"recent": recent_at[:10]}
         except Exception:
             logging.warning("parse err: recent pushed")
-            metadata = {"recent":None}
-        
+            metadata = {"recent": None}
+
         return self.api_get(endpoint, self.parse_user, metadata=metadata)
-    
-    def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100) :
-        
+
+    def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100):
+
         req = scrapy.Request(
-                f'{API_URL}/{endpoint}?page={page}&per_page={per_page}',
-                callback,
-                meta=metadata,
-                dont_filter=True
-                )
-        
+            f'{API_URL}/{endpoint}?page={page}&per_page={per_page}',
+            callback,
+            meta=metadata,
+            dont_filter=True
+        )
+
         return req
 
-
-    def parse_user(self, res) :
+    def parse_user(self, res):
         user_json = json.loads(res.body)
         github_id = user_json['login']
         user_item = User()
@@ -74,7 +75,8 @@ class GithubSpider(scrapy.Spider):
         user_item['total_PRs'] = 0
         user_item['total_issues'] = 0
         user_item['stars'] = 0
-        user_item['request_cnt'] = 1 + max(math.ceil(user_json['public_repos'] / 100), 1)
+        user_item['request_cnt'] = 1 + \
+            max(math.ceil(user_json['public_repos'] / 100), 1)
 
         created_date = user_json['created_at'][:10]
         updated_date = user_json['updated_at'][:10]
@@ -86,56 +88,56 @@ class GithubSpider(scrapy.Spider):
         user_item["github_updated_date"] = updated_date
         if recent_date != None:
             recent_date_yy_mm = datetime.strptime(recent_date[:7], '%Y-%m')
-            if end_date < recent_date_yy_mm :
+            if end_date < recent_date_yy_mm:
                 end_date = recent_date_yy_mm
                 user_item["github_updated_date"] = recent_date
 
         # 최근 업데이트 날짜와 비교하기 위해 크롤러 날짜 저장
+        user_item["created_date"] = created_date
         user_item["crawled_date"] = datetime.now().strftime("%Y-%m-%d")
         user_item["updated_date"] = datetime.now().strftime("%Y-%m-%d")
 
         logging.info(f"parse_user: end_date {end_date}")
 
         end_date = self.__end_of_month(end_date)
-        while pivot_date < end_date :
+        while pivot_date < end_date:
             pivot_date = self.__end_of_month(pivot_date) + timedelta(days=1)
             user_item['request_cnt'] += 1
         yield user_item
 
-
         yield self.api_get(
-            f'users/{github_id}/repos', 
+            f'users/{github_id}/repos',
             self.parse_user_repo,
             {'github_id': github_id, 'page': 1}
-            )
+        )
 
         pivot_date = datetime.strptime(created_date[:7], '%Y-%m')
-        while pivot_date < end_date :
+        while pivot_date < end_date:
             from_date = pivot_date.strftime('%Y-%m-%d')
             to_date = self.__end_of_month(pivot_date).strftime('%Y-%m-%d')
             yield scrapy.Request(
                 f'{HTML_URL}/{github_id}/?tab=overview&from={from_date}&to={to_date}',
                 self.parse_user_update,
-                meta={'github_id':github_id, 'from': from_date, 'to': to_date},
+                meta={'github_id': github_id, 'from': from_date, 'to': to_date},
             )
             pivot_date = self.__end_of_month(pivot_date) + timedelta(days=1)
-        
+
         yield scrapy.Request(
-            f'{HTML_URL}/{user_json["login"]}', 
+            f'{HTML_URL}/{user_json["login"]}',
             self.parse_user_page,
-            meta={'github_id':github_id}
+            meta={'github_id': github_id}
         )
-        
+
         yield self.api_get(
             f'users/{github_id}/following',
             self.parse_user_following,
-            metadata={'github_id': github_id, 'page':1}
+            metadata={'github_id': github_id, 'page': 1}
         )
-        
+
         yield self.api_get(
             f'users/{github_id}/starred',
             self.parse_user_starred,
-            metadata={'github_id': github_id, 'page':1}
+            metadata={'github_id': github_id, 'page': 1}
         )
 
     def parse_user_update(self, res):
@@ -147,7 +149,7 @@ class GithubSpider(scrapy.Spider):
         user_update['total_commits'] = 0
         user_update['total_PRs'] = 0
         user_update['total_issues'] = 0
-        
+
         user_period = UserPeriod()
         user_period['github_id'] = github_id
         user_period['start_yymm'] = res.meta['from']
@@ -160,50 +162,56 @@ class GithubSpider(scrapy.Spider):
         for event in soup.select('.TimelineItem-body'):
             summary = event.select_one('summary')
             body = event.select('details > div > details')
-            if summary == None :
+            if summary == None:
                 summary = event.select_one('h4')
                 if summary == None:
                     pass
                 else:
                     summary = ' '.join(summary.text.strip().split())
-                    if 'Opened their first issue' in summary :
+                    if 'Opened their first issue' in summary:
                         user_update['total_issues'] += 1
-                    if 'Opened their first pull request' in summary :
+                    if 'Opened their first pull request' in summary:
                         user_update['total_PRs'] += 1
-                    if 'Created an issue' in summary :
+                    if 'Created an issue' in summary:
                         user_update['total_issues'] += 1
                         issue = Issue()
-                        repo = tuple(event.select_one('h4 > a')['href'][1:].split('/'))
+                        repo_link = event.select_one('h4 > a')['href'][1:]
+                        repo = tuple(repo_link.split('/'))
                         issue['github_id'] = github_id
                         issue['owner_id'] = repo[0]
                         issue['repo_name'] = repo[1]
                         issue['title'] = event.select_one('h3 > a').text
-                        issue['number'] = event.select_one('h3 > a')['href']
-                        issue['number'] = issue['number'][issue['number'].rfind('/') + 1:]
+                        issue_link = event.select_one('h3 > a')['href']
+                        num_start = issue_link.rfind('/') + 1
+                        issue['number'] = issue_link[num_start:]
                         date = event.select_one('time').text.strip()
                         date = datetime.strptime(date, '%b %d')
-                        issue['date'] = date.replace(year=int(res.meta['from'][:4]))
-                        if repo[0] != github_id :
+                        issue['date'] = date.replace(
+                            year=int(res.meta['from'][:4]))
+                        if repo[0] != github_id:
                             contributed_repo.add(repo)
-                        else :
+                        else:
                             owned_repo.add(repo)
                         yield issue
-                    if 'Created a pull request' in summary :
+                    if 'Created a pull request' in summary:
                         user_update['total_PRs'] += 1
                         pr = PullRequest()
-                        repo = tuple(event.select_one('h4 > a')['href'][1:].split('/'))
+                        repo = tuple(event.select_one('h4 > a')
+                                     ['href'][1:].split('/'))
                         pr['github_id'] = github_id
                         pr['owner_id'] = repo[0]
                         pr['repo_name'] = repo[1]
                         pr['title'] = event.select_one('h3 > a').text
-                        pr['number'] = event.select_one('h3 > a')['href']
-                        pr['number'] = pr['number'][pr['number'].rfind('/') + 1:]
+                        pr_link = event.select_one('h3 > a')['href']
+                        num_start = pr_link.rfind('/') + 1
+                        pr['number'] = pr_link[num_start:]
                         date = event.select_one('time').text.strip()
                         date = datetime.strptime(date, '%b %d')
-                        pr['date'] = date.replace(year=int(res.meta['from'][:4]))
-                        if repo[0] != github_id :
+                        pr['date'] = date.replace(
+                            year=int(res.meta['from'][:4]))
+                        if repo[0] != github_id:
                             contributed_repo.add(repo)
-                        else :
+                        else:
                             owned_repo.add(repo)
                         yield pr
                 continue
@@ -212,28 +220,29 @@ class GithubSpider(scrapy.Spider):
                 # Create Commit
                 if summary[2] == 'commit' or summary[2] == 'commits':
                     commit_list = event.select('li')
-                    for commit in commit_list :
+                    for commit in commit_list:
                         detail = commit.select('a')
                         commit_cnt = int(detail[1].text.strip().split()[0])
-                        user_update['total_commits']  += commit_cnt
-                        repo = tuple(detail[0].text.split('/'))
-                        if repo[0] != github_id :
+                        user_update['total_commits'] += commit_cnt
+                        repo = tuple(detail[0]['href'][1:].split('/'))
+                        if repo[0] != github_id:
                             contributed_repo.add(repo)
-                        else :
+                        else:
                             owned_repo.add(repo)
                 # Create Repository
                 elif summary[2] == 'repository' or summary[2] == 'repositories':
                     user_period['num_of_cr_repos'] += 1
-            elif summary[0] == 'Opened' :
+            elif summary[0] == 'Opened':
                 # Open Issues
-                if 'issue' in summary or 'issues' in summary :
+                if 'issue' in summary or 'issues' in summary:
                     user_update['total_issues'] += int(summary[1])
                     for issue_repo in body:
-                        repo = issue_repo.select_one('summary span').text.strip()
+                        repo = issue_repo.select_one(
+                            'summary span').text.strip()
                         repo = tuple(repo.split('/'))
-                        if repo[0] != github_id :
+                        if repo[0] != github_id:
                             contributed_repo.add(repo)
-                        else :
+                        else:
                             owned_repo.add(repo)
                         for issue_tag in issue_repo.select('li'):
                             if issue_tag.select_one('a > span') is None:
@@ -242,22 +251,25 @@ class GithubSpider(scrapy.Spider):
                             issue['github_id'] = github_id
                             issue['owner_id'] = repo[0]
                             issue['repo_name'] = repo[1]
-                            issue['title'] = issue_tag.select_one('a > span').text
-                            issue['number'] = issue_tag.select_one('a')['href']
-                            issue['number'] = issue['number'][issue['number'].rfind('/') + 1:]
+                            issue['title'] = issue_tag.select_one(
+                                'a > span').text
+                            issue_link = issue_tag.select_one('a')['href']
+                            num_start = issue_link.rfind('/') + 1
+                            issue['number'] = issue_link[num_start:]
                             date = issue_tag.select_one('time').text.strip()
                             date = datetime.strptime(date, '%b %d')
-                            issue['date'] = date.replace(year=int(res.meta['from'][:4]))
+                            issue['date'] = date.replace(
+                                year=int(res.meta['from'][:4]))
                             yield issue
                 # Open Pull Requests
-                elif 'request' in summary or 'requests' in summary :
+                elif 'request' in summary or 'requests' in summary:
                     user_update['total_PRs'] += int(summary[1])
                     for pr_repo in body:
                         repo = pr_repo.select_one('summary span').text.strip()
                         repo = tuple(repo.split('/'))
-                        if repo[0] != github_id :
+                        if repo[0] != github_id:
                             contributed_repo.add(repo)
-                        else :
+                        else:
                             owned_repo.add(repo)
                         for pr_tag in pr_repo.select('li'):
                             if pr_tag.select_one('a > span') is None:
@@ -267,11 +279,13 @@ class GithubSpider(scrapy.Spider):
                             pr['owner_id'] = repo[0]
                             pr['repo_name'] = repo[1]
                             pr['title'] = pr_tag.select_one('a > span').text
-                            pr['number'] = pr_tag.select_one('a')['href']
-                            pr['number'] = pr['number'][pr['number'].rfind('/') + 1:]
+                            pr_link = pr_tag.select_one('a')['href']
+                            num_start = pr_link.rfind('/') + 1
+                            pr['number'] = pr_link[num_start:]
                             date = pr_tag.select_one('time').text.strip()
                             date = datetime.strptime(date, '%b %d')
-                            pr['date'] = date.replace(year=int(res.meta['from'][:4]))
+                            pr['date'] = date.replace(
+                                year=int(res.meta['from'][:4]))
                             yield pr
         yield user_update
 
@@ -281,13 +295,13 @@ class GithubSpider(scrapy.Spider):
         user_period['num_of_issues'] = user_update['total_issues']
         yield user_period
 
-        for repo in owned_repo :
+        for repo in owned_repo:
             contribute = RepoContribute()
             contribute['github_id'] = github_id
             contribute['owner_id'], contribute['repo_name'] = repo
             yield contribute
             yield self.api_get(f'repos/{"/".join(repo)}', self.parse_repo, metadata={'from': github_id})
-        for repo in contributed_repo :
+        for repo in contributed_repo:
             contribute = RepoContribute()
             contribute['github_id'] = github_id
             contribute['owner_id'], contribute['repo_name'] = repo
@@ -302,17 +316,17 @@ class GithubSpider(scrapy.Spider):
         user_data['target'] = 'badge'
         user_data['achievements'] = None
         user_data['highlights'] = None
-        for info in info_list :
-            if info.h2.text == 'Achievements' :
+        for info in info_list:
+            if info.h2.text == 'Achievements':
                 user_data['achievements'] = ', '.join(
                     [tag['alt'] for tag in info.select('img')]
-                    )
-            if info.h2.text == 'Highlights' :
+                )
+            if info.h2.text == 'Highlights':
                 user_data['highlights'] = ', '.join(
                     [tag.text.strip() for tag in info.select('li')]
                 )
         yield user_data
-    
+
     def parse_user_following(self, res):
         json_data = json.loads(res.body)
         github_id = res.meta['github_id']
@@ -322,8 +336,8 @@ class GithubSpider(scrapy.Spider):
                 following_id=following['login']
             )
             yield user_following
-        
-        if len(json_data) == 100 :
+
+        if len(json_data) == 100:
             metadata = res.meta
             metadata['page'] += 1
             yield self.api_get(
@@ -332,7 +346,7 @@ class GithubSpider(scrapy.Spider):
                 metadata,
                 page=metadata['page']
             )
-    
+
     def parse_user_starred(self, res):
         json_data = json.loads(res.body)
         github_id = res.meta['github_id']
@@ -343,8 +357,8 @@ class GithubSpider(scrapy.Spider):
                 starred_repo_name=starred['name']
             )
             yield user_starred
-        
-        if len(json_data) == 100 :
+
+        if len(json_data) == 100:
             metadata = res.meta
             metadata['page'] += 1
             yield self.api_get(
@@ -353,7 +367,7 @@ class GithubSpider(scrapy.Spider):
                 metadata,
                 page=metadata['page']
             )
-    
+
     def parse_user_repo(self, res):
         json_data = json.loads(res.body)
         user_data = UserUpdate()
@@ -364,16 +378,16 @@ class GithubSpider(scrapy.Spider):
         for repo_data in json_data:
             user_data['stars'] += repo_data['stargazers_count']
         yield user_data
-        
-        if len(json_data) == 100 :
+
+        if len(json_data) == 100:
             metadata = res.meta
             metadata['page'] += 1
             yield self.api_get(
                 f'users/{github_id}/repos',
                 self.parse_user_repo,
                 metadata,
-                page = metadata['page']
-                )
+                page=metadata['page']
+            )
 
     def parse_repo(self, res):
         json_data = json.loads(res.body)
@@ -386,8 +400,10 @@ class GithubSpider(scrapy.Spider):
         repo_data['stargazers_count'] = json_data['stargazers_count']
         repo_data['forks_count'] = json_data['forks_count']
         repo_data['watchers_count'] = None if not 'subscribers_count' in json_data else json_data['subscribers_count']
-        repo_data['create_date'] = datetime.fromisoformat(json_data['created_at'][:-1])
-        repo_data['update_date'] = datetime.fromisoformat(json_data['updated_at'][:-1])
+        repo_data['create_date'] = datetime.fromisoformat(
+            json_data['created_at'][:-1])
+        repo_data['update_date'] = datetime.fromisoformat(
+            json_data['updated_at'][:-1])
         repo_data['language'] = json_data['language']
         repo_data['proj_short_desc'] = json_data['description']
         repo_data['license'] = None if json_data['license'] is None else json_data['license']['name']
@@ -396,7 +412,8 @@ class GithubSpider(scrapy.Spider):
         yield scrapy.Request(
             f'{HTML_URL}/{github_id}/{repo_name}',
             self.parse_repo_page,
-            meta={'github_id': github_id, 'repo_name': repo_name, 'from': res.meta['from']},
+            meta={'github_id': github_id, 'repo_name': repo_name,
+                  'from': res.meta['from']},
             dont_filter=True
         )
 
@@ -408,35 +425,43 @@ class GithubSpider(scrapy.Spider):
         repo_path = f'{github_id}/{repo_name}'
         repo_data['path'] = repo_path
         release_tag = soup.select_one(f'a[href="/{repo_path}/releases"]')
-        if not release_tag is None :
+        if not release_tag is None:
             release_tag = release_tag.parent.parent
             release_counter = release_tag.select_one('span.Counter')
             if not release_counter is None:
                 try:
-                    repo_data['release_count'] = int(release_counter.text.replace(',', '').replace('+', ''))
+                    release_cnt = release_counter.text.replace(
+                        ',', '').replace('+', '')
+                    repo_data['release_count'] = int(release_cnt)
                 except ValueError:
                     repo_data['release_count'] = 0
-                repo_data['release_ver'] = release_tag.select_one('a > div span').text[:45]
-            else :
+                repo_data['release_ver'] = release_tag.select_one(
+                    'a > div span').text[:45]
+            else:
                 repo_data['release_ver'] = None
                 repo_data['release_count'] = 0
         else:
             repo_data['release_ver'] = None
             repo_data['release_count'] = 0
 
-        contributor_tag = soup.select_one(f'a[href="/{github_id}/{repo_name}/graphs/contributors"]')
+        contributor_tag = soup.select_one(
+            f'a[href="/{github_id}/{repo_name}/graphs/contributors"]')
         if not contributor_tag is None:
             try:
                 contributor_tag = contributor_tag.parent.parent
-                contributor_counter = contributor_tag.select_one('span.Counter')
-                repo_data['contributors_count'] = int(contributor_counter.text.replace(',','').replace('+',''))
+                contributor_counter = contributor_tag.select_one(
+                    'span.Counter')
+                contributors_cnt = contributor_counter.text.replace(
+                    ',', '').replace('+', '')
+                repo_data['contributors_count'] = int(contributors_cnt)
             except ValueError:
                 repo_data['contributors_count'] = 1
         else:
             repo_data['contributors_count'] = 1
-        
+
         repo_data['readme'] = not soup.select_one('div#readme') is None
-        repo_data['commits_count'] = int(soup.select_one('div.Box-header strong').text.replace(',',''))
+        repo_data['commits_count'] = int(soup.select_one(
+            'div.Box-header strong').text.replace(',', ''))
         yield repo_data
 
         yield scrapy.Request(
@@ -451,21 +476,24 @@ class GithubSpider(scrapy.Spider):
         )
         yield self.api_get(
             f'repos/{github_id}/{repo_name}/commits',
-            self.parse_repo_commit, {'path': repo_path, 'page': 1, 'from': res.meta['from']}
+            self.parse_repo_commit, {'path': repo_path,
+                                     'page': 1, 'from': res.meta['from']}
         )
-        
+
         yield scrapy.Request(
             f'{HTML_URL}/{repo_path}/network/dependencies',
             self.parse_repo_dependencies,
             meta={'path': repo_path}
         )
-    
+
     def parse_repo_pr(self, res):
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
-        prs_cnt = soup.select_one('a[data-ga-click="Pull Requests, Table state, Open"]').parent
-        prs_cnt = [x.text.strip().replace(',','').split() for x in prs_cnt.select('a')]
+        prs_cnt = soup.select_one(
+            'a[data-ga-click="Pull Requests, Table state, Open"]').parent
+        prs_cnt = [x.text.strip().replace(',', '').split()
+                   for x in prs_cnt.select('a')]
         repo_data['prs_count'] = int(prs_cnt[0][0]) + int(prs_cnt[1][0])
         yield repo_data
 
@@ -473,21 +501,23 @@ class GithubSpider(scrapy.Spider):
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
-        issue_cnt = soup.select_one('a[data-ga-click="Issues, Table state, Open"]').parent
-        issue_cnt = [x.text.strip().replace(',','').split() for x in issue_cnt.select('a')]
+        issue_cnt = soup.select_one(
+            'a[data-ga-click="Issues, Table state, Open"]').parent
+        issue_cnt = [x.text.strip().replace(',', '').split()
+                     for x in issue_cnt.select('a')]
         repo_data['open_issue_count'] = int(issue_cnt[0][0])
         repo_data['close_issue_count'] = int(issue_cnt[1][0])
         yield repo_data
-    
+
     def parse_repo_commit(self, res):
         json_data = json.loads(res.body)
         path = res.meta['path']
         for commits in json_data:
             committer = commits['committer']
-            if committer is not None and 'login' in committer :
+            if committer is not None and 'login' in committer:
                 committer = committer['login']
             author = commits['author']
-            if author is not None and 'login' in author :
+            if author is not None and 'login' in author:
                 author = author['login']
             if author == res.meta['from'] or author == res.meta['from']:
                 yield self.api_get(
@@ -495,16 +525,16 @@ class GithubSpider(scrapy.Spider):
                     self.parse_repo_commit_edits,
                     {'path': res.meta['path']}
                 )
-        
-        if len(json_data) == 100 :
+
+        if len(json_data) == 100:
             metadata = res.meta
             metadata['page'] += 1
             yield self.api_get(
                 f'repos/{path}/commits',
                 self.parse_repo_commit,
                 metadata,
-                page = metadata['page']
-                )
+                page=metadata['page']
+            )
 
     def parse_repo_commit_edits(self, res):
         json_data = json.loads(res.body)
@@ -517,14 +547,16 @@ class GithubSpider(scrapy.Spider):
             commit_data['committer_github'] = None
         else:
             commit_data['committer_github'] = committer['login']
-        commit_data['committer_date'] = datetime.fromisoformat(json_data['commit']['committer']['date'][:-1])
+        commit_data['committer_date'] = datetime.fromisoformat(
+            json_data['commit']['committer']['date'][:-1])
         commit_data['committer'] = json_data['commit']['committer']['email']
         author = json_data['author']
         if author is None or 'login' not in author:
             commit_data['author_github'] = None
         else:
             commit_data['author_github'] = author['login']
-        commit_data['author_date'] = datetime.fromisoformat(json_data['commit']['author']['date'][:-1])
+        commit_data['author_date'] = datetime.fromisoformat(
+            json_data['commit']['author']['date'][:-1])
         commit_data['author'] = json_data['commit']['author']['email']
         commit_data['additions'] = json_data['stats']['additions']
         commit_data['deletions'] = json_data['stats']['deletions']
@@ -539,12 +571,13 @@ class GithubSpider(scrapy.Spider):
             commit_file['additions'] = file['additions']
             commit_file['deletions'] = file['deletions']
             yield commit_file
-    
+
     def parse_repo_dependencies(self, res):
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
         repo_data['dependencies'] = 0
         for tag in soup.select('.Box .Counter'):
-            repo_data['dependencies'] = max(repo_data['dependencies'], int(tag.text.replace(',', '')))
+            repo_data['dependencies'] = max(
+                repo_data['dependencies'], int(tag.text.replace(',', '')))
         yield repo_data

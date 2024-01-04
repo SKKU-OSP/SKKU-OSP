@@ -1,0 +1,49 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "product": "vite --host"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.3",
+    "@mui/material": "^5.14.5",
+    "@tinymce/tinymce-react": "^4.3.0",
+    "ag-grid-community": "^30.0.6",
+    "ag-grid-react": "^30.0.6",
+    "axios": "^1.4.0",
+    "bootstrap": "^5.3.0",
+    "bootstrap-icons": "^1.10.5",
+    "chart.js": "^4.3.3",
+    "chartjs-chart-error-bars": "^4.3.0",
+    "quill-image-resize": "^3.0.9",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.8.0",
+    "react-datepicker": "^4.16.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
+    "react-js-pagination": "^3.0.3",
+    "react-loader-icon": "^1.0.1",
+    "react-quill": "^2.0.0",
+    "react-router": "^6.14.1",
+    "react-router-dom": "^6.14.0",
+    "react-select": "^5.7.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.37",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react-swc": "^3.0.0",
+    "eslint": "^8.38.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "vite": "^4.3.9"
+  }
+}

@@ -1,0 +1,45 @@
+.forInvite {
+  width: 100%;
+  margin-top: -1px;
+  margin-left: -1px;
+  font-size: calc(1.275rem + 0.3vw) !important;
+  text-align: center;
+  border: 1px solid var(--main-border-color);
+}
+
+.inviteMessageLargeBox {
+  width: 100%;
+  border: 1px solid var(--main-border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 3%;
+  padding-bottom: 3%;
+  flex-direction: column;
+}
+
+.inviteMessageSmallBox {
+  width: 90%;
+  border: 1px solid var(--main-border-color);
+  border-radius: 10px;
+}
+
+.inviteName {
+  width: 98%;
+  text-align: left;
+  padding-left: 5%;
+  font-size: calc(1rem + 0.3vw) !important;
+}
+
+.inviteMessage {
+  font-size: 1rem;
+  text-align: left;
+  padding-left: 3%;
+}
+
+.twoButton {
+  display: flex;
+  flex-direction: row;
+  margin-top: 2%;
+  margin-left: 80%;
+}

@@ -72,17 +72,17 @@
                 </li>
                 {% for noti in notifications.list %}
                 <li id="noti-{{noti.id}}" class="d-flex justify-content-between noti-item hover-opacity {{noti.receiver_read}}"
-                onclick="readNotification('{{noti.body.type}}', '{{noti.id}}', '{{noti.feedback}}');">
+                onclick="readNotification('{{noti.type}}', '{{noti.id}}', '{{noti.feedback}}');">
                     <div class="d-flex">
                         <div class="material-icons-outlined">
                             {{noti.icon}}
                         </div>
                         <div>
-                            {{ noti.body.body }}
+                            {{ noti.body }}
                         </div>
                     </div>
                     <div>
-                        {% if noti.body.type in notifications.open_types %}
+                        {% if noti.type in notifications.open_types %}
                         <i class="bi bi-box-arrow-up-right"></i>
                         {% endif %}
                     </div>
@@ -109,7 +109,6 @@
                 <li><a class="dropdown-item" href="https://analytics.google.com/analytics/web/#/p375838293/reports/intelligenthome?params=_u..nav%3Dmaui&collectionId=user">Google Analytics</a></li>
                 {% endif %}
                 <li><a class="dropdown-item" href="{% url 'community:main' %}">커뮤니티</a></li>
-                <li><a class="dropdown-item" href="{% url 'community:notice-board' %}">공지사항</a></li>
                 <li>
                     <form method="post" action="{% url 'common:logout' %}" class="dropdown-item">
                         {% csrf_token %}
