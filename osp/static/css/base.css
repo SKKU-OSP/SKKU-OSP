@@ -113,6 +113,9 @@ button {
   visibility: hidden;
   opacity: 0;
 }
+.noti-dropdown {
+  padding: 0;
+}
 @media (min-width: 992px) {
   .noti-dropdown {
     padding: 0;
@@ -201,14 +204,6 @@ button {
 .noti-item.read {
   background-color: var(--main-bg-color);
   color: var(--main-border-color);
-}
-.badge-new {
-  height: 0.5rem;
-  width: 0.5rem;
-  position: absolute;
-  background-color: var(--alert-color);
-  border-radius: 50%;
-  padding: 0.25rem;
 }
 #noti-list {
   position: absolute;

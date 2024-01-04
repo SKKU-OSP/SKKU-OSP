@@ -1,11 +1,12 @@
 # SOSD (Square of Software Developers)
 ## 성균관대학교 소프트웨어융합대학 학생들을 위한 오픈소스플랫폼 커뮤니티
-![image](https://user-images.githubusercontent.com/50347615/230562674-4493287f-2387-46dc-8798-60ef21befb42.png)
-![230562795-f9237669-6768-4404-8ad7-0f64ebb5c70f](https://github.com/SKKU-OSP/SKKU-OSP/assets/50347615/a51d5274-0450-46da-bdbf-6a902a5f0032)
+![293148191-08a81b93-523f-459e-9124-44ab42608744](https://github.com/SKKU-OSP/SKKU-OSP/assets/50347615/27432251-8327-4f52-9019-f7ff149af88a)
+![스크린샷 2023-12-28 오후 3 36 38](https://github.com/SKKU-OSP/SKKU-OSP/assets/50347615/a048ff98-15b5-47ac-ab15-ce6aa9371906)
+
 
 
 ## Stacks
-<img src="https://img.shields.io/badge/django-003545?style=for-the-badge&logo=django&logoColor=white"> <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white">
+<img src="https://img.shields.io/badge/django-003545?style=for-the-badge&logo=django&logoColor=white"> <img src="https://img.shields.io/badge/react-61DAFB?style=for-the-badge&logo=react&logoColor=black"> <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
 <img src="https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
 <img src="https://img.shields.io/badge/html-E34F26?style=for-the-badge&logo=html5&logoColor=white">
@@ -13,8 +14,11 @@
 <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
 <img src="https://img.shields.io/badge/nginx-009639?style=for-the-badge&logo=nginx&logoColor=white">
 
+## Releases
 
-# Releases
+1.0.0 (v1.0.0) - 2023.12.29.
+<details>
+<summary> Pre Releases </summary>
 
 Alpha 1.0.0 (v1.0.0-alpha) - 2023.01.06. - Initial version\
 Alpha 1.0.1 (v1.0.1-alpha) - 2023.01.10. - 커뮤니티 팀원관리기능과 코드 리팩토링\
@@ -36,5 +40,4 @@ Beta 1.1.5 (v1.1.5-beta) - 2023.05.21. - 개인정보공개래벨 조정\
 Beta 1.1.6 (v1.1.6-beta) - 2023.06.20. - GitHub 토큰 갱신, 각종오류수정\
 Beta 1.2.0 (v1.2.0-beta) - 2023.06.30. - 베타테스팅 이후 결과반영\
 Beta 1.2.1 (v1.2.1-beta) - 2023.07.01. - 사용언어, 기술스택 설정 안내 문구 추가
-
-
+</details>

@@ -1,10 +1,13 @@
 import math
-from django.db import connections, transaction, DatabaseError
-from django.db.models import Q, F, Value, Sum, Count
+
+from django.db import DatabaseError, transaction
+from django.db.models import Count, F, Q, Sum, Value
 from django.db.models.functions import Concat
 
+from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
+                               GithubRepoStats)
 from user.models import Account, GithubScore, GitHubScoreTable
-from repository.models import GithubRepoCommits, GithubIssues, GithubPulls, GithubRepoStats
+
 
 def user_score_update(user: Account, year: int):
 
@@ -18,7 +21,7 @@ def user_score_update(user: Account, year: int):
     if len(github_score):
         github_score = github_score[0]
     else:
-        github_score = GithubScore.objects.create(\
+        github_score = GithubScore.objects.create(
             yid=f'{year}{github_id}',
             github_id=github_id,
             year=year,
@@ -54,30 +57,33 @@ def user_score_update(user: Account, year: int):
             additional_score_add=0.0,
             additional_score_sum=0.0,
         )
-    
+
     commit_data = GithubRepoCommits.objects.filter(
-        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email)) \
-        & (Q(author_date__year__gte=year) & Q(author_date__year__lte=year))
+        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email))
+        & Q(author_date__year=year)
     )
     issue_data = GithubIssues.objects.filter(
-        Q(github_id=github_id) & Q(date__year__gte=year) & Q(date__year__lte=year)
-    )    
+        github_id=github_id, date__year=year)
     pull_data = GithubPulls.objects.filter(
-        Q(github_id=github_id) & Q(date__year__gte=year) & Q(date__year__lte=year)
-    )    
+        github_id=github_id, date__year=year)
+
     contr_repos = set(commit_data.values_list('github_id', 'repo_name'))
-    contr_repos = contr_repos.union(set(issue_data.values_list('owner_id', 'repo_name')))
-    contr_repos = contr_repos.union(set(pull_data.values_list('owner_id', 'repo_name')))
+    contr_repos = contr_repos.union(
+        set(issue_data.values_list('owner_id', 'repo_name')))
+    contr_repos = contr_repos.union(
+        set(pull_data.values_list('owner_id', 'repo_name')))
     contr_repos = [f'{x[0]}/{x[1]}' for x in contr_repos]
     contr_repos = GithubRepoStats.objects.all().annotate(
         repo=Concat(F('github_id'), Value('/'), F('repo_name'))
     ).filter(repo__in=contr_repos)
-    
-    star_cnt = contr_repos.filter(github_id=github_id).aggregate(total_star=Sum('stargazers_count'))['total_star']
-    if star_cnt is None :
+
+    star_cnt = contr_repos.filter(github_id=github_id).aggregate(
+        total_star=Sum('stargazers_count'))['total_star']
+    if star_cnt is None:
         star_cnt = 0
-    fork_cnt = contr_repos.filter(github_id=github_id).aggregate(total_fork=Sum('forks_count'))['total_fork']
-    if fork_cnt is None :
+    fork_cnt = contr_repos.filter(github_id=github_id).aggregate(
+        total_fork=Sum('forks_count'))['total_fork']
+    if fork_cnt is None:
         fork_cnt = 0
     repo_score = {}
     commit_lines = 0
@@ -85,7 +91,7 @@ def user_score_update(user: Account, year: int):
         repo_string = f'{repo.github_id}/{repo.repo_name}'
         repo_score[repo_string] = {}
         repo_stat_data = commit_data.filter(
-            github_id=repo.github_id, 
+            github_id=repo.github_id,
             repo_name=repo.repo_name
         ).aggregate(
             commit_lines=Sum('additions')+Sum('deletions'),
@@ -96,14 +102,22 @@ def user_score_update(user: Account, year: int):
         if repo_stat_data['commit_cnt'] is None:
             repo_stat_data['commit_cnt'] = 0
         commit_lines += repo_stat_data['commit_lines']
-        repo_score[repo_string]['commit_line_score'] = min(repo_stat_data['commit_lines']/10000, 1)
-        repo_score[repo_string]['commit_cnt_score'] = min(repo_stat_data['commit_cnt']/50, 1)
-        pull_n_issue = len(issue_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
-        pull_n_issue += len(pull_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
-        repo_score[repo_string]['pull_n_issue_score'] = min(pull_n_issue * 0.1, 0.7)
-        repo_score[repo_string]['guideline'] = 0.3 if (repo.readme and repo.license and repo.proj_short_desc) else 0
-        repo_score[repo_string]['score'] = sum([x for _, x in repo_score[repo_string].items()])
-    sorted_score = sorted(repo_score.items(), key=(lambda x: x[1]['score']), reverse=True)
+        repo_score[repo_string]['commit_line_score'] = min(
+            repo_stat_data['commit_lines']/10000, 1)
+        repo_score[repo_string]['commit_cnt_score'] = min(
+            repo_stat_data['commit_cnt']/50, 1)
+        pull_n_issue = len(issue_data.filter(
+            owner_id=repo.github_id, repo_name=repo.repo_name))
+        pull_n_issue += len(pull_data.filter(owner_id=repo.github_id,
+                            repo_name=repo.repo_name))
+        repo_score[repo_string]['pull_n_issue_score'] = min(
+            pull_n_issue * 0.1, 0.7)
+        repo_score[repo_string]['guideline'] = 0.3 if (
+            repo.readme and repo.license and repo.proj_short_desc) else 0
+        repo_score[repo_string]['score'] = sum(
+            [x for _, x in repo_score[repo_string].items()])
+    sorted_score = sorted(repo_score.items(), key=(
+        lambda x: x[1]['score']), reverse=True)
     try:
         with transaction.atomic():
             if len(sorted_score) > 0:
@@ -113,28 +127,26 @@ def user_score_update(user: Account, year: int):
                     github_score.score_other_repo_sum = sorted_score[1][1]['score']
                 if len(sorted_score) > 2:
                     github_score.score_other_repo_sum += sorted_score[2][1]['score']
-                github_score.score_other_repo_sum = min(github_score.score_other_repo_sum, 1.0)
+                github_score.score_other_repo_sum = min(
+                    github_score.score_other_repo_sum, 1.0)
                 github_score.score_star = math.log10(star_cnt + 1)
                 github_score.score_fork = min(fork_cnt * 0.2, 1.0)
             github_score.save()
             score_table = GitHubScoreTable.objects.filter(
-                id=user.student_data.id, 
+                id=user.student_data.id,
                 year=year
             )
+            total_score = github_score.repo_score_sum + github_score.score_other_repo_sum + \
+                github_score.score_star + github_score.score_fork
             if len(score_table) > 0:
                 score_table = score_table[0]
-                score_table
             else:
                 score_table = GitHubScoreTable.objects.create(
                     id=user.student_data.id,
                     year=year,
                     name=user.student_data.name,
                     github_id=github_id,
-                    total_score=min(
-                        github_score.repo_score_sum + github_score.score_other_repo_sum \
-                        + github_score.score_star + github_score.score_fork,
-                        5.0
-                    ),
+                    total_score=min(total_score, 5.0),
                     commit_cnt=0,
                     commit_line=0,
                     issue_cnt=0,
@@ -145,23 +157,19 @@ def user_score_update(user: Account, year: int):
                     plural_major=user.student_data.plural_major,
                     personal_email=personal_email
                 )
-            score_table.total_score=min(
-                github_score.repo_score_sum + github_score.score_other_repo_sum \
-                + github_score.score_star + github_score.score_fork,
-                5.0
-            )
-            score_table.commit_cnt=len(commit_data)
-            score_table.commit_line=commit_lines
-            score_table.issue_cnt=len(issue_data)
-            score_table.pr_cnt=len(pull_data)
-            score_table.repo_cnt=len(contr_repos)
-            score_table.personal_email=personal_email
+            score_table.total_score = min(total_score, 5.0)
+            score_table.commit_cnt = len(commit_data)
+            score_table.commit_line = commit_lines
+            score_table.issue_cnt = len(issue_data)
+            score_table.pr_cnt = len(pull_data)
+            score_table.repo_cnt = len(contr_repos)
+            score_table.personal_email = personal_email
             score_table.save()
     except DatabaseError as e:
         print(year, user, 'ERROR')
         print(e)
-    
-    
+
+
 def user_score_update_ver2(user: Account, year: int):
 
     github_id = user.student_data.github_id
@@ -177,7 +185,7 @@ def user_score_update_ver2(user: Account, year: int):
     if len(github_score):
         github_score = github_score[0]
     else:
-        github_score = GithubScore.objects.create(\
+        github_score = GithubScore.objects.create(
             yid=f'{year}{github_id}',
             github_id=github_id,
             year=year,
@@ -213,39 +221,43 @@ def user_score_update_ver2(user: Account, year: int):
             additional_score_add=0.0,
             additional_score_sum=0.0,
         )
-    
+
     commit_data = GithubRepoCommits.objects.filter(
-        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email)) \
+        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email))
         & (Q(author_date__year__gte=year) & Q(author_date__year__lte=year))
     )
     issue_data = GithubIssues.objects.filter(
         Q(github_id=github_id) & Q(date__year__gte=year) & Q(date__year__lte=year)
-    )    
+    )
     pull_data = GithubPulls.objects.filter(
         Q(github_id=github_id) & Q(date__year__gte=year) & Q(date__year__lte=year)
-    )    
+    )
     contr_repos = set(commit_data.values_list('github_id', 'repo_name'))
-    contr_repos = contr_repos.union(set(issue_data.values_list('owner_id', 'repo_name')))
-    contr_repos = contr_repos.union(set(pull_data.values_list('owner_id', 'repo_name')))
+    contr_repos = contr_repos.union(
+        set(issue_data.values_list('owner_id', 'repo_name')))
+    contr_repos = contr_repos.union(
+        set(pull_data.values_list('owner_id', 'repo_name')))
     contr_repos = [f'{x[0]}/{x[1]}' for x in contr_repos]
     contr_repos = GithubRepoStats.objects.all().annotate(
         repo=Concat(F('github_id'), Value('/'), F('repo_name'))
     ).filter(repo__in=contr_repos)
     my_contr_repos = contr_repos.filter(github_id=github_id)
-    star_cnt = my_contr_repos.aggregate(total_star=Sum('stargazers_count'))['total_star']
-    if star_cnt is None :
+    star_cnt = my_contr_repos.aggregate(
+        total_star=Sum('stargazers_count'))['total_star']
+    if star_cnt is None:
         star_cnt = 0
-    fork_cnt = my_contr_repos.aggregate(total_fork=Sum('forks_count'))['total_fork']
-    if fork_cnt is None :
+    fork_cnt = my_contr_repos.aggregate(
+        total_fork=Sum('forks_count'))['total_fork']
+    if fork_cnt is None:
         fork_cnt = 0
-    
+
     repo_score = {}
     commit_lines = 0
     for repo in contr_repos:
         repo_string = f'{repo.github_id}/{repo.repo_name}'
         repo_score[repo_string] = {}
         repo_stat_data = commit_data.filter(
-            github_id=repo.github_id, 
+            github_id=repo.github_id,
             repo_name=repo.repo_name
         ).aggregate(
             commit_lines=Sum('additions')+Sum('deletions'),
@@ -256,26 +268,36 @@ def user_score_update_ver2(user: Account, year: int):
         if repo_stat_data['commit_cnt'] is None:
             repo_stat_data['commit_cnt'] = 0
         commit_lines += repo_stat_data['commit_lines']
-        repo_score[repo_string]['commit_line_score'] = min(repo_stat_data['commit_lines']/10000, 1)
-        repo_score[repo_string]['commit_cnt_score'] = min(repo_stat_data['commit_cnt']/50, 1)
-        pull_n_issue = len(issue_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
-        pull_n_issue += len(pull_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
-        repo_score[repo_string]['pull_n_issue_score'] = min(pull_n_issue * 0.1, 0.7)
-        repo_score[repo_string]['guideline'] = 0.3 if (repo.readme and repo.license and repo.proj_short_desc) else 0
-        repo_score[repo_string]['score'] = sum([x for _, x in repo_score[repo_string].items()])
-    sorted_score = sorted(repo_score.items(), key=(lambda x: x[1]['score']), reverse=True)
-    
+        repo_score[repo_string]['commit_line_score'] = min(
+            repo_stat_data['commit_lines']/10000, 1)
+        repo_score[repo_string]['commit_cnt_score'] = min(
+            repo_stat_data['commit_cnt']/50, 1)
+        pull_n_issue = len(issue_data.filter(
+            owner_id=repo.github_id, repo_name=repo.repo_name))
+        pull_n_issue += len(pull_data.filter(owner_id=repo.github_id,
+                            repo_name=repo.repo_name))
+        repo_score[repo_string]['pull_n_issue_score'] = min(
+            pull_n_issue * 0.1, 0.7)
+        repo_score[repo_string]['guideline'] = 0.3 if (
+            repo.readme and repo.license and repo.proj_short_desc) else 0
+        repo_score[repo_string]['score'] = sum(
+            [x for _, x in repo_score[repo_string].items()])
+    sorted_score = sorted(repo_score.items(), key=(
+        lambda x: x[1]['score']), reverse=True)
+
     contr_big_repos = contr_repos.filter(
         stargazers_count__gt=50,
         forks_count__gt=50,
         contributors_count__gt=10
     )
-    
+
     big_pull_n_issue = 0
     for repo in contr_big_repos:
-        big_pull_n_issue += len(issue_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
-        big_pull_n_issue += len(pull_data.filter(owner_id=repo.github_id, repo_name=repo.repo_name))
-    
+        big_pull_n_issue += len(issue_data.filter(owner_id=repo.github_id,
+                                repo_name=repo.repo_name))
+        big_pull_n_issue += len(pull_data.filter(owner_id=repo.github_id,
+                                repo_name=repo.repo_name))
+
     try:
         with transaction.atomic():
             if len(sorted_score) > 0:
@@ -285,13 +307,15 @@ def user_score_update_ver2(user: Account, year: int):
                     github_score.score_other_repo_sum = sorted_score[1][1]['score']
                 if len(sorted_score) > 2:
                     github_score.score_other_repo_sum += sorted_score[2][1]['score']
-                github_score.score_other_repo_sum = min(github_score.score_other_repo_sum, 1.0)
-                github_score.score_star = min(math.log10(max((star_cnt + 1.1) / 3, 1)), 2)
+                github_score.score_other_repo_sum = min(
+                    github_score.score_other_repo_sum, 1.0)
+                github_score.score_star = min(
+                    math.log10(max((star_cnt + 1.1) / 3, 1)), 2)
                 github_score.score_fork = min(fork_cnt * 0.1, 1.0)
                 github_score.score_pr_issue = min(big_pull_n_issue * 0.1, 1)
             github_score.save()
             score_table = GitHubScoreTable.objects.filter(
-                id=user.student_data.id, 
+                id=user.student_data.id,
                 year=year
             )
             if len(score_table) > 0:
@@ -303,7 +327,7 @@ def user_score_update_ver2(user: Account, year: int):
                     name=user.student_data.name,
                     github_id=github_id,
                     total_score=min(
-                        github_score.repo_score_sum + github_score.score_other_repo_sum \
+                        github_score.repo_score_sum + github_score.score_other_repo_sum
                         + github_score.score_star + github_score.score_fork + github_score.score_pr_issue,
                         5.0
                     ),
@@ -317,20 +341,20 @@ def user_score_update_ver2(user: Account, year: int):
                     plural_major=plural_major,
                     personal_email=personal_email
                 )
-            score_table.total_score=min(
-                github_score.repo_score_sum + github_score.score_other_repo_sum \
+            score_table.total_score = min(
+                github_score.repo_score_sum + github_score.score_other_repo_sum
                 + github_score.score_star + github_score.score_fork,
                 5.0
             )
             score_table.dept = dept
             score_table.absence = absence
             score_table.plural_major = plural_major
-            score_table.commit_cnt=len(commit_data)
-            score_table.commit_line=commit_lines
-            score_table.issue_cnt=len(issue_data)
-            score_table.pr_cnt=len(pull_data)
-            score_table.repo_cnt=len(contr_repos)
-            score_table.personal_email=personal_email
+            score_table.commit_cnt = len(commit_data)
+            score_table.commit_line = commit_lines
+            score_table.issue_cnt = len(issue_data)
+            score_table.pr_cnt = len(pull_data)
+            score_table.repo_cnt = len(contr_repos)
+            score_table.personal_email = personal_email
             score_table.save()
     except DatabaseError as e:
         print(year, user, 'ERROR')

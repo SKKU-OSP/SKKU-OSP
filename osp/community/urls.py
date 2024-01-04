@@ -1,36 +1,63 @@
 from django.urls import path
 
-from community import views, views_api
+from community import views, views_article
 
 app_name = 'community'
 
 urlpatterns = [
-    path('', views.CommunityMainView.as_view(), name='main'),
-    path('redirect/', views.redirectView.as_view(), name='RedirectView'),
-    path('board/<board_name>/<board_id>/', views.TableBoardView.as_view(), name='Board'),
-    path('board/<board_name>/<board_id>/save/', views.ArticleSaveView.as_view(), name='article-save'),
-    path('board/notice/', views.NoticeView.as_view(), name='notice-board'),
-    path('board/notice-save/', views.ArticleNoticeSaveView.as_view(), name='notice-save'),
+    # 게시판
+    path('api/board/<str:board_name>/',
+         views.TableBoardView.as_view(), name='board'),
+    # 게시글 조회
+    path('api/article/<int:article_id>/',
+         views_article.ArticleAPIView.as_view(), name='ArticleAPI'),
+    # 게시글 수정
+    path('api/article/<int:article_id>/update/',
+         views_article.ArticleUpdateView.as_view(), name='ArticleUpdate'),
+    # 게시글 생성
+    path('api/article/create/',
+         views_article.ArticleCreateView.as_view(), name='ArticleCreate'),
+    # 게시글 삭제
+    path('api/article/<int:article_id>/delete/',
+         views_article.ArticleDeleteView.as_view(), name='ArticleDelete'),
+    # 게시글 좋아요
+    path('api/article/<int:article_id>/like/',
+         views_article.ArticleLikeView.as_view(), name='ArticleLike'),
+    # 게시글 스크랩
+    path('api/article/<int:article_id>/scrap/',
+         views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
+    # 게시글 파일
+    path('api/article/<int:article_id>/file/<int:articlefile_id>/',
+         views_article.ArticleFileView.as_view(), name='ArticleFile'),
+    # 댓글 생성
+    path('api/comment/create/',
+         views_article.CommentCreateView.as_view(), name='CommentCreate'),
+    # 댓글 삭제
+    path('api/comment/<int:comment_id>/delete/',
+         views_article.CommentDeleteView.as_view(), name='CommentDelete'),
+    # 댓글 좋아요
+    path('api/comment/<int:comment_id>/like/',
+         views_article.CommentLikeView.as_view(), name='CommentLike'),
 
+    # 유저가 쓴 게시글 목록
+    path('api/user-articles/',
+         views.UserArticlesView.as_view(), name='user-articles'),
+    # 유저가 쓴 댓글 목록
+    path('api/user-comments/',
+         views.UserCommentsView.as_view(), name='user-comments'),
+    # 유저가 스크랩한 글 목록
+    path('api/user-scrap-articles/',
+         views.UserScrapArticlesView.as_view(), name='user-scrap-articles'),
+    # 게시글 검색
     path('search/', views.SearchView.as_view(), name='Search'),
 
-    path('activity/', views.activity_board, name='Activity'),
-    path('activity/contents/', views.my_activity, name='Activity_List'),
-    path('recommender/user/', views.UserBoardView.as_view(), name='user-board'),
-    path('article-list/<board_name>/<board_id>/', views.article_list ,name='Article_List'),
-    path('account-cards/', views.account_cards ,name='Account_Cards'),
-
-    path('article/<article_id>/', views.ArticleView.as_view(), name='article-view'),
-    path('article/<article_id>/download/file/<file_id>', views_api.file_download, name='file-download'),
-    path('api/article/create/', views_api.article_create, name='article-c'),
-    path('api/article/update/', views_api.article_update, name='article-u'),
-    path('api/article/delete/', views_api.article_delete, name='article-d'),
-
-    path('api/article/like/', views_api.article_like, name='article-like'),
-    path('api/article/scrap/', views_api.article_scrap, name='article-scrap'),
-    path('api/article/image/', views_api.upload_article_image, name='article-image'),
-
-    path('api/comment/create/', views_api.comment_create, name='comment-c'),
-    path('api/comment/delete/', views_api.comment_delete, name='comment-d'),
-    path('api/comment/like/', views_api.comment_like, name='comment-like'),
+    ### 미사용 패턴 ###
+    # 댓글 조회
+    path('api/article/<int:article_id>/comments/',
+         views_article.ArticleCommentsView.as_view(), name='ArticleComments'),
+    # 메인 페이지
+    path('api/main/', views.CommunityMainView.as_view(), name='main'),
+    path('api/board/notice/', views.NoticeView.as_view(), name='notice'),
+    path('board/notice-save/',
+         views.ArticleNoticeSaveView.as_view(), name='notice-save'),
 ]

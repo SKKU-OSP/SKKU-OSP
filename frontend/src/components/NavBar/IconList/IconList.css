@@ -1,0 +1,24 @@
+.nav-bar-icon-list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-bar-icons:hover {
+  cursor: pointer;
+}
+
+.badge-new-message {
+  margin-left: 44px;
+  margin-bottom: 15px;
+}
+
+.badge-new-alert-noti {
+  margin-left: 68px;
+  margin-bottom: 15px;
+}
+
+.badge-new-alert-application {
+  margin-left: 17px;
+  margin-bottom: 15px;
+}

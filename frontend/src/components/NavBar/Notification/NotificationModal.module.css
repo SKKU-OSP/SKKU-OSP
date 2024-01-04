@@ -1,0 +1,47 @@
+.ReadAll {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 90%;
+  margin-left: 5%;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.ReadAll:hover {
+  cursor: pointer;
+}
+
+.ScrollContainer {
+  overflow-y: scroll;
+  width: 90%;
+  height: 500px;
+  justify-content: center;
+}
+
+.ListItem {
+  border-top: 1px solid #dee2e6;
+  padding: 7px 0px 7px 0px;
+  display: flex;
+  flex-direction: row;
+  padding-left: 5%;
+}
+
+.ListItem :hover {
+  cursor: pointer;
+}
+
+.ItemBody {
+  /* style={{ width: '80%', whiteSpace: 'normal', wordBreak: 'break-all', fontSize: '1rem' }} */
+  width: 80%;
+  white-space: normal;
+  word-break: break-all;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0px 5px 0px 5px;
+}
+
+.Circle {
+  color: #0094ff;
+  padding: 3px;
+}

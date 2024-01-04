@@ -1,0 +1,60 @@
+/* CSS 파일 내에 추가 */
+.recommendBar {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 40px;
+  border-bottom: 1px solid var(--main-border-color);
+  border-right: 1px solid var(--main-border-color);
+}
+
+.recommendTitle {
+  font-family: Inter;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: 0em;
+  text-align: center;
+  color: #0066ff;
+}
+
+.recommendBoard {
+  display: flex;
+  flex-wrap: wrap;
+  border-left: 1px solid var(--main-border-color);
+  margin-left: -1px;
+}
+
+.recommendMember {
+  height: 170px;
+  border-right: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
+}
+
+.memberImage {
+  height: 130px;
+  width: 130px;
+  border-radius: 100px;
+  border: 1px solid #b0b0b0;
+}
+
+.memberIntro {
+  font-family: Inter;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #454545;
+}
+
+.memberTag {
+  font-family: Inter;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #454545;
+}

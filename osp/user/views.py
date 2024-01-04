@@ -1,437 +1,582 @@
+import datetime
+import json
+import logging
+import math
+import time
+import os
+
+from django.contrib.auth.models import User
+from django.db import DatabaseError, transaction
+from django.db.models import Q, Avg, Subquery, Sum
+
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.contrib.auth.models import User
-from django.db.models import Avg, Sum, Subquery
-from django.views.generic import TemplateView
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView
+from django.core.files.images import get_image_dimensions
+from django.core.exceptions import ObjectDoesNotExist
 
-from home.models import DistFactor, DistScore
-from tag.models import TagIndependent, DomainLayer
-from team.models import TeamMember
-from repository.models import GithubRepoStats, GithubRepoCommits
+from django.shortcuts import redirect
 
-from user.models import GitHubScoreTable, StudentTab, GithubScore, Account, AccountInterest, GithubStatsYymm, DevType, AccountPrivacy
-from user.templatetags.gbti import get_type_test, get_type_analysis
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from home.models import AnnualOverview, DistFactor, DistScore, Student
+from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
+                               GithubRepoContributor, GithubRepoStats)
 from user import update_act
+from team.models import TeamMember
+from user.models import (Account, AccountInterest, AccountPrivacy, DevType,
+                         GithubScore, GitHubScoreTable, GithubStatsYymm,
+                         StudentTab)
 
-import time
-import datetime
-import json
-import math
-import logging
+from tag.models import DomainLayer, TagIndependent
+
+from user.serializers import (AccountDetailSerializer,
+                              AccountInterestSerializer, AccountSerializer,
+                              StudentSerializer)
+from home.serializers import (AnnualOverviewDashboardSerializer,
+                              DistFactorDashboardSerializer,
+                              DistScoreDashboardSerializer)
+from user.serializers import AccountSerializer
+
+from user import update_act
+from user.gbti import get_type_analysis, get_type_test
+
+from user.forms import ProfileImgUploadForm
 
 
-class ProfileView(TemplateView):
-    '''
-    유저 프로필
-    url        : /user/<username>
-    template   : profile/profile.html 
-    Returns :
-        GET     : redirect, render
-    '''
+from handle_error import get_fail_res, get_missing_data_msg
 
-    template_name = 'profile/profile.html'
-    start_year = 2019
 
-    # 새로 고침 시 GET 요청으로 처리됨.
-    def get_context_data(self, request, *args, **kwargs):
+from user.gbti import get_type_analysis, get_type_test
+from user.models import (Account, AccountPrivacy, DevType, GithubScore,
+                         GitHubScoreTable, GithubStatsYymm, StudentTab)
+
+from user.serializers import GithubScoreResultSerializer
+
+
+class UserAccountView(APIView):
+
+    def get_validation(self, request, status, errors):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, errors
+
+    def get(self, request):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
         try:
-            context = super().get_context_data(**kwargs)
-            user = User.objects.get(username=context["username"])
+            account = Account.objects.get(user=request.user)
+            data['account'] = AccountSerializer(account).data
+
+            if not request.user.is_superuser:
+                name = StudentTab.objects.get(id=account.student_data_id).name
+                data['name'] = name
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+            logging.error(e)
+        except Exception as e:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(e)
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+
+class GuidelineView(APIView):
+
+    def get_validation(self, request, status, errors, username):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, username):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, username)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        try:
+            start = time.time()
+            user = User.objects.get(username=username)
             account = Account.objects.get(user=user)
-            context['account'] = account
             student_data = account.student_data
             github_id = student_data.github_id
-        except Exception as e:
-            logging.exception("[ProfileView] Init get_context_data error", e)
-            return None
+            commit_repos = get_commit_repos(github_id)
 
-        context["end_year"] = datetime.datetime.now().year
-        context["year_list"] = [year for year in range(
-            context["end_year"], self.start_year-1, -1)]
+            repos = {}
+            id_reponame_pair_list = []
+            for commit in commit_repos:
+                commit_repo_name = commit['repo_name']
+                if commit_repo_name not in repos:
+                    repos[commit_repo_name] = {'repo_name': commit_repo_name}
+                    repos[commit_repo_name]['github_id'] = commit['github_id']
+                    repos[commit_repo_name]['committer_date'] = commit['committer_date']
+                    id_reponame_pair_list.append(
+                        (commit['github_id'], commit_repo_name))
+            ctx_repo_stats = []
+            if len(id_reponame_pair_list) > 0:
+                contr_repo_queryset = GithubRepoStats.objects.extra(
+                    where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+                for contr_repo in contr_repo_queryset:
+                    repo_stat = contr_repo.get_guideline()
+                    repo_stat['committer_date'] = repos[contr_repo.repo_name]['committer_date']
+                    ctx_repo_stats.append(repo_stat)
+                ctx_repo_stats = sorted(
+                    ctx_repo_stats, key=lambda x: x['committer_date'], reverse=True)
 
-        developer_context = self.get_developer_type(
-            account=account, username=context['username'])
-        context.update(developer_context)
+            data["guideline"] = ctx_repo_stats
+            print("ProfileRepoView time :", time.time() - start)
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except:
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
 
-        tags_domain = TagIndependent.objects.filter(type='domain')  # 분야 태그
-        ints = AccountInterest.objects.filter(
-            account=account).filter(tag__in=tags_domain)
-        student_id = account.student_data.id
-        domain_layer = DomainLayer.objects
-        lang_tags = TagIndependent.objects.filter(name__in=AccountInterest.objects.filter(
-            account=account).exclude(tag__type="domain").values("tag")).order_by("name")
-        account_lang = AccountInterest.objects.filter(
-            account=account, tag__in=lang_tags).exclude(tag__type="domain").order_by("tag__name")
-        level_list = [al.level for al in account_lang]
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
 
-        lang = []
-        lang_lv0 = []
-        lang_lv1 = []
-        lang_lv2 = []
-        lang_lv3 = []
-        lang_lv4 = []
 
-        for tag in lang_tags:
-            lang_tag_dict = {"name": tag.name, "type": tag.type}
-            lang_tag_dict["level"] = level_list[len(lang)]
-            lang_tag_dict["logo"] = tag.logo
-            lang_tag_dict["color"] = tag.color
-
-            hexcolor = tag.color[1:]
-            r = int(hexcolor[0:2], 16) & 0xff
-            g = int(hexcolor[2:4], 16) & 0xff
-            b = int(hexcolor[4:6], 16) & 0xff
-            luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
-            if luma < 127.5:
-                lang_tag_dict["fontcolor"] = "white"
-            else:
-                lang_tag_dict["fontcolor"] = "black"
-            lang.append(lang_tag_dict)
-            if lang_tag_dict["level"] == 0:
-                lang_lv0.append(lang_tag_dict)
-            if lang_tag_dict["level"] == 1:
-                lang_lv1.append(lang_tag_dict)
-            if lang_tag_dict["level"] == 2:
-                lang_lv2.append(lang_tag_dict)
-            if lang_tag_dict["level"] == 3:
-                lang_lv3.append(lang_tag_dict)
-            if lang_tag_dict["level"] == 4:
-                lang_lv4.append(lang_tag_dict)
-        lang.sort(key=lambda la: la['level'], reverse=True)
-        print(lang)
-        ints_parent_layer = domain_layer.filter(parent_tag__in=ints.values(
-            'tag')).values('parent_tag').order_by('parent_tag').distinct()
-        ints_child_layer = domain_layer.filter(child_tag__in=ints.values(
-            'tag')).values('child_tag').order_by('child_tag').distinct()
-        relation_origin = domain_layer.values('parent_tag', 'child_tag')
-        relations = []
-        remain_children = list(ints_child_layer)
-
-        for par in ints_parent_layer:
-            relation = {
-                'parent': par['parent_tag'],
-                'children': [],
-            }
-            for chi in ints_child_layer:
-                if {'parent_tag': par['parent_tag'], 'child_tag': chi['child_tag']} in relation_origin:
-                    relation['children'].append(chi['child_tag'])
-                    remain_children.remove({'child_tag': chi['child_tag']})
-            relations.append(relation)
-
-        context["relations"] = relations
-        context["remains"] = remain_children
-        context["account"] = Account.objects.get(user=user.id)
-        context["info"] = StudentTab.objects.get(id=student_id)
-        context["ints"] = ints
-        context['lang'] = lang
-        context["lang_lv0"] = lang_lv0
-        context["lang_lv1"] = lang_lv1
-        context["lang_lv2"] = lang_lv2
-        context["lang_lv3"] = lang_lv3
-        context["lang_lv4"] = lang_lv4
-
-        return context
-
-    def get(self, request, *args, **kwargs):
-
-        start = time.time()
-        # 비 로그인 시 프로필 열람 불가
-        if request.user.is_anonymous:
-            context = {"alert": "로그인이 필요합니다.", "url": reverse('common:login')}
-            return render(request, "community/redirect.html", context)
-
-        # 유저 프로필의 접근 권한 체크
-        try:
-            target_username = kwargs.get('username')
-            target_user = User.objects.get(username=target_username)
-            target_account = Account.objects.get(user=target_user)
-            acc_pp = AccountPrivacy.objects.get(account=target_account)
-            print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
-
-            if target_user.is_superuser:
-                context = {"alert": "ADMIN 프로필 페이지는 접근이 불가합니다.",
-                           "url": "history"}
-                print("deny to access admin profile", context)
-                return render(request, "community/redirect.html", context)
-
-            # 권한 없을 시 리다이렉트
-            is_own = request.user.username == target_username
-            if not request.user.is_superuser:
-                is_redirect = True
-                if not is_own and acc_pp.open_lvl == 0:
-                    target_team = TeamMember.objects.filter(
-                        member=target_account).values('team')
-                    if target_team:
-                        # team check
-                        cowork = TeamMember.objects.filter(
-                            member=request.user.account, team__in=target_team)
-                        if cowork:
-                            is_redirect = False
-                            acc_pp.open_lvl = 1
-                    if is_redirect:
-                        context = {"alert": "해당 사용자는 정보 비공개 상태입니다.",
-                                   "url": "history"}
-                        print("deny profile access", context)
-                        return render(request, "community/redirect.html", context)
-        except Exception as e:
-            print("permission check error", e)
-            context = {"alert": "프로필 페이지 로드 중 오류가 발생했습니다.", "url": "history"}
-            return render(request, "community/redirect.html", context)
-
-        # 접근 권한 있다면 유저 데이터 로드 후 분석
-        context = self.get_context_data(request, *args, **kwargs)
-        if not context:
-            print("no context error: redirect main page")
-            return redirect(reverse('community:main'))
-
-        # student repository info
-        context['cur_repo_type'] = 'owned'
-        # owned repository
-        student_info = context['account'].student_data
-        context['score'] = GitHubScoreTable.objects.filter(
-            id=student_info.id).order_by('-year').first()
-        context['success'] = False if not context['score'] else True
-        context['is_own'] = is_own
-        context['open_lvl'] = acc_pp.open_lvl
-        context['is_write'] = acc_pp.is_write
-        context['is_open'] = acc_pp.is_open
-
-        print("ProfileView get time :", time.time() - start)
-        return render(request=request, template_name=self.template_name, context=context)
-
-    def get_developer_type(self, account, username):
-        context = {}
-        # GBTI test
-        hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = update_act.read_commit_time(
-            username)
-        major_act, indi_num, group_num = update_act.read_major_act(username)
-        commit_freq, commit_freq_dist = update_act.read_frequency(username)
-        try:
-            type_data = {}
-            type_data["typeE_data"] = hour_dist
-            type_data["typeE_sector"] = [
-                int(daytime_min/3600), int(daytime_max/3600)]
-            type_data["typeF_data"] = commit_freq_dist
-            type_data["typeG_data"] = [indi_num, group_num]
-            context["type_data"] = json.dumps(type_data)
-        except Exception as e:
-            print("Get Type data error", e)
-
-        try:
-            devtype_data = DevType.objects.get(account=account)
+class ProfileMainView(APIView):
+    def get_validation(self, request, username):
+        user = request.user
+        status = "fail"
+        errors = None
+        if not user.is_authenticated:
+            errors = "require_login"
+        else:
             try:
-                devtype_data.typeE = -1 if daytime > night else 1
-                devtype_data.typeF = commit_freq
-                devtype_data.typeG = 1 if major_act == 'individual' else -1
-                devtype_data.save()
-                gbti_data = {"typeE": devtype_data.typeE,
-                             "typeF": devtype_data.typeF, "typeG": devtype_data.typeG}
-
-                gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(
-                    list(gbti_data.values()))
-                gbti_data["zip"] = list(zip(gbti_desc, gbti_descKR, gbti_icon))
-                context["gbti"] = gbti_data
+                user = User.objects.get(username=username)
+                status = "success"
+            except User.DoesNotExist:
+                errors = "user_not_found"
             except Exception as e:
-                print("Calculate dev type error", e)
-                context["gbti"] = None
-            test_data = {"typeA": devtype_data.typeA, "typeB": devtype_data.typeB,
-                         "typeC": devtype_data.typeC, "typeD": devtype_data.typeD}
-            test_data.update(get_type_test(
-                devtype_data.typeA, devtype_data.typeB, devtype_data.typeC, devtype_data.typeD))
+                logging.exception(f'ProfileMainView undefined_exception: {e}')
+                errors = "undefined_exception"
+        return status, errors
 
-            def get_type_len(type_val):
-                return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val) % 2 - 3)
+    def get(self, request, username):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
 
-            test_data["typeAl"], test_data["typeAr"] = get_type_len(
-                test_data["typeA"])
-            test_data["typeBl"], test_data["typeBr"] = get_type_len(
-                test_data["typeB"])
-            test_data["typeCl"], test_data["typeCr"] = get_type_len(
-                test_data["typeC"])
-            test_data["typeDl"], test_data["typeDr"] = get_type_len(
-                test_data["typeD"])
-        except Exception as e:
-            print("Get DevType object error", e)
-            test_data = None
-            typeE = -1 if daytime > night else 1
-            typeF = commit_freq
-            typeG = 1 if major_act == 'individual' else -1
-            gbti_data = {"typeE": typeE, "typeF": typeF, "typeG": typeG}
-            gbti_desc, gbti_descKR, gbti_icon = get_type_analysis(
-                list(gbti_data.values()))
-            gbti_data["zip"] = list(zip(gbti_desc, gbti_descKR, gbti_icon))
-            context["gbti"] = gbti_data
-        context["test"] = test_data
-        context["success"] = True
+        # Request Validation
+        status, errors = self.get_validation(request, username)
 
-        return context
+        if status == 'fail':
+            return Response(get_fail_res(errors))
 
-    def get_star_dist(self, github_id, num_year):
-        # 서브쿼리를 이용해 유저의 Star 개수를 구하는 방법
-        star_subquery = Subquery(StudentTab.objects.values('github_id'))
-        where_stmt = ["github_repo_contributor.repo_name=github_repo_stats.repo_name",
-                      "github_repo_contributor.owner_id=github_repo_stats.github_id",
-                      "github_repo_stats.github_id = github_repo_contributor.github_id"]
-        star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(
-            tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
-
-        own_star = {"star": 0}
-        star_temp_dist = []
-        for row in star_data:
-            star_temp_dist.append(row["star"])
-            if row["github_id"] == github_id:
-                own_star["star"] = row["star"]
-        star_temp_dist.sort()
-
-        mean = sum(star_temp_dist)/len(star_temp_dist)
-        own_star["avg"] = mean
-        sigma = math.sqrt(
-            sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
-        own_star["std"] = sigma
-        star_dist = [star_temp_dist for _ in range(num_year)]
-
-        return star_dist, own_star
-
-
-def student_id_to_username(request, student_id):
-    username = Account.objects.get(student_data=student_id).user.username
-    return redirect(f'/user/{username}/')
-
-
-@csrf_exempt
-def compare_stat(request, username):
-    if request.method == 'POST':
-        start_year = 2019
-        data = json.loads(request.body)
-        # data에는 github_id 가 들어있어야한다.
-        github_id = data["github_id"]
-        latest_data = GithubScore.objects.filter(
-            github_id=github_id).order_by("year").last()
-        end_year = latest_data.year
-        own_star = 0
-        try:
-            star_data = GithubRepoStats.objects.filter(github_id=github_id).extra(tables=['github_repo_contributor'], where=["github_repo_contributor.repo_name=github_repo_stats.repo_name",
-                                                                                                                             "github_repo_contributor.owner_id=github_repo_stats.github_id", "github_repo_stats.github_id = github_repo_contributor.github_id"]).values('github_id').annotate(star=Sum("stargazers_count"))
-            for sd in star_data:
-                own_star = sd['star']
-        except Exception as e:
-            print(e)
-
-        monthly_contr = [[] for _ in range(end_year-start_year+1)]
-        gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
-        for row in gitstat_year:
-            row_json = row.to_json()
-            row_json['star'] = own_star
-            if row_json["year"] >= start_year:
-                monthly_contr[row_json["year"]-start_year].append(row_json)
-
-        context = {
-            "monthly_contr": monthly_contr,
-            "github_id": github_id,
-        }
-
-        return JsonResponse(context)
-
-
-class ProfileRepoView(TemplateView):
-
-    template_name = 'profile/repo.html'
-
-    def get_context_data(self, *args, **kwargs):
-
-        start = time.time()
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=context["username"])
-        account = Account.objects.get(user=user)
-        student_data = account.student_data
-        github_id = student_data.github_id
-        context['account'] = github_id
-        commit_repos = get_commit_repos(github_id)
-
-        repos = {}
-        id_reponame_pair_list = []
-        for commit in commit_repos:
-            commit_repo_name = commit['repo_name']
-            if commit_repo_name not in repos:
-                repos[commit_repo_name] = {'repo_name': commit_repo_name}
-                repos[commit_repo_name]['github_id'] = commit['github_id']
-                repos[commit_repo_name]['committer_date'] = commit['committer_date']
-                id_reponame_pair_list.append(
-                    (commit['github_id'], commit_repo_name))
-        ctx_repo_stats = []
-        if len(id_reponame_pair_list) > 0:
-            contr_repo_queryset = GithubRepoStats.objects.extra(
-                where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
-            for contr_repo in contr_repo_queryset:
-                repo_stat = contr_repo.get_guideline()
-                repo_stat['committer_date'] = repos[contr_repo.repo_name]['committer_date']
-                ctx_repo_stats.append(repo_stat)
-            ctx_repo_stats = sorted(
-                ctx_repo_stats, key=lambda x: x['committer_date'], reverse=True)
-        context["guideline"] = ctx_repo_stats
-        print("ProfileRepoView time :", time.time() - start)
-
-        return context
-
-
-@csrf_exempt
-def save_test_result(request, username):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            type_factors = data['factor']
-            print("type_factors", type_factors)
-            user = User.objects.get(username=username)
-            try:
-                account = Account.objects.get(user=user)
-            except Exception as e:
-                print("account error", e)
-            devtype_objs = DevType.objects.filter(account=account).all()
-            if len(devtype_objs) == 0:
-                model_instance = DevType(
-                    account=account, typeA=type_factors[0], typeB=type_factors[1], typeC=type_factors[2], typeD=type_factors[3], typeE=0, typeF=0, typeG=0)
-                model_instance.save()
-            else:
-                for devtype in devtype_objs:
-                    devtype.typeA = type_factors[0]
-                    devtype.typeB = type_factors[1]
-                    devtype.typeC = type_factors[2]
-                    devtype.typeD = type_factors[3]
-                    devtype.save()
-            context = {"status": 200}
-        except Exception as e:
-            print("error save", e)
-            context = {"status": 400}
-
-        return JsonResponse(context)
-
-
-def get_commit_repos(github_id, primary_email="", secondary_email=""):
-    repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values(
-        "github_id", "repo_name", "committer_date").order_by("-committer_date")
-    repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values(
-        "github_id", "repo_name", "committer_date").order_by("-committer_date")
-    repo_commits = repo_commiter_commits | repo_author_commits
-    return repo_commits
-
-
-def load_repo_data(request, username):
-    if request.method == 'POST':
-        start = time.time()
+        # Transactions
         try:
             user = User.objects.get(username=username)
+            account = Account.objects.get(user=user)
+            data['account'] = AccountDetailSerializer(account).data
+            name = StudentTab.objects.get(id=account.student_data_id).name
+            data['name'] = name
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except Exception as e:
+            logging.exception(f'ProfileMainView undefined_exception: {e}')
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+    def post_validation(self, request, username):
+        errors = {}
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            except Exception as e:
+                logging.exception(f'ProfileMainView undefined_exception: {e}')
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+
+        return errors
+
+    def post(self, request, username):
+        '''
+        introduction과 portfolio를 업데이트하는 요청 처리
+        '''
+        # Declaration
+        data = {}
+        status = 'fail'
+
+        # Request Validation
+        errors = self.post_validation(request, username)
+
+        if errors:
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        introduction = request.data.get('introduction', None)
+        portfolio = request.data.get('portfolio', None)
+
+        # Transactions
+        try:
+            account = Account.objects.get(user=request.user)
+            if introduction:
+                account = Account.objects.get(user=request.user)
+                account.introduction = introduction
+                account.save()
+                data['introduction'] = introduction
+            if portfolio:
+                account.portfolio = portfolio
+                account.save()
+                data['portfolio'] = portfolio
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+        except Exception as e:
+            logging.exception(
+                f'ProfileIntroUpdateView undefined_exception: {e}')
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if errors:
+            res = {'status': status, 'errors': errors}
+        else:
+            res = {'status': 'success', 'data': data}
+        return Response(res)
+
+
+class UserInterestTagListView(APIView):
+    '''
+    유저 관심분야 읽기 API
+    '''
+
+    def get_validation(self, request, status, errors, username):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, username):
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, username)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        res = {'status': None, 'message': None, 'data': None}
+        data = {'account': None, 'interest_tags': []}
+        tag_type = request.GET.get('type', None)
+
+        filter_kwargs = {}
+
+        if tag_type:
+            tag_type = tag_type.split(",")
+            if type(tag_type) == "str":
+                filter_kwargs['tag__type'] = tag_type
+            else:
+                filter_kwargs['tag__type__in'] = tag_type
+
+        print("tag_type", tag_type)
+        try:
+            account = Account.objects.get(user__username=username)
+            filter_kwargs['account'] = account
+            account_tags = AccountInterest.objects.filter(**filter_kwargs)
+
+            data['account'] = AccountSerializer(account).data
+            data['interest_tags'] = AccountInterestSerializer(
+                account_tags, many=True).data
+            message = f'Username {username}의 태그'
+
+        except DatabaseError as e:
+            # Database Exception handling
+            logging.exception(f'UserInterestTagListView DB ERROR: {e}')
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+            message = '요청실패'
+
+        except Exception as e:
+            logging.exception(f'UserInterestTagListView Exception: {e}')
+            status = 'fail'
+            message = '요청실패'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
+
+
+class UserInterestTagUpdateView(APIView):
+    '''
+    유저 관심분야 수정 API
+    '''
+
+    def post_validation(self, request, status, message, errors):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        return status, message, errors
+
+    def post(self, request):
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, message, errors \
+            = self.post_validation(request, status, message, errors)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        user_interests = []
+        try:
+            user_account = Account.objects.get(user=request.user)
+            account_interests = request.data.get('user_interests', [])
+
+            with transaction.atomic():
+                AccountInterest.objects.filter(
+                    account=user_account, tag__type="domain").delete()
+                objs = self.interests_updater(user_account, account_interests)
+                interests = AccountInterest.objects.bulk_create(objs)
+                data['user_interests'] = AccountInterestSerializer(
+                    interests, many=True).data
+
+            message = '관심분야를 수정했습니다.'
+
+        except DatabaseError:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+
+        except Exception as e:
+            logging.exception(f"UserInterestTagUpdateView Exception: {e}")
+            status = 'fail'
+            message = '유저 관심분야를 수정하는데 실패했습니다.'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
+
+    def interests_updater(self, account, interests):
+        objs = []
+        for interest in interests:
+            int_tag = TagIndependent.objects.get(name=interest['value'].replace(
+                "_", " ").replace("plus", "+").replace("sharp", "#"))
+            new_interest_obj = AccountInterest(account=account, tag=int_tag)
+            objs.append(new_interest_obj)
+        return objs
+
+
+class UserLangTagUpdateView(APIView):
+    '''
+    유저 사용언어 기술스택 수정 API
+    '''
+
+    def post_validation(self, request, status, message, errors):
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        return status, message, errors
+
+    def post(self, request):
+
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        try:
+            user_account = Account.objects.get(user=request.user)
+            account_langs = request.data.get('user_langs', [])
+
+            with transaction.atomic():
+                AccountInterest.objects.filter(
+                    account=user_account).exclude(tag__type='domain').delete()
+                objs = self.skills_updater(user_account, account_langs)
+                updated_interests = AccountInterest.objects.bulk_create(objs)
+
+                data['user_langs'] = AccountInterestSerializer(
+                    updated_interests, many=True).data
+                message = '사용언어를 수정했습니다.'
+
+        except Exception as e:
+            logging.exception(f"UserLangTagUpdateView Exception: {e}")
+            status = 'fail'
+            message = '유저 사용언어를 수정하는데 실패했습니다.'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
+
+    def skills_updater(self, account, skills):
+        objs = []
+        for level_skills in skills.values():
+            for skill in level_skills:
+                lang_tag = TagIndependent.objects.get(name=skill['value'].replace(
+                    "_", " ").replace("plus", "+").replace("sharp", "#"))
+                new_interest_obj = AccountInterest(
+                    account=account, tag=lang_tag, level=int(skill['level']))
+                objs.append(new_interest_obj)
+        return objs
+
+
+class ProfileActivityView(APIView):
+    def get_validation(self, request, status, errors, username):
+        user = request.user
+
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except Exception as e:
+                logging.exception(f"undefined_exception: {e}")
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
+
+        return status, errors
+
+    def get(self, request, username):
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, username)
+
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        try:
+            user = User.objects.get(username=username)
+
             try:
                 account = Account.objects.get(user=user)
+                portfolio = account.portfolio
+                data['portfolio'] = portfolio
             except Exception as e:
-                print("account error", e)
+                logging.exception(f"account error: {e}")
+                status = 'fail'
+                message = 'account error'
+
             # 리포지토리 목록
             github_id = account.student_data.github_id
+            print(github_id)
             commit_repos = get_commit_repos(github_id)
-            print("commit_repos len", len(commit_repos))
             recent_repos = {}
             id_reponame_pair_list = []
+
             # 리포지토리 목록 중, 중복하지 않는 가장 최근 4개의 리포지토리 목록을 생성함
             for commit in commit_repos:
                 commit_repo_name = commit['repo_name']
@@ -454,307 +599,602 @@ def load_repo_data(request, username):
 
             recent_repos = sorted(recent_repos.values(
             ), key=lambda x: x['committer_date'], reverse=True)
-            context = {"status": 200, "repo": recent_repos}
+            data['recent_repos'] = recent_repos
         except Exception as e:
-            print("load_repo_data error save", e)
-            context = {"status": 400}
-        print("ajax repo", time.time() - start)
-        return JsonResponse(context)
+            logging.exception(f"load_repo_data error save: {e}")
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+
+        return Response(res)
+
+def get_commit_repos(github_id):
+    repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values(
+        "github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values(
+        "github_id", "repo_name", "committer_date").order_by("-committer_date")
+    repo_commits = repo_commiter_commits | repo_author_commits
+
+    return repo_commits
 
 
-class ProfileType(TemplateView):
-    template_name = 'profile/profile-type.html'
+class ProfileInfoView(APIView):
+    def get_validation(self, request, status, errors, username):
+        user = request.user
 
-    def get_context_data(self, *args, **kwargs):
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+                status = 'fail'
+            except:
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+                status = 'fail'
 
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=context["username"])
-        context["username"] = user
-        context["end_year"] = datetime.datetime.now().date().today().year
+        return status, errors
 
-        return context
+    def get(self, request, username):
+        # Declaration
+        data = {}
+        errors = {}
+        message = ''
+        status = 'success'
 
+        # Request Validation
+        status, errors \
+            = self.get_validation(request, status, errors, username)
 
-def consent_write(request, username=""):
-    '''
-    글쓰기/댓글쓰기 시 본인의 프로필 공개 동의서
-    url     : /user/api/consent-write
-    template: consent/consent_write.html
-    '''
+        if status == 'fail':
+            res = {'status': status, 'errors': errors}
+            return Response(res)
 
-    if request.method == 'GET':
-        account = Account.objects.get(user=request.user.id)
-        acc_pp = AccountPrivacy.objects.get(account=account)
-
-        context = {
-            'is_write': acc_pp.is_write,
-            'open_lvl': acc_pp.open_lvl,
-            'user': username
-        }
-
-        return render(request, 'consent/consent_write.html', context)
-
-    if request.method == 'POST':
-        try:
-            account = Account.objects.get(user=request.user.id)
-            acc_pp = AccountPrivacy.objects.get(account=account)
-            acc_pp.is_write = True
-            if request.POST.get('open_lvl', 0):
-                acc_pp.open_lvl = 1
-            acc_pp.save()
-            return JsonResponse({'status': 'success', 'msg': '저장하였습니다.'})
-        except Exception as e:
-            print(e)
-            return JsonResponse({'status': 'fail', 'msg': '저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
-
-
-def consent_open(request, username=""):
-    '''
-    유저 추천시스템 사용에 대한 동의서
-    url     : /user/api/consent-open
-    template: consent/consent_open.html
-    '''
-
-    if request.method == 'GET':
-        account = Account.objects.get(user=request.user.id)
-        acc_pp = AccountPrivacy.objects.get(account=account)
-
-        context = {
-            'is_open': acc_pp.is_open,
-            'open_lvl': acc_pp.open_lvl,
-            'user': username
-        }
-
-        return render(request, 'consent/consent_open.html', context)
-
-    if request.method == 'POST':
-        try:
-            account = Account.objects.get(user=request.user.id)
-            acc_pp = AccountPrivacy.objects.get(account=account)
-            acc_pp.is_open = True
-            if request.POST.get('open_lvl', 0):
-                acc_pp.open_lvl = 1
-            acc_pp.save()
-            return JsonResponse({'status': 'success', 'msg': '저장하였습니다.'})
-        except Exception as e:
-            print(e)
-            return JsonResponse({'status': 'fail', 'msg': '저장에 실패하였습니다. 잠시후 다시 시도해주세요.'})
-
-
-def get_chart_data(request, username):
-    '''
-    유저 차트 데이터 계산
-    url     : /<username>/api/chart-data
-    Returns :
-        POST    : JsonResponse
-    '''
-    start_year = 2019
-    if request.method == 'POST':
-        start = time.time()
-        context = {}
-
-        # 비 로그인 시 프로필 열람 불가
-        if request.user.is_anonymous:
-            return JsonResponse({'status': 'fail', 'msg': '로그인이 필요합니다.', 'data': ''})
-
-        # 유저 프로필의 접근 권한 체크
-        try:
-            target_user = User.objects.get(username=username)
-            target_account = Account.objects.get(user=target_user)
-            acc_pp = AccountPrivacy.objects.get(account=target_account)
-
-            # 권한 없을 시 리다이렉트
-            is_own = request.user.username == username
-            if not request.user.is_superuser:
-                is_redirect = True
-                if not is_own and acc_pp.open_lvl == 0:
-                    target_team = TeamMember.objects.filter(
-                        member=target_account).values('team')
-                    if target_team:
-                        # team check
-                        cowork = TeamMember.objects.filter(
-                            member=request.user.account, team__in=target_team)
-                        if cowork:
-                            is_redirect = False
-                            acc_pp.open_lvl = 1
-                    if is_redirect:
-                        print("deny chart data access", context)
-                        return JsonResponse({'status': 'fail', 'msg': '권한이 없습니다.', 'data': ''})
-        except Exception as e:
-            logging.exception("[get_chart_data] Permission check error", e)
-            return JsonResponse({'status': 'fail', 'msg': '권한을 확인하지 못했습니다.', 'data': ''})
+        # Transactions
 
         try:
             user = User.objects.get(username=username)
             account = Account.objects.get(user=user)
-            context['account'] = account
-            student_data = account.student_data
-            github_id = student_data.github_id
+            studenttab = StudentTab.objects.get(id=account.student_data_id)
+
+            data['student'] = StudentSerializer(studenttab).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
         except Exception as e:
-            logging.exception(
-                "[get_chart_data] Init get_context_data error", e)
-            return JsonResponse({'status': 'fail', 'msg': '유저 데이터를 로드하는데 실패했습니다.'})
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+            logging.exception(f"undefined_exception: {e}")
 
-        chartdata = {}
-        context["student_id"] = student_data.id
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
 
-        score_data_list = []
-        score_detail_data = GithubScore.objects.filter(
-            github_id=github_id).order_by("year")
-        for row in score_detail_data:
-            score_data_list.append(row.to_json())
-
-        # GitHub Score data가 존재하지 않는 경우 더미데이터 리턴하고
-        # 데이터 관련 부분 프로필페이지에서 제거
-        try:
-            end_year = score_data_list[len(score_data_list)-1]["year"]
-            num_year = end_year-start_year+1
-            context["end_year"] = end_year
-            context["year_list"] = [
-                year for year in range(end_year, start_year-1, -1)]
-            chartdata["score_data"] = score_data_list
-        except Exception as e:
-            logging.exception("[get_chart_data] There are no score_data", e)
-            return JsonResponse({'status': 'fail', 'msg': 'GitHub Score 데이터를 로드하는데 실패했습니다.'})
-
-        star_dist, own_star = get_star_dist(
-            github_id=github_id, num_year=num_year)
-
-        annual_dist = {}
-        dist_score_total = DistScore.objects.filter(case_num=0)
-        for row in dist_score_total:
-            row_json = row.to_json()
-            annual_dist[row_json["year"]] = row_json
-
-        dist_factor_total = DistFactor.objects.filter(case_num=0)
-        for row in dist_factor_total:
-            row_json = row.to_json()
-            factor = row_json["factor"]
-            row_json[factor] = row_json.pop("value")
-            row_json[factor+"_sid"] = row_json.pop("value_sid")
-            row_json[factor+"_sid_pct"] = row_json.pop("value_sid_pct")
-            row_json[factor+"_dept"] = row_json.pop("value_dept")
-            row_json[factor+"_dept_pct"] = row_json.pop("value_dept_pct")
-            annual_dist[row_json["year"]].update(row_json)
-        for annual_key in annual_dist.keys():
-            key_name = "year"+str(annual_key)
-            chartdata[key_name] = json.dumps([annual_dist[annual_key]])
-
-        try:
-            # 유저 점수를 모두 가져와서 각 요소별로 분포 데이터를 만든다.
-            # 연도를 인덱스로 하여 저장한다.
-            score_data = GitHubScoreTable.objects.all()
-            user_data_list = [None for _ in range(num_year)]
-            score_dist = [[] for _ in range(num_year)]
-            commit_dist = [[] for _ in range(num_year)]
-            pr_dist = [[] for _ in range(num_year)]
-            issue_dist = [[] for _ in range(num_year)]
-            repo_dist = [[] for _ in range(num_year)]
-            for row in score_data:
-                score_json = row.to_json()
-                if score_json["year"] >= start_year:
-                    yid = score_json["year"] - start_year
-                    score_dist[yid].append(score_json["total_score"])
-                    commit_dist[yid].append(score_json["commit_cnt"])
-                    pr_dist[yid].append(score_json["pr_cnt"])
-                    issue_dist[yid].append(score_json["issue_cnt"])
-                    repo_dist[yid].append(score_json["repo_cnt"])
-                if row.github_id == github_id:
-                    yid = score_json["year"] - start_year
-                    user_data_list[yid] = score_json
-        except Exception as e:
-            logging.exception("[ProfileView] There are no user_data_list", e)
-            return JsonResponse({'status': 'fail', 'msg': '차트 데이터를 생성 하는데 실패했습니다.'})
-
-        chartdata["user_data"] = json.dumps(user_data_list)
-
-        # 연도별로 각 요소별 평균, 표준편차를 구해 확률밀도함수를 구할 수 있도록 한다.
-        annual_dist_data = {"score": [], "commit": [], "pr": [], "issue": [], "repo": [
-        ], "score_std": [], "commit_std": [], "pr_std": [], "issue_std": [], "repo_std": []}
-
-        def get_annual_dist(target_dist):
-            mean_list, sigma_list = [], []
-            for sub_dist in target_dist:
-                sub_dist.sort()
-                mean = sum(sub_dist)/len(sub_dist)
-                mean_list.append(mean)
-                sigma = math.sqrt(
-                    sum((val - mean)**2 for val in sub_dist)/len(sub_dist))
-                sigma_list.append(sigma)
-
-            return mean_list, sigma_list
-
-        annual_dist_data["score"], annual_dist_data["score_std"] = get_annual_dist(
-            score_dist)
-        annual_dist_data["commit"], annual_dist_data["commit_std"] = get_annual_dist(
-            commit_dist)
-        annual_dist_data["pr"], annual_dist_data["pr_std"] = get_annual_dist(
-            pr_dist)
-        annual_dist_data["issue"], annual_dist_data["issue_std"] = get_annual_dist(
-            issue_dist)
-        annual_dist_data["repo"], annual_dist_data["repo_std"] = get_annual_dist(
-            repo_dist)
-
-        chartdata["annual_overview"] = json.dumps([annual_dist_data])
-        chartdata["score_dist"] = score_dist
-        chartdata["star_dist"] = star_dist
-        chartdata["commit_dist"] = commit_dist
-        chartdata["pr_dist"] = pr_dist
-        chartdata["issue_dist"] = issue_dist
-        chartdata["repo_dist"] = repo_dist
-
-        # 월별 데이터 만들기
-        monthly_contr = [[] for _ in range(num_year)]
-        gitstat_year = GithubStatsYymm.objects.filter(github_id=github_id)
-        for row in gitstat_year:
-            row_json = row.to_json()
-            row_json['star'] = own_star["star"]
-            if row_json["year"] >= start_year and row_json["year"] <= end_year:
-                monthly_contr[row_json["year"] - start_year].append(row_json)
-        total_avg_queryset = GithubStatsYymm.objects.exclude(num_of_cr_repos=0, num_of_co_repos=0, num_of_commits=0, num_of_prs=0, num_of_issues=0).values('start_yymm').annotate(
-            commit=Avg("num_of_commits"), pr=Avg("num_of_prs"), issue=Avg("num_of_issues"), repo_cr=Avg("num_of_cr_repos"), repo_co=Avg("num_of_co_repos")).order_by('start_yymm')
-
-        monthly_avg = [[] for _ in range(num_year)]
-        for avg in total_avg_queryset:
-            yid = avg["start_yymm"].year - start_year
-            if avg["start_yymm"].year >= start_year and avg["start_yymm"].year <= end_year:
-                avg["year"] = avg["start_yymm"].year
-                avg["month"] = avg["start_yymm"].month
-                avg.pop('start_yymm', None)
-                monthly_avg[yid].append(avg)
-        chartdata["monthly_contr"] = monthly_contr
-        chartdata["own_star"] = own_star
-        chartdata["monthly_avg"] = monthly_avg
-        chartdata["username"] = github_id
-        context["star"] = own_star["star"]
-        context["chart_data"] = json.dumps(chartdata, ensure_ascii=False)
-        print("ajax chart data", time.time() - start)
-
-        return JsonResponse({'status': 'success', 'msg': 'chart data를 반환합니다.', 'data': chartdata})
+        return Response(res)
 
 
-def get_star_dist(github_id, num_year):
-    # 서브쿼리를 이용해 유저의 Star 개수를 구하는 방법
+class ProfileImageView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Declaration
+        status = 'success'
+
+        user = request.user
+        user_account = Account.objects.get(user=user.id)
+
+        pre_img = user_account.photo.path
+
+        field_check_list = {}
+
+        profile_img = request.FILES.get('photo', False)
+        print("profile_img", profile_img)
+        is_valid = True
+        print(request.POST.get('is_default'))
+
+        if request.POST.get('is_default') == 'true':
+            print("is true!!")
+
+        if profile_img:
+            img_width, img_height = get_image_dimensions(profile_img)
+            print(img_width, img_height)
+            if img_width > 500 or img_height > 500:
+                is_valid = False
+                field_check_list[
+                    'photo'] = f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px'
+                print(
+                    f'이미지 크기는 500px \u00d7 500px 이하입니다. 현재 {img_width}px \u00d7 {img_height}px')
+
+        img_form = ProfileImgUploadForm(
+            request.POST, request.FILES, instance=user_account)
+        img_form.save()
+        print("img_form", img_form)
+        print("pre_img", pre_img)
+        if bool(img_form.is_valid()) and is_valid:
+            if 'photo' in request.FILES:  # 폼에 이미지가 있으면
+                print('form에 이미지 존재')
+                try:
+                    print(" path of pre_image is " + pre_img)
+                    if (pre_img.split("/")[-1] == "default.jpg" or pre_img.split("\\")[-1] == "default.jpg"):
+                        pass
+                    else:
+                        print("기존이미지를 삭제합니다.")
+                        print(pre_img.split("/")[-1])
+                        os.remove(pre_img)  # 기존 이미지 삭제
+
+                except:                # 기존 이미지가 없을 경우에 pass
+                    pass
+
+            print('Image is valid form')
+
+            print(user_account.photo.path)
+
+            img_form.save()
+            user_account.save()
+            print("세이브 완료되면출력되는 문구")
+
+        else:
+            print("not vaild", field_check_list['photo'])
+        res = {"status": status}
+        return Response(res)
+
+
+class ProfileImageDefaultView(APIView):
+    def post(self, request, username, *args, **kwargs):
+        status = 'success'
+        user = User.objects.get(username=username)
+        user_account = Account.objects.get(user=user.id)
+        user_account.photo = "img/profile_img/default.jpg"
+        user_account.save()
+        res = {"status": status}
+        return Response(res)
+    
+def get_user_star(github_id: str):
+    # 서브쿼리를 이용해 모든 유저의 Star 개수를 계산
     star_subquery = Subquery(StudentTab.objects.values('github_id'))
-    where_stmt = ["github_repo_contributor.repo_name=github_repo_stats.repo_name",
-                  "github_repo_contributor.owner_id=github_repo_stats.github_id",
-                  "github_repo_stats.github_id = github_repo_contributor.github_id"]
+    # repo_name, owner_id, github_id 값 비교
+    where_stmt = [
+        "github_repo_contributor.repo_name=github_repo_stats.repo_name",
+        "github_repo_contributor.owner_id=github_repo_stats.github_id",
+        "github_repo_contributor.github_id=github_repo_stats.github_id"]
     star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(
         tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
+    total_stars = sum(item['star'] for item in star_data)
+    avg_stars = total_stars / max(len(star_data), 1)
 
-    own_star = {"star": 0}
-    star_temp_dist = []
+    # 순회해서 찾고 반환
+    user_star = {"star": 0, "avg": avg_stars}
     for row in star_data:
-        star_temp_dist.append(row["star"])
         if row["github_id"] == github_id:
-            own_star["star"] = row["star"]
-    star_temp_dist.sort()
+            user_star["star"] = row["star"]
+            break
 
-    mean = sum(star_temp_dist)/len(star_temp_dist)
-    own_star["avg"] = mean
-    sigma = math.sqrt(
-        sum((val - mean)**2 for val in star_temp_dist)/len(star_temp_dist))
-    own_star["std"] = sigma
-    star_dist = [star_temp_dist for _ in range(num_year)]
+    return user_star
 
-    return star_dist, own_star
+
+class UserDashboardView(APIView):
+    '''
+    유저 대시보드
+    url     : /user/api/dashboard/<username>/
+    '''
+
+    def get(self, request, username):
+
+        start = time.time()
+        data = {}
+
+        target_account, error = get_account_valid(request, username)
+        if error:
+            return Response(get_fail_res(error_code=error))
+        github_id = target_account.github_id
+
+        # 최신 점수 가져옴
+        github_id = target_account.github_id
+        score = GithubScore.objects.filter(
+            github_id=github_id).order_by("-year")
+        # 연도 계산
+        years = score.values_list("year", flat=True)
+        start_year, end_year = min(years), max(years)
+        data['years'] = years
+
+        # github_score_result의 best_repo를 객체로 변경
+        # best_repo를 이용해 repo stat과 repo commit line을 구함
+        github_score_result = GithubScoreResultSerializer(
+            score, many=True).data
+        for obj in github_score_result:
+            year, repo = obj['year'], obj['best_repo']
+            if '/' in repo:
+                [owner_id, repo_name] = repo.split('/')
+                try:
+                    # GithubRepoStats에 커밋 라인 수 데이터가 없어 따로 계산
+                    commit_data = GithubRepoCommits.objects.filter(
+                        github_id=owner_id, repo_name=repo_name).aggregate(
+                        commit_lines=Sum('additions')+Sum('deletions')
+                    )
+                    repo_stat = GithubRepoStats.objects.get(
+                        github_id=owner_id, repo_name=repo_name)
+                    repo_stat = repo_stat.get_factors()
+                    repo_stat['commit_lines'] = commit_data['commit_lines']
+                    obj['best_repo'] = repo_stat
+
+                except ObjectDoesNotExist as e:
+                    logging.exception(f'repo {repo} is not exist: {e}')
+                    obj['best_repo'] = None
+
+        data['score'] = github_score_result
+
+        # star 데이터 따로 처리
+        user_star = get_user_star(github_id=github_id)
+
+        # 연도별 월기여내역 데이터
+        monthly_contr = {year: [] for year in years}
+        # 기간별 수집된 데이터를 이용해 월 기여내역 데이터 쿼리
+        gitstat_year = GithubStatsYymm.objects.filter(
+            github_id=github_id, start_yymm__year__gte=start_year, start_yymm__year__lte=end_year)
+        for row in gitstat_year:
+            row_json = row.to_json()
+            row_json['star'] = user_star["star"]
+            row_json['total'] = 0
+            for key in ['star', 'repo_cr', 'repo_co', 'commit', 'pr', 'issue']:
+                row_json['total'] += row_json[key]
+            monthly_contr[row_json["year"]].append(row_json)
+        data['monthly_contr'] = monthly_contr
+
+        # 기여내역 factor 별 히스토그램을 위한 분포 데이터 처리
+        dist_score = DistScore.objects.filter(
+            case_num=0).order_by('case_num', 'year')
+        dist_score_data = DistScoreDashboardSerializer(
+            dist_score, many=True).data
+        dist_factor = DistFactor.objects.filter(case_num=0).order_by('year')
+        dist_factor_data = DistFactorDashboardSerializer(
+            dist_factor, many=True).data
+
+        factor_dist = get_nested_dict(years)
+        # 연도별 score 데이터 할당
+        for obj in dist_score_data:
+            year = obj["year"]
+            factor_dist[year]["score"] = obj["score"]
+        # 연도별 각 factor 데이터 할당
+        for obj in dist_factor_data:
+            year = obj["year"]
+            factor = obj["factor"]
+            factor_dist[year][factor] = obj["value"]
+
+        data['factor_dist'] = factor_dist
+        data["factors"] = ["score", "commit", "star", "pr", "issue"]
+
+        # 유저의 factor 기여내역
+        annual_user_factor = get_nested_dict(years)
+        students = Student.objects.filter(github_id=github_id)
+        for student in students:
+            # year, score, commit, star, pr, issue 값 가져옴
+            user_factors = student.get_factors()
+            annual_user_factor[user_factors['year']] = user_factors
+        data['annual_user_factor'] = annual_user_factor
+
+        # 전체 유저의 factor 기여내역 평균
+        annual_overview = AnnualOverview.objects.get(case_num=0)
+        annual_overview_data = AnnualOverviewDashboardSerializer(
+            annual_overview).data
+
+        # 히스토그램 세팅값(bar 개수, 구간 사이즈)
+        dist_setting = {}
+        class_nums = annual_overview_data['class_num']
+        level_steps = annual_overview_data['level_step']
+        for vals in zip(data["factors"], class_nums,  level_steps):
+            factor, class_size, step_size = vals
+            dist_setting[factor] = {}
+            dist_setting[factor]['class_num'] = class_size
+            dist_setting[factor]['level_step'] = step_size
+        data['dist_setting'] = dist_setting
+
+        # 연도별 유저의 기여 factor 평균값
+        annual_factor_avg = get_nested_dict(years)
+        for factor in data["factors"]:
+            for idx, val in enumerate(annual_overview_data[factor]):
+                annual_factor_avg[idx+start_year][factor] = val
+        data['annual_factor_avg'] = annual_factor_avg
+
+        # 개발자 유형, 성향 데이터
+        devtype = get_dev_type(target_account, github_id)
+        devtendency = get_dev_tendency(target_account, github_id)
+        data.update(devtype)
+        data.update(devtendency)
+
+        print("UserDashboardView:", time.time() - start)
+        return Response({"status": "success", "data": data})
+
+
+class UserDevTendencyView(APIView):
+    '''
+    유저 개발자 성향분석 조회
+    url     : /user/api/dashboard/<username>/dev-tendency/
+    '''
+
+    def get(self, request, username):
+        start = time.time()
+        target_account, error = get_account_valid(request, username)
+        if error:
+            return Response(get_fail_res(error_code=error))
+        github_id = target_account.github_id
+        data = get_dev_tendency(target_account, github_id)
+
+        coworkers = get_coworkers(github_id)
+        data['coworkers'] = coworkers
+
+        print("UserDevTendencyView elapsed time", time.time() - start)
+
+        return Response({'status': 'success', 'data': data})
+
+
+class UserDevTypeView(APIView):
+    '''
+    유저 개발자 유형 조회
+    url     : /user/api/dashboard/<username>/dev-type/
+    '''
+
+    def get(self, request, username):
+
+        target_account, error = get_account_valid(request, username)
+        if error:
+            return Response(get_fail_res(error_code=error))
+        github_id = target_account.github_id
+
+        # 개발자 유형, 성향 데이터
+        data = get_dev_type(target_account, github_id)
+
+        return Response({"status": "success", "data": data})
+
+
+class TotalContrView(APIView):
+    def get(self, request, username):
+        res = {'status': 'success', 'data': None}
+        try:
+            target_account, error = get_account_valid(request, username)
+            if error:
+                return Response(get_fail_res(error_code=error))
+            github_id = target_account.github_id
+            contr_repo = get_contr_repos(github_id)
+            data = {'repo_num': len(contr_repo)}
+
+            contrs = get_total_contrs(github_id)
+            data.update(contrs)
+            res['data'] = data
+        except ObjectDoesNotExist as e:
+            logging.exception(f'{e}')
+            return Response(get_fail_res('object_not_found'))
+        except Exception as e:
+            logging.exception(f'TotalContrView Exception: {e}')
+            return Response(get_fail_res('undefined_exception'))
+
+        return Response(res)
+
+
+def get_account_valid(request, username):
+    # 익명 체크
+    if request.user.is_anonymous:
+        return None, "require_login"
+
+    # 해당 유저의 대시보드 접근 권한 체크
+    try:
+        target_user = User.objects.get(username=username)
+        if target_user.is_superuser:
+            return None, "access_denied"
+        target_account = Account.objects.get(user=target_user)
+        acc_pp = AccountPrivacy.objects.get(account=target_account)
+        print("acc_pp", acc_pp.open_lvl, acc_pp.is_write, acc_pp.is_open)
+
+        # 권한 체크
+        is_own = request.user.username.lower() == username.lower()
+        is_superuser = request.user.is_superuser
+        is_open = acc_pp.open_lvl == 2
+        # 팀원여부 확인 (잠정 보류)
+        # target_team = TeamMember.objects.filter(
+        #     member=target_account).values('team')
+        # coworkers = TeamMember.objects.filter(
+        #     member=request.user.account, team__in=target_team)
+        # is_member = coworkers.exists()
+        permission = is_own or is_superuser or is_open
+        if not permission:
+            return None, "access_permission_denied"
+    except Exception as e:
+        logging.exception(f"UserDashboardView Exception: {e}")
+        return None, 'undefined_exception'
+
+    return target_account, None
+
+
+def get_dev_tendency(account, github_id):
+    data = {'dev_tendency': None, 'dev_tendency_data': None}
+
+    # GitHub 활동 분석 내용 읽기
+    commit_time = update_act.read_commit_time(github_id)
+    hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = commit_time
+    major_act, indi_num, group_num = update_act.read_major_act(github_id)
+    commit_freq, commit_freq_dist = update_act.read_frequency(github_id)
+
+    # 분석 내용 업데이트
+    typeE = -1 if daytime > night else 1
+    typeF = commit_freq
+    typeG = 1 if major_act == 'individual' else -1
+    devtype, created = DevType.objects.get_or_create(account=account)
+    if created:
+        # 만약 개발자 유형이 없는 경우 생성 후 디폴트 값 추가
+        devtype.typeA = 0
+        devtype.typeB = 0
+        devtype.typeC = 0
+        devtype.typeD = 0
+    devtype.typeE = typeE
+    devtype.typeF = typeF
+    devtype.typeG = typeG
+    devtype.save()
+
+    dev_tendency = {'typeE': typeE, 'typeF': typeF,
+                    'typeG': typeG, "details": []}
+    # 개발자 성향 문구 표시를 위한 데이터 가져오기
+    dev_tendency['details'] = get_type_analysis(list(dev_tendency.values()))
+    data["dev_tendency"] = dev_tendency
+
+    try:
+        # 개발자 성향 차트를 그리기 위한 데이터 추가
+        dev_tendency_data = {}
+        dev_tendency_data["typeE_data"] = hour_dist
+        dev_tendency_data["typeE_sector"] = [
+            int(daytime_min/3600), int(daytime_max/3600)]
+        dev_tendency_data["typeF_data"] = commit_freq_dist
+        dev_tendency_data["typeG_data"] = [indi_num, group_num]
+        data["dev_tendency_data"] = dev_tendency_data
+    except Exception as e:
+        logging.exception(f"Get Type data error: {e}")
+
+    return data
+
+
+def get_coworkers(github_id):
+    '''
+    GitHub ID를 이용해 리포지토리에서 협업한 유저를 찾는 함수
+    '''
+    # 기여한 리포지토리의 목록 조회
+    subquery = GithubRepoContributor.objects.filter(
+        github_id=github_id).values_list('repo_name', 'owner_id')
+
+    # 기여 리포지토리에 존재하는 기여자 목록 쿼리
+    coworker_github_ids = GithubRepoContributor.objects.filter(
+        (Q(repo_name__in=[item[0] for item in subquery]) &
+         Q(owner_id__in=[item[1] for item in subquery]))
+    ).values_list('github_id', flat=True).distinct()
+
+    # 자기자신 삭제
+    coworker_github_ids = list(coworker_github_ids)
+    coworker_github_ids.remove(github_id)
+
+    coworkers = Account.objects.filter(
+        student_data__github_id__in=coworker_github_ids)
+    coworkers = AccountSerializer(coworkers, many=True).data
+
+    return coworkers
+
+
+def get_dev_type(account, github_id):
+    data = {'dev_type': None}
+    try:
+        devtype = DevType.objects.get(account=account)
+    except ObjectDoesNotExist as e:
+        logging.error(f"{github_id} DevType No Data: {e}")
+        return data
+
+    # 개발자 유형
+    dev_type = {"typeA": devtype.typeA, "typeB": devtype.typeB,
+                "typeC": devtype.typeC, "typeD": devtype.typeD}
+    if not all(val == 0 for val in dev_type.values()):
+        # 모든 값이 0인 경우 개발자 유형 검사를 진행하지 않은 것으로 간주
+        dev_type.update(get_type_test(
+            devtype.typeA, devtype.typeB, devtype.typeC, devtype.typeD))
+
+        def get_type_len(type_val):
+            return (int((100 - type_val)/2) - 3, int((100 + type_val)/2) + (100 + type_val) % 2 - 3)
+        # 개발자 ID 카드 렌더링을 위한 길이 데이터
+        dev_type["typeAl"], dev_type["typeAr"] = get_type_len(
+            dev_type["typeA"])
+        dev_type["typeBl"], dev_type["typeBr"] = get_type_len(
+            dev_type["typeB"])
+        dev_type["typeCl"], dev_type["typeCr"] = get_type_len(
+            dev_type["typeC"])
+        dev_type["typeDl"], dev_type["typeDr"] = get_type_len(
+            dev_type["typeD"])
+        data['dev_type'] = dev_type
+
+    return data
+
+
+def get_total_contrs(github_id):
+    total_contrs = GitHubScoreTable.objects.filter(github_id=github_id).aggregate(commits=Sum(
+        'commit_cnt'), commit_lines=Sum('commit_line'), issues=Sum('issue_cnt'), prs=Sum('pr_cnt'))
+    return total_contrs
+
+
+def get_contr_repos(github_id):
+    student = StudentTab.objects.get(github_id=github_id)
+    pri_email = student.primary_email
+    sec_email = student.secondary_email
+
+    commit_data = GithubRepoCommits.objects.filter(
+        (Q(author_github=github_id) | Q(author=pri_email) | Q(author=sec_email))
+    ).values_list('github_id', 'repo_name').distinct()
+
+    issue_data = GithubIssues.objects.filter(
+        github_id=github_id).values_list('owner_id', 'repo_name').distinct()
+
+    pull_data = GithubPulls.objects.filter(
+        github_id=github_id).values_list('owner_id', 'repo_name').distinct()
+
+    contr_repos = set(commit_data).union(issue_data).union(pull_data)
+    contr_repos = [f'{x[0]}/{x[1]}' for x in contr_repos]
+
+    return contr_repos
+
+
+def get_nested_dict(keys):
+    '''
+    딕셔너리를 중첩하여 할당하여 반환하는 함수 
+    '''
+    ret = {}
+    for key in keys:
+        ret[key] = {}
+    return ret
+
+
+class DevTypeTestSaveView(APIView):
+
+    def post(self, request, username):
+        '''
+        유저 개발자 유형 결과 저장
+        url     : /user/api/dashboard/<username>/dev-type/save/
+        '''
+        type_factors = request.data.get('factor')
+        if type_factors is None:
+            appended_msg = get_missing_data_msg('factor')
+            return Response(get_fail_res('missing_required_data', appended_msg))
+        try:
+            account = Account.objects.get(user__username=username)
+        except ObjectDoesNotExist:
+            logging.error(f"account DoesNotExist {e}")
+            return Response(get_fail_res('user_not_found'))
+        if request.user.username != username:
+            return Response(get_fail_res('access_permission_denied'))
+
+        try:
+            devtype_objs = DevType.objects.filter(account=account)
+            if len(devtype_objs) == 0:
+                devtype = DevType(
+                    account=account,
+                    typeA=type_factors[0],
+                    typeB=type_factors[1],
+                    typeC=type_factors[2],
+                    typeD=type_factors[3],
+                    typeE=0, typeF=0, typeG=0
+                )
+                devtype.save()
+            else:
+                devtype = devtype_objs.first()
+                devtype.typeA = type_factors[0]
+                devtype.typeB = type_factors[1]
+                devtype.typeC = type_factors[2]
+                devtype.typeD = type_factors[3]
+                devtype.save()
+        except DatabaseError as e:
+            logging.error(f"DevTypeTestSaveView DatabaseError: {e}")
+            return Response(get_fail_res('db_exception'))
+        except Exception as e:
+            logging.exception(f"DevTypeTestSaveView Exception: {e}")
+            return Response(get_fail_res('undefined_exception'))
+
+        return Response({'status': 'success', 'message': '저장했습니다.'})

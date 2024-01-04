@@ -1,0 +1,72 @@
+.nav-link.UnselectedNavItem {
+  width: 100%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #454545;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-link.UnselectedNavItem:hover {
+  width: 100%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #454545;
+  display: flex;
+  justify-content: center;
+  border-bottom: 3px solid #0066ff;
+}
+
+.nav-link.SelectedNavItem {
+  width: 100%;
+  font-size: 18px;
+  font-weight: bolder;
+  text-decoration: none;
+  color: #0066ff;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-link.SelectedNavItem:link {
+  width: 100%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #0066ff;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-new {
+  background-color: #ffc0cb;
+  border-radius: 7px;
+  font-size: 15px;
+  padding: 2px 5px 0px 5px;
+  color: white;
+  margin-right: 6px;
+}
+
+.nav-link.SelectedNavItem:hover,
+.nav-link.SelectedNavItem:active {
+  width: 100%;
+  font-size: 18px;
+  text-decoration: none;
+  color: #0066ff;
+  display: flex;
+  justify-content: center;
+  border-bottom: 3px solid #0066ff;
+}
+
+.nav-link.BorderLine {
+  border-bottom: 3px solid black;
+}
+
+.AppBody {
+  min-height: 300px;
+}
+
+.EmptyApp {
+  border-top: 1px solid #454545;
+  padding-top: 5%;
+  text-align: center;
+  font-size: 16px;
+}

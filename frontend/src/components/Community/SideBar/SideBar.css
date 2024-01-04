@@ -1,0 +1,98 @@
+@media screen and (max-width: 768px) {
+  .community-sidebar {
+    display: none !important;
+  }
+}
+
+.community-sidebar {
+  text-align: center;
+  max-height: fit-content;
+  position: sticky;
+  top: 150px;
+  background-color: white;
+  box-shadow: 0 4px 8px var(--card-box-shadow);
+  border-radius: 30px;
+  padding: 20px 0px;
+  margin-left: -15px;
+  margin-right: 15px;
+}
+
+#sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.625rem;
+  width: 100%;
+}
+.img-container {
+  width: 100%;
+  height: 100%;
+  margin: 10px;
+  display: block;
+}
+#sidebar-user-info .sidebar-profile-img {
+  width: 70%;
+  border: 1px solid var(--main-border-color);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#sidebar-profile-name {
+  color: var(--main-light-font-color);
+  font-weight: 700;
+  font-size: 25px;
+  letter-spacing: -2px;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+#sidebar-profile-username {
+  color: var(--main-light-font-color);
+  font-weight: 500;
+  font-size: 18px;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-bottom: 0.5rem !important;
+}
+
+.sidebar-content a {
+  color: var(--main-font-color);
+  text-decoration: none;
+}
+.sidebar-content div {
+  letter-spacing: -1px;
+}
+
+.sidebar-activity {
+  font-size: 16px !important;
+  padding: 0.625rem;
+  cursor: pointer;
+}
+
+#sidebar-profile-name:hover,
+#sidebar-profile-username:hover,
+.sidebar-activity:hover {
+  opacity: 0.5;
+}
+
+.sidebar-selected-activity {
+  font-size: 16px !important;
+  padding: 0.625rem;
+  color: var(--main-selected-color);
+  font-weight: 700;
+}
+
+.sidebar-boardgroup-item.selected > a {
+  color: var(--sub-point-color);
+  font-weight: 600;
+}
+
+.btn-login,
+.btn-signup {
+  margin: 7px;
+}
+
+.btn-logout {
+  margin: 10px 0px 7px;
+}

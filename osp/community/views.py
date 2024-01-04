@@ -1,315 +1,387 @@
-from django.http import JsonResponse, Http404
-from django.shortcuts import render, redirect
+import logging
+import math
+
+from django.core.paginator import Paginator
+from django.db import DatabaseError
+from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.urls import reverse
-from django.template.loader import render_to_string
-from django.contrib.auth.decorators import login_required
-from django.db.models import F, Q, Count
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import *
-from team.models import TeamMember, Team, TeamTag, TeamInviteMessage
-from user.models import Account, AccountInterest, AccountPrivacy
-from community.models import TeamRecruitArticle
-from team.recommend import get_team_recommendation_list
+from community.models import *
+from community.serializers import (ArticleCommentSerializer, ArticleSerializer,
+                                   BoardArticleSerializer, BoardSerializer,
+                                   RecruitArticleSerializer)
+from tag.serializers import TagIndependentSerializer
+from team.models import Team, TeamInviteMessage, TeamMember
+from team.serializers import TeamMemberSerializer, TeamSerializer
+from team.utils import is_teammember
+from user.models import Account, AccountPrivacy
+from user.serializers import AccountPrivacySerializer
 
-import math, json, time
-from django.views.generic import TemplateView
-from datetime import datetime
 
-# Create your views here.
+class TableBoardView(APIView):
+    '''
+    GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
+    URL : /community/api/board/<board_name>/?page_number=
 
-class CommunityMainView(TemplateView):
-    def get(self, request, *args, **kwargs):
-        board_list = []
-        boards = Board.objects.exclude(board_type='User').exclude(board_type='Team')
+    '''
 
-        for board in boards:
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
 
-            # 최신 게시물
-            article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-            board.article_list = article_list[:min(8, len(article_list))]
-            board.article_list = get_article_metas(board.article_list)
-            
-            if board.board_type == 'Recruit':
-                for article in board.article_list:
-                    tr = TeamRecruitArticle.objects.filter(article=article).first()
-                    if tr:
-                        article.team = tr.team
+        user = request.user
+        board_name = kwargs.get('board_name')
+        page_number = request.GET.get('page_number')
+        try:
+            board = Board.objects.get(name=board_name)
+            valid_data['board'] = board
+            if board.board_type == 'Team':
+                if not request.user.is_authenticated:
+                    errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
+                    status = 'fail'
+                    return status, message, errors, valid_data
+                teaminvitemessage = TeamInviteMessage.objects.filter(
+                    team__id=board.team_id, account__user=request.user, direction=True, status=0)
+                if not is_teammember(board.team.id, user.id):
+                    if not teaminvitemessage.exists():
+                        errors["user_is_not_teammember"] = "해당 팀의 멤버가 아닙니다. "
+                        status = 'fail'
                     else:
-                        article.team = None
-
-            board_list.append(board)
-
-        return render(request, 'community/main.html', {'boards': board_list, 'is_community': True})
-
-class TableBoardView(TemplateView):
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        board_name = context["board_name"]
-        board_id = context["board_id"]
-        context['is_community'] = True
-        context["need_login"] = False
-        context["need_member"] = False
-        try:
-            board = Board.objects.get(id=board_id, name=board_name)
-            context["board"] = board
-
-        except Board.DoesNotExist:
-            board = Board.objects.filter(id=board_id)
-            if len(board) > 0:
-                board = board[0]
-                return redirect(reverse('community:Board', args=[board.name, board.id]))
-            else:
-                raise Http404("게시판을 찾을 수 없습니다.")
-
-        # 로그인된 정보공개 설정을 확인한다.
-        if request.user.is_authenticated:
-            account = Account.objects.get(user_id=request.user.id)
-            
-            try:
-                acc_pp = AccountPrivacy.objects.get(account=account)
-            except:
-                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=1, is_write=False, is_open=False)
-            context['is_write'] = acc_pp.is_write
-            context['is_open'] = acc_pp.is_open
-            context['open_lvl'] = acc_pp.open_lvl
-        else:
-            account = None
-            context['is_write'] = 0
-            context['is_open'] = 0
-            context['open_lvl'] = 0
-        
-        # 게시판 별로 다른 데이터를 전달한다.
-        if board.board_type == 'Notice':
-            return redirect(reverse("community:notice-board"))
-        if board.board_type == 'User':
-            return redirect(reverse("community:user-board"))
-
-        if board.board_type == 'Team':
-            if not request.user.is_authenticated:
-                context["need_login"] = True
-                return render(request, 'community/tableBoard/table-board.html', context)
-
-            # 팀 소속일 경우 팀 게시판 로드
-            # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
-            # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
-            context['waitedInviteMsg'] = TeamInviteMessage.objects.filter(team__id=board.team_id, account__user=request.user, direction=True, status=0)
-            if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
-                # 팀 멤버라면 초대 상태 리셋
-                context['invited_user'] = False
-            elif context['waitedInviteMsg'].exists():
-                # 초대 상태로 설정
-                context['invited_user'] = True
-            else :
-                # 팀 멤버도 아니고 초대 받지 않았다면 열람 불가
-                context["need_member"] = True
-                return render(request, 'community/tableBoard/table-board.html', context)
-        
-            team = board.team
-            team_tags = TeamTag.objects.filter(team=team).values('team', 'tag__name', 'tag__type')
-            team_tags_list= []
-            try:
-                for atg in team_tags:
-                    team_tags_list.append({'name':atg["tag__name"], 'type':atg["tag__type"]})
-            except Exception as e:
-                print("error in team tag", e)
-            
-            team_members = TeamMember.objects.filter(team=team).order_by('-is_admin').prefetch_related('member__user')
-
-            # 검색한 팀 멤버에서 유저 검색
-            tm = team_members.filter(member=account).first()
-            if tm:
-                context['team_admin'] = tm.is_admin
-            context['team'] = team
-            context['team_tags'] = team_tags_list
-            context['team_members'] = team_members
-
-        if board.board_type == 'Recruit':
-
-            active_article = Article.objects.filter(board=board, period_end__gte=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            active_article = get_article_board_data(active_article)
-            for article in active_article:
-                article.tags = [art_tag.tag for art_tag in ArticleTag.objects.filter(article=article)]
-                teamrecruitarticle = TeamRecruitArticle.objects.filter(article=article).first()
-                if teamrecruitarticle:
-                    article.team = teamrecruitarticle.team
+                        valid_data['teaminvitemessage'] = teaminvitemessage
                 else:
-                    article.team = None
-
-            team_cnt = len(TeamMember.objects.filter(member=account).prefetch_related('team'))
-            context['team_cnt'] = team_cnt
-            context['active_article'] = active_article
-            context['active_article_tab'] = range(math.ceil(len(active_article) / 4))
-
-        return render(request, 'community/tableBoard/table-board.html', context)
-
-    def get_context_data(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class NoticeView(TemplateView):
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-
-        context["need_login"] = False
-        context["need_member"] = False
-        context['is_community'] = True
-        try:
-            board = Board.objects.get(board_type="Notice")
-            context["board"] = board
-            context["board_id"] = board.id
-            context["board_name"] = board.name
+                    valid_data['teaminvitemessage'] = teaminvitemessage
+            elif board.board_type == 'Notice':
+                errors["invalid_url"] = "공지게시판 api 접근 url 은 /community/api/board/notice 입니다."
+                status = 'fail'
+            elif board.board_type == 'User':
+                errors["invalid_url"] = "유저추천 게시판 api 접근 url 은 /community/api/recommender/user/ 입니다."
+                status = 'fail'
+            if not page_number:
+                pass
+            elif int(page_number) < 0:
+                errors["invalid_page_number"] = "잘못된 page_number 입니다."
+                status = 'fail'
 
         except Board.DoesNotExist:
-            raise Http404("게시판을 찾을 수 없습니다.")
-        
-        context.update(get_auth(board.id, request.user))
+            errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
+            status = 'fail'
 
-        if 'alert' in context:
-            return render(request, "community/redirect.html", context)
-        if not context['is_auth_notice']:
-            context['alert'] ="접근권한이 없습니다."
-            context['url'] = reverse("community:main")
-            return render(request, "community/redirect.html", context)
-        
-        return render(request, 'community/tableBoard/table-board.html', context)
-
-    def get_context_data(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class SearchView(TemplateView):
-    '''
-    검색 
-    url        : community/search/
-    template   : community/tableBoard/searched.html
-    query      : page, keyword, tag, team_li
-
-    Returns :
-        GET     : render
-    '''
-    template_name = "community/tableBoard/searched.html"
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        board_id = request.GET.get('board', 0)
-        board_id = int(board_id) if board_id.isdigit() else 0
-        context["need_login"] = False
-        context["need_member"] = False
-        context['is_community'] = True
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            print(errors)
+            message = list(errors.values())[0]
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
         try:
-            if(board_id):
-                board = Board.objects.get(id=board_id)
-                board_name = board.name
-                context["board"] = board
+            data['show_searchbox'] = True
+            board = valid_data['board']
+            data["board"] = BoardSerializer(board).data
+
+            if request.user.is_authenticated:
+                account = Account.objects.get(user=request.user)
+                try:
+                    acc_pp = AccountPrivacy.objects.get(account=account)
+                except:
+                    acc_pp = AccountPrivacy.objects.create(
+                        account=account, open_lvl=1, is_write=False, is_open=False)
+                data['privacy'] = AccountPrivacySerializer(acc_pp).data
+
             else:
-                board_name = "전체"
-                board = {"name":board_name, "id":0, "board_type":"Total"}
-                context["board"] = board
-        except Board.DoesNotExist:
-            raise Http404("게시판을 찾을 수 없습니다.")
-        
-        # 로그인된 정보공개 설정을 확인한다.
-        if request.user.is_authenticated:
-            account = Account.objects.get(user_id=request.user.id)
-            
-            try:
-                acc_pp = AccountPrivacy.objects.get(account=account)
-            except:
-                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=1, is_write=False, is_open=False)
-            context['is_write'] = acc_pp.is_write
-            context['is_open'] = acc_pp.is_open
+                account = None
+                data['privacy'] = None
+
+            if board.board_type == 'Recruit':
+                data = self.get_recruit_board(request)
+                return Response({'status': status, 'data': data})
+
+            sort_field = request.GET.get('sort', '-id')
+            sort_field = sort_field.split(",")
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F(
+                "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by(*sort_field)
+
+            page_size = 10
+            paginator = Paginator(article_list, page_size)
+            page_number = request.GET.get('page_number', 1)
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+            # article_list = get_article_metas(article_list)
+            article_list = get_article_metas(page)
+            data['max_page_number'] = max_page_number
+            data['articles'] = BoardArticleSerializer(
+                article_list, many=True).data
+
+            # 팀 게시판
+            if board.board_type == 'Team':
+
+                # 팀에 초대받은 상태일 경우 메시지와 invited_user True 전달해 표시
+                # 그외의 경우 커뮤니티 메인페이지로 리다이렉트
+                account = Account.objects.get(user=request.user)
+                teaminvitemessage = valid_data['teaminvitemessage']
+
+                if TeamMember.objects.filter(team=board.team_id, member_id=request.user.id).exists():
+                    # 팀 멤버라면 초대 상태 리셋
+                    data['invite_id'] = 0
+
+                elif teaminvitemessage.exists():
+                    # 초대 상태로 설정
+                    data['invite_id'] = teaminvitemessage.last().id
+
+                team = board.team
+                team_tags = TagIndependent.objects.filter(
+                    teamtag__team_id=team)
+                data['team_tags'] = TagIndependentSerializer(
+                    team_tags, many=True).data
+
+                team_members = TeamMember.objects.filter(team=team).order_by(
+                    '-is_admin').prefetch_related('member__user')
+
+                # 검색한 팀 멤버에서 유저 검색
+                tm = team_members.filter(member=account).first()
+                if tm:
+                    data['team_admin'] = tm.is_admin
+                data['team'] = TeamSerializer(team).data
+                data['team_members'] = TeamMemberSerializer(
+                    team_members, many=True).data
+
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'TableBoardView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + \
+                str(e)
+            logging.exception(f'TableBoardView undefined ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
         else:
-            account = None
-            context['is_write'] = 0
-            context['is_open'] = 0
+            res = {'status': status, 'errors': errors}
+        return Response(res)
 
-        result = search_article(request, board_name, board_id)
-        context['html'] = result['html']
-        context['max_page'] = result['max-page']
+    def get_recruit_board(self, request):
+        data = {}
+        page_number = request.GET.get('page_number', 1)
+        sort_field = request.GET.get('sort', '-id')
+        sort_field = sort_field.split(",")
 
-        keyword = request.GET.get('keyword', '')
-        tags = request.GET.get('tag', False)
-        context['title'] = board_name + " 게시판 검색 결과"
-        context['keyword'] = keyword
+        team_recruit_subquery = TeamRecruitArticle.objects.filter(
+            article_id=OuterRef('pk')
+        ).annotate(
+            writer_name=Subquery(
+                Account.objects.filter(pk=OuterRef(
+                    'article__writer_id')).values('user__username')[:1]
+            ),
+            team_name=Subquery(
+                Team.objects.filter(pk=OuterRef('team_id')).values('name')[:1]
+            ),
+            member_cnt=Subquery(
+                TeamMember.objects.filter(team_id=OuterRef('team_id')).values(
+                    'team').annotate(cnt=Count('id')).values('cnt')
+            ),
+        )
 
-        return render(request, self.template_name , context)
+        articles = Article.objects.filter(
+            board__name='팀 모집'
+        ).annotate(
+            writer_name=Subquery(
+                team_recruit_subquery.values('writer_name')[:1]),
+            team_name=Subquery(team_recruit_subquery.values('team_name')[:1]),
+            member_cnt=Subquery(
+                team_recruit_subquery.values('member_cnt')[:1]),
+        ).prefetch_related(
+            'articletag_set'
+        ).order_by(*sort_field)
 
-    def get_context_data(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+        page_size = 10
+        paginator = Paginator(articles, page_size)
+        page = paginator.get_page(page_number)
 
-def search_article(request, board_name, board_id):
+        data['max_page_number'] = paginator.num_pages
+        data['articles'] = RecruitArticleSerializer(page, many=True).data
+        return data
+
+
+class SearchView(APIView):
+    '''
+    GET: 검색된 게시글 모음
+    URL : /community/search
+
+    JSON RESPONSE
+    data :
+        board : 검색 대상 게시판
+        show_searchbox : 해당 뷰에서 항상 true
+        require_login : 해당 뷰에서 항상 false
+        require_membership : 해당 뷰에서 항상 false
+        privacy : AccountPrivacy 모델에 저장된 값
+        max_page : 검색된 게시글 개수 / PAGE_SIZE
+        articles : 검색된 게시글 리스트
+    '''
+
+    def get_validation(self, request):
+        board_name = request.GET.get("board", None)
+        status = "success"
+        errors = {}
+        vaild_data = {"board": None}
+        if board_name:
+            try:
+                vaild_data['board'] = Board.objects.get(name=board_name)
+            except Board.DoesNotExist as e:
+                logging.exception(f"search_view {e}")
+                errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
+                status = 'fail'
+            except Exception as e:
+                logging.exception(f"search_view {e}")
+                errors['undefined_exception'] = 'undefined_exception'
+                status = 'fail'
+        return status, errors, vaild_data
+
+    def get(self, request, *args, **kwargs):
+        # Declaration
+        message = ''
+        data = {}
+
+        # Request Validation
+        status, errors, valid_data = self.get_validation(request)
+
+        # Transactions
+        try:
+            board = valid_data['board']
+            data["require_login"] = False
+            data["require_membership"] = False
+            data['show_searchbox'] = True
+            if board:
+                board = BoardSerializer(board).data
+                data['board'] = board
+            else:
+                board = {"name": "전체", "id": 0, "board_type": "Total"}
+                data["board"] = board
+
+            # 로그인된 정보공개 설정을 확인한다.
+            if request.user.is_authenticated:
+                account = Account.objects.get(user_id=request.user.id)
+
+                try:
+                    acc_pp = AccountPrivacy.objects.get(account=account)
+                except:
+                    acc_pp = AccountPrivacy.objects.create(
+                        account=account, open_lvl=1, is_write=False, is_open=False)
+                data['privacy'] = AccountPrivacySerializer(acc_pp).data
+            else:
+                account = None
+                data['privacy'] = {'is_write': 0, 'is_open': 0}
+            result = search_article(request, board)
+            data['articles'] = BoardArticleSerializer(
+                result['articles'], many=True).data
+            data['max_page'] = result['max-page']
+
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'SearchView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + str(e)
+            logging.exception(f'SearchView undefined ERROR : {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
+def search_article(request, board):
+    '''
+    게시글 검색
+
+    RETURN dictionary
+    '''
     # 반복문으로 구현
-    keyword = request.GET.get('keyword', '')
-    tags = request.GET.get('tag', False)
-    sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
-    page = request.GET.get('page', 1)
-    page = int(page) if page.isdigit() else 1
-    print("keyword", keyword, " tags", tags)
 
+    # Get values from request
+    # url ex) /community/search/?page=1&keyword=abcd&tag=&board=0
+
+    keyword = request.GET.get('keyword', '')
+    tags = request.GET.get('tag', None)
+    sort_field = request.GET.get('sort', '-id')
+    sort_field = sort_field.split(',')
+    page = request.GET.get('page', "1")
+    page = int(page) if page.isdigit() else 1
+
+    print("keyword", keyword, " tags", tags)
+    board_list = []
     # 타겟 게시판 설정
     try:
-        if board_id == 0:
-            #전체 검색
-            boardList = []
-            boards = Board.objects.filter(team_id=None).exclude(board_type='User')
-            for board in boards:
-                boardList.append(board)
+        if board["id"] == 0:
+            # 전체 검색
+
+            boards = Board.objects.filter(
+                team_id=None).exclude(board_type='User')
+
+            for obj in boards:
+                board_list.append(obj)
 
             if request.user.is_authenticated:
                 account = Account.objects.get(user=request.user.id)
-                team_list = [x.team.name for x in TeamMember.objects.filter(member=account).prefetch_related('team')]
+                team_list = [x.team.name for x in TeamMember.objects.filter(
+                    member=account).prefetch_related('team')]
                 team_board_query = Q(name__in=team_list)
 
-                for board in Board.objects.filter(team_board_query):
-                    boardList.append(board)
-
-            print("total 검색", boardList)
-            board_type = "Total"
-            board_name = "전체"
-            board_data = {"name":board_name, "id":0, "board_type":board_type}
+                for obj in Board.objects.filter(team_board_query):
+                    board_list.append(obj)
         else:
-            board_data = Board.objects.get(id=board_id)
-            board_type = board_data.board_type
-            board_name = board_data.name
-            boardList = [board_data]
-    except Board.DoesNotExist:
-        result = {'html': '', 'max-page': 0}
-        return JsonResponse(result)
-    
-    if board_type == 'Recruit':
-        PAGE_SIZE = 5
-    else:
-        PAGE_SIZE = 10
+            board_list = list(Board.objects.filter(name=board["name"]))
 
-    context = {}
-    context['board'] = board_data
-    context['type'] = "mix"
+    except Board.DoesNotExist:
+        result = {'article': None, 'max-page': 0}
+        return result
+
+    PAGE_SIZE = 5 if board['board_type'] == 'Recruit' else 10
+
+    data = {}
+    data['board'] = board
+    data['type'] = "mix"
 
     total_article_list = Article.objects.none()
-    for board in boardList:
+    for obj in board_list:
         # Filter Board
-        if board.board_type == "Notice" and not request.user.is_superuser:
+        if obj.board_type == "Notice" and not request.user.is_superuser:
             # 일반유저가 검색할 때는 공지게시판에서 공지 설정된 게시글만 가져옴
-            article_list = Article.objects.filter(board=board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
-        else :
-            article_list = Article.objects.filter(board=board).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+            article_list = Article.objects.filter(board=obj, is_notice=True).annotate(
+                writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+        else:
+            article_list = Article.objects.filter(board=obj).annotate(writer_name=F(
+                "writer__user__username"), is_superuser=F("writer__user__is_superuser"))
         article_list = filter_keyword_tag(article_list, keyword, tags)
         total_article_list = total_article_list.union(article_list)
-    
+
     total_len = len(total_article_list)
     # Order
     total_article_list = total_article_list.order_by(*sort_field)
     # Slice to Page
-    total_article_list = list(total_article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
+    total_article_list = list(
+        total_article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
 
     total_article_list = get_article_board_data(total_article_list)
-    if board_type == 'Recruit' or board_type == "Total":
+    if board["board_type"] == 'Recruit' or board["board_type"] == "Total":
         for article in total_article_list:
             if article.board_type == 'Recruit':
                 tr = TeamRecruitArticle.objects.filter(article=article).first()
@@ -320,474 +392,277 @@ def search_article(request, board_name, board_id):
     # Get Article Metadata
     total_article_list = get_article_metas(total_article_list)
 
-    context['article_list'] = total_article_list
     result = {}
-    result['html'] = render_to_string('community/article-table.html', context,request=request)
+    result['articles'] = total_article_list
     result['max-page'] = math.ceil(total_len / PAGE_SIZE)
 
     return result
 
-class UserBoardView(TemplateView):
-    '''
-    맞춤 유저 추천
-    url        : community/recommender/user/
-    template   : community/board/user-board.html
 
-    Returns :
-        GET     : render
-    '''
-    template_name = 'community/board/user-board.html'
+class UserArticlesView(APIView):
+    '내가 작성한 글'
+
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
 
     def get(self, request, *args, **kwargs):
-        try:
-            board = Board.objects.get(name="User")
-        except Board.DoesNotExist:
-            return Http404("유저 추천 게시판이 없습니다.")
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
 
-        context = {'board': board, 'type': 'user'}
-        context['is_open'] = 0
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserArticlesView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        data = {}
         try:
-            acc_pp = AccountPrivacy.objects.get(account=request.user.id)
-            context['is_open'] = acc_pp.is_open
-            context['open_lvl'] = acc_pp.open_lvl
+            user = request.user
+            sort_field = request.GET.get('sort', '-id')
+            sort_field = sort_field.split(',')
+            account = Account.objects.get(user=user)
+            user_articles = Article.objects.filter(
+                writer=account).order_by(*sort_field)
+            user_articles = get_article_metas(user_articles)
+
+            page_size = 10
+            paginator = Paginator(user_articles, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+            # article_list = get_article_metas(article_list)
+
+            user_articles = get_article_metas(page)
+            data['max_page_number'] = max_page_number
+            data['user_articles'] = BoardArticleSerializer(
+                user_articles, many=True).data
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserArticlesView DB ERROR: {e}')
+            status = 'fail'
+
         except Exception as e:
-            print("community view account_cards error: ", e)
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserArticlesView ERROR: {e}')
+            status = 'fail'
 
-        return render(request, self.template_name, context)
-
-def account_cards(request):
-    '''
-    유저 카드 목록
-    url        : community/account-cards/
-    template   : community/account-card.html
-    query      : page=1&team_li=%5B%5D&type=article HTTP/1.1" 200 10635
-
-    Returns :
-        GET     : JsonResponse
-    '''
-
-    start = time.time()
-    PAGE_SIZE = 9
-
-    context = {}
-    context['board'] = Board.objects.get(board_type="User")
-    context['account_list'] = []
-
-    # Filter Board
-    open_acc = AccountPrivacy.objects.filter(is_open=True).exclude(account=request.user.id).values('account_id')
-    print("open_acc", len(open_acc))
-
-    account_list = Account.objects.filter(user__is_superuser=False, user__id__in=open_acc)
-    # Filter Keyword
-    keyword = request.GET.get('keyword', '')
-    team_li = json.loads(request.GET.get('team_li', "[]"))
-    print("team_li",team_li)
-
-    if request.user.is_anonymous:
-        team_li = []
-    elif team_li==['first']:
-        team_li = list(TeamMember.objects.filter(member__user=request.user).values_list("team_id", flat=True))
-
-    if keyword != '':
-        account_list = account_list.filter(Q(user__username__icontains=keyword) | Q(introduction__icontains=keyword))
-    # Filter Tag
-    tag_list = request.GET.get('tag', False)
-    if tag_list:
-        tag_list = tag_list.split(',')
-        tag_query = Q()
-        for tag in tag_list:
-            tag_query = tag_query | Q(tag=tag)
-        article_with_tag = AccountInterest.objects.filter(tag_query).values('account__user')
-        account_list = account_list.filter(user__in=article_with_tag)
-
-    user_list = []
-    member_id = []
-
-    team_list = Team.objects.filter(id__in=team_li)
-    print("team_list", team_list)
-
-    if len(team_list) == 0:
-        user_list = list(account_list)
-    else:
-        # team_list를 받아서 추천하는 팀과 유저의 Account의 리스트를 검색
-        try:
-            team_member_dict = get_team_recommendation_list(team_list)
-        except:
-            team_member_dict = {}
-
-        for team_obj in team_list:
-            if team_obj.id in team_member_dict:
-                member_li = team_member_dict[team_obj.id]
-                member_id += member_li
-                tmps = account_list.filter(user__in=member_li)
-                for tmp in tmps:
-                    tmp.recommend_team = team_obj
-                user_list += list(tmps)
-
-    account_list = user_list    
-    total_len = len(account_list)
-
-    result = {'html': []}
-    for account in account_list:
-        context['account'] = account
-        result['html'].append(render_to_string('community/account-card.html', context, request=request))
-    print("html len",len(result['html']))
-    
-    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
-    if result['max-page'] == 0:
-        result['html'] = "추천할 사용자가 없습니다."
-    result['offset'] = PAGE_SIZE
-    print("elapsed time account_cards", time.time() - start)
-
-    return JsonResponse(result)
-
-
-def article_list(request, board_name, board_id):
-    try:
-        board = Board.objects.get(id=board_id)
-    except Board.DoesNotExist:
-        result = {'html': '', 'max-page': 0}
-        return JsonResponse(result)
-    if board.board_type == 'Recruit':
-        PAGE_SIZE = 5
-    else:
-        PAGE_SIZE = 10
-    context = {'board': board, 'type': "board"}
-
-    sort_field = request.GET.get('sort', ('-pub_date', 'title', 'id'))
-    
-    page = int(request.GET.get('page', 1))
-    # Filter Board
-    article_list = Article.objects.filter(board=board, is_notice=False).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
-    # Filter Keyword
-    keyword = request.GET.get('keyword', '')
-    if keyword != '':
-        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
-    # Filter Tag
-    tag_list = request.GET.get('tag', False)
-    if tag_list:
-        tag_list = tag_list.split(',')
-        tag_query = Q()
-        for tag in tag_list:
-            tag_query = tag_query | Q(tag=tag)
-        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
-        article_list = article_list.filter(id__in=article_with_tag)
-    
-    total_len = len(article_list)
-    # Order
-    article_list = article_list.order_by(*sort_field)
-    # Slice to Page
-    article_list = list(article_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-
-    # Get Article Metadata
-    article_list = get_article_board_data(article_list)
-    article_list = get_article_metas(article_list)
-    
-    if board.board_type == 'Recruit':
-        for article in article_list:
-            tr = TeamRecruitArticle.objects.filter(article=article).first()
-            if tr:
-                article.team = tr.team
-            else:
-                article.team = None
-    context['notices'] = get_notices(board_id=board_id)
-    context['article_list'] = article_list
-    result = {}
-    result['html'] = render_to_string('community/article-table.html', context,request=request)
-    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
-
-    return JsonResponse(result)
-
-def get_notices(board_id = None):
-    notice_board = Board.objects.get(board_type="Notice")
-    global_notices = Article.objects.filter(board=notice_board, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
-    local_notices = Article.objects.filter(board_id=board_id, is_notice=True).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
-    notices = global_notices | local_notices
-
-    notices = get_article_board_data(notices)
-    notices = get_article_metas(notices)
-    # 쿼리셋 합쳐서 리턴
-    return notices
-
-
-class ArticleSaveView(TemplateView):
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        board_name = context["board_name"]
-        board_id = context["board_id"]
-        context["url"] = f"/community/board/{board_name}/{board_id}/"
-
-        if request.user.is_anonymous:
-            context["alert"] = "로그인이 필요한 서비스입니다."
-            return render(request, "community/redirect.html", context)
-        # 쿼리스트링의 값을 가져온다.
-        if 'team_id' in request.GET:
-            team_id = request.GET['team_id']
-            members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
-            
-            if request.user.id in members:
-                context['team'] = Team.objects.get(id=team_id)
-        context['type'] = 'register'
-        context['type_kr'] = '등록'
-        context['anonymous_check'] = 'checked'
-        context['notice_check'] = ''
-        context['is_auth_notice'] = False
-        board_id = kwargs.get('board_id')
-        # 로그인된 정보공개 설정을 확인한다.
-        if request.user.is_authenticated:
-            account = Account.objects.get(user_id=request.user.id)
-            try:
-                acc_pp = AccountPrivacy.objects.get(account=account)
-            except:
-                acc_pp = AccountPrivacy.objects.create(account=account, open_lvl=1, is_write=False, is_open=False)
-            context['is_write'] = acc_pp.is_write
-            context['is_open'] = acc_pp.is_open
-            context['open_lvl'] = acc_pp.open_lvl
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
         else:
-            account = None
-            context['is_write'] = 0
-            context['is_open'] = 0
-            context['open_lvl'] = 0
-
-        context.update(get_auth(board_id, request.user))
-        if 'alert' in context:
-            return render(request, "community/redirect.html", context)
-        
-        return render(request, 'community/article/article.html', context)
-
-    def get_context_data(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
 
 
-class ArticleNoticeSaveView(TemplateView):
+class UserCommentsView(APIView):
+    '내가 작성한 댓글'
+
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+
+        return status, message, errors, valid_data
+
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        board = Board.objects.get(board_type="Notice")
-        context['board'] = board
-        context["board_name"] = board.name
-        context["board_id"] = board.id
-        context["url"] = "/community/board/notice/"
-        if request.user.is_anonymous:
-            context["alert"] = "로그인이 필요한 서비스입니다."
-            return render(request, "community/redirect.html", context)
-        # 쿼리스트링의 값을 가져온다.
-        if 'team_id' in request.GET:
-            team_id = request.GET['team_id']
-            members = TeamMember.objects.filter(team_id=team_id).values_list("member_id", flat=True)
-            if request.user.id in members:
-                context['team'] = Team.objects.get(id=team_id)
-        context['type'] = 'register'
-        context['type_kr'] = '등록'
-        context['notice_check'] = 'checked'
-        context['is_auth_notice'] = False
-        context.update(get_auth(board.id, request.user))
-        if 'alert' in context:
-            return render(request, "community/redirect.html", context)
-        if not context['is_auth_notice']:
-            context['alert'] ="접근권한이 없습니다."
-            context['url'] = reverse("community:main")
-            return render(request, "community/redirect.html", context)
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
 
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserCommentsView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
 
-        return render(request, 'community/article/article.html', context)
-
-    def get_context_data(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class ArticleView(TemplateView):
-
-    @csrf_exempt
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        context['type'] = 'view'
-        context['is_community'] = True
-        article_id = kwargs.get('article_id')
-        
+        # Transactions
+        data = {}
         try:
-            article = Article.objects.get(id=article_id)
-            context['tags'] = ArticleTag.objects.filter(article__id=article_id)
-            context['board'] = Board.objects.get(id=article.board_id)
-            context['comments'] = ArticleComment.objects.filter(article_id=article_id)
-            if context['board'].board_type == 'Recruit':
-                teamrecruit = TeamRecruitArticle.objects.filter(article=article).first()
-                if teamrecruit:
-                    article.team = teamrecruit.team
-            if article.writer.user_id != request.user.id:
-                article.view_cnt += 1
-            article.save()
-            article_file_objs = ArticleFile.objects.filter(article_id=article.id, status="POST")
-            article_files = []
-            for obj in article_file_objs:
-                article_files.append({'id':obj.id,
-                                    'name':obj.filename,
-                                    'file':obj.file.name,
-                                    'size':convert_size(obj.file.size)})
-            context['article'] = article
-            context['article_file'] = article_files
-        except:
-            context['error_occur'] = True
+            user = request.user
+            sort_field = request.GET.get('sort', '-id')
+            sort_field = sort_field.split(',')
+            account = Account.objects.get(user=user)
+            articlecomments = ArticleComment.objects.filter(
+                writer=account).exclude(is_deleted=1).order_by(*sort_field)
 
-        context["need_login"] = False
-        context["need_member"] = False
-        if context['board'].board_type == 'Team':
-            if not request.user.is_authenticated:
-                context["need_login"] = True
-                return render(request, 'community/article/article.html', context)
-            if not TeamMember.objects.filter(team=context['board'].team_id, member_id=request.user.id).exists():
-                # 팀 멤버가 아니면 열람 불가
-                context["need_member"] = True
-                return render(request, 'community/article/article.html', context)
+            page_size = 10
+            paginator = Paginator(articlecomments, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
 
-        return render(request, 'community/article/article.html', context)
+            articlecomments = page
+            data['max_page_number'] = max_page_number
+            data['articlecomments'] = ArticleCommentSerializer(
+                articlecomments, many=True).data
 
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(request, *args, **kwargs)
-        context['type'] = 'edit'
-        context['type_kr'] = '수정'
-        
-        article_id = kwargs.get('article_id')
-        context['article'] = Article.objects.get(id=article_id)
-        article_file_objs = ArticleFile.objects.filter(article_id=article_id, status="POST")
-        article_files = []
-        for obj in article_file_objs:
-            article_files.append({'id':obj.id,
-                                'name':obj.filename,
-                                'file':obj.file.name,
-                                'size':convert_size(obj.file.size)})
-        context['article_file'] = article_files
-        context['tags'] = ArticleTag.objects.filter(article__id=article_id)
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserCommentsView DB ERROR: {e}')
+            status = 'fail'
 
-        context['board'] = Board.objects.get(id=context['article'].board.id)
-        if context['board'].board_type == 'Recruit':
-            teamrecruit = TeamRecruitArticle.objects.filter(article=context['article']).first()
-            if teamrecruit:
-                context['article'].team = teamrecruit.team
-        context['anonymous_check'] = "checked" if context['article'].anonymous_writer else ""
-        context['notice_check'] = "checked" if context['article'].is_notice else ""
-        context.update(get_auth(context['board'].id, request.user))
-        result = {}
-        result['html'] = render_to_string('community/article/includes/content-edit.html', context, request=request)
-        result['tags'] = list(context['tags'].values_list('tag__name', flat=True))
-
-        return JsonResponse(result)
-
-    def get_context_data(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-@login_required
-def activity_board(request):
-    context = {'board_name': 'activity', 'board_type': 'activity', 'board_id':0}
-
-    return render(request, 'community/activity.html', context)
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserCommentsView ERROR: {e}')
+            status = 'fail'
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
 
 
-@login_required
-def my_activity(request):
-    keyword = request.GET.get('keyword', '')
-    tags = request.GET.get('tag', False)
-    page = int(request.GET.get('page', 1))
-    activity_type = request.GET.get('type', 'article')
-    account = Account.objects.get(user=request.user.id)
-    print("activity_type", activity_type)
+class UserScrapArticlesView(APIView):
+    '내가 스크랩한 글'
 
-    if activity_type == "scrap":
-        target_list = Article.objects.filter(id__in=ArticleScrap.objects.filter(account=account).values_list('article', flat=True)).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
-    elif activity_type == "comment":
-        target_list = ArticleComment.objects.filter(writer=account).order_by('-pub_date')
-    else :
-        target_list = Article.objects.filter(writer=account).annotate(writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
 
-    if activity_type != "comment":
-        target_list = filter_keyword_tag(target_list, keyword, tags)
-        target_list = get_article_metas(target_list)
-        target_list = get_article_board_data(target_list)
-        for article in target_list:
-            if article.board_type == 'Recruit':
-                tr = TeamRecruitArticle.objects.filter(article=article).first()
-                if tr:
-                    article.team = tr.team
-                else:
-                    article.team = None
-    else:
-        if keyword != '':
-            target_list = target_list.filter(Q(body__icontains=keyword))
-        comment_board = {}
-        for comment in target_list:
-            if comment.article.board_id not in comment_board:
-                board_id = comment.article.board_id
-                board_q = Board.objects.get(id=board_id)
-                comment_board[board_id] = board_q.name
-        for comment in target_list:
-            comment.board_name = comment_board[comment.article.board_id]
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
 
-    PAGE_SIZE = 10
-    total_len = len(target_list)
-    target_list = list(target_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)])
-    context = {
-        'target_list': target_list,
-        # 'scrap_article': list(scrap_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]),
-        # 'comment_list': list(comment_list[PAGE_SIZE * (page - 1):PAGE_SIZE * (page)]), 
-    }
-    context['activity_type'] = activity_type
-    print("context['activity_type']", context['activity_type'])
-    context['type'] = 'mix'
+        return status, message, errors, valid_data
 
-    result = {}
-    result['html'] = render_to_string('community/activity-tab.html', context, request=request)
-    result['max-page'] = math.ceil(total_len / PAGE_SIZE)
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
 
-    return JsonResponse(result)
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'UserScrapArticlesView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
 
-# 게시글 리스트를 받아서 게시판 이름을 게시글 객체에 포함시키는 함수
+        # Transactions
+        data = {}
+        try:
+            user = request.user
+            sort_field = request.GET.get('sort', '-id')
+            sort_field = sort_field.split(',')
+            account = Account.objects.get(user=user)
+            article_scraps = ArticleScrap.objects.filter(
+                account=account).values_list('article')
+
+            user_scrap_articles = Article.objects.filter(
+                id__in=article_scraps).order_by(*sort_field)
+
+            page_size = 10
+            paginator = Paginator(user_scrap_articles, page_size)
+            page_number = request.GET.get('page_number')
+            if not page_number:
+                page_number = 1
+            page = paginator.get_page(page_number)
+            max_page_number = paginator.num_pages
+
+            user_scrap_articles = get_article_metas(page)
+
+            data['max_page_number'] = max_page_number
+            data['userscraparticles'] = BoardArticleSerializer(
+                user_scrap_articles, many=True).data
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'UserScrapArticlesView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'UserScrapArticlesView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
+
+
 def get_article_board_data(article_list):
+    '''게시글 리스트를 받아서 
+    게시판 이름을 게시글 객체에 포함시키는 함수'''
+
     article_board = {}
     for article in article_list:
         if article.board_id not in article_board:
             board_q = Board.objects.get(id=article.board_id)
-            article_board[article.board_id] = (board_q.name, board_q.board_type)
+            article_board[article.board_id] = (
+                board_q.name, board_q.board_type)
 
     for article in article_list:
         article.board_name, article.board_type = article_board[article.board_id]
 
     return article_list
 
-# 게시글 리스트를 받아서 태그, 좋아요 수, 스크랩 수, 댓글 수를 게시글 객체에 포함시키는 함수
+
 def get_article_metas(article_list):
-    
+    # 게시글 리스트를 받아서 태그, 좋아요 수, 스크랩 수, 댓글 수를 게시글 객체에 포함시키는 함수
     if type(article_list) != list:
         article_list = list(article_list)
-    
-    article_tags = ArticleTag.objects.filter(article__in=article_list).values('article', 'tag__name', 'tag__type')
+
+    article_tags = ArticleTag.objects.filter(
+        article__in=article_list).values('article', 'tag__name', 'tag__type')
     article_tags_dict = {}
     try:
         for atg in article_tags:
             if atg["article"] not in article_tags_dict:
                 article_tags_dict[atg["article"]] = []
-            article_tags_dict[atg["article"]].append({'name':atg["tag__name"], 'type':atg["tag__type"]})
+            article_tags_dict[atg["article"]].append(
+                {'name': atg["tag__name"], 'type': atg["tag__type"]})
     except Exception as e:
         print("error tag", e)
 
-    article_likes = ArticleLike.objects.filter(article__in=article_list).values('article').annotate(like_num=Count('article'))
+    article_likes = ArticleLike.objects.filter(article__in=article_list).values(
+        'article').annotate(like_num=Count('article'))
     article_likes_dict = {}
     try:
         for obj in article_likes:
             article_likes_dict[obj["article"]] = obj["like_num"]
     except Exception as e:
         print("like error: ", e)
-        
-    article_comments = ArticleComment.objects.filter(article__in=article_list).values('article').annotate(comment_num=Count('article'))
+
+    article_comments = ArticleComment.objects.filter(article__in=article_list).values(
+        'article').annotate(comment_num=Count('article'))
     article_comments_dict = {}
     try:
         for obj in article_comments:
             article_comments_dict[obj["article"]] = obj["comment_num"]
     except Exception as e:
         print("comment error: ", e)
-        
-    article_scraps = ArticleScrap.objects.filter(article__in=article_list).values('article').annotate(scrap_num=Count('article'))
+
+    article_scraps = ArticleScrap.objects.filter(article__in=article_list).values(
+        'article').annotate(scrap_num=Count('article'))
     article_scraps_dict = {}
     try:
         for obj in article_scraps:
@@ -800,62 +675,265 @@ def get_article_metas(article_list):
         article.like_cnt = article_likes_dict.get(article.id, 0)
         article.comment_cnt = article_comments_dict.get(article.id, 0)
         article.scrap_cnt = article_scraps_dict.get(article.id, 0)
-        
+
     return article_list
+
 
 def filter_keyword_tag(article_list, keyword, tags):
     # Filter Keyword
     if keyword != '':
-        article_list = article_list.filter(Q(title__icontains=keyword)|Q(body__icontains=keyword))
+        article_list = article_list.filter(
+            Q(title__icontains=keyword) | Q(body__icontains=keyword) | Q(writer__user__username__icontains=keyword, anonymous_writer=False))
     # Filter Tag
     if tags:
         tag_list = tags.split(',')
         tag_query = Q()
         for tag in tag_list:
             tag_query = tag_query | Q(tag=tag)
-        article_with_tag = ArticleTag.objects.filter(tag_query).values('article')
+        article_with_tag = ArticleTag.objects.filter(
+            tag_query).values('article')
         article_list = article_list.filter(id__in=article_with_tag)
 
     return article_list
 
+
 def get_auth(board_id, user):
-    context = {"is_auth_notice": False}
+    context = {"show_notice_check": False}
     try:
         print("board_id", board_id)
-        context['board'] = Board.objects.get(id=board_id)
+        context['board'] = BoardSerializer(Board.objects.get(id=board_id)).data
         team_id = context['board'].team_id
         print("team", team_id)
         if team_id is not None:
             members = TeamMember.objects.filter(team_id=team_id)
-            admin_members = members.filter(is_admin=True).values_list("member_id", flat=True)
+            admin_members = members.filter(
+                is_admin=True).values_list("member_id", flat=True)
             members = members.values_list("member_id", flat=True)
             print("len m", len(members))
             if user.id in admin_members:
                 context['team'] = Team.objects.get(id=team_id)
-                context['is_auth_notice'] = True
+                context['show_notice_check'] = True
             elif user.id in members:
                 context['team'] = Team.objects.get(id=team_id)
             else:
                 context["alert"] = "팀에 가입해야 이용가능한 서비스입니다."
         else:
             if user.is_superuser:
-                context['is_auth_notice'] = True
+                context['show_notice_check'] = True
     except:
         print("Exception")
         context["alert"] = "오류가 발생했습니다."
-    
+
     return context
 
-class redirectView(TemplateView):
-    def get(self, request, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return render(request, 'community/redirect.html', context)
 
-def convert_size(size_bytes):
-    if size_bytes == 0:
-        return "0 B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return f"{s} {size_name[i]}"
+def get_notices(board_id=None):
+    notice_board = Board.objects.get(board_type="Notice")
+    global_notices = Article.objects.filter(board=notice_board, is_notice=True).annotate(
+        writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    local_notices = Article.objects.filter(board_id=board_id, is_notice=True).annotate(
+        writer_name=F("writer__user__username"), is_superuser=F("writer__user__is_superuser"))
+    notices = global_notices | local_notices
+
+    notices = get_article_board_data(notices)
+    notices = get_article_metas(notices)
+    # 쿼리셋 합쳐서 리턴
+    return notices
+
+
+class NoticeView(APIView):
+    '''
+    GET: 공지게시판을 위한 JSON response
+    URL : /community/board/notice
+    '''
+
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+            status = 'fail'
+        else:
+            try:
+                board = Board.objects.get(board_type="Notice")
+                valid_data['board'] = board
+            except Board.DoesNotExist:
+                errors["board_not_found"] = "해당 게시판이 존재하지않습니다."
+                status = 'fail'
+            if user.is_superuser != 1:
+                errors["user_is_not_superuser"] = "어드민계정만 접근할 수 있는 게시판 입니다."
+                status = 'fail'
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'NoticeView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            data["require_login"] = False
+            data["require_membership"] = False
+            data['show_notice_check'] = True
+
+            board = valid_data['board']
+            data["board"] = BoardSerializer(board).data
+
+            data.update(get_auth(board.id, request.user))
+            article_list = Article.objects.filter(board=board).annotate(writer_name=F(
+                "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+            # article_list = article_list[:min(8, len(article_list))]
+            article_list = get_article_metas(article_list)
+            data['articles'] = ArticleSerializer(article_list, many=True).data
+
+        except DatabaseError as e:
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'NoticeView DB ERROR: {e}')
+            status = 'fail'
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception : ' + str(e)
+            logging.exception(f'NoticeView undefined ERROR : {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+
+class ArticleNoticeSaveView(APIView):
+    '''
+    GET: 공지사항 작성
+    URL : board/<board_name>/<board_id>/save/
+
+    JSON RESPONSE
+    data :
+        show_anonymous_check : 해당 뷰에서 항상 true
+        show_notice_check : 해당 뷰에서 항상 false
+    '''
+
+    def get(self, request, *args, **kwargs):
+
+        data = {}
+        board = Board.objects.get(board_type="Notice")
+        data['board'] = board
+        data["board_name"] = board.name
+        data["board_id"] = board.id
+        data["url"] = "/community/board/notice/"
+        if request.user.is_anonymous:
+            data["alert"] = "로그인이 필요한 서비스입니다."
+            res = {'status': 'fail', 'msg': '로그인이 필요한 서비스입니다.'}
+            return Response(res)
+        # 쿼리스트링의 값을 가져온다.
+        if 'team_id' in request.GET:
+            team_id = request.GET['team_id']
+            members = TeamMember.objects.filter(
+                team_id=team_id).values_list("member_id", flat=True)
+            if request.user.id in members:
+                data['team'] = Team.objects.get(id=team_id)
+        data['type'] = 'register'
+        data['type_kr'] = '등록'
+        data['notice_check'] = 'checked'
+        data['show_notice_check'] = False
+        data.update(get_auth(board.id, request.user))
+
+        if 'alert' in data:
+            res = {'status': 'fail', 'msg': '접근이 제한되었습니다.'}
+            return Response(res)
+        if not data['is_auth_notice']:
+            data['alert'] = "접근권한이 없습니다."
+            data['url'] = reverse("community:main")
+            res = {'status': 'fail', 'msg': '접근이 제한되었습니다.'}
+            return Response(res)
+
+        res = {'status': 'success', 'data': data}
+        return Response(res)
+
+
+class CommunityMainView(APIView):
+    '''
+    GET: 커뮤니티 메인화면을 위한 JSON response
+    URL : /community
+    '''
+
+    def get_validation(self, request, *args, **kwargs):
+        status = 'success'
+        message = ''
+        errors = {}
+        valid_data = {}
+
+        user = request.user
+
+        return status, message, errors, valid_data
+
+    def get(self, request, *args, **kwargs):
+        # Request Validation
+        status, message, errors, valid_data \
+            = self.get_validation(request, *args, **kwargs)
+
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(f'CommunityMainView validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res)
+
+        # Transactions
+        data = {}
+        try:
+            data['show_searchbox'] = True
+            boards = Board.objects.exclude(
+                board_type='User').exclude(board_type='Team')
+            for board in boards:
+                # 최신 게시물
+                article_list = Article.objects.filter(board=board).annotate(writer_name=F(
+                    "writer__user__username"), is_superuser=F("writer__user__is_superuser")).order_by('-pub_date')
+                article_list = article_list[:min(8, len(article_list))]
+                article_list = get_article_metas(article_list)
+                board.article_list = article_list
+
+                if board.board_type == 'Recruit':
+                    for article in board.article_list:
+                        tr = TeamRecruitArticle.objects.filter(
+                            article=article).first()
+                        if tr:
+                            article.team = tr.team
+                        else:
+                            article.team = None
+
+                meta = BoardSerializer(board).data
+                articles = ArticleSerializer(article_list, many=True).data
+
+                data['boards_'+board.board_type+'_meta'] = meta
+                data['boards_'+board.board_type +
+                     '_articles'] = articles
+
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+            logging.exception(f'CommunityMainView DB ERROR: {e}')
+            status = 'fail'
+
+        except Exception as e:
+            errors['undefined_exception'] = 'undefined_exception ' + str(e)
+            logging.exception(f'CommunityMainView ERROR: {e}')
+            status = 'fail'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'message': message, 'data': data}
+        else:
+            res = {'status': status, 'message': message, 'errors': errors}
+        return Response(res)
