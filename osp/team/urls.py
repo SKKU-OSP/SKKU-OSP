@@ -31,6 +31,4 @@ urlpatterns = [
          name='TeamApplicationList'),
     path('api/recommender/users/', views.UserRecommenderView.as_view(),
          name='UserRecommender')
-
-    # path('api/member', views.TeamMemberAPI.asView(), name='TeamMember API'),
 ]
