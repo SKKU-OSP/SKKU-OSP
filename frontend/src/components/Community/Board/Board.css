@@ -60,6 +60,7 @@
 .board-article {
   width: 100%;
   padding: 30px 20px;
+  max-height: 150px;
   border-bottom: 1px solid var(--sub-border-color);
 }
 
@@ -453,4 +454,8 @@ ul.pagination li a.active {
 
 .ql-editor {
   height: 400px;
+}
+
+.articleTeam {
+  color: black;
 }
