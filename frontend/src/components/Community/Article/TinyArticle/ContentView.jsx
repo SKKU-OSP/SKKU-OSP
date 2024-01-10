@@ -353,7 +353,7 @@ function ContentView(props) {
               </div>
             )}
 
-            {!team && <div className={styles.articleTeam}>팀 정보가 없습니다. 지원할 수 없습니다.</div>}
+            {!team && <div className="articleTeam">팀 정보가 없습니다. 지원할 수 없습니다.</div>}
           </>
         )}
       </div>
