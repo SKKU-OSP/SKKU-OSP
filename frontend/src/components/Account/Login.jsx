@@ -5,6 +5,7 @@ import axios from 'axios';
 
 import classes from './Login.module.css';
 import AuthContext from '../../utils/auth-context';
+import LoginErrorModal from './LoginErrorModal';
 import { setExpiration } from '../../utils/auth';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
@@ -15,6 +16,7 @@ const login_url = `${domain_url}/accounts/login/user/`;
 function Login() {
   const location = useLocation();
   const [error, setError] = useState(location.state?.error);
+  const [show, setShow] = useState(false);
   const navigate = useNavigate();
   const usernameInputRef = useRef();
   const passwordInputRef = useRef();
@@ -35,6 +37,7 @@ function Login() {
         navigate('/community');
       } else {
         setError(res.message);
+        setShow(true);
       }
     } catch (error) {
       console.log('error', error);
@@ -54,14 +57,10 @@ function Login() {
 
   return (
     <div style={{ maxWidth: '460px', margin: 'auto' }}>
+      <LoginErrorModal show={show} onShowLoginErrorModal={setShow} error={error} />
       <div className="d-flex justify-content-center mb-3">
         <img src="/images/logo.svg" alt="Logo" className="w-50" />
       </div>
-      {error && (
-        <div className="text-start mb-3">
-          <strong>{error}</strong>
-        </div>
-      )}
 
       <form method="post" onSubmit={handleLogin}>
         <div className="form-floating mb-3">

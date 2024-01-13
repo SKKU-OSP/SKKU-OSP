@@ -59,7 +59,7 @@ class JWTLoginView(APIView):
             }
             return Response({"status": "success", "message": "로그인 성공", "data": data})
 
-        return Response(get_fail_res("인증에 실패했습니다. Username과 password를 다시 확인해주세요."),)
+        return Response(get_fail_res("Username과 password를 다시 확인해주세요."),)
 
 
 class GitHubLoginView(APIView):
