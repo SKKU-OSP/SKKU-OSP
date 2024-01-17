@@ -186,7 +186,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-basis: 55%;
+  width: 55%;
 }
 
 .board-team-article {
