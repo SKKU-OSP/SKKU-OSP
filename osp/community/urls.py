@@ -1,6 +1,6 @@
 from django.urls import path
 
-from community import views, views_article
+from community import views
 
 app_name = 'community'
 
@@ -10,34 +10,34 @@ urlpatterns = [
          views.TableBoardView.as_view(), name='board'),
     # 게시글 조회
     path('api/article/<int:article_id>/',
-         views_article.ArticleAPIView.as_view(), name='ArticleAPI'),
+         views.ArticleAPIView.as_view(), name='ArticleAPI'),
     # 게시글 수정
     path('api/article/<int:article_id>/update/',
-         views_article.ArticleUpdateView.as_view(), name='ArticleUpdate'),
+         views.ArticleUpdateView.as_view(), name='ArticleUpdate'),
     # 게시글 생성
     path('api/article/create/',
-         views_article.ArticleCreateView.as_view(), name='ArticleCreate'),
+         views.ArticleCreateView.as_view(), name='ArticleCreate'),
     # 게시글 삭제
     path('api/article/<int:article_id>/delete/',
-         views_article.ArticleDeleteView.as_view(), name='ArticleDelete'),
+         views.ArticleDeleteView.as_view(), name='ArticleDelete'),
     # 게시글 좋아요
     path('api/article/<int:article_id>/like/',
-         views_article.ArticleLikeView.as_view(), name='ArticleLike'),
+         views.ArticleLikeView.as_view(), name='ArticleLike'),
     # 게시글 스크랩
     path('api/article/<int:article_id>/scrap/',
-         views_article.ArticleScrapView.as_view(), name='ArticleScrap'),
+         views.ArticleScrapView.as_view(), name='ArticleScrap'),
     # 게시글 파일
     path('api/article/<int:article_id>/file/<int:articlefile_id>/',
-         views_article.ArticleFileView.as_view(), name='ArticleFile'),
+         views.ArticleFileView.as_view(), name='ArticleFile'),
     # 댓글 생성
     path('api/comment/create/',
-         views_article.CommentCreateView.as_view(), name='CommentCreate'),
+         views.CommentCreateView.as_view(), name='CommentCreate'),
     # 댓글 삭제
     path('api/comment/<int:comment_id>/delete/',
-         views_article.CommentDeleteView.as_view(), name='CommentDelete'),
+         views.CommentDeleteView.as_view(), name='CommentDelete'),
     # 댓글 좋아요
     path('api/comment/<int:comment_id>/like/',
-         views_article.CommentLikeView.as_view(), name='CommentLike'),
+         views.CommentLikeView.as_view(), name='CommentLike'),
 
     # 유저가 쓴 게시글 목록
     path('api/user-articles/',
@@ -54,7 +54,7 @@ urlpatterns = [
     ### 미사용 패턴 ###
     # 댓글 조회
     path('api/article/<int:article_id>/comments/',
-         views_article.ArticleCommentsView.as_view(), name='ArticleComments'),
+         views.ArticleCommentsView.as_view(), name='ArticleComments'),
     # 메인 페이지
     path('api/main/', views.CommunityMainView.as_view(), name='main'),
     path('api/board/notice/', views.NoticeView.as_view(), name='notice'),
