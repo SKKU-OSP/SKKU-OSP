@@ -17,6 +17,7 @@
 ## Releases
 
 1.0.0 (v1.0.0) - 2023.12.29.
+1.0.1 (v1.0.1) - 2024.01.24.
 <details>
 <summary> Pre Releases </summary>
 
