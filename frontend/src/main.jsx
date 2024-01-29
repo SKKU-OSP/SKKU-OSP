@@ -74,7 +74,15 @@ const router = createBrowserRouter([
             element: <TeamBoard />
           },
           {
-            path: 'board/:board_name/register',
+            path: 'board/:board_name/register', //커뮤니티 게시글 등록
+            element: <ArticleRegister />
+          },
+          {
+            path: 'recruit/:board_name/register', //팀 모집 게시판 게시글 등록
+            element: <ArticleRegister />
+          },
+          {
+            path: 'team/:board_name/register', //팀 게시판 게시글 등록
             element: <ArticleRegister />
           },
           {
