@@ -94,7 +94,7 @@ function TeamBoard() {
   };
 
   const onWrite = () => {
-    navigate(`/community/board/${thisTeam.board.name}/register/`);
+    navigate(`/community/team/${thisTeam.board.name}/register/`);
   };
 
   const onRecommender = () => {
