@@ -86,7 +86,7 @@
   min-height: 350px;
   max-height: 500px;
   z-index: 1;
-  /* margin: 5px 0; */
+  color: var(--main-black);
 }
 
 .article-body {
