@@ -1,0 +1,22 @@
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip-bubble {
+  position: absolute;
+  padding: 5px;
+  background-color: var(--main-white);
+  color: var(--main-black);
+  border-radius: 5px;
+  font-size: 12px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip-text:hover + .tooltip-bubble {
+  visibility: visible;
+  opacity: 1;
+}
