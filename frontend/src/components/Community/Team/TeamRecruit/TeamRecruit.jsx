@@ -99,7 +99,7 @@ function TeamRecruit() {
 
   const onWrite = () => {
     if (username) {
-      navigate(`/community/board/${tabName}/register`);
+      navigate(`/community/recruit/${tabName}/register`);
     } else {
       if (confirm('로그인이 필요합니다. 로그인 화면으로 이동하시겠습니까?')) {
         navigate(`/accounts/login`);
