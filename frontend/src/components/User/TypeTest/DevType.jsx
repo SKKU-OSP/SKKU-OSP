@@ -13,7 +13,14 @@ function DevType(props) {
 
   return (
     <>
-      <div className="fs-4 bold mb-2">개발자 유형</div>
+      <div className="d-flex fs-4 bold mb-2 justify-content-between">
+        <div>개발자 유형</div>
+        <div>
+          <button className="btn btn-secondary" onClick={() => navigate('test')}>
+            다시 검사하기
+          </button>
+        </div>
+      </div>
       <div className="mb-4">
         <DevTypeCard
           devType={devType}
@@ -23,13 +30,7 @@ function DevType(props) {
           typeKr={data.nicknameKR}
           factors={factors}
         />
-        <div className="d-flex justify-content-end my-2">
-          <button className="btn btn-secondary" onClick={() => navigate('test')}>
-            다시 검사하기
-          </button>
-        </div>
       </div>
-
       <div className="d-flex justify-content-around flex-wrap gap-2">
         <div className="mb-2">
           <div className="fs-5">상생 파트너</div>
