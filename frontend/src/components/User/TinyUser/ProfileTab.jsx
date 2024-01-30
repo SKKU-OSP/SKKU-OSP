@@ -3,9 +3,9 @@ import Nav from 'react-bootstrap/Nav';
 import ProfileDetail from './ProfileDetail';
 
 function ProfileTab(props) {
+  const { github_id, isEdit, open_lvl } = props;
   const [activeTab, setActiveTab] = useState('관심분야');
   const [githubId, setGithubId] = useState();
-  const { github_id, isEdit } = props;
   useEffect(() => setGithubId(github_id), [github_id]);
   const handleTabSelect = (selectedKey) => {
     setActiveTab(selectedKey);
@@ -26,7 +26,7 @@ function ProfileTab(props) {
               <Nav.Link eventKey="정보">정보</Nav.Link>
             </Nav.Item>
           </Nav>
-        ) : (
+        ) : (open_lvl === 2 ? (
           <Nav justify activeKey={activeTab} onSelect={handleTabSelect}>
             <Nav.Item>
               <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
@@ -35,9 +35,15 @@ function ProfileTab(props) {
               <Nav.Link eventKey="활동">활동</Nav.Link>
             </Nav.Item>
           </Nav>
-        )}
+        ) : (open_lvl === 1 ? (
+          <Nav justify activeKey={activeTab} onSelect={handleTabSelect}>
+            <Nav.Item>
+              <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        ) : <></>))}
       </div>
-      <ProfileDetail Tab={activeTab} githubId={githubId} isEdit={isEdit} />
+      { (isEdit || open_lvl >=1) && <ProfileDetail Tab={activeTab} githubId={githubId} isEdit={isEdit} /> }
     </>
   );
 }
