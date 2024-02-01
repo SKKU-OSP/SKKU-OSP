@@ -9,21 +9,23 @@ export default function ProfileDropdown_Presenter(props) {
   return (
     <>
       {userId ? (
-        <span className="dropdown-button" style={{ display: 'inline-block' }}>
-          {isLogin ? (
-            <DropdownButton title={userName} variant="link" style={{ marginRight: '5px', fontSize: '16px' }}>
-              <Dropdown.Item onClick={onProfile}>프로필</Dropdown.Item>
-              {!isMine && (
-                <>
-                  <Dropdown.Item onClick={onChat}>메시지</Dropdown.Item>
-                  <ChatMessageModal_Container show={show} onCloseChatModal={onCloseChat} targetId={userId} />
-                </>
-              )}
-            </DropdownButton>
-          ) : (
-            <span style={{ marginRight: '5px', fontSize: '16px' }}>{userName}</span>
-          )}
-        </span>
+        (userId === 1 && isMine) ? (<span>{userName}</span>) : (<span className="dropdown-button" style={{ display: 'inline-block' }}>
+        {isLogin ? (
+          <DropdownButton title={userName} variant="link" style={{ marginRight: '5px', fontSize: '16px' }}>
+            {
+              userId !== 1 && <Dropdown.Item onClick={onProfile}>프로필</Dropdown.Item>
+            }
+            {!isMine && (
+              <>
+                <Dropdown.Item onClick={onChat}>메시지</Dropdown.Item>
+                <ChatMessageModal_Container show={show} onCloseChatModal={onCloseChat} targetId={userId} />
+              </>
+            )}
+          </DropdownButton>
+        ) : (
+          <span style={{ marginRight: '5px', fontSize: '16px' }}>{userName}</span>
+        )}
+      </span>) 
       ) : (
         '탈퇴계정'
       )}
