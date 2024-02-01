@@ -33,10 +33,10 @@ export default function BoardArticle_Presenter(props) {
                   article.anonymous_writer ? (
                     <span>익명</span>
                   ) : (
-                    <ProfileDropdown_Container
+                    article.writer.user.is_superuser ? (<span>{article.writer.user.username}</span>) : (<ProfileDropdown_Container
                       userName={article.writer.user.username}
                       userId={article.writer.user.id}
-                    />
+                    />)
                   )
                 ) : (
                   <span>탈퇴한 이용자</span>
