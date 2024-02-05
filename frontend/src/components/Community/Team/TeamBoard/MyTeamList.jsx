@@ -59,6 +59,8 @@ function MyTeamList() {
     } else {
       if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
         navigate('/accounts/login');
+      } else {
+        navigate('/');
       }
       return;
     }
