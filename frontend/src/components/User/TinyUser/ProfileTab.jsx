@@ -35,15 +35,15 @@ function ProfileTab(props) {
               <Nav.Link eventKey="활동">활동</Nav.Link>
             </Nav.Item>
           </Nav>
-        ) : (open_lvl === 1 ? (
+        ) : (
           <Nav justify activeKey={activeTab} onSelect={handleTabSelect}>
             <Nav.Item>
               <Nav.Link eventKey="관심분야">관심분야</Nav.Link>
             </Nav.Item>
           </Nav>
-        ) : <></>))}
+        ))}
       </div>
-      { (isEdit || open_lvl >=1) && <ProfileDetail Tab={activeTab} githubId={githubId} isEdit={isEdit} /> }
+      <ProfileDetail Tab={activeTab} githubId={githubId} isEdit={isEdit} open_lvl={open_lvl}/>
     </>
   );
 }
