@@ -13,12 +13,23 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 function OwnerInfo() {
   const { username } = useParams();
   const [ownerInfo, setOwnerInfo] = useState();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isActivityOpen, setIsActivityOpen] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(undefined);
+  const [isActivityOpen, setIsActivityOpen] = useState(undefined);
   const handlePublicSwitchChange = (checked, type) => {
-    if (type === 0) setIsProfileOpen(checked);
-    else setIsActivityOpen(checked);
+    let open_lvl = 0;
+    if (type === 0)
+    {
+      open_lvl = isProfileOpen ? 0 : (isActivityOpen ? 2 : 1);
+      setIsProfileOpen(checked);
+    }
+    else
+    {
+      open_lvl = isProfileOpen ? (isActivityOpen ? 1 : 2) : 0;
+      setIsActivityOpen(checked);
+    }
+    updatePostAccountPrivacy(open_lvl);
   };
+
   useEffect(() => {
     const getOwnerInfo = async () => {
       try {
@@ -30,12 +41,37 @@ function OwnerInfo() {
         }
       } catch (error) {}
     };
+    const getAccountPrivacy = async () => {
+      try {
+        const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/'+ username + '/';
+        const response = await axios.get(AccountPrivacyGetUrl, getAuthConfig());
+        const res = response.data;
+        if (res.status === 'success') {
+          if (res.data.open_lvl === 2) {
+            setIsProfileOpen(true);
+            setIsActivityOpen(true);
+          } else if (res.data.open_lvl === 1) {
+            setIsProfileOpen(true);
+            setIsActivityOpen(false);
+          } else {
+            setIsProfileOpen(false);
+            setIsActivityOpen(false);
+          }
+        }
+      } catch (error) {}
+    };
     getOwnerInfo();
+    getAccountPrivacy();
   }, []);
+
+  const updatePostAccountPrivacy = async (open_lvl) => {
+    const AccountPrivacyPostUrl = server_url + '/user/api/account-privacy/'+ username + '/';
+    await axios.post(AccountPrivacyPostUrl, { open_lvl: open_lvl }, getAuthConfig());
+  };
 
   return (
     <>
-      {ownerInfo ? (
+      {ownerInfo && isActivityOpen != undefined && isProfileOpen != undefined ? (
         <div className="d-flex flex-column profile-owner-info">
           <div className="d-flex flex-column info-university">
             <div className="d-flex justify-content-center">

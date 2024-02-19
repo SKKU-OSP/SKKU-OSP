@@ -612,6 +612,7 @@ class ProfileActivityView(APIView):
 
         return Response(res)
 
+
 def get_commit_repos(github_id):
     repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values(
         "github_id", "repo_name", "committer_date").order_by("-committer_date")
@@ -756,7 +757,8 @@ class ProfileImageDefaultView(APIView):
         user_account.save()
         res = {"status": status}
         return Response(res)
-    
+
+
 def get_user_star(github_id: str):
     # 서브쿼리를 이용해 모든 유저의 Star 개수를 계산
     star_subquery = Subquery(StudentTab.objects.values('github_id'))
@@ -1198,3 +1200,113 @@ class DevTypeTestSaveView(APIView):
             return Response(get_fail_res('undefined_exception'))
 
         return Response({'status': 'success', 'message': '저장했습니다.'})
+
+
+class AccountPrivacyView(APIView):
+    def get_validation(self, request, username):
+        user = request.user
+        status = "fail"
+        errors = None
+        if not user.is_authenticated:
+            errors = "require_login"
+        else:
+            try:
+                user = User.objects.get(username=username)
+                status = "success"
+            except User.DoesNotExist:
+                errors = "user_not_found"
+            except Exception as e:
+                logging.exception(
+                    f'AccountPrivacyView undefined_exception: {e}')
+                errors = "undefined_exception"
+        return status, errors
+
+    def get(self, request, username):
+        # Declaration
+        data = {}
+        errors = {}
+        status = 'success'
+
+        # Request Validation
+        status, errors = self.get_validation(request, username)
+
+        if status == 'fail':
+            return Response(get_fail_res(errors))
+
+        # Transactions
+        try:
+            account = Account.objects.get(user__username=username)
+            account_privacy = AccountPrivacy.objects.get(account=account)
+            data['open_lvl'] = account_privacy.open_lvl
+
+        except DatabaseError as e:
+            # Database Exception handling
+            status = 'fail'
+            errors['DB_exception'] = 'DB Error'
+        except Exception as e:
+            logging.exception(f'AccountPrivacyView undefined_exception: {e}')
+            status = 'fail'
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if status == 'success':
+            res = {'status': status, 'data': data}
+        else:
+            res = {'status': status, 'errors': errors}
+        return Response(res)
+
+    def post_validation(self, request, username):
+        errors = {}
+        user = request.user
+        if not user.is_authenticated:
+            errors["require_login"] = "로그인이 필요합니다."
+        else:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
+            except Exception as e:
+                logging.exception(
+                    f'AccountPrivacyView undefined_exception: {e}')
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
+
+        return errors
+
+    def post(self, request, username):
+        '''
+        프로필 공개 범위 설정 수정
+        '''
+        # Declaration
+        data = {}
+        status = 'fail'
+
+        # Request Validation
+        errors = self.post_validation(request, username)
+
+        if errors:
+            res = {'status': status, 'errors': errors}
+            return Response(res)
+
+        open_lvl = request.data.get('open_lvl', None)
+        # Transactions
+        try:
+            if open_lvl != None:
+                account = Account.objects.get(user=request.user)
+                account_privacy = AccountPrivacy.objects.get(account=account)
+                account_privacy.open_lvl = open_lvl
+                account_privacy.save()
+                data['open_lvl'] = open_lvl
+        except DatabaseError as e:
+            # Database Exception handling
+            errors['DB_exception'] = 'DB Error'
+        except Exception as e:
+            logging.exception(
+                f'AccountPrivacyView undefined_exception: {e}')
+            errors['undefined_exception'] = 'undefined_exception'
+
+        # Response
+        if errors:
+            res = {'status': status, 'errors': errors}
+        else:
+            res = {'status': 'success', 'data': data}
+        return Response(res)
