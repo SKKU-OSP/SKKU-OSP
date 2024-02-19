@@ -21,7 +21,6 @@ const domainUrl = import.meta.env.VITE_SERVER_URL;
 function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id;
   const urlEditArticle = domainUrl + '/community/api/article/' + articleID + '/update/';
-
   const article = {};
   const username = useContext(AuthContext).username;
   const [myArticle, setMyArticle] = useState(false);
@@ -45,7 +44,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
     //axios 사용
     const getTag = async () => {
       const urlTag = domainUrl + '/tag/api/list/';
-      const responseTag = await axios.get(urlTag);
+      const responseTag = await axios.get(urlTag, getAuthConfig());
 
       const resTag = responseTag.data;
       if (resTag.status === 'success') {
@@ -81,8 +80,8 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       }
     };
     const getArticle = async () => {
-      const urlArticle = domainUrl + '/community/api/article/' + articleID;
-      const responseArticle = await axios.get(urlArticle);
+      const urlArticle = domainUrl + '/community/api/article/' + articleID + '/';
+      const responseArticle = await axios.get(urlArticle, getAuthConfig());
       const resArticle = responseArticle.data;
       console.log('arti', resArticle);
       if (resArticle.status === 'success') {
