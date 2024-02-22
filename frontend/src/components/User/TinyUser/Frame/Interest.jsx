@@ -12,7 +12,7 @@ import LoaderIcon from 'react-loader-icon';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 function Interest(props) {
-  const { isEdit } = props;
+  const { isEdit, open_lvl } = props;
   // Interest 훅
   const [interestShow, setInterestShow] = useState(false);
   const [interest, setInterest] = useState([]);
@@ -155,13 +155,13 @@ function Interest(props) {
                   )}
                 </div>
                 <div className="d-flex flex-row flex-wrap category-icon">
-                  {myInterest.length > 0
+                  {open_lvl===0 ? ('비공개 설정 되어 있습니다.') : (myInterest.length > 0
                     ? myInterest.map((interest) => (
                         <div className="icon" key={interest.value}>
                           <span className="icon-text">{interest.value}</span>
                         </div>
                       ))
-                    : '관심분야가 없습니다.'}
+                    : '관심분야가 없습니다.')}
                 </div>
               </div>
               <div className="d-flex flex-column profile-language">
@@ -183,7 +183,9 @@ function Interest(props) {
                     </>
                   )}
                 </div>
-                {Object.values(mySkill).reduce((sum, tags) => sum + tags.length, 0) > 0 ? (
+                {open_lvl===0 ? (<div className="d-flex flex-row language-level" key={`level-`}>
+                    비공개 설정 되어 있습니다.
+                  </div>) : (Object.values(mySkill).reduce((sum, tags) => sum + tags.length, 0) > 0 ? (
                   <>
                     {Object.entries(mySkill)
                       .reverse()
@@ -255,7 +257,7 @@ function Interest(props) {
                   <div className="d-flex flex-row language-level" key={`level-`}>
                     사용언어/기술스택이 없습니다.
                   </div>
-                )}
+                ))}
               </div>
             </div>
           ) : (

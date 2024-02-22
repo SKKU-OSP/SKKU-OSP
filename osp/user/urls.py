@@ -34,5 +34,6 @@ urlpatterns = [
          views.DevTypeTestSaveView.as_view(), name='DevTypeTestSave'),
     path('api/dashboard/<username>/contr/',
          views.TotalContrView.as_view(), name='TotalContr'),
-
+    path('api/account-privacy/<username>/',
+         views.AccountPrivacyView.as_view(), name='account-privacy'),
 ]
