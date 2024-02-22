@@ -60,7 +60,7 @@ const SignUpForm = () => {
   const [selectAbsence, setSelectAbsence] = useState('0');
   const [selectPluralMajor, setSelectPluralMajor] = useState('0');
   const [personalDomain, setPersonalDomain] = useState('');
-  const [inputPersonalDomain, setInputPersonalDomain] = useState(githubData?.personal_email_domain.value);
+  const [inputPersonalDomain, setInputPersonalDomain] = useState('');
   const [primaryDomain, setPrimaryDomain] = useState('');
   const [inputPrimaryDomain, setInputPrimaryDomain] = useState(githubData?.github_email_domain.value);
   const [secondaryDomain, setSecondaryDomain] = useState('');
@@ -89,8 +89,8 @@ const SignUpForm = () => {
     plural_major: 0,
     personal_email: '',
     personal_email_domain: '',
-    primary_email: '',
-    primary_email_domain: '',
+    primary_email: githubData?.github_email_id.value,
+    primary_email_domain: githubData?.github_email_domain.value,
     secondary_email: '',
     secondary_email_domain: '',
     account_interests: '',
@@ -145,6 +145,7 @@ const SignUpForm = () => {
   };
 
   const handleSelectCollege = (obj) => {
+    onChangeCollege();
     setSelectCollege(obj.value);
   };
 
@@ -404,6 +405,12 @@ const SignUpForm = () => {
         return { ...prev, name: { label: '', status: 'success' } };
       });
     }
+  };
+
+  const onChangeCollege = () => {
+    setLabels((prev) => {
+      return { ...prev, college: { label: '', status: 'info' } };
+    });
   };
 
   const onChangeDept = (e) => {
