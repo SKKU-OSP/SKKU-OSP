@@ -179,18 +179,6 @@ function ContentView(props) {
             </span>
           </div>
           {username === article.writer.user.username ? (
-            // <BsThreeDotsVertical className="dropdownbtn">
-            //   <DropdownButton className="article-more">
-            //     <Dropdown.Item onClick={onEdit}>
-            //       <BsPencilFill style={{ marginRight: '10px' }} />
-            //       수정
-            //     </Dropdown.Item>
-            //     <Dropdown.Item onClick={onDelete}>
-            //       <BsTrash style={{ marginRight: '10px' }} />
-            //       삭제
-            //     </Dropdown.Item>
-            //   </DropdownButton>
-            // </BsThreeDotsVertical>
             <Dropdown className="article-more" style={{ display: 'inline-block' }}>
               <Dropdown.Toggle as="span" id="dropdown-custom-component" className="dropdownbtn">
                 <BsThreeDotsVertical />
@@ -208,22 +196,6 @@ function ContentView(props) {
               </Dropdown.Menu>
             </Dropdown>
           ) : (
-            // <Dropdown className="article-more" style={{ display: 'inline-block' }}>
-            //   <Dropdown.Toggle as="span" id="dropdownbtn">
-            //     <BsThreeDotsVertical className="dropdown-toggle" />
-            //   </Dropdown.Toggle>
-
-            //   <Dropdown.Menu>
-            //     <Dropdown.Item onClick={onEdit}>
-            //       <BsPencilFill style={{ marginRight: '10px' }} />
-            //       수정
-            //     </Dropdown.Item>
-            //     <Dropdown.Item onClick={onDelete}>
-            //       <BsTrash style={{ marginRight: '10px' }} />
-            //       삭제
-            //     </Dropdown.Item>
-            //   </Dropdown.Menu>
-            // </Dropdown>
             <Dropdown className="article-more hidden">
               <Dropdown.Toggle id="dropdown-button">
                 <BsThreeDotsVertical />

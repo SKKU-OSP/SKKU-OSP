@@ -5,7 +5,6 @@ import ProfileDropdown_Container from '../../ProfileDropdown';
 
 export default function BoardArticle_Presenter(props) {
   const { article, pubDate, onArticle } = props;
-
   return (
     <div className="board-article">
       {article.title ? (

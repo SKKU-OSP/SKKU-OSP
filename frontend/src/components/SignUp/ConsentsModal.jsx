@@ -134,7 +134,7 @@ const ConsentsModal = (props) => {
 
         <Modal.Footer>
           <Button variant="primary" onClick={handleModalClose}>
-            닫기
+            확인
           </Button>
         </Modal.Footer>
       </Modal>
