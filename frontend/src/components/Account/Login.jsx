@@ -6,7 +6,7 @@ import axios from 'axios';
 import classes from './Login.module.css';
 import AuthContext from '../../utils/auth-context';
 import LoginErrorModal from './LoginErrorModal';
-import { setExpiration } from '../../utils/auth';
+import { tokenLoader, setExpiration } from '../../utils/auth';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
 const github_login_url = `oauth/authorize?client_id=${client_id}`;
@@ -26,18 +26,24 @@ function Login() {
   const sendLoginRequest = async () => {
     try {
       if ((usernameInputRef.current.value === '') | (passwordInputRef.current.value === '')) return;
-      const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
-      const response = await axios.post(login_url, data);
-      const res = response.data;
-      if (res.status == 'success') {
-        localStorage.setItem('access_token', res.data.access_token);
-        localStorage.setItem('refresh_token', res.data.refresh_token);
-        setExpiration(); // 로컬스토리지에 expiration 저장
-        setUser();
+      const token = tokenLoader()
+      if (token !== null && token !== 'EXPIRED') {
         navigate('/community');
-      } else {
-        setError(res.message);
-        setShow(true);
+      }
+      else{
+        const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
+        const response = await axios.post(login_url, data);
+        const res = response.data;
+        if (res.status == 'success') {
+          localStorage.setItem('access_token', res.data.access_token);
+          localStorage.setItem('refresh_token', res.data.refresh_token);
+          setExpiration(); // 로컬스토리지에 expiration 저장
+          setUser();
+          navigate('/community');
+        } else {
+          setError(res.message);
+          setShow(true);
+        }
       }
     } catch (error) {
       console.log('error', error);
