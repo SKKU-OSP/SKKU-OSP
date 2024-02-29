@@ -28,6 +28,7 @@ function Login() {
       if ((usernameInputRef.current.value === '') | (passwordInputRef.current.value === '')) return;
       const token = tokenLoader()
       if (token !== null && token !== 'EXPIRED') {
+        setUser();
         navigate('/community');
       }
       else{
