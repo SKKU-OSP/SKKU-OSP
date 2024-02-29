@@ -90,11 +90,11 @@ function Login() {
         </div>
         <div className="d-flex flex-column">
           <button type="submit" className="btn btn-primary mb-2">
-            Login
+            Sign-in
           </button>
           {github_login_url ? (
             <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
-              <BsGithub /> Start with Github
+              <BsGithub /> Sign-up with Github
             </button>
           ) : (
             <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>
@@ -104,8 +104,10 @@ function Login() {
       <div className="d-flex justify-content-between flex-wrap">
         <div className={classes.weakText}>
           <Link to="/accounts/find">계정 찾기</Link>
-          <span>|</span>
+          <span> | </span>
           <Link to="/accounts/password-reset">비밀번호 재설정</Link>
+          <span> | </span>
+          <Link onClick={handleGithubLogin}> 회원가입 </Link>
         </div>
       </div>
     </div>
