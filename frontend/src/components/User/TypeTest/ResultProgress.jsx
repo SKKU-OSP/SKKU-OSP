@@ -5,7 +5,6 @@ const ResultProgress = (factor) => {
   const q = factor.factor;
   const leftLength = String((100 - q) / 2 - 3) + '%';
   const rightLength = String((100 + q) / 2 + ((100 + q) % 2) - 3) + '%';
-  console.log(leftLength, rightLength, factor.factor);
   return (
     <div className="d-flex" style={{ backgroundColor: '#E2E2E2' }}>
       <div style={{ height: '10px', width: leftLength, backgroundColor: '#E2E2E2' }}></div>

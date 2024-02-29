@@ -297,6 +297,7 @@ def read_commit_time(username):
         update_commmit_time()
     try:
         committer_hour_dist = pd.read_csv(filepath1, index_col=0)
+        print("committer_hour_dist", committer_hour_dist)
         hour_dist = committer_hour_dist.at[username, "hour_dist"]
         hour_dist = json.loads(hour_dist)
         daytime = committer_hour_dist.at[username, "daytime"]
