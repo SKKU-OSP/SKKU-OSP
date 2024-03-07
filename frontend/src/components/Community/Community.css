@@ -350,3 +350,96 @@
   background-color: var(--btn-back-hover);
   border: 1px solid var(--btn-back-hover);
 }
+
+.community-hero {
+  width: 100%;
+  height: 400px;
+  background-color: #dddddd;
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 7px;
+  color: var(--main-white);
+  position: relative;
+}
+.community-hero .icon {
+  transform: scaleX(1.5);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.community-hero:hover .icon {
+  opacity: 1;
+}
+
+.page-indicators {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-indicators svg {
+  margin: 0 2px;
+  cursor: pointer;
+  color: var(--main-white);
+}
+
+.board-left {
+  width: 50%;
+}
+
+.board-right {
+  width: 50%;
+}
+
+.board-nav {
+  background-color: var(--main-white);
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+  margin: 10px 15px 5px;
+  padding: 10px 15px 0;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.board-nav-item {
+  padding: 2px;
+}
+
+.board-nav-item > div {
+  padding: 0 8px;
+  margin: 0 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.selected-board-nav-item > div {
+  font-weight: bolder;
+  position: relative;
+  color: var(--btn-hover-color);
+}
+.selected-board-nav-item > div::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -1px;
+  width: 80%;
+  height: 1.5px;
+  background-color: var(--btn-hover-color);
+}
+
+.unselected-board-nav-item > div {
+  width: inherit;
+  font-weight: bolder;
+  color: var(--nav-unselect-color);
+}
+.unselected-board-nav-item > div:hover {
+  color: var(--main-light-font-color);
+}

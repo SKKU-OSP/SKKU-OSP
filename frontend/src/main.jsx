@@ -40,6 +40,7 @@ import PasswordResetSend from './components/Account/PasswordResetSend';
 import PasswordResetSendDone from './components/Account/PasswordResetSendDone';
 import PasswordResetConfirm from './components/Account/PasswordResetConfirm';
 import PasswordResetComplete from './components/Account/PasswordResetComplete';
+import MainBoard_Container from './components/Community/Board/MainBoard/MainBoard_Container';
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
         element: <CommunityLayout />,
         children: [
           { path: '', element: <HomePage /> },
+          {
+            path: 'main',
+            element: <MainBoard_Container />
+          },
           {
             path: 'activity/:tabName',
             element: <UserActivity />
