@@ -124,6 +124,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'osp.middleware.SimpleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -263,3 +264,24 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
 SCHEDULER_DEFAULT = True
 
 CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
+
+'''
+nginx에서 중계해준 패킷에 대한 정보 주석해제 후 사용
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {  # 이렇게 설정하면 모든 로거에 대해 적용됩니다.
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+} 
+'''
