@@ -73,9 +73,9 @@ export default function SideBar_Presenter(props) {
           <button type="button" className="btn btn-third btn-login" onClick={onLogin}>
             로그인
           </button>
-          <button type="button" className="btn btn-fourth btn-signup" onClick={onLogin}>
+          {/* <button type="button" className="btn btn-fourth btn-signup" onClick={onLogin}>
             회원가입
-          </button>
+          </button> */}
         </div>
       )}
     </div>
