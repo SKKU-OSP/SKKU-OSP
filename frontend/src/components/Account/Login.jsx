@@ -89,12 +89,16 @@ function Login() {
           <label htmlFor="password">Password</label>
         </div>
         <div className="d-flex flex-column">
-          <button type="submit" className="btn btn-primary mb-2">
-            Sign-in
+          <button
+            type="submit"
+            className="btn btn-primary mb-2"
+            style={{ backgroundColor: '#072A60', border: '#072A60', fontWeight: 'bold' }}
+          >
+            LOGIN
           </button>
           {github_login_url ? (
             <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
-              <BsGithub /> Sign-up with Github
+              <BsGithub /> Start with Github
             </button>
           ) : (
             <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>
@@ -103,11 +107,11 @@ function Login() {
       </form>
       <div className="d-flex justify-content-between flex-wrap">
         <div className={classes.weakText}>
+          <Link onClick={handleGithubLogin}> 회원가입 </Link>
+          <span> | </span>
           <Link to="/accounts/find">계정 찾기</Link>
           <span> | </span>
           <Link to="/accounts/password-reset">비밀번호 재설정</Link>
-          <span> | </span>
-          <Link onClick={handleGithubLogin}> 회원가입 </Link>
         </div>
       </div>
     </div>
