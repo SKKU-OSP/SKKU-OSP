@@ -803,8 +803,15 @@ class UserDashboardView(APIView):
 
         # 최신 점수 가져옴
         github_id = target_account.github_id
-        score = GithubScore.objects.filter(
-            github_id=github_id).order_by("-year")
+        try:
+            score = GithubScore.objects.filter(
+                github_id=github_id).order_by("-year")
+            if not score:
+                raise ObjectDoesNotExist(
+                    f"No GithubScore found for github_id: {github_id}")
+        except ObjectDoesNotExist as e:
+            logging.exception(f'{e}')
+            return Response(get_fail_res('object_not_found'))
         # 연도 계산
         years = score.values_list("year", flat=True)
         start_year, end_year = min(years), max(years)
