@@ -589,8 +589,11 @@ class ProfileActivityView(APIView):
                     recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
                     id_reponame_pair_list.append(
                         (commit['github_id'], commit_repo_name))
-            contr_repo_queryset = GithubRepoStats.objects.extra(
-                where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+            if id_reponame_pair_list:
+                contr_repo_queryset = GithubRepoStats.objects.extra(
+                    where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
+            else:
+                contr_repo_queryset = []
             for contr_repo in contr_repo_queryset:
                 recent_repos[contr_repo.repo_name]["desc"] = contr_repo.proj_short_desc
                 recent_repos[contr_repo.repo_name]["stargazers_count"] = contr_repo.stargazers_count
@@ -800,8 +803,15 @@ class UserDashboardView(APIView):
 
         # 최신 점수 가져옴
         github_id = target_account.github_id
-        score = GithubScore.objects.filter(
-            github_id=github_id).order_by("-year")
+        try:
+            score = GithubScore.objects.filter(
+                github_id=github_id).order_by("-year")
+            if not score:
+                raise ObjectDoesNotExist(
+                    f"No GithubScore found for github_id: {github_id}")
+        except ObjectDoesNotExist as e:
+            logging.exception(f'{e}')
+            return Response(get_fail_res('object_not_found'))
         # 연도 계산
         years = score.values_list("year", flat=True)
         start_year, end_year = min(years), max(years)
@@ -928,7 +938,6 @@ class UserDevTendencyView(APIView):
             return Response(get_fail_res(error_code=error))
         github_id = target_account.github_id
         data = get_dev_tendency(target_account, github_id)
-
         coworkers = get_coworkers(github_id)
         data['coworkers'] = coworkers
 
@@ -949,10 +958,8 @@ class UserDevTypeView(APIView):
         if error:
             return Response(get_fail_res(error_code=error))
         github_id = target_account.github_id
-
         # 개발자 유형, 성향 데이터
         data = get_dev_type(target_account, github_id)
-
         return Response({"status": "success", "data": data})
 
 
@@ -1022,7 +1029,6 @@ def get_dev_tendency(account, github_id):
     hour_dist, time_circmean, daytime, night, daytime_min, daytime_max = commit_time
     major_act, indi_num, group_num = update_act.read_major_act(github_id)
     commit_freq, commit_freq_dist = update_act.read_frequency(github_id)
-
     # 분석 내용 업데이트
     typeE = -1 if daytime > night else 1
     typeF = commit_freq
@@ -1067,20 +1073,19 @@ def get_coworkers(github_id):
     # 기여한 리포지토리의 목록 조회
     subquery = GithubRepoContributor.objects.filter(
         github_id=github_id).values_list('repo_name', 'owner_id')
-
     # 기여 리포지토리에 존재하는 기여자 목록 쿼리
-    coworker_github_ids = GithubRepoContributor.objects.filter(
-        (Q(repo_name__in=[item[0] for item in subquery]) &
-         Q(owner_id__in=[item[1] for item in subquery]))
-    ).values_list('github_id', flat=True).distinct()
-
-    # 자기자신 삭제
-    coworker_github_ids = list(coworker_github_ids)
-    coworker_github_ids.remove(github_id)
-
-    coworkers = Account.objects.filter(
-        student_data__github_id__in=coworker_github_ids)
-    coworkers = AccountSerializer(coworkers, many=True).data
+    coworkers = []
+    if subquery:
+        coworker_github_ids = GithubRepoContributor.objects.filter(
+            (Q(repo_name__in=[item[0] for item in subquery]) &
+             Q(owner_id__in=[item[1] for item in subquery]))
+        ).values_list('github_id', flat=True).distinct()
+        coworker_github_ids = list(coworker_github_ids)
+        coworker_github_ids.remove(github_id)
+        # 자기자신 삭제
+        coworkers = Account.objects.filter(
+            student_data__github_id__in=coworker_github_ids)
+        coworkers = AccountSerializer(coworkers, many=True).data
 
     return coworkers
 
@@ -1092,7 +1097,6 @@ def get_dev_type(account, github_id):
     except ObjectDoesNotExist as e:
         logging.error(f"{github_id} DevType No Data: {e}")
         return data
-
     # 개발자 유형
     dev_type = {"typeA": devtype.typeA, "typeB": devtype.typeB,
                 "typeC": devtype.typeC, "typeD": devtype.typeD}

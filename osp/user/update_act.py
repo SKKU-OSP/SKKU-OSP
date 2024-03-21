@@ -295,21 +295,22 @@ def read_commit_time(username):
             and os.path.exists(filepath2)
             and os.path.exists(filepath3)):
         update_commmit_time()
+    daytime, night, hour_dist, time_circmean = 0, 0, [0]*24, 0
     try:
         committer_hour_dist = pd.read_csv(filepath1, index_col=0)
-        hour_dist = committer_hour_dist.at[username, "hour_dist"]
-        hour_dist = json.loads(hour_dist)
-        daytime = committer_hour_dist.at[username, "daytime"]
-        night = committer_hour_dist.at[username, "night"]
+        if username in committer_hour_dist.index:
+            hour_dist = committer_hour_dist.at[username, "hour_dist"]
+            hour_dist = json.loads(hour_dist)
+            daytime = committer_hour_dist.at[username, "daytime"]
+            night = committer_hour_dist.at[username, "night"]
     except Exception as e:
         logging.exception(f"Read Hour_dist exception: {e}")
-        daytime, night, hour_dist = 0, 0, [0]*24
     try:
         time_circmean_df = pd.read_csv(filepath2, index_col=0)
-        time_circmean = time_circmean_df.at[username, "time_circmean"]
+        if username in time_circmean_df.index:
+            time_circmean = time_circmean_df.at[username, "time_circmean"]
     except Exception as e:
         logging.exception(f"Read Circmean exception", e)
-        time_circmean = 0
 
     # TODO 데이터에 대한 추가적인 논의 필요
     try:
@@ -328,14 +329,15 @@ def read_major_act(username):
     filepath = DATA_DIR + major_act_path1
     if not os.path.exists(filepath):
         update_individual()
+    indi_num, group_num, major_act = 0, 0, "individual"
     try:
         major_act_df = pd.read_csv(filepath, index_col=0)
-        major_act = major_act_df.at[username, "major_act"]
-        indi_num = int(major_act_df.at[username, "individual"])
-        group_num = int(major_act_df.at[username, "group"])
+        if username in major_act_df.index:
+            major_act = major_act_df.at[username, "major_act"]
+            indi_num = int(major_act_df.at[username, "individual"])
+            group_num = int(major_act_df.at[username, "group"])
     except Exception as e:
         logging.exception(f"Read Major_act exception: {e}")
-        indi_num, group_num, major_act = 0, 0, "individual"
     return major_act, indi_num, group_num
 
 
@@ -343,13 +345,14 @@ def read_frequency(username):
     filepath = DATA_DIR + frequency_path1
     if not os.path.exists(filepath):
         update_frequency()
+    commit_freq, commit_freq_dist = 0, [0]*4
     try:
         committer_frequency = pd.read_csv(filepath, index_col=0)
-        commit_freq = committer_frequency.at[username, "type3"]
-        commit_freq_dist = committer_frequency.at[username, "dist"]
-        commit_freq_dist = json.loads(commit_freq_dist)
+        if username in committer_frequency.index:
+            commit_freq = committer_frequency.at[username, "type3"]
+            commit_freq_dist = committer_frequency.at[username, "dist"]
+            commit_freq_dist = json.loads(commit_freq_dist)
     except Exception as e:
         logging.exception(f"Read Freq exception {e}")
-        commit_freq, commit_freq_dist = 0, [0]*4
 
     return commit_freq, commit_freq_dist
