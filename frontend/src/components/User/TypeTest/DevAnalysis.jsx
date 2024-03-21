@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import DevType from './DevType';
 import { getAuthConfig } from '../../../utils/auth';
@@ -15,17 +15,16 @@ function DevAnalysis() {
   const { username } = useParams();
   const [devType, setDevType] = useState(null);
   const [error, setError] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const getDevType = async () => {
       try {
         const response = await axios.get(`${dashboardDataUrl}${username}/dev-type/`, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
-          setDevType(res.data.dev_type);
+          res.data.dev_type ? setDevType(res.data.dev_type) : setDevType(undefined)
           setError(null);
         } else {
-          console.log(res.message);
           setError(res.message);
         }
       } catch (error) {
@@ -40,6 +39,14 @@ function DevAnalysis() {
     <>
       {error && <div>{error}</div>}
       {devType && <DevType data={devType} />}
+      {devType === undefined && <div className="d-flex fs-4 bold mb-2 justify-content-between">
+        <div>개발자 유형</div>
+        <div>
+          <button className="btn btn-secondary" onClick={() => navigate('test')}>
+            검사하기
+          </button>
+        </div>
+      </div>}
     </>
   );
 }
