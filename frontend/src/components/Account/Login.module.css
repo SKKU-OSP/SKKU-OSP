@@ -9,3 +9,8 @@
 .weakText a:hover {
   color: var(--main-selected-color);
 }
+
+.signinBtn {
+  margin-bottom: 0.5rem;
+  background-color: #072a60;
+}

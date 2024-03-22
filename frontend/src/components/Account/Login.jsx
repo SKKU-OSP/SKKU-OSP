@@ -6,7 +6,7 @@ import axios from 'axios';
 import classes from './Login.module.css';
 import AuthContext from '../../utils/auth-context';
 import LoginErrorModal from './LoginErrorModal';
-import { setExpiration } from '../../utils/auth';
+import { tokenLoader, setExpiration } from '../../utils/auth';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
 const github_login_url = `oauth/authorize?client_id=${client_id}`;
@@ -26,18 +26,25 @@ function Login() {
   const sendLoginRequest = async () => {
     try {
       if ((usernameInputRef.current.value === '') | (passwordInputRef.current.value === '')) return;
-      const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
-      const response = await axios.post(login_url, data);
-      const res = response.data;
-      if (res.status == 'success') {
-        localStorage.setItem('access_token', res.data.access_token);
-        localStorage.setItem('refresh_token', res.data.refresh_token);
-        setExpiration(); // 로컬스토리지에 expiration 저장
+      const token = tokenLoader()
+      if (token !== null && token !== 'EXPIRED') {
         setUser();
         navigate('/community');
-      } else {
-        setError(res.message);
-        setShow(true);
+      }
+      else{
+        const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
+        const response = await axios.post(login_url, data);
+        const res = response.data;
+        if (res.status == 'success') {
+          localStorage.setItem('access_token', res.data.access_token);
+          localStorage.setItem('refresh_token', res.data.refresh_token);
+          setExpiration(); // 로컬스토리지에 expiration 저장
+          setUser();
+          navigate('/community');
+        } else {
+          setError(res.message);
+          setShow(true);
+        }
       }
     } catch (error) {
       console.log('error', error);
@@ -89,8 +96,12 @@ function Login() {
           <label htmlFor="password">Password</label>
         </div>
         <div className="d-flex flex-column">
-          <button type="submit" className="btn btn-primary mb-2">
-            Login
+          <button
+            type="submit"
+            className="btn btn-primary mb-2"
+            style={{ backgroundColor: '#072A60', border: '#072A60', fontWeight: 'bold' }}
+          >
+            LOGIN
           </button>
           {github_login_url ? (
             <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
@@ -103,8 +114,10 @@ function Login() {
       </form>
       <div className="d-flex justify-content-between flex-wrap">
         <div className={classes.weakText}>
+          <Link onClick={handleGithubLogin}> 회원가입 </Link>
+          <span> | </span>
           <Link to="/accounts/find">계정 찾기</Link>
-          <span>|</span>
+          <span> | </span>
           <Link to="/accounts/password-reset">비밀번호 재설정</Link>
         </div>
       </div>

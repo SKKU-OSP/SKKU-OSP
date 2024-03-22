@@ -29,6 +29,7 @@ function Dashboard() {
         const response = await axios.get(contrUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
+          console.log('getContr', res.data);
           setContr(res.data);
         } else {
           setContrError(res.message);

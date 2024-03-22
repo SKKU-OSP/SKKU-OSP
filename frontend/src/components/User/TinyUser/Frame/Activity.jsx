@@ -20,8 +20,10 @@ function Activity(props) {
         const getUrl = server_url + '/user/api/profile-activity/' + username + '/';
         const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;
+        console.log("activity", res);
         if (res.status === 'success') {
           setProfileActivity(res.data);
+          console.log("activity", res.data);
         }
       } catch (error) {}
     };
@@ -142,7 +144,7 @@ function Activity(props) {
                 })}
               </>
             ) : (
-              <>최근 기여활동이 없습니다.</>
+              <div className="text">최근 기여활동이 없습니다.</div>
             )}
           </div>
         </div>
