@@ -84,9 +84,9 @@ function Activity(props) {
                   onChange={handleInputChange}
                 />
               ) : (
-                <div className="text">
+                <>
                   {profileActivity.portfolio.length > 0 ? (
-                    <>
+                    <div className="text">
                       {profileActivity.portfolio.split('\n').map((line, idx) => {
                         return (
                           <span key={`portfolio-${idx}`}>
@@ -95,11 +95,11 @@ function Activity(props) {
                           </span>
                         );
                       })}
-                    </>
+                    </div>
                   ) : (
                     <>포트폴리오를 작성하지 않았습니다.</>
                   )}
-                </div>
+                </>
               )}
             </div>
           </div>
@@ -144,7 +144,9 @@ function Activity(props) {
                 })}
               </>
             ) : (
-              <div className="text">최근 기여활동이 없습니다.</div>
+              <div className="contribution-text">
+              최근 기여활동이 없습니다.
+              </div>
             )}
           </div>
         </div>
