@@ -15,6 +15,15 @@ const ChallengePage = () => {
   const [total, setTotal] = useState(1);
   const { userId } = useContext(AuthContext);
 
+  const updateUrl = serverUrl + `/challenge/api/update/${userId}/`;
+  const Update = async () => {
+    const response = await axios.get(updateUrl);
+    const res = response.data;
+    if (res.status === 'success') {
+      console.log(res.status);
+    }
+  };
+
   const url = serverUrl + `/challenge/api/list/${userId}/`;
   const getAchievements = async () => {
     const response = await axios.get(url);
@@ -22,7 +31,6 @@ const ChallengePage = () => {
     if (res.status === 'success') {
       setTotal(res.data.total_accounts);
       setAchievements(res.data.achievements);
-      console.log(res.data.achievements);
     } else {
       console.log(res.message);
     }
@@ -30,6 +38,7 @@ const ChallengePage = () => {
 
   useEffect(() => {
     if (userId !== null) {
+      Update();
       getAchievements();
     } else {
       if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
@@ -136,7 +145,7 @@ const ChallengePage = () => {
                           className={classes.ProgressBar}
                           style={{ width: `${(prog.progress / prog.challenge.max_progress) * 100}%` }}
                         >
-                          {(prog.progress / prog.challenge.max_progress) * 100}%
+                          {Math.round((prog.progress / prog.challenge.max_progress) * 1000) / 10}%
                         </div>
                       </div>
                     </div>
