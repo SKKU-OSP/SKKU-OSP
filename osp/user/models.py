@@ -33,7 +33,7 @@ class GithubOverview(models.Model):
     # Field name made lowercase.
     total_prs = models.CharField(db_column='total_PRs', max_length=45)
     total_issues = models.CharField(max_length=45)
-    achievements = models.CharField(max_length=200, blank=True, null=True)
+    achievements = models.CharField(max_length=1000, blank=True, null=True)
     highlights = models.CharField(max_length=200, blank=True, null=True)
     created_date = models.DateTimeField()  # GitHub 계정 생성일
     updated_date = models.DateTimeField(
