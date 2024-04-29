@@ -86,7 +86,7 @@ class GithubRepoStats(models.Model):
             "star_count": self.stargazers_count,
             "commit_count": self.commits_count,
             "pr_count": self.prs_count,
-            "issue_count": self.open_issue_count + self.close_issue_count,
+            "issue_count": (self.open_issue_count or 0) + (self.close_issue_count or 0),
         }
 
     def __str__(self):
