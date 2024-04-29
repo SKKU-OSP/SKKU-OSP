@@ -97,7 +97,7 @@ class GithubSpider(scrapy.Spider):
         user_item["crawled_date"] = datetime.now().strftime("%Y-%m-%d")
         user_item["updated_date"] = datetime.now().strftime("%Y-%m-%d")
 
-        logging.info(f"parse_user: end_date {end_date}")
+        logging.info(f"parse_user: {github_id} end_date: {end_date}")
 
         end_date = self.__end_of_month(end_date)
         while pivot_date < end_date:
@@ -185,9 +185,14 @@ class GithubSpider(scrapy.Spider):
                         num_start = issue_link.rfind('/') + 1
                         issue['number'] = issue_link[num_start:]
                         date = event.select_one('time').text.strip()
-                        date = datetime.strptime(date, '%b %d')
-                        issue['date'] = date.replace(
-                            year=int(res.meta['from'][:4]))
+                        try:
+                            date = datetime.strptime(date, '%b %d')
+                            issue['date'] = date.replace(
+                                year=int(res.meta['from'][:4]))
+                        except ValueError:
+                            issue['date'] = datetime(
+                                int(res.meta['from'][:4]), 2, 29, 0, 0)
+                            logging.info(f"Issue date ValueError: {date}")
                         if repo[0] != github_id:
                             contributed_repo.add(repo)
                         else:
@@ -206,9 +211,14 @@ class GithubSpider(scrapy.Spider):
                         num_start = pr_link.rfind('/') + 1
                         pr['number'] = pr_link[num_start:]
                         date = event.select_one('time').text.strip()
-                        date = datetime.strptime(date, '%b %d')
-                        pr['date'] = date.replace(
-                            year=int(res.meta['from'][:4]))
+                        try:
+                            date = datetime.strptime(date, '%b %d')
+                            pr['date'] = date.replace(
+                                year=int(res.meta['from'][:4]))
+                        except ValueError:
+                            pr['date'] = datetime(
+                                int(res.meta['from'][:4]), 2, 29, 0, 0)
+                            logging.info(f"pr date ValueError: {date}")
                         if repo[0] != github_id:
                             contributed_repo.add(repo)
                         else:
@@ -257,9 +267,14 @@ class GithubSpider(scrapy.Spider):
                             num_start = issue_link.rfind('/') + 1
                             issue['number'] = issue_link[num_start:]
                             date = issue_tag.select_one('time').text.strip()
-                            date = datetime.strptime(date, '%b %d')
-                            issue['date'] = date.replace(
-                                year=int(res.meta['from'][:4]))
+                            try:
+                                date = datetime.strptime(date, '%b %d')
+                                issue['date'] = date.replace(
+                                    year=int(res.meta['from'][:4]))
+                            except ValueError:
+                                issue['date'] = datetime(
+                                    int(res.meta['from'][:4]), 2, 29, 0, 0)
+                                logging.info(f"Issue date ValueError: {date}")
                             yield issue
                 # Open Pull Requests
                 elif 'request' in summary or 'requests' in summary:
@@ -283,12 +298,16 @@ class GithubSpider(scrapy.Spider):
                             num_start = pr_link.rfind('/') + 1
                             pr['number'] = pr_link[num_start:]
                             date = pr_tag.select_one('time').text.strip()
-                            date = datetime.strptime(date, '%b %d')
-                            pr['date'] = date.replace(
-                                year=int(res.meta['from'][:4]))
+                            try:
+                                date = datetime.strptime(date, '%b %d')
+                                pr['date'] = date.replace(
+                                    year=int(res.meta['from'][:4]))
+                            except ValueError:
+                                pr['date'] = datetime(
+                                    int(res.meta['from'][:4]), 2, 29, 0, 0)
+                                logging.info(f"pr date ValueError: {date}")
                             yield pr
         yield user_update
-
         user_period['num_of_co_repos'] = len(contributed_repo)
         user_period['num_of_commits'] = user_update['total_commits']
         user_period['num_of_PRs'] = user_update['total_PRs']
@@ -443,7 +462,6 @@ class GithubSpider(scrapy.Spider):
         else:
             repo_data['release_ver'] = None
             repo_data['release_count'] = 0
-
         contributor_tag = soup.select_one(
             f'a[href="/{github_id}/{repo_name}/graphs/contributors"]')
         if not contributor_tag is None:
@@ -458,10 +476,15 @@ class GithubSpider(scrapy.Spider):
                 repo_data['contributors_count'] = 1
         else:
             repo_data['contributors_count'] = 1
-
         repo_data['readme'] = not soup.select_one('div#readme') is None
-        repo_data['commits_count'] = int(soup.select_one(
-            'div.Box-header strong').text.replace(',', ''))
+        try:
+            commits_counter = soup.select_one('.react-last-commit-history-group').select_one(
+                'span[data-component="text"]').select_one('span')
+            commits_cnt = commits_counter.text.split()[0].replace(',', '')
+            repo_data['commits_count'] = int(commits_cnt)
+        except ValueError:
+            repo_data['commits_count'] = 0
+            logging.info(f"commits_count ValueError: {repo_path}")
         yield repo_data
 
         yield scrapy.Request(
