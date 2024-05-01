@@ -70,6 +70,13 @@
   cursor: pointer;
 }
 
+.sidebar-activity2 {
+  font-size: 14px !important;
+  text-decoration: underline;
+  padding: 0.625rem;
+  cursor: pointer;
+}
+
 #sidebar-profile-name:hover,
 #sidebar-profile-username:hover,
 .sidebar-activity:hover {
@@ -95,4 +102,6 @@
 
 .btn-logout {
   margin: 10px 0px 7px;
+  border: solid 1px #808080 !important;
+  color: #808080 !important;
 }
