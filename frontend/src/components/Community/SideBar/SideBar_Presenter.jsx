@@ -22,15 +22,15 @@ export default function SideBar_Presenter(props) {
                 data-bs-title="프로필 페이지"
               ></img>
             </div>
-            <div id="sidebar-profile-name" onClick={onMyProfile}>
+            <div id="sidebar-profile-name" onClick={onMyProfile} className="d-flex align-items-center">
               {name}
             </div>
             <div id="sidebar-profile-username" onClick={onMyGithub}>
               <BsGithub />
               {githubUsername}
             </div>
-            <button type="button" className="btn btn-outline-secondary btn-logout" onClick={sendLogoutRequest}>
-              로그아웃
+            <button type="button" className="btn btn-logout" onClick={onMyProfile}>
+              프로필 편집
             </button>
           </div>
           <div className="sidebar-content">
@@ -56,6 +56,9 @@ export default function SideBar_Presenter(props) {
                 내가 스크랩한 글
               </div>
             </Link>
+            <div className="sidebar-activity2" style={{ color: '#808080' }} onClick={sendLogoutRequest}>
+              로그아웃
+            </div>
           </div>
         </>
       ) : (
