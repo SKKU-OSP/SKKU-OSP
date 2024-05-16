@@ -26,12 +26,11 @@ function Login() {
   const sendLoginRequest = async () => {
     try {
       if ((usernameInputRef.current.value === '') | (passwordInputRef.current.value === '')) return;
-      const token = tokenLoader()
+      const token = tokenLoader();
       if (token !== null && token !== 'EXPIRED') {
         setUser();
         navigate('/community');
-      }
-      else{
+      } else {
         const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
         const response = await axios.post(login_url, data);
         const res = response.data;
@@ -105,7 +104,7 @@ function Login() {
           </button>
           {github_login_url ? (
             <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
-              <BsGithub /> Start with Github
+              <BsGithub /> Start with GitHub
             </button>
           ) : (
             <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>
