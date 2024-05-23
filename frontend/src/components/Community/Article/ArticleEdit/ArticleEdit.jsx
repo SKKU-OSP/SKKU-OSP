@@ -18,11 +18,13 @@ import './ArticleEdit.css';
  */
 const domainUrl = import.meta.env.VITE_SERVER_URL;
 
-function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
+function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id;
   const urlEditArticle = domainUrl + '/community/api/article/' + articleID + '/update/';
-  const article = {};
   const username = useContext(AuthContext).username;
+  const navigate = useNavigate();
+
+  const article = {};
   const [myArticle, setMyArticle] = useState(false);
   const [board, setBoard] = useState('');
   const [isAuthNotice, setIsAuthNotice] = useState(true);
@@ -31,6 +33,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const [selectTeam, setSelectTeam] = useState('');
   const [existFiles, setExistFiles] = useState({});
   const [articleFiles, setArticleFiles] = useState({});
+  const [heroArticleFile, setHeroArticleFile] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
@@ -38,7 +41,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const getCurrentDateTime = () => new Date();
-  const navigate = useNavigate();
+  const [isHero, setIsHero] = useState(false);
 
   useEffect(() => {
     //axios 사용
@@ -83,7 +86,6 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       const urlArticle = domainUrl + '/community/api/article/' + articleID + '/';
       const responseArticle = await axios.get(urlArticle, getAuthConfig());
       const resArticle = responseArticle.data;
-      console.log('arti', resArticle);
       if (resArticle.status === 'success') {
         if (resArticle.data.article.writer.user.username !== username) {
           alert('본인의 게시글만 수정할 수 있습니다.');
@@ -92,6 +94,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
           setBoard(resArticle.data.article.board);
           setTitle(resArticle.data.article.title);
           setBodyText(resArticle.data.article.body);
+          setIsHero(resArticle.data.article.is_hero);
           if (resArticle.data.article.board.board_type === 'Recruit') {
             const start = new Date(resArticle.data.article.period_start);
             const end = new Date(resArticle.data.article.period_end);
@@ -122,6 +125,12 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
           );
           setIsAuthNotice(resArticle.data.article.is_notice);
           setAnonymousWriter(resArticle.data.article.anonymous_writer);
+
+          if (resArticle.data.article.is_hero) {
+            const heroFile = resArticle.data.files.find((file) => file.is_hero_thumbnail);
+            setHeroArticleFile(heroFile ? { [heroFile.name]: heroFile } : {});
+          }
+
           const exist_files = {};
           resArticle.data.files.map((t) => {
             exist_files[t.id] = t;
@@ -140,6 +149,11 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       getTeam();
     }
   }, [username, articleID, navigate]);
+
+  // hero 게시글 체크 여부 확인
+  const heroCheck = () => {
+    return isHero;
+  };
 
   // 수정 버튼 클릭 시
   const handleShow = (event) => {
@@ -182,9 +196,14 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
           period_start: toKST(startDate).toISOString(),
           period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
+        }),
+        ...(board.board_type === 'Promotion' && {
+          is_hero: isHero,
+          hero_article_file_name: Object.keys(heroArticleFile)[0],
+          ...heroArticleFile
         })
       };
-
+      console.log(postData);
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
         if (key === 'article_tags') {
@@ -265,6 +284,40 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
     if (already_exist_files.length) {
       window.alert(already_exist_files + ' 파일은 이미 존재합니다.');
     }
+  };
+
+  // Hero File
+  const handleHeroFileChange = (event) => {
+    if (Object.keys(heroArticleFile).length > 0) {
+      window.alert('파일은 하나만 선택 가능합니다. 삭제 후 다른 파일을 추가하십시오.');
+      return;
+    }
+
+    const files = event.target.files[0];
+    if (!files) return;
+    const all_file = heroArticleFile;
+    all_file[files.name] = files;
+
+    var file = document.createElement('div');
+    file.id = files.name;
+    file.classList.add('article-file');
+    file.classList.add('d-flex');
+
+    var delete_button = document.createElement('button');
+    delete_button.classList.add('article-file-delete-btn');
+    delete_button.append('X');
+    delete_button.setAttribute('type', 'button');
+    delete_button.onclick = function () {
+      delete heroArticleFile[files.name];
+      this.parentElement.remove();
+      setHeroArticleFile({ ...heroArticleFile });
+    };
+
+    file.append(files.name);
+    file.appendChild(delete_button);
+
+    document.getElementById('hero-file-list').appendChild(file);
+    setHeroArticleFile(all_file);
   };
 
   // Tag
@@ -394,6 +447,17 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
                       <label htmlFor="is-anonymous">익명</label>
                     </div>
                     <button type="button" className="btn-write">
+                      <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
+                      저장하기
+                    </button>
+                  </div>
+                ) : board.name === '홍보' ? (
+                  <div>
+                    <div className="anonymous-btn">
+                      <input type="checkbox" id="is-hero" checked={heroCheck()} onChange={() => setIsHero(!isHero)} />{' '}
+                      <label htmlFor="is-hero">Hero 게시</label>
+                    </div>
+                    <button type="submit" className="btn-write">
                       <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
                       저장하기
                     </button>
@@ -560,6 +624,15 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
                     })}
                   </div>
                 </div>
+                {board.board_type === 'Promotion' && isHero && (
+                  <div className="community-file">
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ color: '#000000', marginRight: '10px' }}>Hero 게시용 썸네일</div>
+                      <input type="file" name="hero_article_files" onChange={handleHeroFileChange} multiple />
+                    </div>
+                    <div id="hero-file-list"></div>
+                  </div>
+                )}
               </div>
             </form>
           </div>
