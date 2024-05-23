@@ -1,11 +1,14 @@
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { BsUnindent, BsIndent, BsFillPersonFill, BsFillBarChartFill } from 'react-icons/bs';
 import { FaShapes } from 'react-icons/fa6';
 
 function Sidebar(props) {
   const { onToggle, isToggled } = props;
   const username = useParams().username;
+  const location = useLocation();
   const activeStyle = { color: 'black' };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div id="sidebar-wrapper">
@@ -20,7 +23,7 @@ function Sidebar(props) {
         <li>
           <NavLink
             to={`/user/${username}/profile`}
-            style={({ isActive }) => (isActive ? activeStyle : {})}
+            style={isActive(`/user/${username}/profile`) || isActive(`/user/${username}`) ? activeStyle : {}}
             className="text-nowrap"
           >
             <BsFillPersonFill size={24} />
@@ -30,7 +33,7 @@ function Sidebar(props) {
         <li>
           <NavLink
             to={`/user/${username}/dashboard`}
-            style={({ isActive }) => (isActive ? activeStyle : {})}
+            style={isActive(`/user/${username}/dashboard`) ? activeStyle : {}}
             className="text-nowrap"
           >
             <BsFillBarChartFill size={24} />
@@ -40,7 +43,7 @@ function Sidebar(props) {
         <li>
           <NavLink
             to={`/user/${username}/dev-type`}
-            style={({ isActive }) => (isActive ? activeStyle : {})}
+            style={isActive(`/user/${username}/dev-type`) ? activeStyle : {}}
             className="text-nowrap"
           >
             <FaShapes size={24} />
