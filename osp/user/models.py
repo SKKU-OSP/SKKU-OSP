@@ -46,6 +46,7 @@ class GithubOverview(models.Model):
         db_table = 'github_overview'
 
 
+# Field empty in database
 class GithubStatsYymm(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)
     start_yymm = models.DateField()
