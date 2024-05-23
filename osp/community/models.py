@@ -26,6 +26,7 @@ class Article(models.Model):
     view_cnt = models.IntegerField(default=0)
     anonymous_writer = models.BooleanField()
     is_notice = models.BooleanField(default=False)
+    is_hero = models.BooleanField(default=False)
     board = models.ForeignKey(Board, models.CASCADE)
     writer = models.ForeignKey(Account, models.SET_NULL, blank=True, null=True)
     period_start = models.DateTimeField(blank=True, null=True)
@@ -155,3 +156,9 @@ def ellipsis_name(name, max_length=20):
         return name[:max_length] + '...'
     else:
         return name
+
+class HeroArticle(models.Model):
+    id = models.AutoField(primary_key=True)
+    article = models.ForeignKey(Article, models.CASCADE)
+    pub_date = models.DateTimeField(default='1999-03-25')
+    thumbnail = models.FileField(default='1', upload_to='file/article/')
