@@ -27,6 +27,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const [selectTeam, setSelectTeam] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [articleFiles, setArticleFiles] = useState({});
+  const [heroArticleFile, setHeroArticleFile] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
@@ -35,6 +36,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   const [endDate, setEndDate] = useState(null);
   const getCurrentDateTime = () => new Date();
   const [isTeamRegistration, setIsTeamRegistration] = useState(false);
+  const [isHero, setIsHero] = useState(false);
 
   useEffect(() => {
     //axios 사용
@@ -83,6 +85,11 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // 익명 체크 여부 확인
   const anonymousCheck = () => {
     return anonymousWriter;
+  };
+
+  // hero 게시글 체크 여부 확인
+  const heroCheck = () => {
+    return isHero;
   };
 
   // 저장 버튼 클릭 시
@@ -134,9 +141,15 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
           period_start: toKST(startDate).toISOString(),
           period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
+        }),
+        ...(boardName === '홍보' && {
+          is_hero: isHero,
+          hero_article_file_name: Object.keys(heroArticleFile)[0],
+          ...heroArticleFile
         })
       };
-
+      console.log('hero', Object.keys(heroArticleFile)[0]);
+      console.log(postData);
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
         if (key === 'article_tags') {
@@ -212,6 +225,40 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     if (already_exist_files.length) {
       window.alert(already_exist_files + ' 파일은 이미 존재합니다.');
     }
+  };
+
+  // Hero File
+  const handleHeroFileChange = (event) => {
+    if (Object.keys(heroArticleFile).length > 0) {
+      window.alert('파일은 하나만 선택 가능합니다. 삭제 후 다른 파일을 추가하십시오.');
+      return;
+    }
+
+    const files = event.target.files[0];
+    if (!files) return;
+    const all_file = heroArticleFile;
+    all_file[files.name] = files;
+
+    var file = document.createElement('div');
+    file.id = files.name;
+    file.classList.add('article-file');
+    file.classList.add('d-flex');
+
+    var delete_button = document.createElement('button');
+    delete_button.classList.add('article-file-delete-btn');
+    delete_button.append('X');
+    delete_button.setAttribute('type', 'button');
+    delete_button.onclick = function () {
+      delete heroArticleFile[files.name];
+      this.parentElement.remove();
+      setHeroArticleFile({ ...heroArticleFile });
+    };
+
+    file.append(files.name);
+    file.appendChild(delete_button);
+
+    document.getElementById('hero-file-list').appendChild(file);
+    setHeroArticleFile(all_file);
   };
 
   // Tag
@@ -337,6 +384,17 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
                     onChange={() => setAnonymousWriter(!anonymousWriter)}
                   />{' '}
                   <label htmlFor="is-anonymous">익명</label>
+                </div>
+                <button type="submit" className="btn-write">
+                  <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
+                  작성하기
+                </button>
+              </div>
+            ) : boardName === '홍보' ? (
+              <div>
+                <div className="anonymous-btn">
+                  <input type="checkbox" id="is-hero" checked={heroCheck()} onChange={() => setIsHero(!isHero)} />{' '}
+                  <label htmlFor="is-hero">Hero 게시</label>
                 </div>
                 <button type="submit" className="btn-write">
                   <BsPencilFill style={{ marginRight: '7px', marginBottom: '5px' }} />
@@ -491,6 +549,15 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               <input type="file" name="article_files" onChange={handleFileChange} multiple />
               <div id="file-list"></div>
             </div>
+            {boardName === '홍보' && isHero && (
+              <div className="community-file">
+                <div style={{ display: 'flex' }}>
+                  <div style={{ color: '#000000', marginRight: '10px' }}>Hero 게시용 썸네일</div>
+                  <input type="file" name="hero_article_files" onChange={handleHeroFileChange} multiple />
+                </div>
+                <div id="hero-file-list"></div>
+              </div>
+            )}
           </div>
         </form>
       </div>

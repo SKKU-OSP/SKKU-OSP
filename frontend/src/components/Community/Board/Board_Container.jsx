@@ -64,6 +64,7 @@ export default function Board_Container() {
       maxPageNumber={maxPageNumber}
       nowPage={nowPage}
       onPageChange={onPageChange}
+      userName={username}
     />
   );
 }

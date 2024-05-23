@@ -24,6 +24,7 @@ function ContentView(props) {
   const [likeCnt, setLikeCnt] = useState(article.like_cnt);
   const [scrapCnt, setScrapCnt] = useState(article.scrap_cnt);
   const [showApplyTeamModal, setShowApplyTeamModal] = useState(false);
+  const [isHero, setIsHero] = useState(false);
   const navigate = useNavigate();
 
   const delete_url = `${domain_url}/community/api/article/${article.id}/delete/`;
