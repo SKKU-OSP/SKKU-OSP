@@ -25,7 +25,7 @@ function MyTeamList() {
   const [sortOrder, setSortOrder] = useState('-id');
 
   const sortOptions = [
-    { label: '최신순', value: '-id' },
+    { label: '최신 순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '이름 순', value: 'name' },
     { label: '팀원 많은 순', value: '-member_cnt' }

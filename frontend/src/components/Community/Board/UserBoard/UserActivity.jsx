@@ -33,18 +33,18 @@ function UserActivity() {
   const [sortOrder, setSortOrder] = useState('-id');
   const sortOptions = {
     article: [
-      { label: '최신순', value: '-id' },
+      { label: '최신 순', value: '-id' },
       { label: '오래된 순', value: 'id' },
       { label: '제목순', value: 'title' },
       { label: '조회수 순', value: '-view_cnt' }
     ],
     comment: [
-      { label: '최신순', value: '-id' },
+      { label: '최신 순', value: '-id' },
       { label: '오래된 순', value: 'id' },
       { label: '원 게시글 제목순', value: 'article__title' }
     ],
     scrap: [
-      { label: '최신순', value: '-id' },
+      { label: '최신 순', value: '-id' },
       { label: '오래된 순', value: 'id' },
       { label: '제목순', value: 'title' },
       { label: '조회수 순', value: '-view_cnt' }

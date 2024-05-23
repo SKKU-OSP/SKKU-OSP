@@ -34,13 +34,13 @@ function TeamRecruit() {
   const [teamSortOrders, setTeamSortOrders] = useState('-id');
 
   const recruitSortOptions = [
-    { label: '최신순', value: '-id' },
+    { label: '최신 순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '팀 이름 순', value: 'team_name' },
     { label: '팀원 많은 순', value: '-member_cnt' }
   ];
   const TeamSortOptions = [
-    { label: '최신순', value: '-id' },
+    { label: '최신 순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '이름 순', value: 'name' },
     { label: '팀원 많은 순', value: '-member_cnt' }
