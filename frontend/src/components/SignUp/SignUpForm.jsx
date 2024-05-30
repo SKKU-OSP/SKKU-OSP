@@ -4,6 +4,7 @@ import axios from 'axios';
 import Select from 'react-select';
 import LoaderIcon from 'react-loader-icon';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -124,6 +125,12 @@ const SignUpForm = () => {
           emailDomains.push({ value: '', label: '직접 입력' });
           setDomains(emailDomains);
           setConsents(res.data.consents);
+
+          ReactGA.event({
+            category: 'Sign_Up',
+            action: 'Access Sign_Up',
+            label: '회원가입 페이지 접근'
+          });
         } else {
           console.log(res.message);
         }
@@ -284,6 +291,11 @@ const SignUpForm = () => {
         } catch (error) {
           console.log(error);
         }
+        ReactGA.event({
+          category: 'Sign_Up',
+          action: 'Success_Sign_UP',
+          label: '로그인 성공'
+        });
         navigate('/community');
       }
     } catch (error) {

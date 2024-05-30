@@ -2,6 +2,7 @@ import { useContext, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BsGithub } from 'react-icons/bs';
 import axios from 'axios';
+import ReactGA from 'react-ga4';
 
 import classes from './Login.module.css';
 import AuthContext from '../../utils/auth-context';
@@ -39,6 +40,11 @@ function Login() {
           localStorage.setItem('refresh_token', res.data.refresh_token);
           setExpiration(); // 로컬스토리지에 expiration 저장
           setUser();
+          ReactGA.event({
+            category: 'login',
+            action: 'Success_Login',
+            label: '로그인 성공'
+          });
           navigate('/community');
         } else {
           setError(res.message);
