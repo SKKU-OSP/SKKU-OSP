@@ -1,5 +1,7 @@
-import MiniBoardArticle_Presenter from './MiniBoardArticle_Presenter';
+import ReactGA from 'react-ga4';
 import { useNavigate } from 'react-router-dom';
+
+import MiniBoardArticle_Presenter from './MiniBoardArticle_Presenter';
 
 export default function MiniBoardArticle_Container(props) {
   const { article } = props;
@@ -7,6 +9,11 @@ export default function MiniBoardArticle_Container(props) {
 
   const onArticle = () => {
     navigate(`/community/article/${article.id}`);
+    ReactGA.event({
+      category: 'Article',
+      action: 'Access_Article_From_Main',
+      label: '게시판 접근(메인)'
+    });
   };
 
   const formatDate = (dateString) => {

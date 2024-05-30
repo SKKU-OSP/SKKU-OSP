@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 
 import { FaTrophy } from 'react-icons/fa';
 
@@ -40,6 +41,11 @@ const ChallengePage = () => {
     if (userId !== null) {
       Update();
       getAchievements();
+      ReactGA.event({
+        category: 'Page',
+        action: 'Access_Challenge',
+        label: '도전과제 접근'
+      });
     } else {
       if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
         navigate('/accounts/login');
