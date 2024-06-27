@@ -28,6 +28,9 @@ function ChatMessageModal_Presenter({
               targetMember={targetMember}
             />
           )}
+          {!loading && chatRoomMembers == 0 && (
+            <div>메시지함이 비어있습니다.</div>
+          )}
         </div>
       </Modal.Body>
     </Modal>
