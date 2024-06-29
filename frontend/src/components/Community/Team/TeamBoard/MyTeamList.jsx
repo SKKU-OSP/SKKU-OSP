@@ -96,12 +96,12 @@ function MyTeamList() {
             onToggle={(isOpen) => setShowDropDown(isOpen)}
             style={{ marginRight: '5px' }}
           >
-            <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+            <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px', fontFamily: "nanumfont_Bold" }} id="dropdown-sort">
               {sortOptions.find((option) => option.value === sortOrder).label}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               {sortOptions.map((option) => (
-                <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
+                <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)} style={{fontFamily: "nanumfont_Regular"}}>
                   {option.label}
                 </Dropdown.Item>
               ))}
