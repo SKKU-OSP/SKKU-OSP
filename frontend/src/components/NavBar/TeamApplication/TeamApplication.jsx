@@ -220,7 +220,7 @@ const TeamApplication = ({ handleClose, show }) => {
       <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            <h5>팀 지원서 목록</h5>
+            <h5 style={{fontFamily: "nanumfont_ExtraBold"}}>팀 지원서 목록</h5>
           </Modal.Title>
         </Modal.Header>
 
