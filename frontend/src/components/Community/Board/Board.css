@@ -485,6 +485,7 @@ ul.pagination li a.active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: "nanumfont_Bold";
 }
 
 .mini-board-article-title:hover {
@@ -500,6 +501,7 @@ ul.pagination li a.active {
   text-align: right;
   color: #7e7e7e;
   font-size: 14px;
+  font-family: "nanumfont_Regular";
 }
 
 .mini-board-team-recruit {
@@ -519,6 +521,7 @@ ul.pagination li a.active {
   font-weight: 700;
   line-height: normal;
   font-size: 12px;
+  font-family: "nanumfont_Regular";
 }
 .mini-board-team-recruit-off {
   padding: 5px;
@@ -532,6 +535,7 @@ ul.pagination li a.active {
   font-weight: 700;
   line-height: normal;
   font-size: 12px;
+  font-family: "nanumfont_Regular";
 }
 
 .mini-board-team-desc {
@@ -543,4 +547,5 @@ ul.pagination li a.active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: "nanumfont_Regular";
 }
