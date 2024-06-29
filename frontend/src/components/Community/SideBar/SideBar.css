@@ -40,11 +40,11 @@
 
 #sidebar-profile-name {
   color: var(--main-light-font-color);
-  font-weight: 700;
+  font-weight: bold;
   font-size: 25px;
-  letter-spacing: -2px;
   cursor: pointer;
-  margin-bottom: 0.5rem;
+  font-family: "nanumfont_ExtraBold";
+  margin-bottom: 0.2rem;
 }
 
 #sidebar-profile-username {
@@ -54,6 +54,7 @@
   text-decoration: underline;
   cursor: pointer;
   margin-bottom: 0.5rem !important;
+  font-family: "nanumfont_Regular";
 }
 
 .sidebar-content a {
@@ -68,13 +69,19 @@
   font-size: 16px !important;
   padding: 0.625rem;
   cursor: pointer;
+  font-family: "nanumfont_Regular";
 }
 
-.sidebar-activity2 {
+.sidebar-logout {
   font-size: 14px !important;
   text-decoration: underline;
   padding: 0.625rem;
   cursor: pointer;
+  font-family: "nanumfont_Regular";
+}
+
+.sidebar-logout:hover{
+  opacity: 0.5;
 }
 
 #sidebar-profile-name:hover,
@@ -104,4 +111,12 @@
   margin: 10px 0px 7px;
   border: solid 1px #808080 !important;
   color: #808080 !important;
+  font-family: "nanumfont_Regular" !important;
+  letter-spacing: 0.5px;
+  background-color: white !important;
+}
+
+.btn-logout:hover{
+  color: white !important;
+  background-color: #808080 !important;
 }
