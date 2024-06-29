@@ -75,8 +75,8 @@ const ChallengePage = () => {
         <div className={classes.ChallengeList}>
           <div className={classes.ChallengeProgressTitle}>도전과제</div>
           <div className={classes.ChallengeProgressDetail}>
-            <div>전체 도전과제: {totalnum}</div>
-            <div>
+            <div className={classes.ChallengeText}>전체 도전과제: {totalnum}</div>
+            <div className={classes.ChallengeText}>
               도전과제 진행률: {numAchieved}/{totalnum}
             </div>
           </div>
