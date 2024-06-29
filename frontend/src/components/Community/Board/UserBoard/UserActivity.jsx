@@ -180,7 +180,7 @@ function UserActivity() {
               )}
             </div>
             <Dropdown>
-              <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+              <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px', fontFamily:"nanumfont_Bold" }} id="dropdown-sort">
                 {sortOptions[tabName].find((option) => option.value === sortOrder).label}
               </Dropdown.Toggle>
               <Dropdown.Menu>
