@@ -498,10 +498,13 @@ ul.pagination li a.active {
 }
 
 .mini-board-article-pubdate {
-  text-align: right;
+  text-align: left;
   color: #7e7e7e;
   font-size: 14px;
   font-family: "nanumfont_Regular";
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .mini-board-team-recruit {
