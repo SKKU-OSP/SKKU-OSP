@@ -218,6 +218,9 @@
 .board-team-name {
   align-items: center;
   flex-basis: 35%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .link {
