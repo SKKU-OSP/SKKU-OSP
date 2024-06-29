@@ -412,6 +412,7 @@
   padding: 10px 15px 0;
   font-size: 21px;
   font-weight: 700;
+  font-family: "nanumfont_ExtraBold";
 }
 
 .board-nav-item {
@@ -423,12 +424,14 @@
   margin: 0 5px;
   font-size: 16px;
   cursor: pointer;
+  font-family: "nanumfont_Bold";
 }
 
 .selected-board-nav-item > div {
   font-weight: bolder;
   position: relative;
   color: var(--btn-hover-color);
+  font-family: "nanumfont_ExtraBold";
 }
 .selected-board-nav-item > div::after {
   content: '';
