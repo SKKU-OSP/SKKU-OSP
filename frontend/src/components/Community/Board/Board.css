@@ -85,6 +85,7 @@
   text-decoration: none;
   font-weight: 600;
   font-size: 22px;
+  font-family: "nanumfont_ExtraBold";
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,6 +121,7 @@
 
 .board-article-writer {
   flex-basis: 45%;
+  font-family: "nanumfont_Regular";
   text-align: center;
 }
 
@@ -148,6 +150,7 @@
   margin-bottom: 1%;
   color: #454545;
   font-size: 15px;
+  font-family: "nanumfont_Regular";
 }
 
 .dropdown-button .dropdown-toggle {
@@ -173,7 +176,7 @@
   float: right;
   color: #454545;
   text-align: right;
-  font-family: Inter;
+  font-family: "nanumfont_Regular";
   font-size: 15px;
 }
 .board-article-meta {

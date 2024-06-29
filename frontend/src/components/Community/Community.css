@@ -251,6 +251,7 @@
 .selected-nav-item > div {
   font-weight: bolder;
   position: relative;
+  font-family: "nanumfont_ExtraBold";
 }
 .selected-nav-item > div::after {
   content: '';
@@ -267,6 +268,7 @@
   width: inherit;
   font-weight: bolder;
   color: var(--nav-unselect-color);
+  font-family: "nanumfont_Bold";
 }
 .unselected-nav-item > div:hover {
   color: var(--main-light-font-color);
@@ -281,6 +283,7 @@
   padding: 5px 20px;
   font-size: 20px;
   cursor: pointer;
+  font-family: "nanumfont_Bold";
 }
 
 .hidden {
@@ -331,6 +334,8 @@
   padding: 7px 15px;
   border-radius: 17px;
   gap: 10px;
+  font-family: "nanumfont_Bold";
+  letter-spacing: 0.5px;
 }
 .btn-write:hover,
 .btn-write:active {
