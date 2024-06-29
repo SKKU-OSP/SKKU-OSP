@@ -70,11 +70,13 @@
 }
 
 .siteTitle {
-  margin-left: 10px;
-  margin-right: 20px;
-  font-weight: 700;
+  margin-left: 5px;
+  margin-right: 25px;
+  font-weight: bold;
+  font-size: larger;
   color: var(--main-white);
   letter-spacing: -2px;
+  font-family: "nanumfont_ExtraBold";
 }
 
 header {
@@ -113,17 +115,21 @@ header.extended {
 }
 
 .header-navbar-menu {
-  font-weight: 400;
+  font-weight: 500;
+  font-size: larger;
   margin: 15px;
   text-decoration: none;
   color: var(--header-navbar-color);
+  font-family: "nanumfont_Regular";
 }
 
 .header-navbar-selected-menu {
-  font-weight: 900;
+  font-weight: bold;
+  font-size: larger;
   margin: 15px;
   text-decoration: none;
   color: var(--alert-color);
+  font-family: "nanumfont_ExtraBold";
 }
 
 .header-navbar-menu:hover {
