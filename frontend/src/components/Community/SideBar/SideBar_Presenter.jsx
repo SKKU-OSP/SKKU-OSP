@@ -1,4 +1,5 @@
 import './SideBar.css';
+import Button from 'react-bootstrap/Button'
 import { BsGithub } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 
@@ -29,9 +30,9 @@ export default function SideBar_Presenter(props) {
               <BsGithub />
               {githubUsername}
             </div>
-            <button type="button" className="btn btn-logout" onClick={onMyProfile}>
+            <Button type="button" className="btn btn-logout" onClick={onMyProfile}>
               프로필 편집
-            </button>
+            </Button>
           </div>
           <div className="sidebar-content">
             <Link to="/community/activity/article">
@@ -56,7 +57,7 @@ export default function SideBar_Presenter(props) {
                 내가 스크랩한 글
               </div>
             </Link>
-            <div className="sidebar-activity2" style={{ color: '#808080' }} onClick={sendLogoutRequest}>
+            <div className="sidebar-logout" style={{ color: '#808080' }} onClick={sendLogoutRequest}>
               로그아웃
             </div>
           </div>
@@ -73,7 +74,7 @@ export default function SideBar_Presenter(props) {
               data-bs-title="프로필 페이지"
             ></img>
           </div>
-          <button type="button" className="btn btn-third btn-login" onClick={onLogin}>
+          <button type="button" className="btn btn-third btn-login" onClick={onLogin} style={{ fontFamily: "nanumfont_Bold", letterSpacing: "1px"}}>
             로그인
           </button>
           {/* <button type="button" className="btn btn-fourth btn-signup" onClick={onLogin}>
