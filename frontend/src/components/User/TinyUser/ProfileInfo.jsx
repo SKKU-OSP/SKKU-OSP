@@ -110,6 +110,10 @@ function ProfileInfo(props) {
     fileInput.current.value = null;
   };
 
+  const handleUserGuideClick = () => {
+    window.open("https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42")
+  }
+
   return (
     <>
       {userInfo ? (
@@ -146,6 +150,9 @@ function ProfileInfo(props) {
           <div className="d-flex flex-column info_right">
             {isEdit && (
               <div className="d-flex flex-row justify-content-end info_button">
+                <button className="info_btn" onClick={handleUserGuideClick}>
+                  <span className="info_btn-text">유저 가이드</span>
+                </button>
                 {editing ? (
                   <button className="info_btn" onClick={handleSaveClick}>
                     <span className="info_btn-text">프로필 저장</span>
