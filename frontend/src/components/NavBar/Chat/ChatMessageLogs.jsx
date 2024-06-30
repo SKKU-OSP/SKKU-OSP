@@ -97,7 +97,7 @@ const ChatMessageLogs = (props) => {
         return <Spinner animation="border" style={{ position: 'relative', top: '40%', left: '50%' }} />;
       }
     } else {
-      <div>사용자를 선택하세요.</div>;
+      <div style={{fontFamily: "nanumfont_Regular"}}>사용자를 선택하세요.</div>;
     }
   };
 
