@@ -101,6 +101,7 @@ function OwnerInfo() {
                   type="switch"
                   id="isOpenProfile"
                   label="프로필 공개"
+                  style={{fontFamily: "nanumfont_Regular"}}
                   onChange={(e) => handlePublicSwitchChange(e.target.checked, 0)}
                   checked={isProfileOpen}
                 />
@@ -110,6 +111,7 @@ function OwnerInfo() {
                   label="활동 공개"
                   disabled={!isProfileOpen}
                   onChange={(e) => handlePublicSwitchChange(e.target.checked, 1)}
+                  style={{fontFamily: "nanumfont_Regular"}}
                   checked={!isProfileOpen ? false : isActivityOpen}
                 />
               </Form>
