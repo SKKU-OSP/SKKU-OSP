@@ -37,6 +37,7 @@
         line-height: 21.78px;
         letter-spacing: 0em;
         text-align: left;
+        font-family: "nanumfont_Regular";
       }
       .info_btn:hover,
       .info_btn:hover .info_btn-text {
@@ -49,7 +50,7 @@
       padding: 0px 10px;
       gap: 6px;
       .username {
-        font-family: Inter;
+        font-family: "nanumfont_ExtraBold";
         font-size: 24px;
         font-weight: 700;
         line-height: 29.05px;
@@ -63,7 +64,7 @@
       gap: 6px;
       .github_username {
         text-decoration: none;
-        font-family: Inter;
+        font-family: "nanumfont_Bold";
         font-size: 18px;
         font-weight: 700;
         line-height: 21.78px;
@@ -79,7 +80,7 @@
       width: 100%;
       white-space: pre-wrap;
       border-color: #a0a0a0;
-      font-family: Inter;
+      font-family: "nanumfont_Regular";
       font-size: 16px;
       font-weight: 500;
       line-height: 19px;
@@ -91,7 +92,7 @@
       padding: 8px 16px;
       gap: 6px;
       height: 150px;
-      font-family: Inter;
+      font-family: "nanumfont_Regular";
       font-size: 16px;
       font-weight: 500;
       line-height: 19px;
@@ -118,6 +119,7 @@
   border-top-right-radius: 10px;
   padding-bottom: 10px;
   color: var(--main-black);
+  font-family: "nanumfont_Bold";
 }
 .profile-tab .nav-link:hover {
   opacity: 0.9;
@@ -128,6 +130,7 @@
   background-color: var(--profile-tab-color);
   color: var(--main-white);
   font-weight: bold;
+  font-family: "nanumfont_ExtraBold";
 }
 
 .profile-interest {
@@ -140,7 +143,7 @@
     .category-intro {
       padding: 8px 16px;
       .intro {
-        font-family: Inter;
+        font-family: "nanumfont_ExtraBold";
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -157,7 +160,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -182,6 +185,7 @@
         gap: 10px;
         background-color: #cdcdcd;
         .icon-text {
+          font-family: "nanumfont_Regular";
           font-size: 18px;
           line-height: 22px;
           letter-spacing: 0em;
@@ -198,7 +202,7 @@
     .language-intro {
       padding: 8px 16px;
       .intro {
-        font-family: Inter;
+        font-family: "nanumfont_ExtraBold";
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -215,7 +219,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -254,7 +258,8 @@
           width: 18px;
         }
         .language-text {
-          font-family: Inter;
+          padding-top: 2px;
+          font-family: "nanumfont_Regular";
           font-size: 18px;
           font-weight: 400;
           line-height: 22px;
@@ -518,7 +523,7 @@
       border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 18px;
         font-weight: 400;
         line-height: 10px;
@@ -537,7 +542,7 @@
       gap: 10px;
       background-color: #cdcdcd;
       .input-text {
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -552,6 +557,7 @@
 .modal-skill {
   padding: 8px 16px;
   gap: 10px;
+  font-family: "nanumfont_Regular";
   .modal-skill-input {
     padding: 10px;
     gap: 16px;
@@ -567,7 +573,7 @@
       border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 18px;
         font-weight: 400;
         line-height: 10px;
@@ -594,7 +600,7 @@
         width: 14px;
       }
       .input-text {
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -612,7 +618,7 @@
   .modal-skill-message {
     padding: 8px 16px;
     gap: 10px;
-    font-family: Inter;
+    font-family: "nanumfont_Bold";
     font-size: 16px;
     font-weight: 400;
     line-height: 0px;
@@ -646,7 +652,7 @@
         width: 14px;
       }
       .modal-language-text {
-        font-family: Inter;
+        font-family: "nanumfont_Regular";
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
