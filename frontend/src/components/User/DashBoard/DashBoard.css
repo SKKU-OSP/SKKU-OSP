@@ -116,6 +116,7 @@
   background-color: var(--main-white);
   box-shadow: 0 4px 4px var(--card-box-shadow);
   border-radius: 15px;
+  font-family: "nanumfont_Bold";
 }
 .coworker-link {
   display: flex;
