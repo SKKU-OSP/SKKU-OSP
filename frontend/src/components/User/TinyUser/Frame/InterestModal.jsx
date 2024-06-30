@@ -31,7 +31,7 @@ function InterestModal(props) {
   return (
     <Modal size="lg" show={interestShow} onHide={OnHandleInterestClose}>
       <Modal.Header closeButton>
-        <Modal.Title>관심분야 설정</Modal.Title>
+        <Modal.Title style={{fontFamily: "nanumfont_ExtraBold"}}>관심분야 설정</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="d-flex flex-column modal-interest">
