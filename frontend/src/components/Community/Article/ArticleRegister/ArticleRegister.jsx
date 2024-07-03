@@ -95,7 +95,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   // 저장 버튼 클릭 시
   const handleShow = (event) => {
     event.preventDefault();
-    if (boardName === '팀 모집 게시판') {
+    if (boardName === '팀 모집') {
       if (selectTeam === '') {
         window.alert('모집할 팀을 선택해 주세요');
         return;
@@ -137,7 +137,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         anonymous_writer: anonymousWriter,
         article_tags: selectTags,
         ...articleFiles,
-        ...(boardName === '팀 모집 게시판' && {
+        ...(boardName === '팀 모집' && {
           period_start: toKST(startDate).toISOString(),
           period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
