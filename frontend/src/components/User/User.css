@@ -103,6 +103,28 @@
       text-overflow: ellipsis;
     }
   }
+  .info_qna {
+    padding: 6px 12px;
+    border: none;
+    background-color: transparent;
+    gap: 5px;
+    margin-right: 10px;
+  }
+  .info_qna-text {
+    color: var(--gray-500);
+    font-family: Inter;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 21.78px;
+    letter-spacing: 0em;
+    text-align: left;
+    text-decoration: underline;
+  }
+  .info_qna:hover,
+  .info_qna:hover .info_qna-text {
+    border: none;
+    color: var(--main-selected-color);
+  }
 }
 
 .profile-tab {
@@ -888,4 +910,8 @@
     border-left: 0;
     border-top: 1px solid var(--main-border-color-transparent);
   }
+}
+.text-muted {
+  font-size: 12px;
+  color: #6c757d;
 }
