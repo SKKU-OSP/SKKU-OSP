@@ -151,7 +151,7 @@ function ProfileInfo(props) {
             {isEdit && (
               <div className="d-flex flex-row justify-content-end info_button">
                 <button className="info_btn" onClick={handleUserGuideClick}>
-                  <span className="info_btn-text">유저 가이드</span>
+                  <span className="info_btn-text">사용자 가이드</span>
                 </button>
                 {editing ? (
                   <button className="info_btn" onClick={handleSaveClick}>
