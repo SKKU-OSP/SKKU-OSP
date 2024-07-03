@@ -46,6 +46,7 @@ export default function ChatMessageModal_Container({ show, onCloseChatModal, tar
       chatRoomMembers={chatRoomMembers}
       chatRoomMembersId={chatRoomMembersId}
       targetMember={targetMember}
+      targetId={targetId}
     />
   );
 }
