@@ -73,7 +73,7 @@ function SkillModal(props) {
   return (
     <Modal size="lg" show={skillShow} onHide={OnHandleSkillClose}>
       <Modal.Header closeButton>
-        <Modal.Title>사용언어/기술스택</Modal.Title>
+        <Modal.Title style={{fontFamily: "nanumfont_ExtraBold"}}>사용언어/기술스택</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="d-flex flex-column modal-skill">

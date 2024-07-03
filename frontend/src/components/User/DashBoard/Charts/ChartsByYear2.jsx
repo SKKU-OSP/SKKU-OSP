@@ -231,7 +231,7 @@ function ChartsByYear2() {
   return (
     <div className="row mb-4">
       <div className="d-flex justify-content-between mb-2">
-        <div className="fs-4 mb-2 bold">연도별 분석</div>
+        <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>연도별 분석</div>
         <DropdownButton variant="light" title={targetYear} style={{ float: 'right' }}>
           {years.map((year) => {
             return (
@@ -255,8 +255,8 @@ function ChartsByYear2() {
           <div className="dashboard-box mb-4">
             <div className="d-flex flex-wrap justify-content-between">
               <div className="col-4 col-lg-3 p-2 mb-2">
-                <div className="fs-5 bold">GitHub 기여점수</div>
-                <div className="d-flex gap-2 fs-7 weak-text">GitHub 활동내역을 통해 산출한 점수 (최대 5점)</div>
+                <div className="fs-5 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>GitHub 기여점수</div>
+                <div className="d-flex gap-2 fs-7 weak-text" style={{fontFamily: "nanumfont_Bold"}}>GitHub 활동내역을 통해 산출한 점수 (최대 5점)</div>
                 <Chart {...mainScoreChartConfig} />
               </div>
               <div className="col-7 col-lg-5 p-2 mb-2">
@@ -292,13 +292,13 @@ function ChartsByYear2() {
             </div>
           </div>
           <div className="col-12 col-lg-5 dashboard-box p-3 mb-4">
-            <div className="fs-5 bold">월별 기여내역</div>
+            <div className="fs-5 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>월별 기여내역</div>
             <div className="col-12">
               <Chart {...lineChart} />
             </div>
           </div>
           <div className="col-12 col-lg-7 dashboard-box p-3 mb-4">
-            <div className="fs-5 bold">기여내역 비교</div>
+            <div className="fs-5 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>기여내역 비교</div>
             <Nav justify variant="underline" activeKey={selectTab} onSelect={handleTabSelect}>
               {chartTab.map((factor) => {
                 return (

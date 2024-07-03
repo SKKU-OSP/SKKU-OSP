@@ -85,6 +85,7 @@
   text-decoration: none;
   font-weight: 600;
   font-size: 22px;
+  font-family: "nanumfont_ExtraBold";
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,6 +121,7 @@
 
 .board-article-writer {
   flex-basis: 45%;
+  font-family: "nanumfont_Regular";
   text-align: center;
 }
 
@@ -131,6 +133,7 @@
 .board-article-tags {
   flex-basis: 13%;
   gap: 5px;
+  font-family: "nanumfont_Regular";
 }
 .board-article-tag {
   font-size: 15px;
@@ -148,6 +151,7 @@
   margin-bottom: 1%;
   color: #454545;
   font-size: 15px;
+  font-family: "nanumfont_Regular";
 }
 
 .dropdown-button .dropdown-toggle {
@@ -173,7 +177,7 @@
   float: right;
   color: #454545;
   text-align: right;
-  font-family: Inter;
+  font-family: "nanumfont_Regular";
   font-size: 15px;
 }
 .board-article-meta {
@@ -215,6 +219,10 @@
 .board-team-name {
   align-items: center;
   flex-basis: 35%;
+  font-family: "nanumfont_Bold";
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .link {
@@ -234,15 +242,18 @@
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  font-family: "nanumfont_Regular";
 }
 
 .board-team-leader {
   flex-basis: 70%;
   padding-left: 20px;
+  font-family: "nanumfont_Regular"
 }
 
 .board-team-member {
   flex-basis: 30%;
+  font-family: "nanumfont_Regular"
 }
 
 .vertical-divider {
@@ -272,6 +283,7 @@
   color: #0085ff;
   font-style: normal;
   font-weight: 600;
+  font-family: "nanumfont_Bold";
   line-height: normal;
 }
 .board-team-recruit-off {
@@ -284,6 +296,7 @@
   color: #929292;
   font-style: normal;
   font-weight: 600;
+  font-family: "nanumfont_Bold";
   line-height: normal;
 }
 
@@ -485,6 +498,7 @@ ul.pagination li a.active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: "nanumfont_Bold";
 }
 
 .mini-board-article-title:hover {
@@ -497,9 +511,13 @@ ul.pagination li a.active {
 }
 
 .mini-board-article-pubdate {
-  text-align: right;
+  text-align: left;
   color: #7e7e7e;
   font-size: 14px;
+  font-family: "nanumfont_Regular";
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .mini-board-team-recruit {
@@ -519,6 +537,7 @@ ul.pagination li a.active {
   font-weight: 700;
   line-height: normal;
   font-size: 12px;
+  font-family: "nanumfont_Regular";
 }
 .mini-board-team-recruit-off {
   padding: 5px;
@@ -532,6 +551,7 @@ ul.pagination li a.active {
   font-weight: 700;
   line-height: normal;
   font-size: 12px;
+  font-family: "nanumfont_Regular";
 }
 
 .mini-board-team-desc {
@@ -543,4 +563,5 @@ ul.pagination li a.active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: "nanumfont_Regular";
 }
