@@ -6,6 +6,8 @@ import { BsGithub } from 'react-icons/bs';
 import { IoAddCircle, IoReloadCircle, IoCloseCircle } from 'react-icons/io5';
 import LoaderIcon from 'react-loader-icon';
 
+import QnAModal from './Frame/QnAModal';
+
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function ProfileInfo(props) {
@@ -17,6 +19,7 @@ function ProfileInfo(props) {
   const [imagePreview, setImagePreview] = useState();
   const [imageFile, setImageFile] = useState(null);
   const fileInput = useRef(null);
+  const [QnAShow, setQnAShow] = useState(false);
 
   useEffect(() => {
     setUserInfo(props.userInfo);
@@ -72,6 +75,15 @@ function ProfileInfo(props) {
     setImagePreview(null);
     setImageFile(null);
     setEditing(false);
+  };
+
+  const OnHandleQnAShow = () => setQnAShow(true);
+
+  const OnHandleQnAClose = () => setQnAShow(false);
+
+  const OnHandleQnASaveClose = (modalQnA) => {
+    console.log('Saved QnA:', modalQnA);
+    setQnAShow(false);
   };
 
   const handleIntroChange = (event) => {
@@ -164,8 +176,18 @@ function ProfileInfo(props) {
                 )}
               </div>
             )}
-            <div className="info_username">
-              <span className="username">{userInfo.user.username}</span>
+            <div className="d-flex flex-row justify-content-between align-items-center">
+              <div className="info_username">
+                <span className="username">{userInfo.user.username}</span>
+              </div>
+              <button className="info_qna" onClick={OnHandleQnAShow}>
+                <span className="info_qna-text">문의하기</span>
+              </button>
+              <QnAModal
+                Show={QnAShow}
+                OnHandleQnAClose={OnHandleQnAClose}
+                OnHandleQnASaveClose={OnHandleQnASaveClose}
+              />
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />
