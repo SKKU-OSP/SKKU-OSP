@@ -1369,9 +1369,13 @@ class ArticleDeleteView(APIView):
                     try:
                         team_recruit_article = TeamRecruitArticle.objects.get(
                             article=article)
-                        team_recruit_article.delete()
-                    except:
-                        res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                    #     team_recruit_article.delete()
+                    # except:
+                    #     res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                    except TeamRecruitArticle.DoesNotExist:
+                        article.delete()
+                        res['status'] = 'success'
+                        res['message'] = '해당 모집글에는 팀이 설정되지 않아 삭제했습니다.'
                         print(res['message'])
                         return Response(res)
 
