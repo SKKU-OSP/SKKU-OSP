@@ -100,7 +100,7 @@ const ChatUserList = (props) => {
                     <img src={`${serverUrl + member.account.photo}`} className="opponent-profile" />
                   </div>
                   <div className="my-auto">
-                    <div className="opponent-name">{member.account.user.username}</div>
+                    <div className="opponent-name" style={{fontFamily: "nanumfont_Regular"}}>{member.account.user.username}</div>
                   </div>
                   {member.unread > 0 && <div className="ms-auto my-auto me-2 unread-count">{member.unread}</div>}
                 </div>

@@ -157,14 +157,14 @@ function TeamRecruit() {
                     className="community-dropdown"
                     show={showRecruitDropdown}
                     onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}
-                    style={{ marginRight: '5px' }}
+                    style={{ marginRight: '5px', fontFamily: "nanumfont_Bold" }}
                   >
-                    <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+                    <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' , fontFamily: "nanumfont_Bold"}} id="dropdown-sort">
                       {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       {recruitSortOptions.map((option) => (
-                        <Dropdown.Item key={option.value} onClick={() => handleRecruitSortChange(option)}>
+                        <Dropdown.Item key={option.value} onClick={() => handleRecruitSortChange(option)} style={{fontFamily: "nanumfont_Regular"}}>
                           {option.label}
                         </Dropdown.Item>
                       ))}
@@ -182,12 +182,12 @@ function TeamRecruit() {
                   show={showTeamDropdown}
                   onToggle={(isOpen) => setShowTeamDropdown(isOpen)}
                 >
-                  <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+                  <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px', fontFamily: "nanumfont_Bold" }} id="dropdown-sort">
                     {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     {TeamSortOptions.map((option) => (
-                      <Dropdown.Item key={option.value} onClick={() => handleTeamSortChange(option)}>
+                      <Dropdown.Item key={option.value} onClick={() => handleTeamSortChange(option)} style={{fontFamily: "nanumfont_Regular"}}>
                         {option.label}
                       </Dropdown.Item>
                     ))}

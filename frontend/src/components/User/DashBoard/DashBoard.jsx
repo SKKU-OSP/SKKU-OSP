@@ -76,7 +76,7 @@ function Dashboard() {
           <div>깃허브에서 활동 정보를 수집중입니다. 잠시 후, 다시 방문해주세요. (최대 12시간 소요)</div>
         ) : (
           <>
-            <div className="fs-4 mb-2 bold">전체 기여 내역</div>
+            <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>전체 기여 내역</div>
             {contrError && <div>{contrError}</div>}
             {contr && (
               <div className="row d-flex dashboard-box justify-content-between mb-4">
@@ -85,7 +85,7 @@ function Dashboard() {
                 ))}
               </div>
             )}
-            <div className="fs-4 mb-2 bold">기여 성향 분석</div>
+            <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>기여 성향 분석</div>
             {devTendency || devTendencyError ? (
               <>
                 {devTendencyError && <div>{devTendencyError}</div>}

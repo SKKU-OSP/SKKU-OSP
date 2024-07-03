@@ -23,17 +23,17 @@ function DevTypeCard(props) {
             <p
               id="descEng"
               className="text-center text-label"
-              style={{ fontSize: '12px', marginBottom: '2px', fontWeight: '600' }}
+              style={{ fontSize: '12px', marginBottom: '2px', fontWeight: '600', fontFamily: "nanumfont_Bold"}}
             >
               {descEng}
             </p>
-            <p id="descKr" className="text-center text-label mb-1" style={{ fontSize: '14px', fontWeight: '600' }}>
+            <p id="descKr" className="text-center text-label mb-1" style={{ fontSize: '14px', fontWeight: '600', fontFamily: "nanumfont_Bold" }}>
               {descKr}
             </p>
-            <h4 id="typeEng" className="text-center">
+            <h4 id="typeEng" className="text-center" style={{fontFamily: "nanumfont_Bold"}}>
               {typeEng}
             </h4>
-            <h4 id="typeKr" className="text-center">
+            <h4 id="typeKr" className="text-center" style={{fontFamily: "nanumfont_Bold"}}>
               {typeKr}
             </h4>
             <div className="d-flex justify-content-between text-label">

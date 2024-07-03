@@ -4,7 +4,7 @@ export default function MiniBoardTeamRecruit_Presenter(props) {
   const { article, pubDate, onArticle } = props;
 
   return (
-    <div className="mini-board-article">
+    <div key={article.id} className="mini-board-article">
       {article.title ? (
         <>
           <div className="mini-board-article-header">

@@ -229,7 +229,7 @@ export default function Board_Presenter(props) {
               {selectedTab2 === '팀 모집' ? (
                 <>
                   {recruitArticles.slice(0, 5).map((article) => (
-                    <RecruitArticle article={article} />
+                    <RecruitArticle key={article.id} article={article} />
                   ))}
                 </>
               ) : (

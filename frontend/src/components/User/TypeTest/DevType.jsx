@@ -14,9 +14,9 @@ function DevType(props) {
   return (
     <>
       <div className="d-flex fs-4 bold mb-2 justify-content-between">
-        <div>개발자 유형</div>
+        <div style={{fontFamily: "nanumfont_ExtraBold"}}>개발자 유형</div>
         <div>
-          <button className="btn btn-secondary" onClick={() => navigate('test')}>
+          <button className="btn btn-secondary" onClick={() => navigate('test')} style={{fontFamily: "nanumfont_Bold"}}>
             다시 검사하기
           </button>
         </div>
@@ -33,7 +33,7 @@ function DevType(props) {
       </div>
       <div className="d-flex justify-content-around flex-wrap gap-2">
         <div className="mb-2">
-          <div className="fs-5">상생 파트너</div>
+          <div className="fs-5" style={{fontFamily: "nanumfont_ExtraBold"}}>상생 파트너</div>
           <ImageDescBox
             src={`${serverUrl}/static/images/${pos.code}.png`}
             title={pos.nicknameKR}
@@ -42,7 +42,7 @@ function DevType(props) {
           />
         </div>
         <div className="mb-2">
-          <div className="fs-5">상극 파트너</div>
+          <div className="fs-5" style={{fontFamily: "nanumfont_ExtraBold"}}>상극 파트너</div>
           <ImageDescBox
             src={`${serverUrl}/static/images/${neg.code}.png`}
             title={neg.nicknameKR}

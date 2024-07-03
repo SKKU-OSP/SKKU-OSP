@@ -1,6 +1,7 @@
 .nav-link.UnselectedNavItem {
   width: 100%;
   font-size: 18px;
+  font-family: "nanumfont_Bold";
   text-decoration: none;
   color: #454545;
   display: flex;
@@ -14,15 +15,16 @@
   color: #454545;
   display: flex;
   justify-content: center;
-  border-bottom: 3px solid #0066ff;
+  border-bottom: 3px solid #8dc63f;
 }
 
 .nav-link.SelectedNavItem {
   width: 100%;
   font-size: 18px;
   font-weight: bolder;
+  font-family: "nanumfont_ExtraBold";
   text-decoration: none;
-  color: #0066ff;
+  color: #8dc63f;
   display: flex;
   justify-content: center;
 }
@@ -31,7 +33,7 @@
   width: 100%;
   font-size: 18px;
   text-decoration: none;
-  color: #0066ff;
+  color: #8dc63f;
   display: flex;
   justify-content: center;
 }
@@ -50,10 +52,10 @@
   width: 100%;
   font-size: 18px;
   text-decoration: none;
-  color: #0066ff;
+  color: #8dc63f;
   display: flex;
   justify-content: center;
-  border-bottom: 3px solid #0066ff;
+  border-bottom: 3px solid #8dc63f;
 }
 
 .nav-link.BorderLine {
@@ -68,5 +70,6 @@
   border-top: 1px solid #454545;
   padding-top: 5%;
   text-align: center;
-  font-size: 16px;
+  font-size: 35px;
+  font-family: "nanumfont_ExtraBold";
 }
