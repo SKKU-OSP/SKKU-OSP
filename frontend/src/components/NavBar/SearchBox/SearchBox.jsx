@@ -58,13 +58,12 @@ function SearcherBox() {
   const [tagSelectedInterest, setTagSelectedInterest] = useState([]); // Select에서 선택한 관심분야
   const [tagModalInterest, setTagModalInterest] = useState([]); // 모달에서 선택한 관심분야
   const [tagSearchInterest, setTagSearchInterest] = useState([]); // 선택한 관심분야
-  const handleInterestSelect = (Interest) => setTagSelectedInterest(Interest); // Select에서 관심분야 선택
-  const handleSaveInterest = () => {
-    if (tagSelectedInterest) {
-      setTagModalInterest([...tagModalInterest, tagSelectedInterest]);
-      setTagSelectedInterest([]);
-    }
-  }; // Select한 관심분야 저장
+  const handleInterestSelect = (Interest) => {
+    setTagModalInterest([...tagModalInterest, Interest]);
+    setTagSelectedInterest([]);
+    setTagSelectedInterest(Interest);
+  }; // Select에서 관심분야 선택
+
   const handleRemoveInterest = (removeLabel) => {
     setTagModalInterest(tagModalInterest?.filter((interest) => interest.label !== removeLabel));
   }; // Select한 관심분야 삭제
@@ -73,13 +72,11 @@ function SearcherBox() {
   const [tagSelectedSkill, setTagSelectedSkill] = useState([]); // Select에서 선택한 관심언어
   const [tagModalSkill, setTagModalSkill] = useState([]); // 모달에서 선택한 관심언어
   const [tagSearchSkill, setTagSearchSkill] = useState([]); // 선택한 관심언어
-  const handleSkillSelect = (Skill) => setTagSelectedSkill(Skill); // Select에서 관심언어 선택
-  const handleSaveSkill = () => {
-    if (tagSelectedSkill) {
-      setTagModalSkill([...tagModalSkill, tagSelectedSkill]);
-      setTagSelectedSkill([]);
-    }
-  }; // Select한 관심언어 저장
+  const handleSkillSelect = (Skill) => {
+    setTagModalSkill([...tagModalSkill, Skill]);
+    setTagSelectedSkill([]);
+    setTagSelectedSkill(Skill);
+  }; // Select에서 관심언어 선택
   const handleRemoveSkill = (removeLabel) => {
     setTagModalSkill(tagModalSkill?.filter((Skill) => Skill.label !== removeLabel));
   }; // Select한 관심언어 삭제
@@ -131,6 +128,17 @@ function SearcherBox() {
     getTags();
   }, [tagSelectShow]);
 
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      width: '200px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      fontFamily: 'nanumfont_Bold'
+    })
+  };
+
   return (
     <div className="searchBox">
       <div className="search">
@@ -142,7 +150,7 @@ function SearcherBox() {
           aria-describedby="search-btn"
           onChange={(e) => handleKeyword(e)}
           onKeyDown={(e) => handleEnter(e)}
-          style={{ fontFamily: 'nanumfont_Regular', letterSpacing: "1.5px"}}
+          style={{ fontFamily: 'nanumfont_Regular', letterSpacing: '1.5px' }}
         />
         <BsHash className="hash-icon" size="24" onClick={() => handleTagSelectShow()} />
         <BsSearch className="search-icon" onClick={() => searchArticle()} />
@@ -154,25 +162,29 @@ function SearcherBox() {
             <div className="d-flex flex-row modal-interest-input">
               <Select
                 className="modal-interest-select"
-                size="lg"
                 name="interest"
                 value={tagSelectedInterest}
                 onChange={handleInterestSelect}
                 options={tagInterest.filter((item) => !tagModalInterest?.some((mi) => item.value === mi.value))}
+                placeholder="관심분야를 선택"
+                styles={customStyles}
               />
-              <button className="btn" onClick={handleSaveInterest}>
-                <span className="btn-text">+</span>
-              </button>
             </div>
-            <div className="d-flex flex-row flex-wrap modal-interest-result">
+            <div
+              className="d-flex flex-row flex-wrap modal-interest-result"
+              style={{ marginTop: '10px', marginBottom: '25px', fontFamily: 'nanumfont_Regular' }}
+            >
               {tagModalInterest?.length > 0 ? (
                 <>
                   {tagModalInterest.map((interest) => (
                     <div
                       className="d-flex flex-row align-items-center modal-input"
                       key={`modal-interest-${interest.value}`}
+                      style={{ marginRight: '7px' }}
                     >
-                      <span className="input-text">{interest.label}</span>
+                      <span className="input-text" style={{ fontFamily: 'nanumfont_Regular' }}>
+                        {interest.label}
+                      </span>
                       <BsXLg
                         size={14}
                         onClick={() => handleRemoveInterest(interest.label)}
@@ -188,22 +200,29 @@ function SearcherBox() {
             <div className="d-flex flex-row modal-skill-input">
               <Select
                 className="modal-skill-select"
-                size="lg"
                 name="skill"
                 value={tagSelectedSkill}
                 onChange={handleSkillSelect}
                 options={tagSkill.filter((item) => !tagModalSkill?.some((mi) => item.value === mi.value))}
+                placeholder="관심언어를 선택"
+                styles={customStyles}
               />
-              <button className="btn" onClick={handleSaveSkill}>
-                <span className="btn-text">+</span>
-              </button>
             </div>
-            <div className="d-flex flex-row flex-wrap modal-skill-result">
+            <div
+              className="d-flex flex-row flex-wrap modal-skill-result"
+              style={{ marginTop: '10px', fontFamily: 'nanumfont_Regular' }}
+            >
               {tagModalSkill?.length > 0 ? (
                 <>
                   {tagModalSkill.map((skill) => (
-                    <div className="d-flex flex-row align-items-center modal-input" key={`modal-skill-${skill.value}`}>
-                      <span className="input-text">{skill.label}</span>
+                    <div
+                      className="d-flex flex-row align-items-center modal-input"
+                      key={`modal-skill-${skill.value}`}
+                      style={{ marginRight: '7px' }}
+                    >
+                      <span className="input-text" style={{ fontFamily: 'nanumfont_Regular' }}>
+                        {skill.label}
+                      </span>
                       <BsXLg size={14} onClick={() => handleRemoveSkill(skill.label)} style={{ cursor: 'pointer' }} />
                     </div>
                   ))}
@@ -214,7 +233,11 @@ function SearcherBox() {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={() => handleTagSelectSaveClose()}>
+            <Button
+              className="saveBtn"
+              onClick={() => handleTagSelectSaveClose()}
+              style={{ backgroundColor: '#072a60', borderColor: '#072a60' }}
+            >
               저장
             </Button>
           </Modal.Footer>
