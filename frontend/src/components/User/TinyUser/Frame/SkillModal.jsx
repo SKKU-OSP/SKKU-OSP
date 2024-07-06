@@ -26,7 +26,9 @@ function SkillModal(props) {
     }
   };
   const OnHandleRemoveSkill = (removeSkill) => {
-    setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.label !== removeSkill.label));
+    setUndefinedSkill((prevSkill) => 
+      prevSkill.filter((skill) => skill.tag.label != removeSkill)
+    );
   };
 
   useEffect(() => {
@@ -139,7 +141,7 @@ function SkillModal(props) {
                       <span className="input-text" style={{ color: fontColor }}>
                         {element.tag.name}
                       </span>
-                      <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
+                      <BsXLg size={14} onClick={() => OnHandleRemoveSkill(element.tag.name)} style={{ cursor: 'pointer' }} />
                     </div>
                   );
                 })}
