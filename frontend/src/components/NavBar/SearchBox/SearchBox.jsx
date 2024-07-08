@@ -37,6 +37,7 @@ function SearcherBox() {
           tag: tagData
         }
       });
+      setTagPlaceholder('');
       setKeyword('');
       setTagData(null);
       setTagSearchInterest([]);
@@ -54,7 +55,6 @@ function SearcherBox() {
     }
   };
 
-
   const [tagInterest, setTagInterest] = useState([]); // 전체 관심분야
   const [tagSelectedInterest, setTagSelectedInterest] = useState([]); // Select에서 선택한 관심분야
   const [tagModalInterest, setTagModalInterest] = useState([]); // 모달에서 선택한 관심분야
@@ -69,7 +69,7 @@ function SearcherBox() {
     setTagModalInterest(tagModalInterest?.filter((interest) => interest.label !== removeLabel));
   }; // Select한 관심분야 삭제
 
-  const [tagPlaceholder, setTagPlaceholder] = useState("검색");
+  const [tagPlaceholder, setTagPlaceholder] = useState('검색');
   const [tagSkill, setTagSkill] = useState([]); // 전체 언어
   const [tagSelectedSkill, setTagSelectedSkill] = useState([]); // Select에서 선택한 관심언어
   const [tagModalSkill, setTagModalSkill] = useState([]); // 모달에서 선택한 관심언어
@@ -97,10 +97,9 @@ function SearcherBox() {
     const tagString = tags.map((tag) => tag.value).join(', ');
     setTagData(tagString);
     if (tagString.length > 20) {
-      setTagPlaceholder(tagString.substring(0, 20).concat(".."));
-    }
-    else{
-      setTagPlaceholder(tagString)
+      setTagPlaceholder(tagString.substring(0, 20).concat('..'));
+    } else {
+      setTagPlaceholder(tagString);
     }
     setTagSearchInterest(tagModalInterest);
     setTagSearchSkill(tagModalSkill);
