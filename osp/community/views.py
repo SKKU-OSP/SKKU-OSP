@@ -694,8 +694,10 @@ def filter_keyword_tag(article_list, keyword, tags):
     if tags:
         tag_list = tags.split(',')
         tag_query = Q()
-        for tag in tag_list:
-            tag_query = tag_query | Q(tag=tag)
+        for tag_item in tag_list:
+            if tag_item[0] == ' ':
+                tag_item = tag_item[1:]
+            tag_query = tag_query | Q(tag=tag_item)
         article_with_tag = ArticleTag.objects.filter(
             tag_query).values('article')
         article_list = article_list.filter(id__in=article_with_tag)
@@ -944,6 +946,7 @@ class CommunityMainView(APIView):
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
+
 class ArticleAPIView(APIView):
     '''
     GET : 게시글 읽기 API
@@ -1098,7 +1101,7 @@ class ArticleCreateView(APIView):
 
             # board name 확인
             board = Board.objects.get(name=board_name)
-            pub_date = datetime.now() 
+            pub_date = datetime.now()
 
             # Article 생성
             article = Article.objects.create(
@@ -1108,7 +1111,7 @@ class ArticleCreateView(APIView):
                 mod_date=datetime.now(),
                 anonymous_writer=anonymous_writer,
                 is_notice=is_notice,
-                is_hero = is_hero,
+                is_hero=is_hero,
                 board_id=board.id,
                 writer=account)
 
@@ -1140,17 +1143,18 @@ class ArticleCreateView(APIView):
                     res['message'] = '해당 팀의 모집글을 작성할 수 없습니다.'
                     print(res['message'])
                     return Response(res)
-            
+
             # Hero 홍보 게시글 확인
             if article.board.board_type == "Promotion":
-                
-                if is_hero :
+
+                if is_hero:
                     # HeroArticle 생성
-                    hero_article_file_name = request.data.get('hero_article_file_name')
+                    hero_article_file_name = request.data.get(
+                        'hero_article_file_name')
                     hero_article_file = request.FILES[hero_article_file_name]
 
                     heroArticle = HeroArticle.objects.create(
-                    article = article, pub_date = pub_date, thumbnail = hero_article_file)
+                        article=article, pub_date=pub_date, thumbnail=hero_article_file)
 
                     article.save()
                     heroArticle.save()
@@ -1180,7 +1184,7 @@ class ArticleCreateView(APIView):
                     created_user=created_user,
                     status="POST",
                     article_id=article.id)
-                    
+
             res['status'] = 'success'
             res['message'] = '게시글을 등록했습니다.'
             res['data'] = {'article_id': article.id}
@@ -1271,7 +1275,8 @@ class ArticleUpdateView(APIView):
             # 홍보 게시판의 경우 Hero 홍보 게시 유무 업데이트
             hero_article = HeroArticle.objects.filter(article=article).first()
             if is_hero:
-                hero_article_file_name = request.data.get('hero_article_file_name')
+                hero_article_file_name = request.data.get(
+                    'hero_article_file_name')
 
                 if hero_article_file_name in request.FILES:
                     hero_article_file = request.FILES[hero_article_file_name]
@@ -1279,7 +1284,8 @@ class ArticleUpdateView(APIView):
                         hero_article.thumbnail = hero_article_file
                         hero_article.save()
                     else:
-                        heroArticle = HeroArticle.objects.create(article=article, thumbnail=hero_article_file, pub_date=datetime.now())
+                        heroArticle = HeroArticle.objects.create(
+                            article=article, thumbnail=hero_article_file, pub_date=datetime.now())
 
                         heroArticle.save()
             else:
@@ -1746,6 +1752,7 @@ def set_article_period(article: Article, period_start: str, period_end: str):
     # 게시 기간 설정된 Article 객체 반환
     return ret
 
+
 class HeroThumbnailView(APIView):
     '''
     POST : Hero 게시물 생성 API
@@ -1777,13 +1784,14 @@ class HeroThumbnailView(APIView):
 
         return Response(res)
 
+
 class HeroThumbnailFileView(APIView):
     '''
     GET:
     Hero 게시글의 article_id와 filename을 받아서 파일을 반환하는 API
     URL: api/heroes/<int:article_id>/file/<str:filename>/
     '''
-    
+
     def get(self, request, article_id, filename):
         res = {'status': 'success', 'message': '', 'errors': {}}
 
@@ -1792,7 +1800,7 @@ class HeroThumbnailFileView(APIView):
             if hero_article.thumbnail.name.split('/')[-1] != filename:
                 res['message'] = '해당 게시글파일이 존재하지 않습니다.'
                 return Response(res)
-            
+
             file_path = hero_article.thumbnail.path  # 파일 시스템 상의 경로
             file_handle = open(file_path, 'rb')
             return FileResponse(file_handle, as_attachment=True, filename=filename)
@@ -1804,5 +1812,5 @@ class HeroThumbnailFileView(APIView):
             logging.exception(f"HeroThumbnailFileView ERROR: {e}")
             res['message'] = '서버 내부 오류가 발생했습니다.'
             res['errors']['internal_error'] = str(e)
-        
+
         return Response(res)
