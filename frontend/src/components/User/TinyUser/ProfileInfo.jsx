@@ -123,8 +123,8 @@ function ProfileInfo(props) {
   };
 
   const handleUserGuideClick = () => {
-    window.open("https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42")
-  }
+    window.open('https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42');
+  };
 
   return (
     <>
@@ -184,6 +184,7 @@ function ProfileInfo(props) {
                 <span className="info_qna-text">문의하기</span>
               </button>
               <QnAModal
+                user={userInfo.user.username}
                 Show={QnAShow}
                 OnHandleQnAClose={OnHandleQnAClose}
                 OnHandleQnASaveClose={OnHandleQnASaveClose}
