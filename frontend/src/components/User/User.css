@@ -37,7 +37,7 @@
         line-height: 21.78px;
         letter-spacing: 0em;
         text-align: left;
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
       }
       .info_btn:hover,
       .info_btn:hover .info_btn-text {
@@ -50,7 +50,7 @@
       padding: 0px 10px;
       gap: 6px;
       .username {
-        font-family: "nanumfont_ExtraBold";
+        font-family: 'nanumfont_ExtraBold';
         font-size: 24px;
         font-weight: 700;
         line-height: 29.05px;
@@ -64,7 +64,7 @@
       gap: 6px;
       .github_username {
         text-decoration: none;
-        font-family: "nanumfont_Bold";
+        font-family: 'nanumfont_Bold';
         font-size: 18px;
         font-weight: 700;
         line-height: 21.78px;
@@ -80,7 +80,7 @@
       width: 100%;
       white-space: pre-wrap;
       border-color: #a0a0a0;
-      font-family: "nanumfont_Regular";
+      font-family: 'nanumfont_Regular';
       font-size: 16px;
       font-weight: 500;
       line-height: 19px;
@@ -92,7 +92,7 @@
       padding: 8px 16px;
       gap: 6px;
       height: 150px;
-      font-family: "nanumfont_Regular";
+      font-family: 'nanumfont_Regular';
       font-size: 16px;
       font-weight: 500;
       line-height: 19px;
@@ -141,7 +141,7 @@
   border-top-right-radius: 10px;
   padding-bottom: 10px;
   color: var(--main-black);
-  font-family: "nanumfont_Bold";
+  font-family: 'nanumfont_Bold';
 }
 .profile-tab .nav-link:hover {
   opacity: 0.9;
@@ -152,7 +152,7 @@
   background-color: var(--profile-tab-color);
   color: var(--main-white);
   font-weight: bold;
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
 }
 
 .profile-interest {
@@ -165,7 +165,7 @@
     .category-intro {
       padding: 8px 16px;
       .intro {
-        font-family: "nanumfont_ExtraBold";
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -182,7 +182,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -207,7 +207,7 @@
         gap: 10px;
         background-color: #cdcdcd;
         .icon-text {
-          font-family: "nanumfont_Regular";
+          font-family: 'nanumfont_Regular';
           font-size: 18px;
           line-height: 22px;
           letter-spacing: 0em;
@@ -224,7 +224,7 @@
     .language-intro {
       padding: 8px 16px;
       .intro {
-        font-family: "nanumfont_ExtraBold";
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -241,7 +241,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -281,7 +281,7 @@
         }
         .language-text {
           padding-top: 2px;
-          font-family: "nanumfont_Regular";
+          font-family: 'nanumfont_Regular';
           font-size: 18px;
           font-weight: 400;
           line-height: 22px;
@@ -306,7 +306,7 @@
     .portfolio-intro {
       padding: 8px 16px;
       .intro {
-        font-family: "nanumfont_ExtraBold";
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -323,7 +323,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -343,7 +343,7 @@
       border-radius: 10px;
       gap: 10px;
       .text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -357,7 +357,7 @@
         width: 100%;
         white-space: pre-wrap;
         border-color: #a0a0a0;
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 16px;
         font-weight: 500;
         line-height: 19px;
@@ -374,7 +374,7 @@
     .contribution-intro {
       padding: 7px 16px;
       .intro {
-        font-family: "nanumfont_ExtraBold";
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -386,7 +386,7 @@
         padding: 6px 12px;
         border-radius: 10px;
         gap: 5px;
-        font-family: "nanumfont_Bold";
+        font-family: 'nanumfont_Bold';
         font-size: 15px;
         font-weight: bold;
         line-height: 22px;
@@ -412,7 +412,7 @@
         .title {
           padding: 1px 11px;
           .title-text {
-            font-family: "nanumfont_ExtraBold";
+            font-family: 'nanumfont_ExtraBold';
             font-size: 20px;
             font-weight: 700;
             line-height: 24px;
@@ -421,7 +421,7 @@
             color: var(--main-black);
           }
           .commit-date {
-            font-family: "nanumfont_Regular";
+            font-family: 'nanumfont_Regular';
             font-size: 16px;
             font-weight: 400;
             line-height: 19px;
@@ -434,7 +434,7 @@
           padding: 1px 11px;
           gap: 10px;
           .stat-text {
-            font-family: "nanumfont_Regular";
+            font-family: 'nanumfont_Regular';
             font-size: 16px;
             font-weight: 400;
             line-height: 19px;
@@ -446,7 +446,7 @@
         .desc {
           padding: 1px 11px;
           gap: 10px;
-          font-family: "nanumfont_Regular";
+          font-family: 'nanumfont_Regular';
           font-size: 16px;
           font-weight: 400;
           line-height: 19px;
@@ -461,7 +461,7 @@
       border-radius: 10px;
       gap: 10px;
       .text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -482,7 +482,7 @@
     gap: 16px;
     border-bottom: 1px solid var(--sub-border-color);
     .info-uniName {
-      font-family: "nanumfont_ExtraBold";
+      font-family: 'nanumfont_ExtraBold';
       font-size: 24px;
       font-weight: 700;
       line-height: 29px;
@@ -491,7 +491,7 @@
       color: #696969;
     }
     .info-uniMajor {
-      font-family: "nanumfont_ExtraBold";
+      font-family: 'nanumfont_ExtraBold';
       font-size: 24px;
       font-weight: 700;
       line-height: 29px;
@@ -501,7 +501,7 @@
     }
     .info-uniId {
       .uniId {
-        font-family: "nanumfont_ExtraBold";
+        font-family: 'nanumfont_ExtraBold';
         font-size: 16px;
         font-weight: 700;
         line-height: 19px;
@@ -516,7 +516,7 @@
     padding: 24px;
     gap: 16px;
     .title {
-      font-family: "nanumfont_ExtraBold";
+      font-family: 'nanumfont_ExtraBold';
       font-size: 24px;
       font-weight: 700;
       line-height: 29px;
@@ -545,7 +545,7 @@
       border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 10px;
@@ -558,13 +558,14 @@
   .modal-interest-result {
     padding: 8px 16px;
     gap: 10px;
+    margin-top: 200px;
     .modal-input {
       padding: 4px 8px;
       border-radius: 10px;
       gap: 10px;
       background-color: #cdcdcd;
       .input-text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -579,7 +580,7 @@
 .modal-skill {
   padding: 8px 16px;
   gap: 10px;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
   .modal-skill-input {
     padding: 10px;
     gap: 16px;
@@ -595,7 +596,7 @@
       border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 10px;
@@ -622,7 +623,7 @@
         width: 14px;
       }
       .input-text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -640,7 +641,7 @@
   .modal-skill-message {
     padding: 8px 16px;
     gap: 10px;
-    font-family: "nanumfont_Bold";
+    font-family: 'nanumfont_Bold';
     font-size: 16px;
     font-weight: 400;
     line-height: 0px;
@@ -674,7 +675,7 @@
         width: 14px;
       }
       .modal-language-text {
-        font-family: "nanumfont_Regular";
+        font-family: 'nanumfont_Regular';
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
