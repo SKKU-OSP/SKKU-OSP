@@ -1,7 +1,7 @@
 import SearchArticle_Presenter from './SearchArticle_Presenter';
 import { useNavigate } from 'react-router-dom';
 
-export default function BoardArticle_Container(props) {
+export default function SearchArticle_Container(props) {
   const article = props.article;
   const navigate = useNavigate();
   console.log('article', article);
