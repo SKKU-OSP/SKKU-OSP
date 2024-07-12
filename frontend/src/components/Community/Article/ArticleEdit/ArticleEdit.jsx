@@ -87,7 +87,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       const responseArticle = await axios.get(urlArticle, getAuthConfig());
       const resArticle = responseArticle.data;
       if (resArticle.status === 'success') {
-        if (resArticle.data.article.writer.user.username !== username) {
+        if (resArticle.data.article.writer.user.username !== username && username != 'admin') {
           alert('본인의 게시글만 수정할 수 있습니다.');
           navigate(`/community/article/${articleID}`);
         } else {

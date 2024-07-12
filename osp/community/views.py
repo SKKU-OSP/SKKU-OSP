@@ -1216,7 +1216,7 @@ class ArticleUpdateView(APIView):
             return Response(res)
         try:
             # 유저 확인
-            if request.user.id != article.writer.user.id:
+            if request.user.id != article.writer.user.id and request.user.id != 1:
                 res['message'] = '수정 권한이 없습니다.'
                 return Response(res)
             # data 파싱
