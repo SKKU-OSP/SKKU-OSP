@@ -126,17 +126,48 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           setIsAuthNotice(resArticle.data.article.is_notice);
           setAnonymousWriter(resArticle.data.article.anonymous_writer);
 
-          if (resArticle.data.article.is_hero) {
-            const heroFile = resArticle.data.files.find((file) => file.is_hero_thumbnail);
-            setHeroArticleFile(heroFile ? { [heroFile.name]: heroFile } : {});
-          }
+          const heroFiles = [];
+          const normalFiles = [];
 
-          const exist_files = {};
-          resArticle.data.files.map((t) => {
-            exist_files[t.id] = t;
-          });
-          setExistFiles(exist_files);
-          setMyArticle(true);
+          const getHeroArticles = async () => {
+            const urlHeroArticles = domainUrl + '/community/api/heroes/';
+            const responseHeroArticles = await axios.get(urlHeroArticles, getAuthConfig());
+            const resHeroArticles = responseHeroArticles.data;
+
+            if (resHeroArticles.status === 'success') {
+              const heroArticle = resHeroArticles.data.hero_articles.find(
+                (hero) => hero.article_id === resArticle.data.article.id
+              );
+              if (heroArticle) {
+                heroFiles.push({
+                  id: resArticle.data.article.id,
+                  name: heroArticle.thumbnail.file.split('/').pop(),
+                  file: heroArticle.thumbnail.file,
+                  size: heroArticle.thumbnail.size
+                });
+              }
+
+              resArticle.data.files.forEach((file) => {
+                const fileNameWithoutExtension = file.file.split('/').pop();
+                if (!heroFiles.some((heroFile) => heroFile.name === fileNameWithoutExtension)) {
+                  normalFiles.push(file);
+                }
+              });
+
+              setHeroArticleFile(heroFiles.length > 0 ? { [heroFiles[0].name]: heroFiles[0] } : {});
+              const exist_files = {};
+              normalFiles.forEach((file) => {
+                exist_files[file.id] = file;
+              });
+              setExistFiles(exist_files);
+              setMyArticle(true);
+            } else {
+              console.log(resHeroArticles.message);
+            }
+          };
+
+          getHeroArticles();
+          console.log('hero:', heroArticleFile);
         }
       } else {
         console.log(resArticle.message);
@@ -173,6 +204,9 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     } else if (bodyText.trim() === '' || bodyText.trim() === '<p><br></p>') {
       window.alert('본문을 입력해 주세요');
       return;
+    } else if (isHero && Object.keys(heroArticleFile).length === 0) {
+      window.alert('메인페이지 게시용 썸네일을 추가해 주세요.');
+      return;
     } else if (window.confirm('글을 수정하시겠습니까?')) {
       postArticle();
     }
@@ -198,9 +232,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           team_id: selectTeam.value
         }),
         ...(board.board_type === 'Promotion' && {
-          is_hero: isHero,
-          hero_article_file_name: Object.keys(heroArticleFile)[0],
-          ...heroArticleFile
+          is_hero: isHero
         })
       };
       console.log(postData);
@@ -212,6 +244,13 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           formData.append(key, value);
         }
       });
+
+      if (isHero) {
+        Object.entries(heroArticleFile).forEach(([key, value]) => {
+          formData.append('hero_thumbnail', value);
+        });
+      }
+
       console.log(formData);
       const response = await axios.post(urlEditArticle, formData, getAuthConfig());
 
@@ -308,9 +347,10 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     delete_button.append('X');
     delete_button.setAttribute('type', 'button');
     delete_button.onclick = function () {
-      delete heroArticleFile[files.name];
+      const updatedFiles = { ...heroArticleFile };
+      delete updatedFiles[files.name];
       this.parentElement.remove();
-      setHeroArticleFile({ ...heroArticleFile });
+      setHeroArticleFile(updatedFiles);
     };
 
     file.append(files.name);
@@ -455,7 +495,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                   <div>
                     <div className="anonymous-btn">
                       <input type="checkbox" id="is-hero" checked={heroCheck()} onChange={() => setIsHero(!isHero)} />{' '}
-                      <label htmlFor="is-hero">Hero 게시</label>
+                      <label htmlFor="is-hero">메인페이지 게시</label>
                     </div>
                     <button type="submit" className="btn-write">
                       <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
@@ -627,10 +667,32 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                 {board.board_type === 'Promotion' && isHero && (
                   <div className="community-file">
                     <div style={{ display: 'flex' }}>
-                      <div style={{ color: '#000000', marginRight: '10px' }}>Hero 게시용 썸네일</div>
+                      <div style={{ color: '#000000', marginRight: '10px' }}>메인페이지 게시용 썸네일</div>
                       <input type="file" name="hero_article_files" onChange={handleHeroFileChange} multiple />
                     </div>
-                    <div id="hero-file-list"></div>
+                    <div id="hero-file-list">
+                      {Object.entries(heroArticleFile).map(([key, file]) => (
+                        <div id={file.name} key={file.id} className="article-file d-flex">
+                          {file.name}
+                          <button
+                            type="button"
+                            className="article-file-delete-btn"
+                            onClick={function () {
+                              const all_file = heroArticleFile;
+                              delete all_file[file.id];
+                              setHeroArticleFile(all_file);
+                              var this_element = document.getElementById(file.name);
+                              // if (this_element) {
+                              //   this_element.parentElement.removeChild(this_element);
+                              // }
+                              document.getElementById('hero-file-list').removeChild(this_element);
+                            }}
+                          >
+                            X
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
