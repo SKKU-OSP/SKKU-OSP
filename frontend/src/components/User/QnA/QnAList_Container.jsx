@@ -16,7 +16,6 @@ const QnAList_Container = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
-  const [totalItemsCount, setTotalItemsCount] = useState(0);
 
   useEffect(() => {
     const checkPermissions = async () => {
@@ -36,9 +35,7 @@ const QnAList_Container = () => {
       try {
         const qna_url = `${domain_url}/user/api/qna/`;
         const response = await axios.get(qna_url, getAuthConfig());
-        console.log('hello', response.data.data.length);
         setQnas(response.data.data);
-        setTotalItemsCount(response.data.data.length);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching QnAs:', error);
@@ -54,9 +51,7 @@ const QnAList_Container = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = qnas.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div>
@@ -65,13 +60,6 @@ const QnAList_Container = () => {
       ) : (
         <>
           <QnAList_Presenter qnas={currentItems} />
-          <Pagination
-            activePage={currentPage}
-            itemsCountPerPage={itemsPerPage}
-            totalItemsCount={totalItemsCount}
-            pageRangeDisplayed={5}
-            onChange={handlePageChange}
-          />
           <Pagination>
             {Array.from({ length: Math.ceil(qnas.length / itemsPerPage) }, (_, i) => (
               <Pagination.Item key={i} active={i + 1 === currentPage} onClick={() => paginate(i + 1)}>

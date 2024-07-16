@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import QnAArticle from './QnaArticle';
 import '../User.css';
 
 const QnAList_Presenter = ({ qnas }) => {
+  const [selectedQna, setSelectedQna] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
   const options = [
     { value: 'inquiry', label: '이용 문의' },
     { value: 'bug', label: '오류 신고' },
@@ -14,12 +18,22 @@ const QnAList_Presenter = ({ qnas }) => {
     return option ? option.label : type;
   };
 
+  const handleItemClick = (qna) => {
+    setSelectedQna(qna);
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setSelectedQna(null);
+  };
+
   return (
     <div className="mx-5 px-5">
       <div className="qna-nav">
         <ul className="nav">
           <li className="nav-item selected-nav-item">
-            <div>문의 게시판</div>
+            <div>문의 목록</div>
           </li>
         </ul>
       </div>
@@ -35,7 +49,12 @@ const QnAList_Presenter = ({ qnas }) => {
         </div>
         <div className="divider"></div>
         {qnas.map((qna, index) => (
-          <div className="d-flex qna-item" key={index}>
+          <div
+            className="d-flex qna-item"
+            key={index}
+            onClick={() => handleItemClick(qna)}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="qna-no">{qna.id}</div>
             <div className="qna-type">{getTypeLabel(qna.type)}</div>
             <div className="qna-content">{qna.content}</div>
@@ -45,6 +64,7 @@ const QnAList_Presenter = ({ qnas }) => {
           </div>
         ))}
       </div>
+      {selectedQna && <QnAArticle qna={selectedQna} Show={showModal} handleClose={handleClose} />}
     </div>
   );
 };
