@@ -162,3 +162,4 @@ class HeroArticle(models.Model):
     article = models.ForeignKey(Article, models.CASCADE)
     pub_date = models.DateTimeField(default='1999-03-25')
     thumbnail = models.FileField(default='1', upload_to='file/article/')
+    name = models.CharField(max_length=255, blank=True)
