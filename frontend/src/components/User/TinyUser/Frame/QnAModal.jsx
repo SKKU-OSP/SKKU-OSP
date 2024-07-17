@@ -144,7 +144,9 @@ function QnAModal(props) {
       <Modal.Body>
         <Form>
           <Form.Group controlId="qnaType">
-            <Form.Label>질문 유형</Form.Label>
+            <Form.Label>
+              <span className="qna-details-font">질문 유형</span>
+            </Form.Label>
             <Select
               name="type"
               value={options.find((option) => option.value === modalQnA.type)}
@@ -154,7 +156,9 @@ function QnAModal(props) {
             />
           </Form.Group>
           <Form.Group controlId="qnaContent" className="mt-3">
-            <Form.Label>내용</Form.Label>
+            <Form.Label>
+              <span className="qna-details-font">내용</span>
+            </Form.Label>
             <Form.Control
               as="textarea"
               name="content"
@@ -169,7 +173,9 @@ function QnAModal(props) {
             </div>
           </Form.Group>
           <Form.Group controlId="qnaImages" className="mt-3">
-            <Form.Label>이미지 업로드</Form.Label>
+            <Form.Label>
+              <span className="qna-details-font">이미지 업로드</span>
+            </Form.Label>
             <Form.Control type="file" multiple accept="image/*" onChange={handleImageChange} />
             <div className="image-previews mt-3">
               {imagePreviews.map((preview, index) => (

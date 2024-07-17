@@ -979,3 +979,37 @@
 .qna-item > div {
   text-align: center;
 }
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  font-family: 'nanumfont_Regular';
+}
+
+.qna-details {
+  display: flex;
+  justify-content: space-between;
+}
+
+.qna-details-left,
+.qna-details-right {
+  width: 45%;
+}
+
+.qna-details-font {
+  font-family: 'nanumfont_Bold';
+}
+
+.qna-attachments {
+  margin-bottom: 1rem;
+}
+
+.qna-attachment img {
+  max-width: 200px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.qna-attachment-modal img {
+  max-width: 100%;
+}

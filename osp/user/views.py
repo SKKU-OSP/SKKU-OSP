@@ -1372,3 +1372,22 @@ class QnADetailView(APIView):
             res['status'] = 'error'
             res['message'] = 'QnA not found'
             return Response(res, status=status.HTTP_404_NOT_FOUND)
+        
+    def patch(self, request, id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        
+        try:
+            qna = QnA.objects.get(id=id)
+            serializer = QnASerializer(qna, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                res['data'] = serializer.data
+                return Response(res, status=status.HTTP_200_OK)
+            else:
+                res['status'] = 'error'
+                res['message'] = serializer.errors
+                return Response(res, status=status.HTTP_400_BAD_REQUEST)
+        except QnA.DoesNotExist:
+            res['status'] = 'error'
+            res['message'] = 'QnA not found'
+            return Response(res, status=status.HTTP_404_NOT_FOUND)

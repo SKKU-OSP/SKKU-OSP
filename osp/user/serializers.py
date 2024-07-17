@@ -180,8 +180,9 @@ class QnAImageSerializer(serializers.ModelSerializer):
 
 class QnASerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
+    user_id = serializers.IntegerField(source='user.id')
     images = QnAImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.QnA
-        fields = ('id', 'user', 'type', 'content', 'created_at', 'solved', 'images')
+        fields = ('id', 'user', 'user_id', 'type', 'content', 'created_at', 'solved', 'response', 'images')
