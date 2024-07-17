@@ -886,7 +886,7 @@ const SignUpForm = () => {
       </div>
 
       {/* 사용 언어 */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <Form.Label htmlFor="tag">사용 언어/프레임워크</Form.Label>
         <Select
           size="sm"
@@ -897,7 +897,7 @@ const SignUpForm = () => {
           name="tag"
           isMulti
         ></Select>
-      </div>
+      </div> */}
       <br />
       {/* 버튼 */}
 
@@ -924,7 +924,7 @@ const SignUpForm = () => {
         />
       ) : null}
       <div className="d-flex flex-row justify-content-end">
-        <Button variant="primary" type="submit" disabled={checkLoading.submit}>
+        <Button variant="primary" type="submit" disabled={checkLoading.submit} style={{background: '#072a60', borderColor: '#072a60'}}>
           {checkLoading.submit ? <LoaderIcon type={'spin'} size={24} className={classes.btnLoader} /> : '가입하기'}
         </Button>
       </div>

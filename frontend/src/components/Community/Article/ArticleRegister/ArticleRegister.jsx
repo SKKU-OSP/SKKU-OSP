@@ -263,12 +263,16 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
 
   // Tag
   const handleOptionSelect = (selectedTags) => {
-    setSelectTags(selectedTags);
+    if (selectedTags.length <= 5) {
+      setSelectTags(selectedTags);
+    } else {
+      setSelectTags(selectedTags.slice(0, 5));
+    }
   };
   const customStyles = {
     control: (provided) => ({
       ...provided,
-      height: '45px',
+      height: 'wrap_content',
       margin: '10px 0px',
       borderRadius: '15px'
     }),

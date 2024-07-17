@@ -179,7 +179,7 @@ function ContentView(props) {
               {pub_date1} {pub_date2}
             </span>
           </div>
-          {username === article.writer.user.username ? (
+          {(username === article.writer.user.username || username == 'admin') ? (
             <Dropdown className="article-more" style={{ display: 'inline-block' }}>
               <Dropdown.Toggle as="span" id="dropdown-custom-component" className="dropdownbtn">
                 <BsThreeDotsVertical />

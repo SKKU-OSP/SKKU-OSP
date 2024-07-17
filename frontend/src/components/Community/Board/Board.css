@@ -538,6 +538,9 @@ ul.pagination li a.active {
   line-height: normal;
   font-size: 12px;
   font-family: "nanumfont_Regular";
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .mini-board-team-recruit-off {
   padding: 5px;
@@ -552,6 +555,9 @@ ul.pagination li a.active {
   line-height: normal;
   font-size: 12px;
   font-family: "nanumfont_Regular";
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .mini-board-team-desc {
