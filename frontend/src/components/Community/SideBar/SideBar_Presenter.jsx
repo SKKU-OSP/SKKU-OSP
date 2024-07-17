@@ -35,11 +35,11 @@ export default function SideBar_Presenter(props) {
               {githubUsername}
             </div>
             <Button type="button" className="btn btn-logout" onClick={onMyProfile}>
-              프로필 편집
+              내 프로필
             </Button>
           </div>
           <div className="sidebar-content">
-            <Link to="/community/activity/article">
+            {/* <Link to="/community/activity/article">
               <div
                 className={location == '/community/activity/article' ? 'sidebar-selected-activity' : 'sidebar-activity'}
               >
@@ -60,10 +60,13 @@ export default function SideBar_Presenter(props) {
               >
                 내가 스크랩한 글
               </div>
-            </Link>
-            <div className="sidebar-manual" style={{ color: '#072a60' }} onClick={handleClickManual}>
+            </Link> */}
+            <Button type="button" className="btn btn-manual" onClick={handleClickManual}>
               사용자 가이드
-            </div>
+            </Button>
+            {/* <div className="sidebar-manual" style={{ color: '#072a60' }} onClick={handleClickManual}>
+              사용자 가이드
+            </div> */}
             <div className="sidebar-logout" style={{ color: '#808080' }} onClick={sendLogoutRequest}>
               로그아웃
             </div>
