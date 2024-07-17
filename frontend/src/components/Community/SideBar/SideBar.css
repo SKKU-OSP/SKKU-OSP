@@ -120,9 +120,9 @@
 }
 
 .btn-logout {
-  margin: 10px 0px 7px;
-  border: solid 1px #808080 !important;
-  color: #808080 !important;
+  margin: 18px 0px 7px;
+  border: solid 1px #072a60 !important;
+  color: #072a60 !important;
   font-family: "nanumfont_Regular" !important;
   letter-spacing: 0.5px;
   background-color: white !important;
@@ -130,5 +130,19 @@
 
 .btn-logout:hover{
   color: white !important;
-  background-color: #808080 !important;
+  background-color: #072a60 !important;
+}
+
+.btn-manual {
+  margin: 0px 0px 7px;
+  border: solid 1px #072a60 !important;
+  color: #072a60 !important;
+  font-family: "nanumfont_Regular" !important;
+  letter-spacing: 0.5px;
+  background-color: white !important;
+}
+
+.btn-manual:hover{
+  color: white !important;
+  background-color: #072a60 !important;
 }

@@ -1357,7 +1357,7 @@ class ArticleDeleteView(APIView):
         try:
             with transaction.atomic():
                 # 유저 확인
-                if request.user.id != article.writer.user.id:
+                if request.user.id != article.writer.user.id and request.user.id != 1:
                     res['message'] = '삭제 권한이 없습니다.'
                     return Response(res)
 
