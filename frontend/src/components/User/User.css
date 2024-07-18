@@ -46,6 +46,14 @@
         color: var(--main-white);
       }
     }
+    .info_dropdown .btn {
+      background-color: #eaeaea !important;
+      border: #eaeaea;
+      color: black;
+      font-family: 'nanumfont_Regular';
+      font-size: 18px;
+    }
+
     .info_username {
       padding: 0px 10px;
       gap: 6px;
