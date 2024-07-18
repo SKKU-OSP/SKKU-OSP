@@ -21,6 +21,8 @@ from django.shortcuts import redirect
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from home.models import AnnualOverview, DistFactor, DistScore, Student
 from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
@@ -29,13 +31,13 @@ from user import update_act
 from team.models import TeamMember
 from user.models import (Account, AccountInterest, AccountPrivacy, DevType,
                          GithubScore, GitHubScoreTable, GithubStatsYymm,
-                         StudentTab)
+                         StudentTab, QnA, QnAImage)
 
 from tag.models import DomainLayer, TagIndependent
 
 from user.serializers import (AccountDetailSerializer,
                               AccountInterestSerializer, AccountSerializer,
-                              StudentSerializer)
+                              StudentSerializer, QnASerializer, QnAImageSerializer)
 from home.serializers import (AnnualOverviewDashboardSerializer,
                               DistFactorDashboardSerializer,
                               DistScoreDashboardSerializer)
@@ -1314,3 +1316,78 @@ class AccountPrivacyView(APIView):
         else:
             res = {'status': 'success', 'data': data}
         return Response(res)
+
+class QnAListView(APIView):
+    def get(self, request):
+        res = {'status': 'success', 'message': '', 'data': None}
+
+        if not request.user.is_superuser:
+            res['status'] = 'error'
+            res['message'] = 'Permission denied'
+            return Response(res, status=status.HTTP_403_FORBIDDEN)
+        
+        qnas = QnA.objects.all().order_by('-created_at')
+        serializer = QnASerializer(qnas, many=True)
+        res['data'] = serializer.data
+        return Response(res, status=status.HTTP_200_OK)
+
+class QnACreateView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        res = {'status': 'success', 'message': '', 'data': None}
+
+        if not request.user.is_authenticated:
+            res['status'] = 'error'
+            res['message'] = 'Authentication required'
+            return Response(res, status=status.HTTP_401_UNAUTHORIZED)
+        
+        data = request.data
+        qna = QnA.objects.create(user=request.user, type=data['type'], content=data['content'], solved=False)
+        
+        for i in range(1, 4):
+            image_key = f'image{i}'
+            if image_key in request.FILES:
+                image_file = request.FILES[image_key]
+                QnAImage.objects.create(
+                    qna=qna,
+                    file=image_file,
+                    name=image_file.name
+                )
+        
+        serializer = QnASerializer(qna)
+        res['data'] = serializer.data
+        return Response(res, status=status.HTTP_201_CREATED)
+    
+class QnADetailView(APIView):
+    def get(self, request, id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        
+        try:
+            qna = QnA.objects.get(id=id)
+            serializer = QnASerializer(qna)
+            res['data'] = serializer.data
+            return Response(res, status=status.HTTP_200_OK)
+        except QnA.DoesNotExist:
+            res['status'] = 'error'
+            res['message'] = 'QnA not found'
+            return Response(res, status=status.HTTP_404_NOT_FOUND)
+        
+    def patch(self, request, id):
+        res = {'status': 'success', 'message': '', 'data': None}
+        
+        try:
+            qna = QnA.objects.get(id=id)
+            serializer = QnASerializer(qna, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                res['data'] = serializer.data
+                return Response(res, status=status.HTTP_200_OK)
+            else:
+                res['status'] = 'error'
+                res['message'] = serializer.errors
+                return Response(res, status=status.HTTP_400_BAD_REQUEST)
+        except QnA.DoesNotExist:
+            res['status'] = 'error'
+            res['message'] = 'QnA not found'
+            return Response(res, status=status.HTTP_404_NOT_FOUND)

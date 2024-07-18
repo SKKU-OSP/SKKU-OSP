@@ -6,6 +6,8 @@ import { BsGithub } from 'react-icons/bs';
 import { IoAddCircle, IoReloadCircle, IoCloseCircle } from 'react-icons/io5';
 import LoaderIcon from 'react-loader-icon';
 
+import QnAModal from './Frame/QnAModal';
+
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 function ProfileInfo(props) {
@@ -17,6 +19,7 @@ function ProfileInfo(props) {
   const [imagePreview, setImagePreview] = useState();
   const [imageFile, setImageFile] = useState(null);
   const fileInput = useRef(null);
+  const [QnAShow, setQnAShow] = useState(false);
 
   useEffect(() => {
     setUserInfo(props.userInfo);
@@ -74,6 +77,15 @@ function ProfileInfo(props) {
     setEditing(false);
   };
 
+  const OnHandleQnAShow = () => setQnAShow(true);
+
+  const OnHandleQnAClose = () => setQnAShow(false);
+
+  const OnHandleQnASaveClose = (modalQnA) => {
+    console.log('Saved QnA:', modalQnA);
+    setQnAShow(false);
+  };
+
   const handleIntroChange = (event) => {
     const { name, value } = event.target;
     setEditUserInfo({
@@ -111,8 +123,8 @@ function ProfileInfo(props) {
   };
 
   const handleUserGuideClick = () => {
-    window.open("https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42")
-  }
+    window.open('https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42');
+  };
 
   return (
     <>
@@ -164,8 +176,19 @@ function ProfileInfo(props) {
                 )}
               </div>
             )}
-            <div className="info_username">
-              <span className="username">{userInfo.user.username}</span>
+            <div className="d-flex flex-row justify-content-between align-items-center">
+              <div className="info_username">
+                <span className="username">{userInfo.user.username}</span>
+              </div>
+              <button className="info_qna" onClick={OnHandleQnAShow}>
+                <span className="info_qna-text">문의하기</span>
+              </button>
+              <QnAModal
+                user={userInfo.user.username}
+                Show={QnAShow}
+                OnHandleQnAClose={OnHandleQnAClose}
+                OnHandleQnASaveClose={OnHandleQnASaveClose}
+              />
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />

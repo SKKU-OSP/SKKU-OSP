@@ -1145,19 +1145,12 @@ class ArticleCreateView(APIView):
                     return Response(res)
 
             # Hero 홍보 게시글 확인
-            if article.board.board_type == "Promotion":
-
-                if is_hero:
-                    # HeroArticle 생성
-                    hero_article_file_name = request.data.get(
-                        'hero_article_file_name')
-                    hero_article_file = request.FILES[hero_article_file_name]
-
-                    heroArticle = HeroArticle.objects.create(
-                        article=article, pub_date=pub_date, thumbnail=hero_article_file)
-
-                    article.save()
-                    heroArticle.save()
+            if article.board.board_type == "Promotion" and is_hero:
+                hero_article_file = request.FILES.get('hero_thumbnail')
+                if hero_article_file:
+                    HeroArticle.objects.create(
+                        article=article, pub_date=pub_date, thumbnail=hero_article_file, name=hero_article_file.name
+                    )
 
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
@@ -1178,12 +1171,13 @@ class ArticleCreateView(APIView):
                 "_" + str(request.user.id)
             for key in files:
                 print("file", key, files[key])
-                ArticleFile.objects.create(
-                    file=files[key],
-                    filename=files[key],
-                    created_user=created_user,
-                    status="POST",
-                    article_id=article.id)
+                if key != 'hero_thumbnail':
+                    ArticleFile.objects.create(
+                        file=files[key],
+                        filename=files[key],
+                        created_user=created_user,
+                        status="POST",
+                        article_id=article.id)
 
             res['status'] = 'success'
             res['message'] = '게시글을 등록했습니다.'
@@ -1273,24 +1267,21 @@ class ArticleUpdateView(APIView):
                     return Response(res)
 
             # 홍보 게시판의 경우 Hero 홍보 게시 유무 업데이트
-            hero_article = HeroArticle.objects.filter(article=article).first()
-            if is_hero:
-                hero_article_file_name = request.data.get(
-                    'hero_article_file_name')
-
-                if hero_article_file_name in request.FILES:
-                    hero_article_file = request.FILES[hero_article_file_name]
+            if article.board.board_type == "Promotion":
+                hero_article = HeroArticle.objects.filter(article=article).first()
+                hero_article_file = request.FILES.get('hero_thumbnail')
+                if is_hero and hero_article_file:
                     if hero_article:
                         hero_article.thumbnail = hero_article_file
+                        hero_article.name = hero_article_file.name
                         hero_article.save()
                     else:
-                        heroArticle = HeroArticle.objects.create(
-                            article=article, thumbnail=hero_article_file, pub_date=datetime.now())
-
-                        heroArticle.save()
-            else:
-                if hero_article:
-                    hero_article.delete()
+                        HeroArticle.objects.create(
+                            article=article, thumbnail=hero_article_file, pub_date=datetime.now(), name=hero_article_file.name
+                        )
+                else:
+                    if hero_article:
+                        hero_article.delete()
 
             # 게시글 태그 삭제 후 재생성
             old_article_tags = ArticleTag.objects.filter(
@@ -1327,12 +1318,13 @@ class ArticleUpdateView(APIView):
             # 새로 업로드한 파일을 POST상태로 create
             for key in files:
                 # if key not in existing_files:
-                ArticleFile.objects.create(
-                    file=files[key],
-                    filename=files[key],
-                    created_user=created_user,
-                    status="POST",
-                    article_id=article.id)
+                if key != 'hero_thumbnail':
+                    ArticleFile.objects.create(
+                        file=files[key],
+                        filename=files[key],
+                        created_user=created_user,
+                        status="POST",
+                        article_id=article.id)
 
             res['status'] = 'success'
             res['message'] = '게시글을 수정했습니다.'
@@ -1376,8 +1368,12 @@ class ArticleDeleteView(APIView):
                         team_recruit_article = TeamRecruitArticle.objects.get(
                             article=article)
                         team_recruit_article.delete()
-                    except:
-                        res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                    # except:
+                    #     res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                    except TeamRecruitArticle.DoesNotExist:
+                        article.delete()
+                        res['status'] = 'success'
+                        res['message'] = '해당 모집글에는 팀이 설정되지 않아 삭제했습니다.'
                         print(res['message'])
                         return Response(res)
 
@@ -1803,7 +1799,10 @@ class HeroThumbnailFileView(APIView):
 
             file_path = hero_article.thumbnail.path  # 파일 시스템 상의 경로
             file_handle = open(file_path, 'rb')
-            return FileResponse(file_handle, as_attachment=True, filename=filename)
+            # return FileResponse(file_handle, as_attachment=True, filename=filename)
+            response = FileResponse(file_handle, as_attachment=True, filename=filename)
+            response['Content-Disposition'] += f"; filename*=UTF-8''{hero_article.name}"
+            return response
 
         except HeroArticle.DoesNotExist:
             res['message'] = '해당 Hero 게시글을 찾을 수 없습니다.'

@@ -100,7 +100,13 @@ export default function RecruitArticle(props) {
             </div>
             <div className="board-team-recruit">
               {article?.period_end && new Date(article.period_end) > new Date() ? (
-                <span className="board-team-recruit-on">모집중</span>
+                article?.period_start && new Date(article.period_start) < new Date() ? (
+                  <span className="board-team-recruit-on">모집중</span>
+                ) : (
+                  <span className="board-team-recruit-off" style={{ padding: '10px' }}>
+                    모집전
+                  </span>
+                )
               ) : (
                 <span className="board-team-recruit-off">모집마감</span>
               )}
