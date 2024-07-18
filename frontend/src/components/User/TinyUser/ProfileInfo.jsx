@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 import { BsGithub } from 'react-icons/bs';
 import { IoAddCircle, IoReloadCircle, IoCloseCircle } from 'react-icons/io5';
 import LoaderIcon from 'react-loader-icon';
+import { FaAngleDown } from 'react-icons/fa';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 import QnAModal from './Frame/QnAModal';
 
@@ -21,6 +23,7 @@ function ProfileInfo(props) {
   const fileInput = useRef(null);
   const [QnAShow, setQnAShow] = useState(false);
 
+  const navigate = useNavigate();
   useEffect(() => {
     setUserInfo(props.userInfo);
   }, [props]);
@@ -174,6 +177,26 @@ function ProfileInfo(props) {
                     <span className="info_btn-text">프로필 수정</span>
                   </button>
                 )}
+                <DropdownButton
+                  align="end"
+                  title={
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      <span>나의 활동</span>
+                      <FaAngleDown style={{ marginLeft: '5px' }} />
+                    </span>
+                  }
+                  className="info_dropdown"
+                >
+                  <Dropdown.Item eventKey="1" onClick={() => navigate('/community/activity/article')}>
+                    내가 작성한 글
+                  </Dropdown.Item>
+                  <Dropdown.Item eventKey="2" onClick={() => navigate('/community/activity/comment')}>
+                    내가 작성한 댓글
+                  </Dropdown.Item>
+                  <Dropdown.Item eventKey="3" onClick={() => navigate('/community/activity/scrap')}>
+                    내가 스크랩한 글
+                  </Dropdown.Item>
+                </DropdownButton>
               </div>
             )}
             <div className="d-flex flex-row justify-content-between align-items-center">
