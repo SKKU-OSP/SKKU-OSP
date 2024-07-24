@@ -161,5 +161,5 @@ class HeroArticle(models.Model):
     id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, models.CASCADE)
     pub_date = models.DateTimeField(default='1999-03-25')
-    thumbnail = models.FileField(default='1', upload_to='file/article/')
+    thumbnail = models.ImageField(default='1', upload_to='img/hero/')
     name = models.CharField(max_length=255, blank=True)

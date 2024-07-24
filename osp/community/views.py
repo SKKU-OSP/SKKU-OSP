@@ -1769,7 +1769,7 @@ class HeroThumbnailView(APIView):
                 'article_id': hero_article.article.id,
                 'pub_date': hero_article.pub_date,
                 'thumbnail': {
-                    'file': thumbnail.name,
+                    'file': thumbnail.url,
                     'size': convert_size(thumbnail.size),
                 }
             }
@@ -1777,39 +1777,5 @@ class HeroThumbnailView(APIView):
 
         data = {'hero_articles': hero_articles_list}
         res['data'] = data
-
-        return Response(res)
-
-
-class HeroThumbnailFileView(APIView):
-    '''
-    GET:
-    Hero 게시글의 article_id와 filename을 받아서 파일을 반환하는 API
-    URL: api/heroes/<int:article_id>/file/<str:filename>/
-    '''
-
-    def get(self, request, article_id, filename):
-        res = {'status': 'success', 'message': '', 'errors': {}}
-
-        try:
-            hero_article = HeroArticle.objects.get(article_id=article_id)
-            if hero_article.thumbnail.name.split('/')[-1] != filename:
-                res['message'] = '해당 게시글파일이 존재하지 않습니다.'
-                return Response(res)
-
-            file_path = hero_article.thumbnail.path  # 파일 시스템 상의 경로
-            file_handle = open(file_path, 'rb')
-            # return FileResponse(file_handle, as_attachment=True, filename=filename)
-            response = FileResponse(file_handle, as_attachment=True, filename=filename)
-            response['Content-Disposition'] += f"; filename*=UTF-8''{hero_article.name}"
-            return response
-
-        except HeroArticle.DoesNotExist:
-            res['message'] = '해당 Hero 게시글을 찾을 수 없습니다.'
-            res['errors']['article_not_found'] = '해당 게시글이 존재하지 않습니다.'
-        except Exception as e:
-            logging.exception(f"HeroThumbnailFileView ERROR: {e}")
-            res['message'] = '서버 내부 오류가 발생했습니다.'
-            res['errors']['internal_error'] = str(e)
 
         return Response(res)

@@ -18,10 +18,7 @@ export default function Board_Container() {
 
       if (res.status === 'success') {
         const promotionImages = res.data.hero_articles.map((heroArticle) => {
-          const file_url = `${server_url}/community/api/heroes/${
-            heroArticle.article_id
-          }/file/${heroArticle.thumbnail.file.split('/').pop()}`;
-          // return file_url;
+          const file_url = `${server_url}${heroArticle.thumbnail.file}`;
           return { src: file_url, id: heroArticle.article_id };
         });
 
