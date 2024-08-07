@@ -34,8 +34,8 @@ function Comment(props) {
       {username && (
         <div className="comment-input">
           <div>
-            <span className="article-info">
-              <BsChatLeft size={22} style={{ margin: '5px' }} />({data.comments.length})
+            <span className="article-info mx-1">
+              <BsChatLeft size={22} style={{ margin: '3px' }} />({data.comments.length})
             </span>
           </div>
           <Form.Check
@@ -44,7 +44,7 @@ function Comment(props) {
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
           />
-          <div className="col-8">
+          <div className="flex-grow-1 mx-1">
             <Form.Control
               type="text"
               placeholder="댓글을 입력하세요"

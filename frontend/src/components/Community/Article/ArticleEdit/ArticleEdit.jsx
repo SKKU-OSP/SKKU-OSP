@@ -463,7 +463,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       {myArticle ? (
         <>
           {renderConsentMessage}
-          <div id="community-main" className="col-md-9">
+          <div id="community-main" className="col-9">
             <form
               id="article-form"
               method="post"

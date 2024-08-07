@@ -53,7 +53,7 @@
   margin-left: 8px;
   visibility: hidden;
   display: none;
-  font-family: "nanumfont_Bold";
+  font-family: 'nanumfont_Bold';
 }
 .sidebar-toggle {
   height: 36px;
@@ -62,7 +62,7 @@
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 769px) {
   #wrapper {
     padding-left: 160px;
   }
@@ -116,7 +116,7 @@
   background-color: var(--main-white);
   box-shadow: 0 4px 4px var(--card-box-shadow);
   border-radius: 15px;
-  font-family: "nanumfont_Bold";
+  font-family: 'nanumfont_Bold';
 }
 .coworker-link {
   display: flex;

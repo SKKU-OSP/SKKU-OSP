@@ -19,6 +19,8 @@
   border-radius: 50px;
   padding: 10px 20px;
   font-size: 14px;
+  font-family: 'nanumfont_Regular';
+  letter-spacing: 1.5px;
 }
 
 .search-icon {

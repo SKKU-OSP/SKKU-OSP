@@ -66,7 +66,7 @@ const ChallengePage = () => {
     <>
       <div className="col-9">
         <div className="community-nav d-flex">
-          <div className="nav nav-fill community-nav-items">
+          <div className="nav nav-fill">
             <li className="nav-item selected-nav-item">
               <div>챌린지</div>
             </li>

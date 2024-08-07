@@ -172,7 +172,7 @@ function UserActivity() {
       {!error && (
         <>
           <div className="community-nav d-flex">
-            <div className="nav nav-fill community-nav-items">
+            <div className="nav nav-fill">
               {activityNames.includes(tabName) && (
                 <li className="nav-item selected-nav-item">
                   <div>{activityNavMap[tabName]}</div>
@@ -180,7 +180,11 @@ function UserActivity() {
               )}
             </div>
             <Dropdown>
-              <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px', fontFamily:"nanumfont_Bold" }} id="dropdown-sort">
+              <Dropdown.Toggle
+                variant="secondary"
+                style={{ borderRadius: '17px', fontFamily: 'nanumfont_Bold' }}
+                id="dropdown-sort"
+              >
                 {sortOptions[tabName].find((option) => option.value === sortOrder).label}
               </Dropdown.Toggle>
               <Dropdown.Menu>

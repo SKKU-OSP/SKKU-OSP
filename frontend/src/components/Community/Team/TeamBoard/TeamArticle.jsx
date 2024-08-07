@@ -28,7 +28,7 @@ export default function TeamArticle(props) {
       {article.title && (
         <>
           <div className="board-article-header">
-            <div className="board-article-main">
+            <div className="board-article-team-main">
               <h4 className="board-article-title" onClick={onArticle}>
                 {article.title}
               </h4>
@@ -44,7 +44,7 @@ export default function TeamArticle(props) {
                 )}
               </div>
             </div>
-            <div className="board-article-info">
+            <div className="board-article-team-info">
               <div className="board-article-writer">
                 {article.writer ? (
                   article.anonymous_writer ? (

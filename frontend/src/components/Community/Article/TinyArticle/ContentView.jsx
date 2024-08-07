@@ -161,7 +161,7 @@ function ContentView(props) {
         </div>
       </div>
       <div className="article-design">
-        <div className="d-flex justify-content-between align-items-end">
+        <div className="article-container">
           <div id="article-title" className="col-md-9">
             {article.title}
           </div>
@@ -179,7 +179,7 @@ function ContentView(props) {
               {pub_date1} {pub_date2}
             </span>
           </div>
-          {(username === article.writer.user.username || username == 'admin') ? (
+          {username === article.writer.user.username || username == 'admin' ? (
             <Dropdown className="article-more" style={{ display: 'inline-block' }}>
               <Dropdown.Toggle as="span" id="dropdown-custom-component" className="dropdownbtn">
                 <BsThreeDotsVertical />
@@ -272,6 +272,9 @@ function ContentView(props) {
                   </div>
                 </span>
                 <span className="article-team-divide">
+                  <div className="article-team-img">
+                    <img className="hidden" src={`${domain_url}${team.image}`}></img>
+                  </div>
                   <span>
                     <div>
                       <div className="article-info-name" style={{ fontWeight: '500' }}>
