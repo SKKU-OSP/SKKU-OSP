@@ -2,6 +2,18 @@
   box-sizing: border-box;
 }
 
+@media screen and (max-width: 554px) {
+  .AchievementList {
+    display: block !important;
+    margin: 10px !important;
+  }
+  .Achieved,
+  .Unachieved {
+    width: 100% !important;
+    margin: 10px 0px !important;
+  }
+}
+
 .ChallengeList {
   display: flex;
   flex-direction: column;
@@ -14,15 +26,15 @@
   border-radius: 15px;
 }
 
-.ChallengeText{
-  font-family: "nanumfont_Regular";
+.ChallengeText {
+  font-family: 'nanumfont_Regular';
 }
 
 .ChallengeProgressTitle {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 10px;
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
 }
 
 .ChallengeProgressDetail {
@@ -47,7 +59,7 @@
   background-color: var(--bs-progress-bg);
   border-radius: var(--bs-progress-border-radius);
   width: 100%;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .ProgressBar {
@@ -60,7 +72,7 @@
   white-space: nowrap;
   background-color: var(--bs-progress-bar-bg);
   transition: var(--bs-progress-bar-transition);
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .AchievementList {
@@ -89,7 +101,7 @@
   color: var(--main-black);
   font-weight: 700;
   font-size: 24px;
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--sub-border-color);
   z-index: 1;
@@ -115,7 +127,7 @@
   font-size: 20px;
   font-weight: 600;
   margin-top: 4px;
-  font-family: "nanumfont_Bold";
+  font-family: 'nanumfont_Bold';
 }
 
 .ChallengeRate {
@@ -123,21 +135,21 @@
   font-weight: 500;
   margin-bottom: 4px;
   color: #9d9d9d;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .ChallengeInstruction {
   color: black;
   font-size: 16px;
   font-weight: 400;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .ChallengeDate {
   color: #0e4392;
   font-size: 16px;
   font-weight: 400;
-  font-family: "nanumfont_Bold";
+  font-family: 'nanumfont_Bold';
 }
 
 .Tier-1 {

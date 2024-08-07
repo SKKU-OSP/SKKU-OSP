@@ -159,11 +159,19 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
         }
       });
 
+      Object.entries(articleFiles).forEach(([key, value]) => {
+        formData.append('article_files', value);
+      });
+
       if (isHero) {
-        Object.entries(heroArticleFile).forEach(([key, value]) => {
-          formData.append('hero_thumbnail', value);
-        });
+        formData.append('hero_thumbnail', heroArticleFile);
       }
+
+      // if (isHero) {
+      //   Object.entries(heroArticleFile).forEach(([key, value]) => {
+      //     formData.append('hero_thumbnail', value);
+      //   });
+      // }
 
       console.log(formData);
       const response = await axios.post(urlRegistArticle, formData, getAuthConfig());
@@ -376,7 +384,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
   return (
     <>
       {renderConsentMessage}
-      <div id="community-main" className="col-md-9">
+      <div id="community-main" className="col-9">
         <form id="article-form" method="post" data-edit-type={type} encType="multipart/form-data" onSubmit={handleShow}>
           <div className="community-nav d-flex">
             <div>
@@ -564,7 +572,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
               <div className="community-file">
                 <div style={{ display: 'flex' }}>
                   <div style={{ color: '#000000', marginRight: '10px' }}>메인페이지 게시용 썸네일</div>
-                  <input type="file" name="hero_article_files" onChange={handleHeroFileChange} multiple />
+                  <input type="file" name="hero_article_files" onChange={handleHeroFileChange} accept="image/*" />
                 </div>
                 <div id="hero-file-list"></div>
               </div>

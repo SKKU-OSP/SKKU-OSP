@@ -206,7 +206,7 @@ function TeamBoard() {
           <button type="button" onClick={onMyTeamList} className="btn-back">
             <BsChevronLeft style={{ marginRight: '7px', marginBottom: '5px' }} />내 팀 목록
           </button>
-          <ul className="nav nav-fill community-nav-items">
+          <ul className="nav nav-fill">
             <li className="nav-item selected-nav-item">
               <div>{team_name}</div>
             </li>

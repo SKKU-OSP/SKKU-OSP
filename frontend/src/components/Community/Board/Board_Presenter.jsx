@@ -12,7 +12,7 @@ export default function Board_Presenter(props) {
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <ul className="nav nav-fill community-nav-items">
+        <ul className="nav nav-fill">
           <CommunityNavItem navName="자유" tabName={tabName} />
           <CommunityNavItem navName="질문" tabName={tabName} />
           <CommunityNavItem navName="정보" tabName={tabName} />

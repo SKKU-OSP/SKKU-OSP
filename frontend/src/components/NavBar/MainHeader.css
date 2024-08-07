@@ -41,7 +41,7 @@
   }
 }
 
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 992px) {
   .siteTitle {
     display: none !important;
   }
@@ -76,7 +76,7 @@
   font-size: larger;
   color: var(--main-white);
   letter-spacing: -2px;
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
 }
 
 header {
@@ -120,7 +120,7 @@ header.extended {
   margin: 15px;
   text-decoration: none;
   color: var(--header-navbar-color);
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .header-navbar-selected-menu {
@@ -129,7 +129,7 @@ header.extended {
   margin: 15px;
   text-decoration: none;
   color: var(--alert-color);
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
 }
 
 .header-navbar-menu:hover {

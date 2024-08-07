@@ -1,4 +1,4 @@
-.d-flex.text-lg{
+.d-flex.text-lg {
   gap: 0.5% !important;
 }
 @media (min-width: 768px) {
@@ -54,23 +54,23 @@ a.nav-link {
   color: gray;
 }
 
-.border-round{
+.border-round {
   border-radius: 0.375rem;
 }
-.nav-link.border-round{
+.nav-link.border-round {
   background: white;
   border: 1px solid var(--profile-btn-border) !important;
   min-width: 100px;
   text-align: center;
-  color:black;
+  color: black;
 }
-.nav-link.border-round:hover{
+.nav-link.border-round:hover {
   background: var(--profile-btn-active);
 }
-.nav-link.border-round.active{
+.nav-link.border-round.active {
   background-color: var(--profile-btn-active);
   color: var(--bootstrap-primary);
 }
-.form-check-input:hover{
+.form-check-input:hover {
   background-color: var(--bootstrap-active-primary);
 }
