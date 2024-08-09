@@ -134,12 +134,24 @@
   z-index: 1;
   color: var(--main-black);
 }
+.article-body-edit ::-webkit-scrollbar-thumb {
+  background-color: var(--main-icon-color);
+}
+.article-body-edit ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--profile-nav-font);
+}
 
 .article-body {
   min-height: 350px;
   max-height: 500px;
   overflow: auto;
   padding: 25px 40px 20px;
+}
+.article-body::-webkit-scrollbar-thumb {
+  background-color: var(--main-icon-color);
+}
+.article-body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--profile-nav-font);
 }
 
 .article-body img {
