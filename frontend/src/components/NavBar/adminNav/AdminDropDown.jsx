@@ -44,6 +44,7 @@ const AdminDropDown = ({ iconSize }) => {
         >
           Google Analytics
         </Dropdown.Item>
+        <Dropdown.Item onClick={() => navigate('/manage/githubid')}>Github 계정 관리</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );

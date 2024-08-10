@@ -43,6 +43,7 @@ import PasswordResetConfirm from './components/Account/PasswordResetConfirm';
 import PasswordResetComplete from './components/Account/PasswordResetComplete';
 import MainBoard_Container from './components/Community/Board/MainBoard/MainBoard_Container';
 import QnAPage from './routes/QnAPage';
+import ManageGihubPage from './routes/ManageGithubPage';
 import { useEffect } from 'react';
 
 const GaTrackingId = import.meta.env.VITE_GA_TRACKING_ID;
@@ -217,6 +218,10 @@ const router = createBrowserRouter([
       {
         path: 'qna',
         element: <QnAPage />
+      },
+      {
+        path: 'manage/githubid',
+        element: <ManageGihubPage />
       }
     ]
   }

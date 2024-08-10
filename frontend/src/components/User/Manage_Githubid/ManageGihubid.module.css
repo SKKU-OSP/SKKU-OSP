@@ -1,0 +1,16 @@
+
+.user_box{
+  display: flex;
+  align-items: center;
+  border: 1px solid black;
+  height: 50px;
+  width: 50%;
+  font-size: 45px;
+}
+
+.input_box{
+  border: 1px solid black;
+  height: 50px;
+  width: 50%;
+  font-size: 30px;
+}

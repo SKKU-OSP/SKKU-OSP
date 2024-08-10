@@ -147,3 +147,8 @@ class DistFactorDashboardSerializer(serializers.ModelSerializer):
             ret["value"] = json.loads(ret["value"])
 
         return ret
+
+class RepositoryOwnerUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Repository
+        fields = ['owner']

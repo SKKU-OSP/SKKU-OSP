@@ -7,14 +7,16 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from home.serializers import AnnualOverviewSerializer, AnnualTotalSerializer, DistScoreSerializer, DistFactorSerializer
+from home.serializers import AnnualOverviewSerializer, AnnualTotalSerializer, DistScoreSerializer, DistFactorSerializer, RepositoryOwnerUpdateSerializer
 from home.updateScore import user_score_update
 from home.updateChart import update_chart
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
-from user.models import Account, GitHubScoreTable
+from user.models import Account, GitHubScoreTable, StudentTab, GithubScore, GithubStatsYymm, GithubUserFollowing, GithubUserStarred, GithubOverview
 from user.update_act import update_commmit_time, update_individual, update_frequency
 from challenge.models import Challenge
 from challenge.views import achievement_check
+from repository.models import (GithubIssues, GithubPulls, GithubRepoCommits,
+                               GithubRepoContributor, GithubRepoStats, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars)
 from handle_error import get_fail_res
 
 import json
@@ -299,3 +301,70 @@ def update_score(request):
         print('Done!')
 
     return redirect(reverse('home:statistic'))
+
+class GithubUpdateView(APIView):
+    def post(self, request):
+        old_owner = request.data.get('old_owner')
+        new_owner = request.data.get('new_owner')
+
+        try:
+            repositories = Repository.objects.filter(owner=old_owner)
+            students = Student.objects.filter(github_id=old_owner)
+            student_tabs = StudentTab.objects.filter(github_id=old_owner)
+            account = Account.objects.filter(github_id=old_owner)
+            github_issues = GithubIssues.objects.filter(github_id=old_owner)
+            github_overview = GithubOverview.objects.filter(github_id=old_owner)
+            github_pulls = GithubPulls.objects.filter(github_id=old_owner)
+            github_repo_commit_files = GithubRepoCommitFiles.objects.filter(github_id=old_owner)
+            github_repo_commits = GithubRepoCommits.objects.filter(github_id=old_owner)
+            github_repo_commits2 = GithubRepoCommits.objects.filter(author_github=old_owner)
+            github_repo_contributors = GithubRepoContributor.objects.filter(github_id=old_owner)
+            github_repo_contributors2 = GithubRepoContributor.objects.filter(owner_id=old_owner)
+            github_repo_stats = GithubRepoStats.objects.filter(github_id=old_owner)
+            github_repo_stats_yymm = GithubRepoStatsyymm.objects.filter(github_id=old_owner)
+            github_scores = GithubScore.objects.filter(github_id=old_owner)
+            github_stars = GithubStars.objects.filter(github_id=old_owner)
+            github_stats_yymm = GithubStatsYymm.objects.filter(github_id=old_owner)
+            github_user_followings = GithubUserFollowing.objects.filter(github_id=old_owner)
+            github_user_followings2 = GithubUserFollowing.objects.filter(following_id=old_owner)
+            github_user_starreds = GithubUserStarred.objects.filter(github_id=old_owner)
+            github_user_scoretable = GitHubScoreTable.objects.filter(github_id=old_owner)
+
+            repositories.update(owner=new_owner)
+            students.update(github_id=new_owner)
+            student_tabs.update(github_id=new_owner)
+            account.update(github_id=new_owner)
+            github_issues.update(github_id=new_owner)
+            github_overview.update(github_id=new_owner)
+            github_pulls.update(github_id=new_owner)
+            github_repo_commit_files.update(github_id=new_owner)
+            github_repo_commits.update(github_id=new_owner)
+            github_repo_commits2.update(author_github=new_owner)
+            github_repo_contributors.update(github_id=new_owner)
+            github_repo_contributors2.update(owner_id=new_owner)
+            github_repo_stats.update(github_id=new_owner)
+            github_repo_stats_yymm.update(github_id=new_owner)
+            github_stars.update(github_id=new_owner)
+            github_stats_yymm.update(github_id=new_owner)
+            github_user_starreds.update(github_id=new_owner)
+            github_user_scoretable.update(github_id=new_owner)
+            github_user_followings.update(github_id=new_owner)
+            github_user_followings2.update(following_id=new_owner)
+
+
+            for data in github_scores:
+                yid = data.yid
+                year = data.year
+                new_yid = f"{year}{new_owner}"
+
+                data.github_id = new_owner
+                data.yid = new_yid
+                data.save()
+
+
+            return Response({"status": "success", "message": "github ID 수정 완료"})
+        except Repository.DoesNotExist:
+            return Response({"status": "fail", "message": "해당 유저 정보가 존재하지 않습니다."})
+        except Exception as e:
+            print(e)
+            return Response({"status": "fail", "message": "github ID 수정 중 오류 발생"})

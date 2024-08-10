@@ -92,6 +92,34 @@ class GithubRepoStats(models.Model):
     def __str__(self):
         return f'{self.github_id}/{self.repo_name}'
 
+class GithubRepoStatsyymm(models.Model):
+    github_id = models.CharField(primary_key=True, max_length=40)
+    repo_name = models.CharField(max_length=100)
+    start_yymm = models.DateField()
+    end_yymm = models.DateField()
+    stargazers_count = models.IntegerField(blank=True, null=True)
+    forks_count = models.IntegerField(blank=True, null=True)
+    commits_count = models.IntegerField(blank=True, null=True)
+    prs_count = models.IntegerField(blank=True, null=True)
+    open_issue_count = models.IntegerField(blank=True, null=True)
+    close_issue_count = models.IntegerField(blank=True, null=True)
+    watchers_count = models.IntegerField(blank=True, null=True)
+    dependencies = models.IntegerField(blank=True, null=True)
+    language = models.CharField(max_length=45, blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True)
+    update_date = models.DateTimeField(blank=True, null=True)
+    contributors_count = models.IntegerField(blank=True, null=True)
+    release_ver = models.CharField(max_length=45, blank=True, null=True)
+    release_count = models.IntegerField(blank=True, null=True)
+    readme = models.IntegerField(blank=True, null=True)
+    license = models.CharField(max_length=45, blank=True, null=True)
+    proj_short_desc = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'github_repo_stats_yymm'
+        unique_together = (('github_id', 'repo_name'),)
+
 
 class GithubIssues(models.Model):
     owner_id = models.CharField(primary_key=True, max_length=40)
@@ -119,6 +147,22 @@ class GithubPulls(models.Model):
         managed = False
         db_table = 'github_pulls'
         unique_together = (('owner_id', 'repo_name', 'number'),)
+
+class GithubRepoCommitFiles(models.Model):
+    github_id = models.CharField(max_length=40, primary_key=True)
+    repo_name = models.CharField(max_length=100)
+    sha = models.CharField(max_length=256)
+    filename = models.CharField(max_length=256)
+    status = models.CharField(max_length=40)
+    additions = models.IntegerField()
+    deletions = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'github_repo_commit_files'
+        unique_together = (('github_id', 'repo_name', 'sha'),)
+
+
 
 
 class GithubStars(models.Model):
