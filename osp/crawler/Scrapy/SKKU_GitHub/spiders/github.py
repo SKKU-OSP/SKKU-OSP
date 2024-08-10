@@ -31,7 +31,10 @@ class GithubSpider(scrapy.Spider):
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        self.driver = webdriver.Chrome(options=chrome_options)
+        chromedriver_path = ChromeDriverManager().install()
+        print(f"Chromedriver path: {chromedriver_path}")  # 경로를 출력하여 확인
+
+        self.driver = webdriver.Chrome(service=ChromeService(chromedriver_path), options=chrome_options)
     def start_requests(self):
         for id in self.ids:
             yield self.get_recent(f'users/{id}')
@@ -45,14 +48,17 @@ class GithubSpider(scrapy.Spider):
         # 타겟 유저의 최신 push 기록을 확인한다.
         try:
             GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=pushed"
+            print(GITHUB_API_URL)
             return scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint": endpoint})
         except Exception as e:
+            print("exception")
             logging.warning("recent pushed")
             return self.api_get(endpoint, self.parse_user)
 
     def find_recent(self, res):
         # push 기록을 저장한 후 api_get을 호출해 크롤링을 진행한다.
         try:
+            print("find_recent")
             endpoint = res.meta["endpoint"]
             recent_json = json.loads(res.body)
             recent_at = recent_json[0]["pushed_at"]
@@ -75,6 +81,7 @@ class GithubSpider(scrapy.Spider):
         return req
 
     def parse_user(self, res):
+        print("parse_user")
         user_json = json.loads(res.body)
         github_id = user_json['login']
         user_item = User()

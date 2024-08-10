@@ -51,6 +51,6 @@ urllib3==1.26.9
 virtualenv==20.14.1
 virtualenv-clone==0.5.7
 virtualenvwrapper==4.8.4
-webdriver-manager==3.5.2
+webdriver-manager
 Werkzeug==2.1.2
 zipp==3.8.0
