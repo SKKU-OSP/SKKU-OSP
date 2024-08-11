@@ -40,9 +40,9 @@ function DevAnalysis() {
       {error && <div>{error}</div>}
       {devType && <DevType data={devType} />}
       {devType === undefined && <div className="d-flex fs-4 bold mb-2 justify-content-between">
-        <div>개발자 유형</div>
+        <div style={{fontFamily: "nanumfont_ExtraBold"}}>개발자 유형</div>
         <div>
-          <button className="btn btn-secondary" onClick={() => navigate('test')}>
+          <button className="btn btn-secondary" onClick={() => navigate('test')} style={{fontFamily: "nanumfont_Bold"}}>
             검사하기
           </button>
         </div>

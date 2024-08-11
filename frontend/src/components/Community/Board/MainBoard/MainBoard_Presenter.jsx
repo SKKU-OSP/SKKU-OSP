@@ -11,7 +11,7 @@ import { BsChevronCompactLeft, BsChevronCompactRight, BsFillPlusCircleFill } fro
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function Board_Presenter(props) {
-  const { currentPage, handlePrevClick, handleNextClick, renderPageIndicators } = props;
+  const { currentPage, promotionImages, handlePrevClick, handleNextClick, renderPageIndicators, renderImages } = props;
 
   const navigate = useNavigate();
   const [isLoadedArticles, setIsLoadedArticles] = useState(false);
@@ -19,8 +19,10 @@ export default function Board_Presenter(props) {
   const [recruitArticles, setRecruitArticles] = useState([]);
   const [teamLists, setTeamLists] = useState([]);
   const [error, setError] = useState(false);
-  const [selectedTab1, setSelectedTab1] = useState('자유');
+  const [selectedTab1, setSelectedTab1] = useState('홍보');
   const [selectedTab2, setSelectedTab2] = useState('팀 모집');
+  const backgroundImage = promotionImages[currentPage];
+  console.log('image', backgroundImage);
 
   const getArticles = async (page) => {
     try {
@@ -101,15 +103,40 @@ export default function Board_Presenter(props) {
     navigate(`/community/recruit/팀 모집`);
   };
 
+  const onImageClick = () => {
+    navigate(`/community/article/${backgroundImage.id}`);
+  };
+
   return (
     <div className="col-9">
-      <div className="community-hero">
-        <BsChevronCompactLeft className="icon" size={30} onClick={handlePrevClick} />
-        <div className="page-indicators">{renderPageIndicators(currentPage)}</div>
-        <BsChevronCompactRight className="icon" size={30} onClick={handleNextClick} />
-      </div>
+      {promotionImages.length > 0 ? (
+        <div className="community-hero" onClick={onImageClick}>
+          <img src={backgroundImage.src} alt="Community Hero" className="community-hero-img" />
+          <BsChevronCompactLeft
+            className="icon left-icon"
+            size={30}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrevClick();
+            }}
+          />
+          <div className="page-indicators">{renderPageIndicators(currentPage)}</div>
+          <BsChevronCompactRight
+            className="icon right-icon"
+            size={30}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNextClick();
+            }}
+          />
+        </div>
+      ) : (
+        <div className="community-hero">
+          <p>Loading images...</p>
+        </div>
+      )}
 
-      <div className="d-flex">
+      <div className="board-container">
         <div className="board-left">
           <div className="board-nav">
             <div onClick={onCommunity}>커뮤니티</div>
@@ -117,6 +144,14 @@ export default function Board_Presenter(props) {
           </div>
           <div>
             <ul className="nav" style={{ marginLeft: '15px' }}>
+              <li
+                className={`board-nav-item ${
+                  selectedTab1 === '홍보' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
+                }`}
+                onClick={() => handleTabClick1('홍보')}
+              >
+                <div>홍보</div>
+              </li>
               <li
                 className={`board-nav-item ${
                   selectedTab1 === '자유' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
@@ -140,14 +175,6 @@ export default function Board_Presenter(props) {
                 onClick={() => handleTabClick1('정보')}
               >
                 <div>정보</div>
-              </li>
-              <li
-                className={`board-nav-item ${
-                  selectedTab1 === '홍보' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
-                }`}
-                onClick={() => handleTabClick1('홍보')}
-              >
-                <div>홍보</div>
               </li>
             </ul>
           </div>
@@ -195,7 +222,7 @@ export default function Board_Presenter(props) {
               {selectedTab2 === '팀 모집' ? (
                 <>
                   {recruitArticles.slice(0, 5).map((article) => (
-                    <RecruitArticle article={article} />
+                    <RecruitArticle key={article.id} article={article} />
                   ))}
                 </>
               ) : (

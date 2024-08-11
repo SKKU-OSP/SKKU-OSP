@@ -20,10 +20,10 @@ function Activity(props) {
         const getUrl = server_url + '/user/api/profile-activity/' + username + '/';
         const response = await axios.get(getUrl, getAuthConfig());
         const res = response.data;
-        console.log("activity", res);
+        console.log('activity', res);
         if (res.status === 'success') {
           setProfileActivity(res.data);
-          console.log("activity", res.data);
+          console.log('activity', res.data);
         }
       } catch (error) {}
     };
@@ -60,8 +60,8 @@ function Activity(props) {
     <>
       {profileActivity ? (
         <div className="profile-activity">
-          <div className="d-flex flex-column justify-content-start profile-portfolio">
-            <div className="d-flex flex-row justify-content-between portfolio-intro">
+          <div className="profile-portfolio">
+            <div className="portfolio-intro">
               <span className="intro">포트폴리오</span>
               {isEdit &&
                 (editing ? (
@@ -84,9 +84,9 @@ function Activity(props) {
                   onChange={handleInputChange}
                 />
               ) : (
-                <div className="text">
+                <>
                   {profileActivity.portfolio.length > 0 ? (
-                    <>
+                    <div className="text">
                       {profileActivity.portfolio.split('\n').map((line, idx) => {
                         return (
                           <span key={`portfolio-${idx}`}>
@@ -95,16 +95,16 @@ function Activity(props) {
                           </span>
                         );
                       })}
-                    </>
+                    </div>
                   ) : (
                     <>포트폴리오를 작성하지 않았습니다.</>
                   )}
-                </div>
+                </>
               )}
             </div>
           </div>
-          <div className="d-flex flex-column justify-content-start profile-contribution">
-            <div className="d-flex flex-row justify-content-between contribution-intro">
+          <div className="profile-contribution">
+            <div className="contribution-intro">
               <span className="intro">최근 기여활동</span>
               <a
                 onClick={() => {
@@ -120,8 +120,8 @@ function Activity(props) {
                 {profileActivity.recent_repos.map((repo, idx) => {
                   return (
                     <div className="contribution-repo" key={idx}>
-                      <div className="d-flex flex-column justify-content-start repo">
-                        <div className="d-flex flex-row justify-content-between title">
+                      <div className="repo">
+                        <div className="title">
                           <span className="title-text">{repo.repo_name}</span>
                           <span className="commit-date">
                             최근 커밋일자
@@ -129,7 +129,7 @@ function Activity(props) {
                             {repo.committer_date.substring(0, 10)}
                           </span>
                         </div>
-                        <div className="d-flex flex-row justify-content-start gap-1 stat">
+                        <div className="gap-1 stat">
                           <BsStar size={16} />
                           <span className="stat-text">Stars {repo.stargazers_count}</span>
                           <BsCheck2 size={16} />
@@ -144,7 +144,7 @@ function Activity(props) {
                 })}
               </>
             ) : (
-              <div className="text">최근 기여활동이 없습니다.</div>
+              <div className="contribution-text">최근 기여활동이 없습니다.</div>
             )}
           </div>
         </div>

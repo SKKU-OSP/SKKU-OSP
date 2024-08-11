@@ -8,7 +8,7 @@ function Search_Presenter(props) {
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <div className="nav nav-fill community-nav-items">
+        <div className="nav nav-fill">
           {keyword ? (
             <li className="nav-item selected-nav-item">
               <div>'{keyword}' 검색 결과</div>

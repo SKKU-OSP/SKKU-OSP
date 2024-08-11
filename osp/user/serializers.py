@@ -172,3 +172,17 @@ class GithubScoreResultSerializer(serializers.ModelSerializer):
 
     def get_total_score(self, stat):
         return stat.repo_score_sum + stat.score_other_repo_sum + stat.score_star + stat.score_fork
+
+class QnAImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.QnAImage
+        fields = ('id', 'file', 'name')
+
+class QnASerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    user_id = serializers.IntegerField(source='user.id')
+    images = QnAImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.QnA
+        fields = ('id', 'user', 'user_id', 'type', 'content', 'created_at', 'solved', 'response', 'images')

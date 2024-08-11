@@ -2,6 +2,7 @@ import { useContext, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BsGithub } from 'react-icons/bs';
 import axios from 'axios';
+import ReactGA from 'react-ga4';
 
 import classes from './Login.module.css';
 import AuthContext from '../../utils/auth-context';
@@ -26,12 +27,11 @@ function Login() {
   const sendLoginRequest = async () => {
     try {
       if ((usernameInputRef.current.value === '') | (passwordInputRef.current.value === '')) return;
-      const token = tokenLoader()
+      const token = tokenLoader();
       if (token !== null && token !== 'EXPIRED') {
         setUser();
         navigate('/community');
-      }
-      else{
+      } else {
         const data = { username: usernameInputRef.current.value, password: passwordInputRef.current.value };
         const response = await axios.post(login_url, data);
         const res = response.data;
@@ -40,6 +40,11 @@ function Login() {
           localStorage.setItem('refresh_token', res.data.refresh_token);
           setExpiration(); // 로컬스토리지에 expiration 저장
           setUser();
+          ReactGA.event({
+            category: 'login',
+            action: 'Success_Login',
+            label: '로그인 성공'
+          });
           navigate('/community');
         } else {
           setError(res.message);
@@ -105,7 +110,7 @@ function Login() {
           </button>
           {github_login_url ? (
             <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
-              <BsGithub /> Start with Github
+              <BsGithub /> Start with GitHub
             </button>
           ) : (
             <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>

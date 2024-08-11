@@ -22,7 +22,7 @@ export default function TeamOverview(props) {
                 <h6 className="board-team-desc-text">{team.description}</h6>
               </div>
             </div>
-            <div className="board-article-info" style={{ flexBasis: '30%' }}>
+            <div className="board-article-team-info">
               <div className="board-team-leader">
                 {team.leader_username && (
                   <>

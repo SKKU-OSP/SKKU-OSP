@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 
 import DevTendency from './Charts/DevTendency';
 import ChartsByYear from './Charts/ChartsByYear';
@@ -9,6 +10,7 @@ import ChartsByYear2 from './Charts/ChartsByYear2';
 
 import { getAuthConfig } from '../../../utils/auth';
 import SimpleBox from './Item/SimpleBox';
+import LoaderIcon from 'react-loader-icon';
 
 import './DashBoard.css';
 
@@ -29,13 +31,11 @@ function Dashboard() {
         const response = await axios.get(contrUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
-          console.log('getContr', res.data);
           setContr(res.data);
         } else {
           setContrError(res.message);
         }
       } catch (error) {
-        console.log('getContr error', error);
         setContrError('기여내역 데이터를 가져오는데 실패했습니다.');
       }
     };
@@ -46,18 +46,20 @@ function Dashboard() {
         if (res.status === 'success') {
           setDevTendency(res.data);
           setDevTendencyError(null);
-          console.log('getDevTendency', res.data);
         } else {
-          console.log(res.message);
           setDevTendencyError(res.message);
         }
       } catch (error) {
-        console.log('getDevTendency error', error);
         setDevTendencyError('개발성향 데이터를 가져오는데 실패했습니다.');
       }
     };
     getContr();
     getDevTendency();
+    ReactGA.event({
+      category: 'Page',
+      action: 'Access_Dashboard',
+      label: '대시보드 접근'
+    });
   }, [username]);
 
   const factorKorMap = {
@@ -67,22 +69,37 @@ function Dashboard() {
     issues: '이슈',
     prs: '풀 리퀘스트'
   };
-
   return (
     <>
-      <div className="fs-4 mb-2 bold">전체 기여 내역</div>
-      {contrError && <div>{contrError}</div>}
-      {contr && (
-        <div className="row d-flex dashboard-box justify-content-between mb-4">
-          {Object.entries(contr).map(([label, value]) => (
-            <SimpleBox key={label} label={factorKorMap[label]} value={value} />
-          ))}
-        </div>
+      {contr || contrError ? (
+        contr && contr.commits === null ? (
+          <div>깃허브에서 활동 정보를 수집중입니다. 잠시 후, 다시 방문해주세요. (최대 12시간 소요)</div>
+        ) : (
+          <>
+            <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>전체 기여 내역</div>
+            {contrError && <div>{contrError}</div>}
+            {contr && (
+              <div className="row d-flex dashboard-box justify-content-between mb-4">
+                {Object.entries(contr).map(([label, value]) => (
+                  <SimpleBox key={label} label={factorKorMap[label]} value={value} />
+                ))}
+              </div>
+            )}
+            <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>기여 성향 분석</div>
+            {devTendency || devTendencyError ? (
+              <>
+                {devTendencyError && <div>{devTendencyError}</div>}
+                {devTendency && <DevTendency data={devTendency} />}
+              </>
+            ) : (
+              <LoaderIcon style={{ marginTop: '20px' }} />
+            )}
+            <ChartsByYear2 />
+          </>
+        )
+      ) : (
+        <LoaderIcon style={{ marginTop: '20px' }} />
       )}
-      <div className="fs-4 mb-2 bold">기여 성향 분석</div>
-      {devTendencyError && <div>{devTendencyError}</div>}
-      {devTendency && <DevTendency data={devTendency} />}
-      <ChartsByYear2 />
     </>
   );
 }

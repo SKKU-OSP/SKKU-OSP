@@ -17,13 +17,10 @@ function OwnerInfo() {
   const [isActivityOpen, setIsActivityOpen] = useState(undefined);
   const handlePublicSwitchChange = (checked, type) => {
     let open_lvl = 0;
-    if (type === 0)
-    {
-      open_lvl = isProfileOpen ? 0 : (isActivityOpen ? 2 : 1);
+    if (type === 0) {
+      open_lvl = isProfileOpen ? 0 : isActivityOpen ? 2 : 1;
       setIsProfileOpen(checked);
-    }
-    else
-    {
+    } else {
       open_lvl = isProfileOpen ? (isActivityOpen ? 1 : 2) : 0;
       setIsActivityOpen(checked);
     }
@@ -43,7 +40,7 @@ function OwnerInfo() {
     };
     const getAccountPrivacy = async () => {
       try {
-        const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/'+ username + '/';
+        const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/' + username + '/';
         const response = await axios.get(AccountPrivacyGetUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -65,7 +62,7 @@ function OwnerInfo() {
   }, []);
 
   const updatePostAccountPrivacy = async (open_lvl) => {
-    const AccountPrivacyPostUrl = server_url + '/user/api/account-privacy/'+ username + '/';
+    const AccountPrivacyPostUrl = server_url + '/user/api/account-privacy/' + username + '/';
     await axios.post(AccountPrivacyPostUrl, { open_lvl: open_lvl }, getAuthConfig());
   };
 
@@ -103,7 +100,8 @@ function OwnerInfo() {
                 <Form.Check
                   type="switch"
                   id="isOpenProfile"
-                  label="프로필 공개 설정"
+                  label="프로필 공개"
+                  style={{fontFamily: "nanumfont_Regular"}}
                   onChange={(e) => handlePublicSwitchChange(e.target.checked, 0)}
                   checked={isProfileOpen}
                 />
@@ -113,6 +111,7 @@ function OwnerInfo() {
                   label="활동 공개"
                   disabled={!isProfileOpen}
                   onChange={(e) => handlePublicSwitchChange(e.target.checked, 1)}
+                  style={{fontFamily: "nanumfont_Regular"}}
                   checked={!isProfileOpen ? false : isActivityOpen}
                 />
               </Form>

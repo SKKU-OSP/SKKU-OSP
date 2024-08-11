@@ -1,8 +1,34 @@
+@media screen and (max-width: 554px) {
+  .title-text {
+    max-width: 65% !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .profile-tab .nav {
+    margin-bottom: 0px !important;
+  }
+  .info_left {
+    width: 30% !important;
+    height: 30% !important;
+    padding-top: 25px;
+  }
+  .info_img {
+    width: 90% !important;
+    height: 90% !important;
+  }
+  .contribution-repo {
+    padding: 8px !important;
+  }
+}
+
 .user-container {
   background: var(--main-white);
 }
 
 .profile_info {
+  display: flex;
+  flex-direction: row;
   .info_left {
     width: 257px;
     height: 255px;
@@ -37,6 +63,7 @@
         line-height: 21.78px;
         letter-spacing: 0em;
         text-align: left;
+        font-family: 'nanumfont_Regular';
       }
       .info_btn:hover,
       .info_btn:hover .info_btn-text {
@@ -45,11 +72,18 @@
         color: var(--main-white);
       }
     }
+    .info_dropdown .btn {
+      background-color: #eaeaea !important;
+      border: #eaeaea;
+      color: black;
+      font-family: 'nanumfont_Regular';
+      font-size: 18px;
+    }
     .info_username {
       padding: 0px 10px;
       gap: 6px;
       .username {
-        font-family: Inter;
+        font-family: 'nanumfont_ExtraBold';
         font-size: 24px;
         font-weight: 700;
         line-height: 29.05px;
@@ -63,7 +97,7 @@
       gap: 6px;
       .github_username {
         text-decoration: none;
-        font-family: Inter;
+        font-family: 'nanumfont_Bold';
         font-size: 18px;
         font-weight: 700;
         line-height: 21.78px;
@@ -79,7 +113,7 @@
       width: 100%;
       white-space: pre-wrap;
       border-color: #a0a0a0;
-      font-family: Inter;
+      font-family: 'nanumfont_Regular';
       font-size: 16px;
       font-weight: 500;
       line-height: 19px;
@@ -91,7 +125,7 @@
       padding: 8px 16px;
       gap: 6px;
       height: 150px;
-      font-family: Inter;
+      font-family: 'nanumfont_Regular';
       font-size: 16px;
       font-weight: 500;
       line-height: 19px;
@@ -102,6 +136,28 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+  }
+  .info_qna {
+    padding: 6px 12px;
+    border: none;
+    background-color: transparent;
+    gap: 5px;
+    margin-right: 10px;
+  }
+  .info_qna-text {
+    color: var(--gray-500);
+    font-family: Inter;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 21.78px;
+    letter-spacing: 0em;
+    text-align: left;
+    text-decoration: underline;
+  }
+  .info_qna:hover,
+  .info_qna:hover .info_qna-text {
+    border: none;
+    color: var(--main-selected-color);
   }
 }
 
@@ -118,6 +174,7 @@
   border-top-right-radius: 10px;
   padding-bottom: 10px;
   color: var(--main-black);
+  font-family: 'nanumfont_Bold';
 }
 .profile-tab .nav-link:hover {
   opacity: 0.9;
@@ -128,6 +185,7 @@
   background-color: var(--profile-tab-color);
   color: var(--main-white);
   font-weight: bold;
+  font-family: 'nanumfont_ExtraBold';
 }
 
 .profile-interest {
@@ -140,7 +198,7 @@
     .category-intro {
       padding: 8px 16px;
       .intro {
-        font-family: Inter;
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -157,7 +215,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -182,6 +240,7 @@
         gap: 10px;
         background-color: #cdcdcd;
         .icon-text {
+          font-family: 'nanumfont_Regular';
           font-size: 18px;
           line-height: 22px;
           letter-spacing: 0em;
@@ -198,7 +257,7 @@
     .language-intro {
       padding: 8px 16px;
       .intro {
-        font-family: Inter;
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -215,7 +274,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -254,7 +313,8 @@
           width: 18px;
         }
         .language-text {
-          font-family: Inter;
+          padding-top: 2px;
+          font-family: 'nanumfont_Regular';
           font-size: 18px;
           font-weight: 400;
           line-height: 22px;
@@ -273,13 +333,19 @@
   padding: 10px 16px;
   gap: 16px;
   .profile-portfolio {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
     padding: 24px 0px;
     gap: 16px;
     border-bottom: 1px solid var(--sub-border-color);
     .portfolio-intro {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
       padding: 8px 16px;
       .intro {
-        font-family: Inter;
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -296,7 +362,7 @@
       }
       .btn-text {
         color: var(--main-black);
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -316,7 +382,7 @@
       border-radius: 10px;
       gap: 10px;
       .text {
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 22px;
@@ -330,7 +396,7 @@
         width: 100%;
         white-space: pre-wrap;
         border-color: #a0a0a0;
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 16px;
         font-weight: 500;
         line-height: 19px;
@@ -341,13 +407,19 @@
     }
   }
   .profile-contribution {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
     padding: 24px 0px;
     gap: 10px;
     border-bottom: 1px solid var(--sub-border-color);
     .contribution-intro {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
       padding: 7px 16px;
       .intro {
-        font-family: Inter;
+        font-family: 'nanumfont_ExtraBold';
         font-size: 1.5rem !important;
         font-weight: bold;
         line-height: 29px;
@@ -359,7 +431,7 @@
         padding: 6px 12px;
         border-radius: 10px;
         gap: 5px;
-        font-family: Inter;
+        font-family: 'nanumfont_Bold';
         font-size: 15px;
         font-weight: bold;
         line-height: 22px;
@@ -377,15 +449,26 @@
       padding: 8px 16px;
       gap: 10px;
       .repo {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
         padding: 10px 16px;
         gap: 10px;
         background-color: white;
         box-shadow: 0 4px 4px var(--card-box-shadow);
         border-radius: 15px;
         .title {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
           padding: 1px 11px;
           .title-text {
-            font-family: Inter;
+            display: inline-block;
+            max-width: 75%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: 'nanumfont_ExtraBold';
             font-size: 20px;
             font-weight: 700;
             line-height: 24px;
@@ -394,7 +477,7 @@
             color: var(--main-black);
           }
           .commit-date {
-            font-family: Inter;
+            font-family: 'nanumfont_Regular';
             font-size: 16px;
             font-weight: 400;
             line-height: 19px;
@@ -404,10 +487,13 @@
           }
         }
         .stat {
+          display: flex;
+          flex-direction: row;
+          justify-content: start;
           padding: 1px 11px;
           gap: 10px;
           .stat-text {
-            font-family: Inter;
+            font-family: 'nanumfont_Regular';
             font-size: 16px;
             font-weight: 400;
             line-height: 19px;
@@ -419,7 +505,7 @@
         .desc {
           padding: 1px 11px;
           gap: 10px;
-          font-family: Inter;
+          font-family: 'nanumfont_Regular';
           font-size: 16px;
           font-weight: 400;
           line-height: 19px;
@@ -427,6 +513,20 @@
           text-align: left;
           color: var(--main-black);
         }
+      }
+    }
+    .contribution-text {
+      padding: 8px 16px;
+      border-radius: 10px;
+      gap: 10px;
+      .text {
+        font-family: 'nanumfont_Regular';
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: var(--main-black);
       }
     }
   }
@@ -441,7 +541,7 @@
     gap: 16px;
     border-bottom: 1px solid var(--sub-border-color);
     .info-uniName {
-      font-family: Inter;
+      font-family: 'nanumfont_ExtraBold';
       font-size: 24px;
       font-weight: 700;
       line-height: 29px;
@@ -450,7 +550,7 @@
       color: #696969;
     }
     .info-uniMajor {
-      font-family: Inter;
+      font-family: 'nanumfont_ExtraBold';
       font-size: 24px;
       font-weight: 700;
       line-height: 29px;
@@ -460,7 +560,7 @@
     }
     .info-uniId {
       .uniId {
-        font-family: Inter;
+        font-family: 'nanumfont_ExtraBold';
         font-size: 16px;
         font-weight: 700;
         line-height: 19px;
@@ -475,7 +575,7 @@
     padding: 24px;
     gap: 16px;
     .title {
-      font-family: Inter;
+      font-family: 'nanumfont_ExtraBold';
       font-size: 24px;
       font-weight: 700;
       line-height: 29px;
@@ -504,7 +604,7 @@
       border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 10px;
@@ -517,13 +617,14 @@
   .modal-interest-result {
     padding: 8px 16px;
     gap: 10px;
+    margin-top: 200px;
     .modal-input {
       padding: 4px 8px;
       border-radius: 10px;
       gap: 10px;
       background-color: #cdcdcd;
       .input-text {
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -538,6 +639,7 @@
 .modal-skill {
   padding: 8px 16px;
   gap: 10px;
+  font-family: 'nanumfont_Regular';
   .modal-skill-input {
     padding: 10px;
     gap: 16px;
@@ -553,7 +655,7 @@
       border: 1px solid var(--main-black);
       background-color: white;
       .btn-text {
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 18px;
         font-weight: 400;
         line-height: 10px;
@@ -580,7 +682,7 @@
         width: 14px;
       }
       .input-text {
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -598,7 +700,7 @@
   .modal-skill-message {
     padding: 8px 16px;
     gap: 10px;
-    font-family: Inter;
+    font-family: 'nanumfont_Bold';
     font-size: 16px;
     font-weight: 400;
     line-height: 0px;
@@ -632,7 +734,7 @@
         width: 14px;
       }
       .modal-language-text {
-        font-family: Inter;
+        font-family: 'nanumfont_Regular';
         font-size: 14px;
         font-weight: 400;
         line-height: 17px;
@@ -864,7 +966,7 @@
     color: black;
   }
   .card-half {
-    width: 100%;
+    width: 100% !important;
   }
   .card-half:nth-child(1) {
     border-right: 0;
@@ -874,4 +976,100 @@
     border-left: 0;
     border-top: 1px solid var(--main-border-color-transparent);
   }
+}
+
+.text-muted {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.qna-nav {
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.qna-header {
+  font-weight: bolder;
+  font-family: 'nanumfont_Bold';
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+.qna-header > div {
+  text-align: center;
+}
+
+.qna-divider {
+  background-color: var(--main-light-font-color);
+  height: 1px;
+  align-items: center;
+}
+
+.qna-no {
+  width: 7%;
+}
+.qna-type {
+  width: 10%;
+}
+.qna-content {
+  width: 46%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qna-writer {
+  width: 15%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qna-time {
+  width: 14%;
+}
+.qna-ans {
+  width: 8%;
+}
+
+.qna-item {
+  font-family: 'nanumfont_Regular';
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+.qna-item > div {
+  text-align: center;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  font-family: 'nanumfont_Regular';
+}
+
+.qna-details {
+  display: flex;
+  justify-content: space-between;
+}
+
+.qna-details-left,
+.qna-details-right {
+  width: 45%;
+}
+
+.qna-details-font {
+  font-family: 'nanumfont_Bold';
+}
+
+.qna-attachments {
+  margin-bottom: 1rem;
+}
+
+.qna-attachment img {
+  max-width: 200px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.qna-attachment-modal img {
+  max-width: 100%;
 }

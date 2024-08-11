@@ -17,6 +17,9 @@ const CreateTeamModal = ({ show, onClose }) => {
   const [options, setOptions] = useState([]);
   const [imgFile, setImgFile] = useState('');
   const [selectTags, setSelectTags] = useState([]);
+  const [teamNameTag, setTeamNameTag] = useState("팀 이름")
+  const [descTag, setDescTag] = useState("팀 설명")
+  const [imgTag, setImgTag] = useState("팀 대표 이미지")
 
   const teamnameInputRef = useRef();
   const teamdescriptionInputRef = useRef();
@@ -56,16 +59,41 @@ const CreateTeamModal = ({ show, onClose }) => {
         team_tag: selectTags
       };
       const formData = new FormData();
-      if ((teamnameInputRef.current.value === '') | (teamdescriptionInputRef.current.value === '')) return;
+      if (teamnameInputRef.current.value === '') {
+        setTeamNameTag("팀 이름 (팀 이름은 필수 값입니다!)")
+        return
+      }
+      else{
+        setTeamNameTag("팀 이름")
+      }
+      if(teamdescriptionInputRef.current.value === ''){
+        setDescTag("팀 설명 (팀 설명은 필수 값입니다!)")
+        return;
+      } 
+      else{
+        setDescTag("팀 설명")
+      }
       Object.entries(postData).forEach(([key, value]) => {
         formData.append(key, value);
       });
       const response = await axios.post(postCreateUrl, formData, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
-        console.log(res.status, res.errors);
+        if(res.errors["team_name_duplicate"])
+          setTeamNameTag("팀 이름 (" + res.errors["team_name_duplicate"] + ")")
+
+        if(res.errors["team_description_length"])
+          setDescTag("팀 설명 (" + res.errors["team_description_length"] + ")")
+
+        if(res.errors["team_description_duplicate"])
+          setDescTag("팀 설명 (" + res.errors["team_description_duplicate"] + ")")
+
+        if(res.errors["team_image_too_big"])
+          setDescTag("팀 대표 이미지 (" + res.errors["team_description_duplicate"] + ")")
+
       } else {
-        console.log(res.data);
+        onClose();
+        alert("팀이 성공적으로 만들어졌습니다!")
         navigate(`/community/team/${postData.team_name}`);
       }
     } catch (error) {
@@ -75,7 +103,6 @@ const CreateTeamModal = ({ show, onClose }) => {
 
   const handleSaveClick = () => {
     postCreateTeam();
-    onClose();
   };
 
   const saveImgFile = () => {
@@ -101,16 +128,16 @@ const CreateTeamModal = ({ show, onClose }) => {
 
       <Modal.Body>
         <Form.Group className="mb-4" controlId="TeamName">
-          <Form.Label>팀 이름</Form.Label>
+          <Form.Label>{teamNameTag}</Form.Label>
           <Form.Control ref={teamnameInputRef} type="text" style={{ display: 'block' }} />
         </Form.Group>
         <Form.Group className="mb-4" controlId="TeamExplain">
-          <Form.Label>팀 설명</Form.Label>
+          <Form.Label>{descTag}</Form.Label>
           <Form.Control ref={teamdescriptionInputRef} as="textarea" rows={3} style={{ display: 'block' }} />
         </Form.Group>
 
         <Form.Group className="mb-4" controlId="TeamImg">
-          <Form.Label>팀 대표 이미지</Form.Label>
+          <Form.Label>{imgTag}</Form.Label>
           <div style={{ fontSize: 'small', color: 'gray', marginBottom: '10px' }}>png,jpg,jpeg 확장자만 지원합니다</div>
           <Form.Control
             ref={teamImgRef}
@@ -134,7 +161,7 @@ const CreateTeamModal = ({ show, onClose }) => {
 
       <Modal.Footer>
         <Button variant="primary" onClick={handleSaveClick}>
-          저장
+          팀 만들기
         </Button>
       </Modal.Footer>
     </Modal>

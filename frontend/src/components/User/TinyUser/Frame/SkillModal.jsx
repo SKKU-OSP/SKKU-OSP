@@ -18,15 +18,16 @@ function SkillModal(props) {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [undefinedSkill, setUndefinedSkill] = useState([]);
 
-  const OnHandleSkillSelect = (selectedSkill) => setSelectedSkill(selectedSkill);
-  const OnHandleUndefinedSkill = () => {
-    if (selectedSkill) {
-      setUndefinedSkill([...undefinedSkill, { tag: selectedSkill }]);
-      setSelectedSkill(null);
-    }
-  };
+  const OnHandleSkillSelect = (selectedSkill) => {
+    setSelectedSkill(selectedSkill);
+    setUndefinedSkill([...undefinedSkill, { tag: selectedSkill }]);
+    setSelectedSkill(null);
+    console.log(selectedSkill)
+  }
   const OnHandleRemoveSkill = (removeSkill) => {
-    setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.label !== removeSkill.label));
+    setUndefinedSkill((prevSkill) => 
+      prevSkill.filter((skill) => skill.tag.label != removeSkill)
+    );
   };
 
   useEffect(() => {
@@ -73,7 +74,7 @@ function SkillModal(props) {
   return (
     <Modal size="lg" show={skillShow} onHide={OnHandleSkillClose}>
       <Modal.Header closeButton>
-        <Modal.Title>사용언어/기술스택</Modal.Title>
+        <Modal.Title style={{fontFamily: "nanumfont_ExtraBold"}}>사용언어/기술스택</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="d-flex flex-column modal-skill">
@@ -84,6 +85,7 @@ function SkillModal(props) {
               size="lg"
               name="skill"
               value={selectedSkill}
+              placeholder="사용언어/기술스택을 선택해주세요"
               onChange={OnHandleSkillSelect}
               options={skill
                 .filter(
@@ -99,9 +101,6 @@ function SkillModal(props) {
                       .some((obj) => obj.tag.name === item.name)
                 )}
             />
-            <button className="btn" onClick={OnHandleUndefinedSkill}>
-              <span className="btn-text">+</span>
-            </button>
           </div>
           <div className="d-flex flex-row flex-wrap modal-skill-result">
             {undefinedSkill.length > 0 ? (
@@ -139,14 +138,13 @@ function SkillModal(props) {
                       <span className="input-text" style={{ color: fontColor }}>
                         {element.tag.name}
                       </span>
-                      <BsXLg size={14} onClick={() => OnHandleRemoveSkill(skill)} style={{ cursor: 'pointer' }} />
+                      <BsXLg size={14} onClick={() => OnHandleRemoveSkill(element.tag.name)} style={{ cursor: 'pointer',  }} />
                     </div>
                   );
                 })}
               </>
             ) : (
               <div className="d-flex align-items-center modal-text">
-                사용언어/기술스택을 선택하고 + 버튼을 눌러주세요.
               </div>
             )}
           </div>
@@ -217,7 +215,7 @@ function SkillModal(props) {
                               <BsXLg
                                 size={14}
                                 onClick={() => OnHandleRemoveModalSkill(element, level)}
-                                style={{ cursor: 'pointer' }}
+                                style={{ cursor: 'pointer', color: fontColor }}
                               />
                             </div>
                           );

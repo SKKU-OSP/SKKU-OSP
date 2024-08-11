@@ -1,10 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../utils/auth';
 import { BsGithub } from 'react-icons/bs';
 import { IoAddCircle, IoReloadCircle, IoCloseCircle } from 'react-icons/io5';
 import LoaderIcon from 'react-loader-icon';
+import { FaAngleDown } from 'react-icons/fa';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
+
+import QnAModal from './Frame/QnAModal';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
@@ -17,6 +21,8 @@ function ProfileInfo(props) {
   const [imagePreview, setImagePreview] = useState();
   const [imageFile, setImageFile] = useState(null);
   const fileInput = useRef(null);
+  const [QnAShow, setQnAShow] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setUserInfo(props.userInfo);
@@ -74,6 +80,15 @@ function ProfileInfo(props) {
     setEditing(false);
   };
 
+  const OnHandleQnAShow = () => setQnAShow(true);
+
+  const OnHandleQnAClose = () => setQnAShow(false);
+
+  const OnHandleQnASaveClose = (modalQnA) => {
+    console.log('Saved QnA:', modalQnA);
+    setQnAShow(false);
+  };
+
   const handleIntroChange = (event) => {
     const { name, value } = event.target;
     setEditUserInfo({
@@ -110,10 +125,14 @@ function ProfileInfo(props) {
     fileInput.current.value = null;
   };
 
+  const handleUserGuideClick = () => {
+    window.open('https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42');
+  };
+
   return (
     <>
       {userInfo ? (
-        <div className="d-flex flex-row profile_info">
+        <div className="profile_info">
           <div className="d-flex flex-column align-items-center justify-content-center info_left">
             {isEdit ? (
               editing ? (
@@ -146,6 +165,9 @@ function ProfileInfo(props) {
           <div className="d-flex flex-column info_right">
             {isEdit && (
               <div className="d-flex flex-row justify-content-end info_button">
+                <button className="info_btn" onClick={handleUserGuideClick}>
+                  <span className="info_btn-text">사용자 가이드</span>
+                </button>
                 {editing ? (
                   <button className="info_btn" onClick={handleSaveClick}>
                     <span className="info_btn-text">프로필 저장</span>
@@ -155,10 +177,41 @@ function ProfileInfo(props) {
                     <span className="info_btn-text">프로필 수정</span>
                   </button>
                 )}
+                <DropdownButton
+                  align="end"
+                  title={
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      <span>나의 활동</span>
+                      <FaAngleDown style={{ marginLeft: '5px' }} />
+                    </span>
+                  }
+                  className="info_dropdown"
+                >
+                  <Dropdown.Item eventKey="1" onClick={() => navigate('/community/activity/article')}>
+                    내가 작성한 글
+                  </Dropdown.Item>
+                  <Dropdown.Item eventKey="2" onClick={() => navigate('/community/activity/comment')}>
+                    내가 작성한 댓글
+                  </Dropdown.Item>
+                  <Dropdown.Item eventKey="3" onClick={() => navigate('/community/activity/scrap')}>
+                    내가 스크랩한 글
+                  </Dropdown.Item>
+                </DropdownButton>
               </div>
             )}
-            <div className="info_username">
-              <span className="username">{userInfo.user.username}</span>
+            <div className="d-flex flex-row justify-content-between align-items-center">
+              <div className="info_username">
+                <span className="username">{userInfo.user.username}</span>
+              </div>
+              <button className="info_qna" onClick={OnHandleQnAShow}>
+                <span className="info_qna-text">문의하기</span>
+              </button>
+              <QnAModal
+                user={userInfo.user.username}
+                Show={QnAShow}
+                OnHandleQnAClose={OnHandleQnAClose}
+                OnHandleQnASaveClose={OnHandleQnASaveClose}
+              />
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />

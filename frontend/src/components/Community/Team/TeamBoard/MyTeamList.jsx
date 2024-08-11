@@ -25,7 +25,7 @@ function MyTeamList() {
   const [sortOrder, setSortOrder] = useState('-id');
 
   const sortOptions = [
-    { label: '최신순', value: '-id' },
+    { label: '최신 순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '이름 순', value: 'name' },
     { label: '팀원 많은 순', value: '-member_cnt' }
@@ -84,7 +84,7 @@ function MyTeamList() {
   return (
     <div className="col-9">
       <div className="community-nav d-flex">
-        <ul className="nav nav-fill community-nav-items">
+        <ul className="nav nav-fill">
           <li className="nav-item selected-nav-item">
             <div style={{ cursor: 'default' }}>내 팀 목록</div>
           </li>
@@ -96,12 +96,20 @@ function MyTeamList() {
             onToggle={(isOpen) => setShowDropDown(isOpen)}
             style={{ marginRight: '5px' }}
           >
-            <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+            <Dropdown.Toggle
+              variant="secondary"
+              style={{ borderRadius: '17px', fontFamily: 'nanumfont_Bold' }}
+              id="dropdown-sort"
+            >
               {sortOptions.find((option) => option.value === sortOrder).label}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               {sortOptions.map((option) => (
-                <Dropdown.Item key={option.value} onClick={() => handleSortChange(option)}>
+                <Dropdown.Item
+                  key={option.value}
+                  onClick={() => handleSortChange(option)}
+                  style={{ fontFamily: 'nanumfont_Regular' }}
+                >
                   {option.label}
                 </Dropdown.Item>
               ))}
@@ -134,11 +142,11 @@ function MyTeamList() {
                       <h6 className="board-team-desc-text">{team.description}</h6>
                     </div>
                   </div>
-                  <div className="board-article-info" style={{ flexBasis: '30%' }}>
+                  <div className="board-article-team-info">
                     <div className="board-team-leader">
                       {team.leader_username && (
                         <>
-                          <BsFillPatchCheckFill style={{ marginRight: '10px' }} />
+                          <BsFillPatchCheckFill style={{ marginRight: '5px' }} />
                           <ProfileDropdown_Container userName={team.leader_username} userId={team.leader_id} />
                         </>
                       )}

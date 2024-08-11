@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom/client';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, useLocation } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 
 import RootLayout from './routes/RootLayout';
 import LoginPage from './routes/LoginPage';
@@ -41,6 +42,22 @@ import PasswordResetSendDone from './components/Account/PasswordResetSendDone';
 import PasswordResetConfirm from './components/Account/PasswordResetConfirm';
 import PasswordResetComplete from './components/Account/PasswordResetComplete';
 import MainBoard_Container from './components/Community/Board/MainBoard/MainBoard_Container';
+import QnAPage from './routes/QnAPage';
+import { useEffect } from 'react';
+
+const GaTrackingId = import.meta.env.VITE_GA_TRACKING_ID;
+ReactGA.initialize(GaTrackingId);
+
+const GAListner = ({ children }) => {
+  const location = useLocation();
+
+  useEffect(() => {
+    ReactGA.set({ page: location.pathname });
+    ReactGA.send('pageview');
+  }, [location]);
+
+  return children;
+};
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -196,9 +213,17 @@ const router = createBrowserRouter([
       {
         path: 'rank/repo',
         element: <RankRepoPage />
+      },
+      {
+        path: 'qna',
+        element: <QnAPage />
       }
     ]
   }
 ]);
 
-ReactDOM.createRoot(document.getElementById('root')).render(<RouterProvider router={router} />);
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <RouterProvider router={router}>
+    <GAListner />
+  </RouterProvider>
+);

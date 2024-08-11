@@ -694,8 +694,10 @@ def filter_keyword_tag(article_list, keyword, tags):
     if tags:
         tag_list = tags.split(',')
         tag_query = Q()
-        for tag in tag_list:
-            tag_query = tag_query | Q(tag=tag)
+        for tag_item in tag_list:
+            if tag_item[0] == ' ':
+                tag_item = tag_item[1:]
+            tag_query = tag_query | Q(tag=tag_item)
         article_with_tag = ArticleTag.objects.filter(
             tag_query).values('article')
         article_list = article_list.filter(id__in=article_with_tag)
@@ -944,6 +946,7 @@ class CommunityMainView(APIView):
             res = {'status': status, 'message': message, 'errors': errors}
         return Response(res)
 
+
 class ArticleAPIView(APIView):
     '''
     GET : 게시글 읽기 API
@@ -1092,19 +1095,23 @@ class ArticleCreateView(APIView):
             anonymous_writer = convert_to_boolean(anonymous_writer)
             is_notice = request.data.get('is_notice', False)
             is_notice = convert_to_boolean(is_notice)
+            is_hero = request.data.get('is_hero', False)
+            is_hero = convert_to_boolean(is_hero)
             board_name = request.data.get('board_name', '')
 
             # board name 확인
             board = Board.objects.get(name=board_name)
+            pub_date = datetime.now()
 
             # Article 생성
             article = Article.objects.create(
                 title=title,
                 body=content,
-                pub_date=datetime.now(),
+                pub_date=pub_date,
                 mod_date=datetime.now(),
                 anonymous_writer=anonymous_writer,
                 is_notice=is_notice,
+                is_hero=is_hero,
                 board_id=board.id,
                 writer=account)
 
@@ -1137,6 +1144,14 @@ class ArticleCreateView(APIView):
                     print(res['message'])
                     return Response(res)
 
+            # Hero 홍보 게시글 확인
+            if article.board.board_type == "Promotion" and is_hero:
+                hero_article_file = request.FILES.get('hero_thumbnail')
+                if hero_article_file:
+                    HeroArticle.objects.create(
+                        article=article, pub_date=pub_date, thumbnail=hero_article_file, name=hero_article_file.name
+                    )
+
             # 태그 생성
             article_tags = request.data.get('article_tags', [])
             if isinstance(article_tags, str):
@@ -1156,12 +1171,13 @@ class ArticleCreateView(APIView):
                 "_" + str(request.user.id)
             for key in files:
                 print("file", key, files[key])
-                ArticleFile.objects.create(
-                    file=files[key],
-                    filename=files[key],
-                    created_user=created_user,
-                    status="POST",
-                    article_id=article.id)
+                if key != 'hero_thumbnail':
+                    ArticleFile.objects.create(
+                        file=files[key],
+                        filename=files[key],
+                        created_user=created_user,
+                        status="POST",
+                        article_id=article.id)
 
             res['status'] = 'success'
             res['message'] = '게시글을 등록했습니다.'
@@ -1194,7 +1210,7 @@ class ArticleUpdateView(APIView):
             return Response(res)
         try:
             # 유저 확인
-            if request.user.id != article.writer.user.id:
+            if request.user.id != article.writer.user.id and request.user.id != 1:
                 res['message'] = '수정 권한이 없습니다.'
                 return Response(res)
             # data 파싱
@@ -1205,6 +1221,8 @@ class ArticleUpdateView(APIView):
             anonymous_writer = convert_to_boolean(anonymous_writer)
             is_notice = request.data.get('is_notice', False)
             is_notice = convert_to_boolean(is_notice)
+            is_hero = request.data.get('is_hero', False)
+            is_hero = convert_to_boolean(is_hero)
 
             # 게시글 내용 업데이트
             article.title = title
@@ -1212,6 +1230,7 @@ class ArticleUpdateView(APIView):
             article.mod_date = datetime.now()
             article.anonymous_writer = anonymous_writer
             article.is_notice = is_notice
+            article.is_hero = is_hero
             if not article.board.anonymous_writer:
                 article.anonymous_writer = False
             article.save()
@@ -1246,6 +1265,23 @@ class ArticleUpdateView(APIView):
                     logging.exception(f"{res['message']} {e}")
                     print(res['message'])
                     return Response(res)
+
+            # 홍보 게시판의 경우 Hero 홍보 게시 유무 업데이트
+            if article.board.board_type == "Promotion":
+                hero_article = HeroArticle.objects.filter(article=article).first()
+                hero_article_file = request.FILES.get('hero_thumbnail')
+                if is_hero and hero_article_file:
+                    if hero_article:
+                        hero_article.thumbnail = hero_article_file
+                        hero_article.name = hero_article_file.name
+                        hero_article.save()
+                    else:
+                        HeroArticle.objects.create(
+                            article=article, thumbnail=hero_article_file, pub_date=datetime.now(), name=hero_article_file.name
+                        )
+                else:
+                    if hero_article:
+                        hero_article.delete()
 
             # 게시글 태그 삭제 후 재생성
             old_article_tags = ArticleTag.objects.filter(
@@ -1282,12 +1318,13 @@ class ArticleUpdateView(APIView):
             # 새로 업로드한 파일을 POST상태로 create
             for key in files:
                 # if key not in existing_files:
-                ArticleFile.objects.create(
-                    file=files[key],
-                    filename=files[key],
-                    created_user=created_user,
-                    status="POST",
-                    article_id=article.id)
+                if key != 'hero_thumbnail':
+                    ArticleFile.objects.create(
+                        file=files[key],
+                        filename=files[key],
+                        created_user=created_user,
+                        status="POST",
+                        article_id=article.id)
 
             res['status'] = 'success'
             res['message'] = '게시글을 수정했습니다.'
@@ -1320,7 +1357,7 @@ class ArticleDeleteView(APIView):
         try:
             with transaction.atomic():
                 # 유저 확인
-                if request.user.id != article.writer.user.id:
+                if request.user.id != article.writer.user.id and request.user.id != 1:
                     res['message'] = '삭제 권한이 없습니다.'
                     return Response(res)
 
@@ -1331,8 +1368,12 @@ class ArticleDeleteView(APIView):
                         team_recruit_article = TeamRecruitArticle.objects.get(
                             article=article)
                         team_recruit_article.delete()
-                    except:
-                        res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                    # except:
+                    #     res['message'] = '해당 모집글에는 팀이 설정되지 않았습니다.'
+                    except TeamRecruitArticle.DoesNotExist:
+                        article.delete()
+                        res['status'] = 'success'
+                        res['message'] = '해당 모집글에는 팀이 설정되지 않아 삭제했습니다.'
                         print(res['message'])
                         return Response(res)
 
@@ -1706,3 +1747,35 @@ def set_article_period(article: Article, period_start: str, period_end: str):
 
     # 게시 기간 설정된 Article 객체 반환
     return ret
+
+
+class HeroThumbnailView(APIView):
+    '''
+    POST : Hero 게시물 생성 API
+    URL : api/heroes/
+    '''
+
+    def get(self, request):
+        res = {'status': 'success', 'message': '', 'data': None}
+        data = {}
+        hero_articles_list = []
+
+        hero_articles = HeroArticle.objects.all().order_by('-pub_date')[:5]
+
+        for hero_article in hero_articles:
+            thumbnail = hero_article.thumbnail
+            thumbnail_details = {
+                'id': hero_article.id,
+                'article_id': hero_article.article.id,
+                'pub_date': hero_article.pub_date,
+                'thumbnail': {
+                    'file': thumbnail.url,
+                    'size': convert_size(thumbnail.size),
+                }
+            }
+            hero_articles_list.append(thumbnail_details)
+
+        data = {'hero_articles': hero_articles_list}
+        res['data'] = data
+
+        return Response(res)

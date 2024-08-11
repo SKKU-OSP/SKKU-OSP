@@ -4,6 +4,7 @@ import axios from 'axios';
 import Select from 'react-select';
 import LoaderIcon from 'react-loader-icon';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -124,6 +125,12 @@ const SignUpForm = () => {
           emailDomains.push({ value: '', label: '직접 입력' });
           setDomains(emailDomains);
           setConsents(res.data.consents);
+
+          ReactGA.event({
+            category: 'Sign_Up',
+            action: 'Access Sign_Up',
+            label: '회원가입 페이지 접근'
+          });
         } else {
           console.log(res.message);
         }
@@ -284,6 +291,11 @@ const SignUpForm = () => {
         } catch (error) {
           console.log(error);
         }
+        ReactGA.event({
+          category: 'Sign_Up',
+          action: 'Success_Sign_UP',
+          label: '로그인 성공'
+        });
         navigate('/community');
       }
     } catch (error) {
@@ -874,7 +886,7 @@ const SignUpForm = () => {
       </div>
 
       {/* 사용 언어 */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <Form.Label htmlFor="tag">사용 언어/프레임워크</Form.Label>
         <Select
           size="sm"
@@ -885,7 +897,7 @@ const SignUpForm = () => {
           name="tag"
           isMulti
         ></Select>
-      </div>
+      </div> */}
       <br />
       {/* 버튼 */}
 
@@ -912,7 +924,7 @@ const SignUpForm = () => {
         />
       ) : null}
       <div className="d-flex flex-row justify-content-end">
-        <Button variant="primary" type="submit" disabled={checkLoading.submit}>
+        <Button variant="primary" type="submit" disabled={checkLoading.submit} style={{background: '#072a60', borderColor: '#072a60'}}>
           {checkLoading.submit ? <LoaderIcon type={'spin'} size={24} className={classes.btnLoader} /> : '가입하기'}
         </Button>
       </div>

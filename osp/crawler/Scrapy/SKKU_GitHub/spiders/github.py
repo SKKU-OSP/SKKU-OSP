@@ -4,7 +4,13 @@ import logging
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import scrapy
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from ..items import *
 from ..settings import *
 
@@ -20,7 +26,15 @@ class GithubSpider(scrapy.Spider):
         self.ids = []
         if ids != '':
             self.ids = ids.split(',')
+        self.flag = 0
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chromedriver_path = ChromeDriverManager().install()
+        print(f"Chromedriver path: {chromedriver_path}")  # 경로를 출력하여 확인
 
+        self.driver = webdriver.Chrome(service=ChromeService(chromedriver_path), options=chrome_options)
     def start_requests(self):
         for id in self.ids:
             yield self.get_recent(f'users/{id}')
@@ -34,14 +48,17 @@ class GithubSpider(scrapy.Spider):
         # 타겟 유저의 최신 push 기록을 확인한다.
         try:
             GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=pushed"
+            print(GITHUB_API_URL)
             return scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint": endpoint})
         except Exception as e:
+            print("exception")
             logging.warning("recent pushed")
             return self.api_get(endpoint, self.parse_user)
 
     def find_recent(self, res):
         # push 기록을 저장한 후 api_get을 호출해 크롤링을 진행한다.
         try:
+            print("find_recent")
             endpoint = res.meta["endpoint"]
             recent_json = json.loads(res.body)
             recent_at = recent_json[0]["pushed_at"]
@@ -53,7 +70,7 @@ class GithubSpider(scrapy.Spider):
         return self.api_get(endpoint, self.parse_user, metadata=metadata)
 
     def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100):
-
+        print(f'{API_URL}/{endpoint}?page={page}&per_page={per_page}')
         req = scrapy.Request(
             f'{API_URL}/{endpoint}?page={page}&per_page={per_page}',
             callback,
@@ -64,6 +81,7 @@ class GithubSpider(scrapy.Spider):
         return req
 
     def parse_user(self, res):
+        print("parse_user")
         user_json = json.loads(res.body)
         github_id = user_json['login']
         user_item = User()
@@ -83,7 +101,6 @@ class GithubSpider(scrapy.Spider):
 
         pivot_date = datetime.strptime(created_date[:7], '%Y-%m')
         end_date = datetime.strptime(updated_date[:7], '%Y-%m')
-
         recent_date = res.meta['recent']
         user_item["github_updated_date"] = updated_date
         if recent_date != None:
@@ -91,13 +108,12 @@ class GithubSpider(scrapy.Spider):
             if end_date < recent_date_yy_mm:
                 end_date = recent_date_yy_mm
                 user_item["github_updated_date"] = recent_date
-
         # 최근 업데이트 날짜와 비교하기 위해 크롤러 날짜 저장
         user_item["created_date"] = created_date
         user_item["crawled_date"] = datetime.now().strftime("%Y-%m-%d")
         user_item["updated_date"] = datetime.now().strftime("%Y-%m-%d")
 
-        logging.info(f"parse_user: end_date {end_date}")
+        logging.info(f"parse_user: {github_id} end_date: {end_date}")
 
         end_date = self.__end_of_month(end_date)
         while pivot_date < end_date:
@@ -142,7 +158,19 @@ class GithubSpider(scrapy.Spider):
 
     def parse_user_update(self, res):
         github_id = res.meta['github_id']
-        soup = BeautifulSoup(res.body, 'html.parser')
+        self.driver.get(res.url)
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, '.TimelineItem-body'))
+        )
+
+        html = self.driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+        #soup = BeautifulSoup(res.body, 'html.parser')
+        # if self.flag == 1:
+        #     print("soup\n\n")
+        #     print(soup)
+        #     print("\n\nsoup")
+        #     self.flag = 0
         user_update = UserUpdate()
         user_update['github_id'] = github_id
         user_update['target'] = 'activity'
@@ -158,8 +186,15 @@ class GithubSpider(scrapy.Spider):
         user_period['stars'] = 0
         owned_repo = set()
         contributed_repo = set()
-
-        for event in soup.select('.TimelineItem-body'):
+        events = soup.select('.TimelineItem-body')
+        # if self.flag == 1:
+        #     print(self.flag)
+        #     print("soup\n\n")
+        #     print(res.url)
+        #     print(events)
+        #     print("\n\nsoup")
+        #     self.flag = 0
+        for event in events:
             summary = event.select_one('summary')
             body = event.select('details > div > details')
             if summary == None:
@@ -185,9 +220,14 @@ class GithubSpider(scrapy.Spider):
                         num_start = issue_link.rfind('/') + 1
                         issue['number'] = issue_link[num_start:]
                         date = event.select_one('time').text.strip()
-                        date = datetime.strptime(date, '%b %d')
-                        issue['date'] = date.replace(
-                            year=int(res.meta['from'][:4]))
+                        try:
+                            date = datetime.strptime(date, '%b %d')
+                            issue['date'] = date.replace(
+                                year=int(res.meta['from'][:4]))
+                        except ValueError:
+                            issue['date'] = datetime(
+                                int(res.meta['from'][:4]), 2, 29, 0, 0)
+                            logging.info(f"Issue date ValueError: {date}")
                         if repo[0] != github_id:
                             contributed_repo.add(repo)
                         else:
@@ -206,9 +246,14 @@ class GithubSpider(scrapy.Spider):
                         num_start = pr_link.rfind('/') + 1
                         pr['number'] = pr_link[num_start:]
                         date = event.select_one('time').text.strip()
-                        date = datetime.strptime(date, '%b %d')
-                        pr['date'] = date.replace(
-                            year=int(res.meta['from'][:4]))
+                        try:
+                            date = datetime.strptime(date, '%b %d')
+                            pr['date'] = date.replace(
+                                year=int(res.meta['from'][:4]))
+                        except ValueError:
+                            pr['date'] = datetime(
+                                int(res.meta['from'][:4]), 2, 29, 0, 0)
+                            logging.info(f"pr date ValueError: {date}")
                         if repo[0] != github_id:
                             contributed_repo.add(repo)
                         else:
@@ -231,6 +276,14 @@ class GithubSpider(scrapy.Spider):
                             owned_repo.add(repo)
                 # Create Repository
                 elif summary[2] == 'repository' or summary[2] == 'repositories':
+                    create_list = event.select('li')
+                    for commit in create_list:
+                        detail = commit.select('a')
+                        repo = tuple(detail[0]['href'][1:].split('/'))
+                        if repo[0] != github_id:
+                            contributed_repo.add(repo)
+                        else:
+                            owned_repo.add(repo)
                     user_period['num_of_cr_repos'] += 1
             elif summary[0] == 'Opened':
                 # Open Issues
@@ -257,9 +310,14 @@ class GithubSpider(scrapy.Spider):
                             num_start = issue_link.rfind('/') + 1
                             issue['number'] = issue_link[num_start:]
                             date = issue_tag.select_one('time').text.strip()
-                            date = datetime.strptime(date, '%b %d')
-                            issue['date'] = date.replace(
-                                year=int(res.meta['from'][:4]))
+                            try:
+                                date = datetime.strptime(date, '%b %d')
+                                issue['date'] = date.replace(
+                                    year=int(res.meta['from'][:4]))
+                            except ValueError:
+                                issue['date'] = datetime(
+                                    int(res.meta['from'][:4]), 2, 29, 0, 0)
+                                logging.info(f"Issue date ValueError: {date}")
                             yield issue
                 # Open Pull Requests
                 elif 'request' in summary or 'requests' in summary:
@@ -283,18 +341,21 @@ class GithubSpider(scrapy.Spider):
                             num_start = pr_link.rfind('/') + 1
                             pr['number'] = pr_link[num_start:]
                             date = pr_tag.select_one('time').text.strip()
-                            date = datetime.strptime(date, '%b %d')
-                            pr['date'] = date.replace(
-                                year=int(res.meta['from'][:4]))
+                            try:
+                                date = datetime.strptime(date, '%b %d')
+                                pr['date'] = date.replace(
+                                    year=int(res.meta['from'][:4]))
+                            except ValueError:
+                                pr['date'] = datetime(
+                                    int(res.meta['from'][:4]), 2, 29, 0, 0)
+                                logging.info(f"pr date ValueError: {date}")
                             yield pr
         yield user_update
-
         user_period['num_of_co_repos'] = len(contributed_repo)
         user_period['num_of_commits'] = user_update['total_commits']
         user_period['num_of_PRs'] = user_update['total_PRs']
         user_period['num_of_issues'] = user_update['total_issues']
         yield user_period
-
         for repo in owned_repo:
             contribute = RepoContribute()
             contribute['github_id'] = github_id
@@ -309,7 +370,13 @@ class GithubSpider(scrapy.Spider):
             yield self.api_get(f'repos/{"/".join(repo)}', self.parse_repo, metadata={'from': github_id})
 
     def parse_user_page(self, res):
-        soup = BeautifulSoup(res.body, 'html.parser')
+        self.driver.get(res.url)
+        WebDriverWait(self.driver, 1).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'h2.h4.mb-2'))
+        )
+        html = self.driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+        #soup = BeautifulSoup(res.body, 'html.parser')
         info_list = [tag.parent for tag in soup.select('h2.h4.mb-2')]
         user_data = UserUpdate()
         user_data['github_id'] = res.meta['github_id']
@@ -378,7 +445,6 @@ class GithubSpider(scrapy.Spider):
         for repo_data in json_data:
             user_data['stars'] += repo_data['stargazers_count']
         yield user_data
-
         if len(json_data) == 100:
             metadata = res.meta
             metadata['page'] += 1
@@ -443,7 +509,6 @@ class GithubSpider(scrapy.Spider):
         else:
             repo_data['release_ver'] = None
             repo_data['release_count'] = 0
-
         contributor_tag = soup.select_one(
             f'a[href="/{github_id}/{repo_name}/graphs/contributors"]')
         if not contributor_tag is None:
@@ -458,12 +523,24 @@ class GithubSpider(scrapy.Spider):
                 repo_data['contributors_count'] = 1
         else:
             repo_data['contributors_count'] = 1
-
         repo_data['readme'] = not soup.select_one('div#readme') is None
-        repo_data['commits_count'] = int(soup.select_one(
-            'div.Box-header strong').text.replace(',', ''))
+        repo_data['commits_count'] = 0
+        try:
+            div_elements = soup.find_all('div', class_='d-flex gap-2')
+            # 각 div 요소 안의 '2 Commits'가 있는 span 요소 선택 및 출력
+            for div_element in div_elements:
+                commits_span = div_element.select_one('span[data-component="text"] > span')
+                if commits_span:
+                    commits_text = commits_span.text
+                    commits_cnt = commits_text.split()[0].replace(',', '')
+                    repo_data['commits_count'] = int(commits_cnt)
+        except ValueError:
+            repo_data['commits_count'] = 0
+            logging.info(f"commits_count ValueError: {repo_path}")
         yield repo_data
-
+        print(f'repos/{github_id}/{repo_name}/commits')
+        print(repo_path)
+        print(res.meta['from'])
         yield scrapy.Request(
             f'{HTML_URL}/{repo_path}/pulls',
             self.parse_repo_pr,

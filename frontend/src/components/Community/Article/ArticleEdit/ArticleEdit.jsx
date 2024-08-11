@@ -18,11 +18,13 @@ import './ArticleEdit.css';
  */
 const domainUrl = import.meta.env.VITE_SERVER_URL;
 
-function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
+function ArticleEdit({ isWrite, type, consentWriteOpen }) {
   const articleID = useParams().article_id;
   const urlEditArticle = domainUrl + '/community/api/article/' + articleID + '/update/';
-  const article = {};
   const username = useContext(AuthContext).username;
+  const navigate = useNavigate();
+
+  const article = {};
   const [myArticle, setMyArticle] = useState(false);
   const [board, setBoard] = useState('');
   const [isAuthNotice, setIsAuthNotice] = useState(true);
@@ -31,6 +33,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const [selectTeam, setSelectTeam] = useState('');
   const [existFiles, setExistFiles] = useState({});
   const [articleFiles, setArticleFiles] = useState({});
+  const [heroArticleFile, setHeroArticleFile] = useState({});
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
   const [tags, setTags] = useState([]);
@@ -38,7 +41,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const getCurrentDateTime = () => new Date();
-  const navigate = useNavigate();
+  const [isHero, setIsHero] = useState(false);
 
   useEffect(() => {
     //axios 사용
@@ -83,15 +86,15 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       const urlArticle = domainUrl + '/community/api/article/' + articleID + '/';
       const responseArticle = await axios.get(urlArticle, getAuthConfig());
       const resArticle = responseArticle.data;
-      console.log('arti', resArticle);
       if (resArticle.status === 'success') {
-        if (resArticle.data.article.writer.user.username !== username) {
+        if (resArticle.data.article.writer.user.username !== username && username != 'admin') {
           alert('본인의 게시글만 수정할 수 있습니다.');
           navigate(`/community/article/${articleID}`);
         } else {
           setBoard(resArticle.data.article.board);
           setTitle(resArticle.data.article.title);
           setBodyText(resArticle.data.article.body);
+          setIsHero(resArticle.data.article.is_hero);
           if (resArticle.data.article.board.board_type === 'Recruit') {
             const start = new Date(resArticle.data.article.period_start);
             const end = new Date(resArticle.data.article.period_end);
@@ -122,12 +125,49 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
           );
           setIsAuthNotice(resArticle.data.article.is_notice);
           setAnonymousWriter(resArticle.data.article.anonymous_writer);
-          const exist_files = {};
-          resArticle.data.files.map((t) => {
-            exist_files[t.id] = t;
-          });
-          setExistFiles(exist_files);
-          setMyArticle(true);
+
+          const heroFiles = [];
+          const normalFiles = [];
+
+          const getHeroArticles = async () => {
+            const urlHeroArticles = domainUrl + '/community/api/heroes/';
+            const responseHeroArticles = await axios.get(urlHeroArticles, getAuthConfig());
+            const resHeroArticles = responseHeroArticles.data;
+
+            if (resHeroArticles.status === 'success') {
+              const heroArticle = resHeroArticles.data.hero_articles.find(
+                (hero) => hero.article_id === resArticle.data.article.id
+              );
+              if (heroArticle) {
+                heroFiles.push({
+                  id: resArticle.data.article.id,
+                  name: heroArticle.thumbnail.file.split('/').pop(),
+                  file: heroArticle.thumbnail.file,
+                  size: heroArticle.thumbnail.size
+                });
+              }
+
+              resArticle.data.files.forEach((file) => {
+                const fileNameWithoutExtension = file.file.split('/').pop();
+                if (!heroFiles.some((heroFile) => heroFile.name === fileNameWithoutExtension)) {
+                  normalFiles.push(file);
+                }
+              });
+
+              setHeroArticleFile(heroFiles.length > 0 ? { [heroFiles[0].name]: heroFiles[0] } : {});
+              const exist_files = {};
+              normalFiles.forEach((file) => {
+                exist_files[file.id] = file;
+              });
+              setExistFiles(exist_files);
+              setMyArticle(true);
+            } else {
+              console.log(resHeroArticles.message);
+            }
+          };
+
+          getHeroArticles();
+          console.log('hero:', heroArticleFile);
         }
       } else {
         console.log(resArticle.message);
@@ -140,6 +180,11 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       getTeam();
     }
   }, [username, articleID, navigate]);
+
+  // hero 게시글 체크 여부 확인
+  const heroCheck = () => {
+    return isHero;
+  };
 
   // 수정 버튼 클릭 시
   const handleShow = (event) => {
@@ -158,6 +203,9 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       window.alert('제목을 입력해 주세요');
     } else if (bodyText.trim() === '' || bodyText.trim() === '<p><br></p>') {
       window.alert('본문을 입력해 주세요');
+      return;
+    } else if (isHero && Object.keys(heroArticleFile).length === 0) {
+      window.alert('메인페이지 게시용 썸네일을 추가해 주세요.');
       return;
     } else if (window.confirm('글을 수정하시겠습니까?')) {
       postArticle();
@@ -182,9 +230,12 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
           period_start: toKST(startDate).toISOString(),
           period_end: toKST(endDate).toISOString(),
           team_id: selectTeam.value
+        }),
+        ...(board.board_type === 'Promotion' && {
+          is_hero: isHero
         })
       };
-
+      console.log(postData);
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
         if (key === 'article_tags') {
@@ -193,6 +244,13 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
           formData.append(key, value);
         }
       });
+
+      if (isHero) {
+        Object.entries(heroArticleFile).forEach(([key, value]) => {
+          formData.append('hero_thumbnail', value);
+        });
+      }
+
       console.log(formData);
       const response = await axios.post(urlEditArticle, formData, getAuthConfig());
 
@@ -267,9 +325,48 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
     }
   };
 
+  // Hero File
+  const handleHeroFileChange = (event) => {
+    if (Object.keys(heroArticleFile).length > 0) {
+      window.alert('파일은 하나만 선택 가능합니다. 삭제 후 다른 파일을 추가하십시오.');
+      return;
+    }
+
+    const files = event.target.files[0];
+    if (!files) return;
+    const all_file = heroArticleFile;
+    all_file[files.name] = files;
+
+    var file = document.createElement('div');
+    file.id = files.name;
+    file.classList.add('article-file');
+    file.classList.add('d-flex');
+
+    var delete_button = document.createElement('button');
+    delete_button.classList.add('article-file-delete-btn');
+    delete_button.append('X');
+    delete_button.setAttribute('type', 'button');
+    delete_button.onclick = function () {
+      const updatedFiles = { ...heroArticleFile };
+      delete updatedFiles[files.name];
+      this.parentElement.remove();
+      setHeroArticleFile(updatedFiles);
+    };
+
+    file.append(files.name);
+    file.appendChild(delete_button);
+
+    document.getElementById('hero-file-list').appendChild(file);
+    setHeroArticleFile(all_file);
+  };
+
   // Tag
   const handleOptionSelect = (selectedTags) => {
-    setSelectTags(selectedTags);
+    if (selectedTags.length <= 5) {
+      setSelectTags(selectedTags);
+    } else {
+      setSelectTags(selectedTags.slice(0, 5));
+    }
   };
   const customStyles = {
     control: (provided) => ({
@@ -366,7 +463,7 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
       {myArticle ? (
         <>
           {renderConsentMessage}
-          <div id="community-main" className="col-md-9">
+          <div id="community-main" className="col-9">
             <form
               id="article-form"
               method="post"
@@ -394,6 +491,17 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
                       <label htmlFor="is-anonymous">익명</label>
                     </div>
                     <button type="button" className="btn-write">
+                      <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
+                      저장하기
+                    </button>
+                  </div>
+                ) : board.name === '홍보' ? (
+                  <div>
+                    <div className="anonymous-btn">
+                      <input type="checkbox" id="is-hero" checked={heroCheck()} onChange={() => setIsHero(!isHero)} />{' '}
+                      <label htmlFor="is-hero">메인페이지 게시</label>
+                    </div>
+                    <button type="submit" className="btn-write">
                       <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
                       저장하기
                     </button>
@@ -560,6 +668,37 @@ function ArticleEdit({ teamInfo, isWrite, type, consentWriteOpen }) {
                     })}
                   </div>
                 </div>
+                {board.board_type === 'Promotion' && isHero && (
+                  <div className="community-file">
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ color: '#000000', marginRight: '10px' }}>메인페이지 게시용 썸네일</div>
+                      <input type="file" name="hero_article_files" onChange={handleHeroFileChange} multiple />
+                    </div>
+                    <div id="hero-file-list">
+                      {Object.entries(heroArticleFile).map(([key, file]) => (
+                        <div id={file.name} key={file.id} className="article-file d-flex">
+                          {file.name}
+                          <button
+                            type="button"
+                            className="article-file-delete-btn"
+                            onClick={function () {
+                              const all_file = heroArticleFile;
+                              delete all_file[file.id];
+                              setHeroArticleFile(all_file);
+                              var this_element = document.getElementById(file.name);
+                              // if (this_element) {
+                              //   this_element.parentElement.removeChild(this_element);
+                              // }
+                              document.getElementById('hero-file-list').removeChild(this_element);
+                            }}
+                          >
+                            X
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
           </div>

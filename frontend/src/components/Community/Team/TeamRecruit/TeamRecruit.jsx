@@ -34,13 +34,13 @@ function TeamRecruit() {
   const [teamSortOrders, setTeamSortOrders] = useState('-id');
 
   const recruitSortOptions = [
-    { label: '최신순', value: '-id' },
+    { label: '최신 순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '팀 이름 순', value: 'team_name' },
     { label: '팀원 많은 순', value: '-member_cnt' }
   ];
   const TeamSortOptions = [
-    { label: '최신순', value: '-id' },
+    { label: '최신 순', value: '-id' },
     { label: '오래된 순', value: 'id' },
     { label: '이름 순', value: 'name' },
     { label: '팀원 많은 순', value: '-member_cnt' }
@@ -145,7 +145,7 @@ function TeamRecruit() {
       {!error && (
         <>
           <div className="community-nav d-flex">
-            <ul className="nav nav-fill community-nav-items">
+            <ul className="nav nav-fill">
               <CommunityNavItem navName="팀 모집" tabName={tabName} />
               <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
             </ul>
@@ -157,14 +157,22 @@ function TeamRecruit() {
                     className="community-dropdown"
                     show={showRecruitDropdown}
                     onToggle={(isOpen) => setShowRecruitDropdown(isOpen)}
-                    style={{ marginRight: '5px' }}
+                    style={{ marginRight: '5px', fontFamily: 'nanumfont_Bold' }}
                   >
-                    <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+                    <Dropdown.Toggle
+                      variant="secondary"
+                      style={{ borderRadius: '17px', fontFamily: 'nanumfont_Bold' }}
+                      id="dropdown-sort"
+                    >
                       {recruitSortOptions.find((option) => option.value === recruitSortOrders).label}
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       {recruitSortOptions.map((option) => (
-                        <Dropdown.Item key={option.value} onClick={() => handleRecruitSortChange(option)}>
+                        <Dropdown.Item
+                          key={option.value}
+                          onClick={() => handleRecruitSortChange(option)}
+                          style={{ fontFamily: 'nanumfont_Regular' }}
+                        >
                           {option.label}
                         </Dropdown.Item>
                       ))}
@@ -182,12 +190,20 @@ function TeamRecruit() {
                   show={showTeamDropdown}
                   onToggle={(isOpen) => setShowTeamDropdown(isOpen)}
                 >
-                  <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px' }} id="dropdown-sort">
+                  <Dropdown.Toggle
+                    variant="secondary"
+                    style={{ borderRadius: '17px', fontFamily: 'nanumfont_Bold' }}
+                    id="dropdown-sort"
+                  >
                     {TeamSortOptions.find((option) => option.value === teamSortOrders).label}
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     {TeamSortOptions.map((option) => (
-                      <Dropdown.Item key={option.value} onClick={() => handleTeamSortChange(option)}>
+                      <Dropdown.Item
+                        key={option.value}
+                        onClick={() => handleTeamSortChange(option)}
+                        style={{ fontFamily: 'nanumfont_Regular' }}
+                      >
                         {option.label}
                       </Dropdown.Item>
                     ))}

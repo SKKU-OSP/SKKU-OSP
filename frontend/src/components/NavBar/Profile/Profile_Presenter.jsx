@@ -27,35 +27,14 @@ export default function Profile_Presenter(props) {
   return (
     <Dropdown className="on-mobile">
       <Dropdown.Toggle as={CustomToggle} id="dropdown-basic"></Dropdown.Toggle>
-      {username == 'admin' ? (
-        <Dropdown.Menu>
-          <Dropdown.Item href={`/user/${username}`}>내 프로필</Dropdown.Item>
-          <Dropdown.Item href="/community/activity/article">내가 작성한 글</Dropdown.Item>
-          <Dropdown.Item href="/community/activity/comment">내가 작성한 댓글</Dropdown.Item>
-          <Dropdown.Item href="/community/activity/scrap">내가 스크랩한 글</Dropdown.Item>
-          <Dropdown.Item onClick={sendLogoutRequest}>로그아웃</Dropdown.Item>
-          <Dropdown.Item onClick={() => navigate('/statistics')}>GitHub 통계</Dropdown.Item>
-          <Dropdown.Item onClick={() => navigate('/rank/user')}>유저 랭킹</Dropdown.Item>
-          <Dropdown.Item onClick={() => navigate('/rank/repo')}>리포지토리 랭킹</Dropdown.Item>
-          <Dropdown.Item
-            onClick={() =>
-              handleOpenNewTab(
-                'https://analytics.google.com/analytics/web/#/p375838293/reports/intelligenthome?params=_u..nav%3Dmaui&collectionId=use'
-              )
-            }
-          >
-            Google Analytics
-          </Dropdown.Item>
-        </Dropdown.Menu>
-      ) : (
-        <Dropdown.Menu>
-          <Dropdown.Item href={`/user/${username}`}>내 프로필</Dropdown.Item>
-          <Dropdown.Item href="/community/activity/article">내가 작성한 글</Dropdown.Item>
-          <Dropdown.Item href="/community/activity/comment">내가 작성한 댓글</Dropdown.Item>
-          <Dropdown.Item href="/community/activity/scrap">내가 스크랩한 글</Dropdown.Item>
-          <Dropdown.Item onClick={sendLogoutRequest}>로그아웃</Dropdown.Item>
-        </Dropdown.Menu>
-      )}
+
+      <Dropdown.Menu>
+        <Dropdown.Item href={`/user/${username}`}>내 프로필</Dropdown.Item>
+        <Dropdown.Item href={`https://equinox-rule-857.notion.site/SOSD-User-Manual-4283b4cc583e47298a42470a11be1c42`}>
+          사용자 가이드
+        </Dropdown.Item>
+        <Dropdown.Item onClick={sendLogoutRequest}>로그아웃</Dropdown.Item>
+      </Dropdown.Menu>
     </Dropdown>
   );
 }

@@ -118,14 +118,14 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            <h5>알림내역</h5>
+            <h5 style={{fontFamily: "nanumfont_ExtraBold"}}>알림내역</h5>
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           <div className={classes.ReadAll}>
             <AiOutlineCheckSquare />
-            <div className="ms-1" onClick={() => handleReadAll(userId)}>
+            <div className="ms-1" onClick={() => handleReadAll(userId)} style={{fontFamily: "nanumfont_Bold"}}>
               모두읽음
             </div>
           </div>

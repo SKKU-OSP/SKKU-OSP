@@ -21,11 +21,11 @@ function ImageDescBox(props) {
         </div>
         {attrs &&
           attrs.map((attr) => (
-            <span key={attr} className="badge text-bg-light fs-7">
+            <span key={attr} className="badge text-bg-light fs-7" style={{fontFamily: "nanumfont_Bold"}}>
               #{attr}
             </span>
           ))}
-        <p className="fs-6">{desc}</p>
+        <p className="fs-6" style={{fontFamily: "nanumfont_Bold"}}>{desc}</p>
       </div>
     </div>
   );
