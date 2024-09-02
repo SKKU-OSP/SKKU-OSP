@@ -9,8 +9,11 @@ import InterestModal from './InterestModal';
 import Button from 'react-bootstrap/Button';
 import { BsFillStarFill } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
+import ProfileInfo from '../ProfileInfo';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
+const url = `${server_url}/user/api/info/`;
+
 function Interest(props) {
   const { isEdit, open_lvl } = props;
   // Interest 훅
@@ -55,13 +58,17 @@ function Interest(props) {
     };
     getTags();
   }, []);
+
   useEffect(() => {
     const getProfileTags = async () => {
       try {
+        const responseInfo = await axios.get(url, getAuthConfig());
+        const resInfo = responseInfo.data;
         const profileTagsUrl = server_url + '/user/api/tag/' + username + '/';
         const response = await axios.get(profileTagsUrl, getAuthConfig());
         const res = response.data;
-        if (res.status === 'success') {
+        if (res.status === 'success' && resInfo.status === 'success') {
+          const account = resInfo.data.account;
           const profileTags = res.data.interest_tags;
           const profileInterest = profileTags
             .filter((interest) => interest.tag && interest.tag.type === 'domain')
@@ -80,6 +87,32 @@ function Interest(props) {
           });
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
+
+          if (profileInterest.length === 0) {
+            const notificationData = {
+              body: '[프로필] 관심 분야를 설정해주세요.',
+              type: 'profile',
+              receiver: account.user.id
+            };
+            const response = await axios.post(
+              `${server_url}/message/api/noti/create/`,
+              notificationData,
+              getAuthConfig()
+            );
+          }
+
+          if (Object.values(profileSkillLevel).reduce((sum, tags) => sum + tags.length, 0) === 0) {
+            const notificationData = {
+              body: '[프로필] 사용언어/기술스택을 설정해주세요.',
+              type: 'profile',
+              receiver: account.user.id
+            };
+            const response = await axios.post(
+              `${server_url}/message/api/noti/create/`,
+              notificationData,
+              getAuthConfig()
+            );
+          }
         } else {
           setError(true);
         }
@@ -155,13 +188,15 @@ function Interest(props) {
                   )}
                 </div>
                 <div className="d-flex flex-row flex-wrap category-icon">
-                  {open_lvl===0 ? ('비공개 설정 되어 있습니다.') : (myInterest.length > 0
+                  {open_lvl === 0
+                    ? '비공개 설정 되어 있습니다.'
+                    : myInterest.length > 0
                     ? myInterest.map((interest) => (
                         <div className="icon" key={interest.value}>
                           <span className="icon-text">{interest.value}</span>
                         </div>
                       ))
-                    : '관심분야가 없습니다.')}
+                    : '관심분야가 없습니다.'}
                 </div>
               </div>
               <div className="d-flex flex-column profile-language">
@@ -183,9 +218,11 @@ function Interest(props) {
                     </>
                   )}
                 </div>
-                {open_lvl===0 ? (<div className="d-flex flex-row language-level" key={`level-`}>
+                {open_lvl === 0 ? (
+                  <div className="d-flex flex-row language-level" key={`level-`}>
                     비공개 설정 되어 있습니다.
-                  </div>) : (Object.values(mySkill).reduce((sum, tags) => sum + tags.length, 0) > 0 ? (
+                  </div>
+                ) : Object.values(mySkill).reduce((sum, tags) => sum + tags.length, 0) > 0 ? (
                   <>
                     {Object.entries(mySkill)
                       .reverse()
@@ -257,7 +294,7 @@ function Interest(props) {
                   <div className="d-flex flex-row language-level" key={`level-`}>
                     사용언어/기술스택이 없습니다.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           ) : (
