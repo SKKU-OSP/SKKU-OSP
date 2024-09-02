@@ -305,12 +305,14 @@ class NotificationListView(APIView):
                         print(f'{noti["route_id"]} 팀의 게시판이 없습니다. {e}')
                         continue
                     noti['icon'] = 'group_add'
-
                 elif noti['type'] == 'team_invite_result':
                     noti['icon'] = 'group_add'
                     # board = Board.objects.get(team__id=noti['route_id'])
                     # noti['feedback'] = BoardSerializer(board).data
                     noti['feedback'] = "team_invite_result"
+                elif noti['type'] == 'profile':
+                    noti['icon'] = 'assignment_ind'
+                    noti['feedback'] = 'profile'
 
         except Exception as e:
             logging.exception(f"Exception get_notifications: {e}")
@@ -572,3 +574,26 @@ class MessageSplitView(APIView):
         except Exception as e:
             logging.exception(f"MessageSplitView: {e}")
         return Response(res)
+
+class NotificationCreateView(APIView):
+    """
+    새로운 알림을 생성하는 뷰
+    """
+    def post(self, request):
+        try:
+            receiver_id = request.data.get('receiver')
+            body = request.data.get('body')
+            type = request.data.get('type')
+
+            receiver = Account.objects.get(user_id=receiver_id)
+            notification = Notification.objects.create(type = type, receiver = receiver, body = body, sender_name = request.user.username, receiver_read = False, receiver_delete=False)
+            notification.save()
+
+            return Response({'status': 'success', 'notification': NotificationSerializer(notification).data})
+
+        except Account.DoesNotExist:
+            return Response({'status': 'fail', 'message': 'Receiver not found'})
+
+        except Exception as e:
+            logging.exception(f"NotificationCreateView: {e}")
+            return JsonResponse({'status': 'fail', 'message': 'Failed to create notification'})
