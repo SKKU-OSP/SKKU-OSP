@@ -203,15 +203,19 @@ function ProfileInfo(props) {
               <div className="info_username">
                 <span className="username">{userInfo.user.username}</span>
               </div>
-              <button className="info_qna" onClick={OnHandleQnAShow}>
-                <span className="info_qna-text">문의하기</span>
-              </button>
-              <QnAModal
-                user={userInfo.user.username}
-                Show={QnAShow}
-                OnHandleQnAClose={OnHandleQnAClose}
-                OnHandleQnASaveClose={OnHandleQnASaveClose}
-              />
+              {isEdit && (
+                <>
+                  <button className="info_qna" onClick={OnHandleQnAShow}>
+                    <span className="info_qna-text">문의하기</span>
+                  </button>
+                  <QnAModal
+                    user={userInfo.user.username}
+                    Show={QnAShow}
+                    OnHandleQnAClose={OnHandleQnAClose}
+                    OnHandleQnASaveClose={OnHandleQnASaveClose}
+                  />
+                </>
+              )}
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />
