@@ -70,7 +70,8 @@ function RankUser() {
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
-          setRowData(res.data.score_table);
+          const rankedData = calculateRank(res.data.score_table);
+          setRowData(rankedData);
           setYears(res.data.years);
           setError(null);
         } else {
@@ -83,6 +84,23 @@ function RankUser() {
     };
     getUserRank();
   }, [targetYear]);
+
+  const calculateRank = (data) => {
+    let currentRank = 1;
+    let rankCount = 1;
+
+    data.sort((a, b) => b.score - a.score);
+
+    for (let i = 0; i < data.length; i++) {
+      if (i > 0 && data[i].score !== data[i - 1].score) {
+        currentRank = rankCount;
+      }
+      data[i].rank = currentRank;
+      rankCount++;
+    }
+
+    return data;
+  };
 
   const clearFilters = useCallback(() => {
     gridRef.current.api.setFilterModel(null);
