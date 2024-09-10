@@ -23,6 +23,7 @@ urlpatterns = [
          name="PasswordResetSend"),
     path('reset/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(),
          name="password_reset_confirm"),
+    path('github_id/change/', views.GithubIdChangeView.as_view(), name='id_change'),
 
 
     # LEGACY: Django 관련 로그인 View
