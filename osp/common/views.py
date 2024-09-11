@@ -52,12 +52,21 @@ class JWTLoginView(APIView):
                 account = account.first()
             else:
                 return Response(get_fail_res("계정 정보가 있으나 문제가 있습니다. 관리자에게 문의하세요."))
+            github_id = account.to_json()['github_id']
+            res = requests.get(f'https://api.github.com/users/SW-Skku')
+            status = res.json()['status']
+            print(res.json()['status'])
+            is_valid = 1
+            if status == '404':
+                is_valid = 0
 
             data = {
                 'user': account.to_json(),
                 'access_token': str(token.access_token),
                 'refresh_token': str(token),
+                'is_valid': is_valid
             }
+            print(data)
             return Response({"status": "success", "message": "로그인 성공", "data": data})
 
         return Response(get_fail_res("Username과 password를 다시 확인해주세요."),)
