@@ -8,7 +8,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from home.serializers import AnnualOverviewSerializer, AnnualTotalSerializer, DistScoreSerializer, DistFactorSerializer
-from home.updateScore import user_score_update
+try:
+    from home.updateScore import user_score_update
+except ImportError:
+    user_score_update = None
+from home.zeroScore import zero_score_update
 from home.updateChart import update_chart
 from home.models import AnnualOverview, AnnualTotal, DistFactor, DistScore, Repository, Student
 from user.models import Account, GitHubScoreTable
@@ -291,7 +295,11 @@ def update_score(request):
             for chal in challenge_list:
                 achievement_check(user, chal)
             for year in range(end_year, start_year-1, -1):
-                user_score_update(user, year)
+                if user_score_update:
+                    print("user_score_update")
+                    user_score_update(user, year)
+                else:
+                    zero_score_update(user, year)
         update_commmit_time()
         update_individual()
         update_frequency()

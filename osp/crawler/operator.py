@@ -8,7 +8,11 @@ from django.db.models import F
 
 from osp.settings import CRAWLING_LOG_PATH, BASE_DIR
 from user.models import Account, GithubOverview
-from home.updateScore import user_score_update
+try:
+    from home.updateScore import user_score_update
+except ImportError:
+    user_score_update = None
+from home.zeroScore import zero_score_update
 from home.updateChart import update_chart
 from challenge.models import Challenge
 from challenge.views import achievement_check
@@ -100,7 +104,10 @@ def start():
             for chal in challenge_list:
                 achievement_check(user, chal)
             for year in range(end_year, start_year-1, -1):
-                user_score_update(user, year)
+                if user_score_update:
+                    user_score_update(user, year)
+                else:
+                    zero_score_update(user, year)
         update_commmit_time()
         update_individual()
         update_frequency()
@@ -197,7 +204,11 @@ def force_start():
                 for chal in challenge_list:
                     achievement_check(user, chal)
                 for year in range(end_year, start_year-1, -1):
-                    user_score_update(user, year)
+                    if user_score_update:
+                        print("user_score_update")
+                        user_score_update(user, year)
+                    else:
+                        zero_score_update(user, year)
         update_commmit_time()
         update_individual()
         update_frequency()
@@ -207,6 +218,6 @@ def force_start():
         print('Done!')
 
     # scheduler.start()
-    crawl_overview_job()
-    crawl_job()
+    #crawl_overview_job()
+    #crawl_job()
     update_score()
