@@ -52,9 +52,6 @@ urlpatterns = [
     path('search/', views.SearchView.as_view(), name='Search'),
     # Hero 게시글 목록
     path('api/heroes/', views.HeroThumbnailView.as_view(), name='heroArticles'),
-    # Hero 게시글 파일
-    path('api/heroes/<int:article_id>/file/<str:filename>/',
-         views.HeroThumbnailFileView.as_view(), name='heroImage'),
 
     ### 미사용 패턴 ###
     # 댓글 조회

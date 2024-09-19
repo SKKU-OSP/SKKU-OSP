@@ -22,6 +22,7 @@ function ProfileInfo(props) {
   const [imageFile, setImageFile] = useState(null);
   const fileInput = useRef(null);
   const [QnAShow, setQnAShow] = useState(false);
+  const navigate = useNavigate();
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -132,7 +133,7 @@ function ProfileInfo(props) {
   return (
     <>
       {userInfo ? (
-        <div className="d-flex flex-row profile_info">
+        <div className="profile_info">
           <div className="d-flex flex-column align-items-center justify-content-center info_left">
             {isEdit ? (
               editing ? (

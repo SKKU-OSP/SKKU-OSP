@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getAuthConfig } from '../../../../utils/auth';
 import UserArticle from './UserArticle';
@@ -12,6 +12,7 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 
 function UserActivity() {
   const { tabName } = useParams();
+  const navigate = useNavigate();
   const [isLoadedArticles, setIsLoadedArticles] = useState(false);
   const [articles, setArticles] = useState([]);
   const [comments, setComments] = useState([]);
@@ -28,6 +29,9 @@ function UserActivity() {
     article: '내가 작성한 글',
     comment: '내가 작성한 댓글',
     scrap: '내가 스크랩한 글'
+  };
+  const onNavigate = (tabName) => {
+    navigate(`./../${tabName}`);
   };
 
   const [sortOrder, setSortOrder] = useState('-id');
@@ -172,15 +176,22 @@ function UserActivity() {
       {!error && (
         <>
           <div className="community-nav d-flex">
-            <div className="nav nav-fill community-nav-items">
-              {activityNames.includes(tabName) && (
-                <li className="nav-item selected-nav-item">
-                  <div>{activityNavMap[tabName]}</div>
+            <div className="nav nav-fill">
+              {activityNames.map((activity) => (
+                <li
+                  key={activity}
+                  className={`nav-item ${tabName === activity ? 'selected-nav-item' : 'unselected-nav-item'}`}
+                >
+                  <div onClick={() => onNavigate(activity)}>{activityNavMap[activity]}</div>
                 </li>
-              )}
+              ))}
             </div>
             <Dropdown>
-              <Dropdown.Toggle variant="secondary" style={{ borderRadius: '17px', fontFamily:"nanumfont_Bold" }} id="dropdown-sort">
+              <Dropdown.Toggle
+                variant="secondary"
+                style={{ borderRadius: '17px', fontFamily: 'nanumfont_Bold' }}
+                id="dropdown-sort"
+              >
                 {sortOptions[tabName].find((option) => option.value === sortOrder).label}
               </Dropdown.Toggle>
               <Dropdown.Menu>

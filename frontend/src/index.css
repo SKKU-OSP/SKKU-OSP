@@ -180,19 +180,19 @@ footer {
 }
 
 @font-face {
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
   font-display: swap;
   src: url(./assets/fonts/NanumSquareRoundR.ttf);
 }
 
 @font-face {
-  font-family: "nanumfont_Bold";
+  font-family: 'nanumfont_Bold';
   font-display: swap;
   src: url(./assets/fonts/NanumSquareRoundB.ttf);
 }
 
 @font-face {
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
   font-display: swap;
   src: url(./assets/fonts/NanumSquareRoundEB.ttf);
 }

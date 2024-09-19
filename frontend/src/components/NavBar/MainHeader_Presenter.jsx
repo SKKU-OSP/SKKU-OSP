@@ -22,7 +22,7 @@ function MainHeader_Presenter(props) {
             <div className="siteTitle fs-3">SKKU SOSD</div>
           </Link>
           <div className="col-lg-9 col-11 d-flex justify-content-end">
-            <div className="on-desktop justify-content-between flex-grow-1 gap-3">
+            <div className="on-desktop justify-content-between flex-grow-1">
               <HeaderNavBar />
               <SearchBox />
             </div>

@@ -18,7 +18,7 @@ const serverUrl = import.meta.env.VITE_SERVER_URL;
 const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose, setShowTeamApp }) => {
   const [length, setLength] = useState(0);
   const [readAll, setReadAll] = useState(0);
-  const { userId } = useContext(AuthContext);
+  const { userId, username } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleShowTeamApp = () => {
@@ -58,6 +58,9 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
     } else if (type === 'team_invite') {
       handleClose();
       navigate(`/community/team/${team_name}`);
+    } else if (type === 'profile') {
+      handleClose();
+      navigate(`/user/${username}`);
     }
     setLength(length - 1);
     setNotiList((prev) =>
@@ -118,14 +121,14 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            <h5 style={{fontFamily: "nanumfont_ExtraBold"}}>알림내역</h5>
+            <h5 style={{ fontFamily: 'nanumfont_ExtraBold' }}>알림내역</h5>
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           <div className={classes.ReadAll}>
             <AiOutlineCheckSquare />
-            <div className="ms-1" onClick={() => handleReadAll(userId)} style={{fontFamily: "nanumfont_Bold"}}>
+            <div className="ms-1" onClick={() => handleReadAll(userId)} style={{ fontFamily: 'nanumfont_Bold' }}>
               모두읽음
             </div>
           </div>

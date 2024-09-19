@@ -43,7 +43,7 @@
   font-weight: bold;
   font-size: 25px;
   cursor: pointer;
-  font-family: "nanumfont_ExtraBold";
+  font-family: 'nanumfont_ExtraBold';
   margin-bottom: 0.2rem;
 }
 
@@ -54,7 +54,7 @@
   text-decoration: underline;
   cursor: pointer;
   margin-bottom: 0.5rem !important;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .sidebar-content a {
@@ -69,7 +69,7 @@
   font-size: 16px !important;
   padding: 0.625rem;
   cursor: pointer;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
 .sidebar-logout {
@@ -77,10 +77,10 @@
   text-decoration: underline;
   padding: 0.625rem;
   cursor: pointer;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
-.sidebar-logout:hover{
+.sidebar-logout:hover {
   opacity: 0.5;
 }
 
@@ -89,10 +89,10 @@
   text-decoration: underline;
   padding: 0.625rem;
   cursor: pointer;
-  font-family: "nanumfont_Regular";
+  font-family: 'nanumfont_Regular';
 }
 
-.sidebar-manual:hover{
+.sidebar-manual:hover {
   opacity: 0.5;
 }
 
@@ -123,12 +123,12 @@
   margin: 18px 0px 7px;
   border: solid 1px #072a60 !important;
   color: #072a60 !important;
-  font-family: "nanumfont_Regular" !important;
+  font-family: 'nanumfont_Regular' !important;
   letter-spacing: 0.5px;
   background-color: white !important;
 }
 
-.btn-logout:hover{
+.btn-logout:hover {
   color: white !important;
   background-color: #072a60 !important;
 }
@@ -137,12 +137,12 @@
   margin: 0px 0px 7px;
   border: solid 1px #072a60 !important;
   color: #072a60 !important;
-  font-family: "nanumfont_Regular" !important;
+  font-family: 'nanumfont_Regular' !important;
   letter-spacing: 0.5px;
   background-color: white !important;
 }
 
-.btn-manual:hover{
+.btn-manual:hover {
   color: white !important;
   background-color: #072a60 !important;
 }

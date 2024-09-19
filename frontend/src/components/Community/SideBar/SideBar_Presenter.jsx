@@ -42,9 +42,6 @@ export default function SideBar_Presenter(props) {
             <Button type="button" className="btn btn-manual" onClick={handleClickManual}>
               사용자 가이드
             </Button>
-            {/* <div className="sidebar-manual" style={{ color: '#072a60' }} onClick={handleClickManual}>
-              사용자 가이드
-            </div> */}
             <div className="sidebar-logout" style={{ color: '#808080' }} onClick={sendLogoutRequest}>
               로그아웃
             </div>

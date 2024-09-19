@@ -19,8 +19,9 @@ urlpatterns = [
          name='ApplicationRead'),
     path('api/noti/list/', views.NotificationListView.as_view(),
          name='NotificationList'),
-    path('api/split/',
-         views.MessageSplitView.as_view(), name='MessageSplit'),
+    path('api/noti/create/', views.NotificationCreateView.as_view(),
+         name='NotificationCreate'),
+    path('api/split/', views.MessageSplitView.as_view(), name='MessageSplit'),
 
     # Django
     path('list/<int:selected_oppo>', views.message_list_view, name='message-list'),

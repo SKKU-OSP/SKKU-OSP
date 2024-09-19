@@ -110,17 +110,10 @@ export default function Board_Presenter(props) {
   return (
     <div className="col-9">
       {promotionImages.length > 0 ? (
-        <div
-          className="community-hero"
-          style={{
-            backgroundImage: `url(${backgroundImage.src})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-          onClick={onImageClick}
-        >
+        <div className="community-hero" onClick={onImageClick}>
+          <img src={backgroundImage.src} alt="Community Hero" className="community-hero-img" />
           <BsChevronCompactLeft
-            className="icon"
+            className="icon left-icon"
             size={30}
             onClick={(e) => {
               e.stopPropagation();
@@ -129,7 +122,7 @@ export default function Board_Presenter(props) {
           />
           <div className="page-indicators">{renderPageIndicators(currentPage)}</div>
           <BsChevronCompactRight
-            className="icon"
+            className="icon right-icon"
             size={30}
             onClick={(e) => {
               e.stopPropagation();
@@ -143,7 +136,7 @@ export default function Board_Presenter(props) {
         </div>
       )}
 
-      <div className="d-flex">
+      <div className="board-container">
         <div className="board-left">
           <div className="board-nav">
             <div onClick={onCommunity}>커뮤니티</div>

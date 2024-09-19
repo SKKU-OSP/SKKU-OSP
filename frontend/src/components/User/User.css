@@ -1,8 +1,34 @@
+@media screen and (max-width: 554px) {
+  .title-text {
+    max-width: 65% !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .profile-tab .nav {
+    margin-bottom: 0px !important;
+  }
+  .info_left {
+    width: 30% !important;
+    height: 30% !important;
+    padding-top: 25px;
+  }
+  .info_img {
+    width: 90% !important;
+    height: 90% !important;
+  }
+  .contribution-repo {
+    padding: 8px !important;
+  }
+}
+
 .user-container {
   background: var(--main-white);
 }
 
 .profile_info {
+  display: flex;
+  flex-direction: row;
   .info_left {
     width: 257px;
     height: 255px;
@@ -47,13 +73,17 @@
       }
     }
     .info_dropdown .btn {
-      background-color: #eaeaea !important;
-      border: #eaeaea;
-      color: black;
+      border: 1px solid var(--sub-border-color);
+      background-color: var(--sub-border-color);
+      color: var(--main-black);
       font-family: 'nanumfont_Regular';
       font-size: 18px;
     }
-
+    .info_dropdown .btn:hover {
+      background-color: var(--main-selected-color);
+      border: 1px solid var(--main-selected-color);
+      color: var(--main-white);
+    }
     .info_username {
       padding: 0px 10px;
       gap: 6px;
@@ -308,10 +338,16 @@
   padding: 10px 16px;
   gap: 16px;
   .profile-portfolio {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
     padding: 24px 0px;
     gap: 16px;
     border-bottom: 1px solid var(--sub-border-color);
     .portfolio-intro {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
       padding: 8px 16px;
       .intro {
         font-family: 'nanumfont_ExtraBold';
@@ -376,10 +412,16 @@
     }
   }
   .profile-contribution {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
     padding: 24px 0px;
     gap: 10px;
     border-bottom: 1px solid var(--sub-border-color);
     .contribution-intro {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
       padding: 7px 16px;
       .intro {
         font-family: 'nanumfont_ExtraBold';
@@ -412,14 +454,25 @@
       padding: 8px 16px;
       gap: 10px;
       .repo {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
         padding: 10px 16px;
         gap: 10px;
         background-color: white;
         box-shadow: 0 4px 4px var(--card-box-shadow);
         border-radius: 15px;
         .title {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
           padding: 1px 11px;
           .title-text {
+            display: inline-block;
+            max-width: 75%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             font-family: 'nanumfont_ExtraBold';
             font-size: 20px;
             font-weight: 700;
@@ -439,6 +492,9 @@
           }
         }
         .stat {
+          display: flex;
+          flex-direction: row;
+          justify-content: start;
           padding: 1px 11px;
           gap: 10px;
           .stat-text {
@@ -915,7 +971,7 @@
     color: black;
   }
   .card-half {
-    width: 100%;
+    width: 100% !important;
   }
   .card-half:nth-child(1) {
     border-right: 0;
@@ -926,6 +982,7 @@
     border-top: 1px solid var(--main-border-color-transparent);
   }
 }
+
 .text-muted {
   font-size: 12px;
   color: #6c757d;

@@ -157,7 +157,6 @@ function SearcherBox() {
           aria-describedby="search-btn"
           onChange={(e) => handleKeyword(e)}
           onKeyDown={(e) => handleEnter(e)}
-          style={{ fontFamily: 'nanumfont_Regular', letterSpacing: '1.5px' }}
         />
         <BsHash className="hash-icon" size="24" onClick={() => handleTagSelectShow()} />
         <BsSearch className="search-icon" onClick={() => searchArticle()} />

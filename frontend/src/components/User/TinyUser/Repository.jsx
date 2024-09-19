@@ -43,8 +43,15 @@ function Repository() {
       {error_occur ? (
         <>잘못된 페이지입니다.</>
       ) : guideline ? (
-        <div className="container my-4">
-          <h3>Guideline</h3>
+        <div className="container mb-4">
+          <div className="community-nav d-flex" style={{ marginLeft: '10px' }}>
+            <div className="nav nav-fill">
+              <li className="nav-item selected-nav-item">
+                <div>Guideline</div>
+              </li>
+            </div>
+          </div>
+
           {guideline.length > 0 ? (
             guideline.map((repo, index) => (
               <div className="card guideline-check mx-4 mb-3" key={`card-${index}`}>

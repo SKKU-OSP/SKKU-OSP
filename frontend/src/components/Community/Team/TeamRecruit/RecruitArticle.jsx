@@ -33,7 +33,7 @@ export default function RecruitArticle(props) {
                 <>
                   <h5 className="board-team-name">{article.team_name}</h5>
                   <div className="vertical-divider"></div>
-                  <div className="board-article-main">
+                  <div className="board-article-team-main">
                     <h4 className="board-article-title" onClick={onArticle}>
                       {article.title}
                     </h4>
@@ -73,7 +73,7 @@ export default function RecruitArticle(props) {
                 </>
               )}
             </div>
-            <div className="board-article-info">
+            <div className="board-article-team-info">
               <div className="board-article-writer">
                 {article.writer ? (
                   article.anonymous_writer ? (
