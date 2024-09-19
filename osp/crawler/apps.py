@@ -12,4 +12,4 @@ class CrawlerConfig(AppConfig):
         if os.environ.get('RUN_MAIN', None) != 'true':
             if settings.SCHEDULER_DEFAULT:
                 from . import operator
-                operator.force_start()
+                operator.start()
