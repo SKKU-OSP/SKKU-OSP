@@ -54,7 +54,7 @@ class JWTLoginView(APIView):
                 return Response(get_fail_res("계정 정보가 있으나 문제가 있습니다. 관리자에게 문의하세요."))
             github_id = account.to_json()['github_id']
             res = requests.get(f'https://api.github.com/users/{github_id}')
-            if 'status' in res.json() and res.json()['status'] == '404':
+            if 'status' in res.json() and res.json()['status'] == '404' and username!="admin":
                 return Response(get_fail_res("유효하지 않은 깃허브 계정명입니다. Start with GitHub를 통해 재인증해주세요."))
             data = {
                 'user': account.to_json(),
