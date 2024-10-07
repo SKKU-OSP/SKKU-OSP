@@ -724,6 +724,6 @@ class GithubIdChangeView(APIView):
                 print(e)
                 return Response({"status": "fail", "message": "github ID 수정 중 오류 발생"})
         else:
-            return Response(get_fail_res("기존 github id와 동일합니다."))
+            return Response(get_fail_res("기존 GitHub ID와 동일합니다."))
         res = {'status': 'success'}
         return Response(res)
