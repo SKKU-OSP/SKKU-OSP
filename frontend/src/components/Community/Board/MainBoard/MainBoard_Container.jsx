@@ -15,7 +15,6 @@ export default function Board_Container() {
     try {
       const response = await axios.get(server_url + `/community/api/heroes/`);
       const res = response.data;
-
       if (res.status === 'success') {
         const promotionImages = res.data.hero_articles.map((heroArticle) => {
           const file_url = `${server_url}/community/api/heroes/${
@@ -30,7 +29,8 @@ export default function Board_Container() {
         alert('홍보 이미지를 불러올 수 없습니다.');
       }
     } catch (error) {
-      setError(true);
+      //   setError(true);
+      console.log(error);
     }
   };
   console.log(promotionImages);
