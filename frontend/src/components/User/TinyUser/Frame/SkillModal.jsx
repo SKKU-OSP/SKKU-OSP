@@ -22,12 +22,9 @@ function SkillModal(props) {
     setSelectedSkill(selectedSkill);
     setUndefinedSkill([...undefinedSkill, { tag: selectedSkill }]);
     setSelectedSkill(null);
-    console.log(selectedSkill)
-  }
+  };
   const OnHandleRemoveSkill = (removeSkill) => {
-    setUndefinedSkill((prevSkill) => 
-      prevSkill.filter((skill) => skill.tag.label != removeSkill)
-    );
+    setUndefinedSkill((prevSkill) => prevSkill.filter((skill) => skill.tag.label != removeSkill));
   };
 
   useEffect(() => {
@@ -74,7 +71,7 @@ function SkillModal(props) {
   return (
     <Modal size="lg" show={skillShow} onHide={OnHandleSkillClose}>
       <Modal.Header closeButton>
-        <Modal.Title style={{fontFamily: "nanumfont_ExtraBold"}}>사용언어/기술스택</Modal.Title>
+        <Modal.Title style={{ fontFamily: 'nanumfont_ExtraBold' }}>사용언어/기술스택</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="d-flex flex-column modal-skill">
@@ -138,14 +135,17 @@ function SkillModal(props) {
                       <span className="input-text" style={{ color: fontColor }}>
                         {element.tag.name}
                       </span>
-                      <BsXLg size={14} onClick={() => OnHandleRemoveSkill(element.tag.name)} style={{ cursor: 'pointer',  }} />
+                      <BsXLg
+                        size={14}
+                        onClick={() => OnHandleRemoveSkill(element.tag.name)}
+                        style={{ cursor: 'pointer' }}
+                      />
                     </div>
                   );
                 })}
               </>
             ) : (
-              <div className="d-flex align-items-center modal-text">
-              </div>
+              <div className="d-flex align-items-center modal-text"></div>
             )}
           </div>
           {Object.entries(modalSkill)
