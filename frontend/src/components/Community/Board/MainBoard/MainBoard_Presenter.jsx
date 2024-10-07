@@ -234,8 +234,8 @@ export default function Board_Presenter(props) {
                 </>
               ) : (
                 <>
-                  {teamLists.slice(0, 5).map((team) => (
-                    <TeamList team={team} />
+                  {teamLists.slice(0, 5).map((team, idx) => (
+                    <TeamList key={idx} team={team} />
                   ))}
                 </>
               )}
