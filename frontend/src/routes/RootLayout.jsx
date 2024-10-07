@@ -2,6 +2,7 @@ import { useContext, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import MainHeader from '../components/NavBar/MainHeader_Container';
+import MainFooter from '../components/NavBar/MainFooter_Container';
 import AuthContext, { AuthContextProvider } from '../utils/auth-context.jsx';
 import { getTokenDuration, tokenLoader, tokenRemover } from '../utils/auth';
 
@@ -37,6 +38,7 @@ function RootLayout() {
     <AuthContextProvider>
       <MainHeader />
       <Outlet />
+      <MainFooter />
     </AuthContextProvider>
   );
 }
