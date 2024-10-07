@@ -69,7 +69,6 @@ function QnAModal(props) {
 
   const handleShowQnA = (event) => {
     event.preventDefault();
-    console.log('modal', modalQnA);
 
     if (modalQnA.type === '') {
       window.alert('질문 유형을 선택해 주세요');

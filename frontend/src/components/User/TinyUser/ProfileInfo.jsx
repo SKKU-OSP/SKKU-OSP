@@ -84,8 +84,8 @@ function ProfileInfo(props) {
 
   const OnHandleQnAClose = () => setQnAShow(false);
 
-  const OnHandleQnASaveClose = (modalQnA) => {
-    console.log('Saved QnA:', modalQnA);
+  const OnHandleQnASaveClose = () => {
+    console.log('Successfully Save QnA');
     setQnAShow(false);
   };
 

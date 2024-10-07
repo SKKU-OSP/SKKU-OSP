@@ -167,7 +167,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           };
 
           getHeroArticles();
-          console.log('hero:', heroArticleFile);
         }
       } else {
         console.log(resArticle.message);
@@ -235,7 +234,6 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
           is_hero: isHero
         })
       };
-      console.log(postData);
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
         if (key === 'article_tags') {

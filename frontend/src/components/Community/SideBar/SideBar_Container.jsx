@@ -19,7 +19,6 @@ export default function SideBar_Container() {
     try {
       const response = await axios.get(logout_url);
       const res = response.data;
-      console.log(res);
       tokenRemover();
       localStorage.removeItem('username');
       unsetUser();

@@ -22,7 +22,6 @@ export default function Board_Presenter(props) {
   const [selectedTab1, setSelectedTab1] = useState('홍보');
   const [selectedTab2, setSelectedTab2] = useState('팀 모집');
   const backgroundImage = promotionImages[currentPage];
-  console.log('image', backgroundImage);
 
   const getArticles = async (page) => {
     try {
@@ -108,7 +107,7 @@ export default function Board_Presenter(props) {
   };
 
   return (
-    <div className="col-9">
+    <div className="col-9" style={{ marginBottom: '2%' }}>
       {promotionImages.length > 0 ? (
         <div className="community-hero" onClick={onImageClick}>
           <img src={backgroundImage.src} alt="Community Hero" className="community-hero-img" />

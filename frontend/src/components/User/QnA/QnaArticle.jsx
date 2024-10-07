@@ -25,7 +25,6 @@ const QnAArticle = (props) => {
       const response = await axios.get(`${server_url}/user/api/qna/${qna.id}/`, getAuthConfig());
       setQnaDetails(response.data.data);
       setResponse(response.data.data.response || '');
-      console.log(qna);
     } catch (error) {
       console.error('Error fetching QnA details:', error);
     }

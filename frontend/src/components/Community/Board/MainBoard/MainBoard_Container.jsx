@@ -30,7 +30,6 @@ export default function Board_Container() {
       setError(true);
     }
   };
-  console.log(promotionImages);
 
   useEffect(() => {
     getImage(); // 홍보 이미지 불러오기
