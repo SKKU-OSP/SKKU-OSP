@@ -154,6 +154,9 @@ const SignUpForm = () => {
   const handleSelectCollege = (obj) => {
     onChangeCollege();
     setSelectCollege(obj.value);
+    setFormData((prev) => {
+      return { ...prev, college: obj.value };
+    });
   };
 
   const handleSelectPersonalDomain = (obj) => {
@@ -901,17 +904,19 @@ const SignUpForm = () => {
       <br />
       {/* 버튼 */}
 
-      <button
+      {/* 개인정보 이용내역 동의 */}
+      <Button
         onClick={() => {
           setOpenModal(!openModal);
           setSelectConsent(true);
           setConsentBtnClass('btn-danger');
         }}
         type="button"
-        className={'btn ms-auto mb-1 ' + consentBtnClass}
+        className={`pulsing-button btn ms-auto mb-1 ${consentBtnClass}`}
       >
-        개인정보 이용내역 동의<span className="text-danger">*</span>
-      </button>
+        개인정보 이용내역 동의<span className={classes.RequiredStar}>*</span>
+      </Button>
+
       {openModal === true ? (
         <ConsentsModal
           consents={consents}
