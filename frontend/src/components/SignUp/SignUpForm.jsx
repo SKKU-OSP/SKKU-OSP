@@ -521,18 +521,21 @@ const SignUpForm = () => {
     success: 'primary',
     fail: 'danger'
   };
-  const CheckGithubId = async () => {
-    setCheckLoading({ ...checkLoading, github_id: true });
-    const response = await axios.post(serverUrl + '/accounts/register/checkgithub/', {
-      github_id: githubData?.github_username.value
-    });
-    const res = response.data;
-    setCheckLoading({ ...checkLoading, github_id: false });
-    alert(res.message);
-    setBtnCheckr((prev) => {
-      return { ...prev, github_id: btnStatusMap[res.status] };
-    });
-  };
+
+  // GitHub Username 검사 로직 삭제
+  // 받아오는 GitAuth 에서 받아오는 github username이 항상 유효한지 확인 필요함
+  // const CheckGithubId = async () => {
+  //   setCheckLoading({ ...checkLoading, github_id: true });
+  //   const response = await axios.post(serverUrl + '/accounts/register/checkgithub/', {
+  //     github_id: githubData?.github_username.value
+  //   });
+  //   const res = response.data;
+  //   setCheckLoading({ ...checkLoading, github_id: false });
+  //   alert(res.message);
+  //   setBtnCheckr((prev) => {
+  //     return { ...prev, github_id: btnStatusMap[res.status] };
+  //   });
+  // };
   const CheckStudent = async () => {
     setCheckLoading({ ...checkLoading, student_id: true });
     const response = await axios.post(serverUrl + '/accounts/register/checkstudent/', {
@@ -584,9 +587,6 @@ const SignUpForm = () => {
               defaultValue={githubData?.github_username.value}
               disabled={githubData?.github_username.readonly}
             />
-            <Button variant={btnChecker.github_id} onClick={CheckGithubId} disabled={checkLoading.github_id}>
-              {checkLoading.github_id ? <LoaderIcon type={'spin'} size={16} className={classes.btnLoader} /> : 'Check'}
-            </Button>
           </InputGroup>
         </div>
         <div className={classes.FormControl}>
@@ -924,7 +924,12 @@ const SignUpForm = () => {
         />
       ) : null}
       <div className="d-flex flex-row justify-content-end">
-        <Button variant="primary" type="submit" disabled={checkLoading.submit} style={{background: '#072a60', borderColor: '#072a60'}}>
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={checkLoading.submit}
+          style={{ background: '#072a60', borderColor: '#072a60' }}
+        >
           {checkLoading.submit ? <LoaderIcon type={'spin'} size={24} className={classes.btnLoader} /> : '가입하기'}
         </Button>
       </div>
