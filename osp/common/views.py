@@ -54,7 +54,7 @@ class JWTLoginView(APIView):
                 return Response(get_fail_res("계정 정보가 있으나 문제가 있습니다. 관리자에게 문의하세요."))
             github_id = account.to_json()['github_id']
             res = requests.get(f'https://api.github.com/users/{github_id}')
-            if 'status' in res.json() and res.json()['status'] == '404' and username!="admin":
+            if 'status' in res.json() and res.json()['status'] == '404' and username != "admin":
                 return Response(get_fail_res("유효하지 않은 깃허브 계정명입니다. Start with GitHub를 통해 재인증해주세요."))
             data = {
                 'user': account.to_json(),
@@ -192,6 +192,7 @@ class SignUpView(APIView):
             fail_reason['name'] = f'이름을 입력해주세요.'
         # 소속대학 유효성 검사
         college = request.data.get('college', '')
+        print(f"college name : {college}")
         if not college:
             fail_reason['college'] = f'소속대학을 선택해주세요.'
         if not check_college(college):
@@ -617,19 +618,21 @@ class LogoutView(APIView):
         logout(request)
         res = {'status': 'success'}
         return Response(res)
-    
+
+
 class GithubIdChangeView(APIView):
     def post(self, request):
         data = request.data
         print(data.get('student_data'))
-        student_data = Account.objects.filter(student_data=data.get('student_data'))
+        student_data = Account.objects.filter(
+            student_data=data.get('student_data'))
         if student_data.exists():
             student_data = student_data.first()
         else:
             return Response(get_fail_res("학번을 다시 확인해주세요."))
         print(student_data)
         print(student_data.github_id)
-        if(data.get('github_id') != student_data.github_id):
+        if (data.get('github_id') != student_data.github_id):
             old_owner = student_data.github_id
             new_owner = data.get('github_id')
 
@@ -638,24 +641,38 @@ class GithubIdChangeView(APIView):
                 students = Student.objects.filter(github_id=old_owner)
                 student_tabs = StudentTab.objects.filter(github_id=old_owner)
                 account = Account.objects.filter(github_id=old_owner)
-                github_issues = GithubIssues.objects.filter(github_id=old_owner)
-                github_overview = GithubOverview.objects.filter(github_id=old_owner)
+                github_issues = GithubIssues.objects.filter(
+                    github_id=old_owner)
+                github_overview = GithubOverview.objects.filter(
+                    github_id=old_owner)
                 github_pulls = GithubPulls.objects.filter(github_id=old_owner)
-                github_repo_commit_files = GithubRepoCommitFiles.objects.filter(github_id=old_owner)
-                github_repo_commits = GithubRepoCommits.objects.filter(github_id=old_owner)
-                github_repo_commits2 = GithubRepoCommits.objects.filter(author_github=old_owner)
-                github_repo_contributors = GithubRepoContributor.objects.filter(github_id=old_owner)
-                github_repo_contributors2 = GithubRepoContributor.objects.filter(owner_id=old_owner)
-                github_repo_stats = GithubRepoStats.objects.filter(github_id=old_owner)
-                github_repo_stats_yymm = GithubRepoStatsyymm.objects.filter(github_id=old_owner)
+                github_repo_commit_files = GithubRepoCommitFiles.objects.filter(
+                    github_id=old_owner)
+                github_repo_commits = GithubRepoCommits.objects.filter(
+                    github_id=old_owner)
+                github_repo_commits2 = GithubRepoCommits.objects.filter(
+                    author_github=old_owner)
+                github_repo_contributors = GithubRepoContributor.objects.filter(
+                    github_id=old_owner)
+                github_repo_contributors2 = GithubRepoContributor.objects.filter(
+                    owner_id=old_owner)
+                github_repo_stats = GithubRepoStats.objects.filter(
+                    github_id=old_owner)
+                github_repo_stats_yymm = GithubRepoStatsyymm.objects.filter(
+                    github_id=old_owner)
                 github_scores = GithubScore.objects.filter(github_id=old_owner)
                 print(github_scores)
                 github_stars = GithubStars.objects.filter(github_id=old_owner)
-                github_stats_yymm = GithubStatsYymm.objects.filter(github_id=old_owner)
-                github_user_followings = GithubUserFollowing.objects.filter(github_id=old_owner)
-                github_user_followings2 = GithubUserFollowing.objects.filter(following_id=old_owner)
-                github_user_starreds = GithubUserStarred.objects.filter(github_id=old_owner)
-                github_user_scoretable = GitHubScoreTable.objects.filter(github_id=old_owner)
+                github_stats_yymm = GithubStatsYymm.objects.filter(
+                    github_id=old_owner)
+                github_user_followings = GithubUserFollowing.objects.filter(
+                    github_id=old_owner)
+                github_user_followings2 = GithubUserFollowing.objects.filter(
+                    following_id=old_owner)
+                github_user_starreds = GithubUserStarred.objects.filter(
+                    github_id=old_owner)
+                github_user_scoretable = GitHubScoreTable.objects.filter(
+                    github_id=old_owner)
 
                 repositories.update(owner=new_owner)
                 students.update(github_id=new_owner)
@@ -677,7 +694,6 @@ class GithubIdChangeView(APIView):
                 github_user_scoretable.update(github_id=new_owner)
                 github_user_followings.update(github_id=new_owner)
                 github_user_followings2.update(following_id=new_owner)
-
 
                 for score in github_scores:
                     year = score.year
