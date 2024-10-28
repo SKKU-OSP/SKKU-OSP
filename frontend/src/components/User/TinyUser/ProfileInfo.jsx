@@ -233,7 +233,7 @@ function ProfileInfo(props) {
               />
             ) : (
               <div className="info_introduction">
-                {userInfo.introduction.length > 0 ? (
+                {userInfo.introduction?.length > 0 ? (
                   <>
                     {userInfo.introduction.split('\n').map((line, idx) => {
                       return (
