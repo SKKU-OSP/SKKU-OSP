@@ -192,7 +192,6 @@ class SignUpView(APIView):
             fail_reason['name'] = f'이름을 입력해주세요.'
         # 소속대학 유효성 검사
         college = request.data.get('college', '')
-        print(f"college name : {college}")
         if not college:
             fail_reason['college'] = f'소속대학을 선택해주세요.'
         if not check_college(college):
