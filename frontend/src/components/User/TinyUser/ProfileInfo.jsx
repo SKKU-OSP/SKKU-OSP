@@ -219,7 +219,12 @@ function ProfileInfo(props) {
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />
-              <a href={`https://github.com/${userInfo.github_id}`} target="_blank" className="github_username">
+              <a
+                href={`https://github.com/${userInfo.github_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="github_username"
+              >
                 {userInfo.github_id}
               </a>
             </div>
@@ -233,7 +238,7 @@ function ProfileInfo(props) {
               />
             ) : (
               <div className="info_introduction">
-                {userInfo.introduction.length > 0 ? (
+                {userInfo.introduction?.length > 0 ? (
                   <>
                     {userInfo.introduction.split('\n').map((line, idx) => {
                       return (
