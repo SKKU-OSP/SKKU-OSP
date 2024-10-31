@@ -84,8 +84,8 @@ function ProfileInfo(props) {
 
   const OnHandleQnAClose = () => setQnAShow(false);
 
-  const OnHandleQnASaveClose = (modalQnA) => {
-    console.log('Saved QnA:', modalQnA);
+  const OnHandleQnASaveClose = () => {
+    console.log('Successfully Save QnA');
     setQnAShow(false);
   };
 
@@ -203,19 +203,28 @@ function ProfileInfo(props) {
               <div className="info_username">
                 <span className="username">{userInfo.user.username}</span>
               </div>
-              <button className="info_qna" onClick={OnHandleQnAShow}>
-                <span className="info_qna-text">문의하기</span>
-              </button>
-              <QnAModal
-                user={userInfo.user.username}
-                Show={QnAShow}
-                OnHandleQnAClose={OnHandleQnAClose}
-                OnHandleQnASaveClose={OnHandleQnASaveClose}
-              />
+              {isEdit && (
+                <>
+                  <button className="info_qna" onClick={OnHandleQnAShow}>
+                    <span className="info_qna-text">문의하기</span>
+                  </button>
+                  <QnAModal
+                    user={userInfo.user.username}
+                    Show={QnAShow}
+                    OnHandleQnAClose={OnHandleQnAClose}
+                    OnHandleQnASaveClose={OnHandleQnASaveClose}
+                  />
+                </>
+              )}
             </div>
             <div className="d-flex flex-row info_github">
               <BsGithub />
-              <a href={`https://github.com/${userInfo.github_id}`} target="_blank" className="github_username">
+              <a
+                href={`https://github.com/${userInfo.github_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="github_username"
+              >
                 {userInfo.github_id}
               </a>
             </div>
@@ -229,7 +238,7 @@ function ProfileInfo(props) {
               />
             ) : (
               <div className="info_introduction">
-                {userInfo.introduction.length > 0 ? (
+                {userInfo.introduction?.length > 0 ? (
                   <>
                     {userInfo.introduction.split('\n').map((line, idx) => {
                       return (

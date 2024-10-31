@@ -25,7 +25,6 @@ const QnAArticle = (props) => {
       const response = await axios.get(`${server_url}/user/api/qna/${qna.id}/`, getAuthConfig());
       setQnaDetails(response.data.data);
       setResponse(response.data.data.response || '');
-      console.log(qna);
     } catch (error) {
       console.error('Error fetching QnA details:', error);
     }
@@ -36,8 +35,6 @@ const QnAArticle = (props) => {
   };
 
   const handleResponseSubmit = async () => {
-    console.log('Response submitted:', response);
-
     try {
       const messageData = {
         'chat-input': `[문의 답변] 문의하신 내용에 대한 답변이 등록되었습니다.\n\n${response}`
@@ -49,12 +46,15 @@ const QnAArticle = (props) => {
       );
 
       if (messageResponse.status === 200) {
-        const formData = new FormData();
-        Object.entries({ solved: true }).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
-
-        const updateQnaResponse = await axios.patch(`${server_url}/user/api/qna/${qna.id}/`, formData, getAuthConfig());
+        const updateQnaData = {
+          solved: true,
+          response: response
+        };
+        const updateQnaResponse = await axios.patch(
+          `${server_url}/user/api/qna/${qna.id}/`,
+          updateQnaData,
+          getAuthConfig()
+        );
 
         if (updateQnaResponse.status === 200) {
           console.log('QnA solved updated successfully');
@@ -84,7 +84,7 @@ const QnAArticle = (props) => {
       );
 
       if (messageResponse.status === 200) {
-        const updateQnaData = { response };
+        const updateQnaData = { response: response };
         const updateResponse = await axios.patch(
           `${server_url}/user/api/qna/${qna.id}/`,
           updateQnaData,

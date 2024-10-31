@@ -149,7 +149,6 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
           is_hero: isHero
         })
       };
-      console.log(postData);
       const formData = new FormData();
       Object.entries(postData).forEach(([key, value]) => {
         if (key === 'article_tags') {

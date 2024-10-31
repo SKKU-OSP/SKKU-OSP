@@ -198,6 +198,8 @@ secret.key
 osp/static/data/
 osp/data
 
+# update score file
+osp/home/updateScore.py
 # docker
 # Dockerfile
 # docker-compose.yml

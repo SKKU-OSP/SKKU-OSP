@@ -24,8 +24,9 @@ from osp.settings import (EMAIL_HOST_USER, GITHUB_CLIENT_ID,
                           GITHUB_CLIENT_SECRET)
 from tag.models import TagIndependent
 from tag.serializers import TagIndependentSerializer
-from user.models import Account, AccountInterest, AccountPrivacy, StudentTab
-
+from user.models import Account, AccountInterest, AccountPrivacy, StudentTab, GitHubScoreTable, GithubScore, GithubStatsYymm, GithubUserFollowing, GithubUserStarred, GithubOverview
+from repository.models import GithubIssues, GithubPulls, GithubRepoCommits, GithubRepoContributor, GithubRepoStats, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
+from home.models import Repository, Student
 from data.api import GitHub_API
 
 
@@ -51,12 +52,16 @@ class JWTLoginView(APIView):
                 account = account.first()
             else:
                 return Response(get_fail_res("계정 정보가 있으나 문제가 있습니다. 관리자에게 문의하세요."))
-
+            github_id = account.to_json()['github_id']
+            res = requests.get(f'https://api.github.com/users/{github_id}')
+            if 'status' in res.json() and res.json()['status'] == '404' and username != "admin":
+                return Response(get_fail_res("유효하지 않은 깃허브 계정명입니다. Start with GitHub를 통해 재인증해주세요."))
             data = {
                 'user': account.to_json(),
                 'access_token': str(token.access_token),
                 'refresh_token': str(token),
             }
+            print(data)
             return Response({"status": "success", "message": "로그인 성공", "data": data})
 
         return Response(get_fail_res("Username과 password를 다시 확인해주세요."),)
@@ -610,5 +615,130 @@ def get_user_primary_email(access_token):
 class LogoutView(APIView):
     def get(self, request):
         logout(request)
+        res = {'status': 'success'}
+        return Response(res)
+
+
+class GithubIdChangeView(APIView):
+    def post(self, request):
+        data = request.data
+        print(data.get('student_data'))
+        student_data = Account.objects.filter(
+            student_data=data.get('student_data'))
+        if student_data.exists():
+            student_data = student_data.first()
+        else:
+            return Response(get_fail_res("학번을 다시 확인해주세요."))
+        print(student_data)
+        print(student_data.github_id)
+        if (data.get('github_id') != student_data.github_id):
+            old_owner = student_data.github_id
+            new_owner = data.get('github_id')
+
+            try:
+                repositories = Repository.objects.filter(owner=old_owner)
+                students = Student.objects.filter(github_id=old_owner)
+                student_tabs = StudentTab.objects.filter(github_id=old_owner)
+                account = Account.objects.filter(github_id=old_owner)
+                github_issues = GithubIssues.objects.filter(
+                    github_id=old_owner)
+                github_overview = GithubOverview.objects.filter(
+                    github_id=old_owner)
+                github_pulls = GithubPulls.objects.filter(github_id=old_owner)
+                github_repo_commit_files = GithubRepoCommitFiles.objects.filter(
+                    github_id=old_owner)
+                github_repo_commits = GithubRepoCommits.objects.filter(
+                    github_id=old_owner)
+                github_repo_commits2 = GithubRepoCommits.objects.filter(
+                    author_github=old_owner)
+                github_repo_contributors = GithubRepoContributor.objects.filter(
+                    github_id=old_owner)
+                github_repo_contributors2 = GithubRepoContributor.objects.filter(
+                    owner_id=old_owner)
+                github_repo_stats = GithubRepoStats.objects.filter(
+                    github_id=old_owner)
+                github_repo_stats_yymm = GithubRepoStatsyymm.objects.filter(
+                    github_id=old_owner)
+                github_scores = GithubScore.objects.filter(github_id=old_owner)
+                print(github_scores)
+                github_stars = GithubStars.objects.filter(github_id=old_owner)
+                github_stats_yymm = GithubStatsYymm.objects.filter(
+                    github_id=old_owner)
+                github_user_followings = GithubUserFollowing.objects.filter(
+                    github_id=old_owner)
+                github_user_followings2 = GithubUserFollowing.objects.filter(
+                    following_id=old_owner)
+                github_user_starreds = GithubUserStarred.objects.filter(
+                    github_id=old_owner)
+                github_user_scoretable = GitHubScoreTable.objects.filter(
+                    github_id=old_owner)
+
+                repositories.update(owner=new_owner)
+                students.update(github_id=new_owner)
+                student_tabs.update(github_id=new_owner)
+                account.update(github_id=new_owner)
+                github_issues.update(github_id=new_owner)
+                github_overview.update(github_id=new_owner)
+                github_pulls.update(github_id=new_owner)
+                github_repo_commit_files.update(github_id=new_owner)
+                github_repo_commits.update(github_id=new_owner)
+                github_repo_commits2.update(author_github=new_owner)
+                github_repo_contributors.update(github_id=new_owner)
+                github_repo_contributors2.update(owner_id=new_owner)
+                github_repo_stats.update(github_id=new_owner)
+                github_repo_stats_yymm.update(github_id=new_owner)
+                github_stars.update(github_id=new_owner)
+                github_stats_yymm.update(github_id=new_owner)
+                github_user_starreds.update(github_id=new_owner)
+                github_user_scoretable.update(github_id=new_owner)
+                github_user_followings.update(github_id=new_owner)
+                github_user_followings2.update(following_id=new_owner)
+
+                for score in github_scores:
+                    year = score.year
+                    new_yid = f"{year}{new_owner}"
+
+                    score.delete()
+                    GithubScore.objects.create(
+                        yid=new_yid,
+                        github_id=new_owner,
+                        year=score.year,
+                        excellent_contributor=score.excellent_contributor,
+                        best_repo=score.best_repo,
+                        guideline_score=score.guideline_score,
+                        code_score=score.code_score,
+                        other_project_score=score.other_project_score,
+                        contributor_score=score.contributor_score,
+                        star_score=score.star_score,
+                        contribution_score=score.contribution_score,
+                        star_count=score.star_count,
+                        commit_count=score.commit_count,
+                        pr_count=score.pr_count,
+                        issue_count=score.issue_count,
+                        star_owner_count=score.star_owner_count,
+                        fork_owner_count=score.fork_owner_count,
+                        score_10000L_sub=score.score_10000L_sub,
+                        score_10000L_add=score.score_10000L_add,
+                        score_10000L_sum=score.score_10000L_sum,
+                        score_50C=score.score_50C,
+                        score_pr_issue=score.score_pr_issue,
+                        guideline_score_v2=score.guideline_score_v2,
+                        repo_score_sub=score.repo_score_sub,
+                        repo_score_add=score.repo_score_add,
+                        repo_score_sum=score.repo_score_sum,
+                        score_star=score.score_star,
+                        score_fork=score.score_fork,
+                        score_other_repo_sub=score.score_other_repo_sub,
+                        score_other_repo_add=score.score_other_repo_add,
+                        score_other_repo_sum=score.score_other_repo_sum,
+                        additional_score_sub=score.additional_score_sub,
+                        additional_score_add=score.additional_score_add,
+                        additional_score_sum=score.additional_score_sum
+                    )
+            except Exception as e:
+                print(e)
+                return Response({"status": "fail", "message": "github ID 수정 중 오류 발생"})
+        else:
+            return Response(get_fail_res("기존 github id와 동일합니다."))
         res = {'status': 'success'}
         return Response(res)

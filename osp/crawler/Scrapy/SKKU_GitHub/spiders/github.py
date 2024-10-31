@@ -484,6 +484,7 @@ class GithubSpider(scrapy.Spider):
         )
 
     def parse_repo_page(self, res):
+        print("parse_repo_page")
         soup = BeautifulSoup(res.body, 'html.parser')
         github_id = res.meta['github_id']
         repo_name = res.meta['repo_name']
@@ -523,7 +524,9 @@ class GithubSpider(scrapy.Spider):
                 repo_data['contributors_count'] = 1
         else:
             repo_data['contributors_count'] = 1
-        repo_data['readme'] = not soup.select_one('div#readme') is None
+        repo_data['readme'] = not soup.select_one('a[title="README.md"]') is None
+        print(repo_name)
+        print(repo_data['readme'])
         repo_data['commits_count'] = 0
         try:
             div_elements = soup.find_all('div', class_='d-flex gap-2')

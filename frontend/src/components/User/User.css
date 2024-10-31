@@ -73,11 +73,16 @@
       }
     }
     .info_dropdown .btn {
-      background-color: #eaeaea !important;
-      border: #eaeaea;
-      color: black;
+      border: 1px solid var(--sub-border-color);
+      background-color: var(--sub-border-color);
+      color: var(--main-black);
       font-family: 'nanumfont_Regular';
       font-size: 18px;
+    }
+    .info_dropdown .btn:hover {
+      background-color: var(--main-selected-color);
+      border: 1px solid var(--main-selected-color);
+      color: var(--main-white);
     }
     .info_username {
       padding: 0px 10px;
