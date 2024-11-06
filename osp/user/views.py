@@ -631,15 +631,10 @@ def get_commit_repos(github_id):
 class ProfileInfoView(APIView):
     def get_validation(self, request, status, errors, username):
         user = request.user
-        authenticated_user_id = user.id
-        print(authenticated_user_id)
-        print(username)
         if not user.is_authenticated:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
-        elif authenticated_user_id != username:
-            print(authenticated_user_id)
-            print(username)
+        elif str(user) != username:
             errors["require_login"] = "잘못된 id에 대한 요청입니다."
             status = 'fail'
         else:
