@@ -24,7 +24,7 @@ from team.serializers import TeamMemberSerializer, TeamSerializer
 from team.utils import is_teammember
 from user.models import Account, AccountPrivacy
 from user.serializers import AccountPrivacySerializer
-
+from rest_framework import status as http_status
 
 class TableBoardView(APIView):
     '''
@@ -82,6 +82,13 @@ class TableBoardView(APIView):
         # Request Validation
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             print(errors)
@@ -425,7 +432,14 @@ class UserArticlesView(APIView):
         # Request Validation
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
-
+        
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(f'UserArticlesView validation error')
@@ -496,6 +510,13 @@ class UserCommentsView(APIView):
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
 
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(f'UserCommentsView validation error')
@@ -564,6 +585,13 @@ class UserScrapArticlesView(APIView):
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
 
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(f'UserScrapArticlesView validation error')
@@ -781,6 +809,13 @@ class NoticeView(APIView):
         # Request Validation
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1530,6 +1565,13 @@ class ArticleFileView(APIView):
         # Request Validation
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'

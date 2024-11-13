@@ -57,7 +57,7 @@ from user.models import (Account, AccountPrivacy, DevType, GithubScore,
                          GitHubScoreTable, GithubStatsYymm, StudentTab)
 
 from user.serializers import GithubScoreResultSerializer
-
+from rest_framework import status as http_status
 
 class UserAccountView(APIView):
 
@@ -79,6 +79,13 @@ class UserAccountView(APIView):
         # Request Validation
         status, errors \
             = self.get_validation(request, status, errors)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -141,6 +148,13 @@ class GuidelineView(APIView):
         status, errors \
             = self.get_validation(request, status, errors, username)
 
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+
         if status == 'fail':
             res = {'status': status, 'errors': errors}
             return Response(res)
@@ -194,21 +208,20 @@ class GuidelineView(APIView):
 
 
 class ProfileMainView(APIView):
-    def get_validation(self, request, username):
+    def get_validation(self, request, errors, username):
         user = request.user
         status = "fail"
-        errors = None
         if not user.is_authenticated:
-            errors = "require_login"
+            errors["require_login"] = "로그인이 필요합니다."
         else:
             try:
                 user = User.objects.get(username=username)
                 status = "success"
             except User.DoesNotExist:
-                errors = "user_not_found"
+                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
             except Exception as e:
                 logging.exception(f'ProfileMainView undefined_exception: {e}')
-                errors = "undefined_exception"
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다." 
         return status, errors
 
     def get(self, request, username):
@@ -218,7 +231,14 @@ class ProfileMainView(APIView):
         status = 'success'
 
         # Request Validation
-        status, errors = self.get_validation(request, username)
+        status, errors = self.get_validation(request, errors, username)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             return Response(get_fail_res(errors))
@@ -273,6 +293,13 @@ class ProfileMainView(APIView):
 
         # Request Validation
         errors = self.post_validation(request, username)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if errors:
             res = {'status': status, 'errors': errors}
@@ -342,6 +369,13 @@ class UserInterestTagListView(APIView):
         # Request Validation
         status, errors \
             = self.get_validation(request, status, errors, username)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -416,6 +450,13 @@ class UserInterestTagUpdateView(APIView):
         status, message, errors \
             = self.post_validation(request, status, message, errors)
 
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+
         if status == 'fail':
             res = {'status': status, 'errors': errors}
             return Response(res)
@@ -483,6 +524,16 @@ class UserLangTagUpdateView(APIView):
         errors = {}
         message = ''
         status = 'success'
+
+        status, message, errors \
+            = self.post_validation(request, status, message, errors)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         try:
             user_account = Account.objects.get(user=request.user)
@@ -554,6 +605,13 @@ class ProfileActivityView(APIView):
         # Request Validation
         status, errors \
             = self.get_validation(request, status, errors, username)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -659,6 +717,13 @@ class ProfileInfoView(APIView):
         # Request Validation
         status, errors \
             = self.get_validation(request, status, errors, username)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
@@ -1290,6 +1355,13 @@ class AccountPrivacyView(APIView):
 
         # Request Validation
         errors = self.post_validation(request, username)
+
+        if "require_login" in errors:
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': errors}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if errors:
             res = {'status': status, 'errors': errors}
