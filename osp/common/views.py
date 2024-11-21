@@ -127,7 +127,7 @@ class GitHubLoginView(APIView):
                 data['personal_email_id'], data['personal_email_domain'] = split_email(
                     user_info['email'], False)
 
-                return Response({"status": "success", "message": "회원가입 페이지로 이동합니다.", "data": data}, status=status.HTTP_200_OK)
+                return Response({"status": "success", "message": "현재 GitHub ID로 로그인할 수 없습니다.\nGitHub ID 변경을 원하신다면 \"확인\"을, 회원가입을 원하신다면 \"취소\"를 눌러주시기 바랍니다.", "data": data}, status=status.HTTP_200_OK)
         except Exception as e:
             logging.exception(f'Account Proccess Exception: {e}')
             return Response(get_fail_res("계정을 확인할 수 없습니다."))

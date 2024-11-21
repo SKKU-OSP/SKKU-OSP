@@ -7,8 +7,6 @@ import ReactGA from 'react-ga4';
 import classes from './Login.module.css';
 import AuthContext from '../../utils/auth-context';
 import LoginErrorModal from './LoginErrorModal';
-import GithubLoginModal from './GithubLoginModal';
-import LoginSelectModal from './LoginSelectModal';
 import { tokenLoader, setExpiration } from '../../utils/auth';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
@@ -20,8 +18,6 @@ function Login() {
   const location = useLocation();
   const [error, setError] = useState(location.state?.error);
   const [show, setShow] = useState(false);
-  const [githubModalShow, setGithubModalShow] = useState(false);
-  const [selectModalShow, setSelectModalShow] = useState(false);
   const navigate = useNavigate();
   const usernameInputRef = useRef();
   const passwordInputRef = useRef();
@@ -68,35 +64,7 @@ function Login() {
 
   const handleGithubLogin = () => {
     console.log('handleGithubLogin');
-    setSelectModalShow(true);
-    // setGithubModalShow(true);
-  };
-
-  const handleDirectGithubLogin = () => {
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${client_id}`;
-  };
-
-  const handleGithubIdChange = () => {
-    setSelectModalShow(false);
-    setGithubModalShow(true);
-  };
-
-  const handleGithubIdSubmit = async (studentId, githubId) => {
-    try {
-      const response = await axios.post(`${domain_url}/accounts/github_id/change/`, {
-        student_data: studentId,
-        github_id: githubId
-      });
-      const res = response.data;
-      if (res.status === 'success') {
-        alert('GitHub ID가 성공적으로 변경되었습니다.\n다시 로그인 해주시기 바랍니다.');
-      } else {
-        alert(res.message);
-      }
-    } catch (error) {
-      console.error('GitHub ID 변경 실패', error);
-      alert('서버 요청 중 오류가 발생했습니다.');
-    }
   };
 
   return (
@@ -141,23 +109,9 @@ function Login() {
             LOGIN
           </button>
           {github_login_url ? (
-            <>
-              <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
-                <BsGithub /> Start with GitHub
-              </button>
-              <LoginSelectModal
-                show={selectModalShow}
-                onClose={() => setSelectModalShow(false)}
-                onDirectLogin={handleDirectGithubLogin}
-                onIdChange={handleGithubIdChange}
-              />
-
-              <GithubLoginModal
-                show={githubModalShow}
-                onShowGithubLoginModal={setGithubModalShow}
-                onSubmitGithubId={handleGithubIdSubmit}
-              />
-            </>
+            <button type="button" className="btn btn-dark mb-2" onClick={handleGithubLogin}>
+              <BsGithub /> Start with GitHub
+            </button>
           ) : (
             <div>죄송합니다. 현재 회원가입 및 GitHub 로그인이 불가능합니다.</div>
           )}
