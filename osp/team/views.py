@@ -26,6 +26,7 @@ from user.models import Account, AccountPrivacy, User
 from user.serializers import AccountWithInterestSerializer
 from rest_framework import status as http_status
 
+
 class TeamInviteOnTeamboardView(APIView):
 
     def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
@@ -543,7 +544,7 @@ class TeamCreateView(APIView):
                 f'TeamApplicationList validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
-        
+
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(
@@ -1580,12 +1581,12 @@ class TeamsOfUserListView(APIView):
         # Request Validation
         status, error = self.get_validation(request)
 
-        # if status == 'fail':
-        #     message = 'validation 과정 중 오류가 발생하였습니다.'
-        #     logging.exception(
-        #         f'TeamApplicationList validation error')
-        #     res = {'status': status, 'message': message, 'errors': error}
-        #     return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        if status == 'fail':
+            message = 'validation 과정 중 오류가 발생하였습니다.'
+            logging.exception(
+                f'TeamApplicationList validation error')
+            res = {'status': status, 'message': message, 'errors': error}
+            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
 
         if status == 'fail':
             return Response(get_fail_res(error))
@@ -1652,14 +1653,13 @@ class TeamApplicationListView(APIView):
                 f'TeamApplicationList validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
-        
+
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(
                 f'TeamApplicationList validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res)
-            
 
         # Transactions
         user = request.user

@@ -7,8 +7,11 @@ import { FaTrophy } from 'react-icons/fa';
 
 import AuthContext from '../utils/auth-context';
 import classes from './ChallengePage.module.css';
+import { tokenRemover } from '../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
+const domain_url = import.meta.env.VITE_SERVER_URL;
+const logout_url = `${domain_url}/accounts/logout/`;
 
 const ChallengePage = () => {
   const navigate = useNavigate();
@@ -18,10 +21,21 @@ const ChallengePage = () => {
 
   const updateUrl = serverUrl + `/challenge/api/update/${userId}/`;
   const Update = async () => {
-    const response = await axios.get(updateUrl);
-    const res = response.data;
-    if (res.status === 'success') {
-      console.log(res.status);
+    try {
+      const response = await axios.get(updateUrl);
+      const res = response.data;
+      if (res.status === 'success') {
+        console.log(res.status);
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        const res = await axios.get(logout_url);
+        console.log(res);
+        tokenRemover();
+        alert('로그인이 만료되었습니다. 로그인 화면으로 이동합니다.');
+        navigate('/accounts/login');
+        return;
+      }
     }
   };
 
