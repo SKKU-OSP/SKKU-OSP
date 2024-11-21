@@ -15,7 +15,7 @@ export default function TeamApplication_Container({ iconSize, showTeamApp, setSh
 
   const checkNewAlert = async () => {
     try {
-      const url = server_url + '/team/api/applications';
+      const url = server_url + '/team/api/applications/';
       const response = await axios.get(url, getAuthConfig());
       const res = response.data;
       if (res.data.received.length > 0) {
