@@ -33,7 +33,7 @@ class TeamInviteOnTeamboardView(APIView):
         team_id = request.GET.get('team_id')
         user = request.user
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -102,7 +102,7 @@ class TeamInviteOnTeamboardView(APIView):
         invite_msg = request.data.get('invite_msg', False)
         user = request.user
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -241,7 +241,7 @@ class TeamInviteOnRecommendView(APIView):
 
     def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -309,7 +309,7 @@ class TeamInviteOnRecommendView(APIView):
         invite_msg = request.data.get('invite_msg', False)
         user = request.user
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -438,7 +438,7 @@ class TeamCreateView(APIView):
     def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -490,7 +490,7 @@ class TeamCreateView(APIView):
         team_description = ' '.join(team_description.split())
         team_image = request.FILES.get('team_image', False)
 
-        if not request.user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -637,7 +637,7 @@ class TeamUpdateView(APIView):
         account = Account.objects.get(user=user)
         target_team_id = request.GET.get('target_team_id')
 
-        if not request.user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -743,7 +743,7 @@ class TeamUpdateView(APIView):
 
         team_image = request.FILES.get('team_image', False)
 
-        if not request.user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
             return status, errors, valid_data
@@ -920,7 +920,7 @@ class TeamApplyView(APIView):
         valid_data = {}
         user = request.user
         article_id = kwargs.get('article_id')
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -1002,7 +1002,7 @@ class TeamApplyView(APIView):
         status, errors, valid_data = 'success', {}, {}
         user = request.user
         article_id = kwargs.get('article_id')
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -1113,7 +1113,7 @@ class TeamOutView(APIView):
         account = Account.objects.get(user=user)
         team_name = request.data.get('team_name')
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -1206,7 +1206,7 @@ class TeamInviteUpdateView(APIView):
         target_teaminvitemessage_id = request.data.get(
             'target_teaminvitemessage_id')
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -1292,7 +1292,7 @@ class TeamInviteDeleteView(APIView):
         target_teaminvitemessage_id = request.data.get(
             'target_teaminvitemessage_id')
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -1371,7 +1371,7 @@ class TeamApplyUpdateView(APIView):
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -1453,7 +1453,7 @@ class TeamApplyDeleteView(APIView):
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -1568,7 +1568,7 @@ class TeamsOfUserListView(APIView):
     def get_validation(self, request):
         status = 'success'
         error = None
-        if not request.user.is_authenticated:
+        if not request.auth:
             status = 'fail'
             error = "require_login"
 
@@ -1633,7 +1633,7 @@ class TeamApplicationListView(APIView):
     def get_validation(self, request):
         status, errors = "success", {}
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
