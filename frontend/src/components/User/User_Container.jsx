@@ -39,10 +39,10 @@ function User_Container() {
     getProfileInfo();
   }, [username, isChange]);
 
-  useEffect(()=> {
+  useEffect(() => {
     const getAccountPrivacy = async () => {
       try {
-        const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/'+ username + '/';
+        const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/' + username + '/';
         const response = await axios.get(AccountPrivacyGetUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
@@ -51,9 +51,17 @@ function User_Container() {
       } catch (error) {}
     };
     getAccountPrivacy();
-  }, [])
+  }, []);
 
-  return <User_Presenter userInfo={userInfo} isEdit={isEdit} isChange={isChange} setIsChange={setIsChange} open_lvl={open_lvl}/>;
+  return (
+    <User_Presenter
+      userInfo={userInfo}
+      isEdit={isEdit}
+      isChange={isChange}
+      setIsChange={setIsChange}
+      open_lvl={open_lvl}
+    />
+  );
 }
 
 export default User_Container;
