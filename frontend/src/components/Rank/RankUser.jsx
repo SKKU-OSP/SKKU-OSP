@@ -24,9 +24,9 @@ function RankUser() {
 
   // Column 세팅 값
   const columnDefs = [
-    { field: 'id', width: 130, hide: true },
     { field: 'rank', width: 80 },
     { field: 'name', width: 100, cellClass: 'rank-cell link-cell' },
+    { field: 'id', width: 130, headerName: '학번' },
     { field: 'dept', width: 120, headerName: '학과' },
     { field: 'absence_label', width: 70, headerName: '재/휴학' },
     { field: 'plural_major_label', width: 90, headerName: '전공구분' },
@@ -71,6 +71,7 @@ function RankUser() {
         const res = response.data;
         if (res.status === 'success') {
           const rankedData = calculateRank(res.data.score_table);
+          console.log(rankedData)
           setRowData(rankedData);
           setYears(res.data.years);
           setError(null);
