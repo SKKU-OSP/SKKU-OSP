@@ -43,6 +43,11 @@ function RankRepo() {
       width: 100
     },
     {
+      field: 'contribCount',
+      headerName: '기여학생 수',
+      width: 70
+    },
+    {
       field: 'contrib',
       headerName: '기여학생',
       cellRenderer: cellRenderer,
@@ -69,8 +74,13 @@ function RankRepo() {
         const url = serverDomain + '/rank/api/repo/';
         const response = await axios.get(url, getAuthConfig());
         const res = response.data;
+        const addContribCount = res.data.repos.map((item) => ({
+          ...item,
+          contribCount: item.contribs.length,
+        }));
+        console.log(addContribCount);
         if (res.status === 'success') {
-          setRowData(res.data.repos);
+          setRowData(addContribCount);
         } else {
           console.log(res.message);
           setError(res.message);

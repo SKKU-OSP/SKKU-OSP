@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -9,10 +10,12 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Badge from 'react-bootstrap/Badge';
 
-import { getAuthConfig } from '../../../utils/auth';
+import { getAuthConfig, tokenRemover } from '../../../utils/auth';
 import './TeamApplication.css';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
+const domain_url = import.meta.env.VITE_SERVER_URL;
+const logout_url = `${domain_url}/accounts/logout/`;
 const applyUrl = serverUrl + '/team/api/team-apply-update/';
 const deleteUrl = serverUrl + '/team/api/team-apply-delete/';
 const TeamApplication = ({ handleClose, show }) => {
@@ -22,6 +25,7 @@ const TeamApplication = ({ handleClose, show }) => {
   const [sent, setSent] = useState([]);
   const [receivedLength, setReceivedLength] = useState(0);
   const [sentLength, setSentLength] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getApplications = async () => {
@@ -39,6 +43,14 @@ const TeamApplication = ({ handleClose, show }) => {
           setSentLength(res.data.sent.length);
         }
       } catch (error) {
+        if (error.response?.status === 401) {
+          const res = await axios.get(logout_url);
+          console.log(res);
+          tokenRemover();
+          alert('로그인이 만료되었습니다. 로그인 화면으로 이동합니다.');
+          navigate('/accounts/login');
+          return;
+        }
         console.log(error);
       }
     };
@@ -220,7 +232,7 @@ const TeamApplication = ({ handleClose, show }) => {
       <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            <h5 style={{fontFamily: "nanumfont_ExtraBold"}}>팀 지원서 목록</h5>
+            <h5 style={{ fontFamily: 'nanumfont_ExtraBold' }}>팀 지원서 목록</h5>
           </Modal.Title>
         </Modal.Header>
 
