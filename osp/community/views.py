@@ -46,7 +46,7 @@ class TableBoardView(APIView):
             board = Board.objects.get(name=board_name)
             valid_data['board'] = board
             if board.board_type == 'Team':
-                if not request.user.is_authenticated:
+                if not request.auth:
                     errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
                     status = 'fail'
                     return status, message, errors, valid_data
@@ -422,7 +422,7 @@ class UserArticlesView(APIView):
         valid_data = {}
 
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -499,7 +499,7 @@ class UserCommentsView(APIView):
         valid_data = {}
 
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -574,7 +574,7 @@ class UserScrapArticlesView(APIView):
         valid_data = {}
 
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -789,7 +789,7 @@ class NoticeView(APIView):
         errors = {}
         valid_data = {}
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -1536,7 +1536,7 @@ class ArticleFileView(APIView):
         try:
             article = Article.objects.get(id=article_id)
             if article.board.board_type == 'Team':
-                if not request.user.is_authenticated:
+                if not request.auth:
                     errors["require_login"] = "팀게시판에 접근하기 위해서는 로그인이 필요합니다."
                     status = 'fail'
                     return status, message, errors, valid_data

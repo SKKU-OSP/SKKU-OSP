@@ -64,7 +64,7 @@ class UserAccountView(APIView):
     def get_validation(self, request, status, errors):
         user = request.user
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -123,7 +123,7 @@ class GuidelineView(APIView):
     def get_validation(self, request, status, errors, username):
         user = request.user
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         else:
@@ -211,7 +211,7 @@ class ProfileMainView(APIView):
     def get_validation(self, request, errors, username):
         user = request.user
         status = "fail"
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
         else:
             try:
@@ -270,7 +270,7 @@ class ProfileMainView(APIView):
     def post_validation(self, request, username):
         errors = {}
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
         else:
             try:
@@ -343,7 +343,7 @@ class UserInterestTagListView(APIView):
 
     def get_validation(self, request, status, errors, username):
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -434,7 +434,7 @@ class UserInterestTagUpdateView(APIView):
 
     def post_validation(self, request, status, message, errors):
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         return status, message, errors
@@ -512,7 +512,7 @@ class UserLangTagUpdateView(APIView):
 
     def post_validation(self, request, status, message, errors):
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         return status, message, errors
@@ -578,7 +578,7 @@ class ProfileActivityView(APIView):
     def get_validation(self, request, status, errors, username):
         user = request.user
 
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
 
@@ -689,7 +689,7 @@ def get_commit_repos(github_id):
 class ProfileInfoView(APIView):
     def get_validation(self, request, status, errors, username):
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
             status = 'fail'
         elif str(user) != username:
@@ -1331,7 +1331,7 @@ class AccountPrivacyView(APIView):
     def post_validation(self, request, username):
         errors = {}
         user = request.user
-        if not user.is_authenticated:
+        if not request.auth:
             errors["require_login"] = "로그인이 필요합니다."
         else:
             try:
@@ -1411,7 +1411,7 @@ class QnACreateView(APIView):
     def post(self, request):
         res = {'status': 'success', 'message': '', 'data': None}
 
-        if not request.user.is_authenticated:
+        if not request.auth:
             res['status'] = 'error'
             res['message'] = 'Authentication required'
             return Response(res, status=status.HTTP_401_UNAUTHORIZED)
