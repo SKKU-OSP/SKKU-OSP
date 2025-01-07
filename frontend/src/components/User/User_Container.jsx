@@ -41,12 +41,14 @@ function User_Container() {
     const getAccountPrivacy = async () => {
       try {
         const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/' + username + '/';
-        const response = await axios.get(AccountPrivacyGetUrl, getAuthConfig());
+        const response = await axiosInstance.get(AccountPrivacyGetUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setOpen_lvl(res.data.open_lvl);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.error(error);
+      }
     };
     getAccountPrivacy();
   }, []);

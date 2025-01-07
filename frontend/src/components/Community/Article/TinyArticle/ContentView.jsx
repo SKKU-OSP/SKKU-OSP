@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { useNavigate } from 'react-router-dom';
 import { FaBookmark, FaRegBookmark, FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 import { BsThreeDotsVertical, BsChevronLeft, BsPencilFill, BsTrash } from 'react-icons/bs';
@@ -87,7 +88,7 @@ function ContentView(props) {
   const onDelete = async () => {
     if (confirm('게시글을 삭제하시겠습니까?')) {
       try {
-        const response = await axios.post(delete_url, { article_id: article.id }, getAuthConfig());
+        const response = await axiosInstance.post(delete_url, { article_id: article.id }, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           console.log(res.errors);
@@ -108,7 +109,7 @@ function ContentView(props) {
       return;
     } else {
       try {
-        const response = await axios.post(like_url, { article_id: article.id }, getAuthConfig());
+        const response = await axiosInstance.post(like_url, { article_id: article.id }, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           alert(res.message);
@@ -130,7 +131,7 @@ function ContentView(props) {
       return;
     } else {
       try {
-        const response = await axios.post(scrap_url, { article_id: article.id }, getAuthConfig());
+        const response = await axiosInstance.post(scrap_url, { article_id: article.id }, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           alert(res.message);

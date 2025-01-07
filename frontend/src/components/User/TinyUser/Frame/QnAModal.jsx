@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
@@ -114,7 +115,7 @@ function QnAModal(props) {
         formData.append(`image${index + 1}`, image);
       });
 
-      const response = await axios.post(`${server_url}/user/api/qna/create/`, formData, config);
+      const response = await axiosInstance.post(`${server_url}/user/api/qna/create/`, formData, config);
 
       if (response.status === 201) {
         window.alert('등록이 완료되었습니다!');

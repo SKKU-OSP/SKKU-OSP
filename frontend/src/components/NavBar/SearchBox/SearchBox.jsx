@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import Select from 'react-select';
 import { BsSearch, BsHash, BsXLg } from 'react-icons/bs';
@@ -113,7 +114,7 @@ function SearcherBox() {
     const getTags = async () => {
       try {
         const tagsUrl = server_url + '/tag/api/list/';
-        const response = await axios.get(tagsUrl, getAuthConfig());
+        const response = await axiosInstance.get(tagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           const tags = res.data.tags;

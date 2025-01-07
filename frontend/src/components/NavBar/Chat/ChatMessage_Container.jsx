@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import ChatMessage_Presenter from './ChatMessage_Presenter';
 
@@ -20,7 +21,7 @@ export default function ChatMessage_Container({ iconSize }) {
   const checkNewMessage = async () => {
     try {
       const url = server_url + '/message/api/chat/new/';
-      const response = await axios.get(url, getAuthConfig());
+      const response = await axiosInstance.get(url, getAuthConfig());
       const res = response.data;
       if (res.data.show_new_message) {
         setNewMessage(true);

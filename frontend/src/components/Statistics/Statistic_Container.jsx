@@ -4,6 +4,7 @@ import CaseSelectors from './CaseSelectors';
 import StatisticMain from './StatisticMain';
 
 import axios from 'axios';
+import axiosInstance from '../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../utils/auth';
 
 const serverDomain = import.meta.env.VITE_SERVER_URL;
@@ -25,7 +26,7 @@ function Statistic_Container() {
   useEffect(() => {
     const getStatisticData = async () => {
       try {
-        const response = await axios.get(chartDataUrl, getAuthConfig());
+        const response = await axiosInstance.get(chartDataUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           console.log(res.status, res.data);
