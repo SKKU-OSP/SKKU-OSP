@@ -1021,7 +1021,7 @@ class ArticleAPIView(APIView):
         try:
             article = valid_data['article']
 
-            # 익명 또는 글쓴이가 아닌 유저가 조회할 때, 게시글 조회수 증가
+            # 익명 또는 탈퇴한 유저의 글 또는는 글쓴이가 아닌 유저가 조회할 때, 게시글 조회수 증가
             if request.user.is_anonymous or not article.writer or article.writer.user_id != request.user.id:
                 article.view_cnt += 1
             article.save()
