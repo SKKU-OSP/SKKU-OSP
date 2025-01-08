@@ -25,16 +25,15 @@ export const setNavigate = (navigateFunction) => {
 };
 
 // Response Interceptor
-// 401 에러 발생 시 로그아웃 요청 후 토큰 제거
+// 401 에러 발생 시 토큰 제거 후 로그아웃 요청청
 axiosInstance.interceptors.response.use(
   (response) => response, // 성공적인 응답은 그대로 반환
   async (error) => {
-    console.log('인터셉터 에러 발생');
     if (error.response?.status === 401) {
       try {
         // Interceptor를 적용하지 않는 인스턴스로 로그아웃 요청
-        await plainAxiosInstance.get(logout_url);
         tokenRemover(); // 토큰 제거
+        await plainAxiosInstance.get(logout_url);
         alert('로그인이 만료되었습니다. 로그인 화면으로 이동합니다.');
         navigate('/accounts/login'); // React Router로 로그인 화면 이동
       } catch (logoutError) {
