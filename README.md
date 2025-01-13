@@ -1,4 +1,4 @@
-# SOSD (Square of Software Developers)
+# SOSD (Square for Open Source Developers)
 ## 성균관대학교 소프트웨어융합대학 학생들을 위한 오픈소스플랫폼 커뮤니티
 
 ○ 본 개발 결과물은 과학기술정보통신부 및 정보통신기획평가원에서 지원하는 『소프트웨어중심대학』 사업의 결과물입니다.<br>
