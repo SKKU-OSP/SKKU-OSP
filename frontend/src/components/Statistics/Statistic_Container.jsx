@@ -7,11 +7,13 @@ import axios from 'axios';
 import axiosInstance from '../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../utils/auth';
 
+import { useCaseNumStore } from '../../stores/statistics/statisticsStore';
+
 const serverDomain = import.meta.env.VITE_SERVER_URL;
 const chartDataUrl = `${serverDomain}/home/api/statistic/`;
 
 function Statistic_Container() {
-  const [caseNum, setCaseNum] = useState(0);
+  //   const [caseNum, setCaseNum] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [chartData, setChartData] = useState(null);
   const [overviewData, setOverviewData] = useState(null);
@@ -22,6 +24,8 @@ function Statistic_Container() {
   const [userData, setUserData] = useState([]);
   const [years, setYears] = useState([]);
   const [error, setError] = useState(null);
+
+  const { caseNum } = useCaseNumStore();
 
   useEffect(() => {
     const getStatisticData = async () => {
@@ -49,9 +53,9 @@ function Statistic_Container() {
       const findOverview = chartData.annual_overview.find((obj) => obj.case_num === caseNum);
       const findDetail = chartData.annual_total.find((obj) => obj.case_num === caseNum);
       const findDist = chartData.annual_data.factor.find((obj) => obj.case_num === caseNum);
-      findDist.depts = chartData.depts;
-      findDist.sids = chartData.sids;
-      findDist.factors = chartData.factors;
+      //   findDist.depts = chartData.depts;
+      //   findDist.sids = chartData.sids;
+      //   findDist.factors = chartData.factors;
       setOverviewData(findOverview);
       setFactorsClassNum(findOverview.class_num);
       setFactorLevelStep(findOverview.level_step);
@@ -61,16 +65,20 @@ function Statistic_Container() {
     }
   }, [chartData, caseNum]);
 
-  const handleCaseNum = (targetCase) => {
-    setCaseNum(targetCase);
-  };
+  //   const handleCaseNum = (targetCase) => {
+  //     setCaseNum(targetCase);
+  //   };
+
+  //   console.log('overviewData:', overviewData);
+  //   console.log('chartData:', chartData);
+  //   console.log('caseNum:', caseNum);
 
   return (
     <>
       {error && <div>{error}</div>}
       {!error && (
         <>
-          <CaseSelectors onSetCaseNum={handleCaseNum} />
+          <CaseSelectors />
           <AnnualOverviews overviewData={overviewData} isReady={isReady} years={years} />
           <StatisticMain
             detailData={detailData}
