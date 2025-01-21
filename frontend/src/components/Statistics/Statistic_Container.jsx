@@ -1,18 +1,24 @@
+import AnnualOverviews from './AnnualOverviews';
+import CaseSelectors from './CaseSelectors';
+import StatisticMain from './StatisticMain';
+
 import { useChartData } from '../../api/reactQuery/statistics/useChartData';
 import { useChartDataStore } from '../../stores/statistics/chartDataStore';
 
 function Statistic_Container() {
-  const { data, isLoading } = useChartData();
-  const { chartData } = useChartDataStore();
+  const { isLoading, isError } = useChartData();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading...</div>;
+  // }
 
-  console.log('chartData: ', chartData);
-  console.log('data: ', data);
-
-  return <div>{JSON.stringify(chartData)}</div>;
+  return (
+    <>
+      <CaseSelectors />
+      <AnnualOverviews />
+      <StatisticMain />
+    </>
+  );
 }
 
 export default Statistic_Container;

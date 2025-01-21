@@ -1,8 +1,25 @@
+import { use } from 'react';
 import { create } from 'zustand';
 
 export const useChartDataStore = create((set) => ({
-  chartData: null,
-  setChartData: (data) => set({ chartData: data })
+  chartData: {
+    annual_data: { factor: [] },
+    annual_overview: [],
+    annual_total: [],
+    depts: [],
+    factors: [],
+    sids: [],
+    student_data: {},
+    years: []
+  },
+  setChartData: (data) => set({ chartData: data }),
+
+  // caseNum에 따라 필터링된 데이터 제공
+  getOverviewData: () => {
+    const { caseNum } = useChartFilterStore.getState();
+    const { annual_overview } = get().chartData;
+    return annual_overview.filter((data) => data.caseNum === caseNum);
+  }
 }));
 
 export const useChartFilterStore = create((set) => ({

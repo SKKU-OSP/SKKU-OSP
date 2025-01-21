@@ -11,6 +11,7 @@ export const useChartData = () => {
     queryFn: getChartData
   });
 
+  // react qeury v5 에서는 onSuccess가 삭제되어 useEffect를 이용하여 전역 데이터 동기화
   React.useEffect(() => {
     if (query.data) {
       setChartData(query.data);
