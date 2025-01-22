@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { useChartFilterStore } from '../../stores/statistics/chartDataStore';
 
-function CaseSelectors(props) {
+function CaseSelectors() {
   const { absence, major, toggleAbsence, toggleMajor } = useChartFilterStore();
 
   return (
@@ -10,7 +9,7 @@ function CaseSelectors(props) {
       <Form.Check
         type="switch"
         label={`휴학생 ${absence ? '포함' : '미포함'}`}
-        onClick={() => toggleAbsence()}
+        onChange={() => toggleAbsence()}
         className="flex-switch"
         checked={absence}
       />

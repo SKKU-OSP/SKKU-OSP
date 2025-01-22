@@ -1,21 +1,22 @@
-import React from 'react';
+// import React from 'react';
 import { getChartData } from '../../endpoints/statistics/getChartData';
 import { useQuery } from '@tanstack/react-query';
-import { useChartDataStore } from '../../../stores/statistics/chartDataStore';
+import { useChartFilterStore } from '../../../stores/statistics/chartDataStore';
 
 export const useChartData = () => {
-  const { setChartData } = useChartDataStore();
+  const { caseNum } = useChartFilterStore();
 
   const query = useQuery({
     queryKey: ['chartData'],
-    queryFn: getChartData
+    queryFn: getChartData,
+    select: (data) => {
+      const overviewData = data?.annual_overview.find((item) => item.case_num === caseNum);
+      return {
+        ...data,
+        overviewData: overviewData || {}
+      };
+    }
   });
 
-  // react qeury v5 에서는 onSuccess가 삭제되어 useEffect를 이용하여 전역 데이터 동기화
-  React.useEffect(() => {
-    if (query.data) {
-      setChartData(query.data);
-    }
-  }, [query.data]);
   return query;
 };
