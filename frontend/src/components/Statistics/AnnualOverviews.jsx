@@ -2,8 +2,6 @@ import './Statistic.css';
 import OverviewChart from './Charts/OverviewChart';
 import { makeErrorJson, getChartConfig, scoreOption, noLegendOption } from '../../utils/chartOption';
 import { useChartData } from '../../api/reactQuery/statistics/useChartData';
-import { useChartFilterStore } from '../../stores/statistics/chartDataStore';
-// import { useChartFilterStore } from '../../stores/statistics/chartDataStore';
 
 function AnnualOverviews() {
   // TODO: 에러 핸들링 추가
@@ -23,6 +21,7 @@ function AnnualOverviews() {
     ];
   };
 
+  // 차트 컴포넌트에서 사용할 데이터 정리
   const viewData = [
     {
       title: '연도별 Score',
