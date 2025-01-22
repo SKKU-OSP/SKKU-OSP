@@ -226,9 +226,9 @@ const router = createBrowserRouter([
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <RouterProvider router={router}>
-    <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <RouterProvider router={router}>
       <GAListner />
-    </QueryClientProvider>
-  </RouterProvider>
+    </RouterProvider>
+  </QueryClientProvider>
 );
