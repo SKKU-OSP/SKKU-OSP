@@ -58,7 +58,7 @@ from user.models import (Account, AccountPrivacy, DevType, GithubScore,
 
 from user.serializers import GithubScoreResultSerializer
 from rest_framework import status as http_status
-
+from osp.utils import auth_validation, return_http_error_response
 class UserAccountView(APIView):
 
     def get_validation(self, request, status, errors):
@@ -211,8 +211,9 @@ class ProfileMainView(APIView):
     def get_validation(self, request, errors, username):
         user = request.user
         status = "fail"
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
+        status, errors = auth_validation(request, status, errors, username)
+        if errors:
+            return status, errors
         else:
             try:
                 user = User.objects.get(username=username)
@@ -233,12 +234,9 @@ class ProfileMainView(APIView):
         # Request Validation
         status, errors = self.get_validation(request, errors, username)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             return Response(get_fail_res(errors))
@@ -688,22 +686,15 @@ def get_commit_repos(github_id):
 
 class ProfileInfoView(APIView):
     def get_validation(self, request, status, errors, username):
-        user = request.user
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
+        status, errors = auth_validation(request, status, errors, username)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
             status = 'fail'
-        elif str(user) != username:
-            errors["require_login"] = "잘못된 id에 대한 요청입니다."
+        except:
+            errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
             status = 'fail'
-        else:
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
-                status = 'fail'
-            except:
-                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
-                status = 'fail'
 
         return status, errors
 
@@ -718,12 +709,9 @@ class ProfileInfoView(APIView):
         status, errors \
             = self.get_validation(request, status, errors, username)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             res = {'status': status, 'errors': errors}
