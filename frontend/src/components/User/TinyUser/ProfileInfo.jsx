@@ -92,10 +92,19 @@ function ProfileInfo(props) {
 
   const handleIntroChange = (event) => {
     const { name, value } = event.target;
-    setEditUserInfo({
-      ...editUserInfo,
-      [name]: value
-    });
+    const totalLines = (value.match(/\n/g) || []).length;
+    if (value.length <= 100 && totalLines <= 4) {
+      setEditUserInfo({
+        ...editUserInfo,
+        [name]: value
+      });
+    } else if (totalLines > 4) {
+      const lines = value.split('\n').slice(0, 5);
+      setEditUserInfo({
+        ...editUserInfo,
+        [name]: lines.join('\n')
+      });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -230,13 +239,19 @@ function ProfileInfo(props) {
               </a>
             </div>
             {editing ? (
-              <textarea
-                name="introduction"
-                rows="5"
-                className="info_editing-textarea"
-                value={editUserInfo.introduction}
-                onChange={handleIntroChange}
-              />
+              <div className="d-flex flex-column">
+                <textarea
+                  name="introduction"
+                  rows="5"
+                  className="info_editing-textarea"
+                  value={editUserInfo.introduction}
+                  onChange={handleIntroChange}
+                  maxLength={100}
+                />
+                <div className="text-end text-muted mt-1">
+                  <small>{editUserInfo.introduction?.length || 0}/100자</small>
+                </div>
+              </div>
             ) : (
               <div className="info_introduction">
                 {userInfo.introduction?.length > 0 ? (
