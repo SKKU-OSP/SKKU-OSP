@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import axios from 'axios';
 import axiosInstance from '../utils/axiosInterCeptor';
 import { useNavigate } from 'react-router-dom';
 import ReactGA from 'react-ga4';
@@ -25,19 +24,13 @@ const ChallengePage = () => {
       const response = await axiosInstance.get(updateUrl);
       const res = response.data;
     } catch (error) {
-      if (error.response?.status === 401) {
-        const res = await axios.get(logout_url);
-        tokenRemover();
-        alert('로그인이 만료되었습니다. 로그인 화면으로 이동합니다.');
-        navigate('/accounts/login');
-        return;
-      }
+      console.log(error);
     }
   };
 
   const url = serverUrl + `/challenge/api/list/${userId}/`;
   const getAchievements = async () => {
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
     const res = response.data;
     if (res.status === 'success') {
       setTotal(res.data.total_accounts);
@@ -49,7 +42,7 @@ const ChallengePage = () => {
 
   const KCoinUrl = `http://kingocoin-dev.cs.skku.edu:8080/api/auth/platform?name=오픈소스플랫폼`;
   const getKCoinJWT = async () => {
-    const response = await axios.get(KCoinUrl, {
+    const response = await axiosInstance.get(KCoinUrl, {
       headers: {
         'Authorization-Temp': `bearer ${JWT}`
       }
@@ -58,7 +51,7 @@ const ChallengePage = () => {
 
   const secretJWTUrl = serverUrl + `/challenge/api/secret/${userId}/`;
   const getSecretJWT = async () => {
-    const response = await axios.get(secretJWTUrl);
+    const response = await axiosInstance.get(secretJWTUrl);
     const res = response.data;
   };
 
