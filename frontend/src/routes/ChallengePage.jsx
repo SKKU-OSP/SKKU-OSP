@@ -7,11 +7,8 @@ import { FaTrophy } from 'react-icons/fa';
 
 import AuthContext from '../utils/auth-context';
 import classes from './ChallengePage.module.css';
-import { tokenRemover } from '../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
-const domain_url = import.meta.env.VITE_SERVER_URL;
-const logout_url = `${domain_url}/accounts/logout/`;
 
 const ChallengePage = () => {
   const navigate = useNavigate();
@@ -53,6 +50,8 @@ const ChallengePage = () => {
   const getSecretJWT = async () => {
     const response = await axiosInstance.get(secretJWTUrl);
     const res = response.data;
+    // TODO 추후 킹고코인 관련 코드 추가 예정정
+    // console.log(res);
   };
 
   useEffect(() => {
