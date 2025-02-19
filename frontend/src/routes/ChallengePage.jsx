@@ -50,27 +50,27 @@ const ChallengePage = () => {
     }
   };
 
-  const KCoinUrl = `http://kingocoin-dev.cs.skku.edu:8080/api/auth/platform?name=오픈소스플랫폼`
+  const KCoinUrl = `http://kingocoin-dev.cs.skku.edu:8080/api/auth/platform?name=오픈소스플랫폼`;
   const getKCoinJWT = async () => {
     const response = await axios.get(KCoinUrl, {
-      headers:{
-        "Authorization-Temp": `bearer ${JWT}`
+      headers: {
+        'Authorization-Temp': `bearer ${JWT}`
       }
-    })
-    console.log(response)
-  }
+    });
+    console.log(response);
+  };
 
   const secretJWTUrl = serverUrl + `/challenge/api/secret/${userId}/`;
   const getSecretJWT = async () => {
-    console.log("getSecretJWT")
-    console.log(username)
+    console.log('getSecretJWT');
+    console.log(username);
     const response = await axios.get(secretJWTUrl);
     const res = response.data;
-    console.log(res)
+    console.log(res);
   };
 
   useEffect(() => {
-    if (userId !== null) {
+    if (username !== null) {
       Update();
       getAchievements();
       getSecretJWT();
