@@ -2,15 +2,11 @@ import './Statistic.css';
 import OverviewChart from './Charts/OverviewChart';
 import { makeErrorJson, getChartConfig, scoreOption, noLegendOption } from '../../utils/chartOption';
 import { useChartData } from '../../api/reactQuery/statistics/useChartData';
+import LoaderIcon from 'react-loader-icon';
 
 function AnnualOverviews() {
   // TODO: 에러 핸들링 추가
-  const { data, isLoading, isError } = useChartData();
-
-  // TODO: 로딩 컴포넌트 추가
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const { data } = useChartData();
 
   const getDatasets = (data, colors = '#0d6efd') => {
     return [
