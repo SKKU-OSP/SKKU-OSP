@@ -2,14 +2,11 @@ import AnnualDetails from './AnnualDetails';
 import FactorDists from './FactorDists';
 import { useChartData } from '../../api/reactQuery/statistics/useChartData';
 import { useChartFilterStore } from '../../stores/statistics/chartDataStore';
+import LoaderIcon from 'react-loader-icon';
 
 function StatisticMain() {
-  const { data, isLoading, isError } = useChartData();
+  const { data, isLoading } = useChartData();
   const { year, setYear } = useChartFilterStore();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   // TODO: 아래 컴포넌트 분석 후 props 모두 제거 예정정
   return (
