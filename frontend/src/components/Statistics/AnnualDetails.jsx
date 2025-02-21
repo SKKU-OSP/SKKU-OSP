@@ -61,14 +61,8 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     ];
   };
 
-  const factorMinLimitMap = {
-    score: 3,
-    commit: 8,
-    star: 1,
-    repo: 2
-  };
-
   const getUserScatterData = () => {
+    const factorMinLimitMap = { score: 3, commit: 8, star: 1, repo: 2 };
     const userScatterData = { score: [], commit: [], star: [], repo: [] };
     ['score', 'commit', 'star', 'repo'].forEach((factor) => {
       years.forEach((year) => {
@@ -93,6 +87,38 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
     userScatterData = getUserScatterData();
   }
 
+  // 렌더링할 데이터 리스트
+  const chartDataList = [
+    {
+      data: kpiData,
+      title: '3점 이상 인원',
+      totalData: detailData.student_KP,
+      userData: userScatterData.score,
+      option: isTotal ? noLegendOption : getScatterOption(5)
+    },
+    {
+      data: commitData,
+      title: isTotal ? '총 Commit 수' : '학생당 Commit 수',
+      totalData: detailData.commit,
+      userData: userScatterData.commit,
+      option: isTotal ? noLegendOption : getScatterOption()
+    },
+    {
+      data: starData,
+      title: isTotal ? '총 Star 수' : '학생당 Star 수',
+      totalData: detailData.star,
+      userData: userScatterData.star,
+      option: isTotal ? noLegendOption : getScatterOption()
+    },
+    {
+      data: repoData,
+      title: isTotal ? '총 Repo 수' : '학생당 Repo 수',
+      totalData: repoLineData,
+      userData: userScatterData.repo,
+      option: isTotal ? noLegendOption : getScatterOption()
+    }
+  ];
+
   return (
     <>
       <AnnualSelectors
@@ -103,93 +129,19 @@ function AnnualDetails({ detailData, userData, isReady, years, targetYear, onSet
         onSetIsTotal={setIsTotal}
       />
       <div className="row pt-2">
-        {isTotal && (
-          <>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-                {isReady && (
-                  <DetailChart
-                    options={noLegendOption}
-                    data={getChartConfig(years, getDatasets(detailData.student_KP))}
-                  />
-                )}
-              </div>
+        {chartDataList.map(({ data, title, totalData, userData, option }, index) => (
+          <div className="col-md-3" key={index}>
+            <div className="card p-3">
+              <DetailCardContent data={data} cardTitle={title} />
+              {isReady &&
+                (isTotal ? (
+                  <DetailChart options={option} data={getChartConfig(years, getDatasets(totalData))} />
+                ) : (
+                  <ScatterChart options={option} data={getChartConfig(years, getDatasets(userData, '#0d6efd30'))} />
+                ))}
             </div>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={commitData} cardTitle="총 Commit 수" />
-                {isReady && (
-                  <DetailChart options={noLegendOption} data={getChartConfig(years, getDatasets(detailData.commit))} />
-                )}
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={starData} cardTitle="총 Star 수" />
-                {isReady && (
-                  <DetailChart options={noLegendOption} data={getChartConfig(years, getDatasets(detailData.star))} />
-                )}
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={repoData} cardTitle="총 Repo 수" />
-                {isReady && (
-                  <DetailChart options={noLegendOption} data={getChartConfig(years, getDatasets(repoLineData))} />
-                )}
-              </div>
-            </div>
-          </>
-        )}
-        {!isTotal && (
-          <>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={kpiData} cardTitle="3점 이상 인원" />
-                {isReady && (
-                  <ScatterChart
-                    options={getScatterOption(5)}
-                    data={getChartConfig(years, getDatasets(userScatterData.score, '#0d6efd30'))}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={commitData} cardTitle="학생당 Commit 수" />
-                {isReady && (
-                  <ScatterChart
-                    options={getScatterOption()}
-                    data={getChartConfig(years, getDatasets(userScatterData.commit, '#0d6efd30'))}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={starData} cardTitle="학생당 Star 수" />
-                {isReady && (
-                  <ScatterChart
-                    options={getScatterOption()}
-                    data={getChartConfig(years, getDatasets(userScatterData.star, '#0d6efd30'))}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="card p-3">
-                <DetailCardContent data={repoData} cardTitle="학생당 Repo 수" />
-                {isReady && (
-                  <ScatterChart
-                    options={getScatterOption()}
-                    data={getChartConfig(years, getDatasets(userScatterData.repo, '#0d6efd30'))}
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        )}
+          </div>
+        ))}
       </div>
     </>
   );
