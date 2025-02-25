@@ -51,6 +51,7 @@ function Dashboard() {
           setDevTendencyError(res.message);
         }
       } catch (error) {
+        console.log(error)
         setDevTendencyError('개발성향 데이터를 가져오는데 실패했습니다.');
       }
     };

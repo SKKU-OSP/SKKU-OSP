@@ -4,6 +4,7 @@ from rest_framework import status as http_status
 
 def auth_validation(request, status, errors, username=None):
     user = request.user
+    status = 'success'
     if not request.auth:
         errors["require_login"] = "로그인이 필요합니다."
         status = 'fail'

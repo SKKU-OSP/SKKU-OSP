@@ -11,15 +11,31 @@ from user.serializers import AccountSerializer
 from osp.settings import K_COIN_SECRET
 import datetime
 import jwt
+from osp.utils import auth_validation, return_http_error_response
 
 class ChallengeListView(APIView):
     '''
     도전과제의 리스트를 받아오는 API
     '''
-
+    def get_validation(self, request, status, errors):
+        status, errors = auth_validation(request, status, errors)
+        print(errors)
+        if errors:
+            return status, errors
+        return status, errors
+    
     def get(self, request):
         res = {'status': 'success', 'message': '', 'data': []}
         data = {}
+        errors = {}
+        message = ''
+        status = 'success'
+
+        # Request Validation
+        status, errors = self.get_validation(request, status, errors)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
         challenges = Challenge.objects.values(
             'id', 'name', 'description', 'tier')
         data['challenges'] = ChallengeSerializer(challenges, many=True).data
@@ -137,7 +153,7 @@ def achievement_check(user: Account, challenge: Challenge):
 
 class SecretSignJWT(APIView):
     '''
-    킹고 코인에 API 요청을 위해 필요한 JWT토큰 생성 및 반환환
+    킹고 코인에 API 요청을 위해 필요한 JWT토큰 생성 및 반환
     '''
 
     def get(self, request, target_user_id):

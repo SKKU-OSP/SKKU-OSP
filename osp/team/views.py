@@ -25,7 +25,7 @@ from team.utils import *
 from user.models import Account, AccountPrivacy, User
 from user.serializers import AccountWithInterestSerializer
 from rest_framework import status as http_status
-
+from osp.utils import auth_validation, return_http_error_response
 
 class TeamInviteOnTeamboardView(APIView):
 
@@ -33,10 +33,10 @@ class TeamInviteOnTeamboardView(APIView):
         team_id = request.GET.get('team_id')
         user = request.user
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
-
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
+        
         elif (len(TeamMember.objects.filter(team__id=team_id, member=user.id).values_list('id')) == 0):
             errors['is_not_teammember'] = '해당 팀의 멤버가 아닙니다.'
             status = 'fail'
@@ -58,12 +58,9 @@ class TeamInviteOnTeamboardView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -102,9 +99,9 @@ class TeamInviteOnTeamboardView(APIView):
         invite_msg = request.data.get('invite_msg', False)
         user = request.user
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
 
         try:
             target_team = Team.objects.get(id=target_team_id)
@@ -149,12 +146,9 @@ class TeamInviteOnTeamboardView(APIView):
         status, errors, valid_data\
             = self.post_validation(request, status, message, errors, valid_data)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -240,10 +234,9 @@ class TeamInviteOnTeamboardView(APIView):
 class TeamInviteOnRecommendView(APIView):
 
     def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
-        user = request.user
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
 
         return status, message, errors, valid_data
 
@@ -262,12 +255,9 @@ class TeamInviteOnRecommendView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -309,9 +299,9 @@ class TeamInviteOnRecommendView(APIView):
         invite_msg = request.data.get('invite_msg', False)
         user = request.user
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
         else:
             try:
                 target_team = Team.objects.get(id=target_team_id)
@@ -354,13 +344,9 @@ class TeamInviteOnRecommendView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
-
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(
@@ -437,10 +423,9 @@ class TeamCreateView(APIView):
 
     def get_validation(self, request, status, message, errors, valid_data, *args, **kwargs):
 
-        user = request.user
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
 
         return status, message, errors, valid_data
 
@@ -459,12 +444,9 @@ class TeamCreateView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -490,9 +472,9 @@ class TeamCreateView(APIView):
         team_description = ' '.join(team_description.split())
         team_image = request.FILES.get('team_image', False)
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
 
         # Team Name Check
         if not team_name:
@@ -538,12 +520,9 @@ class TeamCreateView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -637,9 +616,9 @@ class TeamUpdateView(APIView):
         account = Account.objects.get(user=user)
         target_team_id = request.GET.get('target_team_id')
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
         else:
             # team = Team.objects.get(id=target_team_id)
             if status == 'success':
@@ -684,12 +663,9 @@ class TeamUpdateView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -743,9 +719,8 @@ class TeamUpdateView(APIView):
 
         team_image = request.FILES.get('team_image', False)
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
             return status, errors, valid_data
 
         # Team 존재 여부 체크
@@ -797,12 +772,9 @@ class TeamUpdateView(APIView):
         status, errors, valid_data = self.post_validation(
             request, *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = []
@@ -920,9 +892,9 @@ class TeamApplyView(APIView):
         valid_data = {}
         user = request.user
         article_id = kwargs.get('article_id')
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, errors, valid_data
         else:
             if status == 'success':
                 try:
@@ -961,12 +933,9 @@ class TeamApplyView(APIView):
         status, errors, valid_data = self.get_validation(
             request, *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1002,9 +971,9 @@ class TeamApplyView(APIView):
         status, errors, valid_data = 'success', {}, {}
         user = request.user
         article_id = kwargs.get('article_id')
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, errors, valid_data
         else:
             if status == 'success':
                 try:
@@ -1047,12 +1016,9 @@ class TeamApplyView(APIView):
         status, errors, valid_data = self.post_validation(
             request, *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1113,9 +1079,9 @@ class TeamOutView(APIView):
         account = Account.objects.get(user=user)
         team_name = request.data.get('team_name')
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
         else:
             if status == 'success':
                 try:
@@ -1154,12 +1120,9 @@ class TeamOutView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1206,9 +1169,9 @@ class TeamInviteUpdateView(APIView):
         target_teaminvitemessage_id = request.data.get(
             'target_teaminvitemessage_id')
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
 
         else:
             try:
@@ -1238,12 +1201,9 @@ class TeamInviteUpdateView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1292,9 +1252,9 @@ class TeamInviteDeleteView(APIView):
         target_teaminvitemessage_id = request.data.get(
             'target_teaminvitemessage_id')
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
         else:
             try:
                 teaminvitemessage = TeamInviteMessage.objects.get(
@@ -1323,12 +1283,9 @@ class TeamInviteDeleteView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1371,9 +1328,9 @@ class TeamApplyUpdateView(APIView):
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, errors, valid_data
 
         else:
             try:
@@ -1400,12 +1357,9 @@ class TeamApplyUpdateView(APIView):
         status, errors, valid_data = self.post_validation(
             request, *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1453,9 +1407,9 @@ class TeamApplyDeleteView(APIView):
         target_teamapplymessage_id = request.data.get(
             'target_teamapplymessage_id')
 
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, message, errors, valid_data
         else:
             try:
                 teamapplymessage = TeamApplyMessage.objects.get(
@@ -1484,12 +1438,9 @@ class TeamApplyDeleteView(APIView):
                 status, message, errors, valid_data,
                 *args, **kwargs)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
@@ -1567,12 +1518,12 @@ class TeamsListView(APIView):
 class TeamsOfUserListView(APIView):
     def get_validation(self, request):
         status = 'success'
-        error = None
-        if not request.auth:
-            status = 'fail'
-            error = "require_login"
+        errors = None
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, errors
 
-        return status, error
+        return status, errors
 
     def get(self, request, *args, **kwargs):
         # Declaration
@@ -1581,12 +1532,9 @@ class TeamsOfUserListView(APIView):
         # Request Validation
         status, error = self.get_validation(request)
 
-        if status == 'fail':
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': error}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, error)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             return Response(get_fail_res(error))
@@ -1632,10 +1580,9 @@ class TeamsOfUserListView(APIView):
 class TeamApplicationListView(APIView):
     def get_validation(self, request):
         status, errors = "success", {}
-        user = request.user
-        if not request.auth:
-            errors["require_login"] = "로그인이 필요합니다."
-            status = 'fail'
+        status, errors = auth_validation(request, status, errors)
+        if errors:
+            return status, errors
 
         return status, errors
 
@@ -1647,12 +1594,9 @@ class TeamApplicationListView(APIView):
         # Request Validation
         status, errors = self.get_validation(request)
 
-        if "require_login" in errors:
-            message = 'validation 과정 중 오류가 발생하였습니다.'
-            logging.exception(
-                f'TeamApplicationList validation error')
-            res = {'status': status, 'message': message, 'errors': errors}
-            return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
+        error_response = return_http_error_response(status, errors)
+        if error_response:
+            return error_response
 
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
