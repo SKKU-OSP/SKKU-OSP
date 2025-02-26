@@ -42,7 +42,7 @@ def get_secret(key, secret=secret):
 
 # Django secret key
 SECRET_KEY = get_secret('SECRET_KEY')
-K_COIN_SECRET = get_secret('K_COIN_SECRET')
+K_COIN_SECRET = "secret"
 DEBUG = True
 if 'ENV_MODE' not in os.environ:
     SETTINGS = get_secret('DEBUG')

@@ -1518,7 +1518,7 @@ class TeamsListView(APIView):
 class TeamsOfUserListView(APIView):
     def get_validation(self, request):
         status = 'success'
-        errors = None
+        errors = {}
         status, errors = auth_validation(request, status, errors)
         if errors:
             return status, errors
