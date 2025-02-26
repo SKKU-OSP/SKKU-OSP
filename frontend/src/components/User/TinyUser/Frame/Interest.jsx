@@ -68,7 +68,6 @@ function Interest(props) {
         const response = await axios.get(profileTagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success' && resInfo.status === 'success') {
-          const account = resInfo.data.account;
           const profileTags = res.data.interest_tags;
           const profileInterest = profileTags
             .filter((interest) => interest.tag && interest.tag.type === 'domain')
@@ -87,32 +86,6 @@ function Interest(props) {
           });
           setMyInterest(profileInterest);
           setMySkill(profileSkillLevel);
-
-          if (profileInterest.length === 0) {
-            const notificationData = {
-              body: '[프로필] 관심 분야를 설정해주세요.',
-              type: 'profile',
-              receiver: account.user.id
-            };
-            const response = await axios.post(
-              `${server_url}/message/api/noti/create/`,
-              notificationData,
-              getAuthConfig()
-            );
-          }
-
-          if (Object.values(profileSkillLevel).reduce((sum, tags) => sum + tags.length, 0) === 0) {
-            const notificationData = {
-              body: '[프로필] 사용언어/기술스택을 설정해주세요.',
-              type: 'profile',
-              receiver: account.user.id
-            };
-            const response = await axios.post(
-              `${server_url}/message/api/noti/create/`,
-              notificationData,
-              getAuthConfig()
-            );
-          }
         } else {
           setError(true);
         }
@@ -122,6 +95,40 @@ function Interest(props) {
     };
     getProfileTags();
   }, [username]);
+
+  useEffect(() => {
+    if (myInterest !== undefined && mySkill !== undefined) {
+      const sendNotification = async () => {
+        try {
+          const responseInfo = await axios.get(url, getAuthConfig());
+          const account = responseInfo.data.data.account;
+
+          if (myInterest === 0) {
+            const notificationData = {
+              body: '[프로필] 관심 분야를 설정해주세요.',
+              type: 'profile',
+              receiver: account.user.id
+            };
+            await axios.post(`${server_url}/message/api/noti/create/`, notificationData, getAuthConfig());
+          }
+
+          if (Object.values(mySkill).reduce((sum, tags) => sum + tags.length, 0) === 0) {
+            const notificationData = {
+              body: '[프로필] 사용언어/기술스택을 설정해주세요.',
+              type: 'profile',
+              receiver: account.user.id
+            };
+            await axios.post(`${server_url}/message/api/noti/create/`, notificationData, getAuthConfig());
+          } else {
+            setError(true);
+          }
+        } catch (error) {
+          console.error('알림 전송 실패', error);
+        }
+      };
+      sendNotification();
+    }
+  }, []);
 
   // 서버에 데이터 저장
   const updatePostProfileInterest = async (updateInterest) => {
