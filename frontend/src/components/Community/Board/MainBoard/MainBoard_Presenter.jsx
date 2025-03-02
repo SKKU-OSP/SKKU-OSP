@@ -95,7 +95,7 @@ export default function Board_Presenter(props) {
   };
 
   const onCommunity = () => {
-    navigate(`/community/board/자유`);
+    navigate(`/community/board/홍보`);
   };
 
   const onRecruit = () => {
@@ -165,7 +165,7 @@ export default function Board_Presenter(props) {
                 }`}
                 onClick={() => handleTabClick1('질문')}
               >
-                <div>질문</div>
+                <div>Q&A</div>
               </li>
               <li
                 className={`board-nav-item ${
