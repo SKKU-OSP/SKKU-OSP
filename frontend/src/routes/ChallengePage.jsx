@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import axiosInstance from '../utils/axiosInterCeptor';
 import { useNavigate } from 'react-router-dom';
 import ReactGA from 'react-ga4';
 
@@ -21,26 +22,19 @@ const ChallengePage = () => {
   const updateUrl = serverUrl + `/challenge/api/update/${userId}/`;
   const Update = async () => {
     try {
-      const response = await axios.get(updateUrl);
+      const response = await axiosInstance.get(updateUrl);
       const res = response.data;
       if (res.status === 'success') {
         console.log(res.status);
       }
     } catch (error) {
-      if (error.response?.status === 401) {
-        const res = await axios.get(logout_url);
-        console.log(res);
-        tokenRemover();
-        alert('로그인이 만료되었습니다. 로그인 화면으로 이동합니다.');
-        navigate('/accounts/login');
-        return;
-      }
+      console.log(error);
     }
   };
 
   const url = serverUrl + `/challenge/api/list/${userId}/`;
   const getAchievements = async () => {
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
     const res = response.data;
     if (res.status === 'success') {
       setTotal(res.data.total_accounts);
@@ -50,23 +44,25 @@ const ChallengePage = () => {
     }
   };
 
-  const KCoinUrl = `http://kingocoin-dev.cs.skku.edu:8080/api/auth/platform?name=오픈소스플랫폼`
+  // TODO
+  // Kcoin 관련 api 요청에도 axiosInstance 적용
+  const KCoinUrl = `http://kingocoin-dev.cs.skku.edu:8080/api/auth/platform?name=오픈소스플랫폼`;
   const getKCoinJWT = async () => {
     const response = await axios.get(KCoinUrl, {
-      headers:{
-        "Authorization-Temp": `bearer ${JWT}`
+      headers: {
+        'Authorization-Temp': `bearer ${JWT}`
       }
-    })
-    console.log(response)
-  }
+    });
+    console.log(response);
+  };
 
   const secretJWTUrl = serverUrl + `/challenge/api/secret/${userId}/`;
   const getSecretJWT = async () => {
-    console.log("getSecretJWT")
-    console.log(username)
+    console.log('getSecretJWT');
+    console.log(username);
     const response = await axios.get(secretJWTUrl);
     const res = response.data;
-    console.log(res)
+    console.log(res);
   };
 
   useEffect(() => {
@@ -79,13 +75,6 @@ const ChallengePage = () => {
         action: 'Access_Challenge',
         label: '도전과제 접근'
       });
-    } else {
-      if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
-        navigate('/accounts/login');
-      } else {
-        navigate(-1);
-      }
-      return;
     }
   }, [userId]);
 
