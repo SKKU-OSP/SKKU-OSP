@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { tokenRemover } from './auth'; // 사용자 정의 토큰 제거 함수
+import { getAuthConfig } from './auth';
 
 const domain_url = import.meta.env.VITE_SERVER_URL;
 const logout_url = `${domain_url}/accounts/logout/`;
@@ -23,6 +24,25 @@ let navigate = null;
 export const setNavigate = (navigateFunction) => {
   navigate = navigateFunction;
 };
+
+// Request Interceptor
+// 토큰 정보를 헤더에 추가
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const authConfig = getAuthConfig();
+
+    if (authConfig) {
+      config.headers = {
+        ...config.headers,
+        ...authConfig.headers
+      };
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Response Interceptor
 // 401 에러 발생 시 토큰 제거 후 로그아웃 요청청
