@@ -311,7 +311,8 @@ class ProfileMainView(APIView):
         # Transactions
         try:
             account = Account.objects.get(user=request.user)
-            if introduction:
+            # 빈 문자열 처리를 위한 조건문 수정
+            if introduction is not None:
                 account = Account.objects.get(user=request.user)
                 account.introduction = introduction
                 account.save()
