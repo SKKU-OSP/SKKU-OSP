@@ -317,7 +317,7 @@ class ProfileMainView(APIView):
                 account.introduction = introduction
                 account.save()
                 data['introduction'] = introduction
-            if portfolio:
+            if portfolio is not None:
                 account.portfolio = portfolio
                 account.save()
                 data['portfolio'] = portfolio
