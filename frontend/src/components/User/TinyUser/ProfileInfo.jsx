@@ -27,12 +27,16 @@ function ProfileInfo(props) {
 
   useEffect(() => {
     setUserInfo(props.userInfo);
-  }, [props]);
+  }, []);
 
   const updatePostProfileInfo = async (editIntroduction) => {
     const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
     if (userInfo.introduction !== editIntroduction) {
-      await axiosInstance.post(postUrl, { introduction: editIntroduction }, getAuthConfig());
+      const data = await axiosInstance.post(postUrl, { introduction: editIntroduction }, getAuthConfig());
+      setUserInfo((prev) => ({
+        ...prev,
+        introduction: editIntroduction
+      }));
     }
   };
 
@@ -249,7 +253,11 @@ function ProfileInfo(props) {
                   maxLength={100}
                 />
                 <div className="text-end text-muted mt-1">
-                  <small>{editUserInfo.introduction?.length || 0}/100자</small>
+                  <small>
+                    {editUserInfo.introduction?.length || 0}/100자 |{' '}
+                    {editUserInfo.introduction?.split('\n').length || 1}
+                    /5줄
+                  </small>{' '}
                 </div>
               </div>
             ) : (
