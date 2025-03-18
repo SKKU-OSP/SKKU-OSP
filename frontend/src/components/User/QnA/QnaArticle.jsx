@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import '../User.css';
 
@@ -22,7 +23,7 @@ const QnAArticle = (props) => {
 
   const fetchQnaDetails = async () => {
     try {
-      const response = await axios.get(`${server_url}/user/api/qna/${qna.id}/`, getAuthConfig());
+      const response = await axiosInstance.get(`${server_url}/user/api/qna/${qna.id}/`, getAuthConfig());
       setQnaDetails(response.data.data);
       setResponse(response.data.data.response || '');
     } catch (error) {
@@ -39,7 +40,7 @@ const QnAArticle = (props) => {
       const messageData = {
         'chat-input': `[문의 답변] 문의하신 내용에 대한 답변이 등록되었습니다.\n\n${response}`
       };
-      const messageResponse = await axios.post(
+      const messageResponse = await axiosInstance.post(
         `${server_url}/message/api/chat/${qnaDetails.user_id}/`,
         messageData,
         getAuthConfig()
@@ -50,7 +51,7 @@ const QnAArticle = (props) => {
           solved: true,
           response: response
         };
-        const updateQnaResponse = await axios.patch(
+        const updateQnaResponse = await axiosInstance.patch(
           `${server_url}/user/api/qna/${qna.id}/`,
           updateQnaData,
           getAuthConfig()
@@ -77,7 +78,7 @@ const QnAArticle = (props) => {
       const messageData = {
         'chat-input': `[문의 답변 수정] 문의하신 내용에 대한 답변이 수정되었습니다.\n\n${response}`
       };
-      const messageResponse = await axios.post(
+      const messageResponse = await axiosInstance.post(
         `${server_url}/message/api/chat/${qnaDetails.user_id}/`,
         messageData,
         getAuthConfig()
@@ -85,7 +86,7 @@ const QnAArticle = (props) => {
 
       if (messageResponse.status === 200) {
         const updateQnaData = { response: response };
-        const updateResponse = await axios.patch(
+        const updateResponse = await axiosInstance.patch(
           `${server_url}/user/api/qna/${qna.id}/`,
           updateQnaData,
           getAuthConfig()

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 
 import SkillModal from './SkillModal';
@@ -35,7 +36,7 @@ function Interest(props) {
     const getTags = async () => {
       try {
         const tagsUrl = server_url + '/tag/api/list/';
-        const response = await axios.get(tagsUrl, getAuthConfig());
+        const response = await axiosInstance.get(tagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           const tags = res.data.tags;
@@ -62,10 +63,10 @@ function Interest(props) {
   useEffect(() => {
     const getProfileTags = async () => {
       try {
-        const responseInfo = await axios.get(url, getAuthConfig());
+        const responseInfo = await axiosInstance.get(url, getAuthConfig());
         const resInfo = responseInfo.data;
         const profileTagsUrl = server_url + '/user/api/tag/' + username + '/';
-        const response = await axios.get(profileTagsUrl, getAuthConfig());
+        const response = await axiosInstance.get(profileTagsUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success' && resInfo.status === 'success') {
           const profileTags = res.data.interest_tags;
@@ -109,7 +110,11 @@ function Interest(props) {
               type: 'profile',
               receiver: account.user.id
             };
-            await axios.post(`${server_url}/message/api/noti/create/`, notificationData, getAuthConfig());
+            const response = await axiosInstance.post(
+              `${server_url}/message/api/noti/create/`,
+              notificationData,
+              getAuthConfig()
+            );
           }
 
           if (Object.values(mySkill).reduce((sum, tags) => sum + tags.length, 0) === 0) {
@@ -118,9 +123,12 @@ function Interest(props) {
               type: 'profile',
               receiver: account.user.id
             };
-            await axios.post(`${server_url}/message/api/noti/create/`, notificationData, getAuthConfig());
-          } else {
-            setError(true);
+
+            const response = await axiosInstance.post(
+              `${server_url}/message/api/noti/create/`,
+              notificationData,
+              getAuthConfig()
+            );
           }
         } catch (error) {
           console.error('알림 전송 실패', error);
@@ -133,11 +141,11 @@ function Interest(props) {
   // 서버에 데이터 저장
   const updatePostProfileInterest = async (updateInterest) => {
     const profileInterestPostUrl = server_url + '/user/api/interests/update/';
-    await axios.post(profileInterestPostUrl, { user_interests: updateInterest }, getAuthConfig());
+    await axiosInstance.post(profileInterestPostUrl, { user_interests: updateInterest }, getAuthConfig());
   };
   const updatePostProfileSkill = async (updateSkill) => {
     const profileSkillPostUrl = server_url + '/user/api/langs/update/';
-    await axios.post(profileSkillPostUrl, { user_langs: updateSkill }, getAuthConfig());
+    await axiosInstance.post(profileSkillPostUrl, { user_langs: updateSkill }, getAuthConfig());
   };
 
   // Interest 모달 함수

@@ -14,6 +14,7 @@ import {
 import { PiGitForkBold, PiGitPullRequestBold } from 'react-icons/pi';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import LoaderIcon from 'react-loader-icon';
 
@@ -27,7 +28,7 @@ function Repository() {
     const getGuideLine = async () => {
       try {
         const url = server_url + '/user/api/guideline/' + username + '/';
-        const response = await axios.get(url, getAuthConfig());
+        const response = await axiosInstance.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setGuideline(res.data.guideline);

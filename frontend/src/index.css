@@ -119,7 +119,7 @@ body::-webkit-scrollbar {
 .btn-third {
   --bs-btn-border-color: var(--main-selected-color);
   --bs-btn-bg: var(--main-white);
-  color: var(--main-selected-colork);
+  color: var(--main-selected-color);
 }
 .btn-third:hover,
 .btn-third:active {
