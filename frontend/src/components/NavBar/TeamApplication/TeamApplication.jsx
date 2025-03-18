@@ -91,7 +91,7 @@ const TeamApplication = ({ handleClose, show }) => {
   };
 
   const handleRefuseClick = (applyId, userId) => {
-    sendTeamApplication(applyId, userId, 'false');
+    sendTeamApplication(applyId, userId, '-1');
     setReceived((prev) => prev.filter((app) => app.id !== applyId));
   };
 
@@ -131,7 +131,8 @@ const TeamApplication = ({ handleClose, show }) => {
                 <div className="d-flex">
                   <div className="me-2">
                     {' '}
-                    {application.team.name} {application.team.id}{' '}
+                    {/* {application.team.name} {application.team.id}{' '} */}
+                    {application.team.name}{' '}
                   </div>
                   <Link onClick={() => clickUsername(application.account.user.username)}>
                     {application.account.user.username}
@@ -195,9 +196,13 @@ const TeamApplication = ({ handleClose, show }) => {
                     <Badge bg="primary" className="text-center text-left fs-6 me-2 lh-sm">
                       승인됨
                     </Badge>
-                  ) : (
+                  ) : application.status === -1 ? (
                     <Badge bg="danger" className="text-center text-left fs-6 me-2 lh-sm">
                       거절됨
+                    </Badge>
+                  ) : (
+                    <Badge bg="secondary" className="text-center text-left fs-6 me-2 lh-sm">
+                      대기중
                     </Badge>
                   )}
                   <Button
