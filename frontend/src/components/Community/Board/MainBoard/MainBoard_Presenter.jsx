@@ -153,11 +153,11 @@ export default function Board_Presenter(props) {
               </li>
               <li
                 className={`board-nav-item ${
-                  selectedTab1 === '자유' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
+                  selectedTab1 === '정보' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
                 }`}
-                onClick={() => handleTabClick1('자유')}
+                onClick={() => handleTabClick1('정보')}
               >
-                <div>자유</div>
+                <div>정보</div>
               </li>
               <li
                 className={`board-nav-item ${
@@ -169,11 +169,11 @@ export default function Board_Presenter(props) {
               </li>
               <li
                 className={`board-nav-item ${
-                  selectedTab1 === '정보' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
+                  selectedTab1 === '자유' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
                 }`}
-                onClick={() => handleTabClick1('정보')}
+                onClick={() => handleTabClick1('자유')}
               >
-                <div>정보</div>
+                <div>자유</div>
               </li>
             </ul>
           </div>
