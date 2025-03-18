@@ -42,6 +42,7 @@ const ChallengePage = () => {
   const getAchievements = async () => {
     const response = await axios.get(url);
     const res = response.data;
+    console.log('achievement: ', res);
     if (res.status === 'success') {
       setTotal(res.data.total_accounts);
       setAchievements(res.data.achievements);
@@ -69,10 +70,23 @@ const ChallengePage = () => {
     console.log(res);
   };
 
+  // for admin
+
+  const getChallegeListTest = async () => {
+    const url = serverUrl + `/challenge/api/list/`;
+    const response = await axios.get(url);
+    const res = response.data;
+    console.log('test', res.data);
+    setAchievements(res.data.challenges);
+  };
+
   useEffect(() => {
     if (username !== null) {
       Update();
       getAchievements();
+      if (username === 'admin') {
+        getChallegeListTest();
+      }
       getSecretJWT();
       ReactGA.event({
         category: 'Page',
@@ -89,8 +103,12 @@ const ChallengePage = () => {
     }
   }, [userId]);
 
-  let numAchieved = achievements.filter((obj) => obj.acheive_date !== null).length;
-  let totalnum = Math.max(achievements.length, 1);
+  let numAchieved = 0;
+  let totalnum = 1;
+  if (username !== 'admin') {
+    numAchieved = achievements.filter((obj) => obj.acheive_date !== null).length;
+    totalnum = Math.max(achievements.length, 1);
+  }
 
   const progressWidth = Math.round((numAchieved / totalnum) * 100);
   const colorMap = { 1: '#DB944B', 2: '#D9D9D9', 3: '#F9D978' };
@@ -105,94 +123,158 @@ const ChallengePage = () => {
             </li>
           </div>
         </div>
-        <div className={classes.ChallengeList}>
-          <div className={classes.ChallengeProgressTitle}>도전과제</div>
-          <div className={classes.ChallengeProgressDetail}>
-            <div className={classes.ChallengeText}>전체 도전과제: {totalnum}</div>
-            <div className={classes.ChallengeText}>
-              도전과제 진행률: {numAchieved}/{totalnum}
-            </div>
-          </div>
-          <div className={classes.Progress}>
-            <div className={classes.ProgressBar} style={{ width: `${progressWidth}%` }}>
-              {progressWidth}%
-            </div>
-          </div>
-        </div>
-        <div className={classes.AchievementList}>
-          <div className={classes.Achieved}>
-            <div className={classes.AchievedTitle}>달성한 도전과제</div>
-            {achievements.map((prog) => {
-              if (prog.acheive_date !== null) {
-                const year = prog.acheive_date.split('-')[0].substring(2, 4);
-                const month = prog.acheive_date.split('-')[1];
-                const day = prog.acheive_date.split('-')[2].split('T')[0];
-                return (
-                  <div key={prog.id}>
-                    <div className={classes.AchievedItem}>
-                      <div>
-                        <div className={classes.ImgName}>
-                          <FaTrophy size="48" style={{ color: `${colorMap[prog.challenge.tier]}` }} className="me-3" />
-                          <div className={classes.NameRate}>
-                            <div className={classes.ChallengeName}>{prog.challenge.name}</div>
-                            <div className={classes.ChallengeRate}>
-                              {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 달성
-                            </div>
-                          </div>
-                        </div>
-                        <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
-                      </div>
 
-                      <div className="d-flex flex-column">
-                        <span className={classes.ChallengeDate}>
-                          {year}.{month}.{day} 완료
-                        </span>
-                        <div className={classes.Progress}>
-                          <div className={classes.ProgressBar} style={{ width: `${100}%` }}>
-                            {100}%
+        {username === 'admin' ? (
+          <>
+            <div className={classes.ChallengeList}>
+              <div className={classes.ChallengeProgressTitle}>도전과제</div>
+              <div className={classes.ChallengeProgressDetail}>
+                <div className={classes.ChallengeText}>전체 도전과제: {totalnum}</div>
+                <div className={classes.ChallengeText}>
+                  도전과제 진행률: {numAchieved}/{totalnum}
+                </div>
+              </div>
+              <div className={classes.Progress}>
+                <div className={classes.ProgressBar} style={{ width: `${progressWidth}%` }}>
+                  {progressWidth}%
+                </div>
+              </div>
+            </div>
+            <div className={classes.AchievementList}>
+              <div className={classes.Achieved}>
+                <div className={classes.AchievedTitle}>달성한 도전과제</div>
+                {achievements.map((data) => {
+                  return (
+                    <div key={data.id}>
+                      <div className={classes.AchievedItem}>
+                        <div>
+                          <div className={classes.ImgName}>
+                            <FaTrophy size="48" style={{ color: `${colorMap[data.tier]}` }} className="me-3" />
+                            <div className={classes.NameRate}>
+                              <div className={classes.ChallengeName}>{data.name}</div>
+                              <div className={classes.ChallengeRate}>{Math.round(0)}%의 사용자가 달성</div>
+                            </div>
                           </div>
+                          <span className={classes.ChallengeInstruction}>{data.description}</span>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-            })}
-          </div>
-          <div className={classes.Unachieved}>
-            <div className={classes.AchievedTitle}>진행중인 도전과제</div>
-            {achievements
-              .filter((obj) => obj.acheive_date === null)
-              .map((prog) => {
-                return (
-                  <div key={prog.id}>
-                    <div className={classes.AchievedItem}>
-                      <div>
-                        <div className={classes.ImgName}>
-                          <FaTrophy size="48" style={{ color: `${colorMap[prog.challenge.tier]}` }} className="me-3" />
-                          <div className={classes.NameRate}>
-                            <div className={classes.ChallengeName}>{prog.challenge.name}</div>
-                            <div className={classes.ChallengeRate}>
-                              {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 달성
+                        <div className="d-flex flex-column">
+                          <span className={classes.ChallengeDate}>{'2025.03.10'} 완료</span>
+                          <div className={classes.Progress}>
+                            <div className={classes.ProgressBar} style={{ width: `${100}%` }}>
+                              {100}%
                             </div>
                           </div>
                         </div>
-                        <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
-                      </div>
-                      <div className={classes.Progress}>
-                        <div
-                          className={classes.ProgressBar}
-                          style={{ width: `${(prog.progress / prog.challenge.max_progress) * 100}%` }}
-                        >
-                          {Math.round((prog.progress / prog.challenge.max_progress) * 1000) / 10}%
-                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+              <div className={classes.Unachieved}>
+                <div className={classes.AchievedTitle}>진행중인 도전과제</div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={classes.ChallengeList}>
+              <div className={classes.ChallengeProgressTitle}>도전과제</div>
+              <div className={classes.ChallengeProgressDetail}>
+                <div className={classes.ChallengeText}>전체 도전과제: {totalnum}</div>
+                <div className={classes.ChallengeText}>
+                  도전과제 진행률: {numAchieved}/{totalnum}
+                </div>
+              </div>
+              <div className={classes.Progress}>
+                <div className={classes.ProgressBar} style={{ width: `${progressWidth}%` }}>
+                  {progressWidth}%
+                </div>
+              </div>
+            </div>
+            <div className={classes.AchievementList}>
+              <div className={classes.Achieved}>
+                <div className={classes.AchievedTitle}>달성한 도전과제</div>
+                {achievements.map((prog) => {
+                  if (prog.acheive_date !== null) {
+                    const year = prog.acheive_date.split('-')[0].substring(2, 4);
+                    const month = prog.acheive_date.split('-')[1];
+                    const day = prog.acheive_date.split('-')[2].split('T')[0];
+                    return (
+                      <div key={prog.id}>
+                        <div className={classes.AchievedItem}>
+                          <div>
+                            <div className={classes.ImgName}>
+                              <FaTrophy
+                                size="48"
+                                style={{ color: `${colorMap[prog.challenge.tier]}` }}
+                                className="me-3"
+                              />
+                              <div className={classes.NameRate}>
+                                <div className={classes.ChallengeName}>{prog.challenge.name}</div>
+                                <div className={classes.ChallengeRate}>
+                                  {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 달성
+                                </div>
+                              </div>
+                            </div>
+                            <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
+                          </div>
+
+                          <div className="d-flex flex-column">
+                            <span className={classes.ChallengeDate}>
+                              {year}.{month}.{day} 완료
+                            </span>
+                            <div className={classes.Progress}>
+                              <div className={classes.ProgressBar} style={{ width: `${100}%` }}>
+                                {100}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+              <div className={classes.Unachieved}>
+                <div className={classes.AchievedTitle}>진행중인 도전과제</div>
+                {achievements
+                  .filter((obj) => obj.acheive_date === null)
+                  .map((prog) => {
+                    return (
+                      <div key={prog.id}>
+                        <div className={classes.AchievedItem}>
+                          <div>
+                            <div className={classes.ImgName}>
+                              <FaTrophy
+                                size="48"
+                                style={{ color: `${colorMap[prog.challenge.tier]}` }}
+                                className="me-3"
+                              />
+                              <div className={classes.NameRate}>
+                                <div className={classes.ChallengeName}>{prog.challenge.name}</div>
+                                <div className={classes.ChallengeRate}>
+                                  {Math.round((prog.total_achievement / total) * 100)}%의 사용자가 달성
+                                </div>
+                              </div>
+                            </div>
+                            <span className={classes.ChallengeInstruction}>{prog.challenge.description}</span>
+                          </div>
+                          <div className={classes.Progress}>
+                            <div
+                              className={classes.ProgressBar}
+                              style={{ width: `${(prog.progress / prog.challenge.max_progress) * 100}%` }}
+                            >
+                              {Math.round((prog.progress / prog.challenge.max_progress) * 1000) / 10}%
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );
