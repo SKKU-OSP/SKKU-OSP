@@ -14,9 +14,9 @@ export default function Board_Presenter(props) {
       <div className="community-nav d-flex">
         <ul className="nav nav-fill">
           <CommunityNavItem navName="홍보" tabName={tabName} urlTabName="홍보" />
-          <CommunityNavItem navName="자유" tabName={tabName} urlTabName="자유" />
-          <CommunityNavItem navName="Q&A" tabName={tabName} urlTabName="질문" />
           <CommunityNavItem navName="정보" tabName={tabName} urlTabName="정보" />
+          <CommunityNavItem navName="Q&A" tabName={tabName} urlTabName="질문" />
+          <CommunityNavItem navName="자유" tabName={tabName} urlTabName="자유" />
         </ul>
         {username === 'admin' ? (
           <button type="button" className="btn-write" onClick={onWrite}>
