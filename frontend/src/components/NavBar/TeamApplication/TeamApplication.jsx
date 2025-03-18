@@ -192,7 +192,6 @@ const TeamApplication = ({ handleClose, show }) => {
               >
                 <div>{application.team.name}</div>
                 <div className="d-flex flex-row">
-                <p>현재 상태 값: {application.status ?? "알 수 없음"}</p> {/* 상태 출력 */}
                   {application.status === 1 ? (
                     <Badge bg="primary" className="text-center text-left fs-6 me-2 lh-sm">
                       승인됨
