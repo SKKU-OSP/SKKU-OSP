@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import DevTypeCard from './DevTypeCard';
 import ImageDescBox from './ImageDescBox';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,13 +14,36 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
+// 백분율 표시를 위한 커스텀 플러그인 정의
+const percentageLabelsPlugin = {
+  id: 'percentageLabels',
+  afterDatasetsDraw(chart, args, options) {
+    const { ctx, scales: { x, y } } = chart;
+    
+    chart.data.datasets[0].data.forEach((value, index) => {
+      const percentage = chart._metasets[0]._dataset.percentage[index];
+      const xPos = x.getPixelForValue(value) + 10;
+      const yPos = y.getPixelForValue(index);
+      
+      ctx.save();
+      ctx.font = '12px nanumfont_Bold';
+      ctx.fillStyle = '#666';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${percentage}%`, xPos, yPos);
+      ctx.restore();
+    });
+  }
+};
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  percentageLabelsPlugin  // 커스텀 플러그인 등록
 );
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -37,13 +61,34 @@ function DevType(props) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${serverUrl}/api/dev-types/stats`);
-        const data = await response.json();
-        // 데이터를 count 기준으로 정렬
-        const sortedData = data.sort((a, b) => b.count - a.count);
-        setStats(sortedData);
+        const response = await axios.get(`${serverUrl}/user/api/dashboard/dev-type/statistics/`);
+        if (response.data.status === 'success' && response.data.data) {
+          const statsData = response.data.data;
+          // total 필드의 값을 count로 사용하도록 변환
+          const formattedData = Object.entries(statsData).map(([type, data]) => ({
+            type: type,  // MBTI 코드
+            koreanType: data.nicknameKR,  // API에서 받은 한글 닉네임
+            count: data.total || 0  // total 필드의 값 사용
+          }));
+
+          // 전체 합계 계산
+          const total = formattedData.reduce((sum, item) => sum + item.count, 0);
+          
+          // 비율 계산 추가
+          const dataWithPercentage = formattedData.map(item => ({
+            ...item,
+            percentage: total > 0 ? ((item.count / total) * 100).toFixed(1) : '0.0'
+          }));
+
+          // count 기준으로 정렬
+          const sortedData = dataWithPercentage.sort((a, b) => b.count - a.count);
+          setStats(sortedData);
+        } else {
+          setStats([]);
+        }
       } catch (error) {
         console.error('통계 데이터 로딩 실패:', error);
+        setStats([]);
       } finally {
         setLoading(false);
       }
@@ -53,12 +98,21 @@ function DevType(props) {
   }, []);
 
   const chartData = {
-    labels: stats.map((stat, index) => `${index + 1}. ${stat.type}`),
+    labels: stats.map((stat, index) => `${index + 1}. ${stat.koreanType}`),
     datasets: [
       {
         data: stats.map(stat => stat.count),
-        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        percentage: stats.map(stat => stat.percentage), // 백분율 데이터 추가
+        backgroundColor: stats.map(stat => 
+          stat.type === data.code 
+            ? 'rgba(255, 99, 132, 0.5)'  // 사용자의 MBTI 타입인 경우 분홍색
+            : 'rgba(54, 162, 235, 0.5)'  // 그 외의 경우 파란색
+        ),
+        borderColor: stats.map(stat => 
+          stat.type === data.code 
+            ? 'rgba(255, 99, 132, 1)'    // 사용자의 MBTI 타입인 경우 분홍색
+            : 'rgba(54, 162, 235, 1)'    // 그 외의 경우 파란색
+        ),
         borderWidth: 1,
       },
     ],
@@ -74,9 +128,13 @@ function DevType(props) {
       },
       tooltip: {
         callbacks: {
-          label: (context) => `${context.raw}명`,
+          label: (context) => {
+            const stat = stats[context.dataIndex];
+            const isMyType = stat.type === data.code;
+            return ` ${stat.count}명${isMyType ? ' (내 유형)' : ''}`;
+          },
         },
-      },
+      }
     },
     scales: {
       x: {
@@ -87,6 +145,7 @@ function DevType(props) {
         ticks: {
           callback: (value) => `${value}명`,
         },
+        max: Math.max(...stats.map(stat => stat.count)) * 1.2,
       },
       y: {
         grid: {
@@ -156,8 +215,8 @@ function DevType(props) {
               paddingRight: '10px',
               backgroundColor: '#f8f9fa',
               borderRadius: '8px',
-              padding: '16px',
-              boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px'
+              padding: '8px',
+              boxShadow: 'rgba(0, 0, 0, 0.1) 0px 8px 8px'
             }}>
               <div style={{ height: '700px' }}>
                 <Bar data={chartData} options={chartOptions} />

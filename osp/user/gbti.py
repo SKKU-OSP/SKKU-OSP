@@ -112,22 +112,23 @@ def get_dtype(type1, type2, type3, type4):
     return code
 
 def get_dtype_statistics(dtypes):
-    data = {"ENFJ": {"total":0},
-        "INTJ": {"total":0},
-        "ESFJ": {"total":0},
-        "ISTJ": {"total":0},
-        "ISTP": {"total":0},
-        "INFP": {"total":0},
-        "ENFP": {"total":0},
-        "ISFJ": {"total":0},
-        "INFJ": {"total":0},
-        "ESFP": {"total":0},
-        "ISFP": {"total":0},
-        "ENTJ": {"total":0},
-        "INTP": {"total":0},
-        "ESTJ": {"total":0},
-        "ESTP": {"total":0},
-        "ENTP": {"total":0},}
+    data = {"ENFJ": {"total":0, "nicknameKR": "해 질 녘"},
+        "INTJ": {"total":0, "nicknameKR": "심해"},
+        "ESFJ": {"total":0, "nicknameKR": "아침 이슬"},
+        "ISTJ": {"total":0, "nicknameKR": "안개 도시"},
+        "ISTP": {"total":0, "nicknameKR": "소나기"},
+        "INFP": {"total":0, "nicknameKR": "눈송이"},
+        "ENFP": {"total":0, "nicknameKR": "무지개 구름"},
+        "ISFJ": {"total":0, "nicknameKR": "염수호"},
+        "INFJ": {"total":0, "nicknameKR": "달빛"},
+        "ESFP": {"total":0, "nicknameKR": "봄바람"},
+        "ISFP": {"total":0, "nicknameKR": "벚꽃"},
+        "ENTJ": {"total":0, "nicknameKR": "새벽 숨"},
+        "INTP": {"total":0, "nicknameKR": "여명 빛"},
+        "ESTJ": {"total":0, "nicknameKR": "사구선"},
+        "ESTP": {"total":0, "nicknameKR": "번개 섬광"},
+        "ENTP": {"total":0, "nicknameKR": "깜박이별"},}
+    
     for dtype in dtypes:
         data[get_dtype(dtype.typeA, dtype.typeB, dtype.typeC, dtype.typeD)]["total"]+=1
 
