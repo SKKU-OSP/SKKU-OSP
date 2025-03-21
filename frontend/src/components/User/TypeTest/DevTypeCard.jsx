@@ -37,25 +37,25 @@ function DevTypeCard(props) {
               {typeKr}
             </h4>
             <div className="d-flex justify-content-between text-label">
-              <span>Fluid</span>
-              <span>Steady</span>
+              <span>MultiPlay</span>
+              <span>SinglePlay</span>
             </div>
-            <ResultProgress factor={factors[0]} />
-            <div className="d-flex justify-content-between text-label">
-              <span>CoolHead</span>
-              <span>WarmHeart</span>
-            </div>
-            <ResultProgress factor={factors[1]} />
+            <ResultProgress factor={factors[3]} />
             <div className="d-flex justify-content-between text-label">
               <span>Creative</span>
               <span>Efficient</span>
             </div>
             <ResultProgress factor={factors[2]} />
             <div className="d-flex justify-content-between text-label">
-              <span>MultiPlay</span>
-              <span>SinglePlay</span>
+              <span>CoolHead</span>
+              <span>WarmHeart</span>
             </div>
-            <ResultProgress factor={factors[3]} />
+            <ResultProgress factor={factors[1]} />
+            <div className="d-flex justify-content-between text-label">
+              <span>Fluid</span>
+              <span>Steady</span>
+            </div>
+            <ResultProgress factor={factors[0]} />
           </div>
         </div>
         <div className="weak-text me-3 text-end">2023 &#9426; SKKU-OSP</div>
