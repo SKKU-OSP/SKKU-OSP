@@ -100,3 +100,35 @@ def get_type_analysis(type_list):
     results.append(get_type(2, 2, [0]))
 
     return results
+
+
+
+def get_dtype(type1, type2, type3, type4):
+    code = ""
+    code += "E" if type4 > 0 else "I"
+    code += "N" if type3 > 0 else "S"
+    code += "T" if type2 > 0 else "F"
+    code += "P" if type1 > 0 else "J"
+    return code
+
+def get_dtype_statistics(dtypes):
+    data = {"ENFJ": {"total":0},
+        "INTJ": {"total":0},
+        "ESFJ": {"total":0},
+        "ISTJ": {"total":0},
+        "ISTP": {"total":0},
+        "INFP": {"total":0},
+        "ENFP": {"total":0},
+        "ISFJ": {"total":0},
+        "INFJ": {"total":0},
+        "ESFP": {"total":0},
+        "ISFP": {"total":0},
+        "ENTJ": {"total":0},
+        "INTP": {"total":0},
+        "ESTJ": {"total":0},
+        "ESTP": {"total":0},
+        "ENTP": {"total":0},}
+    for dtype in dtypes:
+        data[get_dtype(dtype.typeA, dtype.typeB, dtype.typeC, dtype.typeD)]["total"]+=1
+
+    return data
