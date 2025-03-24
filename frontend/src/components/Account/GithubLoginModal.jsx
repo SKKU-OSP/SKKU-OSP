@@ -21,6 +21,7 @@ const GithubLoginModal = (props) => {
       setError('학번을 입력해주세요.');
       return;
     }
+    onSubmitGithubId(studentId, loginUsername);
     onClose(false);
   };
 
@@ -47,6 +48,15 @@ const GithubLoginModal = (props) => {
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>GitHub ID</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="변경하고자 하는 GitHub ID를 입력해주세요"
+                value={loginUsername}
+                disabled={true}
               />
             </Form.Group>
             {error && <p style={{ color: 'red' }}>{error}</p>}

@@ -96,7 +96,7 @@ function OAuth() {
       {showModal && modalData && (
         <GitHubLoginModal
           show={showModal}
-          loginUsername={modalData?.github_username}
+          loginUsername={modalData?.github_username.value}
           onClose={setShowModal}
           onSubmitGithubId={handleGithubIdChange}
         />
