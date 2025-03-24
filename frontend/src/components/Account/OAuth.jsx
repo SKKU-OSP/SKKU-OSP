@@ -41,7 +41,6 @@ function OAuth() {
               const isValid = Object.values(res.data).every((value) => value !== null);
               if (isValid) {
                 if (confirm(res.message)) {
-                  // Github ID 변경
                   setModalData(res.data);
                   setShowModal(true);
                 } else {
@@ -95,7 +94,12 @@ function OAuth() {
     <>
       <LoaderIcon style={{ marginTop: '50px' }} />
       {showModal && modalData && (
-        <GitHubLoginModal show={showModal} onClose={setShowModal} onSubmitGithubId={handleGithubIdChange} />
+        <GitHubLoginModal
+          show={showModal}
+          loginUsername={modalData?.github_username}
+          onClose={setShowModal}
+          onSubmitGithubId={handleGithubIdChange}
+        />
       )}
     </>
   );
