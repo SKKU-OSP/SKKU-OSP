@@ -85,7 +85,7 @@ function OAuth() {
       })
       .catch((error) => {
         console.error('GitHub ID 변경 오류:', error);
-        alert('GitHub ID 변경 도중 오류가 발생하였습니다.');
+        alert('GitHub ID 변경 도중 오류가 발생하였습니다. 학번이 올바른지 확인해주세요.');
         navigate('/accounts/login');
       });
   };
