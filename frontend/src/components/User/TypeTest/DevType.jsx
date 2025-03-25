@@ -17,20 +17,29 @@ import { Bar } from 'react-chartjs-2';
 // 백분율 표시를 위한 커스텀 플러그인 정의
 const percentageLabelsPlugin = {
   id: 'percentageLabels',
-  afterDatasetsDraw(chart, args, options) {
-    const { ctx, scales: { x, y } } = chart;
+  afterDatasetsDraw(chart) {
+    // 개발자 유형 차트인지 확인
+    if (!chart.canvas.closest('.dev-type-chart')) {
+      return;
+    }
+
+    const { ctx } = chart;
+    const meta = chart.getDatasetMeta(0);
     
-    chart.data.datasets[0].data.forEach((value, index) => {
-      const percentage = chart._metasets[0]._dataset.percentage[index];
-      const xPos = x.getPixelForValue(value) + 10;
-      const yPos = y.getPixelForValue(index);
+    if (!meta || !meta.data || !chart.data.datasets[0].percentage) {
+      return;
+    }
+
+    meta.data.forEach((element, index) => {
+      const percentage = chart.data.datasets[0].percentage[index];
+      const { x, y } = element.tooltipPosition();
       
       ctx.save();
       ctx.font = '12px nanumfont_Bold';
       ctx.fillStyle = '#666';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${percentage}%`, xPos, yPos);
+      ctx.fillText(`${percentage}%`, x + 10, y);
       ctx.restore();
     });
   }
@@ -43,7 +52,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  percentageLabelsPlugin  // 커스텀 플러그인 등록
+  percentageLabelsPlugin
 );
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -217,7 +226,7 @@ function DevType(props) {
               borderRadius: '8px',
               padding: '8px',
               boxShadow: 'rgba(0, 0, 0, 0.1) 0px 8px 8px'
-            }}>
+            }} className="dev-type-chart">
               <div style={{ height: '700px' }}>
                 <Bar data={chartData} options={chartOptions} />
               </div>
