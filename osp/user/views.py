@@ -44,7 +44,7 @@ from home.serializers import (AnnualOverviewDashboardSerializer,
 from user.serializers import AccountSerializer
 
 from user import update_act
-from user.gbti import get_type_analysis, get_type_test
+from user.gbti import get_type_analysis, get_type_test, get_dtype_statistics
 
 from user.forms import ProfileImgUploadForm
 
@@ -52,7 +52,6 @@ from user.forms import ProfileImgUploadForm
 from handle_error import get_fail_res, get_missing_data_msg
 
 
-from user.gbti import get_type_analysis, get_type_test
 from user.models import (Account, AccountPrivacy, DevType, GithubScore,
                          GitHubScoreTable, GithubStatsYymm, StudentTab)
 
@@ -1055,6 +1054,13 @@ class TotalContrView(APIView):
             return Response(get_fail_res('undefined_exception'))
 
         return Response(res)
+
+class DevTypeStatisticsView(APIView):
+    def get(self, request):
+
+        dtypes = DevType.objects.exclude(typeA=0, typeB=0, typeC=0, typeD=0)
+        data = get_dtype_statistics(dtypes)
+        return Response({"status": "success", "data": data})
 
 
 def get_account_valid(request, username):
