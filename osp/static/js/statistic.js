@@ -1,4 +1,6 @@
 window.onload = function () {
+  // Chart.js 컴포넌트 등록
+  Chart.register(...Object.values(Chart.controllers), ...Object.values(Chart.elements), ...Object.values(Chart.plugins), ...Object.values(Chart.scales));
 
   // 휴학생, 복수전공 스위치
   const switchAbsence = document.getElementById("absenceSwitch");
@@ -647,16 +649,16 @@ window.onload = function () {
       sidTopData = annual_dist[`${factor}_sid_pct`];
       deptTopData =annual_dist[`${factor}_dept_pct`];
     }
-    function makeChart(ctx, type, factor,
-      labels, data, color, options, topdata = []) {
-
+    function makeChart(ctx, type, factor, labels, data, color, options, topdata = []) {
       let chart;
+      
       if (type === "barWithErrorBars") {
         const borderWidth = 0.9;
         const barPercentage = 0.9;
         const categoryPercentage = 1;
 
         chart = new Chart(ctx, {
+          type: type,
           data: {
             labels: labels,
             datasets: [
@@ -678,17 +680,16 @@ window.onload = function () {
           options: options,
         });
       } else if (type === "bar") {
-        //Histogram
         const borderWidth = 1;
         const barPercentage = 1;
         const categoryPercentage = 1;
 
         chart = new Chart(ctx, {
+          type: type,
           data: {
             labels: labels,
             datasets: [
               {
-                type: type,
                 label: "num",
                 data: data,
                 backgroundColor: color,
@@ -702,14 +703,16 @@ window.onload = function () {
         });
       } else {
         chart = new Chart(ctx, {
+          type: type,
           data: {
             labels: labels,
             datasets: [
               {
-                type: type,
                 label: factor,
                 data: data,
                 backgroundColor: color,
+                borderColor: color,
+                tension: 0.1
               },
             ],
           },
