@@ -28,6 +28,7 @@ from user.models import Account, AccountInterest, AccountPrivacy, StudentTab, Gi
 from repository.models import GithubIssues, GithubPulls, GithubRepoCommits, GithubRepoContributor, GithubRepoStats, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
 from home.models import Repository, Student
 from data.api import GitHub_API
+from urllib.parse import urlparse
 
 
 class JWTLoginView(APIView):
@@ -450,10 +451,20 @@ class PasswordResetSendView(APIView):
         '''
         django.contrib.auth.forms.PasswordResetForm.save 메소드를 참고
         '''
-        current_site = get_current_site(request)
+        # current_site = get_current_site(request)
 
-        site_name = current_site.name
-        domain = current_site.domain
+        # site_name = current_site.name
+        # domain = current_site.domain
+
+        frontend_domain = request.META.get('HTTP_ORIGIN') or request.META.get('HTTP_REFERER')
+        if frontend_domain:
+            parsed_url = urlparse(frontend_domain)
+            frontend_domain = parsed_url.netloc
+        else:
+            frontend_domain = request.get_host()
+
+        domain = frontend_domain.rstrip('/')
+        site_name = domain
 
         context = {
             "email": user.email,
