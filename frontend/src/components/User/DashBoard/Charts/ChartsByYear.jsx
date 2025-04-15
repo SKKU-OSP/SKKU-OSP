@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { Chart as ChartJS } from 'chart.js';
 import { useParams } from 'react-router-dom';
 
@@ -38,7 +39,7 @@ function ChartsByYear() {
 
   useEffect(() => {
     const getDashboardData = async () => {
-      const response = await axios.get(`${dashboardDataUrl}${username}/`, getAuthConfig());
+      const response = await axiosInstance.get(`${dashboardDataUrl}${username}/`, getAuthConfig());
       const res = response.data;
       if (res.status === 'success') {
         console.log('res.data', res.data);

@@ -10,4 +10,6 @@ urlpatterns = [
          views.ChallengeAchieveView.as_view(), name='ChallengeAchieve'),
     path('api/update/<int:target_user_id>/',
          views.AchievementUpdateView.as_view(), name='AchievementUpdate'),
+    path('api/secret/<int:target_user_id>/',
+         views.SecretSignJWT.as_view(), name='SecretSignJWT'),
 ]

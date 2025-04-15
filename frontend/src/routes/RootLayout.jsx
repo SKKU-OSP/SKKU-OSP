@@ -5,6 +5,7 @@ import MainHeader from '../components/NavBar/MainHeader_Container';
 import MainFooter from '../components/NavBar/MainFooter_Container';
 import AuthContext, { AuthContextProvider } from '../utils/auth-context.jsx';
 import { getTokenDuration, tokenLoader, tokenRemover } from '../utils/auth';
+import { setNavigate } from '../utils/axiosInterCeptor.js';
 
 function RootLayout() {
   const { unsetUser } = useContext(AuthContext);
@@ -12,6 +13,7 @@ function RootLayout() {
   const token = tokenLoader();
 
   useEffect(() => {
+    setNavigate(navigate);
     if (!token) {
       return;
     }

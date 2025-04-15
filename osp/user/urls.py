@@ -34,6 +34,7 @@ urlpatterns = [
           views.DevTypeTestSaveView.as_view(), name='DevTypeTestSave'),
      path('api/dashboard/<username>/contr/',
           views.TotalContrView.as_view(), name='TotalContr'),
+     path('api/dashboard/dev-type/statistics/', views.DevTypeStatisticsView.as_view(), name='DevTypeStatistics'),
      path('api/account-privacy/<username>/',
           views.AccountPrivacyView.as_view(), name='account-privacy'),
      path('api/qna/', views.QnAListView.as_view(), name='qna-list'),

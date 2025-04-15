@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 import { BsStar, BsCheck2, BsArrow90DegLeft } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
@@ -18,7 +19,7 @@ function Activity(props) {
     const getProfileActivity = async () => {
       try {
         const getUrl = server_url + '/user/api/profile-activity/' + username + '/';
-        const response = await axios.get(getUrl, getAuthConfig());
+        const response = await axiosInstance.get(getUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setProfileActivity(res.data);
@@ -31,7 +32,7 @@ function Activity(props) {
   const updatePostProfileActivity = async (editPortfolio) => {
     if (profileActivity.portfolio !== editPortfolio) {
       const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
-      await axios.post(postUrl, { portfolio: editPortfolio }, getAuthConfig());
+      await axiosInstance.post(postUrl, { portfolio: editPortfolio }, getAuthConfig());
     }
   };
   const handleEditClick = () => {
