@@ -628,7 +628,7 @@ class GithubIdChangeView(APIView):
         if student_data.exists():
             student_data = student_data.first()
         else:
-            return Response(get_fail_res("학번을 다시 확인해주세요."))
+            return Response(get_fail_res("학번을 다시 확인해주세요."), status=status.HTTP_404_NOT_FOUND)
         print(student_data)
         print(student_data.github_id)
         if (data.get('github_id') != student_data.github_id):
