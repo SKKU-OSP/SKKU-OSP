@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import Select from 'react-select';
 import { BsChevronLeft, BsPencilSquare } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
@@ -47,7 +48,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     //axios 사용
     const getTag = async () => {
       const urlTag = domainUrl + '/tag/api/list/';
-      const responseTag = await axios.get(urlTag, getAuthConfig());
+      const responseTag = await axiosInstance.get(urlTag, getAuthConfig());
 
       const resTag = responseTag.data;
       if (resTag.status === 'success') {
@@ -66,7 +67,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     };
     const getTeam = async () => {
       const urlTeam = domainUrl + '/team/api/teams-of-user-list/';
-      const responseTeam = await axios.get(urlTeam, getAuthConfig());
+      const responseTeam = await axiosInstance.get(urlTeam, getAuthConfig());
 
       const resTeam = responseTeam.data;
       if (resTeam.status === 'success') {
@@ -84,7 +85,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
     };
     const getArticle = async () => {
       const urlArticle = domainUrl + '/community/api/article/' + articleID + '/';
-      const responseArticle = await axios.get(urlArticle, getAuthConfig());
+      const responseArticle = await axiosInstance.get(urlArticle, getAuthConfig());
       const resArticle = responseArticle.data;
       if (resArticle.status === 'success') {
         if (resArticle.data.article.writer.user.username !== username && username != 'admin') {
@@ -131,7 +132,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
 
           const getHeroArticles = async () => {
             const urlHeroArticles = domainUrl + '/community/api/heroes/';
-            const responseHeroArticles = await axios.get(urlHeroArticles, getAuthConfig());
+            const responseHeroArticles = await axiosInstance.get(urlHeroArticles, getAuthConfig());
             const resHeroArticles = responseHeroArticles.data;
 
             if (resHeroArticles.status === 'success') {
@@ -250,7 +251,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
       }
 
       console.log(formData);
-      const response = await axios.post(urlEditArticle, formData, getAuthConfig());
+      const response = await axiosInstance.post(urlEditArticle, formData, getAuthConfig());
 
       const res = response.data;
       if (res['status'] === 'success') {

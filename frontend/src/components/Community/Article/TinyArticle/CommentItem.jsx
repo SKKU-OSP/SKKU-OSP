@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 import { FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 import { useState } from 'react';
@@ -21,7 +22,7 @@ function CommentItem(props) {
   const delete_url = server_url + `/community/api/comment/${comment.id}/delete/`;
 
   const likeComment = async () => {
-    const response = await axios.post(like_url, {}, getAuthConfig());
+    const response = await axiosInstance.post(like_url, {}, getAuthConfig());
     const res = response.data;
     if (!username) {
       if (window.confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
@@ -39,7 +40,7 @@ function CommentItem(props) {
 
   const deleteComment = async () => {
     if (window.confirm('댓글을 삭제하시겠습니까?')) {
-      const response = await axios.post(delete_url, {}, getAuthConfig());
+      const response = await axiosInstance.post(delete_url, {}, getAuthConfig());
       setData({ ...data, comments: response.data.data.comments });
     }
   };

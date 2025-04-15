@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import { BsGithub } from 'react-icons/bs';
 import { IoAddCircle, IoReloadCircle, IoCloseCircle } from 'react-icons/io5';
@@ -26,12 +27,16 @@ function ProfileInfo(props) {
 
   useEffect(() => {
     setUserInfo(props.userInfo);
-  }, [props]);
+  }, []);
 
   const updatePostProfileInfo = async (editIntroduction) => {
     const postUrl = server_url + '/user/api/profile-intro/' + username + '/';
     if (userInfo.introduction !== editIntroduction) {
-      await axios.post(postUrl, { introduction: editIntroduction }, getAuthConfig());
+      const data = await axiosInstance.post(postUrl, { introduction: editIntroduction }, getAuthConfig());
+      setUserInfo((prev) => ({
+        ...prev,
+        introduction: editIntroduction
+      }));
     }
   };
 
@@ -40,7 +45,7 @@ function ProfileInfo(props) {
     const formData = new FormData();
     formData.append('photo', imageFile);
     try {
-      await axios.post(postUrl, formData, getAuthConfig());
+      await axiosInstance.post(postUrl, formData, getAuthConfig());
     } catch (error) {
       console.error('Error during file upload', error);
     }
@@ -50,7 +55,7 @@ function ProfileInfo(props) {
     const postUrl = server_url + '/user/api/profile-default-image/' + username + '/';
     const formData = new FormData();
     try {
-      await axios.post(postUrl, formData, getAuthConfig());
+      await axiosInstance.post(postUrl, formData, getAuthConfig());
     } catch (error) {
       console.error('Error during file upload', error);
     }
@@ -91,10 +96,19 @@ function ProfileInfo(props) {
 
   const handleIntroChange = (event) => {
     const { name, value } = event.target;
-    setEditUserInfo({
-      ...editUserInfo,
-      [name]: value
-    });
+    const totalLines = (value.match(/\n/g) || []).length;
+    if (value.length <= 100 && totalLines <= 4) {
+      setEditUserInfo({
+        ...editUserInfo,
+        [name]: value
+      });
+    } else if (totalLines > 4) {
+      const lines = value.split('\n').slice(0, 5);
+      setEditUserInfo({
+        ...editUserInfo,
+        [name]: lines.join('\n')
+      });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -229,13 +243,23 @@ function ProfileInfo(props) {
               </a>
             </div>
             {editing ? (
-              <textarea
-                name="introduction"
-                rows="5"
-                className="info_editing-textarea"
-                value={editUserInfo.introduction}
-                onChange={handleIntroChange}
-              />
+              <div className="d-flex flex-column">
+                <textarea
+                  name="introduction"
+                  rows="5"
+                  className="info_editing-textarea"
+                  value={editUserInfo.introduction}
+                  onChange={handleIntroChange}
+                  maxLength={100}
+                />
+                <div className="text-end text-muted mt-1">
+                  <small>
+                    {editUserInfo.introduction?.length || 0}/100자 |{' '}
+                    {editUserInfo.introduction?.split('\n').length || 1}
+                    /5줄
+                  </small>{' '}
+                </div>
+              </div>
             ) : (
               <div className="info_introduction">
                 {userInfo.introduction?.length > 0 ? (
