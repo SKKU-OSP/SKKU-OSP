@@ -1426,7 +1426,7 @@ class TeamApplyUpdateView(APIView):
                     TeamMember.objects.create(
                         team=teamapplymessage.team, member_id=target_user_id)
                 else:
-                    teamapplymessage.status = -1  # 거절
+                    teamapplymessage.status = 2  # 거절
                 teamapplymessage.save()
 
         except DatabaseError as e:

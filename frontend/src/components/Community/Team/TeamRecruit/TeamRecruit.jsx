@@ -146,8 +146,8 @@ function TeamRecruit() {
         <>
           <div className="community-nav d-flex">
             <ul className="nav nav-fill">
-              <CommunityNavItem navName="팀 모집" tabName={tabName} urlTabName="팀 모집" />
-              <CommunityNavItem navName="전체 팀 목록" tabName={tabName} urlTabName="전체 팀 목록" />
+              <CommunityNavItem navName="팀 모집" tabName={tabName} />
+              <CommunityNavItem navName="전체 팀 목록" tabName={tabName} />
             </ul>
 
             <ul className="nav nav-fill">

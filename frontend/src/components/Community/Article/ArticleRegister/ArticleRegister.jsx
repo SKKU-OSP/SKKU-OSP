@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../../../../utils/axiosInterCeptor';
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -43,7 +42,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
     //axios 사용
     const getTeam = async () => {
       const urlTeam = domainUrl + '/team/api/teams-of-user-list/';
-      const responseTeam = await axiosInstance.get(urlTeam, getAuthConfig());
+      const responseTeam = await axios.get(urlTeam, getAuthConfig());
 
       const resTeam = responseTeam.data;
       if (resTeam.status === 'success') {
@@ -174,7 +173,7 @@ function ArticleRegister({ isWrite, type, consentWriteOpen }) {
       // }
 
       console.log(formData);
-      const response = await axiosInstance.post(urlRegistArticle, formData, getAuthConfig());
+      const response = await axios.post(urlRegistArticle, formData, getAuthConfig());
 
       const res = response.data;
       if (res['status'] === 'success') {

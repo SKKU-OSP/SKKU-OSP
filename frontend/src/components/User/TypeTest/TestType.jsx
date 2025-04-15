@@ -6,7 +6,6 @@ import { qnaList, descList, resultList } from './TypeData';
 import './TestType.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -97,7 +96,7 @@ const TestType = () => {
   };
   const saveType = async () => {
     const saveUrl = `${serverUrl}/user/api/dashboard/${username}/dev-type/save/`;
-    const response = await axiosInstance.post(saveUrl, { factor }, getAuthConfig());
+    const response = await axios.post(saveUrl, { factor }, getAuthConfig());
     const res = response.data;
     if (res.status === 'success') {
       console.log(res.message);

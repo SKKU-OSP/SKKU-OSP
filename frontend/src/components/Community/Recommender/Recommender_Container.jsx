@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getAuthConfig } from '../../../utils/auth';
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import styles from './Recommender.module.css';
 import Recommender_Presenter from './Recommender_Presenter';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -28,7 +27,7 @@ function Recommender_Container() {
     const team_name = location.state?.team_name;
     const getTeam = async () => {
       try {
-        const response = await axiosInstance.get(url, getAuthConfig());
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setTeams(res.data.teams);
@@ -47,7 +46,7 @@ function Recommender_Container() {
   useEffect(() => {
     const getTeamMember = async (team_id) => {
       try {
-        const response = await axiosInstance.get(url, {
+        const response = await axios.get(url, {
           ...getAuthConfig(),
           params: {
             team_id: team_id

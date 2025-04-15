@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../utils/axiosInterCeptor';
 import { AgGridReact } from 'ag-grid-react';
 
 import { BsSearch } from 'react-icons/bs';
@@ -73,11 +72,11 @@ function RankRepo() {
     const getUserRank = async () => {
       try {
         const url = serverDomain + '/rank/api/repo/';
-        const response = await axiosInstance.get(url, getAuthConfig());
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         const addContribCount = res.data.repos.map((item) => ({
           ...item,
-          contribCount: item.contribs.length
+          contribCount: item.contribs.length,
         }));
         console.log(addContribCount);
         if (res.status === 'success') {
@@ -104,7 +103,7 @@ function RankRepo() {
   const getRepoContrib = async (github_id, repo_name) => {
     try {
       const url = serverDomain + '/rank/api/contrib/' + `?github_id=${github_id}&repo_name=${repo_name}`;
-      const response = await axiosInstance.get(url, getAuthConfig());
+      const response = await axios.get(url, getAuthConfig());
       const res = response.data;
       if (res.status === 'success') {
         setContribData(res.data);

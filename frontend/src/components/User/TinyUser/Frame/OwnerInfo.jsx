@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 
 import { FaUniversity } from 'react-icons/fa';
@@ -32,7 +31,7 @@ function OwnerInfo() {
     const getOwnerInfo = async () => {
       try {
         const infoUrl = server_url + '/user/api/profile-info/' + username + '/';
-        const response = await axiosInstance.get(infoUrl, getAuthConfig());
+        const response = await axios.get(infoUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setOwnerInfo(res.data.student);
@@ -42,7 +41,7 @@ function OwnerInfo() {
     const getAccountPrivacy = async () => {
       try {
         const AccountPrivacyGetUrl = server_url + '/user/api/account-privacy/' + username + '/';
-        const response = await axiosInstance.get(AccountPrivacyGetUrl, getAuthConfig());
+        const response = await axios.get(AccountPrivacyGetUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           if (res.data.open_lvl === 2) {
@@ -64,7 +63,7 @@ function OwnerInfo() {
 
   const updatePostAccountPrivacy = async (open_lvl) => {
     const AccountPrivacyPostUrl = server_url + '/user/api/account-privacy/' + username + '/';
-    await axiosInstance.post(AccountPrivacyPostUrl, { open_lvl: open_lvl }, getAuthConfig());
+    await axios.post(AccountPrivacyPostUrl, { open_lvl: open_lvl }, getAuthConfig());
   };
 
   return (
@@ -102,7 +101,7 @@ function OwnerInfo() {
                   type="switch"
                   id="isOpenProfile"
                   label="프로필 공개"
-                  style={{ fontFamily: 'nanumfont_Regular' }}
+                  style={{fontFamily: "nanumfont_Regular"}}
                   onChange={(e) => handlePublicSwitchChange(e.target.checked, 0)}
                   checked={isProfileOpen}
                 />
@@ -112,7 +111,7 @@ function OwnerInfo() {
                   label="활동 공개"
                   disabled={!isProfileOpen}
                   onChange={(e) => handlePublicSwitchChange(e.target.checked, 1)}
-                  style={{ fontFamily: 'nanumfont_Regular' }}
+                  style={{fontFamily: "nanumfont_Regular"}}
                   checked={!isProfileOpen ? false : isActivityOpen}
                 />
               </Form>

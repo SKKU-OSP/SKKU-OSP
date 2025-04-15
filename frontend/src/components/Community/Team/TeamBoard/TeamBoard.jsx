@@ -1,7 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 import TeamArticle from './TeamArticle';
 import EditTeamModal from '../EditTeamModal';
@@ -41,7 +40,7 @@ function TeamBoard() {
   const getTeamInfo = async (page) => {
     try {
       setIsLoadedArticles(false);
-      const response = await axiosInstance.get(
+      const response = await axios.get(
         server_url + `/community/api/board/${team_name}/?page_number=${page}`,
         getAuthConfig()
       );
@@ -69,7 +68,7 @@ function TeamBoard() {
   const sendInviteResult = async (id, userId, status) => {
     try {
       const data = { target_teaminvitemessage_id: id, is_okay: status, user_id: userId };
-      const response = await axiosInstance.post(inviteURL, data, getAuthConfig());
+      const response = await axios.post(inviteURL, data, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.status, res.errors);
@@ -132,7 +131,7 @@ function TeamBoard() {
   const postTeamOut = async () => {
     try {
       const data = { team_name: team_name };
-      const response = await axiosInstance.post(server_url + `/team/api/team-out/`, data, getAuthConfig());
+      const response = await axios.post(server_url + `/team/api/team-out/`, data, getAuthConfig());
       const res = response.data;
       alert(`${team_name}팀 탈퇴가 완료되었습니다`);
       navigate('/community/team');

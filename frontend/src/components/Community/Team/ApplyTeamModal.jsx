@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
+
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
@@ -23,7 +23,7 @@ const ApplyTeamModal = (props) => {
     console.log(message);
     try {
       const data = { message: message };
-      const response = await axiosInstance.post(destinationUrl, data, getAuthConfig());
+      const response = await axios.post(destinationUrl, data, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.status, res.errors);

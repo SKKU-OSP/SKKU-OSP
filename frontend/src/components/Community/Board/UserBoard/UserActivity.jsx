@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 import UserArticle from './UserArticle';
 import UserComment from './UserComment';
@@ -58,7 +57,7 @@ function UserActivity() {
 
   const getWrittenArticle = async (page, sort = sortOrder) => {
     try {
-      const responseArticles = await axiosInstance.get(
+      const responseArticles = await axios.get(
         server_url + `/community/api/user-articles/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );
@@ -81,7 +80,7 @@ function UserActivity() {
 
   const getWrittenComment = async (page, sort = sortOrder) => {
     try {
-      const responseComments = await axiosInstance.get(
+      const responseComments = await axios.get(
         server_url + `/community/api/user-comments/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );
@@ -105,7 +104,7 @@ function UserActivity() {
 
   const getScrapArticle = async (page, sort = sortOrder) => {
     try {
-      const responseScraps = await axiosInstance.get(
+      const responseScraps = await axios.get(
         server_url + `/community/api/user-scrap-articles/?page_number=${page}&sort=${sort}`,
         getAuthConfig()
       );

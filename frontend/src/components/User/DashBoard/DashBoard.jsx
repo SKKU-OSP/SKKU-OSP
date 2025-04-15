@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import { useParams } from 'react-router-dom';
 import ReactGA from 'react-ga4';
 
@@ -29,7 +28,7 @@ function Dashboard() {
     const getContr = async () => {
       try {
         const contrUrl = `${dashboardDataUrl}${username}/contr/`;
-        const response = await axiosInstance.get(contrUrl, getAuthConfig());
+        const response = await axios.get(contrUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setContr(res.data);
@@ -42,7 +41,7 @@ function Dashboard() {
     };
     const getDevTendency = async () => {
       try {
-        const response = await axiosInstance.get(`${dashboardDataUrl}${username}/dev-tendency/`, getAuthConfig());
+        const response = await axios.get(`${dashboardDataUrl}${username}/dev-tendency/`, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setDevTendency(res.data);
@@ -77,9 +76,7 @@ function Dashboard() {
           <div>깃허브에서 활동 정보를 수집중입니다. 잠시 후, 다시 방문해주세요. (최대 12시간 소요)</div>
         ) : (
           <>
-            <div className="fs-4 mb-2 bold" style={{ fontFamily: 'nanumfont_ExtraBold' }}>
-              전체 기여 내역
-            </div>
+            <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>전체 기여 내역</div>
             {contrError && <div>{contrError}</div>}
             {contr && (
               <div className="row d-flex dashboard-box justify-content-between mb-4">
@@ -88,9 +85,7 @@ function Dashboard() {
                 ))}
               </div>
             )}
-            <div className="fs-4 mb-2 bold" style={{ fontFamily: 'nanumfont_ExtraBold' }}>
-              기여 성향 분석
-            </div>
+            <div className="fs-4 mb-2 bold" style={{fontFamily: "nanumfont_ExtraBold"}}>기여 성향 분석</div>
             {devTendency || devTendencyError ? (
               <>
                 {devTendencyError && <div>{devTendencyError}</div>}

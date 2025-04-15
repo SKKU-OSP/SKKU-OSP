@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import DevType from './DevType';
@@ -20,10 +19,10 @@ function DevAnalysis() {
   useEffect(() => {
     const getDevType = async () => {
       try {
-        const response = await axiosInstance.get(`${dashboardDataUrl}${username}/dev-type/`, getAuthConfig());
+        const response = await axios.get(`${dashboardDataUrl}${username}/dev-type/`, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
-          res.data.dev_type ? setDevType(res.data.dev_type) : setDevType(undefined);
+          res.data.dev_type ? setDevType(res.data.dev_type) : setDevType(undefined)
           setError(null);
         } else {
           setError(res.message);
@@ -40,20 +39,14 @@ function DevAnalysis() {
     <>
       {error && <div>{error}</div>}
       {devType && <DevType data={devType} />}
-      {devType === undefined && (
-        <div className="d-flex fs-4 bold mb-2 justify-content-between">
-          <div style={{ fontFamily: 'nanumfont_ExtraBold' }}>개발자 유형</div>
-          <div>
-            <button
-              className="btn btn-secondary"
-              onClick={() => navigate('test')}
-              style={{ fontFamily: 'nanumfont_Bold' }}
-            >
-              검사하기
-            </button>
-          </div>
+      {devType === undefined && <div className="d-flex fs-4 bold mb-2 justify-content-between">
+        <div style={{fontFamily: "nanumfont_ExtraBold"}}>개발자 유형</div>
+        <div>
+          <button className="btn btn-secondary" onClick={() => navigate('test')} style={{fontFamily: "nanumfont_Bold"}}>
+            검사하기
+          </button>
         </div>
-      )}
+      </div>}
     </>
   );
 }

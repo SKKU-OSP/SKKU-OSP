@@ -10,11 +10,12 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Badge from 'react-bootstrap/Badge';
 
-import { getAuthConfig } from '../../../utils/auth';
-import axiosInstance from '../../../utils/axiosInterCeptor';
+import { getAuthConfig, tokenRemover } from '../../../utils/auth';
 import './TeamApplication.css';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
+const domain_url = import.meta.env.VITE_SERVER_URL;
+const logout_url = `${domain_url}/accounts/logout/`;
 const applyUrl = serverUrl + '/team/api/team-apply-update/';
 const deleteUrl = serverUrl + '/team/api/team-apply-delete/';
 const TeamApplication = ({ handleClose, show }) => {
@@ -24,12 +25,13 @@ const TeamApplication = ({ handleClose, show }) => {
   const [sent, setSent] = useState([]);
   const [receivedLength, setReceivedLength] = useState(0);
   const [sentLength, setSentLength] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getApplications = async () => {
       try {
         const url = serverUrl + '/team/api/applications/';
-        const response = await axiosInstance.get(url, getAuthConfig());
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         console.log(res);
         if (res.status === 'fail') {
@@ -41,6 +43,14 @@ const TeamApplication = ({ handleClose, show }) => {
           setSentLength(res.data.sent.length);
         }
       } catch (error) {
+        if (error.response?.status === 401) {
+          const res = await axios.get(logout_url);
+          console.log(res);
+          tokenRemover();
+          alert('로그인이 만료되었습니다. 로그인 화면으로 이동합니다.');
+          navigate('/accounts/login');
+          return;
+        }
         console.log(error);
       }
     };
@@ -54,7 +64,7 @@ const TeamApplication = ({ handleClose, show }) => {
     try {
       const data = { target_teamapplymessage_id: id, is_okay: status, user_id: userId };
       console.log(data);
-      const response = await axiosInstance.post(applyUrl, data, getAuthConfig());
+      const response = await axios.post(applyUrl, data, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.status, res.errors);
@@ -69,7 +79,7 @@ const TeamApplication = ({ handleClose, show }) => {
     try {
       const data = { target_teamapplymessage_id: id };
       console.log(data);
-      const response = await axiosInstance.post(deleteUrl, data, getAuthConfig());
+      const response = await axios.post(deleteUrl, data, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.status, res.errors);
@@ -91,7 +101,7 @@ const TeamApplication = ({ handleClose, show }) => {
   };
 
   const handleRefuseClick = (applyId, userId) => {
-    sendTeamApplication(applyId, userId, '-1');
+    sendTeamApplication(applyId, userId, 'false');
     setReceived((prev) => prev.filter((app) => app.id !== applyId));
   };
 
@@ -131,8 +141,7 @@ const TeamApplication = ({ handleClose, show }) => {
                 <div className="d-flex">
                   <div className="me-2">
                     {' '}
-                    {/* {application.team.name} {application.team.id}{' '} */}
-                    {application.team.name}{' '}
+                    {application.team.name} {application.team.id}{' '}
                   </div>
                   <Link onClick={() => clickUsername(application.account.user.username)}>
                     {application.account.user.username}
@@ -196,13 +205,9 @@ const TeamApplication = ({ handleClose, show }) => {
                     <Badge bg="primary" className="text-center text-left fs-6 me-2 lh-sm">
                       승인됨
                     </Badge>
-                  ) : application.status === -1 ? (
+                  ) : (
                     <Badge bg="danger" className="text-center text-left fs-6 me-2 lh-sm">
                       거절됨
-                    </Badge>
-                  ) : (
-                    <Badge bg="secondary" className="text-center text-left fs-6 me-2 lh-sm">
-                      대기중
                     </Badge>
                   )}
                   <Button

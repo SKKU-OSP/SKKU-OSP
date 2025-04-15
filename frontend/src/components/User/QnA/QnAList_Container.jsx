@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import AuthContext from '../../../utils/auth-context';
 import { getAuthConfig } from '../../../utils/auth';
 import QnAList_Presenter from './QnAList_Presenter';
@@ -35,7 +34,7 @@ const QnAList_Container = () => {
     const fetchQnAs = async () => {
       try {
         const qna_url = `${domain_url}/user/api/qna/`;
-        const response = await axiosInstance.get(qna_url, getAuthConfig());
+        const response = await axios.get(qna_url, getAuthConfig());
         setQnas(response.data.data);
         setIsLoading(false);
       } catch (error) {

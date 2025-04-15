@@ -4,7 +4,6 @@ import { AgGridReact } from 'ag-grid-react'; // the AG Grid React Component
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import axios from 'axios';
-import axiosInstance from '../../utils/axiosInterCeptor';
 
 import { getAuthConfig } from '../../utils/auth';
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
@@ -68,11 +67,11 @@ function RankUser() {
         let url = serverDomain + '/rank/api/user/';
         if (targetYear) url += `?year=${targetYear}`;
 
-        const response = await axiosInstance.get(url, getAuthConfig());
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           const rankedData = calculateRank(res.data.score_table);
-          console.log(rankedData);
+          console.log(rankedData)
           setRowData(rankedData);
           setYears(res.data.years);
           setError(null);

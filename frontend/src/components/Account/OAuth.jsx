@@ -1,18 +1,15 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoaderIcon from 'react-loader-icon';
 
 import axios from 'axios';
 import AuthContext from '../../utils/auth-context';
 import { setExpiration } from '../../utils/auth';
-import GitHubLoginModal from './GithubLoginModal';
 
 function OAuth() {
   const location = useLocation();
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
-  const [modalData, setModalData] = useState(null);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     // setUser를 의존성 배열에 넣으면 서버로 요청을 두번 보내게 되어 로그인 불가
@@ -37,16 +34,12 @@ function OAuth() {
               setUser();
               navigate('/community');
             } else {
+              // 회원가입
+              alert(res.message);
               // 데이터 유효성 검사: not null 체크
               const isValid = Object.values(res.data).every((value) => value !== null);
               if (isValid) {
-                if (confirm(res.message)) {
-                  setModalData(res.data);
-                  setShowModal(true);
-                } else {
-                  // 회원가입
-                  navigate('/accounts/signup', { state: res.data });
-                }
+                navigate('/accounts/signup', { state: res.data });
               } else {
                 alert('GitHub 데이터를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.');
                 navigate('/accounts/login');
@@ -67,42 +60,7 @@ function OAuth() {
     }
   }, [location.search, navigate]);
 
-  const handleGithubIdChange = (studentId, githubId) => {
-    const server_url = import.meta.env.VITE_SERVER_URL;
-    const url = `${server_url}/accounts/github_id/change/`;
-
-    axios
-      .post(url, { student_data: studentId, github_id: githubId })
-      .then((response) => {
-        if (response.data.status === 'success') {
-          alert(response.data.message || 'GitHub ID가 성공적으로 변경되었습니다.');
-          setShowModal(false);
-          navigate('/accounts/login');
-        } else {
-          alert(response.data.message);
-          setShowModal(true);
-        }
-      })
-      .catch((error) => {
-        console.error('GitHub ID 변경 오류:', error);
-        alert('GitHub ID 변경 도중 오류가 발생하였습니다. 학번이 올바른지 확인해주세요.');
-        navigate('/accounts/login');
-      });
-  };
-
-  return (
-    <>
-      <LoaderIcon style={{ marginTop: '50px' }} />
-      {showModal && modalData && (
-        <GitHubLoginModal
-          show={showModal}
-          loginUsername={modalData?.github_username.value}
-          onClose={setShowModal}
-          onSubmitGithubId={handleGithubIdChange}
-        />
-      )}
-    </>
-  );
+  return <LoaderIcon style={{ marginTop: '50px' }} />;
 }
 
 export default OAuth;

@@ -6,7 +6,7 @@ function HeaderNavBar() {
   return (
     <div className="header-navbar">
       <Link
-        to="/community/board/홍보"
+        to="/community/board/자유"
         className={location == 'board' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
       >
         커뮤니티

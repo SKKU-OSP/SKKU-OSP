@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 
 import Dropdown from 'react-bootstrap/Dropdown';
 import { BiCommentDetail } from 'react-icons/bi';
@@ -21,7 +20,7 @@ export default function NotificationDropDown({ iconSize }) {
       const url = serverUrl + '/message/api/noti/list/';
 
       const getNotifications = async () => {
-        const response = await axiosInstance.get(url, getAuthConfig());
+        const response = await axios.get(url, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           console.log(res.data.notifications);

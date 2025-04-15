@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { useNavigate } from 'react-router-dom';
 import { FaBookmark, FaRegBookmark, FaRegThumbsUp, FaThumbsUp } from 'react-icons/fa';
 import { BsThreeDotsVertical, BsChevronLeft, BsPencilFill, BsTrash } from 'react-icons/bs';
@@ -88,7 +87,7 @@ function ContentView(props) {
   const onDelete = async () => {
     if (confirm('게시글을 삭제하시겠습니까?')) {
       try {
-        const response = await axiosInstance.post(delete_url, { article_id: article.id }, getAuthConfig());
+        const response = await axios.post(delete_url, { article_id: article.id }, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           console.log(res.errors);
@@ -109,7 +108,7 @@ function ContentView(props) {
       return;
     } else {
       try {
-        const response = await axiosInstance.post(like_url, { article_id: article.id }, getAuthConfig());
+        const response = await axios.post(like_url, { article_id: article.id }, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           alert(res.message);
@@ -131,7 +130,7 @@ function ContentView(props) {
       return;
     } else {
       try {
-        const response = await axiosInstance.post(scrap_url, { article_id: article.id }, getAuthConfig());
+        const response = await axios.post(scrap_url, { article_id: article.id }, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           alert(res.message);
@@ -171,7 +170,7 @@ function ContentView(props) {
               {article.anonymous_writer ? (
                 '익명'
               ) : (
-                <ProfileDropdown_Container userName={article.writer?.user.username} userId={article.writer?.user.id} />
+                <ProfileDropdown_Container userName={article.writer.user.username} userId={article.writer.user.id} />
               )}
             </span>
           </div>
@@ -180,7 +179,7 @@ function ContentView(props) {
               {pub_date1} {pub_date2}
             </span>
           </div>
-          {username === article.writer?.user.username || username == 'admin' ? (
+          {username === article.writer.user.username || username == 'admin' ? (
             <Dropdown className="article-more" style={{ display: 'inline-block' }}>
               <Dropdown.Toggle as="span" id="dropdown-custom-component" className="dropdownbtn">
                 <BsThreeDotsVertical />

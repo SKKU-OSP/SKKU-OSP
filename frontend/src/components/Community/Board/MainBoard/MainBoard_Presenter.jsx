@@ -95,7 +95,7 @@ export default function Board_Presenter(props) {
   };
 
   const onCommunity = () => {
-    navigate(`/community/board/홍보`);
+    navigate(`/community/board/자유`);
   };
 
   const onRecruit = () => {
@@ -153,11 +153,11 @@ export default function Board_Presenter(props) {
               </li>
               <li
                 className={`board-nav-item ${
-                  selectedTab1 === '정보' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
+                  selectedTab1 === '자유' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
                 }`}
-                onClick={() => handleTabClick1('정보')}
+                onClick={() => handleTabClick1('자유')}
               >
-                <div>정보</div>
+                <div>자유</div>
               </li>
               <li
                 className={`board-nav-item ${
@@ -165,15 +165,15 @@ export default function Board_Presenter(props) {
                 }`}
                 onClick={() => handleTabClick1('질문')}
               >
-                <div>Q&A</div>
+                <div>질문</div>
               </li>
               <li
                 className={`board-nav-item ${
-                  selectedTab1 === '자유' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
+                  selectedTab1 === '정보' ? 'selected-board-nav-item' : 'unselected-board-nav-item'
                 }`}
-                onClick={() => handleTabClick1('자유')}
+                onClick={() => handleTabClick1('정보')}
               >
-                <div>자유</div>
+                <div>정보</div>
               </li>
             </ul>
           </div>

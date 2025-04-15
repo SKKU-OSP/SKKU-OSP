@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import Select from 'react-select';
 
 import Form from 'react-bootstrap/Form';
@@ -22,7 +21,7 @@ const InviteTeamModalInBoard = (props) => {
     try {
       const getData = async () => {
         const userListUrl = `${serverUrl}/team/api/team-invite-on-teamboard/?team_id=${teamId}`;
-        const response = await axiosInstance.get(userListUrl, getAuthConfig());
+        const response = await axios.get(userListUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setUsers(
@@ -58,7 +57,7 @@ const InviteTeamModalInBoard = (props) => {
     const formData = { target_user_id: targetUserId, target_team_id: teamId, invite_msg: message };
 
     try {
-      const response = await axiosInstance.post(postUrl, formData, getAuthConfig());
+      const response = await axios.post(postUrl, formData, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.errors);

@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from 'react-bootstrap/Modal';
@@ -89,7 +88,7 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
     const data = { receiver__user: user_id };
     const ReadAllUrl = serverUrl + '/message/api/noti-read/';
     try {
-      const response = await axiosInstance.post(ReadAllUrl, data, getAuthConfig());
+      const response = await axios.post(ReadAllUrl, data, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.status, res.errors);
@@ -105,7 +104,7 @@ const NotificationModal = ({ notiList, setNotiList, iconSize, show, handleClose,
     const data = { target_noti: noti_id };
     const ReadNotiUrl = serverUrl + `/message/api/noti-read/${noti_id}/`;
     try {
-      const response = await axiosInstance.post(ReadNotiUrl, data, getAuthConfig());
+      const response = await axios.post(ReadNotiUrl, data, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.status, res.errors);

@@ -2,7 +2,6 @@ import Search_Presenter from './Search_Presenter';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import LoaderIcon from 'react-loader-icon';
 
@@ -20,7 +19,7 @@ function Search_Container() {
       try {
         setKeyword(location.state?.keyword);
         setTag(location.state?.tag);
-        const response = await axiosInstance.get(searchUrl, {
+        const response = await axios.get(searchUrl, {
           ...getAuthConfig(),
           params: {
             keyword: location.state?.keyword,

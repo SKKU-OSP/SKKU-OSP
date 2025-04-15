@@ -8,9 +8,7 @@ from challenge.serializers import (ChallengeAchieveSerializer,
                                    ChallengeSerializer)
 from user.models import Account, User
 from user.serializers import AccountSerializer
-from osp.settings import K_COIN_SECRET
-import datetime
-import jwt
+
 
 class ChallengeListView(APIView):
     '''
@@ -133,37 +131,3 @@ def achievement_check(user: Account, challenge: Challenge):
         acheive.save()
     except:
         connection.rollback()
-
-
-class SecretSignJWT(APIView):
-    '''
-    킹고 코인에 API 요청을 위해 필요한 JWT토큰 생성 및 반환환
-    '''
-
-    def get(self, request, target_user_id):
-        res = {}
-        try:
-            token = generate_JWT(target_user_id)
-            res['status'] = 'success'
-            res['message'] = '토큰 생성에 성공했습니다'
-            res['data'] = {
-                'token': token,
-            }
-        except Exception as e:
-            print(f"SecretSignJWT: {e}")
-            res['message'] = '토큰 생성에 실패했습니다'
-            res['error'] = str(e)
-            return Response(res, status=500)
-        return Response(res, status=200)
-    
-def generate_JWT(userId):
-    payload = {
-        "userId": userId,
-        "role": "user",
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=1),
-    }
-    token = jwt.encode(payload, K_COIN_SECRET, algorithm="HS512")
-    print(token)
-    print(userId)
-    return token
-

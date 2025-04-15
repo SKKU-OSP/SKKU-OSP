@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 
 import classes from './ChatMessageLogs.module.css';
 import { getAuthConfig } from '../../../utils/auth';
@@ -34,7 +33,7 @@ const ChatMessageLogs = (props) => {
     const chatData = { 'chat-input': inputRef.current.value };
     const url = `${server_url}/message/api/chat/${props.opponentId}/`;
 
-    const response = await axiosInstance.post(url, chatData, getAuthConfig());
+    const response = await axios.post(url, chatData, getAuthConfig());
     if (response.status === 200) {
       props.setLogs(response.data.data.messages);
       document.getElementById('chat-input').value = null;
@@ -98,7 +97,7 @@ const ChatMessageLogs = (props) => {
         return <Spinner animation="border" style={{ position: 'relative', top: '40%', left: '50%' }} />;
       }
     } else {
-      <div style={{ fontFamily: 'nanumfont_Regular' }}>사용자를 선택하세요.</div>;
+      <div style={{fontFamily: "nanumfont_Regular"}}>사용자를 선택하세요.</div>;
     }
   };
 

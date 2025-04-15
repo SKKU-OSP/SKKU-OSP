@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInterCeptor';
 import Select from 'react-select';
 
 import Form from 'react-bootstrap/Form';
@@ -107,7 +106,7 @@ const EditTeamModal = (props) => {
             team_admin: teamMembers.filter((m) => m.isAdmin).map((m) => m.name)
           };
 
-          const response = await axiosInstance.post(urlEditTeamInfo, postData, getAuthConfig());
+          const response = await axios.post(urlEditTeamInfo, postData, getAuthConfig());
           const res = response.data;
 
           if (res.status === 'success') {

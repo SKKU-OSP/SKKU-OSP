@@ -174,13 +174,7 @@ header.extended {
 }
 
 .btn-login {
-  border-color: var(--main-selected-color);
-  background-color: var(--main-white);
-  color: var(--main-selected-color);
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  border-radius: 10px;
+  border: 0;
+  background-color: var(--header-bg-color);
   align-items: center;
 }

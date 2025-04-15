@@ -26,7 +26,6 @@ from user.models import Account, AccountPrivacy
 from user.serializers import AccountPrivacySerializer
 from rest_framework import status as http_status
 
-
 class TableBoardView(APIView):
     '''
     GET: 일반게시판, 팀 게시판, 팀 모집 게시판을 위한 JSON response
@@ -433,14 +432,14 @@ class UserArticlesView(APIView):
         # Request Validation
         status, message, errors, valid_data \
             = self.get_validation(request, *args, **kwargs)
-
+        
         if "require_login" in errors:
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(
                 f'TeamApplicationList validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
-
+        
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(f'UserArticlesView validation error')
@@ -592,7 +591,7 @@ class UserScrapArticlesView(APIView):
                 f'TeamApplicationList validation error')
             res = {'status': status, 'message': message, 'errors': errors}
             return Response(res, status=http_status.HTTP_401_UNAUTHORIZED)
-
+        
         if status == 'fail':
             message = 'validation 과정 중 오류가 발생하였습니다.'
             logging.exception(f'UserScrapArticlesView validation error')
@@ -1021,8 +1020,8 @@ class ArticleAPIView(APIView):
         try:
             article = valid_data['article']
 
-            # 익명 또는 탈퇴한 유저의 글 또는는 글쓴이가 아닌 유저가 조회할 때, 게시글 조회수 증가
-            if request.user.is_anonymous or not article.writer or article.writer.user_id != request.user.id:
+            # 익명 또는 글쓴이가 아닌 유저가 조회할 때, 게시글 조회수 증가
+            if request.user.is_anonymous or article.writer.user_id != request.user.id:
                 article.view_cnt += 1
             article.save()
 
@@ -1304,8 +1303,7 @@ class ArticleUpdateView(APIView):
 
             # 홍보 게시판의 경우 Hero 홍보 게시 유무 업데이트
             if article.board.board_type == "Promotion":
-                hero_article = HeroArticle.objects.filter(
-                    article=article).first()
+                hero_article = HeroArticle.objects.filter(article=article).first()
                 hero_article_file = request.FILES.get('hero_thumbnail')
                 if is_hero and hero_article_file:
                     if hero_article:
