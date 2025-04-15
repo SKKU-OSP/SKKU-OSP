@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 import Select from 'react-select';
 
 import Form from 'react-bootstrap/Form';
@@ -19,7 +20,7 @@ const InviteTeamModal = (props) => {
     try {
       const getData = async () => {
         const teamListUrl = serverUrl + '/team/api/team-invite-on-recommend/';
-        const response = await axios.get(teamListUrl, getAuthConfig());
+        const response = await axiosInstance.get(teamListUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'success') {
           setTeams(
@@ -61,7 +62,7 @@ const InviteTeamModal = (props) => {
 
   const sendInvitation = async () => {
     try {
-      const response = await axios.post(postUrl, formData, getAuthConfig());
+      const response = await axiosInstance.post(postUrl, formData, getAuthConfig());
       const res = response.data;
       if (res.status === 'fail') {
         console.log(res.errors);

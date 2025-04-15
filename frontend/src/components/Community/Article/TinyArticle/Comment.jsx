@@ -2,6 +2,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import CommentItem from './CommentItem';
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../../utils/auth';
 import { useState } from 'react';
 import { BsChatLeft } from 'react-icons/bs';
@@ -16,7 +17,7 @@ function Comment(props) {
 
   const postComment = async () => {
     if (comment !== '') {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         post_url,
         { article_id: data.article.id, content: comment, anonymous_writer: isAnonymous },
         getAuthConfig()
