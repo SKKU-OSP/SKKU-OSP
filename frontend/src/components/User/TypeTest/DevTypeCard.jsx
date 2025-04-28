@@ -1,4 +1,5 @@
 import ResultProgress from './ResultProgress';
+import ImageDescBox from './ImageDescBox';
 
 function DevTypeCard(props) {
   const devType = props.devType;
@@ -13,14 +14,20 @@ function DevTypeCard(props) {
       <div id="gbti-id-card-content" className="modal-gbti-card">
         <div className="weak-text ms-3 text-start">SOSD ID CARD</div>
         <div className="d-flex justify-content-center">
-          <div className="gbti-content d-flex justify-content-center" style={{ padding: '1% 4%', width: '50%' }}>
-            <img src={devType} className="gbti-img" />
+          <div className="gbti-content d-flex justify-content-center" style={{ padding: '2%', width: '50%' }}>
+            {/* <img src={devType} className="gbti-img" /> */}
+            <ImageDescBox
+              src={devType}
+              title={typeKr}
+              desc={descKr}
+              attrs={descEng.split(' ')}
+            />
           </div>
           <div
             className="gbti-content d-flex flex-column justify-content-between"
             style={{ padding: '1% 4%', width: '50%' }}
           >
-            <p
+            {/* <p
               id="descEng"
               className="text-center text-label"
               style={{ fontSize: '12px', marginBottom: '2px', fontWeight: '600', fontFamily: "nanumfont_Bold"}}
@@ -29,7 +36,7 @@ function DevTypeCard(props) {
             </p>
             <p id="descKr" className="text-center text-label mb-1" style={{ fontSize: '14px', fontWeight: '600', fontFamily: "nanumfont_Bold" }}>
               {descKr}
-            </p>
+            </p> */}
             <h4 id="typeEng" className="text-center" style={{fontFamily: "nanumfont_Bold"}}>
               {typeEng}
             </h4>

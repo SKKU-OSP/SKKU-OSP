@@ -108,7 +108,8 @@ function DevType(props) {
   }, []);
 
   // stats가 없을 경우 기본값으로 maxCount를 설정
-  const maxCount = stats.length > 0 ? Math.max(...stats.map(stat => stat.count)) * 1.2 : 100;
+  const rawMax = stats.length > 0 ? Math.max(...stats.map(stat => stat.count)) : 100;
+  const maxCount = Math.ceil(rawMax * 1.2);
 
   const chartData = {
     labels: stats.map((stat, index) => `${index + 1}. ${stat.koreanType}`),
@@ -152,7 +153,10 @@ function DevType(props) {
         beginAtZero: true,
         grid: { display: false },
         ticks: {
-          callback: (value) => `${value}명`,
+          callback: (value) => {
+            if (value > rawMax) return '';
+            return `${value}명`;
+          }
         },
         max: maxCount,
       },
