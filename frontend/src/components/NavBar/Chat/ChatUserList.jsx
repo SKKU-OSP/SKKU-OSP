@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 
 import ChatMessageLogs from './ChatMessageLogs';
 import { getAuthConfig } from '../../../utils/auth';
@@ -24,7 +25,7 @@ const ChatUserList = (props) => {
     setOnce(0);
     const getChatLog = async () => {
       try {
-        const response = await axios.get(getChatLogUrl, getAuthConfig());
+        const response = await axiosInstance.get(getChatLogUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           console.log(res.status, res.errors);
@@ -45,7 +46,7 @@ const ChatUserList = (props) => {
     const getChatLogUrl = serverUrl + '/message/api/chat/' + `${userId}` + '?oldest=' + `${oldest}`;
     const getChatLog = async () => {
       try {
-        const response = await axios.get(getChatLogUrl, getAuthConfig());
+        const response = await axiosInstance.get(getChatLogUrl, getAuthConfig());
         const res = response.data;
         if (res.status === 'fail') {
           console.log(res.status, res.errors);
@@ -100,7 +101,9 @@ const ChatUserList = (props) => {
                     <img src={`${serverUrl + member.account.photo}`} className="opponent-profile" />
                   </div>
                   <div className="my-auto">
-                    <div className="opponent-name" style={{fontFamily: "nanumfont_Regular"}}>{member.account.user.username}</div>
+                    <div className="opponent-name" style={{ fontFamily: 'nanumfont_Regular' }}>
+                      {member.account.user.username}
+                    </div>
                   </div>
                   {member.unread > 0 && <div className="ms-auto my-auto me-2 unread-count">{member.unread}</div>}
                 </div>

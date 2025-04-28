@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosInterCeptor';
 
 import { getAuthConfig } from '../../../utils/auth';
 import ChatMessageModal_Presenter from './ChatMessageModal_Presenter';
@@ -16,7 +17,7 @@ export default function ChatMessageModal_Container({ show, onCloseChatModal, tar
       try {
         const server_url = import.meta.env.VITE_SERVER_URL;
         const url = `${server_url}/message/api/room/list/${targetId}/`;
-        const response = await axios.get(url, getAuthConfig());
+        const response = await axiosInstance.get(url, getAuthConfig());
 
         if (response.data.status === 'success') {
           setChatRoomMembers(response.data.data.chat_accounts);

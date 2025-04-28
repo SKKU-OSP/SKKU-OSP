@@ -7,7 +7,7 @@ import AuthContext from '../../../utils/auth-context';
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 export default function Board_Container() {
-  // tabName으로 '자유', '질문', '정보', '홍보' 를 받아 게시판의 게시글 목록을 렌더링
+  // tabName으로 '홍보', '자유', '질문', '정보' 를 받아 게시판의 게시글 목록을 렌더링
   const navigate = useNavigate();
   const { tabName } = useParams();
   const [isLoadedArticles, setIsLoadedArticles] = useState(false);
