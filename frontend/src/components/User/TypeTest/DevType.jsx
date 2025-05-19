@@ -182,7 +182,7 @@ function DevType(props) {
       <div className="mb-5">
         <DevTypeCard
           devType={devType}
-          descEng={data.desc}
+          desc={data.desc}
           descKr={data.descKR}
           typeEng={data.nickname}
           typeKr={data.nicknameKR}
@@ -196,7 +196,7 @@ function DevType(props) {
             <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>상생 파트너</div>
             <ImageDescBox
               src={`${serverUrl}/static/images/${pos.code}.png`}
-              title={pos.nicknameKR}
+              title={pos.nickname}
               desc={pos.descKR}
               attrs={pos.desc.split(' ')}
             />
@@ -205,7 +205,7 @@ function DevType(props) {
             <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>상극 파트너</div>
             <ImageDescBox
               src={`${serverUrl}/static/images/${neg.code}.png`}
-              title={neg.nicknameKR}
+              title={neg.nickname}
               desc={neg.descKR}
               attrs={neg.desc.split(' ')}
             />
