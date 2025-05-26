@@ -168,7 +168,7 @@ const TestType = () => {
       <section id="main" style={mainStyle}>
         <div className="board mx-0 mt-5" style={bgImgStyle}>
           <div className="my-3">
-            <h3>개발자 유형 검사</h3>
+            <h3>나와 가장 닮은 개발 언어는?</h3>
           </div>
           <div className="d-flex justify-content-center">
             <span className="endpoint left"></span>
@@ -176,11 +176,9 @@ const TestType = () => {
             <span className="endpoint right"></span>
           </div>
           <div className="my-3">
-            위 검사는 개발자 성향 지표를 자가 진단을 통해 분석합니다
+            나의 성격과 가장 닮은 개발 언어를 찾아보세요!
             <br />
-            과학적인 조사와 통계를 기반으로 하지 않습니다
-            <br />
-            결과는 추천 시스템과 무관하니 참고용으로 즐겨주시길 바랍니다
+            이 테스트는 구름 IDE에서 제작한 컨텐츠입니다
           </div>
           <div className="d-flex flex-column align-items-center gap-2 my-2">
             <button className="btn btn-test-start" onClick={begin}>
@@ -205,7 +203,7 @@ const TestType = () => {
         <ProgressBar className="progress mt-5" now={progressLen}></ProgressBar>
       </section>
       <section id="result" className="mx-auto mt-5" style={resultStyle}>
-        <h3>개발자 유형 검사 결과</h3>
+        <h3>나와 가장 닮은 개발 언어는?</h3>
         <div className="d-flex justify-content-center">
           <span className="endpoint left"></span>
           <span className="line-connect"></span>

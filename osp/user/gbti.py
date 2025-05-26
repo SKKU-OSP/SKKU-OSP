@@ -33,7 +33,7 @@ def get_type_test(type1, type2, type3, type4):
     # }
 
     gbti_dict = {
-        "ENFJ": {"code": "ENFJ", "nickname": "Go", "nicknameKR": "모르면 간첩 인싸 재질", "desc": "요즘 가장 핫한 언어 하면 100명 중에 80명은 외쳐요! Go!", "descKR": "문과도 가능하다는 바로 그 언어! 구글의 프로그래밍 언어입니다. 2019년 설문조사 결과 연봉이 높은 프로그래밍 언어 TOP 5 중 하나였어요. 현재 전세계에서 가장 수요가 높은 언어 중 하나입니다. 심플하고 배우기 쉬워 몇 개의 컨셉만 배우면 바로 시작할 수 있어요.\n개발 속도와 실행 속도 둘 다 매우매우 빨라요. 구글, 유튜브, 넷플릭스, 드롭박스, 트위치, 우버, 트위터 등에서 사용하고 있고, 구글의 다운로드 서버가 Go 언어로 되어 있죠."},
+        "ENFJ": {"code": "ENFJ", "nickname": "Go", "nicknameKR": "모르면 간첩 인싸 재질", "desc": "요즘 가장 핫한 언어 하면 100명 중에 80명은 외쳐요! Go!", "descKR": "문과도 가능하다는 바로 그 언어! 구글의 프로그래밍 언어입니다. 2019년 설문조사 결과 연봉이 높은 프로그래밍 언어 TOP 5 중 하나였어요.\n현재 전세계에서 가장 수요가 높은 언어 중 하나입니다. 심플하고 배우기 쉬워 몇 개의 컨셉만 배우면 바로 시작할 수 있어요.\n개발 속도와 실행 속도 둘 다 매우매우 빨라요. 구글, 유튜브, 넷플릭스, 드롭박스, 트위치, 우버, 트위터 등에서 사용하고 있고, 구글의 다운로드 서버가 Go 언어로 되어 있죠."},
         "INTJ": {"code": "INTJ", "nickname": "Assembly", "nicknameKR": "근본은 나야! 둘이 될 수 없어", "desc": "언어계의 근-본", "descKR": "컴퓨터 중심의 언어예요. 사용하기에는 불편하지만 컴퓨터가 처리하기에는 좋죠.\n어떤 언어도 어셈블리로 만든 프로그램보다 빠르게 실행될 수 없어요. 기계에 바로 명령을 내리는 것과 마찬가지이기 때문에 누구보다 빠르게 남들과는 다르게 기계를 제어할 수 있어요.\n매우 세밀하게 프로그래밍 해야 해요. 0과 1만을 사용하는 기계어와 가장 비슷하기 때문에 다른 언어보다 길게 적어야 하죠. 하드웨어의 원리를 잘 알고 있어야 해 배우기 어려워요."},
         "ESFJ": {"code": "ESFJ", "nickname": "Javascript", "nicknameKR": "유연하고 섬세한 마성의 발라더", "desc": "앱도 만들고, 웹도 만들고, 서버도 만들어요! 자며든다..", "descKR": "최근에 가장 인기 있는 언어 중 하나입니다. 빠르고 간단하게 프로그래밍 할 수 있어 초보자들이 쉽게 배우고 사용해요. 마성의 언어!\n웹 페이지의 동작을 책임지는 언어이다 보니 다른 플랫폼이나 운영체제에서도 문제 없이 사용되기 쉬운 형태입니다. 1타 N피! 가성비를 넘은 갓성비!\n여기저기 유연하게 어울리며, 융통성이 좋아요. 다만 너무 유연하다 보니 가독성이 떨어질 때도 있어요."},
         "ISTJ": {"code": "ISTJ", "nickname": "Typescript", "nicknameKR": "너 혹시... 뭐 돼? 자존감 TOP", "desc": "1번도 쓰지 않은 사람은 있어도 1번만 사용한 사람은 없다는 바로 그 언어!", "descKR": "2012년 마이크로소프트가 발표한 언어로 자바스크립트를 기반으로 하고 있어요. 프론트엔드 영역에서 필수 언어로 각광받고 있답니다.\n코드 작성 단계에서 타입을 체크하기 때문에 실수를 막을 수 있어요. 늘 매의 눈으로 코드를 체크하죠. 목적에 맞지 않는 타입의 변수나 함수는 에러를 발생시켜 사전에 버그를 제거해요.\n프로젝트의 규모가 크고 복잡할수록, 유지보수가 중요한 장기 프로젝트일수록 빛을 발해요.🌟"},
@@ -52,28 +52,32 @@ def get_type_test(type1, type2, type3, type4):
     }
 
     gbti_combi_dict = {
-        "ENFJ": {"pos": "INFP", "neg": "ISTJ"},
-        "INTJ": {"pos": "ENTP", "neg": "ESFJ"},
-        "ESFJ": {"pos": "ISFP", "neg": "INTJ"},
-        "ISTJ": {"pos": "ESTP", "neg": "ENFJ"},
-        "ISTP": {"pos": "ESTJ", "neg": "ENFP"},
-        "INFP": {"pos": "ENFJ", "neg": "ESTP"},
-        "ENFP": {"pos": "INFJ", "neg": "ISTP"},
-        "ISFJ": {"pos": "ESFP", "neg": "ENTJ"},
-        "INFJ": {"pos": "ENFP", "neg": "ESTJ"},
-        "ESFP": {"pos": "ISFJ", "neg": "INTP"},
-        "ISFP": {"pos": "ESFJ", "neg": "ENTP"},
-        "ENTJ": {"pos": "INTP", "neg": "ISFJ"},
-        "INTP": {"pos": "ENTJ", "neg": "ESFP"},
-        "ESTJ": {"pos": "ISTP", "neg": "INFJ"},
-        "ESTP": {"pos": "ISTJ", "neg": "INFP"},
-        "ENTP": {"pos": "INTJ", "neg": "ISFP"},
+        "ENFJ": {"pos": "INFP", "neg": "ENFP", "pos_desc":"부모님이 같습니다.\n다트도 구글이 만들었죠.", "neg_desc":"파이썬과 Go 언어 모두 개발자 편의성이 무척 좋아요.\n숙명의 라이벌이자 투톱이죠!"},
+        "INTJ": {"pos": "ISFJ", "neg": "ENFP", "pos_desc":"C언어를 어느 정도 익힌 뒤에 어셈블리어를 접하면 훨씬 쉽게 배울 수 있어요", "neg_desc":"파이썬은 마치 컴퓨터와 사람이 대화하듯이 코드를 짜지만, 어셈블리는 정말 기계어에 가까워요."},
+        "ESFJ": {"pos": "ISTJ", "neg": "INTP", "pos_desc":"자바스크립트를 잘 알아야 타입스크립트를 쓸 수 있어요.\n타입스크립트는 자바스크립트에 갑옷을 입혀 놓은 느낌이거든요.", "neg_desc":"이름만 비슷하지 아-무 상관없습니다.\n완전 다른 언어예요."},
+        "ISTJ": {"pos": "ESFJ", "neg": "ENFP", "pos_desc":"타입스크립트는 자바스크립트와 100% 호환!\n자바스크립트로 작성한 코드는 확장자를 .js -> .ts로 바꿔 타입스크립트로 변환할 수 있어요.", "neg_desc":"타입스크립트는 변수 선언도 하나하나 지정해야 하고, 타입을 일일이 체크하는 과정에서 속도가 느려지는 반면, 파이썬은 변수 선언이 자유롭고 빨라요."},
+        "ISTP": {"pos": "INTP", "neg": "ESFJ", "pos_desc":"C#은 자바와 매우 비슷해요.\n마이크로소프트에서 자바를 이기기 위해 만든 언어가 C#이기 때문이죠.", "neg_desc":"자바스크립트는 문법이 C#에 비해 유연해요.\n타입을 잘못 지정해도 알아서 바꿔주죠.\n엄마가 쓰다듬고 안아주는 느낌이랄까요?"},
+        "INFP": {"pos": "ENFJ", "neg": "ESFJ", "pos_desc":"부모님이 같습니다.\nGo도 구글이 만든 프로그래밍 언어예요.", "neg_desc":"다트는 구글이 자바스크립트를 대체하기 위해 발표한 언어입니다."},
+        "ENFP": {"pos": "INTP", "neg": "ISFJ", "pos_desc":"자바는 파이썬과 같이 입문 코스에서 자주 선택받는 언어예요.", "neg_desc":"C언어로 한 달 걸릴 작업을 파이썬으로는 며칠 만에 뚝딱 해결할 수 있어요."},
+        "ISFJ": {"pos": "ESTP", "neg": "ENFP", "pos_desc":"C에 C++까지 능숙하면 BEST!", "neg_desc":"파이썬은 C보다 적은 사전 지식을 필요로 해요.\n파이썬은 문법에 온전히 집중할 수 있지만, C는 문법 외에 다른 지식도 많이 필요한 편이죠."},
+        "INFJ": {"pos": "ISTJ", "neg": "ENFJ", "pos_desc":"타입스크립트도 러스트 부럽지 않은 안정성을 제공해요.", "neg_desc":"Go는 단순한 문법으로 학습과 구현이 쉽고 생산성이 높아요.\n러스트의 단점이 러닝 커브이기 때문에 Go의 쉬운 문법과는 반대!"},
+        "ESFP": {"pos": "ISFP", "neg": "ESFJ", "pos_desc":"PHP도 루비처럼 간단한 서비스를 만들 때 많이 사용되고 있어요.", "neg_desc":"자바스크립트는 루비보다 조금 더 대중적이고 수요가 많아요."},
+        "ISFP": {"pos": "ESFJ", "neg": "ISTP", "pos_desc":"라떼는 PHP로 웹 개발이 많이 이루어졌지만 최근에는 자바스크립트를 이용하고 있어요.\n마치 웹 개발 언어계의 1세대와 2세대..?", "neg_desc":"PHP는 간단하고 쉽게 만들 수 있다보니 사용하기 쉬운 장점이 있어요.\n반면, C#은 상당히 보수적인 편이죠."},
+        "ENTJ": {"pos": "INTP", "neg": "ENTP", "pos_desc":"코틀린의 가장 큰 장점은 자바 코드와 100% 매끄럽게 호환된다는 점!\n성능도 자바와 비슷한 수준이고요.", "neg_desc":"iOS 개발에 사용되는 스위프트를 좋아하는 분들은 코틀린과는 약간.. 어색한 사이..?"},
+        "INTP": {"pos": "ISFJ", "neg": "ESFJ", "pos_desc":"자바와 함께 개발의 정석이자 바이블로 많이 선택받는 언어예요.", "neg_desc":"이름만 비슷하지, 닮은 구석이 하나도 없어요."},
+        "ESTJ": {"pos": "ENFP", "neg": "ENFP", "pos_desc":"많은 데이터 과학자들이 파이썬과 R을 함께 사용하고 있어요.", "neg_desc":"본격 애증 관계..! 깊게 들어가면 지향하는 바가 달라요.\n파이썬은 유용한 라이브러리가 많은 범용 툴이고, R은 빅데이터 분석 전용으로 만들어졌다고 볼 수 있죠."},
+        "ESTP": {"pos": "ISFJ", "neg": "ENFP", "pos_desc":"C++은 C언어에 클래스, 상속, 템플릿 등 몇 가지 강력한 기능이 추가된 언어입니다.\nC에 대한 이해가 없으면 접근하기 어려워요.", "neg_desc":"파이썬은 C++보다 적은 사전 지식을 필요로 해요.\n파이썬은 문법에 온전히 집중할 수 있지만, C++은 다른 지식도 많이 필요한 편이죠."},
+        "ENTP": {"pos": "ISFJ", "neg": "ENTJ", "pos_desc":"스위프트는 C언어를 기반으로 만들어졌어요.\n성능도 C 수준을 목표로 개발됐죠.", "neg_desc":"안드로이드 개발에 사용되는 코틀린을 좋아하는 분들은 스위프트와는 약간.. 어색한 사이..?"},
     }
     pos_code = gbti_combi_dict[code]["pos"]
     neg_code = gbti_combi_dict[code]["neg"]
+    pos_desc = gbti_combi_dict[code]["pos_desc"]
+    neg_desc = gbti_combi_dict[code]["neg_desc"]
 
     gbti_dict[code]["pos"] = gbti_dict[pos_code]
     gbti_dict[code]["neg"] = gbti_dict[neg_code]
+    gbti_dict[code]["pos_desc"] = pos_desc
+    gbti_dict[code]["neg_desc"] = neg_desc
     return gbti_dict[code]
 
 
@@ -132,22 +136,22 @@ def get_dtype(type1, type2, type3, type4):
     return code
 
 def get_dtype_statistics(dtypes):
-    data = {"ENFJ": {"total":0, "nicknameKR": "해 질 녘"},
-        "INTJ": {"total":0, "nicknameKR": "심해"},
-        "ESFJ": {"total":0, "nicknameKR": "아침 이슬"},
-        "ISTJ": {"total":0, "nicknameKR": "안개 도시"},
-        "ISTP": {"total":0, "nicknameKR": "소나기"},
-        "INFP": {"total":0, "nicknameKR": "눈송이"},
-        "ENFP": {"total":0, "nicknameKR": "무지개 구름"},
-        "ISFJ": {"total":0, "nicknameKR": "염수호"},
-        "INFJ": {"total":0, "nicknameKR": "달빛"},
-        "ESFP": {"total":0, "nicknameKR": "봄바람"},
-        "ISFP": {"total":0, "nicknameKR": "벚꽃"},
-        "ENTJ": {"total":0, "nicknameKR": "새벽 숨"},
-        "INTP": {"total":0, "nicknameKR": "여명 빛"},
-        "ESTJ": {"total":0, "nicknameKR": "사구선"},
-        "ESTP": {"total":0, "nicknameKR": "번개 섬광"},
-        "ENTP": {"total":0, "nicknameKR": "깜박이별"},}
+    data = {"ENFJ": {"total":0, "nicknameKR": "Go"},
+        "INTJ": {"total":0, "nicknameKR": "Assembly"},
+        "ESFJ": {"total":0, "nicknameKR": "Javascript"},
+        "ISTJ": {"total":0, "nicknameKR": "Typescript"},
+        "ISTP": {"total":0, "nicknameKR": "C#"},
+        "INFP": {"total":0, "nicknameKR": "Dart"},
+        "ENFP": {"total":0, "nicknameKR": "Python"},
+        "ISFJ": {"total":0, "nicknameKR": "C"},
+        "INFJ": {"total":0, "nicknameKR": "Rust"},
+        "ESFP": {"total":0, "nicknameKR": "Ruby"},
+        "ISFP": {"total":0, "nicknameKR": "PHP"},
+        "ENTJ": {"total":0, "nicknameKR": "Kotlin"},
+        "INTP": {"total":0, "nicknameKR": "Java"},
+        "ESTJ": {"total":0, "nicknameKR": "R"},
+        "ESTP": {"total":0, "nicknameKR": "C++"},
+        "ENTP": {"total":0, "nicknameKR": "Swift"},}
     
     for dtype in dtypes:
         data[get_dtype(dtype.typeA, dtype.typeB, dtype.typeC, dtype.typeD)]["total"]+=1

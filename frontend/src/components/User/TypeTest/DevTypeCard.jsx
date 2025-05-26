@@ -90,7 +90,8 @@ function DevTypeCard(props) {
             <ImageDescBox
               src={devType}
               title={typeEng}
-              type={typeKr}
+              // type={typeKr}
+              desc={typeKr}
             />
           </div>
 
@@ -103,19 +104,8 @@ function DevTypeCard(props) {
               className="text-center mb-4"
               style={{ fontFamily: "nanumfont_Bold", fontSize: '1.4rem' }}
             >
-              {typeKr}
-            </h4>
-            <p
-              className="mb-2"
-              style={{
-                fontFamily: "nanumfont_Bold",
-                fontSize: '1rem',
-                lineHeight: 1.6,
-                marginBottom: '12px'
-              }}
-            >
               {desc}
-            </p>
+            </h4>
             <p
               style={{
                 fontFamily: "nanumfont_Regular",

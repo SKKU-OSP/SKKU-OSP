@@ -27,14 +27,45 @@ function ImageDescBox(props) {
         />
       </div>
 
-      <div className="desc-textbox" style={{ textAlign: "center", backgroundColor: '#f9f9f9' }}>
-        <h4
-          className="text-center mb-4"
-          style={{ fontFamily: "nanumfont_Bold", fontSize: '1.4rem', lineHeight: 1.6,
-                marginTop: '25px' }}
+      <div
+        className="desc-textbox"
+        style={{
+          backgroundColor: '#072a60',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '120px',
+        }}
+      >
+        {title && (
+          <h4
+            className="text-center mb-4"
+            style={{
+              fontFamily: "nanumfont_Bold",
+              fontSize: '1.8rem',
+              lineHeight: 1.3,
+              margin: 0,
+              marginBottom: '12px',
+              color: '#fff'
+            }}
+          >
+            {title}
+          </h4>
+        )}
+        <p
+          style={{
+            fontFamily: "nanumfont_Regular",
+            fontSize: '1.0rem',
+            whiteSpace: 'pre-line',
+            lineHeight: 1.5,
+            color: '#fff',
+            margin: 0
+          }}
         >
-          &lt;{title}&gt;
-        </h4>
+          {desc}
+        </p>
       </div>
     </div>
   );
