@@ -1,190 +1,190 @@
 const qnaList = [
   {
-    q: '처음 배우는 언어',
+    q: '😓 입사 안내를 기다리는 중! 신규 입사자들이 쭈뼛쭈뼛 모여 있다',
     answer: [
-      { a: '예제 따라서 차근차근 익힌다', factor: ['S'], val: [31] },
-      { a: '맨땅에 코딩해가며 알아간다', factor: ['N'], val: [31] }
+      { a: '입사 동기인가? 먼저 말 걸어봐야지', factor: ['E'], val: [33] },
+      { a: '너무 어색행~ 누가 먼저 말 안 걸어주나?', factor: ['I'], val: [33] }
     ]
   },
   {
-    q: '나의 코딩 음악 플레이리스트는?',
+    q: '🍔 기다리던 점심 시간 밥 먹고 뭘 하면서 쉴까?',
     answer: [
-      { a: 'n월 n주차 탑 100', factor: ['E'], val: [19] },
-      { a: '나만 아는 숨은 명곡 playList', factor: ['I'], val: [19] }
+      { a: '혼자 책을 읽거나 잠을 잔다', factor: ['I'], val: [33] },
+      { a: '팀원들과 수다를 떤다', factor: ['E'], val: [33] }
     ]
   },
   {
-    q: '전공 과목 중간 평가를 고를 수 있다면?',
+    q: '🍺 첫 출근 기념으로 친구와 잡았던 저녁 약속이 취소됐다',
     answer: [
-      { a: '시험', factor: ['S'], val: [18] },
-      { a: '과제', factor: ['N'], val: [18] }
+      { a: '피곤했는데 잘 됐다~ 집에서 쉰다', factor: ['I'], val: [33] },
+      { a: '안 돼! 다른 친구에게 바로 연락한다', factor: ['E'], val: [33] }
     ]
   },
   {
-    q: '친구가 "나 우울해서 모니터 바꿀까봐"',
+    q: '📑 업무 가이드 문서를 받았는데 분량이 상당하다',
     answer: [
-      { a: '요새 힘든가보다 내가 모니터 좀 잘 아니까 골라주자', factor: ['T'], val: [33] },
-      { a: '진짜 우울해보이네 맛있는 거 먹이고 달래야겠다', factor: ['F'], val: [33] }
+      { a: '처음부터 한 자 한 자 꼼꼼하게 읽는다', factor: ['N'], val: [33] },
+      { a: '휘리릭 넘기며 궁금한 것부터 살펴본다', factor: ['S'], val: [33] }
     ]
   },
   {
-    q: '잠 깨러 카페에 왔다. 뭐 마실까?',
+    q: '🗓 오늘은 무슨 일을 할까?',
     answer: [
-      { a: '늘 마시던 걸로 ..', factor: ['J', 'I'], val: [20, 11] },
-      { a: '계절 한정 신메뉴? 이건 먹어봐야지', factor: ['P', 'E'], val: [20, 11] }
+      { a: '신기능을 구상하는 과제', factor: ['S'], val: [33] },
+      { a: '기존 기능을 보완하는 과제', factor: ['N'], val: [33] }
     ]
   },
   {
-    q: '밤에 누워서 하는 생각',
+    q: '💭 옆 자리 동기가 밸런스 게임을 제안한다. “팔만대장경 읽기 VS 대장 내시경 8만 번 하기',
     answer: [
-      { a: '사람은 무엇으로 코딩하는가', factor: ['N'], val: [34] },
-      { a: '56 line에 있던 error code 1046 ...', factor: ['S'], val: [34] }
+      { a: '아~ 안 해요', factor: ['S'], val: [33] },
+      { a: '수면 내시경이에요? 금식해야 돼요?', factor: ['N'], val: [33] }
     ]
   },
   {
-    q: '평소에 연락 안하는 동기가 마감 1시간 전 "개발아, 과제 다했어?ㅠㅠ"',
+    q: '🎁 취업 기념 선물로 받고 싶은 건?',
     answer: [
-      { a: '못본 척.. 1시간 뒤에 답장한다 "아 이제 봤네"', factor: ['T'], val: [25] },
-      { a: '나도 도움받을 일 있겠지 뭐. 공유해준다', factor: ['F'], val: [25] }
+      { a: '예쁘고 기억에 남을만한 것', factor: ['F'], val: [33] },
+      { a: '요즘 가장 필요한 것', factor: ['T'], val: [33] }
     ]
   },
   {
-    q: '알고리즘이 안 풀릴때',
+    q: '💦 내 의견과 팀원들의 의견이 다르다. 어떻게 하지?',
     answer: [
-      { a: '데스크톱 주변을 정리한다', factor: ['J', 'S'], val: [19, 10] },
-      { a: '머리 속 짜놓은 일정을 정리한다', factor: ['P', 'N'], val: [19, 10] }
+      { a: '기분 상하지 않게 설득해 봐야지', factor: ['F'], val: [33] },
+      { a: '논리적으로 설득해 봐야지', factor: ['T'], val: [33] }
     ]
   },
   {
-    q: '변수명 스타일',
+    q: '👭 힘든 일이 생겼을 때 가장 먼저 찾게 되는 동료는?',
     answer: [
-      { a: '자유분방하게 i,j,result, square, thisisbuffer, beonsu…', factor: ['N'], val: [17] },
-      { a: '질서정연 data_fetcher, get_value, item_list…', factor: ['S'], val: [17] }
+      { a: '현실적인 조언을 해주는 동료', factor: ['T'], val: [33] },
+      { a: '위로와 공감을 해주는 동료', factor: ['F'], val: [33] }
     ]
   },
   {
-    q: '심심한데 코딩이나 할까?',
+    q: '💪 드디어 첫 업무를 시작한다. 가장 먼저 할 일은?',
     answer: [
-      { a: '편하고 조용한 내 방', factor: ['I'], val: [28] },
-      { a: '동기들이 모여 있는 과방', factor: ['E'], val: [28] }
+      { a: '어떤 일을 언제까지 할지 계획부터 짠다', factor: ['J'], val: [33] },
+      { a: '시작이 반이다! 일단 자료조사부터 한다', factor: ['P'], val: [33] }
     ]
   },
   {
-    q: '준비중인 개인 프로젝트',
+    q: '🤸‍♂️ 기다리던 퇴근 시간! 마지막으로 할 일은?',
     answer: [
-      { a: '상세한 스케쥴이 있어야 마음이 편안-', factor: ['P'], val: [30] },
-      { a: '일정은 그때그때 맞추고 일단 가보자고', factor: ['J'], val: [30] }
+      { a: '자리만 슥삭 정리한다', factor: ['P'], val: [33] },
+      { a: '내일 할 일을 적어둔다', factor: ['J'], val: [33] }
     ]
   },
   {
-    q: '동료 팀원들끼리 근무 끝나고 한 잔 어때?',
+    q: '🤔 저녁을 먹으려고 했던 가게가 문을 닫았다',
     answer: [
-      { a: '나만 빠질 수 없지. 간다', factor: ['E', 'F'], val: [24, 12] },
-      { a: '업무 시간이면 충분하다. 칼퇴', factor: ['I', 'T'], val: [24, 12] }
-    ]
-  },
-  {
-    q: '코딩 골든 아워',
-    answer: [
-      { a: '맑은 정신과 건강한 육신 낮 코딩', factor: ['E'], val: [18] },
-      { a: '남들이 꿈꾸는 시간에 두 눈 뜨고 밤 코딩', factor: ['I'], val: [18] }
-    ]
-  },
-  {
-    q: 'To do list',
-    answer: [
-      { a: '업무/개인 일 할 일/진행 중 페이지 나눠 깔끔하게 정리', factor: ['J'], val: [31] },
-      { a: '약속이든 프로젝트든 급한 순서대로 한 장에 때려 넣기', factor: ['P'], val: [31] }
-    ]
-  },
-  {
-    q: '나의 실수로 팀원의 작업을 날렸다. 하나만 보내야 한다면?',
-    answer: [
-      { a: '구구절절한 사과가 담긴 장문의 메세지', factor: ['F'], val: [30] },
-      { a: '아메리카노 한 잔 쿠폰', factor: ['T'], val: [30] }
+      { a: '그럴 줄 알고 한두 군데 더 찾아뒀다', factor: ['J'], val: [33] },
+      { a: '오다가 본 다른 가게에 가자고 제안한다', factor: ['P'], val: [33] }
     ]
   }
+  // ,{
+  //   q: '코딩 골든 아워',
+  //   answer: [
+  //     { a: '맑은 정신과 건강한 육신 낮 코딩', factor: ['E'], val: [0] },
+  //     { a: '남들이 꿈꾸는 시간에 두 눈 뜨고 밤 코딩', factor: ['I'], val: [0] }
+  //   ]
+  // },
+  // {
+  //   q: 'To do list',
+  //   answer: [
+  //     { a: '업무/개인 일 할 일/진행 중 페이지 나눠 깔끔하게 정리', factor: ['J'], val: [0] },
+  //     { a: '약속이든 프로젝트든 급한 순서대로 한 장에 때려 넣기', factor: ['P'], val: [0] }
+  //   ]
+  // },
+  // {
+  //   q: '나의 실수로 팀원의 작업을 날렸다. 하나만 보내야 한다면?',
+  //   answer: [
+  //     { a: '구구절절한 사과가 담긴 장문의 메세지', factor: ['F'], val: [0] },
+  //     { a: '아메리카노 한 잔 쿠폰', factor: ['T'], val: [0] }
+  //   ]
+  // }
 ];
 
 const resultList = [
   {
-    typeEng: 'Dawn Breathe',
-    typeKr: '새벽 숨',
+    typeEng: 'Kotlin',
+    typeKr: '내 심장의 색깔은 블랙 모던한 뉴요커',
     mbti: 'ENTJ'
   },
   {
-    typeEng: 'Twilight',
-    typeKr: '해 질 녘',
+    typeEng: 'Go',
+    typeKr: '모르면 간첩 인싸 재질',
     mbti: 'ENFJ'
   },
   {
-    typeEng: 'Morning Dew',
-    typeKr: '아침 이슬',
+    typeEng: 'JavaScript',
+    typeKr: '유연하고 섬세한 마성의 발라더',
     mbti: 'ESFJ'
   },
   {
-    typeEng: 'Dune Line',
-    typeKr: '사구선',
+    typeEng: 'R',
+    typeKr: '완벽.. 빈틈없는 벽이 느껴져..',
     mbti: 'ESTJ'
   },
   {
-    typeEng: 'Lightning Flash',
-    typeKr: '번개 섬광',
+    typeEng: 'C++',
+    typeKr: '고민보다 GO! 행동 대장',
     mbti: 'ESTP'
   },
   {
-    typeEng: 'Blinking Star',
-    typeKr: '깜박이별',
+    typeEng: 'Swift',
+    typeKr: '마이웨이 힙스터',
     mbti: 'ENTP'
   },
   {
-    typeEng: 'Rainbow Cloud',
-    typeKr: '무지개 구름',
+    typeEng: 'Python',
+    typeKr: '단순명쾌 빠워긍정',
     mbti: 'ENFP'
   },
   {
-    typeEng: 'Spring Breeze',
-    typeKr: '봄바람',
+    typeEng: 'Ruby',
+    typeKr: '자유로운 영혼',
     mbti: 'ESFP'
   },
   {
-    typeEng: 'Deep Ocean',
-    typeKr: '심해',
+    typeEng: 'Assembly',
+    typeKr: '근본은 나야! 둘이 될 수 없어',
     mbti: 'INTJ'
   },
   {
-    typeEng: 'Moon Light',
-    typeKr: '달빛',
+    typeEng: 'Rust',
+    typeKr: '겉바속촉 완벽주의',
     mbti: 'INFJ'
   },
   {
-    typeEng: 'Salt Lake',
-    typeKr: '염수호',
+    typeEng: 'C',
+    typeKr: '알잘딱깔쎈 프로일잘러',
     mbti: 'ISFJ'
   },
   {
-    typeEng: 'Fog City',
-    typeKr: '안개 도시',
+    typeEng: 'TypeScript',
+    typeKr: '너 혹시… 뭐 돼? 자존감 TOP',
     mbti: 'ISTJ'
   },
   {
-    typeEng: 'Summer Shower',
-    typeKr: '소나기',
+    typeEng: 'C#',
+    typeKr: '기승전결 확실한 전교 1등 리더상',
     mbti: 'ISTP'
   },
   {
-    typeEng: 'Blue Hour',
-    typeKr: '여명 빛',
+    typeEng: 'Java',
+    typeKr: '무심한 듯 다정한 츤데레',
     mbti: 'INTP'
   },
   {
-    typeEng: 'Snow Flake',
-    typeKr: '눈송이',
+    typeEng: 'Dart',
+    typeKr: '조용히 강한 일잘러',
     mbti: 'INFP'
   },
   {
-    typeEng: 'Cherry Blossom',
-    typeKr: '벚꽃',
+    typeEng: 'PHP',
+    typeKr: '다정다감 따수운 자상보스',
     mbti: 'ISFP'
   }
 ];

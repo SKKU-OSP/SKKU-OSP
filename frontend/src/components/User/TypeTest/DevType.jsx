@@ -57,6 +57,8 @@ function DevType(props) {
   const factors = [data.typeA, data.typeB, data.typeC, data.typeD];
   const pos = data.pos;
   const neg = data.neg;
+  const posDesc = data.pos_desc;
+  const negDesc = data.neg_desc;
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -172,7 +174,7 @@ function DevType(props) {
   return (
     <>
       <div className="d-flex fs-4 bold mb-4 justify-content-between">
-        <div style={{ fontFamily: "nanumfont_ExtraBold" }}>개발자 유형</div>
+        <div style={{ fontFamily: "nanumfont_ExtraBold" }}>나와 닮은 개발 언어는?</div>
         <div>
           <button className="btn btn-secondary" onClick={() => navigate('test')} style={{ fontFamily: "nanumfont_Bold" }}>
             다시 검사하기
@@ -182,7 +184,7 @@ function DevType(props) {
       <div className="mb-5">
         <DevTypeCard
           devType={devType}
-          descEng={data.desc}
+          desc={data.desc}
           descKr={data.descKR}
           typeEng={data.nickname}
           typeKr={data.nicknameKR}
@@ -193,28 +195,30 @@ function DevType(props) {
         {/* 왼쪽: 상생/상극 파트너 */}
         <div className="d-flex gap-3" style={{ flex: '1.6' }}>
           <div style={{ flex: '1' }}>
-            <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>상생 파트너</div>
+            <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>😍 최고의 궁합</div>
             <ImageDescBox
               src={`${serverUrl}/static/images/${pos.code}.png`}
-              title={pos.nicknameKR}
-              desc={pos.descKR}
+              // title={pos.nickname}
+              // desc={pos.descKR}
               attrs={pos.desc.split(' ')}
+              desc={posDesc}
             />
           </div>
           <div style={{ flex: '1' }}>
-            <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>상극 파트너</div>
+            <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>🤔 대환장 궁합</div>
             <ImageDescBox
               src={`${serverUrl}/static/images/${neg.code}.png`}
-              title={neg.nicknameKR}
-              desc={neg.descKR}
+              // title={neg.nickname}
+              // desc={neg.descKR}
               attrs={neg.desc.split(' ')}
+              desc={negDesc}
             />
           </div>
         </div>
 
         {/* 오른쪽: 통계 그래프 */}
         <div style={{ flex: '1', minWidth: '300px', maxWidth: '400px' }}>
-          <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>개발자 유형 통계</div>
+          <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>나와 닮은 개발 언어 순위</div>
           {loading ? (
             <div className="text-center">로딩 중...</div>
           ) : (

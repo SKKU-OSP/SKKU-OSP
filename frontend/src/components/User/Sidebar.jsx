@@ -47,7 +47,7 @@ function Sidebar(props) {
             className="text-nowrap"
           >
             <FaShapes size={24} />
-            <span className="sidebar-menu">개발자 유형</span>
+            <span className="sidebar-menu">나와 닮은 개발 언어</span>
           </NavLink>
         </li>
       </ul>

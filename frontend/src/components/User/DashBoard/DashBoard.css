@@ -77,13 +77,13 @@
     float: right;
   }
   #sidebar-wrapper {
-    width: 180px;
+    width: 200px;
   }
   #content-wrapper {
     width: 100%;
   }
   .sidebar-nav {
-    width: 180px;
+    width: 200px;
   }
   #menu-toggle {
     cursor: pointer;
