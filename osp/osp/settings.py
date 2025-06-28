@@ -108,6 +108,7 @@ INSTALLED_APPS = [
     'message',
     'challenge',
     'crawler',
+    'github_collector',
 ]
 
 SITE_ID = 1
