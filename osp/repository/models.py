@@ -174,3 +174,43 @@ class GithubRepoCommitFiles(models.Model):
         managed = False
         db_table = 'github_repo_commit_files'
         unique_together = (('github_id', 'repo_name', 'sha'),)
+
+
+class TestGithubRepository(models.Model):
+    id = models.AutoField(primary_key=True)
+    owner_name = models.CharField(max_length=100)
+    repo_name = models.CharField(max_length=100)
+    github_id = models.CharField(max_length=40)
+    stars = models.IntegerField(default=0)
+    watchers = models.IntegerField(default=0)
+    forks = models.IntegerField(default=0)
+    commits = models.IntegerField(default=0)
+    commit_del = models.IntegerField(default=0)
+    commit_add = models.IntegerField(default=0)
+    commit_line = models.IntegerField(default=0)
+    pr = models.IntegerField(default=0)
+    open_issues = models.IntegerField(default=0)
+    closed_issues = models.IntegerField(default=0)
+    dependencies = models.IntegerField(default=0)
+    description = models.TextField(blank=True, null=True)
+    readme = models.BooleanField(default=False)
+    license = models.CharField(max_length=100, blank=True, null=True)
+    commit_date = models.DateTimeField(blank=True, null=True)
+    updated_date = models.DateTimeField(blank=True, null=True)
+    created_date = models.DateTimeField(blank=True, null=True)
+    contributors = models.IntegerField(default=0)
+    is_private = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'test_github_repository'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['owner_name', 'repo_name', 'github_id'],
+                name='unique_owner_repo_github_id'
+            )
+        ]
+        
+    def __str__(self):
+        return f'{self.github_id}/{self.owner_name}/{self.repo_name}'
+        
+        
