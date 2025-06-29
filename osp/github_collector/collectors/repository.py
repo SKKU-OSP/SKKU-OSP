@@ -40,16 +40,14 @@ class RepositoryCollector:
             List[Dict[str, Any]]: 레포지토리 정보 목록
         """
 
-        # 사용자가 보유한 공개 레포지토리 목록 조회
-        # TODO: 토큰이 개인 토큰일 시 비공개 레포지토리까지 조회 관련 처리
-        response = self.client._request(
-            method='GET',
-            endpoint=f'/users/{username}/repos'
-        )
-
-        for repo in response.json():
-            repo_name = username + '/' + repo['name']
-            yield repo_name
+        # 사용자가 보유/기여한 공개 레포지토리 목록 조회 (github profile에서 보이는 레포지토리)
+        for item in self.client._paginate(
+            endpoint=f'/users/{username}/repos',
+            params={
+                'type': 'all',
+            }
+        ):
+            yield item['full_name']
 
     def find_contribute_repositories(self, username: str) -> Generator[str, None, None]:
         """
@@ -62,7 +60,7 @@ class RepositoryCollector:
             List[Dict[str, Any]]: 레포지토리 정보 목록
         """
 
-        # 최근 기여한 레포지토리 탐색
+        # 1. pr로 기여한 레포지토리 탐색
         for item in self.client._paginate(
             endpoint=f'/search/issues',
             params={
@@ -71,6 +69,31 @@ class RepositoryCollector:
         ):
             repo_name = item["repository_url"].replace("https://api.github.com/repos/", "")
             yield repo_name
+        
+        # 2. commit으로 기여한 레포지토리 탐색
+        for item in self.client._paginate(
+            endpoint=f'/search/commits',
+            params = {'q': f'author:{username}', 'sort': 'author-date', 'order': 'desc'},
+            headers = {'Accept': 'application/vnd.github.cloak-preview'}
+        ):
+            if 'repository' in item:
+                yield item['repository']['full_name']
+        
+        # # 3. issue로 기여한 레포지토리 탐색
+        # # 이건 기여한 레포로 봐야하나..?
+        # for item in self.client._paginate(
+        #     endpoint=f'/search/issues',
+        #     params = {'q': f'author:{username} type:issue'}
+        # ):
+        #     yield item["repository_url"].replace("https://api.github.com/repos/", "")
+
+        # 4. 공개 이벤트로 기여한 레포지토리 탐색
+        
+        for item in self.client._paginate(
+            endpoint=f'/users/{username}/events/public'
+        ):
+            if 'repo' in item:
+                yield item['repo']['name']
 
     def find_organization_repositories(self, username: str) -> Generator[str, None, None]:
         """

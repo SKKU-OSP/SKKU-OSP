@@ -18,6 +18,8 @@ class Command(BaseCommand):
             client = GithubApiClient()
             collector = RepositoryCollector(client)
             repo_gen = collector.find_all_repositories(username)
+            for repo in repo_gen:
+                print(repo)
             save_repositories_in_batch(username, repo_gen)
             self.stdout.write(f"레포지토리 수집 완료: {username}")
         except Exception as e:

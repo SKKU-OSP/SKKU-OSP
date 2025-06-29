@@ -100,6 +100,7 @@ class GithubApiClient:
                   params: Optional[Dict[str, Any]] = None,
                   per_page: int = 100,
                   page: int = 1,
+                  headers: Optional[Dict[str, str]] = None,
                   ) -> Generator[Dict[str, Any], None, None]:
         """
         페이지네이션 처리 후 yeild를 통해 각 페이지 아이템 반환
@@ -120,9 +121,15 @@ class GithubApiClient:
         params['page'] = page
         
         while True:
-            response = self._request('GET', endpoint, params=params)
-            items = response.json()['items']
-            
+            response = self._request('GET', endpoint, params=params, headers=headers)
+
+            data = response.json()
+
+            if isinstance(data, dict) and 'items' in data:
+                items = data['items']
+            else:
+                items = data
+
             if not items:
                 break
 
