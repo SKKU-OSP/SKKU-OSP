@@ -216,21 +216,16 @@ class TestGithubRepository(models.Model):
     
 
 class TestGithubPullRequest(models.Model):
-    repo_owner_id = models.CharField(max_length=40)
-    repo_name = models.CharField(max_length=100)
-    pr_number = models.IntegerField()
-    github_id = models.CharField(max_length=40)
+    id = models.AutoField(primary_key=True) # pr에 부여되는 고유 번호 (api를 통해 확인 가능)
+    repo_owner_id = models.CharField(max_length=40, null=False, blank=False)
+    repo_name = models.CharField(max_length=100, null=False, blank=False)
+    pr_number = models.IntegerField(null=False, blank=False)
+    author_name = models.CharField(max_length=40, null=False, blank=False)
     pr_title = models.CharField(max_length=256)
     pr_date = models.DateField()
 
     class Meta:
         db_table = 'test_github_pull_request'
-        constraints = [
-            models.UniqueConstraint(
-                fields = ['repo_owner_id', 'repo_name', 'pr_number'],
-                name = 'unique_github_pull_request'
-            )
-        ]
 
     def __str__(self):
-        return f'{self.repo_owner_id}/{self.repo_name}/{self.pr_number}'
+        return f'{self.author_name}/{self.repo_owner_id}/{self.repo_name}/{self.pr_number}'
