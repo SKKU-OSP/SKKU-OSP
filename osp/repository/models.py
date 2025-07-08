@@ -213,4 +213,24 @@ class TestGithubRepository(models.Model):
     def __str__(self):
         return f'{self.github_id}/{self.owner_name}/{self.repo_name}'
         
-        
+    
+
+class TestGithubPullRequest(models.Model):
+    repo_owner_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    pr_number = models.IntegerField()
+    github_id = models.CharField(max_length=40)
+    pr_title = models.CharField(max_length=256)
+    pr_date = models.DateField()
+
+    class Meta:
+        db_table = 'test_github_pull_request'
+        constraints = [
+            models.UniqueConstraint(
+                fields = ['repo_owner_id', 'repo_name', 'pr_number'],
+                name = 'unique_github_pull_request'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.repo_owner_id}/{self.repo_name}/{self.pr_number}'
