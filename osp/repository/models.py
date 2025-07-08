@@ -216,7 +216,7 @@ class TestGithubRepository(models.Model):
     
 
 class TestGithubPullRequest(models.Model):
-    id = models.AutoField(primary_key=True) # pr에 부여되는 고유 번호 (api를 통해 확인 가능)
+    id = models.BigAutoField(primary_key=True) # pr에 부여되는 고유 번호 (api를 통해 확인 가능)
     repo_owner_id = models.CharField(max_length=40, null=False, blank=False)
     repo_name = models.CharField(max_length=100, null=False, blank=False)
     pr_number = models.IntegerField(null=False, blank=False)
