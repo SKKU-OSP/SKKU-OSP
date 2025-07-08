@@ -188,6 +188,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
 
   // 수정 버튼 클릭 시
   const handleShow = (event) => {
+    console.log('수정 버튼 클릭');
     event.preventDefault();
     if (board.board_type === 'Recruit') {
       const offset = new Date().getTimezoneOffset() * 60000;
@@ -489,7 +490,7 @@ function ArticleEdit({ isWrite, type, consentWriteOpen }) {
                       />{' '}
                       <label htmlFor="is-anonymous">익명</label>
                     </div>
-                    <button type="button" className="btn-write">
+                    <button type="submit" className="btn-write">
                       <BsPencilSquare style={{ marginRight: '7px', marginBottom: '5px' }} />
                       저장하기
                     </button>
