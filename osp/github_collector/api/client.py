@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any, List, Generator
+from typing import Optional, Dict, Any, List, Generator, Callable
 import requests
 
 class GithubApiClient:
@@ -101,18 +101,21 @@ class GithubApiClient:
                   per_page: int = 100,
                   page: int = 1,
                   headers: Optional[Dict[str, str]] = None,
-                  ) -> Generator[Dict[str, Any], None, None]:
+                  data_extractor: Optional[Callable[[Any], List]] = None,
+                  ) -> Generator[Any, None, None]:
         """
-        페이지네이션 처리 후 yeild를 통해 각 페이지 아이템 반환
+        페이지네이션 처리 후 데이터 반환
 
         Args:
             endpoint: API 엔드포인트 경로 ('/repos/owner/repo/...')
             params: 쿼리 파라미터 (선택적)
             per_page: 페이지당 아이템 수
             page: 시작 페이지 번호
+            headers: 추가 헤더 (선택적)
+            data_extractor: 데이터 추출 함수 (선택적). None이면 raw data 반환
 
         Returns:
-            Generator[Dict[str, Any], None, None]: 모든 페이지의 아이템 목록
+            Generator[Any, None, None]: 각 페이지의 데이터 또는 추출된 아이템
         """
         if params is None:
             params = {}
@@ -122,22 +125,29 @@ class GithubApiClient:
         
         while True:
             response = self._request('GET', endpoint, params=params, headers=headers)
-
             data = response.json()
 
-            if isinstance(data, dict) and 'items' in data:
-                items = data['items']
+            if data_extractor:
+                items = data_extractor(data)
+                if not items:
+                    break
+                for item in items:
+                    yield item
+                if len(items) < params['per_page']:
+                    break
             else:
-                items = data
-
-            if not items:
-                break
-
-            for item in items:
-                yield item
-                
-            if len(items) < params['per_page']:
-                break
+                # raw data 반환 시에도 리스트면 개별 아이템 yield
+                if isinstance(data, list):
+                    if not data:
+                        break
+                    for item in data:
+                        yield item
+                    if len(data) < params['per_page']:
+                        break
+                else:
+                    # dict 형태이거나 예상치 못한 형태면 그대로 yield하고 1페이지만 처리
+                    yield data
+                    break
                 
             params['page'] += 1
         

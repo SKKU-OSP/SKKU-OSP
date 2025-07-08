@@ -41,13 +41,13 @@ class RepositoryCollector:
         """
 
         # 사용자가 보유/기여한 공개 레포지토리 목록 조회 (github profile에서 보이는 레포지토리)
-        for item in self.client._paginate(
+        for repo in self.client._paginate(
             endpoint=f'/users/{username}/repos',
             params={
                 'type': 'all',
             }
         ):
-            yield item['full_name']
+            yield repo['full_name']
 
     def find_contribute_repositories(self, username: str) -> Generator[str, None, None]:
         """
@@ -65,7 +65,8 @@ class RepositoryCollector:
             endpoint=f'/search/issues',
             params={
                 'q': f'author:{username} type:pr',
-            }
+            },
+            data_extractor=lambda x: x['items']
         ):
             repo_name = item["repository_url"].replace("https://api.github.com/repos/", "")
             yield repo_name
@@ -74,7 +75,8 @@ class RepositoryCollector:
         for item in self.client._paginate(
             endpoint=f'/search/commits',
             params = {'q': f'author:{username}', 'sort': 'author-date', 'order': 'desc'},
-            headers = {'Accept': 'application/vnd.github.cloak-preview'}
+            headers = {'Accept': 'application/vnd.github.cloak-preview'},
+            data_extractor=lambda x: x['items']
         ):
             if 'repository' in item:
                 yield item['repository']['full_name']
@@ -89,11 +91,11 @@ class RepositoryCollector:
 
         # 4. 공개 이벤트로 기여한 레포지토리 탐색
         
-        for item in self.client._paginate(
+        for event in self.client._paginate(
             endpoint=f'/users/{username}/events/public'
         ):
-            if 'repo' in item:
-                yield item['repo']['name']
+            if 'repo' in event:
+                yield event['repo']['name']
 
     def find_organization_repositories(self, username: str) -> Generator[str, None, None]:
         """
