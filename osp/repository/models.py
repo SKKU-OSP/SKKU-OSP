@@ -229,3 +229,19 @@ class TestGithubPullRequest(models.Model):
 
     def __str__(self):
         return f'{self.author_name}/{self.repo_owner_id}/{self.repo_name}/{self.pr_number}'
+    
+
+class TestGithubIssue(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    repo_owner_id = models.CharField(max_length=40, null=False, blank=False)
+    repo_name = models.CharField(max_length=100, null=False, blank=False)
+    issue_number = models.IntegerField(null=False, blank=False)
+    author_name = models.CharField(max_length=40, null=False, blank=False)
+    issue_title = models.CharField(max_length=256)
+    issue_date = models.DateField()
+
+    class Meta:
+        db_table = 'test_github_issue'
+
+    def __str__(self):
+        return f'{self.author_name}/{self.repo_owner_id}/{self.repo_name}/{self.issue_number}'

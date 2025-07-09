@@ -1,8 +1,6 @@
-from github_collector.collectors.pull_request import PullRequestCollector
 from repository.models import TestGithubPullRequest
-from typing import Generator, List, Tuple, Dict, Any
+from typing import Generator, List, Dict, Any
 from itertools import islice
-from django.db.models import Q
 
 def batch_generator(generator: Generator[Dict[str, Any], None, None], batch_size: int) -> Generator[List[Dict[str, Any]], None, None]:
     while True:
