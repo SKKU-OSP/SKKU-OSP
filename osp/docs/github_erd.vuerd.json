@@ -4,8 +4,8 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -198.6491,
-    "scrollLeft": -12.66,
+    "scrollTop": -294.6491,
+    "scrollLeft": 0,
     "zoomLevel": 0.9,
     "show": 495,
     "database": 4,
@@ -209,15 +209,15 @@
           "eemFw7IyKy_OkTvev2mCO"
         ],
         "ui": {
-          "x": 12.5556,
-          "y": 895.5556,
+          "x": 1.4445,
+          "y": 916.6666,
           "zIndex": 69,
           "widthName": 92,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1752125826003,
+          "updateAt": 1752126608952,
           "createAt": 1752123099069
         }
       },
@@ -230,6 +230,7 @@
           "f-aM0W8UR1yHFh10nodyV",
           "BjiYJyFwdfJF5gTftMGe1",
           "8WSsAoHi8ACqNJgfcz7SG",
+          "gszg0PiPncxiDKJAAN9mc",
           "nl9eQSxuHUTNevvNx0Dzj",
           "1zCfN75JBZopqDSM9ezeC",
           "fWi4uZK0OMixiw_Vk_-hu",
@@ -255,6 +256,7 @@
           "kIQzYnZ0ePIPY0Pv5UQvC",
           "BjiYJyFwdfJF5gTftMGe1",
           "8WSsAoHi8ACqNJgfcz7SG",
+          "gszg0PiPncxiDKJAAN9mc",
           "nl9eQSxuHUTNevvNx0Dzj",
           "1zCfN75JBZopqDSM9ezeC",
           "fWi4uZK0OMixiw_Vk_-hu",
@@ -275,15 +277,15 @@
           "uBavAwcvoGuLrO1oPEH1i"
         ],
         "ui": {
-          "x": 822.1111,
-          "y": 698.6482,
+          "x": 798.7777,
+          "y": 563.0927,
           "zIndex": 105,
           "widthName": 102,
           "widthComment": 81,
           "color": ""
         },
         "meta": {
-          "updateAt": 1752125839368,
+          "updateAt": 1752126708458,
           "createAt": 1752123292288
         }
       }
@@ -1053,19 +1055,19 @@
         "id": "l531zWOy6KYIh6kzlagqL",
         "tableId": "M98IyDSU7ob4spyji_LWS",
         "name": "github_name",
-        "comment": "profile name(ex. 강병희)",
+        "comment": "github profile name(ex. 강병희)",
         "dataType": "VARCHAR",
         "default": "",
         "options": 0,
         "ui": {
           "keys": 0,
           "widthName": 76,
-          "widthComment": 132,
+          "widthComment": 172,
           "widthDataType": 60,
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1752124423807,
+          "updateAt": 1752126596162,
           "createAt": 1752124261386
         }
       },
@@ -1448,6 +1450,26 @@
           "updateAt": 1752125429163,
           "createAt": 1752125423698
         }
+      },
+      "gszg0PiPncxiDKJAAN9mc": {
+        "id": "gszg0PiPncxiDKJAAN9mc",
+        "tableId": "tGokp1AVC2q5Qtig6dDGu",
+        "name": "score",
+        "comment": "레포별 점수",
+        "dataType": "INT",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1752126704822,
+          "createAt": 1752126691719
+        }
       }
     },
     "relationshipEntities": {
@@ -1554,8 +1576,8 @@
           "columnIds": [
             "HDc528cIZPglN0kMlWH5E"
           ],
-          "x": 264.5556,
-          "y": 895.5556,
+          "x": 263.4445,
+          "y": 916.6666,
           "direction": 4
         },
         "meta": {
@@ -1573,8 +1595,8 @@
           "columnIds": [
             "uPC2xJQDjEXYLzF4Jgl9C"
           ],
-          "x": 516.5556,
-          "y": 995.5556,
+          "x": 525.4445,
+          "y": 1016.6666,
           "direction": 2
         },
         "end": {
@@ -1582,8 +1604,8 @@
           "columnIds": [
             "f-aM0W8UR1yHFh10nodyV"
           ],
-          "x": 822.1111,
-          "y": 990.6482,
+          "x": 798.7777,
+          "y": 867.0927,
           "direction": 1
         },
         "meta": {
@@ -1819,15 +1841,15 @@
         "id": "pPmKrmMmjoZJKc8G5OI21",
         "value": "github_id + owner_name + repo_name을 복합 유니크로 지정해서 실제 데이터 수집할때 테이블 조회 속도 향상",
         "ui": {
-          "x": 835.6803,
-          "y": 481.6249,
+          "x": 812.347,
+          "y": 419.4027,
           "zIndex": 287,
           "width": 345,
           "height": 101,
           "color": ""
         },
         "meta": {
-          "updateAt": 1752125849999,
+          "updateAt": 1752126625187,
           "createAt": 1752124867658
         }
       }
