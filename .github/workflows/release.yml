@@ -1,21 +1,30 @@
-name: Release Tag
+name: 개발 서버 자동 배포
+
 on:
   push:
     branches:
-      - main 
+      - develop
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: self-hosted
+
     steps:
-    - uses: actions/checkout@v2
-    - name: 버전 정보 추출
-      run: echo "##[set-output name=version;]$(echo '${{ github.event.head_commit.message }}' | egrep -o '\v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\-[a-z]{1,5}')"
-      id: extract_version_name       
-    - name: Release 생성 
-      uses: actions/create-release@v1
-      env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with: 
-        tag_name: ${{ steps.extract_version_name.outputs.version }} 
-        release_name: ${{ steps.extract_version_name.outputs.version }}
-        prerelease : true
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Frontend Docker Image
+        run: |
+          cd frontend
+          docker build --tag sosd/sosd-frontend-vitejs:test .
+
+      - name: Build Backend Docker Image
+        run: |
+          cd osp
+          docker build --tag sosd/sosd-backend-django:test .
+
+      - name: Restart Docker Compose
+        run: |
+          cd ..
+          docker-compose down
+          docker-compose up -d
