@@ -9,7 +9,7 @@ ENV ENV_MODE PRODUCT
 ADD ./deploy/requirements.txt /tmp
 
 # Install requirements
-RUN /usr/local/bin/python -m pip install --upgrade pip \
+RUN /usr/local/bin/python -m pip install --upgrade pip && \
     pip install --no-cache-dir -r /tmp/requirements.txt
 
 # ADD Secret when secret.key does not exist.
