@@ -162,7 +162,7 @@ function ContentView(props) {
         </div>
       </div>
       <div className="article-design">
-        <div className="article-container">
+        {/* <div className="article-container">
           <div id="article-title" className="col-md-9">
             {article.title}
           </div>
@@ -219,7 +219,54 @@ function ContentView(props) {
         <div className="article-info article-view">
           <span className="hidden"></span>
           <span>조회수 {article.view_cnt} </span>
+        </div> */}
+
+        <div className="article-container">
+          {/* 1st line: 제목, 날짜, 드롭다운 */}
+          <div className="article-header-row">
+            <div className="article-title">{article.title}</div>
+            <div className='article-date-row'>
+              <div className="article-date">{pub_date1} {pub_date2}</div>
+              <div className="article-dropdown">
+                {username === article.writer?.user.username || username === 'admin' ? (
+                  <Dropdown className="article-more" style={{ display: 'inline-block' }}>
+                    <Dropdown.Toggle as="span" id="dropdown-custom-component" className="dropdownbtn">
+                      <BsThreeDotsVertical />
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item onClick={onEdit}>
+                        <BsPencilFill style={{ marginRight: '10px' }} />
+                        수정
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={onDelete}>
+                        <BsTrash style={{ marginRight: '10px' }} />
+                        삭제
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                ) : null}
+              </div>
+            </div>
+            
+          </div>
+
+
+          <div className="divider"></div>
+
+          <div className="article-meta-row">
+            <div className="article-writer">
+              <span className="article-info">
+                {article.anonymous_writer ? (
+                  '익명'
+                ) : (
+                  <ProfileDropdown_Container userName={article.writer?.user.username} userId={article.writer?.user.id} />
+                )}
+              </span>
+            </div>
+            <div className="article-view-count">조회수 {article.view_cnt}</div>
+          </div>
         </div>
+
         <div className="article-body">
           <span dangerouslySetInnerHTML={{ __html: article.body }} className="article-info"></span>
         </div>

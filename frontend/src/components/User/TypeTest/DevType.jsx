@@ -191,9 +191,9 @@ function DevType(props) {
           factors={factors}
         />
       </div>
-      <div className="d-flex gap-3">
+      <div className="d-flex gap-3 devtype-flex-col">
         {/* 왼쪽: 상생/상극 파트너 */}
-        <div className="d-flex gap-3" style={{ flex: '1.6' }}>
+        <div className="d-flex gap-3 devtype-col" style={{ flex: '1.6' }}>
           <div style={{ flex: '1' }}>
             <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>😍 최고의 궁합</div>
             <ImageDescBox
@@ -217,7 +217,7 @@ function DevType(props) {
         </div>
 
         {/* 오른쪽: 통계 그래프 */}
-        <div style={{ flex: '1', minWidth: '300px', maxWidth: '400px' }}>
+        <div className="devtype-col" style={{ flex: '1', minWidth: '300px', maxWidth: '400px' }}>
           <div className="fs-5 mb-3" style={{ fontFamily: "nanumfont_ExtraBold" }}>나와 닮은 개발 언어 순위</div>
           {loading ? (
             <div className="text-center">로딩 중...</div>

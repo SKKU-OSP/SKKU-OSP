@@ -14,8 +14,38 @@
   .notice-line-up {
     border-color: var(--notice-row) !important;
   }
+  .article-container {
+    padding: 12px !important;
+  }
+  .article-body {
+    padding-left: 2vw !important;
+    padding-right: 2vw !important;
+  }
+  .article-title {
+    font-size: 1.0rem !important;
+    word-break: break-all;
+    text-align: left;
+  }
+  .article-header-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  .article-date-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    align-self: flex-end;
+    line-height: 1.2;
+  }
+
+  .article-date {
+    font-size: 0.8rem !important;
+    color: #666;
+  }
 }
-@media (max-width: 450px) {
+@media (max-width: 576px) {
   .article-bar {
     display: block !important;
   }
@@ -31,6 +61,73 @@
   .main-board {
     height: 600px !important;
   }
+}
+
+.article-container {
+  width: 100%;
+  padding: 20px;
+}
+
+/* 1st row: 제목, 날짜, 드롭다운 */
+.article-header-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.article-title {
+  flex: 8 1 0;
+  font-weight: bold;
+  font-size: 1.2rem;
+  white-space: normal;
+  word-break: break-all;
+  display: block;
+  color: #2f2f2f;
+  padding-right: 10px;
+}
+
+.article-date-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
+  justify-content: flex-end;
+}
+
+.article-date {
+  flex: none;
+  color: #595959;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.article-dropdown {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 구분선 */
+.divider {
+  border-bottom: 1px solid #eee;
+  margin: 10px 0;
+}
+
+/* 2nd row: 작성자, 조회수 */
+.article-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.article-view-count {
+  color: #595959;
+  white-space: nowrap;
 }
 
 #profile-tab {
@@ -1078,12 +1175,12 @@
   border-radius: 15px;
 }
 
-.article-dropdown {
+/* .article-dropdown {
   display: block;
   position: absolute;
   pointer-events: auto;
   z-index: 50;
-}
+} */
 
 .article-input {
   display: block;

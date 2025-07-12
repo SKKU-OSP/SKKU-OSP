@@ -53,12 +53,6 @@
   align-items: center;
 }
 
-.article-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-}
-
 #artice-meta {
   display: flex;
   flex-direction: row;
@@ -163,16 +157,6 @@
   line-height: 27px;
   text-align: left;
   color: #595959;
-}
-
-.article-view {
-  width: 100%;
-  padding: 10px 20px;
-  color: #595959;
-  font-size: 15px;
-  font-weight: 400;
-  display: flex;
-  justify-content: space-between;
 }
 
 .article-tags {
