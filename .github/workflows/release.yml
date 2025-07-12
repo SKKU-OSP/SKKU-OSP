@@ -28,3 +28,25 @@ jobs:
           cd ..
           docker-compose down
           docker-compose up -d
+
+      - name: Notify Slack on Success
+        if: success()
+        run: |
+          curl -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}" \
+            -H "Content-type: application/json; charset=utf-8" \
+            --data '{
+              "channel": "#sosd-deploy",
+              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다.\n🔗 http://sosd-dev.skku.edu:8080/"
+            }'
+
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          curl -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}" \
+            -H "Content-type: application/json; charset=utf-8" \
+            --data '{
+              "channel": "#sosd-deploy",
+              "text": "❌ [배포 실패] 개발 서버 배포에 실패했습니다. 로그를 확인해주세요."
+            }'
