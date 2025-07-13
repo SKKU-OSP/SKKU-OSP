@@ -23,17 +23,17 @@ from django.contrib.auth.models import User
 def start():
     envmode = os.getenv('ENV_MODE')
     if (envmode == "PRODUCT"):
-        crawl_time = '11, 23'
+        crawl_time = '11, 22'
     elif (envmode == "CRAWL"):
         crawl_time = '10, 22'
     elif (envmode == "DEV"):
         crawl_time = '6, 18'
     else:
         crawl_time = '4, 16'
-
+    crawl_list = "ki011127"
     scheduler = BackgroundScheduler(timezone='Asia/Seoul')
 
-    @scheduler.scheduled_job('cron', hour=crawl_time, misfire_grace_time=60, id='crawling_overview')
+    @scheduler.scheduled_job('cron', hour=crawl_time, minute='15',misfire_grace_time=60, id='crawling_overview')
     def crawl_overview_job():
         print('crawl_overview_job Start!', datetime.now())
         try:
@@ -63,7 +63,7 @@ def start():
         print('crawl_job:django.db.close_old_connections()')
         django.db.close_old_connections()
 
-    @scheduler.scheduled_job('cron', hour='0, 12', misfire_grace_time=60, id='crawling')
+    @scheduler.scheduled_job('cron', hour='0, 22', minute='18',misfire_grace_time=60, id='crawling')
     def crawl_job():
         print('crawl_job Start!', datetime.now())
         try:
@@ -94,7 +94,7 @@ def start():
         print('crawl_job:django.db.close_old_connections()')
         django.db.close_old_connections()
 
-    @scheduler.scheduled_job('cron', hour='6,18', misfire_grace_time=60, id='update_score')
+    @scheduler.scheduled_job('cron', hour='0,16', minute='9', misfire_grace_time=60, id='update_score')
     def update_score():
         print('Update Start!')
         challenge_list = Challenge.objects.all()
