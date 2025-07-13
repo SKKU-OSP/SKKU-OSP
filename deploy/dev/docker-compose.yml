@@ -1,0 +1,46 @@
+# deploy/dev/docker-compose.yml
+version: '3.8'
+
+services:
+  FRONTEND:
+    build:
+      context: ../../
+      dockerfile: frontend/Dockerfile
+      args:
+        BUILD_ENV: DEV
+    image: sosd/sosd-frontend-vitejs:test
+    container_name: sosd-frontend
+    restart: always
+    environment:
+      VIRTUAL_HOST: 'sosd-dev.skku.edu'
+      LETSENCRYPT_HOST: 'sosd-dev.skku.edu'
+      VIRTUAL_PORT: 5173
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - 'net'
+    ports:
+      - '4401:5173'
+
+  OSP:
+    build:
+      context: ../../
+      dockerfile: osp/Dockerfile
+      args:
+        BUILD_ENV: DEV
+    image: sosd/sosd-backend-django:test
+    container_name: sosd-backend
+    restart: always
+    volumes:
+      - '/home/sosd-dev/SKKU-OSP/osp/data/media:/app/data/media'
+      - '/home/sosd-dev/SKKU-OSP/osp/static:/app/staticfiles'
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - 'net'
+    ports:
+      - '4402:8000'
+
+networks:
+  net:
+    external: true
