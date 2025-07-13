@@ -12,13 +12,13 @@ jobs:
     steps:
       - name: Pull latest code from develop branch
         run: |
-          cd /home/sosd-dev/SKKU-OSP
+          cd /home/sosd-dev/SKKU-OSP_FB
           git checkout develop
           git pull origin develop
 
       - name: Deploy with Docker Compose
         run: |
-          cd /home/sosd-dev/SKKU-OSP/deploy/dev
+          cd /home/sosd-dev/SKKU-OSP_FB/deploy/dev
           docker compose down
           docker compose up -d --build
 
@@ -30,7 +30,7 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data '{
               "channel": "#sosd-deploy",
-              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다.\n🔗 https://sosd-dev.skku.edu:8080/"
+              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다.\n🔗 http://sosd-dev.skku.edu:8080/"
             }'
 
       - name: Notify Slack on Failure
@@ -41,5 +41,5 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data '{
               "channel": "#sosd-deploy",
-              "text": "❌ [배포 실패] 개발 서버 배포에 실패했습니다. 로그를 확인해주세요."
+              "text": "❌ [배포 실패] 개발 서버 배포에 실패했습니다. 로그를 확인해주세요.\n🔗 https://github.com/SKKU-OSP/SKKU-OSP/actions"
             }'
