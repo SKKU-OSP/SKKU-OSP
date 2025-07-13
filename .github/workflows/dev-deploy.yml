@@ -41,5 +41,5 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data '{
               "channel": "#sosd-deploy",
-              "text": "❌ [배포 실패] 개발 서버 배포에 실패했습니다. 로그를 확인해주세요."
+              "text": "❌ [배포 실패] 개발 서버 배포에 실패했습니다. 로그를 확인해주세요.\n🔗 https://github.com/SKKU-OSP/SKKU-OSP/actions"
             }'
