@@ -12,13 +12,13 @@ jobs:
     steps:
       - name: Pull latest code from develop branch
         run: |
-          cd /home/sosd-dev/SKKU-OSP
+          cd /home/sosd-dev/SKKU-OSP_FB
           git checkout develop
           git pull origin develop
 
       - name: Deploy with Docker Compose
         run: |
-          cd /home/sosd-dev/SKKU-OSP/deploy/dev
+          cd /home/sosd-dev/SKKU-OSP_FB/deploy/dev
           docker compose down
           docker compose up -d --build
 

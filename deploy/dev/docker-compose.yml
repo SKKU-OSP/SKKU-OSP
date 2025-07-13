@@ -32,8 +32,8 @@ services:
     container_name: sosd-backend
     restart: always
     volumes:
-      - '/home/sosd-dev/SKKU-OSP/osp/data/media:/app/data/media'
-      - '/home/sosd-dev/SKKU-OSP/osp/static:/app/staticfiles'
+      - '/home/sosd-dev/SKKU-OSP_FB/osp/data/media:/app/data/media'
+      - '/home/sosd-dev/SKKU-OSP_FB/osp/static:/app/staticfiles'
     extra_hosts:
       - host.docker.internal:host-gateway
     networks:
