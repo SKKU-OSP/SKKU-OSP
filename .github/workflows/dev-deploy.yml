@@ -10,24 +10,18 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Build Frontend Docker Image
+      - name: Pull latest code from develop branch
         run: |
-          cd frontend
-          docker build --tag sosd/sosd-frontend-vitejs:test .
+          cd /home/sosd-dev/SKKU-OSP
+          git fetch origin develop
+          git reset --hard origin/develop
+          git clean -fd
 
-      - name: Build Backend Docker Image
+      - name: Deploy with Docker Compose
         run: |
-          cd osp
-          docker build --tag sosd/sosd-backend-django:test .
-
-      - name: Restart Docker Compose
-        run: |
-          cd ..
-          docker-compose down
-          docker-compose up -d
+          cd /home/sosd-dev/SKKU-OSP/deploy/dev
+          docker compose down
+          docker compose up -d --build
 
       - name: Notify Slack on Success
         if: success()
@@ -37,7 +31,7 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data '{
               "channel": "#sosd-deploy",
-              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다.\n🔗 http://sosd-dev.skku.edu:8080/"
+              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다.\n🔗 https://sosd-dev.skku.edu:8080/"
             }'
 
       - name: Notify Slack on Failure

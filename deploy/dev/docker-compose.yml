@@ -4,8 +4,8 @@ version: '3.8'
 services:
   FRONTEND:
     build:
-      context: ../../
-      dockerfile: frontend/Dockerfile
+      context: ../../frontend
+      dockerfile: Dockerfile
       args:
         BUILD_ENV: DEV
     image: sosd/sosd-frontend-vitejs:test
@@ -24,8 +24,8 @@ services:
 
   OSP:
     build:
-      context: ../../
-      dockerfile: osp/Dockerfile
+      context: ../../osp
+      dockerfile: Dockerfile
       args:
         BUILD_ENV: DEV
     image: sosd/sosd-backend-django:test
