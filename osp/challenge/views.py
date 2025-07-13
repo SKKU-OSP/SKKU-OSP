@@ -137,7 +137,7 @@ def achievement_check(user: Account, challenge: Challenge):
 
 class SecretSignJWT(APIView):
     '''
-    킹고 코인에 API 요청을 위해 필요한 JWT토큰 생성 및 반환환
+    킹고 코인에 API 요청을 위해 필요한 JWT토큰 생성 및 반환
     '''
 
     def get(self, request, target_user_id):

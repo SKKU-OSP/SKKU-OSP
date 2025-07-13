@@ -23,7 +23,6 @@ from django.urls import include, path, re_path
 from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 
 urlpatterns = [
-    path('', lambda req: redirect('/admin/')),
     path('admin/', admin.site.urls),
 
     path('home/', include('home.urls')),

@@ -7,10 +7,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': "github_crawl",
-        'USER': "crawler",
-        'PASSWORD': "skku",
+        'USER': "root",
+        'PASSWORD': "1234",
         'HOST': "host.docker.internal",
-        'PORT': 3338,
+        'PORT': 4410,
     }
 }
 
