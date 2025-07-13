@@ -13,9 +13,8 @@ jobs:
       - name: Pull latest code from develop branch
         run: |
           cd /home/sosd-dev/SKKU-OSP
-          git fetch origin develop
-          git reset --hard origin/develop
-          git clean -fd
+          git checkout develop
+          git pull origin develop
 
       - name: Deploy with Docker Compose
         run: |
