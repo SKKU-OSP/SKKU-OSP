@@ -4,6 +4,41 @@ from tag.models import Tag, TagIndependent
 
 # Create your models here.
 
+class UserAccount(models.Model):
+    student_id = models.CharField(max_length=255, primary_key=True)
+    date_joined = models.DateTimeField()
+    role = models.IntegerField(null=True, blank=True)
+    name = models.CharField(max_length=20)
+    college = models.CharField(max_length=45)
+    dept = models.CharField(max_length=45)
+    last_login = models.DateTimeField(null=True, blank=True)
+    is_active = models.IntegerField(null=True, blank=True)
+    photo = models.ImageField(
+        upload_to='img/profile_img', default='img/profile_img/default.jpg')
+    introduction = models.TextField(default='', null=True, blank=True)
+    portfolio = models.TextField(default='', null=True, blank=True)
+    plural_major = models.IntegerField()
+    absence = models.IntegerField()
+
+    class Meta:
+        db_table = "test_user_account"
+        verbose_name = "유저 정보"
+        verbose_name_plural = "유저 정보"
+
+class GithubAccount(models.Model):
+    github_id = models.BigIntegerField(primary_key=True)
+    student = models.ForeignKey(UserAccount, on_delete=models.CASCADE, db_column="student_id")
+    github_login = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    github_name = models.CharField(max_length=255, null=True, blank=True)
+    github_token = models.CharField(max_length=255, null=True, blank=True)
+    last_crawling = models.DateTimeField(null=True, blank=True)
+    github_email = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        db_table = "test_github_account"
+        verbose_name = "깃허브 계정"
+        verbose_name_plural = "깃허브 계정"
+
 
 class StudentTab(models.Model):
     id = models.IntegerField(primary_key=True)

@@ -108,6 +108,7 @@ INSTALLED_APPS = [
     'message',
     'challenge',
     'crawler',
+    'migration_tool',
 ]
 
 SITE_ID = 1
