@@ -9,18 +9,23 @@ jobs:
   deploy:
     runs-on: self-hosted
 
-    steps:
-      - name: Pull latest code from develop branch
+    defaults:
+      run:
+        shell: bash
         working-directory: /home/sosd-dev/SKKU-OSP_FB
+
+    steps:
+      - name: check git status
         run: |
-          git checkout develop
-          git pull origin develop
+          pwd && ls -al && git status
+
+      - name: Pull latest code from develop branch
+        run: |
+          git checkout develop && git pull origin develop
 
       - name: Deploy with Docker Compose
-        working-directory: /home/sosd-dev/SKKU-OSP_FB/deploy/dev
         run: |
-          docker compose down
-          docker compose up -d --build
+          cd deploy/dev && docker compose down && docker compose up -d --build
 
       - name: Notify Slack on Success
         if: success()
