@@ -21,7 +21,7 @@ function MainHeader_Presenter() {
               title="개인정보처리방침 바로가기"
               style={{ color: '#8dc63f' }}
             >
-              개인정보처리방침
+              개인정보<br className="mobile-br" />처리방침
             </a>
           </li>
           <li>
@@ -31,7 +31,7 @@ function MainHeader_Presenter() {
               title="네티즌윤리규약 바로가기"
               style={{ color: '#bfbfbf' }}
             >
-              네티즌윤리규약
+              네티즌<br className="mobile-br" />윤리규약
             </a>
           </li>
           <li>
@@ -41,7 +41,7 @@ function MainHeader_Presenter() {
               title="이메일무단수집거부 바로가기"
               style={{ color: '#bfbfbf' }}
             >
-              이메일무단수집거부
+              이메일무단<br className="mobile-br" />수집거부
             </a>
           </li>
         </ul>

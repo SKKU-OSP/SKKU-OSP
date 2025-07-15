@@ -258,9 +258,18 @@
 .comment-input {
   padding: 10px 0;
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-count {
+  width: 100%;
+}
+
+.comment-write {
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-grow: 1;
+  gap: 10px;
 }
 
 .comment {
