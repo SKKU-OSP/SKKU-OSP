@@ -1,0 +1,44 @@
+name: 운영 서버 릴리즈 기반 자동 배포
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull released code from main branch
+        run: |
+          cd /home/sosd-dev/SKKU-OSP
+          git checkout main
+          git pull origin main
+
+      - name: Deploy with Docker Compose (Production)
+        run: |
+          cd /home/sosd-dev/SKKU-OSP/deploy/prod
+          docker compose down
+          FRONTEND_VERSION=${{ github.event.release.tag_name }} BACKEND_VERSION=${{ github.event.release.tag_name }} docker compose up -d --build
+
+      - name: Notify Slack on Success
+        if: success()
+        run: |
+          curl -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}" \
+            -H "Content-type: application/json; charset=utf-8" \
+            --data '{
+              "channel": "#sosd-deploy",
+              "text": "✅ [운영 배포 성공] 릴리즈 `${{ github.event.release.tag_name }}` 버전이 성공적으로 배포되었습니다.\n🔗 https://sosd.skku.edu"
+            }'
+
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          curl -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}" \
+            -H "Content-type: application/json; charset=utf-8" \
+            --data '{
+              "channel": "#sosd-deploy",
+              "text": "❌ [운영 배포 실패] 릴리즈 `${{ github.event.release.tag_name }}` 배포에 실패했습니다. 로그를 확인해주세요.\n🔗 https://github.com/SKKU-OSP/SKKU-OSP/actions"
+            }'
