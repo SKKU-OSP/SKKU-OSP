@@ -12,7 +12,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: /home/sosd-dev/SKKU-OSP_FB
+        working-directory: ~/SKKU-OSP_FB
 
     steps:
       - name: check git status
