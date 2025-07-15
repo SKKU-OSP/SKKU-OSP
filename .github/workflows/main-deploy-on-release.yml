@@ -1,4 +1,4 @@
-name: 운영 서버 릴리즈 기반 자동 배포
+name: 상용 서버 릴리즈 기반 자동 배포
 
 on:
   release:
@@ -8,23 +8,18 @@ jobs:
   deploy:
     runs-on: self-hosted
 
-    defaults:
-      run:
-        shell: bash
-        working-directory: /home/sosd-dev/SKKU-OSP
-
     steps:
       - name: check git status
         run: |
-          pwd && ls -al && git status
+          cd /home/sosd-com/SKKU-OSP && pwd && ls -al && git status
 
       - name: Pull released code from main branch
         run: |
-          git checkout main && git pull origin main
+          cd /home/sosd-com/SKKU-OSP && git checkout main && git pull origin main
 
       - name: Deploy with Docker Compose (Production)
         run: |
-          cd deploy/prod && docker compose down && FRONTEND_VERSION=${{ github.event.release.tag_name }} BACKEND_VERSION=${{ github.event.release.tag_name }} docker compose up -d --build
+          cd /home/sosd-com/SKKU-OSP/deploy/prod && docker compose down && FRONTEND_VERSION=${{ github.event.release.tag_name }} BACKEND_VERSION=${{ github.event.release.tag_name }} docker compose up -d --build
 
       - name: Notify Slack on Success
         if: success()
