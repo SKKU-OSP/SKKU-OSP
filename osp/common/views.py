@@ -3,7 +3,7 @@ import re
 import smtplib
 
 import requests
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import authenticate, get_user_model, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
@@ -28,8 +28,11 @@ from user.models import Account, AccountInterest, AccountPrivacy, StudentTab, Gi
 from repository.models import GithubIssues, GithubPulls, GithubRepoCommits, GithubRepoContributor, GithubRepoStats, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
 from home.models import Repository, Student
 from data.api import GitHub_API
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class JWTLoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -42,7 +45,6 @@ class JWTLoginView(APIView):
 
         if user is not None:
             # 접속일 업데이트
-            login(request, user)
 
             token = RefreshToken.for_user(user)  # simple jwt로 토큰 발급
             print("access_token", token.access_token)
@@ -67,6 +69,7 @@ class JWTLoginView(APIView):
         return Response(get_fail_res("Username과 password를 다시 확인해주세요."),)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class GitHubLoginView(APIView):
     def get(self, request):
         code = request.GET.get('code')
@@ -94,8 +97,6 @@ class GitHubLoginView(APIView):
                     # 유저가 존재하면 데이터 조회하여 반환
                     user_account = account.first()
                     user = User.objects.get(id=user_account.user_id)
-                    # 접속일 업데이트
-                    login(request, user)
 
                     token = RefreshToken.for_user(user)  # simple jwt로 토큰 발급
                     print("access_token", token.access_token)

@@ -20,6 +20,77 @@
   .contribution-repo {
     padding: 8px !important;
   }
+
+  .profile_info {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .profile_info .info_left {
+    width: 100% !important;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .profile_info .info_left .info_img {
+    width: 120px !important;
+    height: 120px !important;
+    margin: 8px 0;
+  }
+  .profile_info .info_right {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    padding: 0 !important;
+  }
+  .profile_info .info_button {
+    width: 100%;
+    justify-content: center !important;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    gap: 8px !important;
+  }
+  .profile_info .info_username,
+  .profile_info .info_github,
+  .profile_info .info_introduction,
+  .profile_info .info_editing-textarea {
+    width: 100% !important;
+    text-align: left;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .info_qna-text {
+    white-space: nowrap;
+  }
+
+  .info_qna {
+    min-width: 70px;
+    max-width: 120px;
+    text-align: right;
+  }
+  
+  .info_username {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .devtype-flex-col {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+
+  .devtype-col {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-bottom: 15px !important;
+  }
 }
 
 .user-container {
