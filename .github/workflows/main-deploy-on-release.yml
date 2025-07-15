@@ -39,7 +39,7 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data '{
               "channel": "#sosd-deploy",
-              "text": "✅ [운영 배포 성공] 릴리즈 `${{ github.event.release.tag_name }}` 버전이 성공적으로 배포되었습니다.\n🔗 https://sosd.skku.edu"
+              "text": "✅ [운영 배포 성공] 릴리즈 `${{ github.event.release.tag_name }}` 버전이 성공적으로 배포되었습니다!\n🔗 https://sosd.skku.edu"
             }'
 
       - name: Notify Slack on Failure
