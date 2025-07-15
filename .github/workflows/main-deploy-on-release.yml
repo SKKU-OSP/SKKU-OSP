@@ -6,12 +6,22 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, prod-runner]
 
     steps:
+      - name: Check runner environment
+        run: |
+          echo "USER: $(whoami)"
+          echo "HOME: $HOME"
+          echo "PWD: $(pwd)"
+          echo "HOSTNAME: $(hostname)"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "RUNNER_WORKSPACE: $RUNNER_WORKSPACE"
+
       - name: check git status
         run: |
-          cd /home/sosd-com/SKKU-OSP && pwd && ls -al && git status
+          cd /home/sosd-com/SKKU-OSP || { echo "❌ 디렉토리 없음"; exit 1; }
+          pwd && ls -al && git status
 
       - name: Pull released code from main branch
         run: |
