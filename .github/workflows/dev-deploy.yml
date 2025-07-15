@@ -40,7 +40,7 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data '{
               "channel": "#sosd-deploy",
-              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다.\n🔗 http://sosd-dev.skku.edu:8080/"
+              "text": "✅ [배포 성공] 개발 서버가 성공적으로 배포되었습니다!\n🔗 http://sosd-dev.skku.edu:8080/"
             }'
 
       - name: Notify Slack on Failure
