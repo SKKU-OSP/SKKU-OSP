@@ -10,9 +10,19 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Check runner environment
+        run: |
+          echo "USER: $(whoami)"
+          echo "HOME: $HOME"
+          echo "PWD: $(pwd)"
+          echo "HOSTNAME: $(hostname)"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "RUNNER_WORKSPACE: $RUNNER_WORKSPACE"
+
       - name: check git status
         run: |
-          cd /home/sosd-dev/SKKU-OSP_FB && pwd && ls -al && git status
+          cd /home/sosd-dev/SKKU-OSP_FB || { echo "❌ 디렉토리 없음"; exit 1; }
+          pwd && ls -al && git status
 
       - name: Pull latest code from develop branch
         run: |
