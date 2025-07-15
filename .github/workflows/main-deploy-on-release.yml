@@ -10,14 +10,14 @@ jobs:
 
     steps:
       - name: Pull released code from main branch
+        working-directory: /home/sosd-dev/SKKU-OSP
         run: |
-          cd /home/sosd-dev/SKKU-OSP
           git checkout main
           git pull origin main
 
       - name: Deploy with Docker Compose (Production)
+        working-directory: /home/sosd-dev/SKKU-OSP/deploy/prod
         run: |
-          cd /home/sosd-dev/SKKU-OSP/deploy/prod
           docker compose down
           FRONTEND_VERSION=${{ github.event.release.tag_name }} BACKEND_VERSION=${{ github.event.release.tag_name }} docker compose up -d --build
 
