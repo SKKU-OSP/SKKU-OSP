@@ -33,6 +33,42 @@ from django.utils.decorators import method_decorator
 
 
 @method_decorator(csrf_exempt, name='dispatch')
+class SSOLoginView(APIView):
+    def post(self, request):
+        student_id = request.data.get('student_id')
+        if not student_id:
+            return Response(get_fail_res("SSO 데이터에서 학번을 찾을 수 없습니다."), status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            student = StudentTab.objects.get(id=student_id)
+            account = Account.objects.get(student_data=student)
+            user = account.user
+        except (StudentTab.DoesNotExist, Account.DoesNotExist):
+            # 사용자가 존재하지 않으면 404 Not Found 응답
+            return Response(get_fail_res("가입되지 않은 사용자입니다. 회원가입을 진행합니다."), status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logging.exception(f"SSOLoginView 에러: {e}")
+            return Response(get_fail_res("로그인 중 문제가 발생했습니다. 관리자에게 문의하세요."), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # 사용자가 존재하면 JWT 토큰 발급
+        token = RefreshToken.for_user(user)
+        github_id = account.github_id
+        
+        # GitHub 계정 유효성 검사 (선택적)
+        res = requests.get(f'https://api.github.com/users/{github_id}')
+        if res.status_code != 200 and user.username != "admin":
+            # GitHub 계정이 유효하지 않아도 로그인은 성공시키되, 클라이언트에서 처리할 수 있도록 메시지 전달
+            pass
+
+        data = {
+            'user': account.to_json(),
+            'access_token': str(token.access_token),
+            'refresh_token': str(token),
+        }
+        return Response({"status": "success", "message": "로그인 성공", "data": data})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
 class JWTLoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -75,63 +111,26 @@ class GitHubLoginView(APIView):
         code = request.GET.get('code')
         if code is None:
             return Response(get_fail_res("요청에서 code를 얻지 못했습니다."))
-        # code 값을 이용해 access_token 발급
+
         access_token = get_access_token(code)
         if access_token is None:
             return Response(get_fail_res("GitHub에서 access_token을 얻지 못했습니다."))
-        # access_token 값을 이용해 github email 조회
-        primary_email = get_user_primary_email(access_token)
-        print("primary_email", primary_email)
-        # access_token 값을 이용해 github 유저 정보 조회
-        user_info = get_user_info(access_token)
-        print("user_info", user_info)
 
+        user_info = get_user_info(access_token)
         if user_info is None:
             return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."))
 
-        # account 존재하면 로그인, 없으면 회원가입
-        try:
-            account = Account.objects.filter(github_id=user_info['username'])
-            if account.exists():
-                try:
-                    # 유저가 존재하면 데이터 조회하여 반환
-                    user_account = account.first()
-                    user = User.objects.get(id=user_account.user_id)
+        primary_email = get_user_primary_email(access_token)
 
-                    token = RefreshToken.for_user(user)  # simple jwt로 토큰 발급
-                    print("access_token", token.access_token)
+        # GitHub ID 중복 체크
+        if check_duplicate_github_id(user_info['username']):
+            return Response(get_fail_res("이미 가입된 GitHub 계정입니다."))
 
-                    data = {
-                        'user': user_account.to_json(),
-                        'access_token': str(token.access_token),
-                        'refresh_token': str(token),
-                    }
-                    return Response({"status": "success", "message": "로그인 성공", "data": data}, status=status.HTTP_200_OK)
-
-                except Exception as e:
-                    logging.exception(
-                        f"[github_login_callback] user_account {e}")
-                    return Response(get_fail_res("GitHub에서 유저 정보를 얻지 못했습니다."), status=status.HTTP_400_BAD_REQUEST)
-
-            else:
-                # 회원가입 페이지에 필요한 GitHub username, username, GitHub email
-                data = {'github_username': None, 'username': None,
-                        "github_email_id": None, "github_email_domain": None,
-                        "personal_email_id": None, "personal_email_domain": None}
-                data['github_username'] = {
-                    "value": user_info['username'], 'readonly': True}
-                data['username'] = {
-                    "value": user_info['username'], 'readonly': False}
-
-                data['github_email_id'], data['github_email_domain'] = split_email(
-                    primary_email, False)
-                data['personal_email_id'], data['personal_email_domain'] = split_email(
-                    user_info['email'], False)
-
-                return Response({"status": "success", "message": "현재 GitHub ID로 로그인할 수 없습니다.\nGitHub ID 변경을 원하신다면 \"확인\"을, 회원가입을 원하신다면 \"취소\"를 눌러주시기 바랍니다.", "data": data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            logging.exception(f'Account Proccess Exception: {e}')
-            return Response(get_fail_res("계정을 확인할 수 없습니다."))
+        data = {
+            "github_username": user_info['username'],
+            "github_email": primary_email or user_info['email'] # primary email이 없으면 public email 사용
+        }
+        return Response({"status": "success", "data": data})
 
 
 def split_email(email, readonly=True):
@@ -164,75 +163,12 @@ class SignUpView(APIView):
 
     def post(self, request):
         fail_reason = {}
-        # username 유효성 검사
+        # username 유효성 검사 (닉네임으로 사용)
         username = request.data.get('username', '').strip()
-        if len(username) < 5:
-            fail_reason['username'] = f'Username은 5자 이상이여야 합니다. 현재 {len(username)} 자'
+        if len(username) < 2:
+            fail_reason['username'] = f'닉네임은 2자 이상이여야 합니다. 현재 {len(username)} 자'
         elif check_duplicate_username(username):
-            fail_reason['username'] = '중복된 Username이 있습니다.'
-
-        # password 유효성 검사
-        password = request.data.get('password', '').strip()
-        password_check = request.data.get('password_check', '').strip()
-        if len(password) < 4:
-            fail_reason['password'] = f'Password는 4자 이상이여야 합니다. 현재 {len(password)} 자'
-        if password != password_check:
-            fail_reason['password_check'] = 'Password가 일치하지 않습니다.'
-
-        # 학번 유효성 검사
-        student_id = request.data.get('student_id', 0)
-        if not re.match('[0-9]{10}', str(student_id)):
-            fail_reason['student_id'] = '학번 형식이 다릅니다.'
-        if check_duplicate_student_id(request.data.get('student_id', 0)):
-            fail_reason['student_id'] = '중복된 학번이 있습니다.'
-        # 이름 유효성 검사
-        name = request.data.get('name', '').strip()
-        if len(name) > 20:
-            fail_reason['name'] = f'이름은 20자를 넘을 수 없습니다. 현재 {len(name)} 자'
-        if name.strip() == '':
-            fail_reason['name'] = f'이름을 입력해주세요.'
-        # 소속대학 유효성 검사
-        college = request.data.get('college', '')
-        if not college:
-            fail_reason['college'] = f'소속대학을 선택해주세요.'
-        if not check_college(college):
-            fail_reason['college'] = f'{college}는 소속대학 목록에 없는 이름입니다.'
-
-        # 학과 유효성 검사
-        dept = request.data.get('dept', '').strip()
-        if len(dept) > 45:
-            fail_reason['dept'] = f'학과명은 45자를 넘을 수 없습니다. 현재 {len(dept)} 자'
-        if dept.strip() == '':
-            fail_reason['dept'] = f'학과를 입력해주세요.'
-
-        # 이메일 유효성 검사
-        personal_email = request.data.get('personal_email', '').strip()
-        personal_email = personal_email + "@" + \
-            request.data.get('personal_email_domain', '').strip()
-        if len(personal_email) > 100:
-            fail_reason['personal_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(personal_email)} 자'
-
-        primary_email = request.data.get('primary_email', '').strip()
-        primary_email = primary_email + "@" + \
-            request.data.get('primary_email_domain', '').strip()
-        if len(primary_email) > 100:
-            fail_reason['primary_email'] = f'이메일 주소는 100자를 넘을 수 없습니다. 현재 {len(primary_email)} 자'
-
-        # secondary email은 필수값이 아니므로 쓰지않았는지 확인
-        secondary_email = request.data.get('secondary_email', '').strip()
-        secondary_email = secondary_email + "@" + \
-            request.data.get('secondary_email_domain', '').strip()
-        if secondary_email.strip() == "@" or secondary_email.strip() == "":
-            secondary_email = None
-        try:
-            if check_email(personal_email):
-                fail_reason['personal_email'] = '이메일이 형식에 맞지 않습니다.'
-            if check_email(primary_email):
-                fail_reason['primary_email'] = '이메일이 형식에 맞지 않습니다.'
-            if secondary_email and check_email(secondary_email):
-                fail_reason['secondary_email'] = '이메일이 형식에 맞지 않습니다.'
-        except Exception as e:
-            logging.exception(f"SignUpView exception {e}")
+            fail_reason['username'] = '중복된 닉네임이 있습니다.'
 
         # 동의서 유효성 검사
         check_consent = request.data.get('consent', False)
@@ -246,13 +182,22 @@ class SignUpView(APIView):
         if len(fail_reason) > 0:
             return Response({'status': 'fail', 'message': f'{len(fail_reason.keys())} 개의 문제가 있습니다.', 'feedback': fail_reason})
 
+        # SSO를 통해 받은 데이터를 사용
+        student_id = request.data.get('student_id')
+        name = request.data.get('name')
+        college = request.data.get('college')
+        dept = request.data.get('dept')
+        primary_email = request.data.get('primary_email', '').strip() + "@" + request.data.get('primary_email_domain', '').strip()
+
         # 실패 케이스가 없으면 저장
         try:
             with transaction.atomic():
-                user = User.objects.create_user(username=username,
-                                                password=password,
-                                                email=personal_email)
+                # User의 username은 닉네임으로, PW는 사용불가로 설정
+                user = User.objects.create_user(username=username)
+                user.set_unusable_password()
+                user.email = primary_email
                 user.save()
+
                 github_id = request.data.get('github_id')
                 student_data = StudentTab.objects.create(
                     id=student_id,
@@ -262,20 +207,15 @@ class SignUpView(APIView):
                     github_id=github_id,
                     absence=request.data.get('absence'),
                     plural_major=request.data.get('plural_major'),
-                    personal_email=personal_email,
                     primary_email=primary_email,
-                    secondary_email=secondary_email
+                    secondary_email=None # secondary_email은 더 이상 사용하지 않음
                 )
                 student_data.save()
+                
                 new_account = Account.objects.create(
-                    user=user, student_data=student_data, github_id=github_id)
+                    user=user, student_data=student_data, github_id=github_id
+                )
                 new_account.save()
-                account_interests = request.data.get('account_interests', [])
-                for tag in account_interests:
-                    tag = TagIndependent.objects.filter(name=tag)
-                    if tag.exists():
-                        AccountInterest.objects.create(
-                            account=new_account, tag=tag.first(), level=0)
 
                 open_lvl = request.data.get('open_lvl', 1)
                 is_write = request.data.get('is_write', False)
@@ -301,8 +241,8 @@ class CheckUserView(APIView):
         fail_reason = None
         username = request.data.get('username')
         print('username', username)
-        if len(username) < 5:
-            fail_reason = 'Username은 5자 이상이여야 합니다.'
+        if len(username) < 2:
+            fail_reason = 'Username은 2자 이상이여야 합니다.'
         elif check_duplicate_username(username):
             fail_reason = '중복된 Username이 있습니다.'
         if fail_reason:
@@ -310,34 +250,34 @@ class CheckUserView(APIView):
         return Response({'status': 'success', 'message': '사용가능한 Username입니다.'})
 
 
-class CheckGithubIdView(APIView):
-    def post(self, request):
-        fail_reason = None
-        github_id = request.data.get('github_id')
-        if len(github_id) == 0:
-            fail_reason = 'GitHub Username을 입력해주세요.'
-        elif check_duplicate_github_id(github_id):
-            fail_reason = '중복된 아이디가 있습니다.'
-        elif not check_api_github(github_id):
-            fail_reason = 'GitHub Username을 확인할 수 없습니다.'
-        if fail_reason:
-            return Response({'status': 'fail', 'message': fail_reason})
-        return Response({'status': 'success', 'message': '사용가능한 GitHub Username입니다.'})
+# class CheckGithubIdView(APIView):
+#     def post(self, request):
+#         fail_reason = None
+#         github_id = request.data.get('github_id')
+#         if len(github_id) == 0:
+#             fail_reason = 'GitHub Username을 입력해주세요.'
+#         elif check_duplicate_github_id(github_id):
+#             fail_reason = '중복된 아이디가 있습니다.'
+#         elif not check_api_github(github_id):
+#             fail_reason = 'GitHub Username을 확인할 수 없습니다.'
+#         if fail_reason:
+#             return Response({'status': 'fail', 'message': fail_reason})
+#         return Response({'status': 'success', 'message': '사용가능한 GitHub Username입니다.'})
 
 
-class CheckStudentIdView(APIView):
-    def post(self, request):
-        fail_reason = None
-        student_id = request.data['student_id']
-        if not student_id:
-            fail_reason = '학번을 입력해주세요.'
-        elif not re.match('[0-9]{10}', student_id):
-            fail_reason = '학번 형식이 다릅니다.'
-        elif check_duplicate_student_id(student_id):
-            fail_reason = '중복된 학번이 있습니다.'
-        if fail_reason:
-            return Response({'status': 'fail', 'message': fail_reason})
-        return Response({'status': 'success', 'message': '사용가능한 학번입니다.'})
+# class CheckStudentIdView(APIView):
+#     def post(self, request):
+#         fail_reason = None
+#         student_id = request.data['student_id']
+#         if not student_id:
+#             fail_reason = '학번을 입력해주세요.'
+#         elif not re.match('[0-9]{10}', student_id):
+#             fail_reason = '학번 형식이 다릅니다.'
+#         elif check_duplicate_student_id(student_id):
+#             fail_reason = '중복된 학번이 있습니다.'
+#         if fail_reason:
+#             return Response({'status': 'fail', 'message': fail_reason})
+#         return Response({'status': 'success', 'message': '사용가능한 학번입니다.'})
 
 
 def check_duplicate_username(username):

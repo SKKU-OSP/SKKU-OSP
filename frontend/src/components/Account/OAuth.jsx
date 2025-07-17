@@ -1,8 +1,8 @@
 import { useContext, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoaderIcon from 'react-loader-icon';
-
 import axios from 'axios';
+
 import AuthContext from '../../utils/auth-context';
 import { setExpiration } from '../../utils/auth';
 import GitHubLoginModal from './GithubLoginModal';
@@ -15,43 +15,53 @@ function OAuth() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    // setUser를 의존성 배열에 넣으면 서버로 요청을 두번 보내게 되어 로그인 불가
     const searchParams = new URLSearchParams(location.search);
     const code = searchParams.get('code');
 
     if (code) {
+      // URL에서 code를 즉시 제거하여 중복 사용 방지
+      const stateParam = searchParams.get('state');
+      navigate(location.pathname, { replace: true });
+
+      const state = stateParam ? JSON.parse(decodeURIComponent(stateParam)) : {};
       const server_url = import.meta.env.VITE_SERVER_URL;
       const url = `${server_url}/accounts/login/github/callback/?code=${code}`;
+
       axios
         .get(url)
         .then((response) => {
-          // 처리 완료 후 리다이렉트 등 필요한 동작 수행
           const res = response.data;
           if (res.status === 'success') {
+            if (state.isConnecting) {
+              const { github_username, github_email } = res.data;
+              navigate('/accounts/signup', {
+                state: {
+                  ssoData: state.ssoData,
+                  githubCallbackData: { github_username, github_email },
+                },
+                replace: true,
+              });
+              return;
+            }
+
             if (res.data?.access_token) {
-              // access_token 존재하면 로그인
-              console.log(res.message);
               localStorage.setItem('access_token', res.data.access_token);
               localStorage.setItem('refresh_token', res.data.refresh_token);
-              setExpiration(); // 로컬스토리지에 expiration 저장
+              setExpiration();
               setUser();
               navigate('/community');
             } else {
-              // 데이터 유효성 검사: not null 체크
-              const isValid = Object.values(res.data).every((value) => value !== null);
-              if (isValid) {
-                if (confirm(res.message)) {
-                  setModalData(res.data);
-                  setShowModal(true);
-                } else {
-                  // 회원가입
-                  navigate('/accounts/signup', { state: res.data });
-                }
+              // 기존 로직 (현재 흐름에서는 거의 사용되지 않음)
+              if (confirm(res.message)) {
+                setModalData(res.data);
+                setShowModal(true);
               } else {
-                alert('GitHub 데이터를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.');
-                navigate('/accounts/login');
+                navigate('/accounts/signup', { state: { githubData: res.data } });
               }
             }
+          } else {
+            alert(res.message || 'GitHub 인증에 실패했습니다.');
+            navigate('/accounts/login');
           }
         })
         .catch((error) => {
@@ -59,13 +69,8 @@ function OAuth() {
           alert('일시적인 장애가 발생했습니다. 잠시 후 다시 시도해주세요.');
           navigate('/accounts/login');
         });
-    } else {
-      console.error('Callback code is missing');
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('username');
     }
-  }, [location.search, navigate]);
+  }, [location, navigate, setUser]);
 
   const handleGithubIdChange = (studentId, githubId) => {
     const server_url = import.meta.env.VITE_SERVER_URL;

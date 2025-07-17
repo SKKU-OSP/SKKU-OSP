@@ -1,9 +1,9 @@
-import Login from '../components/Account/Login';
+import SSOLogin from '../components/Account/SSOLogin';
 
 function LoginPage() {
   return (
     <main>
-      <Login />
+      <SSOLogin />
     </main>
   );
 }
