@@ -62,7 +62,9 @@ class Command(BaseCommand):
                         data = response.json()
                         # id 값이 GitHub 고유 ID (정수)
                         github_id_value = data.get('id')
-                        
+                        GithubAccount.objects.filter(
+                            github_id=github_id_value
+                        ).delete()
                         # GithubAccount 저장
                         ga = GithubAccount(
                             github_id=github_id_value,
