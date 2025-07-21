@@ -28,7 +28,8 @@ class Command(BaseCommand):
         
         for acc in accounts:
             student = acc.student_data
-            if not student or acc.github_id != 'ki011127':
+            if not student:
+                self.stdout.write(self.style.WARNING(f"계정 {acc.github_id}는 student_data 없음"))
                 continue
             UserAccount.objects.filter(student_id=student.id).delete()
             # UserAccount 생성
@@ -80,7 +81,21 @@ class Command(BaseCommand):
                                 f"✅ 성공: {acc.github_id} 계정 처리 완료"
                             )
                         )
-                            
+                    else:
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"❗ API 요청 실패: {acc.github_id} ({response.status_code})"
+                            )
+                        )
+                        if response.status_code == 401:
+                            self.stdout.write(
+                                self.style.ERROR("토큰이 유효하지 않거나 만료되었습니다.")
+                            )
+                        elif response.status_code == 403:
+                            self.stdout.write(
+                                self.style.ERROR("API 요청 한도가 초과되었습니다.")
+                            )
+
                 except requests.RequestException as e:
                     self.stdout.write(
                         self.style.ERROR(f"❗ 네트워크 오류: {acc.github_id} - {str(e)}")
