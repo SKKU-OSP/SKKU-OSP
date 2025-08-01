@@ -34,29 +34,32 @@ function Comment(props) {
     <div className="comment-container">
       {username && (
         <div className="comment-input">
-          <div>
+          <div className="comment-count">
             <span className="article-info mx-1">
               <BsChatLeft size={22} style={{ margin: '3px' }} />({data.comments.length})
             </span>
           </div>
-          <Form.Check
-            type="checkbox"
-            label="익명"
-            checked={isAnonymous}
-            onChange={(e) => setIsAnonymous(e.target.checked)}
-          />
-          <div className="flex-grow-1 mx-1">
-            <Form.Control
-              type="text"
-              placeholder="댓글을 입력하세요"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              style={{ backgroundColor: '#e7e7e7', borderRadius: '20px' }}
+
+          <div className='comment-write'>
+            <Form.Check
+              type="checkbox"
+              label="익명"
+              checked={isAnonymous}
+              onChange={(e) => setIsAnonymous(e.target.checked)}
             />
+            <div className="flex-grow-1 mx-1">
+              <Form.Control
+                type="text"
+                placeholder="댓글을 입력하세요"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                style={{ backgroundColor: '#e7e7e7', borderRadius: '20px' }}
+              />
+            </div>
+            <button className="btn-write" onClick={() => postComment()}>
+              작성
+            </button>
           </div>
-          <button className="btn-write" onClick={() => postComment()}>
-            작성
-          </button>
         </div>
       )}
       {data.comments.map((comment) => (

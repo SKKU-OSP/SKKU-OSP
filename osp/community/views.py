@@ -1808,13 +1808,17 @@ class HeroThumbnailView(APIView):
 
         for hero_article in hero_articles:
             thumbnail = hero_article.thumbnail
+            try:
+                size = convert_size(thumbnail.size)
+            except:
+                size = 0
             thumbnail_details = {
                 'id': hero_article.id,
                 'article_id': hero_article.article.id,
                 'pub_date': hero_article.pub_date,
                 'thumbnail': {
                     'file': thumbnail.url,
-                    'size': convert_size(thumbnail.size),
+                    'size': size,
                 }
             }
             hero_articles_list.append(thumbnail_details)

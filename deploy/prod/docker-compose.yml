@@ -1,0 +1,47 @@
+# deploy/prod/docker-compose.yml
+version: '3.8'
+
+services:
+  FRONTEND:
+    # 빌드와 이미지 둘 다 지정 가능
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: PRODUCT
+    image: sosd/sosd-frontend-vitejs:${FRONTEND_VERSION:-v1.0.7}
+    container_name: sosd-frontend
+    restart: always
+    environment:
+      VIRTUAL_HOST: 'sosd.skku.edu'
+      LETSENCRYPT_HOST: 'sosd.skku.edu'
+      VIRTUAL_PORT: 5173
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - 'net'
+    ports:
+      - '4401:5173'
+
+  OSP:
+    build:
+      context: ../../osp
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: PRODUCT
+    image: sosd/sosd-backend-django:${BACKEND_VERSION:-v1.0.7}
+    container_name: sosd-backend
+    restart: always
+    volumes:
+      - '/home/sosd-com/SKKU-OSP/osp/data/media:/app/data/media'
+      - '/home/sosd-com/SKKU-OSP/osp/static:/app/staticfiles'
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - 'net'
+    ports:
+      - '4402:8000'
+
+networks:
+  net:
+    external: true

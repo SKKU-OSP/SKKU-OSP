@@ -1,3 +1,9 @@
+@media (max-width: 768px) {
+  .mobile-br { display: inline !important; }
+}
+
+.mobile-br { display: none; }
+
 .footer {
   height: 60px;
   padding: 15px;

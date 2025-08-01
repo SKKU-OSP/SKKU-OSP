@@ -53,12 +53,6 @@
   align-items: center;
 }
 
-.article-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-}
-
 #artice-meta {
   display: flex;
   flex-direction: row;
@@ -165,16 +159,6 @@
   color: #595959;
 }
 
-.article-view {
-  width: 100%;
-  padding: 10px 20px;
-  color: #595959;
-  font-size: 15px;
-  font-weight: 400;
-  display: flex;
-  justify-content: space-between;
-}
-
 .article-tags {
   padding: 10px 20px;
 }
@@ -274,9 +258,18 @@
 .comment-input {
   padding: 10px 0;
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-count {
+  width: 100%;
+}
+
+.comment-write {
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-grow: 1;
+  gap: 10px;
 }
 
 .comment {
