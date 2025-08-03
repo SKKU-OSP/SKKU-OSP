@@ -1,8 +1,23 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { useContext } from 'react';
+import AuthContext from '../../utils/auth-context';
 
 function HeaderNavBar() {
   const location = useLocation().pathname.split('/')[2];
+  const navigate = useNavigate();
+  const { username } = useContext(AuthContext);
+
+  const handleDashboardClick = () => {
+    if (username) {
+      navigate('/new-dashboard');
+    } else {
+      if (confirm('로그인해야 이용할 수 있는 기능입니다. 로그인 화면으로 이동하시겠습니까?')) {
+        navigate('/accounts/login');
+      }
+    }
+  };
+
   return (
     <div className="header-navbar">
       <Link
@@ -11,20 +26,18 @@ function HeaderNavBar() {
       >
         커뮤니티
       </Link>
-      <Link
-        to="/community/recruit/팀 모집"
-        className={location == 'recruit' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+      <div
+        onClick={handleDashboardClick}
+        className={location == 'new-dashboard' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+        style={{ cursor: 'pointer' }}
       >
-        팀 모집
-      </Link>
-      <Link to="/community/team" className={location == 'team' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}>
-        팀 게시판
-      </Link>
+        대시보드
+      </div>
       <Link
-        to="/community/challenge"
-        className={location == 'challenge' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
+        to="/inquiry"
+        className={location == 'inquiry' ? 'header-navbar-selected-menu' : 'header-navbar-menu'}
       >
-        챌린지
+        고객센터
       </Link>
     </div>
   );

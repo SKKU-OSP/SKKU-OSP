@@ -17,6 +17,8 @@ import Board_Container from './components/Community/Board/index';
 import SignUpPage from './routes/SignUpPage';
 import RankUserPage from './routes/RankUserPage';
 import RankRepoPage from './routes/RankRepoPage';
+import NewDashBoardLayout from './routes/NewDashBoardLayout';
+import NewDashBoardRedirect from './components/NewDashBoard/NewDashBoardRedirect';
 
 import { tokenLoader } from './utils/auth';
 
@@ -43,6 +45,8 @@ import PasswordResetConfirm from './components/Account/PasswordResetConfirm';
 import PasswordResetComplete from './components/Account/PasswordResetComplete';
 import MainBoard_Container from './components/Community/Board/MainBoard/MainBoard_Container';
 import QnAPage from './routes/QnAPage';
+import InquiryBoard from './components/Inquiry/InquiryBoard';
+import InquiryLayout from './routes/InquiryLayout';
 import { useEffect } from 'react';
 
 const GaTrackingId = import.meta.env.VITE_GA_TRACKING_ID;
@@ -114,10 +118,6 @@ const router = createBrowserRouter([
           {
             path: 'article/:article_id/edit',
             element: <ArticleEdit />
-          },
-          {
-            path: 'challenge',
-            element: <ChallengePage />
           },
           {
             path: 'TeamApplication',
@@ -217,6 +217,25 @@ const router = createBrowserRouter([
       {
         path: 'qna',
         element: <QnAPage />
+      },
+      {
+        path: 'inquiry',
+        element: <InquiryLayout />,
+        children: [
+          { index: true, element: <InquiryBoard /> }
+        ]
+      },
+      {
+        path: 'new-dashboard',
+        element: <NewDashBoardRedirect />
+      },
+      {
+        path: 'new-dashboard/:username',
+        element: <NewDashBoardLayout />,
+        children: [
+          { index: true, element: <DashBoard /> },
+          { path: 'challenge', element: <ChallengePage /> }
+        ]
       }
     ]
   }

@@ -1,10 +1,10 @@
 import { NavLink, useLocation, useParams } from 'react-router-dom';
-import { BsUnindent, BsIndent, BsFillPersonFill, BsFillBarChartFill } from 'react-icons/bs';
+import { BsUnindent, BsIndent, BsFillBarChartFill } from 'react-icons/bs';
 import { FaShapes } from 'react-icons/fa6';
 
-function Sidebar(props) {
+function NewDashBoardSidebar(props) {
   const { onToggle, isToggled } = props;
-  const username = useParams().username;
+  const { username } = useParams();
   const location = useLocation();
   const activeStyle = { color: 'black' };
 
@@ -22,23 +22,22 @@ function Sidebar(props) {
         </li>
         <li>
           <NavLink
-            to={`/user/${username}/profile`}
-            style={isActive(`/user/${username}/profile`) || isActive(`/user/${username}`) ? activeStyle : {}}
+            to={`/new-dashboard/${username}`}
+            style={isActive(`/new-dashboard/${username}`) ? activeStyle : {}}
             className="text-nowrap"
           >
-            <BsFillPersonFill size={24} />
-            <span className="sidebar-menu">프로필</span>
+            <BsFillBarChartFill size={24} />
+            <span className="sidebar-menu">GitHub 대시보드</span>
           </NavLink>
         </li>
-        
         <li>
           <NavLink
-            to={`/user/${username}/dev-type`}
-            style={isActive(`/user/${username}/dev-type`) ? activeStyle : {}}
+            to={`/new-dashboard/${username}/challenge`}
+            style={isActive(`/new-dashboard/${username}/challenge`) ? activeStyle : {}}
             className="text-nowrap"
           >
             <FaShapes size={24} />
-            <span className="sidebar-menu">나와 닮은 개발 언어</span>
+            <span className="sidebar-menu">챌린지</span>
           </NavLink>
         </li>
       </ul>
@@ -46,4 +45,4 @@ function Sidebar(props) {
   );
 }
 
-export default Sidebar;
+export default NewDashBoardSidebar;

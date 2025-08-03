@@ -115,8 +115,8 @@ const ChallengePage = () => {
 
   return (
     <>
-      <div className="col-9">
-        <div className="community-nav d-flex">
+      <div className="col-9" style={{ width: '100%' }}>
+        <div className="community-nav d-flex" style={{ marginTop: '-2rem' }}>
           <div className="nav nav-fill">
             <li className="nav-item selected-nav-item">
               <div>챌린지</div>
