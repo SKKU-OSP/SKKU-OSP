@@ -1,4 +1,7 @@
+import { BsGithub } from 'react-icons/bs';
+
 import { useEffect, useState } from 'react';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import axios from 'axios';
 import axiosInstance from '../../../utils/axiosInterCeptor';
@@ -77,6 +80,46 @@ function Dashboard() {
           <div>깃허브에서 활동 정보를 수집중입니다. 잠시 후, 다시 방문해주세요. (최대 12시간 소요)</div>
         ) : (
           <>
+            
+
+            
+
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="fs-4 bold" style={{ fontFamily: 'nanumfont_ExtraBold' }}>
+                GitHub 계정 선택
+              </div>
+              <button className="btn-write">GitHub 계정 추가하기</button>
+            </div>
+            <div className="d-flex flex-column dashboard-box mb-5">
+              <div className="form-check d-flex align-items-center mb-2">
+                <input className="form-check-input" type="radio" name="github-account" id="github_id_1" value="github_id_1" defaultChecked />
+                <label className="form-check-label d-flex align-items-center ms-2" htmlFor="github_id_1">
+                  <BsGithub />
+                  <a href="https://github.com/github_id_1" target="_blank" rel="noopener noreferrer" className="github_username ms-2">
+                    github_id_1
+                  </a>
+                </label>
+              </div>
+              <div className="form-check d-flex align-items-center mb-2">
+                <input className="form-check-input" type="radio" name="github-account" id="github_id_2" value="github_id_2" />
+                <label className="form-check-label d-flex align-items-center ms-2" htmlFor="github_id_2">
+                  <BsGithub />
+                  <a href="https://github.com/github_id_2" target="_blank" rel="noopener noreferrer" className="github_username ms-2">
+                    github_id_2
+                  </a>
+                </label>
+              </div>
+              <div className="form-check d-flex align-items-center">
+                <input className="form-check-input" type="radio" name="github-account" id="github_id_3" value="github_id_3" />
+                <label className="form-check-label d-flex align-items-center ms-2" htmlFor="github_id_3">
+                  <BsGithub />
+                  <a href="https://github.com/github_id_3" target="_blank" rel="noopener noreferrer" className="github_username ms-2">
+                    github_id_3
+                  </a>
+                </label>
+              </div>
+            </div>
+
             <div className="fs-4 mb-2 bold" style={{ fontFamily: 'nanumfont_ExtraBold' }}>
               전체 기여 내역
             </div>

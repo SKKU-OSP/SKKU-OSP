@@ -128,3 +128,33 @@
 .coworker-link:hover {
   color: var(--main-selected-color);
 }
+.github_username {
+  text-decoration: none;
+  font-family: 'nanumfont_Bold';
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: #696969;
+}
+.github_username:hover {
+  text-decoration: none;
+  color: #000000;
+}
+.btn-write {
+  background-color: var(--btn-write-color);
+  border: 1px solid var(--btn-write-color);
+  color: var(--main-white);
+  height: 37px;
+  padding: 7px 15px;
+  border-radius: 17px;
+  gap: 10px;
+  font-family: 'nanumfont_Bold';
+  letter-spacing: 0.5px;
+  margin-right: 10px;
+}
+.btn-write:hover,
+.btn-write:active {
+  background-color: var(--btn-write-hover);
+  border: 1px solid var(--btn-write-hover);
+}

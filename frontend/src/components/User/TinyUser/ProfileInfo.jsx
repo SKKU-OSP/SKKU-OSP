@@ -237,7 +237,7 @@ function ProfileInfo(props) {
                 href={`https://github.com/${userInfo.github_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="github_username"
+                className="github_username ms-2"
               >
                 {userInfo.github_id}
               </a>
