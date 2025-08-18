@@ -1,4 +1,5 @@
 import '../Community/Community.css';
+import './InquiryBoard.css';
 import BoardArticle from '../Community/Board/BoardArticle/index'; // BoardArticle은 재사용
 import LoaderIcon from 'react-loader-icon';
 import Pagination from 'react-js-pagination';
@@ -10,6 +11,10 @@ export default function InquiryBoard_Presenter(props) {
 
   return (
     <div>
+      <div className="inquiry-header">
+        <p className="inquiry-description">SOSD 사이트 이용에 관한 문의나 건의사항을 남겨주세요.</p>
+        <hr className="inquiry-separator" />
+      </div>
       <div className="community-nav d-flex" style={{ marginTop: '10px' }}>
         {/* 문의게시판은 단일 게시판이므로 CommunityNavItem 제거 */}
         <h3

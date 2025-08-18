@@ -47,6 +47,7 @@ import MainBoard_Container from './components/Community/Board/MainBoard/MainBoar
 import QnAPage from './routes/QnAPage';
 import InquiryBoard from './components/Inquiry/InquiryBoard';
 import InquiryLayout from './routes/InquiryLayout';
+import CustomerCenterHome from './components/Inquiry/CustomerCenterHome';
 import { useEffect } from 'react';
 
 const GaTrackingId = import.meta.env.VITE_GA_TRACKING_ID;
@@ -222,7 +223,9 @@ const router = createBrowserRouter([
         path: 'inquiry',
         element: <InquiryLayout />,
         children: [
-          { index: true, element: <InquiryBoard /> }
+          { index: true, element: <CustomerCenterHome /> },
+          { path: 'board', element: <InquiryBoard /> },
+          { path: 'faq', element: <div>FAQ Page</div> }
         ]
       },
       {
