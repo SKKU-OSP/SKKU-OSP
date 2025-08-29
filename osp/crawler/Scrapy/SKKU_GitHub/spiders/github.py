@@ -33,8 +33,20 @@ class GithubSpider(scrapy.Spider):
         chrome_options.add_argument("--disable-dev-shm-usage")
         chromedriver_path = ChromeDriverManager().install()
         print(f"Chromedriver path: {chromedriver_path}")  # 경로를 출력하여 확인
+        self.driver = webdriver.Chrome(service=ChromeService(
+            chromedriver_path), options=chrome_options)
 
-        self.driver = webdriver.Chrome(service=ChromeService(chromedriver_path), options=chrome_options)
+
+def close(self, reason):
+    """스파이더 종료 시 크롬 닫고 로그 남기기"""
+    if getattr(self, "driver", None):
+        try:
+            self.driver.quit()
+            logging.info("Chrome driver closed successfully")
+        except Exception as e:
+            logging.warning(f"Error while closing Chrome driver: {e}")
+    logging.info(f"Spider closed. Reason: {reason}")
+
     def start_requests(self):
         for id in self.ids:
             yield self.get_recent(f'users/{id}')
@@ -160,12 +172,13 @@ class GithubSpider(scrapy.Spider):
         github_id = res.meta['github_id']
         self.driver.get(res.url)
         WebDriverWait(self.driver, 5).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, '.TimelineItem-body'))
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, '.TimelineItem-body'))
         )
 
         html = self.driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-        #soup = BeautifulSoup(res.body, 'html.parser')
+        # soup = BeautifulSoup(res.body, 'html.parser')
         # if self.flag == 1:
         #     print("soup\n\n")
         #     print(soup)
@@ -376,7 +389,7 @@ class GithubSpider(scrapy.Spider):
         )
         html = self.driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-        #soup = BeautifulSoup(res.body, 'html.parser')
+        # soup = BeautifulSoup(res.body, 'html.parser')
         info_list = [tag.parent for tag in soup.select('h2.h4.mb-2')]
         user_data = UserUpdate()
         user_data['github_id'] = res.meta['github_id']
@@ -524,7 +537,8 @@ class GithubSpider(scrapy.Spider):
                 repo_data['contributors_count'] = 1
         else:
             repo_data['contributors_count'] = 1
-        repo_data['readme'] = not soup.select_one('a[title="README.md"]') is None
+        repo_data['readme'] = not soup.select_one(
+            'a[title="README.md"]') is None
         print(repo_name)
         print(repo_data['readme'])
         repo_data['commits_count'] = 0
@@ -532,7 +546,8 @@ class GithubSpider(scrapy.Spider):
             div_elements = soup.find_all('div', class_='d-flex gap-2')
             # 각 div 요소 안의 '2 Commits'가 있는 span 요소 선택 및 출력
             for div_element in div_elements:
-                commits_span = div_element.select_one('span[data-component="text"] > span')
+                commits_span = div_element.select_one(
+                    'span[data-component="text"] > span')
                 if commits_span:
                     commits_text = commits_span.text
                     commits_cnt = commits_text.split()[0].replace(',', '')
