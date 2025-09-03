@@ -132,3 +132,8 @@ if CRAWLER_DB:
     SQL_HOST = CRAWLER_DB['SQL_HOST']
     SQL_PORT = CRAWLER_DB['SQL_PORT']
     SQL_DB = CRAWLER_DB['SQL_DB']
+
+
+# metrics
+METRIC_TAG = "A"                # 실험 구분 태그 (A/B 등)
+METRIC_OUT_DIR = "metric_out"   # 결과 json 저장 폴더

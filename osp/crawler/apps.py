@@ -11,5 +11,7 @@ class CrawlerConfig(AppConfig):
         super().ready()
         if os.environ.get('RUN_MAIN', None) != 'true':
             if settings.SCHEDULER_DEFAULT:
-                from . import operator
-                operator.start()
+                # from . import operator
+                # operator.start()
+                # 성능 측정용 임시 조치
+                return

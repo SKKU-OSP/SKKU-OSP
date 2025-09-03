@@ -14,6 +14,9 @@ from selenium.webdriver.common.by import By
 from ..items import *
 from ..settings import *
 
+# 성능 측정용
+import os, time, csv
+
 
 API_URL = 'https://api.github.com'
 HTML_URL = 'https://github.com'
@@ -35,6 +38,26 @@ class GithubSpider(scrapy.Spider):
         print(f"Chromedriver path: {chromedriver_path}")  # 경로를 출력하여 확인
 
         self.driver = webdriver.Chrome(service=ChromeService(chromedriver_path), options=chrome_options)
+
+        # === 가벼운 계측 로거 설정 (두 CSV) ===
+        self.ENABLE_LIGHT_METRICS = True
+        if self.ENABLE_LIGHT_METRICS:
+            os.makedirs("crawler/log", exist_ok=True)
+
+            # ① Selenium 오버헤드 로그
+            self._selenium_f = open("crawler/log/selenium_times.csv", "w", newline="", encoding="utf-8")
+            self._selenium_w = csv.writer(self._selenium_f)
+            self._selenium_w.writerow(["ts","github_id","phase","url","load_ms"])
+
+            # ② 커밋 상세 N+1 총 오버헤드 로그
+            self._commit_f = open("crawler/log/commit_overhead.csv", "w", newline="", encoding="utf-8")
+            self._commit_w = csv.writer(self._commit_f)
+            self._commit_w.writerow(["ts","path","page","from_user","child_count","sum_child_ms","avg_child_ms"])
+
+            # 배치 상태 메모리: 커밋 리스트 1페이지에서 내려가는 상세들의 소요 합산
+            self._commit_batches = {}
+
+
     def start_requests(self):
         for id in self.ids:
             yield self.get_recent(f'users/{id}')
@@ -71,10 +94,15 @@ class GithubSpider(scrapy.Spider):
 
     def api_get(self, endpoint, callback, metadata={}, page=1, per_page=100):
         print(f'{API_URL}/{endpoint}?page={page}&per_page={per_page}')
+
+        meta = dict(metadata or {})
+        meta.setdefault("page", page)
+        meta["_t0"] = time.perf_counter()      # ← 요청 시작 시각 주입 (중요)
+
         req = scrapy.Request(
             f'{API_URL}/{endpoint}?page={page}&per_page={per_page}',
             callback,
-            meta=metadata,
+            meta=meta,
             dont_filter=True
         )
 
@@ -158,10 +186,16 @@ class GithubSpider(scrapy.Spider):
 
     def parse_user_update(self, res):
         github_id = res.meta['github_id']
+
+        t0 = time.perf_counter()
         self.driver.get(res.url)
         WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, '.TimelineItem-body'))
         )
+        load_ms = int((time.perf_counter() - t0) * 1000)
+        if getattr(self, "ENABLE_LIGHT_METRICS", False):
+            self._selenium_w.writerow([datetime.utcnow().isoformat(), github_id, "user_overview", res.url, load_ms])
+        self.logger.info(f"[selenium] {github_id} user_overview {load_ms}ms")
 
         html = self.driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
@@ -370,10 +404,18 @@ class GithubSpider(scrapy.Spider):
             yield self.api_get(f'repos/{"/".join(repo)}', self.parse_repo, metadata={'from': github_id})
 
     def parse_user_page(self, res):
+        t0 = time.perf_counter()
+
         self.driver.get(res.url)
         WebDriverWait(self.driver, 1).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'h2.h4.mb-2'))
         )
+
+        load_ms = int((time.perf_counter() - t0) * 1000)
+        if getattr(self, "ENABLE_LIGHT_METRICS", False):
+            self._selenium_w.writerow([datetime.utcnow().isoformat(), res.meta['github_id'], "user_badge", res.url, load_ms])
+        self.logger.info(f"[selenium] {res.meta['github_id']} user_badge {load_ms}ms")
+
         html = self.driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
         #soup = BeautifulSoup(res.body, 'html.parser')
@@ -589,26 +631,77 @@ class GithubSpider(scrapy.Spider):
         repo_data['close_issue_count'] = int(issue_cnt[1][0])
         yield repo_data
 
+    # def parse_repo_commit(self, res):
+    #     json_data = json.loads(res.body)
+    #     path = res.meta['path']
+    #     for commits in json_data:
+    #         committer = commits['committer']
+    #         if committer is not None and 'login' in committer:
+    #             committer = committer['login']
+    #         author = commits['author']
+    #         if author is not None and 'login' in author:
+    #             author = author['login']
+    #         if author == res.meta['from'] or author == res.meta['from']:
+    #             yield self.api_get(
+    #                 f'repos/{path}/commits/{commits["sha"]}',
+    #                 self.parse_repo_commit_edits,
+    #                 {'path': res.meta['path']}
+    #             )
+
+    #     if len(json_data) == 100:
+    #         metadata = res.meta
+    #         metadata['page'] += 1
+    #         yield self.api_get(
+    #             f'repos/{path}/commits',
+    #             self.parse_repo_commit,
+    #             metadata,
+    #             page=metadata['page']
+    #         )
+
     def parse_repo_commit(self, res):
         json_data = json.loads(res.body)
         path = res.meta['path']
+        from_user = res.meta.get('from')
+        page_no = res.meta.get('page', 1)
+
+        # 이번 커밋 리스트(1페이지)에서 내려갈 '상세' 요청들을 수집
+        child_reqs = []
         for commits in json_data:
-            committer = commits['committer']
+            committer = commits.get('committer')
             if committer is not None and 'login' in committer:
                 committer = committer['login']
-            author = commits['author']
+            else:
+                committer = None
+
+            author = commits.get('author')
             if author is not None and 'login' in author:
                 author = author['login']
-            if author == res.meta['from'] or author == res.meta['from']:
-                yield self.api_get(
-                    f'repos/{path}/commits/{commits["sha"]}',
-                    self.parse_repo_commit_edits,
-                    {'path': res.meta['path']}
-                )
+            else:
+                author = None
 
+            # (원래 코드에 있던 중복 비교 버그 수정: author만 두 번 비교하던 부분)
+            if author == from_user or committer == from_user:
+                child_reqs.append(commits["sha"])
+
+        # 배치 시작(상세요청 있을 때만 상태 저장)
+        batch_id = None
+        if child_reqs and getattr(self, "ENABLE_LIGHT_METRICS", False):
+            batch_id = f"{path}|{page_no}|{from_user}|{res.request.url}"
+            self._commit_batches[batch_id] = {"remaining": len(child_reqs), "sum_ms": 0.0, "count": len(child_reqs)}
+
+        # 상세 요청 발사(각 요청의 시작 시각은 api_get에서 meta['_t0']로 기록됨)
+        for sha in child_reqs:
+            meta = {'path': path, 'batch_id': batch_id}
+            yield self.api_get(
+                f'repos/{path}/commits/{sha}',
+                self.parse_repo_commit_edits,
+                meta
+            )
+
+        # 다음 페이지
         if len(json_data) == 100:
             metadata = res.meta
-            metadata['page'] += 1
+            metadata['page'] = page_no + 1
             yield self.api_get(
                 f'repos/{path}/commits',
                 self.parse_repo_commit,
@@ -617,6 +710,32 @@ class GithubSpider(scrapy.Spider):
             )
 
     def parse_repo_commit_edits(self, res):
+        # === 이 상세 요청의 실제 지연(ms) → 배치에 누적 ===
+        t0 = res.meta.get("_t0")
+        if t0 is not None and getattr(self, "ENABLE_LIGHT_METRICS", False):
+            elapsed_ms = int((time.perf_counter() - t0) * 1000)
+            bid = res.meta.get("batch_id")
+            if bid and bid in self._commit_batches:
+                b = self._commit_batches[bid]
+                b["sum_ms"] += elapsed_ms
+                b["remaining"] -= 1
+                if b["remaining"] == 0:
+                    avg_ms = int(b["sum_ms"] / max(1, b["count"]))
+                    path, page_str, from_user, _ = bid.split("|", 3)
+                    self._commit_w.writerow([
+                        datetime.utcnow().isoformat(),
+                        path,
+                        page_str,
+                        from_user,
+                        b["count"],
+                        int(b["sum_ms"]),
+                        avg_ms
+                    ])
+                    self.logger.info(f"[commit-overhead] {path} page={page_str} from={from_user} "
+                                     f"child={b['count']} sum={int(b['sum_ms'])}ms avg={avg_ms}ms")
+                    del self._commit_batches[bid]
+
+
         json_data = json.loads(res.body)
         commit_data = RepoCommit()
         commit_data['github_id'] = res.meta['path'].split('/')[0]
@@ -661,3 +780,21 @@ class GithubSpider(scrapy.Spider):
             repo_data['dependencies'] = max(
                 repo_data['dependencies'], int(tag.text.replace(',', '')))
         yield repo_data
+
+    def closed(self, reason):
+        try:
+            self.driver.quit()
+        except Exception:
+            pass
+        if getattr(self, "ENABLE_LIGHT_METRICS", False):
+            # 혹시 남아있던 배치가 있으면 기록
+            for bid, b in list(self._commit_batches.items()):
+                avg_ms = int(b["sum_ms"] / max(1, b["count"]))
+                path, page_str, from_user, _ = bid.split("|", 3)
+                self._commit_w.writerow([
+                    datetime.utcnow().isoformat(), path, page_str, from_user,
+                    b["count"], int(b["sum_ms"]), avg_ms
+                ])
+            self._commit_batches.clear()
+            self._selenium_f.close()
+            self._commit_f.close()
