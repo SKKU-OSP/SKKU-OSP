@@ -1,8 +1,10 @@
 import json
 import math
 import logging
-from bs4 import BeautifulSoup
+import time
+from collections import defaultdict
 from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 import scrapy
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -27,17 +29,141 @@ class GithubSpider(scrapy.Spider):
         if ids != '':
             self.ids = ids.split(',')
         self.flag = 0
+        
+        # 성능 측정을 위한 변수들
+        self.start_time = time.time()
+        self.request_times = defaultdict(list)  # API별 요청 시간 저장
+        self.request_counts = defaultdict(int)  # API별 요청 횟수
+        self.total_requests = 0
+        self.performance_log = []
+        
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chromedriver_path = ChromeDriverManager().install()
-        print(f"Chromedriver path: {chromedriver_path}")  # 경로를 출력하여 확인
-
+        print(f"Chromedriver path: {chromedriver_path}")
+        
         self.driver = webdriver.Chrome(service=ChromeService(chromedriver_path), options=chrome_options)
+        
+    def closed(self, reason):
+        """스파이더 종료 시 성능 리포트 출력"""
+        self.driver.quit()
+        self._print_performance_report()
+        
+    def _print_performance_report(self):
+        """성능 측정 결과 출력"""
+        total_time = time.time() - self.start_time
+        
+        print("\n" + "="*80)
+        print("PERFORMANCE REPORT")
+        print("="*80)
+        print(f"\n📊 Overall Statistics:")
+        print(f"  - Total Execution Time: {total_time:.2f} seconds")
+        print(f"  - Total Requests Made: {self.total_requests}")
+        print(f"  - Average Request Time: {total_time/max(self.total_requests, 1):.2f} seconds")
+        
+        print(f"\n📈 API Endpoint Statistics:")
+        print("-"*80)
+        print(f"{'Endpoint':<40} {'Count':<10} {'Avg Time':<12} {'Total Time':<12} {'Min':<10} {'Max':<10}")
+        print("-"*80)
+        
+        for endpoint, times in self.request_times.items():
+            if times:
+                avg_time = sum(times) / len(times)
+                total_endpoint_time = sum(times)
+                min_time = min(times)
+                max_time = max(times)
+                count = self.request_counts[endpoint]
+                
+                # Endpoint 이름이 길면 줄임
+                display_endpoint = (endpoint[:37] + '...') if len(endpoint) > 40 else endpoint
+                print(f"{display_endpoint:<40} {count:<10} {avg_time:<12.3f} {total_endpoint_time:<12.3f} {min_time:<10.3f} {max_time:<10.3f}")
+        
+        print("\n📝 Top 10 Slowest Requests:")
+        print("-"*80)
+        sorted_logs = sorted(self.performance_log, key=lambda x: x['duration'], reverse=True)[:10]
+        for i, log in enumerate(sorted_logs, 1):
+            print(f"{i:2}. [{log['duration']:.3f}s] {log['method']}: {log['url'][:70]}...")
+            
+        # 성능 리포트를 파일로 저장
+        self._save_performance_report(total_time)
+    
+    def _save_performance_report(self, total_time):
+        """성능 리포트를 JSON 파일로 저장"""
+        report = {
+            'total_execution_time': total_time,
+            'total_requests': self.total_requests,
+            'average_request_time': total_time / max(self.total_requests, 1),
+            'endpoints': {},
+            'detailed_logs': self.performance_log[:100]  # 상위 100개만 저장
+        }
+        
+        for endpoint, times in self.request_times.items():
+            if times:
+                report['endpoints'][endpoint] = {
+                    'count': self.request_counts[endpoint],
+                    'average_time': sum(times) / len(times),
+                    'total_time': sum(times),
+                    'min_time': min(times),
+                    'max_time': max(times)
+                }
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'performance_report_{timestamp}.json'
+        
+        with open(filename, 'w') as f:
+            json.dump(report, f, indent=2, default=str)
+        
+        print(f"\n💾 Performance report saved to: {filename}")
+
+    def _track_request(self, request, endpoint_type=None):
+        """요청에 성능 추적 메타데이터 추가"""
+        request.meta['start_time'] = time.time()
+        request.meta['endpoint_type'] = endpoint_type or self._extract_endpoint_type(request.url)
+        self.total_requests += 1
+        return request
+
+    def _extract_endpoint_type(self, url):
+        """URL에서 엔드포인트 타입 추출"""
+        if API_URL in url:
+            # API 요청
+            path = url.replace(API_URL + '/', '').split('?')[0]
+            return f"API: {path}"
+        elif HTML_URL in url:
+            # HTML 페이지 요청
+            path = url.replace(HTML_URL + '/', '').split('?')[0]
+            return f"HTML: {path}"
+        else:
+            return "Unknown"
+
+    def _record_response_time(self, response):
+        """응답 시간 기록"""
+        if 'start_time' in response.meta:
+            duration = time.time() - response.meta['start_time']
+            endpoint_type = response.meta.get('endpoint_type', 'Unknown')
+            
+            self.request_times[endpoint_type].append(duration)
+            self.request_counts[endpoint_type] += 1
+            
+            # 상세 로그 저장
+            self.performance_log.append({
+                'timestamp': datetime.now().isoformat(),
+                'url': response.url,
+                'method': response.request.method,
+                'endpoint_type': endpoint_type,
+                'duration': duration,
+                'status': response.status
+            })
+            
+            # 느린 요청 경고
+            if duration > 5.0:
+                logging.warning(f"⚠️ Slow request detected: {duration:.2f}s for {response.url}")
+
     def start_requests(self):
         for id in self.ids:
-            yield self.get_recent(f'users/{id}')
+            request = self.get_recent(f'users/{id}')
+            yield self._track_request(request, f"API: users/{id}/initial")
 
     def __end_of_month(self, now: datetime):
         next_month = now.month % 12 + 1
@@ -45,18 +171,18 @@ class GithubSpider(scrapy.Spider):
         return datetime(next_year, next_month, 1) - timedelta(seconds=1)
 
     def get_recent(self, endpoint):
-        # 타겟 유저의 최신 push 기록을 확인한다.
         try:
             GITHUB_API_URL = f"{API_URL}/{endpoint}/repos?per_page=1&sort=pushed"
             print(GITHUB_API_URL)
-            return scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint": endpoint})
+            request = scrapy.Request(GITHUB_API_URL, callback=self.find_recent, meta={"endpoint": endpoint})
+            return self._track_request(request, f"API: {endpoint}/repos")
         except Exception as e:
             print("exception")
             logging.warning("recent pushed")
             return self.api_get(endpoint, self.parse_user)
 
     def find_recent(self, res):
-        # push 기록을 저장한 후 api_get을 호출해 크롤링을 진행한다.
+        self._record_response_time(res)
         try:
             print("find_recent")
             endpoint = res.meta["endpoint"]
@@ -77,10 +203,10 @@ class GithubSpider(scrapy.Spider):
             meta=metadata,
             dont_filter=True
         )
-
-        return req
+        return self._track_request(req, f"API: {endpoint}")
 
     def parse_user(self, res):
+        self._record_response_time(res)
         print("parse_user")
         user_json = json.loads(res.body)
         github_id = user_json['login']
@@ -108,7 +234,6 @@ class GithubSpider(scrapy.Spider):
             if end_date < recent_date_yy_mm:
                 end_date = recent_date_yy_mm
                 user_item["github_updated_date"] = recent_date
-        # 최근 업데이트 날짜와 비교하기 위해 크롤러 날짜 저장
         user_item["created_date"] = created_date
         user_item["crawled_date"] = datetime.now().strftime("%Y-%m-%d")
         user_item["updated_date"] = datetime.now().strftime("%Y-%m-%d")
@@ -131,18 +256,20 @@ class GithubSpider(scrapy.Spider):
         while pivot_date < end_date:
             from_date = pivot_date.strftime('%Y-%m-%d')
             to_date = self.__end_of_month(pivot_date).strftime('%Y-%m-%d')
-            yield scrapy.Request(
+            request = scrapy.Request(
                 f'{HTML_URL}/{github_id}/?tab=overview&from={from_date}&to={to_date}',
                 self.parse_user_update,
                 meta={'github_id': github_id, 'from': from_date, 'to': to_date},
             )
+            yield self._track_request(request, f"HTML: user_activity/{github_id}")
             pivot_date = self.__end_of_month(pivot_date) + timedelta(days=1)
 
-        yield scrapy.Request(
+        request = scrapy.Request(
             f'{HTML_URL}/{user_json["login"]}',
             self.parse_user_page,
             meta={'github_id': github_id}
         )
+        yield self._track_request(request, f"HTML: user_page/{github_id}")
 
         yield self.api_get(
             f'users/{github_id}/following',
@@ -157,20 +284,21 @@ class GithubSpider(scrapy.Spider):
         )
 
     def parse_user_update(self, res):
+        self._record_response_time(res)
         github_id = res.meta['github_id']
+        
+        # Selenium 작업 시간 측정
+        selenium_start = time.time()
         self.driver.get(res.url)
         WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, '.TimelineItem-body'))
         )
-
         html = self.driver.page_source
+        selenium_time = time.time() - selenium_start
+        logging.info(f"Selenium page load time: {selenium_time:.2f}s for {res.url}")
+        
         soup = BeautifulSoup(html, 'html.parser')
-        #soup = BeautifulSoup(res.body, 'html.parser')
-        # if self.flag == 1:
-        #     print("soup\n\n")
-        #     print(soup)
-        #     print("\n\nsoup")
-        #     self.flag = 0
+        
         user_update = UserUpdate()
         user_update['github_id'] = github_id
         user_update['target'] = 'activity'
@@ -187,13 +315,7 @@ class GithubSpider(scrapy.Spider):
         owned_repo = set()
         contributed_repo = set()
         events = soup.select('.TimelineItem-body')
-        # if self.flag == 1:
-        #     print(self.flag)
-        #     print("soup\n\n")
-        #     print(res.url)
-        #     print(events)
-        #     print("\n\nsoup")
-        #     self.flag = 0
+        
         for event in events:
             summary = event.select_one('summary')
             body = event.select('details > div > details')
@@ -262,7 +384,6 @@ class GithubSpider(scrapy.Spider):
                 continue
             summary = summary.text.strip().split()
             if summary[0] == 'Created':
-                # Create Commit
                 if summary[2] == 'commit' or summary[2] == 'commits':
                     commit_list = event.select('li')
                     for commit in commit_list:
@@ -274,7 +395,6 @@ class GithubSpider(scrapy.Spider):
                             contributed_repo.add(repo)
                         else:
                             owned_repo.add(repo)
-                # Create Repository
                 elif summary[2] == 'repository' or summary[2] == 'repositories':
                     create_list = event.select('li')
                     for commit in create_list:
@@ -286,7 +406,6 @@ class GithubSpider(scrapy.Spider):
                             owned_repo.add(repo)
                     user_period['num_of_cr_repos'] += 1
             elif summary[0] == 'Opened':
-                # Open Issues
                 if 'issue' in summary or 'issues' in summary:
                     user_update['total_issues'] += int(summary[1])
                     for issue_repo in body:
@@ -319,7 +438,6 @@ class GithubSpider(scrapy.Spider):
                                     int(res.meta['from'][:4]), 2, 29, 0, 0)
                                 logging.info(f"Issue date ValueError: {date}")
                             yield issue
-                # Open Pull Requests
                 elif 'request' in summary or 'requests' in summary:
                     user_update['total_PRs'] += int(summary[1])
                     for pr_repo in body:
@@ -370,13 +488,18 @@ class GithubSpider(scrapy.Spider):
             yield self.api_get(f'repos/{"/".join(repo)}', self.parse_repo, metadata={'from': github_id})
 
     def parse_user_page(self, res):
+        self._record_response_time(res)
+        
+        selenium_start = time.time()
         self.driver.get(res.url)
         WebDriverWait(self.driver, 1).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'h2.h4.mb-2'))
         )
         html = self.driver.page_source
+        selenium_time = time.time() - selenium_start
+        logging.info(f"Selenium page load time: {selenium_time:.2f}s for {res.url}")
+        
         soup = BeautifulSoup(html, 'html.parser')
-        #soup = BeautifulSoup(res.body, 'html.parser')
         info_list = [tag.parent for tag in soup.select('h2.h4.mb-2')]
         user_data = UserUpdate()
         user_data['github_id'] = res.meta['github_id']
@@ -395,6 +518,7 @@ class GithubSpider(scrapy.Spider):
         yield user_data
 
     def parse_user_following(self, res):
+        self._record_response_time(res)
         json_data = json.loads(res.body)
         github_id = res.meta['github_id']
         for following in json_data:
@@ -415,6 +539,7 @@ class GithubSpider(scrapy.Spider):
             )
 
     def parse_user_starred(self, res):
+        self._record_response_time(res)
         json_data = json.loads(res.body)
         github_id = res.meta['github_id']
         for starred in json_data:
@@ -436,6 +561,7 @@ class GithubSpider(scrapy.Spider):
             )
 
     def parse_user_repo(self, res):
+        self._record_response_time(res)
         json_data = json.loads(res.body)
         user_data = UserUpdate()
         github_id = res.meta['github_id']
@@ -456,6 +582,7 @@ class GithubSpider(scrapy.Spider):
             )
 
     def parse_repo(self, res):
+        self._record_response_time(res)
         json_data = json.loads(res.body)
         repo_data = Repo()
         github_id = json_data['owner']['login']
@@ -475,15 +602,17 @@ class GithubSpider(scrapy.Spider):
         repo_data['license'] = None if json_data['license'] is None else json_data['license']['name']
         yield repo_data
 
-        yield scrapy.Request(
+        request = scrapy.Request(
             f'{HTML_URL}/{github_id}/{repo_name}',
             self.parse_repo_page,
             meta={'github_id': github_id, 'repo_name': repo_name,
                   'from': res.meta['from']},
             dont_filter=True
         )
+        yield self._track_request(request, f"HTML: repo_page/{github_id}/{repo_name}")
 
     def parse_repo_page(self, res):
+        self._record_response_time(res)
         print("parse_repo_page")
         soup = BeautifulSoup(res.body, 'html.parser')
         github_id = res.meta['github_id']
@@ -530,7 +659,6 @@ class GithubSpider(scrapy.Spider):
         repo_data['commits_count'] = 0
         try:
             div_elements = soup.find_all('div', class_='d-flex gap-2')
-            # 각 div 요소 안의 '2 Commits'가 있는 span 요소 선택 및 출력
             for div_element in div_elements:
                 commits_span = div_element.select_one('span[data-component="text"] > span')
                 if commits_span:
@@ -544,29 +672,36 @@ class GithubSpider(scrapy.Spider):
         print(f'repos/{github_id}/{repo_name}/commits')
         print(repo_path)
         print(res.meta['from'])
-        yield scrapy.Request(
+        
+        request = scrapy.Request(
             f'{HTML_URL}/{repo_path}/pulls',
             self.parse_repo_pr,
             meta={'path': repo_path}
         )
-        yield scrapy.Request(
+        yield self._track_request(request, f"HTML: repo_pulls/{repo_path}")
+        
+        request = scrapy.Request(
             f'{HTML_URL}/{repo_path}/issues',
             self.parse_repo_issue,
             meta={'path': repo_path}
         )
+        yield self._track_request(request, f"HTML: repo_issues/{repo_path}")
+        
         yield self.api_get(
             f'repos/{github_id}/{repo_name}/commits',
             self.parse_repo_commit, {'path': repo_path,
                                      'page': 1, 'from': res.meta['from']}
         )
 
-        yield scrapy.Request(
+        request = scrapy.Request(
             f'{HTML_URL}/{repo_path}/network/dependencies',
             self.parse_repo_dependencies,
             meta={'path': repo_path}
         )
+        yield self._track_request(request, f"HTML: repo_dependencies/{repo_path}")
 
     def parse_repo_pr(self, res):
+        self._record_response_time(res)
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
@@ -578,6 +713,7 @@ class GithubSpider(scrapy.Spider):
         yield repo_data
 
     def parse_repo_issue(self, res):
+        self._record_response_time(res)
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
@@ -590,6 +726,7 @@ class GithubSpider(scrapy.Spider):
         yield repo_data
 
     def parse_repo_commit(self, res):
+        self._record_response_time(res)
         json_data = json.loads(res.body)
         path = res.meta['path']
         for commits in json_data:
@@ -599,7 +736,7 @@ class GithubSpider(scrapy.Spider):
             author = commits['author']
             if author is not None and 'login' in author:
                 author = author['login']
-            if author == res.meta['from'] or author == res.meta['from']:
+            if author == res.meta['from'] or committer == res.meta['from']:
                 yield self.api_get(
                     f'repos/{path}/commits/{commits["sha"]}',
                     self.parse_repo_commit_edits,
@@ -617,6 +754,7 @@ class GithubSpider(scrapy.Spider):
             )
 
     def parse_repo_commit_edits(self, res):
+        self._record_response_time(res)
         json_data = json.loads(res.body)
         commit_data = RepoCommit()
         commit_data['github_id'] = res.meta['path'].split('/')[0]
@@ -653,6 +791,7 @@ class GithubSpider(scrapy.Spider):
             yield commit_file
 
     def parse_repo_dependencies(self, res):
+        self._record_response_time(res)
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']

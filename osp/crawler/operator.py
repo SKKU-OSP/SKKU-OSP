@@ -153,9 +153,9 @@ def force_start():
         log_file = datetime.now().strftime("%y%m%d_%H%M_crawl_overview.log")
         log_path = os.path.join(CRAWLING_LOG_PATH, f'{log_file}')
         print(
-            f'scrapy crawl github_overview -a ids=ki011127 --loglevel=INFO --logfile={log_path}')
+            f'scrapy crawl github_overview -a ids=byungKHee --loglevel=INFO --logfile={log_path}')
         subprocess.run(
-            f'scrapy crawl github_overview -a ids=ki011127 --loglevel=INFO --logfile={log_path}',
+            f'scrapy crawl github_overview -a ids=byungKHee --loglevel=INFO --logfile={log_path}',
             shell=True,
             cwd=os.path.join(BASE_DIR, 'crawler/Scrapy/SKKU_GitHub'),
         )
@@ -184,9 +184,9 @@ def force_start():
         log_file = datetime.now().strftime("%y%m%d_%H%M_crawl.log")
         log_path = os.path.join(CRAWLING_LOG_PATH, f'{log_file}')
         print(
-            f'scrapy crawl github -a ids=ki011127 --loglevel=INFO --logfile={log_path}')
+            f'scrapy crawl github -a ids=byungKHee --loglevel=INFO --logfile={log_path}')
         subprocess.run(
-            f'scrapy crawl github -a ids=ki011127 --loglevel=INFO --logfile={log_path}',
+            f'scrapy crawl github -a ids=byungKHee --loglevel=INFO --logfile={log_path}',
             shell=True,
             cwd=os.path.join(BASE_DIR, 'crawler/Scrapy/SKKU_GitHub'),
         )
@@ -200,7 +200,7 @@ def force_start():
         end_year = datetime.now().year
         start_year = 2019
         for user in Account.objects.filter(user__is_superuser=False):
-            if str(user) == 'ki011127':
+            if str(user) == 'byungKHee':
                 for chal in challenge_list:
                     achievement_check(user, chal)
                 for year in range(end_year, start_year-1, -1):
@@ -218,6 +218,6 @@ def force_start():
         print('Done!')
 
     # scheduler.start()
-    #crawl_overview_job()
-    #crawl_job()
+    crawl_overview_job()
+    crawl_job()
     update_score()
