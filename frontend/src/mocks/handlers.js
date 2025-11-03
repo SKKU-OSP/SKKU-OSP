@@ -11,7 +11,7 @@ export const handlers = [
         student_id: 2020314682,
         yearlyStats: {
           2025: {
-            github_score: 3.4,
+            github_score: 4.4,
             repo_cnt: 19,
             commit_cnt: 132,
             commit_line: 69000,
@@ -30,33 +30,33 @@ export const handlers = [
         repositories: [
           {
             id: 'repo1',
-            name: 'nextjs-project',
-            description: 'A full-stack Next.js project with TypeScript and tailwindcss',
+            name: 'os-xv6',
+            description: '운영체제 과제용 xv6 리포지토리',
             stars: 125,
             forks: 34,
             commits: 208,
             pullRequests: 8,
             issues: 5,
             watchers: 42,
-            languages: ['TypeScript', 'React', 'Tailwind CSS'],
+            languages: ['C', 'Assembly'],
             contributors: 5,
-            createdAt: '2023-01-15',
-            updatedAt: '2024-11-02'
+            createdAt: '2025-04-15',
+            updatedAt: '2025-06-02'
           },
           {
             id: 'repo2',
-            name: 'react-components',
-            description: 'Reusable React components library',
+            name: 'SKKU-OSP-Frontend',
+            description: 'SSA SOSD 팀 프론트엔드 리포지토리',
             stars: 89,
             forks: 22,
             commits: 25,
             pullRequests: 5,
             issues: 3,
             watchers: 31,
-            languages: ['TypeScript', 'React'],
+            languages: ['JavaScript', 'React', 'CSS', 'HTML'],
             contributors: 3,
             createdAt: '2023-03-20',
-            updatedAt: '2024-10-28'
+            updatedAt: '2025-11-04'
           }
         ]
       },
@@ -67,7 +67,7 @@ export const handlers = [
         student_id: 2020319999,
         yearlyStats: {
           2025: {
-            github_score: 4.2,
+            github_score: 3.8,
             repo_cnt: 25,
             commit_cnt: 262,
             commit_line: 123000,

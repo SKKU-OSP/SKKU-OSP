@@ -1,79 +1,89 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './UserStatsMain.css';
+import React, { useState, useEffect } from "react";
+import StudentList from "./StudentList";
+import StudentDetails from "./StudentDetails";
+import "./UserStats.css";
 
-const UserStatsMain = () => {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+function UserStatsMain() {
+  const [students, setStudents] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedYear, setSelectedYear] = useState("2025");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      setError(null);
+    const fetchStudents = async () => {
       try {
-        const response = await fetch('/api/admin/userstats');
-        if (!response.ok) {
-          throw new Error('Something went wrong!');
-        }
+        setLoading(true);
+        const response = await fetch("/api/admin/userstats");
         const data = await response.json();
-        setUsers(data);
+        setStudents(data);
+        if (data.length > 0) {
+          setSelectedStudent(data[0]);
+        }
       } catch (error) {
-        setError(error.message);
+        console.error("Failed to fetch students:", error);
+      } finally {
+        setLoading(false);
       }
-      setIsLoading(false);
     };
 
-    fetchUsers();
+    fetchStudents();
   }, []);
 
-  const handleUserClick = (user) => {
-    setSelectedUser(user);
-    // Bonus: URL change when user is selected
-    // navigate(`/userstats/${user.username}`);
-  };
-
   return (
-    <div className="user-stats-container">
-      <div className="user-list-section">
-        <h2>User List</h2>
-        {/* Search and Sort controls will go here */}
-        <div className="user-list">
-          {isLoading && <p>Loading users...</p>}
-          {error && <p>{error}</p>}
-          {!isLoading &&
-            !error &&
-            users.map((user) => (
-              <div
-                key={user.id}
-                className={`user-card ${selectedUser?.id === user.id ? 'selected' : ''}`}
-                onClick={() => handleUserClick(user)}
-              >
-                <div className="user-card-info">
-                  <span className="user-name">{user.username}</span>
-                  <span className="user-github">@{user.github_id}</span>
-                </div>
-                {/* Student ID and Score will go here */}
-              </div>
-            ))}
+    <div className="page-container">
+      <div className="user-stats-layout">
+        {/* 좌측 학생 리스트 */}
+        <div className="student-list-container">
+          <StudentList
+            students={students}
+            selectedStudent={selectedStudent}
+            onSelectStudent={setSelectedStudent}
+            loading={loading}
+            selectedYear={selectedYear}
+          />
         </div>
-      </div>
-      <div className="user-details-section">
-        {selectedUser ? (
-          <div>
-            <h2>{selectedUser.username}'s Statistics</h2>
-            {/* Detailed stats will go here */}
+
+        {/* 우측 상세 정보 */}
+        <div className="student-details-container">
+          {/* 모바일 학생 선택 헤더 */}
+          <div className="mobile-student-select">
+            <select
+              value={selectedStudent?.id || ""}
+              onChange={(e) => {
+                const student = students.find((s) => s.id === e.target.value);
+                if (student) setSelectedStudent(student);
+              }}
+              className="mobile-select-dropdown"
+            >
+              <option value="">학생을 선택하세요</option>
+              {students.map((student) => (
+                <option key={student.id} value={student.id}>
+                  {student.username} ({student.student_id})
+                </option>
+              ))}
+            </select>
           </div>
-        ) : (
-          <div className="placeholder">
-            <p>Select a user to see their statistics.</p>
+
+          {/* 상세 정보 영역 */}
+          <div className="details-content-area">
+            {loading ? (
+              <div className="loading-container"><p>데이터를 불러오는 중입니다...</p></div>
+            ) : selectedStudent ? (
+              <StudentDetails
+                student={selectedStudent}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
+              />
+            ) : (
+              <div className="loading-container">
+                <p>학생을 선택해주세요</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default UserStatsMain;
