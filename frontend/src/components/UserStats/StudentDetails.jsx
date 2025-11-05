@@ -1,5 +1,5 @@
-import React from "react";
-import RepoList from "./RepoList";
+import React from 'react';
+import RepoList from './RepoList';
 import { BsGithub } from 'react-icons/bs';
 
 // 통계 카드 컴포넌트
@@ -12,7 +12,7 @@ const StatCard = ({ title, value, color }) => (
 
 function StudentDetails({ student, selectedYear, onYearChange }) {
   if (!student) {
-    return null; // Main 컴포넌트에서 이미 로딩/선택 처리를 하지만, 안전장치
+    return null;
   }
 
   // 선택된 연도의 통계 (없을 경우 기본값)
@@ -21,7 +21,7 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
     commit_cnt: 0,
     commit_line: 0,
     pr_cnt: 0,
-    issue_cnt: 0,
+    issue_cnt: 0
   };
 
   // 학생 데이터에서 가능한 연도 목록 추출 (내림차순 정렬)
@@ -33,15 +33,13 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
         <div className="header-info">
           <h1>{student.username}</h1>
           <span className="student-id-badge">{student.student_id}</span>
-          <p className="student-github-link"><BsGithub /> {student.github_id}</p>
+          <p className="student-github-link">
+            <BsGithub /> {student.github_id}
+          </p>
         </div>
         <div className="year-selector">
           <label htmlFor="year-select">연도 선택</label>
-          <select
-            id="year-select"
-            value={selectedYear}
-            onChange={(e) => onYearChange(e.target.value)}
-          >
+          <select id="year-select" value={selectedYear} onChange={(e) => onYearChange(e.target.value)}>
             {availableYears.map((year) => (
               <option key={year} value={year}>
                 {year}년
@@ -52,7 +50,7 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
       </div>
 
       <div className="stats-grid">
-        <StatCard title="총 점수" value={stats.github_score.toFixed(1)} color="#3498db" />
+        <StatCard title="총 점수" value={stats.github_score.toFixed(2)} color="#3498db" />
         <StatCard title="커밋" value={stats.commit_cnt} color="#2ecc71" />
         <StatCard title="커밋 라인" value={stats.commit_line} color="#9b59b6" />
         <StatCard title="PR" value={stats.pr_cnt} color="#f39c12" />

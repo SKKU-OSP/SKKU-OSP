@@ -11,7 +11,7 @@ export const handlers = [
         student_id: 2020314682,
         yearlyStats: {
           2025: {
-            github_score: 4.4,
+            github_score: 4.42,
             repo_cnt: 19,
             commit_cnt: 132,
             commit_line: 69000,
@@ -19,7 +19,7 @@ export const handlers = [
             pr_cnt: 7
           },
           2024: {
-            github_score: 2.1,
+            github_score: 2.61,
             repo_cnt: 19,
             commit_cnt: 62,
             commit_line: 24000,
@@ -67,7 +67,7 @@ export const handlers = [
         student_id: 2020319999,
         yearlyStats: {
           2025: {
-            github_score: 3.8,
+            github_score: 3.87,
             repo_cnt: 25,
             commit_cnt: 262,
             commit_line: 123000,
