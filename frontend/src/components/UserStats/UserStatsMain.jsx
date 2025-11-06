@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from "react";
-import StudentList from "./StudentList";
-import StudentDetails from "./StudentDetails";
-import "./UserStats.css";
+import React, { useState, useEffect } from 'react';
+import StudentList from './StudentList';
+import StudentDetails from './StudentDetails';
+import './UserStats.css';
 
 function UserStatsMain() {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedYear, setSelectedYear] = useState("2025");
+  const [selectedYear, setSelectedYear] = useState('2025');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/admin/userstats");
+        const response = await fetch('/api/admin/userstats');
         const data = await response.json();
         setStudents(data);
-        if (data.length > 0) {
-          setSelectedStudent(data[0]);
-        }
+        // if (data.length > 0) {
+        //   setSelectedStudent(data[0]);
+        // }
       } catch (error) {
-        console.error("Failed to fetch students:", error);
+        console.error('Failed to fetch students:', error);
       } finally {
         setLoading(false);
       }
@@ -48,7 +48,7 @@ function UserStatsMain() {
           {/* 모바일 학생 선택 헤더 */}
           <div className="mobile-student-select">
             <select
-              value={selectedStudent?.id || ""}
+              value={selectedStudent?.id || ''}
               onChange={(e) => {
                 const student = students.find((s) => s.id === e.target.value);
                 if (student) setSelectedStudent(student);
@@ -67,13 +67,11 @@ function UserStatsMain() {
           {/* 상세 정보 영역 */}
           <div className="details-content-area">
             {loading ? (
-              <div className="loading-container"><p>데이터를 불러오는 중입니다...</p></div>
+              <div className="loading-container">
+                <p>데이터를 불러오는 중입니다...</p>
+              </div>
             ) : selectedStudent ? (
-              <StudentDetails
-                student={selectedStudent}
-                selectedYear={selectedYear}
-                onYearChange={setSelectedYear}
-              />
+              <StudentDetails student={selectedStudent} selectedYear={selectedYear} onYearChange={setSelectedYear} />
             ) : (
               <div className="loading-container">
                 <p>학생을 선택해주세요</p>

@@ -1,6 +1,7 @@
 import React from 'react';
 import RepoList from './RepoList';
 import { BsGithub } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
 
 // 통계 카드 컴포넌트
 const StatCard = ({ title, value, color }) => (
@@ -11,6 +12,8 @@ const StatCard = ({ title, value, color }) => (
 );
 
 function StudentDetails({ student, selectedYear, onYearChange }) {
+  const navigate = useNavigate();
+
   if (!student) {
     return null;
   }
@@ -27,13 +30,23 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
   // 학생 데이터에서 가능한 연도 목록 추출 (내림차순 정렬)
   const availableYears = Object.keys(student.yearlyStats).sort().reverse();
 
+  const onGithub = () => {
+    window.open(`https://www.github.com/${student.github_id}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const onProfile = () => {
+    navigate(`/user/${student.username}`);
+  };
+
   return (
     <div className="student-details">
       <div className="details-header">
         <div className="header-info">
-          <h1>{student.username}</h1>
+          <h1 onClick={onProfile} className="student-name-click">
+            {student.name}
+          </h1>
           <span className="student-id-badge">{student.student_id}</span>
-          <p className="student-github-link">
+          <p onClick={onGithub} className="student-github-click">
             <BsGithub /> {student.github_id}
           </p>
         </div>
@@ -51,9 +64,9 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
 
       <div className="stats-grid">
         <StatCard title="총 점수" value={stats.github_score.toFixed(2)} color="#3498db" />
-        <StatCard title="커밋" value={stats.commit_cnt} color="#2ecc71" />
-        <StatCard title="커밋 라인" value={stats.commit_line} color="#9b59b6" />
-        <StatCard title="PR" value={stats.pr_cnt} color="#f39c12" />
+        <StatCard title="Commits" value={stats.commit_cnt} color="#2ecc71" />
+        <StatCard title="Commit Lines" value={stats.commit_line} color="#9b59b6" />
+        <StatCard title="Pull Requests" value={stats.pr_cnt} color="#f39c12" />
         <StatCard title="Issues" value={stats.issue_cnt} color="#e74c3c" />
       </div>
 

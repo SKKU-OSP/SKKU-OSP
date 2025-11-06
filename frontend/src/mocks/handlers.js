@@ -6,8 +6,9 @@ export const handlers = [
     return HttpResponse.json([
       {
         id: 'ababab',
-        username: '이관우',
-        github_id: 'gitid1',
+        name: '이관우',
+        username: 'curamy',
+        github_id: 'Curamy',
         student_id: 2020314682,
         yearlyStats: {
           2025: {
@@ -62,8 +63,9 @@ export const handlers = [
       },
       {
         id: 'cdcdcd',
-        username: '강병희',
-        github_id: 'gitid2',
+        name: '강병희',
+        username: 'byungKHee',
+        github_id: 'byungKHee',
         student_id: 2020319999,
         yearlyStats: {
           2025: {
@@ -98,6 +100,405 @@ export const handlers = [
             contributors: 8,
             createdAt: '2022-11-10',
             updatedAt: '2024-11-01'
+          }
+        ]
+      },
+      {
+        id: 'efefef',
+        name: '김기태',
+        username: 'kitae',
+        github_id: 'kitae-kim',
+        student_id: 2023310001,
+        yearlyStats: {
+          2025: {
+            // 이 사용자는 2025년 데이터만 있음
+            github_score: 3.9,
+            repo_cnt: 12,
+            commit_cnt: 180,
+            commit_line: 55000,
+            issue_cnt: 8,
+            pr_cnt: 12
+          }
+        },
+        repositories: [
+          {
+            id: 'repo4',
+            name: 'unity-game-project',
+            description: 'A 2D platformer game built with Unity',
+            stars: 45,
+            forks: 10,
+            commits: 120,
+            pullRequests: 8,
+            issues: 3,
+            watchers: 12,
+            languages: ['C#', 'Unity'],
+            contributors: 3,
+            createdAt: '2025-03-01',
+            updatedAt: '2025-10-28'
+          },
+          {
+            id: 'repo5',
+            name: 'algorithm-ps',
+            description: 'My solutions for Baekjoon Online Judge',
+            stars: 78,
+            forks: 30,
+            commits: 350,
+            pullRequests: 2,
+            issues: 0,
+            watchers: 25,
+            languages: ['Python', 'C++'],
+            contributors: 1,
+            createdAt: '2025-01-10',
+            updatedAt: '2025-11-05'
+          },
+          {
+            id: 'repo6',
+            name: 'team-portfolio-web',
+            description: 'Portfolio website for our team project',
+            stars: 20,
+            forks: 5,
+            commits: 88,
+            pullRequests: 15,
+            issues: 5,
+            watchers: 8,
+            languages: ['React', 'TypeScript', 'Styled-components'],
+            contributors: 4,
+            createdAt: '2025-05-20',
+            updatedAt: '2025-09-15'
+          }
+        ]
+      },
+      {
+        id: 'ghghgh',
+        name: '박성균',
+        username: 'park',
+        github_id: 'sungkyun-park',
+        student_id: 2021310022,
+        yearlyStats: {
+          2024: {
+            github_score: 2.5,
+            repo_cnt: 8,
+            commit_cnt: 90,
+            commit_line: 18000,
+            issue_cnt: 1,
+            pr_cnt: 2
+          },
+          2025: {
+            github_score: 4.1,
+            repo_cnt: 15,
+            commit_cnt: 210,
+            commit_line: 82000,
+            issue_cnt: 4,
+            pr_cnt: 9
+          }
+        },
+        repositories: [
+          {
+            id: 'repo7',
+            name: 'data-analysis-notebooks',
+            description: 'Jupyter notebooks for data analysis class',
+            stars: 15,
+            forks: 3,
+            commits: 45,
+            pullRequests: 0,
+            issues: 0,
+            watchers: 6,
+            languages: ['Jupyter Notebook', 'Python', 'Pandas'],
+            contributors: 1,
+            createdAt: '2024-02-15',
+            updatedAt: '2024-12-01'
+          },
+          {
+            id: 'repo8',
+            name: 'django-backend-api',
+            description: 'Backend server for a web service',
+            stars: 60,
+            forks: 15,
+            commits: 230,
+            pullRequests: 12,
+            issues: 7,
+            watchers: 18,
+            languages: ['Python', 'Django', 'DRF'],
+            contributors: 4,
+            createdAt: '2024-07-01',
+            updatedAt: '2025-11-01'
+          },
+          {
+            id: 'repo9',
+            name: 'sungkyun-park.github.io',
+            description: 'My personal blog and portfolio',
+            stars: 33,
+            forks: 8,
+            commits: 70,
+            pullRequests: 1,
+            issues: 1,
+            watchers: 10,
+            languages: ['HTML', 'CSS', 'JavaScript'],
+            contributors: 1,
+            createdAt: '2024-01-05',
+            updatedAt: '2025-10-30'
+          },
+          {
+            id: 'repo10',
+            name: 'capstone-design-project',
+            description: 'Graduation capstone design project',
+            stars: 102,
+            forks: 25,
+            commits: 400,
+            pullRequests: 22,
+            issues: 10,
+            watchers: 30,
+            languages: ['Java', 'Spring Boot', 'React'],
+            contributors: 5,
+            createdAt: '2025-03-10',
+            updatedAt: '2025-11-04'
+          }
+        ]
+      },
+      {
+        id: 'ijijij',
+        name: '장수지',
+        username: 'siuuuu',
+        github_id: 'suji-jang',
+        student_id: 2020310033,
+        yearlyStats: {
+          2023: {
+            github_score: 3.1,
+            repo_cnt: 5,
+            commit_cnt: 150,
+            commit_line: 25000,
+            issue_cnt: 2,
+            pr_cnt: 5
+          },
+          2024: {
+            github_score: 3.8,
+            repo_cnt: 9,
+            commit_cnt: 220,
+            commit_line: 60000,
+            issue_cnt: 5,
+            pr_cnt: 10
+          },
+          2025: {
+            github_score: 4.5,
+            repo_cnt: 14,
+            commit_cnt: 310,
+            commit_line: 110000,
+            issue_cnt: 8,
+            pr_cnt: 15
+          }
+        },
+        repositories: [
+          {
+            id: 'repo11',
+            name: 'ml-prediction-model',
+            description: 'Stock price prediction model using TensorFlow',
+            stars: 180,
+            forks: 55,
+            commits: 280,
+            pullRequests: 10,
+            issues: 8,
+            watchers: 60,
+            languages: ['Python', 'TensorFlow', 'Keras'],
+            contributors: 2,
+            createdAt: '2023-09-01',
+            updatedAt: '2025-10-15'
+          },
+          {
+            id: 'repo12',
+            name: 'ios-diary-app',
+            description: 'A simple diary application for iOS',
+            stars: 95,
+            forks: 20,
+            commits: 160,
+            pullRequests: 18,
+            issues: 6,
+            watchers: 22,
+            languages: ['Swift', 'SwiftUI'],
+            contributors: 1,
+            createdAt: '2024-04-20',
+            updatedAt: '2025-08-30'
+          },
+          {
+            id: 'repo13',
+            name: 'suji-design-system',
+            description: 'Personal design system components',
+            stars: 40,
+            forks: 7,
+            commits: 90,
+            pullRequests: 5,
+            issues: 2,
+            watchers: 11,
+            languages: ['TypeScript', 'Storybook', 'React'],
+            contributors: 1,
+            createdAt: '2025-02-01',
+            updatedAt: '2025-09-01'
+          }
+        ]
+      },
+      {
+        id: 'klklkl',
+        name: '홍길동',
+        username: 'HongGD',
+        github_id: 'gildong-hong',
+        student_id: 2022310044,
+        yearlyStats: {
+          2024: {
+            github_score: 1.8,
+            repo_cnt: 4,
+            commit_cnt: 70,
+            commit_line: 9000,
+            issue_cnt: 0,
+            pr_cnt: 1
+          },
+          2025: {
+            github_score: 2.9,
+            repo_cnt: 8,
+            commit_cnt: 140,
+            commit_line: 31000,
+            issue_cnt: 2,
+            pr_cnt: 3
+          }
+        },
+        repositories: [
+          {
+            id: 'repo14',
+            name: 'web-security-scanner',
+            description: 'A simple XSS scanner tool',
+            stars: 30,
+            forks: 10,
+            commits: 65,
+            pullRequests: 2,
+            issues: 1,
+            watchers: 9,
+            languages: ['Go', 'Python'],
+            contributors: 1,
+            createdAt: '2024-06-11',
+            updatedAt: '2025-02-10'
+          },
+          {
+            id: 'repo15',
+            name: 'raspberry-pi-iot',
+            description: 'IoT project using Raspberry Pi and sensors',
+            stars: 55,
+            forks: 20,
+            commits: 110,
+            pullRequests: 4,
+            issues: 3,
+            watchers: 14,
+            languages: ['C', 'Python', 'Shell'],
+            contributors: 3,
+            createdAt: '2024-10-01',
+            updatedAt: '2025-09-20'
+          },
+          {
+            id: 'repo16',
+            name: 'simple-chat-app',
+            description: 'Real-time chat application with Node.js and Socket.io',
+            stars: 68,
+            forks: 15,
+            commits: 90,
+            pullRequests: 8,
+            issues: 4,
+            watchers: 16,
+            languages: ['Node.js', 'Socket.io', 'JavaScript'],
+            contributors: 2,
+            createdAt: '2025-04-05',
+            updatedAt: '2025-10-25'
+          },
+          {
+            id: 'repo17',
+            name: 'project-docs',
+            description: 'Documentation for various projects',
+            stars: 10,
+            forks: 2,
+            commits: 30,
+            pullRequests: 0,
+            issues: 0,
+            watchers: 3,
+            languages: ['Markdown'],
+            contributors: 1,
+            createdAt: '2025-01-30',
+            updatedAt: '2025-08-05'
+          }
+        ]
+      },
+      {
+        id: 'mnmnmn',
+        name: '김율전',
+        username: 'yulbung',
+        github_id: 'yuljeon-kim',
+        student_id: 2021310055,
+        yearlyStats: {
+          2023: {
+            github_score: 2.2,
+            repo_cnt: 3,
+            commit_cnt: 80,
+            commit_line: 15000,
+            issue_cnt: 1,
+            pr_cnt: 3
+          },
+          2024: {
+            github_score: 3.3,
+            repo_cnt: 6,
+            commit_cnt: 160,
+            commit_line: 45000,
+            issue_cnt: 3,
+            pr_cnt: 8
+          },
+          2025: {
+            github_score: 3.7,
+            repo_cnt: 10,
+            commit_cnt: 200,
+            commit_line: 70000,
+            issue_cnt: 5,
+            pr_cnt: 10
+          }
+        },
+        repositories: [
+          {
+            id: 'repo18',
+            name: 'aws-infra-terraform',
+            description: 'Infrastructure as Code for AWS using Terraform',
+            stars: 70,
+            forks: 25,
+            commits: 120,
+            pullRequests: 10,
+            issues: 4,
+            watchers: 20,
+            languages: ['HCL', 'Terraform'],
+            contributors: 2,
+            createdAt: '2023-11-05',
+            updatedAt: '2025-10-10'
+          },
+          {
+            id: 'repo19',
+            name: 'kubernetes-cluster-setup',
+            description: 'Scripts and manifests for setting up a K8s cluster',
+            stars: 85,
+            forks: 30,
+            commits: 150,
+            pullRequests: 12,
+            issues: 6,
+            watchers: 28,
+            languages: ['Shell', 'YAML', 'Dockerfile'],
+            contributors: 3,
+            createdAt: '2024-08-15',
+            updatedAt: '2025-11-03'
+          },
+          {
+            id: 'repo20',
+            name: 'fastapi-microservice',
+            description: 'A high-performance microservice using FastAPI',
+            stars: 110,
+            forks: 18,
+            commits: 95,
+            pullRequests: 7,
+            issues: 2,
+            watchers: 35,
+            languages: ['Python', 'FastAPI'],
+            contributors: 2,
+            createdAt: '2025-07-01',
+            updatedAt: '2025-11-02'
           }
         ]
       }

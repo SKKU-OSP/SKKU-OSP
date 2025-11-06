@@ -256,6 +256,13 @@ body {
   display: inline-block;
   margin-right: 0.5rem;
 }
+.student-name-click {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.student-name-click:hover {
+  opacity: 0.8;
+}
 .student-id-badge {
   display: inline-block;
   background-color: #e9ecef;
@@ -266,10 +273,15 @@ body {
   font-weight: 500;
   vertical-align: middle;
 }
-.student-github-link {
+.student-github-click {
   margin: 0.25rem 0 0 0;
   font-size: 1rem;
   color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.student-github-click:hover {
+  color: var(--color-text-primary); /* 호버 시 살짝 진하게 */
 }
 .year-selector {
   display: flex;
@@ -362,6 +374,10 @@ body {
 .repo-card-header:hover {
   opacity: 0.95;
 }
+.repo-header-info {
+  flex: 1;
+  min-width: 0;
+}
 .repo-header-info h3 {
   margin: 0 0 0.25rem 0.3rem;
   font-size: 1.2rem;
@@ -377,6 +393,8 @@ body {
   color: var(--color-text-light);
   font-size: 1rem;
   cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 1rem;
 }
 
 .repo-card-body {
@@ -395,17 +413,20 @@ body {
   font-weight: 500;
 }
 .repo-stats-inline {
-  display: flex;
+  display: inline-flex;
   gap: 20px;
   flex-wrap: wrap;
   margin-top: 0.6rem;
-  background-color: #1e3a8a;
+  background-color: rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+  width: fit-content;
+  max-width: 100%;
 }
 .repo-stat-item {
   display: flex;
   align-items: center;
+  white-space: nowrap;
   gap: 6px;
   font-size: 0.85rem;
   color: white;

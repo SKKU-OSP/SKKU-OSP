@@ -70,7 +70,7 @@ function StudentList({ students, selectedStudent, onSelectStudent, loading, sele
                 onClick={() => onSelectStudent(student)}
               >
                 <div className="student-item-left">
-                  <div className="student-name">{student.username}</div>
+                  <div className="student-name">{student.name}</div>
                   <div className="student-github">
                     <span className="github-icon">
                       <BsGithub />
