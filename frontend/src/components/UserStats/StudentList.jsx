@@ -13,7 +13,7 @@ function StudentList({ students, selectedStudent, onSelectStudent, loading, sele
     return students
       .filter(
         (student) =>
-          student.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student.github_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student.student_id.toString().includes(searchTerm) // 이름, GitHub ID, 학번으로 검색 가능
       )
