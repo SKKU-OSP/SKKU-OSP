@@ -43,6 +43,7 @@ import PasswordResetConfirm from './components/Account/PasswordResetConfirm';
 import PasswordResetComplete from './components/Account/PasswordResetComplete';
 import MainBoard_Container from './components/Community/Board/MainBoard/MainBoard_Container';
 import QnAPage from './routes/QnAPage';
+import UserStatsPage from './routes/UserStatsPage';
 import { useEffect } from 'react';
 
 const GaTrackingId = import.meta.env.VITE_GA_TRACKING_ID;
@@ -217,6 +218,10 @@ const router = createBrowserRouter([
       {
         path: 'qna',
         element: <QnAPage />
+      },
+      {
+        path: 'userstats',
+        element: <UserStatsPage />
       }
     ]
   }
@@ -226,9 +231,9 @@ async function enableMocking() {
   if (!import.meta.env.DEV) {
     return;
   }
- 
+
   const { worker } = await import('./mocks/browser');
- 
+
   // `worker.start()` returns a Promise that resolves
   // once the Service Worker is up and running.
   return worker.start({
