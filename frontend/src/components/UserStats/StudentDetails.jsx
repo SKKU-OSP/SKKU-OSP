@@ -22,7 +22,8 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
   const stats = student.yearlyStats[selectedYear] || {
     github_score: 0,
     commit_cnt: 0,
-    commit_line: 0,
+    add_line: 0,
+    del_line: 0,
     pr_cnt: 0,
     issue_cnt: 0
   };
@@ -65,7 +66,7 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
       <div className="stats-grid">
         <StatCard title="총 점수" value={stats.github_score.toFixed(2)} color="#3498db" />
         <StatCard title="Commits" value={stats.commit_cnt} color="#2ecc71" />
-        <StatCard title="Commit Lines" value={stats.commit_line} color="#9b59b6" />
+        <StatCard title="Commit Lines" value={stats.add_line + stats.del_line} color="#9b59b6" />
         <StatCard title="Pull Requests" value={stats.pr_cnt} color="#f39c12" />
         <StatCard title="Issues" value={stats.issue_cnt} color="#e74c3c" />
       </div>
