@@ -579,13 +579,13 @@ body {
     grid-template-columns: 1fr; /* 모바일에선 1열로 */
   }
   .repo-optional {
+    display: flex;
+    justify-content: space-between;
     flex-direction: column;
     align-items: stretch;
     gap: 0.8rem;
   }
-  .repo-dates {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem; /* Add some space between date items */
+  .date-item {
+    margin-bottom: 0.3rem;
   }
 }

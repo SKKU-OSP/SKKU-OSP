@@ -58,54 +58,50 @@ function RepoCard({ repo }) {
           <div className="repo-details-grid">
             <div className="detail-item">
               <span className="detail-title">
-                <BsCheckLg /> 커밋 수
+                <BsCheckLg /> 유저 / 전체 Commits
               </span>
-              <span className="detail-value">{repo.commits}</span>
+              <span className="detail-value">
+                {repo.user_commits}
+                {' / '}
+                {repo.commits}
+                {' ('} {((repo.user_commits / repo.commits) * 100).toFixed(2)} {'% )'}
+              </span>
             </div>
             <div className="detail-item">
               <span className="detail-title">
-                <BsCheckLg /> 커밋 수
+                <BsCheckLg /> 유저 / 전체 Commit Lines
               </span>
-              <span className="detail-value">{repo.commits}</span>
+              <span className="detail-value">
+                {repo.user_add_lines + repo.user_del_lines}
+                {' / '}
+                {repo.add_lines + repo.del_lines}
+                {' ('}{' '}
+                {(((repo.user_add_lines + repo.user_del_lines) / (repo.add_lines + repo.del_lines)) * 100).toFixed(2)}{' '}
+                {'% )'}
+              </span>
             </div>
             <div className="detail-item">
               <span className="detail-title">
-                <PiGitPullRequestBold /> PR 수
+                <PiGitPullRequestBold /> 유저 / 전체 Pull Requests
               </span>
-              <span className="detail-value">{repo.pullRequests}</span>
+              <span className="detail-value">
+                {repo.user_PRs}
+                {' / '}
+                {repo.pullRequests}
+                {' ('} {((repo.user_PRs / repo.pullRequests) * 100).toFixed(2)} {'% )'}
+              </span>
             </div>
             <div className="detail-item">
               <span className="detail-title">
-                <BsRecordCircle /> Issue 수
+                <BsRecordCircle /> 유저 / 전체 Issues
               </span>
-              <span className="detail-value">{repo.issues}</span>
+              <span className="detail-value">
+                {repo.user_issues}
+                {' / '}
+                {repo.issues}
+                {' ('} {((repo.user_issues / repo.issues) * 100).toFixed(2)} {'% )'}
+              </span>
             </div>
-            {/* <div className="detail-item">
-              <span className="detail-title">📅 생성 날짜</span>
-              <span className="detail-value">{new Date(repo.createdAt).toLocaleDateString()}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-title">🔄 최근 업데이트</span>
-              <span className="detail-value">{new Date(repo.updatedAt).toLocaleDateString()}</span>
-            </div> */}
-            {/* <span className="repo-stat-item" title="Commits">
-              <span className="stat-icon">
-                <BsCheckLg />
-              </span>{' '}
-              {repo.commits}
-            </span> */}
-            {/* <span className="repo-stat-item" title="Pull Requests">
-              <span className="stat-icon">
-                <PiGitPullRequestBold />
-              </span>{' '}
-              {repo.pullRequests}
-            </span>
-            <span className="repo-stat-item" title="Issues">
-              <span className="stat-icon">
-                <BsRecordCircle />
-              </span>{' '}
-              {repo.issues}
-            </span> */}
           </div>
 
           <div className="repo-optional">
