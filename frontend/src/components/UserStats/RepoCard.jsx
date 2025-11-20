@@ -10,8 +10,11 @@ import {
   BsBox,
   BsCardHeading,
   BsBook,
-  BsKey
+  BsKey,
+  BsPlus,
+  BsDash
 } from 'react-icons/bs';
+import { GoCommit } from 'react-icons/go';
 import { PiGitForkBold, PiGitPullRequestBold } from 'react-icons/pi';
 
 function RepoCard({ repo }) {
@@ -58,48 +61,81 @@ function RepoCard({ repo }) {
           <div className="repo-details-grid">
             <div className="detail-item">
               <span className="detail-title">
-                <BsCheckLg /> 유저 / 전체 Commits
+                <span className="title-name">
+                  <GoCommit /> Commits
+                </span>
+                <span>( 유저 / 전체 )</span>
               </span>
               <span className="detail-value">
-                {repo.user_commits}
-                {' / '}
-                {repo.commits}
-                {' ('} {((repo.user_commits / repo.commits) * 100).toFixed(2)} {'% )'}
+                <span className="detail-user-value">{repo.user_commits}</span>
+                <span className="detail-total-value">
+                  {' / '}
+                  {repo.commits}
+                </span>
+                <span className="detail-percentage">
+                  {' ( '}
+                  {((repo.user_commits / repo.commits) * 100).toFixed(2)} {'% )'}
+                </span>
               </span>
             </div>
             <div className="detail-item">
               <span className="detail-title">
-                <BsCheckLg /> 유저 / 전체 Commit Lines
+                <span className="title-name">
+                  <BsCheckLg /> Commit Lines
+                </span>
+                <span>( 유저 / 전체 )</span>
               </span>
               <span className="detail-value">
-                {repo.user_add_lines + repo.user_del_lines}
-                {' / '}
-                {repo.add_lines + repo.del_lines}
-                {' ('}{' '}
-                {(((repo.user_add_lines + repo.user_del_lines) / (repo.add_lines + repo.del_lines)) * 100).toFixed(2)}{' '}
-                {'% )'}
+                <span className="detail-user-value">{repo.user_add_lines + repo.user_del_lines}</span>
+                <span className="detail-total-value">
+                  {' / '}
+                  {repo.add_lines + repo.del_lines}
+                </span>
+                <span className="detail-percentage">
+                  {' ( '}
+                  {(((repo.user_add_lines + repo.user_del_lines) / (repo.add_lines + repo.del_lines)) * 100).toFixed(
+                    2
+                  )}{' '}
+                  {'% )'}
+                </span>
               </span>
             </div>
             <div className="detail-item">
               <span className="detail-title">
-                <PiGitPullRequestBold /> 유저 / 전체 Pull Requests
+                <span className="title-name">
+                  <PiGitPullRequestBold /> Pull Requests
+                </span>
+                <span>( 유저 / 전체 )</span>
               </span>
               <span className="detail-value">
-                {repo.user_PRs}
-                {' / '}
-                {repo.pullRequests}
-                {' ('} {((repo.user_PRs / repo.pullRequests) * 100).toFixed(2)} {'% )'}
+                <span className="detail-user-value">{repo.user_PRs}</span>
+                <span className="detail-total-value">
+                  {' / '}
+                  {repo.pullRequests}
+                </span>
+                <span className="detail-percentage">
+                  {' ( '}
+                  {((repo.user_PRs / repo.pullRequests) * 100).toFixed(2)} {'% )'}
+                </span>
               </span>
             </div>
             <div className="detail-item">
               <span className="detail-title">
-                <BsRecordCircle /> 유저 / 전체 Issues
+                <span className="title-name">
+                  <BsRecordCircle /> Issues
+                </span>
+                <span>( 유저 / 전체 )</span>
               </span>
               <span className="detail-value">
-                {repo.user_issues}
-                {' / '}
-                {repo.issues}
-                {' ('} {((repo.user_issues / repo.issues) * 100).toFixed(2)} {'% )'}
+                <span className="detail-user-value">{repo.user_issues}</span>
+                <span className="detail-total-value">
+                  {' / '}
+                  {repo.issues}
+                </span>
+                <span className="detail-percentage">
+                  {' ( '}
+                  {((repo.user_issues / repo.issues) * 100).toFixed(2)} {'% )'}
+                </span>
               </span>
             </div>
           </div>

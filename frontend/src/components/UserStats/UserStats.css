@@ -461,10 +461,31 @@ body {
   align-items: center;
   gap: 0.25rem;
 }
+.title-name {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
 .detail-value {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text-primary);
+  white-space: nowrap;
+}
+.detail-user-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.detail-total-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.detail-percentage {
+  margin-left: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-bg-repo-header);
 }
 .date-item {
   display: grid;
