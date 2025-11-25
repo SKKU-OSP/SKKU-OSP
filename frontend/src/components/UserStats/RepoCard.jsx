@@ -98,6 +98,16 @@ function RepoCard({ repo }) {
                   )}{' '}
                   {'% )'}
                 </span>
+                <span className="repo-commit-lines">
+                  <span className="add-lines">
+                    <BsPlus />
+                    {repo.user_add_lines}
+                  </span>
+                  <span className="del-lines">
+                    <BsDash />
+                    {repo.user_del_lines}
+                  </span>
+                </span>
               </span>
             </div>
             <div className="detail-item">

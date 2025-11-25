@@ -318,6 +318,11 @@ body {
   border-left-width: 5px;
   box-shadow: var(--shadow-sm);
 }
+.stat-value-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
 .stat-title {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
@@ -328,6 +333,15 @@ body {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-text-primary);
+}
+.stat-commit-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.3rem;
+  line-height: 1.2;
 }
 
 /* --- 3. 레포 리스트 --- */
@@ -448,6 +462,13 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
 }
+.add-lines {
+  color: #01be1a;
+}
+
+.del-lines {
+  color: #f70c00;
+}
 .detail-item {
   display: flex;
   flex-direction: column;
@@ -470,6 +491,9 @@ body {
   font-weight: 600;
   color: var(--color-text-primary);
   white-space: nowrap;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
 }
 .detail-user-value {
   font-size: 0.95rem;
@@ -486,6 +510,15 @@ body {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-bg-repo-header);
+}
+.repo-commit-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-left: 0.2rem;
+  line-height: 1;
 }
 .date-item {
   display: grid;
@@ -551,6 +584,15 @@ body {
   }
   .stat-value {
     font-size: 1.5rem;
+  }
+  .stat-commit-lines {
+    font-size: 0.6rem;
+  }
+  .add-lines {
+    white-space: nowrap;
+  }
+  .del-lines {
+    white-space: nowrap;
   }
 }
 
