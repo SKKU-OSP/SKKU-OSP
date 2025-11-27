@@ -1,27 +1,39 @@
 import React from 'react';
-import { BsPlus, BsDash } from 'react-icons/bs';
+import { BsPlus, BsDash, BsArrowClockwise } from 'react-icons/bs';
 import RepoList from './RepoList';
 import { BsGithub } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
 // 통계 카드 컴포넌트
-const StatCard = ({ title, value, color, addLines, delLines }) => (
+const StatCard = ({ title, value, color }) => (
   <div className="stat-card" style={{ borderLeftColor: color }}>
     <span className="stat-title">{title}</span>
     <div className="stat-value-wrapper">
       <span className="stat-value">{value.toLocaleString()}</span>
-      {addLines !== undefined && delLines !== undefined && (
-        <span className="stat-commit-lines">
-          <span className="add-lines">
-            <BsPlus />
-            {addLines.toLocaleString()}
-          </span>
-          <span className="del-lines">
-            <BsDash />
-            {delLines.toLocaleString()}
-          </span>
+    </div>
+  </div>
+);
+
+const StatCard_commit_lines = ({ title, value, color, addLines, delLines }) => (
+  <div className="stat-card" style={{ borderLeftColor: color }}>
+    <span className="stat-title">{title}</span>
+    <div className="stat-value-wrapper">
+      <span
+        // 조건에 따라 'is-long' 클래스를 추가
+        className={`stat-value_commit_lines ${value >= 1000000 ? 'is-long' : ''}`}
+      >
+        {value.toLocaleString()}
+      </span>
+      <span className={`stat-commit-lines ${value >= 1000000 ? 'is-long' : ''}`}>
+        <span className="add-lines">
+          <BsPlus />
+          {addLines.toLocaleString()}
         </span>
-      )}
+        <span className="del-lines">
+          <BsDash />
+          {delLines.toLocaleString()}
+        </span>
+      </span>
     </div>
   </div>
 );
@@ -67,7 +79,12 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
           </p>
         </div>
         <div className="year-selector">
-          <label htmlFor="year-select">연도 선택</label>
+          <div className="user-refresh">
+            <label htmlFor="year-select">연도 선택</label>
+            <button className="refresh-button">
+              <BsArrowClockwise />
+            </button>
+          </div>
           <select id="year-select" value={selectedYear} onChange={(e) => onYearChange(e.target.value)}>
             {availableYears.map((year) => (
               <option key={year} value={year}>
@@ -81,7 +98,7 @@ function StudentDetails({ student, selectedYear, onYearChange }) {
       <div className="stats-grid">
         <StatCard title="총 점수" value={stats.github_score.toFixed(2)} color="#3498db" />
         <StatCard title="Commits" value={stats.commit_cnt} color="#2ecc71" />
-        <StatCard
+        <StatCard_commit_lines
           title="Commit Lines"
           value={stats.add_line + stats.del_line}
           color="#9b59b6"

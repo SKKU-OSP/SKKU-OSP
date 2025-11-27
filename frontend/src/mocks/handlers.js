@@ -88,8 +88,8 @@ export const handlers = [
             github_score: 3.87,
             repo_cnt: 25,
             commit_cnt: 262,
-            add_line: 105000,
-            del_line: 18000,
+            add_line: 1750432,
+            del_line: 180400,
             issue_cnt: 5,
             pr_cnt: 5
           },
@@ -97,8 +97,8 @@ export const handlers = [
             github_score: 5.0,
             repo_cnt: 25,
             commit_cnt: 372,
-            add_line: 310000,
-            del_line: 53000,
+            add_line: 25316942,
+            del_line: 5301100,
             issue_cnt: 11,
             pr_cnt: 7
           }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { BsArrowClockwise } from 'react-icons/bs';
 import {
   BsStar,
   BsEye,
@@ -172,6 +172,12 @@ function RepoCard({ repo }) {
                 <span className="date-value">{new Date(repo.updatedAt).toLocaleDateString()}</span>
               </div>
             </div>
+          </div>
+
+          <div className="repo-refresh">
+            <button className="refresh-button">
+              <BsArrowClockwise />
+            </button>
           </div>
         </div>
       )}
