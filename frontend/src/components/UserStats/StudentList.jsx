@@ -19,7 +19,7 @@ function StudentList({ students, selectedStudent, onSelectStudent, loading, sele
       )
       .sort((a, b) => {
         if (sortBy === 'name') {
-          return a.username.localeCompare(b.username);
+          return a.name.localeCompare(b.name);
         } else {
           return getScore(b) - getScore(a);
         }
