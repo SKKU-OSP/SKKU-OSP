@@ -37,15 +37,15 @@ class GithubSpider(scrapy.Spider):
             chromedriver_path), options=chrome_options)
 
 
-def close(self, reason):
-    """스파이더 종료 시 크롬 닫고 로그 남기기"""
-    if getattr(self, "driver", None):
-        try:
-            self.driver.quit()
-            logging.info("Chrome driver closed successfully")
-        except Exception as e:
-            logging.warning(f"Error while closing Chrome driver: {e}")
-    logging.info(f"Spider closed. Reason: {reason}")
+    def close(self, reason):
+        """스파이더 종료 시 크롬 닫고 로그 남기기"""
+        if getattr(self, "driver", None):
+            try:
+                self.driver.quit()
+                logging.info("Chrome driver closed successfully")
+            except Exception as e:
+                logging.warning(f"Error while closing Chrome driver: {e}")
+        logging.info(f"Spider closed. Reason: {reason}")
 
     def start_requests(self):
         for id in self.ids:
