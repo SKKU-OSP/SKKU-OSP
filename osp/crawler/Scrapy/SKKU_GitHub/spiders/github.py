@@ -171,19 +171,40 @@ class GithubSpider(scrapy.Spider):
     def parse_user_update(self, res):
         github_id = res.meta['github_id']
         self.driver.get(res.url)
-        WebDriverWait(self.driver, 5).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, '.TimelineItem-body'))
-        )
+
+        # 2026 GitHub DOM 변경 대응: data-testid 또는 markdown-body 사용
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, '[data-testid="timeline-item"], [data-testid="comment-body"], .markdown-body, .TimelineItem-body'))
+            )
+        except Exception as e:
+            logging.warning(f"Timeline elements not found for {github_id}: {e}")
+            # 기본값 반환
+            user_update = UserUpdate()
+            user_update['github_id'] = github_id
+            user_update['target'] = 'activity'
+            user_update['total_commits'] = 0
+            user_update['total_PRs'] = 0
+            user_update['total_issues'] = 0
+            yield user_update
+
+            user_period = UserPeriod()
+            user_period['github_id'] = github_id
+            user_period['start_yymm'] = res.meta['from']
+            user_period['end_yymm'] = res.meta['to']
+            user_period['num_of_cr_repos'] = 0
+            user_period['num_of_co_repos'] = 0
+            user_period['num_of_commits'] = 0
+            user_period['num_of_PRs'] = 0
+            user_period['num_of_issues'] = 0
+            user_period['stars'] = 0
+            yield user_period
+            return
 
         html = self.driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-        # soup = BeautifulSoup(res.body, 'html.parser')
-        # if self.flag == 1:
-        #     print("soup\n\n")
-        #     print(soup)
-        #     print("\n\nsoup")
-        #     self.flag = 0
+
         user_update = UserUpdate()
         user_update['github_id'] = github_id
         user_update['target'] = 'activity'
@@ -199,7 +220,11 @@ class GithubSpider(scrapy.Spider):
         user_period['stars'] = 0
         owned_repo = set()
         contributed_repo = set()
-        events = soup.select('.TimelineItem-body')
+
+        # 2026 GitHub DOM 변경 대응: 여러 셀렉터 시도
+        events = soup.select('[data-testid="timeline-item"]')
+        if not events:
+            events = soup.select('.TimelineItem-body')
         # if self.flag == 1:
         #     print(self.flag)
         #     print("soup\n\n")
@@ -383,28 +408,42 @@ class GithubSpider(scrapy.Spider):
             yield self.api_get(f'repos/{"/".join(repo)}', self.parse_repo, metadata={'from': github_id})
 
     def parse_user_page(self, res):
-        self.driver.get(res.url)
-        WebDriverWait(self.driver, 1).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'h2.h4.mb-2'))
-        )
-        html = self.driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-        # soup = BeautifulSoup(res.body, 'html.parser')
-        info_list = [tag.parent for tag in soup.select('h2.h4.mb-2')]
         user_data = UserUpdate()
         user_data['github_id'] = res.meta['github_id']
         user_data['target'] = 'badge'
         user_data['achievements'] = None
         user_data['highlights'] = None
-        for info in info_list:
-            if info.h2.text == 'Achievements':
-                user_data['achievements'] = ', '.join(
-                    [tag['alt'] for tag in info.select('img')]
-                )
-            if info.h2.text == 'Highlights':
-                user_data['highlights'] = ', '.join(
-                    [tag.text.strip() for tag in info.select('li')]
-                )
+
+        try:
+            self.driver.get(res.url)
+            WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'h2.h4.mb-2, [data-testid="profile-achievements"]'))
+            )
+            html = self.driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # 2026 GitHub DOM 변경 대응: 여러 셀렉터 시도
+            info_list = [tag.parent for tag in soup.select('h2.h4.mb-2')]
+            if not info_list:
+                # data-testid 기반 셀렉터 시도
+                achievements_section = soup.select_one('[data-testid="profile-achievements"]')
+                if achievements_section:
+                    user_data['achievements'] = ', '.join(
+                        [tag['alt'] for tag in achievements_section.select('img') if tag.get('alt')]
+                    )
+
+            for info in info_list:
+                if info.h2 and info.h2.text == 'Achievements':
+                    user_data['achievements'] = ', '.join(
+                        [tag['alt'] for tag in info.select('img') if tag.get('alt')]
+                    )
+                if info.h2 and info.h2.text == 'Highlights':
+                    user_data['highlights'] = ', '.join(
+                        [tag.text.strip() for tag in info.select('li')]
+                    )
+        except Exception as e:
+            logging.warning(f"Could not parse user page for {res.meta['github_id']}: {e}")
+
         yield user_data
 
     def parse_user_following(self, res):
@@ -585,23 +624,83 @@ class GithubSpider(scrapy.Spider):
         soup = BeautifulSoup(res.body, 'html.parser')
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
-        prs_cnt = soup.select_one(
-            'a[data-ga-click="Pull Requests, Table state, Open"]').parent
-        prs_cnt = [x.text.strip().replace(',', '').split()
-                   for x in prs_cnt.select('a')]
-        repo_data['prs_count'] = int(prs_cnt[0][0]) + int(prs_cnt[1][0])
+        repo_data['prs_count'] = 0
+
+        try:
+            # 2026 GitHub DOM 변경 대응: URL 패턴 기반 셀렉터 사용
+            open_pr = soup.select_one('a[href*="is%3Aopen"][href*="is%3Apr"]')
+            closed_pr = soup.select_one('a[href*="is%3Apr"][href*="is%3Aclosed"]')
+
+            if open_pr and closed_pr:
+                open_cnt = int(open_pr.text.strip().replace(',', '').split()[0])
+                closed_cnt = int(closed_pr.text.strip().replace(',', '').split()[0])
+                repo_data['prs_count'] = open_cnt + closed_cnt
+            else:
+                # 기존 셀렉터 폴백
+                prs_cnt = soup.select_one(
+                    'a[data-ga-click="Pull Requests, Table state, Open"]')
+                if prs_cnt:
+                    prs_cnt = prs_cnt.parent
+                    prs_cnt = [x.text.strip().replace(',', '').split()
+                               for x in prs_cnt.select('a')]
+                    repo_data['prs_count'] = int(prs_cnt[0][0]) + int(prs_cnt[1][0])
+        except (AttributeError, IndexError, ValueError) as e:
+            logging.warning(f"Could not parse PRs for {res.meta['path']}: {e}")
+            repo_data['prs_count'] = 0
+
         yield repo_data
 
     def parse_repo_issue(self, res):
-        soup = BeautifulSoup(res.body, 'html.parser')
+        import re
         repo_data = RepoUpdate()
         repo_data['path'] = res.meta['path']
-        issue_cnt = soup.select_one(
-            'a[data-ga-click="Issues, Table state, Open"]').parent
-        issue_cnt = [x.text.strip().replace(',', '').split()
-                     for x in issue_cnt.select('a')]
-        repo_data['open_issue_count'] = int(issue_cnt[0][0])
-        repo_data['close_issue_count'] = int(issue_cnt[1][0])
+        repo_data['open_issue_count'] = 0
+        repo_data['close_issue_count'] = 0
+
+        try:
+            # 2026 GitHub DOM 변경 대응: Selenium으로 JavaScript 렌더링된 페이지 로드
+            self.driver.get(res.url)
+            WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'a[href*="issues"], nav'))
+            )
+            html = self.driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # 2026 GitHub: Open 이슈 수는 /issues 링크의 span에서, Closed는 state%3Aclos 링크에서 추출
+            # Open: /issues로 끝나는 링크에서 숫자 span 찾기
+            for a in soup.select('a[href$="/issues"]'):
+                for span in a.select('span'):
+                    text = span.text.strip().replace(',', '')
+                    if text.isdigit():
+                        repo_data['open_issue_count'] = int(text)
+                        break
+                if repo_data['open_issue_count'] > 0:
+                    break
+
+            # Closed: state%3Aclos 링크에서 숫자 추출
+            closed_issue = soup.select_one('a[href*="state%3Aclos"]')
+            if closed_issue:
+                closed_text = closed_issue.text.strip().replace(',', '')
+                closed_match = re.search(r'(\d+)', closed_text)
+                if closed_match:
+                    repo_data['close_issue_count'] = int(closed_match.group(1))
+
+            # 폴백: 기존 셀렉터
+            if repo_data['open_issue_count'] == 0 and repo_data['close_issue_count'] == 0:
+                issue_cnt = soup.select_one(
+                    'a[data-ga-click="Issues, Table state, Open"]')
+                if issue_cnt:
+                    issue_cnt = issue_cnt.parent
+                    issue_cnt = [x.text.strip().replace(',', '').split()
+                                 for x in issue_cnt.select('a')]
+                    repo_data['open_issue_count'] = int(issue_cnt[0][0])
+                    repo_data['close_issue_count'] = int(issue_cnt[1][0])
+        except Exception as e:
+            logging.warning(f"Could not parse issues for {res.meta['path']}: {e}")
+            repo_data['open_issue_count'] = 0
+            repo_data['close_issue_count'] = 0
+
         yield repo_data
 
     def parse_repo_commit(self, res):
