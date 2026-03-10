@@ -265,6 +265,8 @@ SCHEDULER_DEFAULT = True
 
 CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
 
+SPRING_BACKEND_URL = os.environ.get('SPRING_BACKEND_URL', 'http://localhost:8080')
+
 '''
 nginx에서 중계해준 패킷에 대한 정보 주석해제 후 사용
 LOGGING = {

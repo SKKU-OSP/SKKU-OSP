@@ -32,6 +32,8 @@ services:
     image: sosd/sosd-backend-django:${BACKEND_VERSION:-v1.0.7}
     container_name: sosd-backend
     restart: always
+    environment:
+      SPRING_BACKEND_URL: 'http://host.docker.internal:4403'
     volumes:
       - '/home/sosd-com/SKKU-OSP/osp/data/media:/app/data/media'
       - '/home/sosd-com/SKKU-OSP/osp/static:/app/staticfiles'
