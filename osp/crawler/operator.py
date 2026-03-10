@@ -205,15 +205,13 @@ def force_start():
         end_year = datetime.now().year
         start_year = 2019
         for user in Account.objects.filter(user__is_superuser=False):
-            if str(user) == 'ki011127':
-                for chal in challenge_list:
-                    achievement_check(user, chal)
-                for year in range(end_year, start_year-1, -1):
-                    if spring_score_update:
-                        print("spring_score_update")
-                        spring_score_update(user, year)
-                    else:
-                        zero_score_update(user, year)
+            for chal in challenge_list:
+                achievement_check(user, chal)
+            for year in range(end_year, start_year-1, -1):
+                if spring_score_update:
+                    spring_score_update(user, year)
+                else:
+                    zero_score_update(user, year)
         update_commmit_time()
         update_individual()
         update_frequency()
