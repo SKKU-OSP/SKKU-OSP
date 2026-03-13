@@ -205,6 +205,25 @@ class SpringScoreService:
             score_table.pr_cnt = score_data.get('prCount', 0)
             score_table.save()
 
+    def trigger_batch(self) -> bool:
+        """
+        Spring Batch를 실행하여 github_contribution_stats 테이블을 갱신합니다.
+        점수 동기화 전에 호출해야 최신 데이터가 반영됩니다.
+        """
+        url = f"{self.base_url}/api/v1/batch/contribution-stats/run"
+        try:
+            logger.info(f"Spring Batch 실행 요청: {url}")
+            response = requests.post(url, timeout=300)
+            response.raise_for_status()
+            logger.info("Spring Batch 실행 완료")
+            return True
+        except requests.Timeout:
+            logger.error("Spring Batch 타임아웃 (300s 초과)")
+            return False
+        except Exception as e:
+            logger.error(f"Spring Batch 실행 실패: {e}")
+            return False
+
 
 # 편의 함수
 def spring_score_update(user: Account, year: int) -> bool:
@@ -222,3 +241,12 @@ def spring_score_update(user: Account, year: int) -> bool:
     """
     service = SpringScoreService()
     return service.sync_user_score(user, year)
+
+
+def trigger_spring_batch() -> bool:
+    """
+    Spring Batch를 실행하여 github_contribution_stats를 갱신합니다.
+    update_score 작업 시작 시 한 번 호출합니다.
+    """
+    service = SpringScoreService()
+    return service.trigger_batch()

@@ -9,9 +9,10 @@ from django.db.models import F
 from osp.settings import CRAWLING_LOG_PATH, BASE_DIR
 from user.models import Account, GithubOverview
 try:
-    from home.updateScore import user_score_update
+    from home.spring_score_service import spring_score_update, trigger_spring_batch
 except ImportError:
-    user_score_update = None
+    spring_score_update = None
+    trigger_spring_batch = None
 from home.zeroScore import zero_score_update
 from home.updateChart import update_chart
 from challenge.models import Challenge
@@ -97,6 +98,8 @@ def start():
     @scheduler.scheduled_job('cron', hour='6,18', misfire_grace_time=60, id='update_score')
     def update_score():
         print('Update Start!')
+        if trigger_spring_batch:
+            trigger_spring_batch()
         challenge_list = Challenge.objects.all()
         end_year = datetime.now().year
         start_year = 2019
@@ -104,8 +107,8 @@ def start():
             for chal in challenge_list:
                 achievement_check(user, chal)
             for year in range(end_year, start_year-1, -1):
-                if user_score_update:
-                    user_score_update(user, year)
+                if spring_score_update:
+                    spring_score_update(user, year)
                 else:
                     zero_score_update(user, year)
         update_commmit_time()
@@ -196,19 +199,19 @@ def force_start():
     # @scheduler.scheduled_job('cron', hour='6,18', misfire_grace_time=60, id='update_score')
     def update_score():
         print('Update Start!')
+        if trigger_spring_batch:
+            trigger_spring_batch()
         challenge_list = Challenge.objects.all()
         end_year = datetime.now().year
         start_year = 2019
         for user in Account.objects.filter(user__is_superuser=False):
-            if str(user) == 'ki011127':
-                for chal in challenge_list:
-                    achievement_check(user, chal)
-                for year in range(end_year, start_year-1, -1):
-                    if user_score_update:
-                        print("user_score_update")
-                        user_score_update(user, year)
-                    else:
-                        zero_score_update(user, year)
+            for chal in challenge_list:
+                achievement_check(user, chal)
+            for year in range(end_year, start_year-1, -1):
+                if spring_score_update:
+                    spring_score_update(user, year)
+                else:
+                    zero_score_update(user, year)
         update_commmit_time()
         update_individual()
         update_frequency()
