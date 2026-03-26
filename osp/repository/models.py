@@ -54,7 +54,7 @@ class GithubRepoStats(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_repo_stats'
+        db_table = 'v_github_repo_stats'
         unique_together = (('github_id', 'repo_name'),)
 
     def get_guideline(self):
@@ -103,7 +103,7 @@ class GithubIssues(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_issues'
+        db_table = 'v_github_issues'
         unique_together = (('owner_id', 'repo_name', 'number'),)
 
 
@@ -117,7 +117,7 @@ class GithubPulls(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_pulls'
+        db_table = 'v_github_pulls'
         unique_together = (('owner_id', 'repo_name', 'number'),)
 
 
