@@ -40,4 +40,5 @@ urlpatterns = [
      path('api/qna/', views.QnAListView.as_view(), name='qna-list'),
      path('api/qna/create/', views.QnACreateView.as_view(), name='qna-create'),
      path('api/qna/<int:id>/', views.QnADetailView.as_view(), name='qna-detail'),
+     path('api/ai-evaluation/', views.AiEvaluationView.as_view(), name='ai-evaluation'),
 ]

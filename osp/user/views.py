@@ -1400,6 +1400,71 @@ class AccountPrivacyView(APIView):
             res = {'status': 'success', 'data': data}
         return Response(res)
 
+from google import genai
+from django.conf import settings
+
+# ... (기타 임포트들)
+
+class AiEvaluationView(APIView):
+    def post(self, request):
+        if not request.auth:
+            return Response({'status': 'fail', 'message': '로그인이 필요합니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        readme_content = request.data.get('readme_content', '')
+        repo_name = request.data.get('repo_name', '')
+        
+        if not readme_content:
+            return Response({'status': 'fail', 'message': '분석할 README 내용이 없습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Gemini API 설정
+            api_key = getattr(settings, 'GEMINI_API_KEY', None)
+            if not api_key:
+                return Response({'status': 'fail', 'message': 'API Key가 설정되지 않았습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            client = genai.Client(api_key=api_key)
+            
+            prompt = f"""
+            다음은 GitHub 리포지토리 '{repo_name}'의 README.md 내용입니다.
+            이 README를 바탕으로 프로젝트의 품질을 평가하고 피드백을 주세요.
+            반드시 아래 JSON 형식으로만 응답하세요:
+            {{
+                "strengths": ["강점1", "강점2", ...],
+                "improvements": ["개선점1", "개선점2", ...],
+                "score": 0~100 사이의 숫자,
+                "grade": "A~F 등급"
+            }}
+            
+            README 내용:
+            {readme_content[:5000]}  # 토큰 제한을 고려하여 앞부분만 전달
+            """
+            
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            )
+            
+            # JSON 응답 추출
+            res_text = response.text.strip()
+            # 마크다운 코드 블록 제거 (```json ... ``` 또는 ``` ... ```)
+            import re
+            json_match = re.search(r'```(?:json)?\s*(.*?)\s*```', res_text, re.DOTALL)
+            if json_match:
+                res_text = json_match.group(1)
+            
+            try:
+                evaluation_data = json.loads(res_text)
+            except json.JSONDecodeError:
+                # JSON 파싱 실패 시 텍스트에서 직접 추출 시도하거나 에러 반환
+                logging.error(f"Failed to parse AI response: {res_text}")
+                return Response({'status': 'fail', 'message': 'AI 응답 형식이 올바르지 않습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            return Response({'status': 'success', 'data': evaluation_data})
+            
+        except Exception as e:
+            logging.exception(f"AI Evaluation Error: {e}")
+            return Response({'status': 'fail', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class QnAListView(APIView):
     def get(self, request):
         res = {'status': 'success', 'message': '', 'data': None}
