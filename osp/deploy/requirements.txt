@@ -55,3 +55,5 @@ virtualenvwrapper==4.8.4
 webdriver-manager
 Werkzeug==2.1.2
 zipp==3.8.0
+google-genai==1.69.0
+

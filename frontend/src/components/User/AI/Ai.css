@@ -1,0 +1,142 @@
+/* Ai README Evaluation 전용 스타일 */
+
+.ai-eval-container {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ai-eval-nav {
+  margin-left: 10px;
+}
+
+.repo-section-title {
+  margin-bottom: 1rem;
+  padding-left: 0.25rem;
+  font-weight: bold;
+  color: #444;
+}
+
+.repo-list-scroll-container {
+  max-height: 750px;
+  overflow-y: auto;
+  padding: 5px 10px;
+}
+
+.repo-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 2px;
+  background-color: #fff;
+}
+
+.repo-card.selected {
+  transform: scale(1.02);
+  background-color: #f8fbff;
+  border-color: #007bff !important;
+}
+
+.repo-card-title {
+  color: #007bff;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.repo-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.last-commit-text {
+  font-size: 0.75rem;
+}
+
+/* 우측 결과 섹션 */
+.ai-result-card {
+  height: 100%;
+  border-top: 4px solid #007bff !important;
+}
+
+.ai-result-header-link {
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: #212529 !important;
+  display: flex;
+  align-items: center;
+}
+
+.ai-repo-icon {
+  margin-right: 0.5rem; /* 아이콘 옆 마진 확보 */
+  font-size: 1.4rem;
+}
+
+.ai-repo-name {
+  position: relative;
+  top: -0.15rem; /* 텍스트를 위로 살짝 올림 */
+}
+
+.ai-result-body {
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+.ai-analysis-title {
+  margin-top: 0.5rem;
+  font-weight: bold;
+}
+
+/* 결과 피드백 박스 */
+.feedback-box {
+  padding: 1.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1.5rem;
+  background-color: #ffffff;
+}
+
+.feedback-box ul {
+  line-height: 1.8;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.feedback-box.strengths {
+  border-left: 5px solid #28a745;
+}
+
+.feedback-box.improvements {
+  border-left: 5px solid #ffc107;
+}
+
+.feedback-box.advice {
+  border-left: 5px solid #17a2b8;
+}
+
+.feedback-box-title {
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+}
+
+.last-analysis-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+/* 로딩 및 빈 상태 */
+.empty-selection-card {
+  height: 100%;
+  padding: 3rem;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+}
+
+.empty-data-box {
+  padding: 3rem;
+  margin-top: 1.5rem;
+  background-color: #f8f9fa;
+  border: 1px dashed #dee2e6;
+}

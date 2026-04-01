@@ -174,3 +174,22 @@ class GithubRepoCommitFiles(models.Model):
         managed = False
         db_table = 'github_repo_commit_files'
         unique_together = (('github_id', 'repo_name', 'sha'),)
+
+class GitHubRepoAiEvaluation(models.Model):
+    github_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    
+    # README Evaluation
+    readme_strengths = models.JSONField(null=True, blank=True)
+    readme_improvements = models.JSONField(null=True, blank=True)
+    readme_advice = models.JSONField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_repo_ai_evaluation'
+        unique_together = (('github_id', 'repo_name'),)
+
+    def __str__(self):
+        return f'{self.github_id}/{self.repo_name} AI Evaluation'

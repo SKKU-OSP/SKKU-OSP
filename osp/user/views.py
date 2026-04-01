@@ -1,3 +1,6 @@
+from google import genai
+from repository.models import GitHubRepoAiEvaluation
+from django.conf import settings
 import datetime
 import json
 import logging
@@ -57,6 +60,7 @@ from user.models import (Account, AccountPrivacy, DevType, GithubScore,
 
 from user.serializers import GithubScoreResultSerializer
 from rest_framework import status as http_status
+
 
 class UserAccountView(APIView):
 
@@ -220,7 +224,7 @@ class ProfileMainView(APIView):
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
             except Exception as e:
                 logging.exception(f'ProfileMainView undefined_exception: {e}')
-                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다." 
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
         return status, errors
 
     def get(self, request, username):
@@ -1057,6 +1061,7 @@ class TotalContrView(APIView):
 
         return Response(res)
 
+
 class DevTypeStatisticsView(APIView):
     def get(self, request):
 
@@ -1400,22 +1405,45 @@ class AccountPrivacyView(APIView):
             res = {'status': 'success', 'data': data}
         return Response(res)
 
-from google import genai
-from django.conf import settings
-
-# ... (기타 임포트들)
 
 class AiEvaluationView(APIView):
+    def get(self, request):
+        if not request.auth:
+            return Response({'status': 'fail', 'message': '로그인이 필요합니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        github_id = request.query_params.get('github_id', '')
+        repo_name = request.query_params.get('repo_name', '')
+
+        if not github_id or not repo_name:
+            return Response({'status': 'fail', 'message': 'github_id와 repo_name이 필요합니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            eval_obj = GitHubRepoAiEvaluation.objects.get(
+                github_id=github_id, repo_name=repo_name)
+            data = {
+                'strengths': eval_obj.readme_strengths,
+                'improvements': eval_obj.readme_improvements,
+                'advice': eval_obj.readme_advice,
+                'updated_at': eval_obj.updated_at
+            }
+            return Response({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
+        except GitHubRepoAiEvaluation.DoesNotExist:
+            return Response({'status': 'success', 'data': None}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logging.exception(f"AiEvaluationView GET Error: {e}")
+            return Response({'status': 'fail', 'message': 'DB 조회 중 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request):
         if not request.auth:
             return Response({'status': 'fail', 'message': '로그인이 필요합니다.'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         readme_content = request.data.get('readme_content', '')
         repo_name = request.data.get('repo_name', '')
-        
-        if not readme_content:
-            return Response({'status': 'fail', 'message': '분석할 README 내용이 없습니다.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+        github_id = request.data.get('github_id', '')
+
+        if not readme_content or not repo_name or not github_id:
+            return Response({'status': 'fail', 'message': '필수 데이터(readme_content, repo_name, github_id)가 부족합니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             # Gemini API 설정
             api_key = getattr(settings, 'GEMINI_API_KEY', None)
@@ -1423,47 +1451,75 @@ class AiEvaluationView(APIView):
                 return Response({'status': 'fail', 'message': 'API Key가 설정되지 않았습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             client = genai.Client(api_key=api_key)
-            
+
             prompt = f"""
             다음은 GitHub 리포지토리 '{repo_name}'의 README.md 내용입니다.
             이 README를 바탕으로 프로젝트의 품질을 평가하고 피드백을 주세요.
-            반드시 아래 JSON 형식으로만 응답하세요:
+            반드시 아래 JSON 형식으로만 한국어로 응답하세요:
             {{
-                "strengths": ["강점1", "강점2", ...],
-                "improvements": ["개선점1", "개선점2", ...],
-                "score": 0~100 사이의 숫자,
-                "grade": "A~F 등급"
+                "strengths": ["잘한 점1", "잘한 점2", ...],
+                "improvements": ["보완할 점1", "보완할 점2", ...],
+                "advice": ["조언1", "조언2", ...]
             }}
-            
+
             README 내용:
-            {readme_content[:5000]}  # 토큰 제한을 고려하여 앞부분만 전달
+            {readme_content[:5000]}
             """
-            
+
+            # 모델을 gemini-1.5-flash로 변경하여 쿼터 여유 확보 (선택 사항, 필요시 유지)
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.5-flash-lite',
                 contents=prompt
             )
-            
+
             # JSON 응답 추출
             res_text = response.text.strip()
-            # 마크다운 코드 블록 제거 (```json ... ``` 또는 ``` ... ```)
             import re
-            json_match = re.search(r'```(?:json)?\s*(.*?)\s*```', res_text, re.DOTALL)
+            json_match = re.search(
+                r'```(?:json)?\s*(.*?)\s*```', res_text, re.DOTALL)
             if json_match:
                 res_text = json_match.group(1)
-            
+
             try:
                 evaluation_data = json.loads(res_text)
+
+                # DB 저장 또는 업데이트
+                eval_obj, created = GitHubRepoAiEvaluation.objects.update_or_create(
+                    github_id=github_id,
+                    repo_name=repo_name,
+                    defaults={
+                        'readme_strengths': evaluation_data.get('strengths', []),
+                        'readme_improvements': evaluation_data.get('improvements', []),
+                        'readme_advice': evaluation_data.get('advice', [])
+                    }
+                )
+
+                return Response({
+                    'status': 'success',
+                    'data': {
+                        'strengths': eval_obj.readme_strengths,
+                        'improvements': eval_obj.readme_improvements,
+                        'advice': eval_obj.readme_advice,
+                        'updated_at': eval_obj.updated_at
+                    }
+                }, status=status.HTTP_200_OK)
+
             except json.JSONDecodeError:
-                # JSON 파싱 실패 시 텍스트에서 직접 추출 시도하거나 에러 반환
-                logging.error(f"Failed to parse AI response: {res_text}")
+                logging.exception(f"JSON Parsing Error: {res_text}")
                 return Response({'status': 'fail', 'message': 'AI 응답 형식이 올바르지 않습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-            return Response({'status': 'success', 'data': evaluation_data})
-            
+
         except Exception as e:
-            logging.exception(f"AI Evaluation Error: {e}")
-            return Response({'status': 'fail', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            error_msg = str(e)
+            logging.exception(f"AiEvaluationView Error: {e}")
+
+            if "RESOURCE_EXHAUSTED" in error_msg or "429" in error_msg:
+                return Response({
+                    'status': 'fail',
+                    'message': 'AI 서비스 호출 쿼터가 초과되었습니다. 잠시 후(약 1분 뒤) 다시 시도해 주세요.'
+                }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+            return Response({'status': 'fail', 'message': f'AI 분석 중 오류가 발생했습니다: {error_msg}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class QnAListView(APIView):
     def get(self, request):
@@ -1473,11 +1529,12 @@ class QnAListView(APIView):
             res['status'] = 'error'
             res['message'] = 'Permission denied'
             return Response(res, status=status.HTTP_403_FORBIDDEN)
-        
+
         qnas = QnA.objects.all().order_by('-created_at')
         serializer = QnASerializer(qnas, many=True)
         res['data'] = serializer.data
         return Response(res, status=status.HTTP_200_OK)
+
 
 class QnACreateView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -1489,10 +1546,11 @@ class QnACreateView(APIView):
             res['status'] = 'error'
             res['message'] = 'Authentication required'
             return Response(res, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         data = request.data
-        qna = QnA.objects.create(user=request.user, type=data['type'], content=data['content'], solved=False)
-        
+        qna = QnA.objects.create(
+            user=request.user, type=data['type'], content=data['content'], solved=False)
+
         for i in range(1, 4):
             image_key = f'image{i}'
             if image_key in request.FILES:
@@ -1502,15 +1560,16 @@ class QnACreateView(APIView):
                     file=image_file,
                     name=image_file.name
                 )
-        
+
         serializer = QnASerializer(qna)
         res['data'] = serializer.data
         return Response(res, status=status.HTTP_201_CREATED)
-    
+
+
 class QnADetailView(APIView):
     def get(self, request, id):
         res = {'status': 'success', 'message': '', 'data': None}
-        
+
         try:
             qna = QnA.objects.get(id=id)
             serializer = QnASerializer(qna)
@@ -1520,10 +1579,10 @@ class QnADetailView(APIView):
             res['status'] = 'error'
             res['message'] = 'QnA not found'
             return Response(res, status=status.HTTP_404_NOT_FOUND)
-        
+
     def patch(self, request, id):
         res = {'status': 'success', 'message': '', 'data': None}
-        
+
         try:
             qna = QnA.objects.get(id=id)
             serializer = QnASerializer(qna, data=request.data, partial=True)
