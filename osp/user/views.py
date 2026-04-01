@@ -836,9 +836,9 @@ def get_user_star(github_id: str):
     star_subquery = Subquery(StudentTab.objects.values('github_id'))
     # repo_name, owner_id, github_id 값 비교
     where_stmt = [
-        "github_repo_contributor.repo_name=github_repo_stats.repo_name",
-        "github_repo_contributor.owner_id=github_repo_stats.github_id",
-        "github_repo_contributor.github_id=github_repo_stats.github_id"]
+        "github_repo_contributor.repo_name=v_github_repo_stats.repo_name",
+        "github_repo_contributor.owner_id=v_github_repo_stats.github_id",
+        "github_repo_contributor.github_id=v_github_repo_stats.github_id"]
     star_data = GithubRepoStats.objects.filter(github_id__in=star_subquery).extra(
         tables=['github_repo_contributor'], where=where_stmt).values('github_id').annotate(star=Sum("stargazers_count"))
     total_stars = sum(item['star'] for item in star_data)
