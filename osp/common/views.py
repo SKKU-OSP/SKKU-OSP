@@ -25,7 +25,7 @@ from osp.settings import (EMAIL_HOST_USER, GITHUB_CLIENT_ID,
 from tag.models import TagIndependent
 from tag.serializers import TagIndependentSerializer
 from user.models import Account, AccountInterest, AccountPrivacy, StudentTab, GitHubScoreTable, GithubScore, GithubStatsYymm, GithubUserFollowing, GithubUserStarred, GithubOverview
-from repository.models import GithubIssues, GithubPulls, GithubRepoCommits, GithubRepoContributor, GithubRepoStats, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
+from repository.models import GithubRepoContributor, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
 from home.models import Repository, Student
 from data.api import GitHub_API
 from django.views.decorators.csrf import csrf_exempt
@@ -641,23 +641,14 @@ class GithubIdChangeView(APIView):
                 students = Student.objects.filter(github_id=old_owner)
                 student_tabs = StudentTab.objects.filter(github_id=old_owner)
                 account = Account.objects.filter(github_id=old_owner)
-                github_issues = GithubIssues.objects.filter(
-                    github_id=old_owner)
                 github_overview = GithubOverview.objects.filter(
                     github_id=old_owner)
-                github_pulls = GithubPulls.objects.filter(github_id=old_owner)
                 github_repo_commit_files = GithubRepoCommitFiles.objects.filter(
                     github_id=old_owner)
-                github_repo_commits = GithubRepoCommits.objects.filter(
-                    github_id=old_owner)
-                github_repo_commits2 = GithubRepoCommits.objects.filter(
-                    author_github=old_owner)
                 github_repo_contributors = GithubRepoContributor.objects.filter(
                     github_id=old_owner)
                 github_repo_contributors2 = GithubRepoContributor.objects.filter(
                     owner_id=old_owner)
-                github_repo_stats = GithubRepoStats.objects.filter(
-                    github_id=old_owner)
                 github_repo_stats_yymm = GithubRepoStatsyymm.objects.filter(
                     github_id=old_owner)
                 github_scores = GithubScore.objects.filter(github_id=old_owner)
@@ -678,15 +669,10 @@ class GithubIdChangeView(APIView):
                 students.update(github_id=new_owner)
                 student_tabs.update(github_id=new_owner)
                 account.update(github_id=new_owner)
-                github_issues.update(github_id=new_owner)
                 github_overview.update(github_id=new_owner)
-                github_pulls.update(github_id=new_owner)
                 github_repo_commit_files.update(github_id=new_owner)
-                github_repo_commits.update(github_id=new_owner)
-                github_repo_commits2.update(author_github=new_owner)
                 github_repo_contributors.update(github_id=new_owner)
                 github_repo_contributors2.update(owner_id=new_owner)
-                github_repo_stats.update(github_id=new_owner)
                 github_repo_stats_yymm.update(github_id=new_owner)
                 github_stars.update(github_id=new_owner)
                 github_stats_yymm.update(github_id=new_owner)
