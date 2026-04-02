@@ -16,7 +16,7 @@ class GithubRepoCommits(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_repo_commits'
+        db_table = 'v_github_repo_commits'
         unique_together = (('github_id', 'repo_name', 'sha'),)
 
 
