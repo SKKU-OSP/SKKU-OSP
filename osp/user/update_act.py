@@ -52,11 +52,11 @@ def update_commmit_time():
     start = time.time()
 
     def time_to_seconds(hour_min_sec):
-        # UTC + 9 => KST
+        # Spring이 KST로 저장하므로 변환 없이 그대로 사용
         time_t = datetime.strptime(
             str(hour_min_sec), '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
         hhmmss = time_t.split(':')
-        hour = (int(hhmmss[0]) + 9) % 24
+        hour = int(hhmmss[0])
         minute = int(hhmmss[1])
         sec = int(hhmmss[2])
         return hour*3600 + minute*60 + sec
