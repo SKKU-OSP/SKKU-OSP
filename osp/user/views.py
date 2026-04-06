@@ -176,7 +176,7 @@ class GuidelineView(APIView):
                     repos[commit_repo_name]['github_id'] = commit['github_id']
                     repos[commit_repo_name]['committer_date'] = commit['committer_date']
                     id_reponame_pair_list.append(
-                        (commit['github_id'], commit_repo_name))
+                        (commit['owner_name'], commit_repo_name))
             ctx_repo_stats = []
             if len(id_reponame_pair_list) > 0:
                 contr_repo_queryset = GithubRepoStats.objects.extra(
@@ -648,7 +648,7 @@ class ProfileActivityView(APIView):
                     recent_repos[commit_repo_name]['github_id'] = commit['github_id']
                     recent_repos[commit_repo_name]['committer_date'] = commit['committer_date']
                     id_reponame_pair_list.append(
-                        (commit['github_id'], commit_repo_name))
+                        (commit['owner_name'], commit_repo_name))
             if id_reponame_pair_list:
                 contr_repo_queryset = GithubRepoStats.objects.extra(
                     where=["(github_id, repo_name) in %s"], params=[tuple(id_reponame_pair_list)])
@@ -678,10 +678,12 @@ class ProfileActivityView(APIView):
 
 def get_commit_repos(github_id):
     repo_commiter_commits = GithubRepoCommits.objects.filter(committer_github=github_id).values(
-        "github_id", "repo_name", "committer_date").order_by("-committer_date")
+        "github_id", "owner_name", "repo_name", "committer_date").order_by("-committer_date")
     repo_author_commits = GithubRepoCommits.objects.filter(author_github=github_id).values(
-        "github_id", "repo_name", "committer_date").order_by("-committer_date")
-    repo_commits = repo_commiter_commits | repo_author_commits
+        "github_id", "owner_name", "repo_name", "committer_date").order_by("-committer_date")
+    repo_owner_commits = GithubRepoCommits.objects.filter(github_id=github_id).values(
+        "github_id", "owner_name", "repo_name", "committer_date").order_by("-committer_date")
+    repo_commits = repo_commiter_commits | repo_author_commits | repo_owner_commits
 
     return repo_commits
 
