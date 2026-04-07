@@ -3,6 +3,7 @@ from django.db import models
 
 class GithubRepoCommits(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)
+    owner_name = models.CharField(max_length=255, blank=True, null=True)
     repo_name = models.CharField(max_length=100)
     sha = models.CharField(max_length=40)
     additions = models.IntegerField()
