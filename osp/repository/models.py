@@ -28,7 +28,7 @@ class GithubRepoContributor(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_repo_contributor'
+        db_table = 'v_github_repo_contributor'
         unique_together = (('github_id', 'repo_name', 'owner_id'),)
 
 

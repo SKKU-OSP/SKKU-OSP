@@ -174,7 +174,7 @@ class RepoContrib(APIView):
                 if len(student_profile) != 1:
                     continue
                 commmit_cnt = len(GithubRepoCommits.objects.filter(
-                    github_id=owner_id,
+                    owner_name=owner_id,
                     repo_name=repo_name,
                     committer_github=student.github_id
                 ))
@@ -275,7 +275,7 @@ def repo_api(request):
         if len(student_profile) != 1:
             continue
         commmit_cnt = len(GithubRepoCommits.objects.filter(
-            github_id=owner_id,
+            owner_name=owner_id,
             repo_name=repo_name,
             committer_github=student.github_id
         ))
