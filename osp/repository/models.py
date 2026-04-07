@@ -180,6 +180,8 @@ class GitHubRepoAiEvaluation(models.Model):
     repo_name = models.CharField(max_length=100)
     
     # README Evaluation
+    readme_score = models.CharField(max_length=10, null=True, blank=True)
+    readme_missing_essentials = models.JSONField(null=True, blank=True)
     readme_strengths = models.JSONField(null=True, blank=True)
     readme_improvements = models.JSONField(null=True, blank=True)
     readme_advice = models.JSONField(null=True, blank=True)

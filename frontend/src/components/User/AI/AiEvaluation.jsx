@@ -224,6 +224,19 @@ function AiEvaluation() {
                   </div>
                 ) : evaluationData ? (
                   <div className="mt-4">
+                    {/* Score Section */}
+                    {evaluationData.score && (
+                      <div className="d-flex align-items-center mb-4 p-3 bg-light rounded score-container">
+                        <div className={`score-badge score-${evaluationData.score.charAt(0).toUpperCase()}`}>
+                          {evaluationData.score}
+                        </div>
+                        <div className="ml-3">
+                          <h6 className="mb-1 font-weight-bold">README Quality Score</h6>
+                          <p className="mb-0 text-muted small">AI가 분석한 문서화 완성도 등급입니다.</p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="feedback-box strengths">
                       <h6 className="feedback-box-title text-success">Strengths (잘한 점)</h6>
                       <ul>
@@ -245,6 +258,23 @@ function AiEvaluation() {
                         ))}
                       </ul>
                     </div>
+
+                    {/* Missing Essentials Section (Only show if there are actual non-empty items) */}
+                    {evaluationData.missing_essentials && 
+                     evaluationData.missing_essentials.filter(item => item && String(item).trim() !== "").length > 0 && (
+                      <div className="feedback-box missing-essentials mb-4">
+                        <h6 className="feedback-box-title text-danger">Missing Essentials (누락된 항목)</h6>
+                        <ul>
+                          {evaluationData.missing_essentials
+                            .filter(item => item && String(item).trim() !== "")
+                            .map((item, idx) => (
+                              <li key={idx} className="mb-1 text-danger font-weight-bold">
+                                {item}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
 
                     <div className="feedback-box advice">
                       <h6 className="feedback-box-title text-info">Advice (조언)</h6>

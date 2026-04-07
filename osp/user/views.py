@@ -1421,6 +1421,8 @@ class AiEvaluationView(APIView):
             eval_obj = GitHubRepoAiEvaluation.objects.get(
                 github_id=github_id, repo_name=repo_name)
             data = {
+                'score': eval_obj.readme_score,
+                'missing_essentials': eval_obj.readme_missing_essentials,
                 'strengths': eval_obj.readme_strengths,
                 'improvements': eval_obj.readme_improvements,
                 'advice': eval_obj.readme_advice,
@@ -1453,22 +1455,45 @@ class AiEvaluationView(APIView):
             client = genai.Client(api_key=api_key)
 
             prompt = f"""
+            당신은 학생들의 성장을 돕는 친절하고 꼼꼼한 시니어 개발자입니다.
             다음은 GitHub 리포지토리 '{repo_name}'의 README.md 내용입니다.
-            이 README를 바탕으로 프로젝트의 품질을 평가하고 피드백을 주세요.
-            반드시 아래 JSON 형식으로만 한국어로 응답하세요:
+            제공된 평가 기준에 따라 구조와 내용을 분석하고, 핵심만 찌르되 다정하고 존중하는 어투로 피드백을 JSON 형식으로 제공하세요.
+
+            [평가 기준]
+            1. 명확성: 프로젝트의 목적, 주요 기능, 사용 기술 스택이 직관적으로 설명되어 있는가?
+            2. 재현성: 처음 보는 사람도 클론받아 실행할 수 있도록 설치(Installation) 및 실행(Usage) 방법이 구체적인가?
+            3. 가독성: 마크다운(Markdown) 문법을 적절히 활용하여 구조화되어 있는가?
+
+            [제약 사항]
+            1. **모든 문장의 끝맺음은 '~합니다', '~하는 것이 좋습니다', '~해 보세요' 등 정중하고 친절한 존댓말을 사용하세요.** ('~함', '~할 것' 등의 명사형 종결이나 반말은 절대 금지합니다.)
+            2. 일반적이고 추상적인 칭찬(예: "앞으로 발전이 기대됩니다")은 제외하고, README 데이터에 존재하는 팩트 기반으로만 작성하세요.
+            3. 분량 조절을 위해 `strengths`, `improvements`, `advice` 배열의 항목은 각각 **최대 3개**로 제한합니다.
+            4. 각 항목은 구구절절 설명하지 말고, **1~2문장 이내**로 핵심만 간결하게 작성하세요.
+            5. 마크다운 코드 블록(```json)을 포함하지 말고, 순수 JSON 객체만 출력하세요.
+
+            [출력 JSON 형식]
             {{
-                "strengths": ["잘한 점1", "잘한 점2", ...],
-                "improvements": ["보완할 점1", "보완할 점2", ...],
-                "advice": ["조언1", "조언2", ...]
+                "score": 'A0', // 평가 기준을 바탕으로 한 A+ ~ F 사이의 퀄리티 점수(예: A0, A-, B+, ..., F)
+                "missing_essentials": ["누락된 핵심 항목 (예: 라이선스, 빌드 방법 등). 모두 있다면 빈 배열"],
+                "strengths": [
+                    "프로젝트 아키텍처 다이어그램이 포함되어 있어서 전반적인 구조를 이해하기 쉽습니다.",
+                    "환경 변수(.env) 설정 방법이 구체적으로 명시되어 있어 직접 실행해 보기 편합니다."
+                ],
+                "improvements": [
+                    "API 엔드포인트에 대한 설명이 누락되어 있어 조금 아쉽습니다.",
+                    "설치 방법이 다소 모호합니다. 구체적인 패키지 매니저 명령어를 명시해 주시면 더 좋을 것 같습니다."
+                ],
+                "advice": [
+                    "Troubleshooting 섹션을 추가하여 흔히 발생하는 빌드 에러 해결법을 적어두시는 것을 추천합니다."
+                ]
             }}
 
-            README 내용:
-            {readme_content[:5000]}
+            [README.md 내용]
+            {readme_content}
             """
 
-            # 모델을 gemini-1.5-flash로 변경하여 쿼터 여유 확보 (선택 사항, 필요시 유지)
             response = client.models.generate_content(
-                model='gemini-2.5-flash-lite',
+                model='gemini-3.1-flash-lite-preview',
                 contents=prompt
             )
 
@@ -1488,6 +1513,8 @@ class AiEvaluationView(APIView):
                     github_id=github_id,
                     repo_name=repo_name,
                     defaults={
+                        'readme_score': evaluation_data.get('score', ''),
+                        'readme_missing_essentials': evaluation_data.get('missing_essentials', []),
                         'readme_strengths': evaluation_data.get('strengths', []),
                         'readme_improvements': evaluation_data.get('improvements', []),
                         'readme_advice': evaluation_data.get('advice', [])
@@ -1497,6 +1524,8 @@ class AiEvaluationView(APIView):
                 return Response({
                     'status': 'success',
                     'data': {
+                        'score': eval_obj.readme_score,
+                        'missing_essentials': eval_obj.readme_missing_essentials,
                         'strengths': eval_obj.readme_strengths,
                         'improvements': eval_obj.readme_improvements,
                         'advice': eval_obj.readme_advice,
