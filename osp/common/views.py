@@ -3,6 +3,7 @@ import re
 import smtplib
 
 import requests
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
@@ -680,6 +681,23 @@ class GithubIdChangeView(APIView):
                 github_user_scoretable.update(github_id=new_owner)
                 github_user_followings.update(github_id=new_owner)
                 github_user_followings2.update(following_id=new_owner)
+
+                # Spring DB 동기화: github_account.github_login_username 업데이트
+                # VIEW(v_github_repo_commits 등)가 github_login_username 기준으로 JOIN하므로
+                # Spring 쪽도 함께 변경해야 데이터 불일치가 발생하지 않음
+                student_id = data.get('student_data')
+                spring_url = getattr(settings, 'SPRING_BACKEND_URL', 'http://localhost:8080')
+                try:
+                    spring_res = requests.patch(
+                        f"{spring_url}/api/v1/github-account/{student_id}/username",
+                        json={"newUsername": new_owner},
+                        timeout=10
+                    )
+                    spring_data = spring_res.json()
+                    if not spring_data.get('success'):
+                        logging.warning(f"GithubIdChangeView Spring 동기화 실패: studentId={student_id}, res={spring_data}")
+                except Exception as spring_e:
+                    logging.warning(f"GithubIdChangeView Spring API 호출 실패 (무시하고 계속): {spring_e}")
 
                 for score in github_scores:
                     year = score.year
