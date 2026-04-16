@@ -32,6 +32,7 @@ const AdminDropDown = ({ iconSize }) => {
       </Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item onClick={() => navigate('/qna')}>문의 게시판</Dropdown.Item>
+        <Dropdown.Item onClick={() => navigate('/userstats')}>유저별 통계</Dropdown.Item>
         <Dropdown.Item onClick={() => navigate('/statistics')}>GitHub 통계</Dropdown.Item>
         <Dropdown.Item onClick={() => navigate('/rank/user')}>유저 랭킹</Dropdown.Item>
         <Dropdown.Item onClick={() => navigate('/rank/repo')}>리포지토리 랭킹</Dropdown.Item>

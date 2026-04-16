@@ -13,19 +13,17 @@ ADD ./deploy/requirements.txt /tmp
 RUN /usr/local/bin/python -m pip install --upgrade pip && \
     /usr/local/bin/python -m pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Install Chrome only for production
-RUN if [ "$BUILD_ENV" = "PRODUCT" ]; then \
-        apt-get update -y && apt-get install -y \
+# Install Chrome
+RUN apt-get update -y && apt-get install -y \
         wget \
         unzip \
         curl \
         gnupg \
-        && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-        && apt-get install -y ./google-chrome-stable_current_amd64.deb \
-        && rm google-chrome-stable_current_amd64.deb \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*; \
-    fi
+    && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+    && rm google-chrome-stable_current_amd64.deb \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Add application
 ADD . /app

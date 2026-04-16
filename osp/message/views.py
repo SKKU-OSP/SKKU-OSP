@@ -586,7 +586,27 @@ class NotificationCreateView(APIView):
             type = request.data.get('type')
 
             receiver = Account.objects.get(user_id=receiver_id)
-            notification = Notification.objects.create(type = type, receiver = receiver, body = body, sender_name = request.user.username, receiver_read = False, receiver_delete=False)
+
+            if type == 'profile':
+                # 동일한 내용의 알림을 찾음
+                existing_notifications = Notification.objects.filter(
+                    receiver=receiver, type=type, body=body)
+
+                # 읽지 않은 알림이 존재하면, 새로 생성하지 않음
+                if existing_notifications.filter(receiver_read=False).exists():
+                    return Response({'status': 'success', 'message': 'Unread notification already exists.'})
+
+                # 읽은 알림만 존재하면, 삭제하고 새로 생성
+                existing_notifications.filter(receiver_read=True).delete()
+
+            notification = Notification.objects.create(
+                type=type,
+                receiver=receiver,
+                body=body,
+                sender_name=request.user.username,
+                receiver_read=False,
+                receiver_delete=False
+            )
             notification.save()
 
             return Response({'status': 'success', 'notification': NotificationSerializer(notification).data})

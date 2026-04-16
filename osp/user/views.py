@@ -942,12 +942,14 @@ class UserDashboardView(APIView):
         # 연도별 score 데이터 할당
         for obj in dist_score_data:
             year = obj["year"]
-            factor_dist[year]["score"] = obj["score"]
+            if year in factor_dist:
+                factor_dist[year]["score"] = obj["score"]
         # 연도별 각 factor 데이터 할당
         for obj in dist_factor_data:
             year = obj["year"]
             factor = obj["factor"]
-            factor_dist[year][factor] = obj["value"]
+            if year in factor_dist:
+                factor_dist[year][factor] = obj["value"]
 
         data['factor_dist'] = factor_dist
         data["factors"] = ["score", "commit", "star", "pr", "issue"]
