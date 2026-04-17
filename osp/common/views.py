@@ -33,6 +33,40 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 
+def _register_to_spring(student_id, name, college, dept, absence, plural_major, github_id, email):
+    """OSP 회원가입 완료 후 Spring DB에 유저 등록"""
+    try:
+        gh_res = requests.get(f'https://api.github.com/users/{github_id}', timeout=10)
+        if gh_res.status_code != 200:
+            logging.warning(f'Spring 등록 실패: GitHub API 조회 실패 ({github_id})')
+            return
+        gh_data = gh_res.json()
+        numeric_id = gh_data.get('id')
+        node_id = gh_data.get('node_id')
+
+        spring_url = getattr(settings, 'SPRING_BACKEND_URL', 'http://localhost:8080')
+        payload = {
+            'studentId': str(student_id),
+            'name': name,
+            'college': college,
+            'dept': dept,
+            'absence': absence,
+            'pluralMajor': plural_major,
+            'githubId': numeric_id,
+            'githubGraphqlNodeId': node_id,
+            'githubLoginUsername': github_id,
+            'githubName': github_id,
+            'githubEmail': email,
+        }
+        res = requests.post(f'{spring_url}/api/auth/signup', json=payload, timeout=10)
+        if res.status_code == 200:
+            logging.info(f'Spring 등록 완료: studentId={student_id}, github={github_id}')
+        else:
+            logging.warning(f'Spring 등록 실패: status={res.status_code}, body={res.text}')
+    except Exception as e:
+        logging.warning(f'Spring 등록 중 오류 (무시): {e}')
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class JWTLoginView(APIView):
     def post(self, request):
@@ -292,6 +326,11 @@ class SignUpView(APIView):
         except DatabaseError as e:
             print('SignUpView 데이터베이스 오류.', e)
             return Response({'status': 'fail', 'message': '데이터베이스에 문제가 발생했습니다.'})
+
+        _register_to_spring(student_id, name, college, dept,
+                            request.data.get('absence', 0),
+                            request.data.get('plural_major', 0),
+                            github_id, personal_email)
 
         return Response({'status': 'success'})
 
