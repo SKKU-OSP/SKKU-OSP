@@ -3,6 +3,7 @@ import re
 import smtplib
 
 import requests
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
@@ -25,11 +26,45 @@ from osp.settings import (EMAIL_HOST_USER, GITHUB_CLIENT_ID,
 from tag.models import TagIndependent
 from tag.serializers import TagIndependentSerializer
 from user.models import Account, AccountInterest, AccountPrivacy, StudentTab, GitHubScoreTable, GithubScore, GithubStatsYymm, GithubUserFollowing, GithubUserStarred, GithubOverview
-from repository.models import GithubIssues, GithubPulls, GithubRepoCommits, GithubRepoContributor, GithubRepoStats, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
+from repository.models import GithubRepoContributor, GithubRepoCommitFiles, GithubRepoStatsyymm, GithubStars
 from home.models import Repository, Student
 from data.api import GitHub_API
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+
+
+def _register_to_spring(student_id, name, college, dept, absence, plural_major, github_id, email):
+    """OSP 회원가입 완료 후 Spring DB에 유저 등록"""
+    try:
+        gh_res = requests.get(f'https://api.github.com/users/{github_id}', timeout=10)
+        if gh_res.status_code != 200:
+            logging.warning(f'Spring 등록 실패: GitHub API 조회 실패 ({github_id})')
+            return
+        gh_data = gh_res.json()
+        numeric_id = gh_data.get('id')
+        node_id = gh_data.get('node_id')
+
+        spring_url = getattr(settings, 'SPRING_BACKEND_URL', 'http://localhost:8080')
+        payload = {
+            'studentId': str(student_id),
+            'name': name,
+            'college': college,
+            'dept': dept,
+            'absence': absence,
+            'pluralMajor': plural_major,
+            'githubId': numeric_id,
+            'githubGraphqlNodeId': node_id,
+            'githubLoginUsername': github_id,
+            'githubName': github_id,
+            'githubEmail': email,
+        }
+        res = requests.post(f'{spring_url}/api/auth/signup', json=payload, timeout=10)
+        if res.status_code == 200:
+            logging.info(f'Spring 등록 완료: studentId={student_id}, github={github_id}')
+        else:
+            logging.warning(f'Spring 등록 실패: status={res.status_code}, body={res.text}')
+    except Exception as e:
+        logging.warning(f'Spring 등록 중 오류 (무시): {e}')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -291,6 +326,11 @@ class SignUpView(APIView):
         except DatabaseError as e:
             print('SignUpView 데이터베이스 오류.', e)
             return Response({'status': 'fail', 'message': '데이터베이스에 문제가 발생했습니다.'})
+
+        _register_to_spring(student_id, name, college, dept,
+                            request.data.get('absence', 0),
+                            request.data.get('plural_major', 0),
+                            github_id, personal_email)
 
         return Response({'status': 'success'})
 
@@ -641,23 +681,14 @@ class GithubIdChangeView(APIView):
                 students = Student.objects.filter(github_id=old_owner)
                 student_tabs = StudentTab.objects.filter(github_id=old_owner)
                 account = Account.objects.filter(github_id=old_owner)
-                github_issues = GithubIssues.objects.filter(
-                    github_id=old_owner)
                 github_overview = GithubOverview.objects.filter(
                     github_id=old_owner)
-                github_pulls = GithubPulls.objects.filter(github_id=old_owner)
                 github_repo_commit_files = GithubRepoCommitFiles.objects.filter(
                     github_id=old_owner)
-                github_repo_commits = GithubRepoCommits.objects.filter(
-                    github_id=old_owner)
-                github_repo_commits2 = GithubRepoCommits.objects.filter(
-                    author_github=old_owner)
                 github_repo_contributors = GithubRepoContributor.objects.filter(
                     github_id=old_owner)
                 github_repo_contributors2 = GithubRepoContributor.objects.filter(
                     owner_id=old_owner)
-                github_repo_stats = GithubRepoStats.objects.filter(
-                    github_id=old_owner)
                 github_repo_stats_yymm = GithubRepoStatsyymm.objects.filter(
                     github_id=old_owner)
                 github_scores = GithubScore.objects.filter(github_id=old_owner)
@@ -678,15 +709,10 @@ class GithubIdChangeView(APIView):
                 students.update(github_id=new_owner)
                 student_tabs.update(github_id=new_owner)
                 account.update(github_id=new_owner)
-                github_issues.update(github_id=new_owner)
                 github_overview.update(github_id=new_owner)
-                github_pulls.update(github_id=new_owner)
                 github_repo_commit_files.update(github_id=new_owner)
-                github_repo_commits.update(github_id=new_owner)
-                github_repo_commits2.update(author_github=new_owner)
                 github_repo_contributors.update(github_id=new_owner)
                 github_repo_contributors2.update(owner_id=new_owner)
-                github_repo_stats.update(github_id=new_owner)
                 github_repo_stats_yymm.update(github_id=new_owner)
                 github_stars.update(github_id=new_owner)
                 github_stats_yymm.update(github_id=new_owner)
@@ -694,6 +720,23 @@ class GithubIdChangeView(APIView):
                 github_user_scoretable.update(github_id=new_owner)
                 github_user_followings.update(github_id=new_owner)
                 github_user_followings2.update(following_id=new_owner)
+
+                # Spring DB 동기화: github_account.github_login_username 업데이트
+                # VIEW(v_github_repo_commits 등)가 github_login_username 기준으로 JOIN하므로
+                # Spring 쪽도 함께 변경해야 데이터 불일치가 발생하지 않음
+                student_id = data.get('student_data')
+                spring_url = getattr(settings, 'SPRING_BACKEND_URL', 'http://localhost:8080')
+                try:
+                    spring_res = requests.patch(
+                        f"{spring_url}/api/v1/github-account/{student_id}/username",
+                        json={"newUsername": new_owner},
+                        timeout=10
+                    )
+                    spring_data = spring_res.json()
+                    if not spring_data.get('success'):
+                        logging.warning(f"GithubIdChangeView Spring 동기화 실패: studentId={student_id}, res={spring_data}")
+                except Exception as spring_e:
+                    logging.warning(f"GithubIdChangeView Spring API 호출 실패 (무시하고 계속): {spring_e}")
 
                 for score in github_scores:
                     year = score.year

@@ -3,6 +3,7 @@ from django.db import models
 
 class GithubRepoCommits(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)
+    owner_name = models.CharField(max_length=255, blank=True, null=True)
     repo_name = models.CharField(max_length=100)
     sha = models.CharField(max_length=40)
     additions = models.IntegerField()
@@ -16,7 +17,7 @@ class GithubRepoCommits(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_repo_commits'
+        db_table = 'v_github_repo_commits'
         unique_together = (('github_id', 'repo_name', 'sha'),)
 
 
@@ -27,7 +28,7 @@ class GithubRepoContributor(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_repo_contributor'
+        db_table = 'v_github_repo_contributor'
         unique_together = (('github_id', 'repo_name', 'owner_id'),)
 
 
@@ -54,7 +55,7 @@ class GithubRepoStats(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_repo_stats'
+        db_table = 'v_github_repo_stats'
         unique_together = (('github_id', 'repo_name'),)
 
     def get_guideline(self):
@@ -103,7 +104,7 @@ class GithubIssues(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_issues'
+        db_table = 'v_github_issues'
         unique_together = (('owner_id', 'repo_name', 'number'),)
 
 
@@ -117,7 +118,7 @@ class GithubPulls(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_pulls'
+        db_table = 'v_github_pulls'
         unique_together = (('owner_id', 'repo_name', 'number'),)
 
 

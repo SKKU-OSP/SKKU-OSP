@@ -60,7 +60,7 @@ class GithubStatsYymm(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'github_stats_yymm'
+        db_table = 'github_monthly_stats'
 
     def to_json(self):
         return {
