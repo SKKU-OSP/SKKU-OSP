@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BsStar, BsChatLeftDots, BsArrowRightShort, BsGithub } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
-import axios from 'axios';
 import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
 import '../User.css';
@@ -19,10 +18,8 @@ function AiEvaluation() {
     const getRepoList = async () => {
       try {
         setLoading(true);
-        const url = '/user/api/guideline/' + username + '/';
-        const response = await axiosInstance.get(url, getAuthConfig());
+        const response = await axiosInstance.get('/user/api/guideline/' + username + '/', getAuthConfig());
         const res = response.data;
-
         if (res.status === 'success') {
           setRepos(res.data.guideline);
         } else {
@@ -35,18 +32,18 @@ function AiEvaluation() {
         setLoading(false);
       }
     };
-
     getRepoList();
   }, [username]);
 
-  const [readmeLoading, setReadmeLoading] = useState(false);
   const [evaluationLoading, setEvaluationLoading] = useState(false);
   const [evaluationData, setEvaluationData] = useState(null);
 
-  const fetchAiEvaluation = async (githubId, repoName) => {
+  const fetchAiEvaluation = async (githubUsername, repoName) => {
     try {
-      const url = `/user/api/ai-evaluation/?github_id=${githubId}&repo_name=${repoName}`;
-      const response = await axiosInstance.get(url, getAuthConfig());
+      const response = await axiosInstance.get(
+        `/api/v2/ai-evaluation/readme?githubUsername=${githubUsername}&repoName=${repoName}`,
+        getAuthConfig()
+      );
       if (response.data.status === 'success' && response.data.data) {
         setEvaluationData(response.data.data);
         return true;
@@ -58,23 +55,14 @@ function AiEvaluation() {
     }
   };
 
-  const evaluateReadme = async (githubId, repoName, readmeContent) => {
+  const evaluateReadme = async (githubUsername, repoName) => {
     setEvaluationLoading(true);
     try {
-      const url = '/user/api/ai-evaluation/';
       const response = await axiosInstance.post(
-        url,
-        {
-          github_id: githubId,
-          repo_name: repoName,
-          readme_content: readmeContent
-        },
-        {
-          ...getAuthConfig(),
-          timeout: 60000
-        }
+        '/api/v2/ai-evaluation/readme',
+        { githubUsername, repoName },
+        { ...getAuthConfig(), timeout: 60000 }
       );
-
       if (response.data.status === 'success') {
         setEvaluationData(response.data.data);
       } else {
@@ -90,40 +78,13 @@ function AiEvaluation() {
 
   const handleRepoClick = async (repo) => {
     setSelectedRepo(repo);
-    setReadmeLoading(true);
     setEvaluationData(null);
 
-    const githubId = repo.github_id || repo.owner_id;
-
-    try {
-      const hasData = await fetchAiEvaluation(githubId, repo.repo_name);
-      const response = await axios
-        .get(`https://api.github.com/repos/${repo.owner_id}/${repo.repo_name}/readme`)
-        .catch(() => null);
-      let decodedContent = '';
-      if (response && response.data && response.data.content) {
-        decodedContent = b64DecodeUnicode(response.data.content);
-        setSelectedRepo((prev) => ({ ...prev, readme_content: decodedContent }));
-      }
-      if (!hasData && decodedContent) {
-        evaluateReadme(githubId, repo.repo_name, decodedContent);
-      }
-    } catch (error) {
-      console.error('Failed to handle repo click:', error);
-    } finally {
-      setReadmeLoading(false);
+    const githubUsername = repo.github_id || repo.owner_id;
+    const hasData = await fetchAiEvaluation(githubUsername, repo.repo_name);
+    if (!hasData) {
+      evaluateReadme(githubUsername, repo.repo_name);
     }
-  };
-
-  const b64DecodeUnicode = (str) => {
-    return decodeURIComponent(
-      atob(str)
-        .split('')
-        .map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join('')
-    );
   };
 
   if (loading)
@@ -186,9 +147,9 @@ function AiEvaluation() {
           {selectedRepo ? (
             <div className="card shadow-sm ai-result-card">
               <div className="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                <a 
-                  href={`https://github.com/${selectedRepo.owner_id}/${selectedRepo.repo_name}`} 
-                  target="_blank" 
+                <a
+                  href={`https://github.com/${selectedRepo.owner_id}/${selectedRepo.repo_name}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="font-weight-bold ai-result-header-link"
                 >
@@ -201,11 +162,10 @@ function AiEvaluation() {
                   onClick={() =>
                     evaluateReadme(
                       selectedRepo.github_id || selectedRepo.owner_id,
-                      selectedRepo.repo_name,
-                      selectedRepo.readme_content
+                      selectedRepo.repo_name
                     )
                   }
-                  disabled={evaluationLoading || !selectedRepo.readme_content}
+                  disabled={evaluationLoading}
                 >
                   {evaluationLoading ? 'Evaluating...' : 'AI Re-evaluate'}
                 </button>
@@ -215,16 +175,13 @@ function AiEvaluation() {
                   <BsChatLeftDots className="mr-2 text-info" /> AI README Analysis Result
                 </h6>
 
-                {evaluationLoading || readmeLoading ? (
+                {evaluationLoading ? (
                   <div className="text-center py-5 mt-4">
                     <LoaderIcon />
-                    <p className="mt-3 text-muted">
-                      {readmeLoading ? 'README를 불러오는 중...' : 'AI가 분석 중입니다...'}
-                    </p>
+                    <p className="mt-3 text-muted">AI가 분석 중입니다...</p>
                   </div>
                 ) : evaluationData ? (
                   <div className="mt-4">
-                    {/* Score Section */}
                     {evaluationData.score && (
                       <div className="d-flex align-items-center mb-4 p-3 bg-light rounded score-container">
                         <div className={`score-badge score-${evaluationData.score.charAt(0).toUpperCase()}`}>
@@ -241,9 +198,7 @@ function AiEvaluation() {
                       <h6 className="feedback-box-title text-success">Strengths (잘한 점)</h6>
                       <ul>
                         {evaluationData.strengths?.map((item, idx) => (
-                          <li key={idx} className="mb-1">
-                            {item}
-                          </li>
+                          <li key={idx} className="mb-1">{item}</li>
                         ))}
                       </ul>
                     </div>
@@ -252,25 +207,20 @@ function AiEvaluation() {
                       <h6 className="feedback-box-title text-warning">Improvements (보완할 점)</h6>
                       <ul>
                         {evaluationData.improvements?.map((item, idx) => (
-                          <li key={idx} className="mb-1">
-                            {item}
-                          </li>
+                          <li key={idx} className="mb-1">{item}</li>
                         ))}
                       </ul>
                     </div>
 
-                    {/* Missing Essentials Section (Only show if there are actual non-empty items) */}
-                    {evaluationData.missing_essentials && 
-                     evaluationData.missing_essentials.filter(item => item && String(item).trim() !== "").length > 0 && (
+                    {evaluationData.missing_essentials &&
+                     evaluationData.missing_essentials.filter(item => item && String(item).trim() !== '').length > 0 && (
                       <div className="feedback-box missing-essentials mb-4">
                         <h6 className="feedback-box-title text-danger">Missing Essentials (누락된 항목)</h6>
                         <ul>
                           {evaluationData.missing_essentials
-                            .filter(item => item && String(item).trim() !== "")
+                            .filter(item => item && String(item).trim() !== '')
                             .map((item, idx) => (
-                              <li key={idx} className="mb-1 text-danger font-weight-bold">
-                                {item}
-                              </li>
+                              <li key={idx} className="mb-1 text-danger font-weight-bold">{item}</li>
                             ))}
                         </ul>
                       </div>
@@ -280,9 +230,7 @@ function AiEvaluation() {
                       <h6 className="feedback-box-title text-info">Advice (조언)</h6>
                       <ul>
                         {evaluationData.advice?.map((item, idx) => (
-                          <li key={idx} className="mb-1">
-                            {item}
-                          </li>
+                          <li key={idx} className="mb-1">{item}</li>
                         ))}
                       </ul>
                     </div>
