@@ -41,7 +41,7 @@ function AiEvaluation() {
   const fetchAiEvaluation = async (githubUsername, repoName) => {
     try {
       const response = await axiosInstance.get(
-        `/api/v2/ai-evaluation/readme?githubUsername=${githubUsername}&repoName=${repoName}`,
+        `/v2/ai-evaluation/readme?githubUsername=${githubUsername}&repoName=${repoName}`,
         getAuthConfig()
       );
       if (response.data.status === 'success' && response.data.data) {
@@ -59,7 +59,7 @@ function AiEvaluation() {
     setEvaluationLoading(true);
     try {
       const response = await axiosInstance.post(
-        '/api/v2/ai-evaluation/readme',
+        '/v2/ai-evaluation/readme',
         { githubUsername, repoName },
         { ...getAuthConfig(), timeout: 60000 }
       );
