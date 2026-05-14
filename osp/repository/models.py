@@ -175,3 +175,4 @@ class GithubRepoCommitFiles(models.Model):
         managed = False
         db_table = 'github_repo_commit_files'
         unique_together = (('github_id', 'repo_name', 'sha'),)
+

@@ -1,3 +1,4 @@
+from django.conf import settings
 import datetime
 import json
 import logging
@@ -57,6 +58,7 @@ from user.models import (Account, AccountPrivacy, DevType, GithubScore,
 
 from user.serializers import GithubScoreResultSerializer
 from rest_framework import status as http_status
+
 
 class UserAccountView(APIView):
 
@@ -220,7 +222,7 @@ class ProfileMainView(APIView):
                 errors["user_not_found"] = "해당 유저가 존재하지 않습니다."
             except Exception as e:
                 logging.exception(f'ProfileMainView undefined_exception: {e}')
-                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다." 
+                errors["undefined_exception"] = "Validation 과정에서 정의되지않은 exception이 발생하였습니다."
         return status, errors
 
     def get(self, request, username):
@@ -1059,6 +1061,7 @@ class TotalContrView(APIView):
 
         return Response(res)
 
+
 class DevTypeStatisticsView(APIView):
     def get(self, request):
 
@@ -1402,6 +1405,7 @@ class AccountPrivacyView(APIView):
             res = {'status': 'success', 'data': data}
         return Response(res)
 
+
 class QnAListView(APIView):
     def get(self, request):
         res = {'status': 'success', 'message': '', 'data': None}
@@ -1410,11 +1414,12 @@ class QnAListView(APIView):
             res['status'] = 'error'
             res['message'] = 'Permission denied'
             return Response(res, status=status.HTTP_403_FORBIDDEN)
-        
+
         qnas = QnA.objects.all().order_by('-created_at')
         serializer = QnASerializer(qnas, many=True)
         res['data'] = serializer.data
         return Response(res, status=status.HTTP_200_OK)
+
 
 class QnACreateView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -1426,10 +1431,11 @@ class QnACreateView(APIView):
             res['status'] = 'error'
             res['message'] = 'Authentication required'
             return Response(res, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         data = request.data
-        qna = QnA.objects.create(user=request.user, type=data['type'], content=data['content'], solved=False)
-        
+        qna = QnA.objects.create(
+            user=request.user, type=data['type'], content=data['content'], solved=False)
+
         for i in range(1, 4):
             image_key = f'image{i}'
             if image_key in request.FILES:
@@ -1439,15 +1445,16 @@ class QnACreateView(APIView):
                     file=image_file,
                     name=image_file.name
                 )
-        
+
         serializer = QnASerializer(qna)
         res['data'] = serializer.data
         return Response(res, status=status.HTTP_201_CREATED)
-    
+
+
 class QnADetailView(APIView):
     def get(self, request, id):
         res = {'status': 'success', 'message': '', 'data': None}
-        
+
         try:
             qna = QnA.objects.get(id=id)
             serializer = QnASerializer(qna)
@@ -1457,10 +1464,10 @@ class QnADetailView(APIView):
             res['status'] = 'error'
             res['message'] = 'QnA not found'
             return Response(res, status=status.HTTP_404_NOT_FOUND)
-        
+
     def patch(self, request, id):
         res = {'status': 'success', 'message': '', 'data': None}
-        
+
         try:
             qna = QnA.objects.get(id=id)
             serializer = QnASerializer(qna, data=request.data, partial=True)

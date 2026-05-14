@@ -7,6 +7,7 @@ import LoginPage from './routes/LoginPage';
 import OAuthPage from './routes/OAuthPage';
 import UserPage from './routes/UserPage';
 import DashBoard from './components/User/DashBoard/DashBoard';
+import AiEvaluation from './components/User/AI/AiEvaluation';
 import ChallengePage from './routes/ChallengePage';
 import CommunityLayout from './routes/CommunityLayout';
 import AccountsLayout from './routes/AccountsLayout';
@@ -188,6 +189,10 @@ const router = createBrowserRouter([
           {
             path: 'dashboard',
             element: <DashBoard />
+          },
+          {
+            path: 'ai-evaluation',
+            element: <AiEvaluation />
           },
           {
             path: 'dev-type',
