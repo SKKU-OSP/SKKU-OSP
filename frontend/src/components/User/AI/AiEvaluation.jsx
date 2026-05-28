@@ -70,7 +70,12 @@ function AiEvaluation() {
       }
     } catch (error) {
       console.error('AI Evaluation failed:', error);
-      alert('AI 평가 요청에 실패했습니다.');
+      const serverMessage = error.response?.data?.message || '';
+      if (serverMessage.includes('README가 없는')) {
+        alert('분석할 README 파일이 존재하지 않습니다.');
+      } else {
+        alert('AI 평가 요청에 실패했습니다.');
+      }
     } finally {
       setEvaluationLoading(false);
     }
@@ -160,10 +165,7 @@ function AiEvaluation() {
                 <button
                   className="btn btn-sm btn-primary px-3 shadow-sm"
                   onClick={() =>
-                    evaluateReadme(
-                      selectedRepo.github_id || selectedRepo.owner_id,
-                      selectedRepo.repo_name
-                    )
+                    evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name)
                   }
                   disabled={evaluationLoading}
                 >
@@ -198,7 +200,9 @@ function AiEvaluation() {
                       <h6 className="feedback-box-title text-success">Strengths (잘한 점)</h6>
                       <ul>
                         {evaluationData.strengths?.map((item, idx) => (
-                          <li key={idx} className="mb-1">{item}</li>
+                          <li key={idx} className="mb-1">
+                            {item}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -207,30 +211,37 @@ function AiEvaluation() {
                       <h6 className="feedback-box-title text-warning">Improvements (보완할 점)</h6>
                       <ul>
                         {evaluationData.improvements?.map((item, idx) => (
-                          <li key={idx} className="mb-1">{item}</li>
+                          <li key={idx} className="mb-1">
+                            {item}
+                          </li>
                         ))}
                       </ul>
                     </div>
 
                     {evaluationData.missing_essentials &&
-                     evaluationData.missing_essentials.filter(item => item && String(item).trim() !== '').length > 0 && (
-                      <div className="feedback-box missing-essentials mb-4">
-                        <h6 className="feedback-box-title text-danger">Missing Essentials (누락된 항목)</h6>
-                        <ul>
-                          {evaluationData.missing_essentials
-                            .filter(item => item && String(item).trim() !== '')
-                            .map((item, idx) => (
-                              <li key={idx} className="mb-1 text-danger font-weight-bold">{item}</li>
-                            ))}
-                        </ul>
-                      </div>
-                    )}
+                      evaluationData.missing_essentials.filter((item) => item && String(item).trim() !== '').length >
+                        0 && (
+                        <div className="feedback-box missing-essentials mb-4">
+                          <h6 className="feedback-box-title text-danger">Missing Essentials (누락된 항목)</h6>
+                          <ul>
+                            {evaluationData.missing_essentials
+                              .filter((item) => item && String(item).trim() !== '')
+                              .map((item, idx) => (
+                                <li key={idx} className="mb-1 text-danger font-weight-bold">
+                                  {item}
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                      )}
 
                     <div className="feedback-box advice">
                       <h6 className="feedback-box-title text-info">Advice (조언)</h6>
                       <ul>
                         {evaluationData.advice?.map((item, idx) => (
-                          <li key={idx} className="mb-1">{item}</li>
+                          <li key={idx} className="mb-1">
+                            {item}
+                          </li>
                         ))}
                       </ul>
                     </div>
