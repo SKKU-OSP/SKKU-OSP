@@ -34,6 +34,7 @@
     "react-icons": "^4.10.1",
     "react-js-pagination": "^3.0.3",
     "react-loader-icon": "^1.0.1",
+    "react-markdown": "^10.1.0",
     "react-quill": "^2.0.0",
     "react-router": "^6.14.1",
     "react-router-dom": "^6.14.0",
