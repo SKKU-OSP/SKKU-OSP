@@ -21,10 +21,12 @@ from django.shortcuts import redirect
 from django.urls import include, path, re_path
 
 from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
+from .ai_proxy_views import AiEvaluationProxyView
 
 urlpatterns = [
     path('', lambda req: redirect('/admin/')),
     path('admin/', admin.site.urls),
+    path('v2/ai-evaluation/readme', AiEvaluationProxyView.as_view(), name='ai-evaluation-proxy'),
 
     path('home/', include('home.urls')),
     path('rank/', include('rank.urls')),
