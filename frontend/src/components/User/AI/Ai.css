@@ -1,12 +1,42 @@
 /* Ai README Evaluation 전용 스타일 */
 
 .ai-eval-container {
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
-.ai-eval-nav {
-  margin-left: 10px;
+/* 탭 네비게이션 */
+.ai-tab-nav {
+  display: flex;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 1rem;
+}
+
+.ai-tab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #868e96;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.ai-tab-item:hover {
+  color: #343a40;
+}
+
+.ai-tab-item.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  font-weight: 600;
 }
 
 .repo-section-title-btn {
@@ -200,13 +230,13 @@
 }
 
 .ai-eval-description {
-  margin: 0.75rem 0 1.5rem 10px;
-  padding: 0.75rem 1rem;
-  background-color: #f8f9fa;
-  border-left: 4px solid #007bff;
+  margin: 0 0 1.25rem 0;
+  padding: 0.6rem 1rem;
+  background-color: #f0f6ff;
+  border-left: 3px solid #007bff;
   border-radius: 0 4px 4px 0;
-  color: #555;
-  font-size: 0.9rem;
+  color: #495057;
+  font-size: 0.85rem;
 }
 
 /* 기준별 점수 */
@@ -248,11 +278,12 @@
 }
 
 .criteria-score {
-  width: 36px;
+  width: 44px;
   flex-shrink: 0;
   text-align: right;
   color: #666;
   font-size: 0.78rem;
+  white-space: nowrap;
 }
 
 .bonus-checklist {
@@ -264,7 +295,7 @@
 }
 
 .bonus-item {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 500;
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
@@ -284,6 +315,15 @@
 .bonus-fail {
   color: #adb5bd;
   background-color: #f8f9fa;
+}
+
+/* PR 목록 제목 */
+.pr-title-text {
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #333;
+  word-break: break-word;
 }
 
 /* README 마크다운 렌더링 */

@@ -22,11 +22,15 @@ from django.urls import include, path, re_path
 
 from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 from .ai_proxy_views import AiEvaluationProxyView
+from .pr_evaluation_views import PrListView, PrEvaluationView, PrCountsView
 
 urlpatterns = [
     path('', lambda req: redirect('/admin/')),
     path('admin/', admin.site.urls),
-    path('v2/ai-evaluation/readme', AiEvaluationProxyView.as_view(), name='ai-evaluation-proxy'),
+    path('v2/ai-evaluation/readme', AiEvaluationProxyView.as_view(), name='ai-evaluation-readme'),
+    path('v2/ai-evaluation/pr-list', PrListView.as_view(), name='ai-evaluation-pr-list'),
+    path('v2/ai-evaluation/pr-counts', PrCountsView.as_view(), name='ai-evaluation-pr-counts'),
+    path('v2/ai-evaluation/pr', PrEvaluationView.as_view(), name='ai-evaluation-pr'),
 
     path('home/', include('home.urls')),
     path('rank/', include('rank.urls')),

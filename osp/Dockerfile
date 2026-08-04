@@ -32,5 +32,5 @@ WORKDIR /app
 # Collect static files
 RUN echo yes | python manage.py collectstatic
 
-# Run server
-CMD python manage.py runserver 0.0.0.0:8000
+# Run server (migrate first to apply any pending schema changes)
+CMD python manage.py migrate repository && python manage.py runserver 0.0.0.0:8000
