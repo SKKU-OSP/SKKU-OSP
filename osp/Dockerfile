@@ -10,7 +10,7 @@ ENV ENV_MODE ${BUILD_ENV}
 
 # Install requirements
 ADD ./deploy/requirements.txt /tmp
-RUN /usr/local/bin/python -m pip install --upgrade pip && \
+RUN /usr/local/bin/python -m pip install --upgrade pip setuptools wheel && \
     /usr/local/bin/python -m pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Install Chrome
