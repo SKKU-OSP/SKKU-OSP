@@ -55,5 +55,6 @@ virtualenvwrapper==4.8.4
 webdriver-manager
 Werkzeug==2.1.2
 zipp==3.8.0
-litellm
+litellm>=1.0.0
+typing_extensions>=4.6.0
 
