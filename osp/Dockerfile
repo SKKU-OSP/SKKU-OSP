@@ -1,5 +1,5 @@
 # docker/backend/Dockerfile
-FROM python:3.9
+FROM python:3.12
 
 # Build argument for environment
 ARG BUILD_ENV=dev
