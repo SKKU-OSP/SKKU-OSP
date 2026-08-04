@@ -2,7 +2,7 @@
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -113,5 +113,5 @@ def analyze_visual(readme: str) -> int:
     return 0
 
 
-def analyze_license(license_field: str | None) -> int:
+def analyze_license(license_field: Optional[str]) -> int:
     return 1 if license_field and license_field.strip() else 0
