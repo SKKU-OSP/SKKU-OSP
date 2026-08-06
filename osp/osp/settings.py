@@ -267,8 +267,9 @@ CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
 
 SPRING_BACKEND_URL = os.environ.get('SPRING_BACKEND_URL', 'http://localhost:8080')
 
-# LLM (Gemini via litellm) — secret.key에서 로드, 없으면 환경변수 fallback
+# LLM — secret.key에서 로드, 없으면 환경변수 fallback
 os.environ.setdefault('GEMINI_API_KEY', SETTINGS.get('GEMINI_API_KEY', ''))
+os.environ.setdefault('ANTHROPIC_API_KEY', SETTINGS.get('ANTHROPIC_API_KEY', ''))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

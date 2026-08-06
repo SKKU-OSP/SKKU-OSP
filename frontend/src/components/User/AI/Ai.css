@@ -8,35 +8,39 @@
 /* 탭 네비게이션 */
 .ai-tab-nav {
   display: flex;
-  border-bottom: 2px solid #e9ecef;
+  align-items: flex-end;
+  border-bottom: 1.5px solid #dee2e6;
   margin-bottom: 1rem;
+  gap: 0.25rem;
 }
 
 .ai-tab-item {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.65rem 1.4rem;
+  padding: 0.55rem 1.4rem;
   font-size: 0.9rem;
   font-weight: 500;
   color: #868e96;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: -1.5px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s, background 0.15s;
   white-space: nowrap;
 }
 
 .ai-tab-item:hover {
   color: #343a40;
+  background: #f1f3f5;
 }
 
 .ai-tab-item.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
+  color: #fff;
+  background: #12233e;
   font-weight: 600;
+  border-bottom-color: #12233e;
 }
 
 .repo-section-title-btn {

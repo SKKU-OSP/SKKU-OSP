@@ -23,6 +23,7 @@ from django.urls import include, path, re_path
 from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 from .ai_proxy_views import AiEvaluationProxyView
 from .pr_evaluation_views import PrListView, PrEvaluationView, PrCountsView
+from .issue_evaluation_views import IssueListView, IssueEvaluationView, IssueCountsView
 
 urlpatterns = [
     path('', lambda req: redirect('/admin/')),
@@ -31,6 +32,9 @@ urlpatterns = [
     path('v2/ai-evaluation/pr-list', PrListView.as_view(), name='ai-evaluation-pr-list'),
     path('v2/ai-evaluation/pr-counts', PrCountsView.as_view(), name='ai-evaluation-pr-counts'),
     path('v2/ai-evaluation/pr', PrEvaluationView.as_view(), name='ai-evaluation-pr'),
+    path('v2/ai-evaluation/issue-list', IssueListView.as_view(), name='ai-evaluation-issue-list'),
+    path('v2/ai-evaluation/issue-counts', IssueCountsView.as_view(), name='ai-evaluation-issue-counts'),
+    path('v2/ai-evaluation/issue', IssueEvaluationView.as_view(), name='ai-evaluation-issue'),
 
     path('home/', include('home.urls')),
     path('rank/', include('rank.urls')),
