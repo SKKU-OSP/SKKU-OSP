@@ -222,6 +222,26 @@ class GithubPrAiEvaluation(models.Model):
         unique_together = (('github_id', 'repo_name', 'pr_number'),)
 
 
+class GithubIssueAiEvaluation(models.Model):
+    github_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    issue_number = models.IntegerField()
+    issue_type = models.CharField(max_length=20, blank=True, null=True)  # bug / feature / skip
+    issue_score = models.CharField(max_length=10, blank=True, null=True)
+    issue_total_score = models.FloatField(blank=True, null=True)
+    issue_breakdown = models.JSONField(blank=True, null=True)
+    issue_strengths = models.JSONField(blank=True, null=True)
+    issue_improvements = models.JSONField(blank=True, null=True)
+    issue_advice = models.JSONField(blank=True, null=True)
+    issue_missing = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_issue_ai_evaluation'
+        unique_together = (('github_id', 'repo_name', 'issue_number'),)
+
+
 class GithubRepoCommitFiles(models.Model):
     github_id = models.CharField(max_length=40, primary_key=True)
     repo_name = models.CharField(max_length=100)
