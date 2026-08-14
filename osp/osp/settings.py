@@ -266,6 +266,16 @@ SCHEDULER_DEFAULT = True
 CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
 
 SPRING_BACKEND_URL = os.environ.get('SPRING_BACKEND_URL', 'http://localhost:8080')
+COMMIT_CONSISTENCY_MAX_TOKENS = int(
+    os.environ.get('COMMIT_CONSISTENCY_MAX_TOKENS', '30000')
+)
+COMMIT_FILE_SUMMARY_MAX_TOKENS = int(
+    os.environ.get('COMMIT_FILE_SUMMARY_MAX_TOKENS', '6000')
+)
+COMMIT_FILE_SUMMARY_MAX_WORKERS = int(
+    # 0이면 요약 대상 파일 수만큼 동시에 실행한다. 운영 환경에서 필요하면 제한 가능.
+    os.environ.get('COMMIT_FILE_SUMMARY_MAX_WORKERS', '0')
+)
 
 # LLM — secret.key에서 로드, 없으면 환경변수 fallback
 os.environ.setdefault('GEMINI_API_KEY', SETTINGS.get('GEMINI_API_KEY', ''))

@@ -265,6 +265,7 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
             github_id=github_username, repo_name=repo_name, issue_number=issue_number
         )
         entity.issue_type = 'skip'
+        entity.model_name = score.actual_model
         entity.issue_score = None
         entity.issue_total_score = None
         entity.issue_breakdown = None
@@ -329,6 +330,7 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
         github_id=github_username, repo_name=repo_name, issue_number=issue_number
     )
     entity.issue_type = issue_type
+    entity.model_name = score.actual_model
     entity.issue_score = grade
     entity.issue_total_score = total
     entity.issue_breakdown = {
@@ -360,6 +362,7 @@ def _entity_to_dict(entity: GithubIssueAiEvaluation, issue_body: Optional[str] =
             'issue_type': 'skip',
             'skip_message': _SKIP_MESSAGE,
             'issue_number': entity.issue_number,
+            'model_name': entity.model_name,
             'issue_score': None,
             'issue_total_score': None,
             'issue_breakdown': None,
@@ -373,6 +376,7 @@ def _entity_to_dict(entity: GithubIssueAiEvaluation, issue_body: Optional[str] =
         'evaluated': True,
         'issue_type': entity.issue_type,
         'issue_number': entity.issue_number,
+        'model_name': entity.model_name,
         'issue_score': entity.issue_score,
         'issue_total_score': entity.issue_total_score,
         'issue_breakdown': entity.issue_breakdown,
