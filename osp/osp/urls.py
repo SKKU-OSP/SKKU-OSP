@@ -24,6 +24,12 @@ from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 from .ai_proxy_views import AiEvaluationProxyView
 from .pr_evaluation_views import PrListView, PrEvaluationView, PrCountsView
 from .issue_evaluation_views import IssueListView, IssueEvaluationView, IssueCountsView
+from .commit_evaluation_views import (
+    CommitCountsView,
+    CommitEvaluationView,
+    CommitFileSummariesView,
+    CommitListView,
+)
 
 urlpatterns = [
     path('', lambda req: redirect('/admin/')),
@@ -35,6 +41,14 @@ urlpatterns = [
     path('v2/ai-evaluation/issue-list', IssueListView.as_view(), name='ai-evaluation-issue-list'),
     path('v2/ai-evaluation/issue-counts', IssueCountsView.as_view(), name='ai-evaluation-issue-counts'),
     path('v2/ai-evaluation/issue', IssueEvaluationView.as_view(), name='ai-evaluation-issue'),
+    path('v2/ai-evaluation/commit-list', CommitListView.as_view(), name='ai-evaluation-commit-list'),
+    path('v2/ai-evaluation/commit-counts', CommitCountsView.as_view(), name='ai-evaluation-commit-counts'),
+    path('v2/ai-evaluation/commit', CommitEvaluationView.as_view(), name='ai-evaluation-commit'),
+    path(
+        'v2/ai-evaluation/commit-file-summaries',
+        CommitFileSummariesView.as_view(),
+        name='ai-evaluation-commit-file-summaries',
+    ),
 
     path('home/', include('home.urls')),
     path('rank/', include('rank.urls')),

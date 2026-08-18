@@ -24,6 +24,7 @@ class GithubRepoAiEvaluation(models.Model):
 
     github_id = models.CharField(max_length=40)
     repo_name = models.CharField(max_length=100)
+    model_name = models.CharField(max_length=64, blank=True, null=True)
     readme_evaluation_status = models.CharField(
         max_length=20, choices=EVALUATION_STATUS_CHOICES, default='code_only'
     )
@@ -207,6 +208,7 @@ class GithubPrAiEvaluation(models.Model):
     github_id = models.CharField(max_length=40)
     repo_name = models.CharField(max_length=100)
     pr_number = models.IntegerField()
+    model_name = models.CharField(max_length=64, blank=True, null=True)
     pr_score = models.CharField(max_length=10, blank=True, null=True)
     pr_total_score = models.FloatField(blank=True, null=True)
     pr_breakdown = models.JSONField(blank=True, null=True)
@@ -226,6 +228,7 @@ class GithubIssueAiEvaluation(models.Model):
     github_id = models.CharField(max_length=40)
     repo_name = models.CharField(max_length=100)
     issue_number = models.IntegerField()
+    model_name = models.CharField(max_length=64, blank=True, null=True)
     issue_type = models.CharField(max_length=20, blank=True, null=True)  # bug / feature / skip
     issue_score = models.CharField(max_length=10, blank=True, null=True)
     issue_total_score = models.FloatField(blank=True, null=True)
@@ -242,6 +245,45 @@ class GithubIssueAiEvaluation(models.Model):
         unique_together = (('github_id', 'repo_name', 'issue_number'),)
 
 
+class GithubCommitAiEvaluation(models.Model):
+    github_id = models.CharField(max_length=255)
+    repo_name = models.CharField(max_length=255)
+    sha = models.CharField(max_length=40)
+    model_name = models.CharField(max_length=128, blank=True, null=True)
+    commit_score = models.CharField(max_length=10, blank=True, null=True)
+    commit_total_score = models.FloatField(blank=True, null=True)
+    message_clarity_score = models.IntegerField(blank=True, null=True)
+    consistency_score = models.IntegerField(blank=True, null=True)
+    atomicity_score = models.IntegerField(blank=True, null=True)
+    convention_score = models.IntegerField(blank=True, null=True)
+    commit_breakdown = models.JSONField(blank=True, null=True)
+    commit_strengths = models.JSONField(blank=True, null=True)
+    commit_improvements = models.JSONField(blank=True, null=True)
+    commit_advice = models.JSONField(blank=True, null=True)
+    commit_missing = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_commit_ai_evaluation'
+        unique_together = (('github_id', 'repo_name', 'sha'),)
+
+
+class GithubCommitFileSummaryCache(models.Model):
+    """점수 계산과 분리된 커밋 파일별 표시용 요약 캐시."""
+
+    github_id = models.CharField(max_length=255)
+    repo_name = models.CharField(max_length=255)
+    sha = models.CharField(max_length=40)
+    summaries = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_commit_file_summary_cache'
+        unique_together = (('github_id', 'repo_name', 'sha'),)
+
+
 class GithubRepoCommitFiles(models.Model):
     github_id = models.CharField(max_length=40, primary_key=True)
     repo_name = models.CharField(max_length=100)
@@ -255,4 +297,3 @@ class GithubRepoCommitFiles(models.Model):
         managed = False
         db_table = 'github_repo_commit_files'
         unique_together = (('github_id', 'repo_name', 'sha'),)
-

@@ -110,10 +110,12 @@ def evaluate(github_username: str, repo_name: str) -> dict:
     entity.readme_total_score = total_score
     entity.readme_criteria_scores = criteria_scores
     entity.readme_missing_essentials = score.missing_essentials
+    entity.model_name = score.actual_model
     entity.readme_evaluation_status = 'partial'
     entity.save(update_fields=[
         'readme_score', 'readme_total_score', 'readme_criteria_scores',
-        'readme_missing_essentials', 'readme_evaluation_status', 'updated_at',
+        'readme_missing_essentials', 'model_name',
+        'readme_evaluation_status', 'updated_at',
     ])
 
     # 8. CoreCriterion / BonusItem 구조
@@ -159,6 +161,7 @@ def evaluate(github_username: str, repo_name: str) -> dict:
 def _entity_to_dict(entity: GithubRepoAiEvaluation, readme: Optional[str]) -> dict:
     return {
         'evaluation_status': entity.readme_evaluation_status,
+        'model_name': entity.model_name,
         'score': entity.readme_score,
         'total_score': entity.readme_total_score,
         'criteria_scores': entity.readme_criteria_scores,

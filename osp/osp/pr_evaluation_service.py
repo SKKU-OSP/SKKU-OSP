@@ -282,6 +282,7 @@ def evaluate(github_username: str, repo_name: str, pr_number: int) -> dict:
     )
     entity.pr_score = grade
     entity.pr_total_score = total
+    entity.model_name = score.actual_model
     entity.pr_breakdown = {
         'fulfilment': fulfilment_score,
         'clarity': clarity_score,
@@ -308,6 +309,7 @@ def _entity_to_dict(entity: GithubPrAiEvaluation, pr_body: Optional[str] = None)
     return {
         'evaluated': True,
         'pr_number': entity.pr_number,
+        'model_name': entity.model_name,
         'pr_score': entity.pr_score,
         'pr_total_score': entity.pr_total_score,
         'pr_breakdown': entity.pr_breakdown,
