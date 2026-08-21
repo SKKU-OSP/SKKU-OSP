@@ -8,6 +8,36 @@ from osp.commit_evaluation_views import _parse_repositories
 
 
 class CommitEvaluationServiceTest(TestCase):
+    def test_grade_uses_fixed_six_point_scale(self):
+        self.assertEqual(service._to_grade(5), 'A+')
+        self.assertEqual(service._to_grade(3.5), 'A')
+        self.assertEqual(service._to_grade(2), 'B')
+        self.assertEqual(service._to_grade(1), 'C')
+        self.assertEqual(service._to_grade(0), 'D')
+
+    def test_entity_response_keeps_six_point_max_when_axes_are_na(self):
+        entity = MagicMock(
+            sha='abc1234',
+            model_name='claude-test',
+            commit_score='A',
+            commit_total_score=2,
+            consistency_score=None,
+            atomicity_score=None,
+            commit_breakdown={
+                'consistency_status': 'N/A',
+                'atomicity_status': 'N/A',
+            },
+            commit_strengths=[],
+            commit_improvements=[],
+            commit_advice=[],
+            updated_at=None,
+        )
+
+        result = service._entity_to_dict(entity)
+
+        self.assertEqual(result['commit_max_score'], 6)
+        self.assertEqual(result['commit_score'], 'B')
+
     @patch.object(service, 'connection')
     def test_commit_list_contains_actual_message_and_metadata(self, connection):
         cursor = MagicMock()
@@ -155,6 +185,83 @@ class CommitEvaluationServiceTest(TestCase):
         self.assertEqual(entity.commit_breakdown['evaluation_status'], 'skipped')
         self.assertEqual(entity.commit_strengths, [])
         entity.save.assert_called_once()
+
+    def test_300_file_commit_skips_all_llm_calls(self):
+        commit = {
+            'sha': 'large123',
+            'message': 'feat: 대규모 파일 추가',
+            'message_body': '',
+            'author': 'octocat',
+            'author_date': None,
+            'committer_date': None,
+            'date': None,
+            'additions': 1000,
+            'deletions': 0,
+        }
+        files = [
+            {'filename': f'src/file_{index}.py', 'patch': '+new code'}
+            for index in range(300)
+        ]
+        entity = MagicMock(updated_at=None)
+
+        with (
+            patch.object(service, '_get_commit', return_value=commit),
+            patch.object(service, '_fetch_commit_files', return_value=files),
+            patch.object(
+                service.GithubCommitAiEvaluation.objects,
+                'get_or_create',
+                return_value=(entity, False),
+            ),
+            patch.object(service.llm_client, 'score_commit_message') as score_message,
+            patch.object(service.llm_client, 'score_commit_atomicity') as score_atomicity,
+            patch.object(service.llm_client, 'score_commit_consistency') as score_consistency,
+            patch.object(service.llm_client, 'write_commit_sentences') as write_sentences,
+        ):
+            result = service.evaluate('octocat', 'hello-world', 'large123')
+
+        score_message.assert_not_called()
+        score_atomicity.assert_not_called()
+        score_consistency.assert_not_called()
+        write_sentences.assert_not_called()
+        self.assertEqual(result['evaluation_status'], 'skipped')
+        self.assertTrue(result['is_file_limit_exceeded'])
+        self.assertEqual(result['file_count'], 300)
+        self.assertEqual(
+            result['skip_reason'],
+            '변경 파일이 300개 이상인 커밋은 평가 대상이 아닙니다.',
+        )
+        self.assertIsNone(result['commit_score'])
+        self.assertIsNone(result['commit_total_score'])
+        self.assertEqual(entity.commit_breakdown['evaluation_status'], 'skipped')
+        self.assertTrue(entity.commit_breakdown['is_file_limit_exceeded'])
+        entity.save.assert_called_once()
+
+    def test_existing_evaluation_is_hidden_when_file_response_reaches_300(self):
+        commit = {
+            'sha': 'large123',
+            'message': 'feat: 대규모 파일 추가',
+            'message_body': '',
+        }
+        files = [
+            {'filename': f'src/file_{index}.py', 'patch': '+new code'}
+            for index in range(300)
+        ]
+        entity = MagicMock(updated_at=None)
+
+        with (
+            patch.object(service, '_get_commit', return_value=commit),
+            patch.object(service, '_fetch_commit_files', return_value=files),
+            patch.object(
+                service.GithubCommitAiEvaluation.objects,
+                'get',
+                return_value=entity,
+            ),
+        ):
+            result = service.get_evaluation('octocat', 'hello-world', 'large123')
+
+        self.assertEqual(result['evaluation_status'], 'skipped')
+        self.assertEqual(result['file_count'], 300)
+        self.assertTrue(result['is_file_limit_exceeded'])
 
     def test_generated_files_are_excluded_but_docs_and_config_are_not(self):
         files = [
@@ -316,7 +423,10 @@ class CommitEvaluationServiceTest(TestCase):
             'repo', 'abc1234', 'feat: add bookmark', '', files
         )
 
-        self.assertEqual(result, (1, 'satisfied', '한 기능의 여러 계층', 'claude-test'))
+        self.assertEqual(
+            result,
+            (1, 'satisfied', '한 기능의 여러 계층', 'claude-test', 0.0),
+        )
         passed_filenames = score_atomicity.call_args.args[4]
         self.assertEqual(passed_filenames, [item['filename'] for item in files])
 
@@ -566,13 +676,15 @@ class CommitEvaluationServiceTest(TestCase):
             }
         )
         message_result._actual_model = 'claude-test'
+        message_result._actual_cost = 0.001
         score_message.return_value = message_result
         consistency_result = llm_client.CommitConsistencyResult(
             result='matched', reason='로그인 세션 수정 방향이 일치합니다.'
         )
         consistency_result._actual_model = 'claude-test'
+        consistency_result._actual_cost = 0.003
         score_consistency.return_value = consistency_result
-        write_sentences.return_value = llm_client.CommitSentenceResponse(
+        sentence_result = llm_client.CommitSentenceResponse(
             strengths=[
                 '변경 대상이 구체적입니다.',
                 '메시지와 변경 방향이 일치합니다.',
@@ -580,11 +692,14 @@ class CommitEvaluationServiceTest(TestCase):
             improvements=['변경 이유를 본문에 작성해 주세요.'],
             advice=['본문에 변경 배경을 한 문장으로 적어 보세요.'],
         )
+        sentence_result._actual_cost = 0.004
+        write_sentences.return_value = sentence_result
         entity = MagicMock()
         entity.updated_at = None
         get_or_create.return_value = (entity, True)
 
-        result = service.evaluate('octocat', 'hello-world', 'abc1234')
+        with patch.object(service.logger, 'info') as log_info:
+            result = service.evaluate('octocat', 'hello-world', 'abc1234')
 
         summarize_commit_file.assert_not_called()
         score_atomicity.assert_not_called()
@@ -630,3 +745,9 @@ class CommitEvaluationServiceTest(TestCase):
         entity.save.assert_called_once()
         self.assertFalse(result['is_provisional'])
         self.assertEqual(result['commit_max_score'], 6)
+        cost_log = next(
+            call for call in log_info.call_args_list
+            if str(call.args[0]).startswith('[LLM 총 비용]')
+        )
+        self.assertEqual(cost_log.args[4], 0.008)
+        self.assertEqual(cost_log.args[5:], (0.001, 0.0, 0.003, 0.004))

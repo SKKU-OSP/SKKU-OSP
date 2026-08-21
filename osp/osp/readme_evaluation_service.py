@@ -71,11 +71,37 @@ def evaluate(github_username: str, repo_name: str) -> dict:
         score = llm_client.score_readme(repo_name, sanitized_readme, readability, visual, reproducibility_code, lic)
     except Exception as e:
         logger.error("LLM 채점 실패, code_only로 착지: %s/%s — %s", github_username, repo_name, e)
+        logger.info(
+            '[LLM 총 비용] %s/%s | README 평가(code_only) | total=$%.6f',
+            github_username, repo_name, float(getattr(e, 'actual_cost', 0.0)),
+        )
         return _entity_to_dict(entity, raw_readme)
 
     clarity = len(score.clarity.satisfied_subs)
     reproducibility_result = 1 if score.reproducibility_result.result == 'satisfied' else 0
     collaboration = 1 if score.collaboration.result == 'satisfied' else 0
+    judgment_label = f'{github_username}/{repo_name} | README'
+    llm_client.log_judgment(
+        judgment_label,
+        'clarity',
+        f'{clarity} satisfied',
+        score.clarity.reason,
+        score.actual_model,
+    )
+    llm_client.log_judgment(
+        judgment_label,
+        'reproducibility_result',
+        score.reproducibility_result.result,
+        score.reproducibility_result.reason,
+        score.actual_model,
+    )
+    llm_client.log_judgment(
+        judgment_label,
+        'collaboration',
+        score.collaboration.result,
+        score.collaboration.reason,
+        score.actual_model,
+    )
 
     # 5. 재현성 세부 합산
     repro_good = list(repro_detail.good)
@@ -120,14 +146,45 @@ def evaluate(github_username: str, repo_name: str) -> dict:
 
     # 8. CoreCriterion / BonusItem 구조
     core_criteria = [
-        {'label': '명확성', 'good': clarity_good, 'bad': clarity_bad},
-        {'label': '재현성', 'good': repro_good,   'bad': repro_bad},
-        {'label': '가독성', 'good': list(r_detail.good), 'bad': list(r_detail.bad)},
+        {
+            'label': '명확성', 'good': clarity_good, 'bad': clarity_bad,
+            'reason': score.clarity.reason,
+        },
+        {
+            'label': '재현성', 'good': repro_good, 'bad': repro_bad,
+            'reason': (
+                f"코드 분석 결과 충족: {', '.join(repro_detail.good) or '없음'}; "
+                f"미충족: {', '.join(repro_detail.bad) or '없음'}. "
+                f"실행 결과 판정: {score.reproducibility_result.reason}"
+            ),
+        },
+        {
+            'label': '가독성', 'good': list(r_detail.good), 'bad': list(r_detail.bad),
+            'reason': (
+                f"마크다운 구조 분석 결과 충족: {', '.join(r_detail.good) or '없음'}; "
+                f"미충족: {', '.join(r_detail.bad) or '없음'}."
+            ),
+        },
     ]
     bonus_items = [
-        {'label': '시각 자료', 'satisfied': visual == 1},
-        {'label': '라이선스',  'satisfied': lic == 1},
-        {'label': '협업',      'satisfied': collaboration == 1},
+        {
+            'label': '시각 자료', 'satisfied': visual == 1,
+            'reason': (
+                'README에서 배지를 제외한 이미지 문법을 확인했습니다.' if visual == 1
+                else 'README에서 배지를 제외한 이미지 문법을 확인하지 못했습니다.'
+            ),
+        },
+        {
+            'label': '라이선스', 'satisfied': lic == 1,
+            'reason': (
+                'GitHub 리포지토리의 라이선스 정보를 확인했습니다.' if lic == 1
+                else 'GitHub 리포지토리에서 라이선스 정보를 확인하지 못했습니다.'
+            ),
+        },
+        {
+            'label': '협업', 'satisfied': collaboration == 1,
+            'reason': score.collaboration.reason,
+        },
     ]
 
     # 9. LLM 2차 호출: 문장화 (temperature=0.7)
@@ -136,6 +193,15 @@ def evaluate(github_username: str, repo_name: str) -> dict:
         sentences = llm_client.write_sentences(repo_name, sanitized_readme, core_criteria, bonus_items)
     except Exception as e:
         logger.error("LLM 문장화 실패, partial로 착지: %s/%s — %s", github_username, repo_name, e)
+        sentence_failure_cost = float(getattr(e, 'actual_cost', 0.0))
+        logger.info(
+            '[LLM 총 비용] %s/%s | README 평가(partial) | total=$%.6f '
+            '| 채점=$%.6f | 문장화 실패 호출=$%.6f',
+            github_username, repo_name,
+            score.actual_cost + sentence_failure_cost,
+            score.actual_cost,
+            sentence_failure_cost,
+        )
         return _entity_to_dict(entity, raw_readme)
 
     strengths = sentences.strengths or [
@@ -155,6 +221,14 @@ def evaluate(github_username: str, repo_name: str) -> dict:
     ])
 
     logger.info("README 평가 완료: %s/%s → grade=%s, total=%s", github_username, repo_name, grade, total_score)
+    logger.info(
+        '[LLM 총 비용] %s/%s | README 평가 | total=$%.6f '
+        '| 채점=$%.6f | 문장화=$%.6f',
+        github_username, repo_name,
+        score.actual_cost + sentences.actual_cost,
+        score.actual_cost,
+        sentences.actual_cost,
+    )
     return _entity_to_dict(entity, raw_readme)
 
 
