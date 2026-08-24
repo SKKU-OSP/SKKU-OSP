@@ -19,13 +19,23 @@ from osp.llm_client import PrFulfilmentResult, PrClarityResult, scan_injection, 
 # ── 헬퍼 ──────────────────────────────────────────────────────────
 
 def fulfilment(what='satisfied', why='satisfied', verification='satisfied'):
-    return PrFulfilmentResult(what=what, why=why, verification=verification)
+    return PrFulfilmentResult(
+        what=what,
+        what_reason='테스트용 변경 내용 판정 근거',
+        why=why,
+        why_reason='테스트용 변경 이유 판정 근거',
+        verification=verification,
+        verification_reason='테스트용 확인 방법 판정 근거',
+    )
 
 def clarity(title_specificity='satisfied', title_body_match='satisfied', single_focus='N/A'):
     return PrClarityResult(
         title_specificity=title_specificity,
+        title_specificity_reason='테스트용 제목 구체성 판정 근거',
         title_body_match=title_body_match,
+        title_body_match_reason='테스트용 제목 본문 일치 판정 근거',
         single_focus=single_focus,
+        single_focus_reason='테스트용 단일 집중도 판정 근거',
     )
 
 def run_case(label, pr_title, pr_body, f: PrFulfilmentResult, c: PrClarityResult):
@@ -159,9 +169,9 @@ run_case(
     c=clarity(title_specificity='satisfied', title_body_match='satisfied', single_focus='N/A'),
 )
 
-# 8. 이슈 정탐 — closes 없는 순수 #숫자
+# 8. 단독 #숫자는 PR 참조일 수 있어 이슈 연결에서 제외
 run_case(
-    "이슈 정탐 (#숫자 단독 / 보너스 1.5 / A)",
+    "단독 참조 제외 (#숫자 단독 / 이슈 보너스 없음)",
     pr_title="fix: 로그인 세션 만료 시간 오류 수정",
     pr_body="""세션이 설정값보다 일찍 만료되는 버그를 수정했습니다. #256
 

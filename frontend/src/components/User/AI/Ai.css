@@ -311,6 +311,311 @@
   white-space: nowrap;
 }
 
+.pr-consistency-result,
+.pr-agent-details,
+.pr-agent-commit {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pr-consistency-result-title {
+  margin-bottom: 0.35rem;
+  color: #343a40;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.pr-consistency-verdict {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.1rem 0 0.55rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.pr-consistency-verdict.matched {
+  color: #157347;
+  background-color: #e8f5ed;
+}
+
+.pr-consistency-verdict.partial {
+  color: #946200;
+  background-color: #fff4d6;
+}
+
+.pr-consistency-verdict.mismatched {
+  color: #b02a37;
+  background-color: #fbeaec;
+}
+
+.pr-consistency-verdict.na {
+  color: #5f6871;
+  background-color: #e9ecef;
+}
+
+.pr-consistency-result-text,
+.pr-agent-commit-title,
+.pr-agent-commit-summary {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pr-consistency-result-text {
+  color: #6c757d;
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.pr-consistency-evidence {
+  margin-top: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  border-left: 3px solid #6ea8fe;
+  border-radius: 0 5px 5px 0;
+  background-color: #f4f8ff;
+}
+
+.pr-consistency-evidence-title {
+  margin-bottom: 0.35rem;
+  color: #495057;
+  font-size: 0.77rem;
+  font-weight: 700;
+}
+
+.pr-consistency-evidence ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.pr-consistency-evidence li {
+  position: relative;
+  margin-bottom: 0.22rem;
+  padding-left: 1.35rem;
+  color: #5f6871;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pr-consistency-evidence li::before {
+  content: '✓';
+  position: absolute;
+  top: 0;
+  left: 0.1rem;
+  color: #198754;
+  font-weight: 700;
+}
+
+.pr-consistency-evidence li:last-child {
+  margin-bottom: 0;
+}
+
+.pr-cohesion-evidence {
+  border-left-color: #6f42c1;
+  background-color: #f8f5fc;
+}
+
+.pr-agent-title-only-note {
+  margin: 0;
+  padding: 0.75rem 0.15rem;
+  color: #6c757d;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.pr-agent-commit-title {
+  flex: 1;
+  line-height: 1.45;
+}
+
+.pr-agent-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d5dae0;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #3f4854;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.pr-agent-loading-status {
+  margin: 0.35rem 0 0;
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
+.pr-agent-loading-status > span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 0.35rem 0.1rem 0;
+  border-radius: 50%;
+  background-color: #198754;
+  animation: pr-agent-status-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pr-agent-status-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+.pr-agent-toggle:hover {
+  border-color: #adb5bd;
+  background-color: #f8f9fa;
+}
+
+.pr-agent-toggle:focus {
+  outline: none;
+  border-color: #adb5bd;
+  box-shadow: 0 0 0 2px rgba(73, 80, 87, 0.08);
+}
+
+.pr-agent-toggle-heading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.65rem;
+}
+
+.pr-agent-toggle-heading > span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.pr-agent-toggle-heading strong {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.pr-agent-toggle-heading small {
+  margin-top: 0.15rem;
+  color: #718096;
+  font-size: 0.69rem;
+}
+
+.pr-agent-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  flex-shrink: 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.pr-agent-toggle-arrow {
+  margin-left: 0.75rem;
+  color: #868e96;
+  font-size: 0.65rem;
+}
+
+.pr-agent-commit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.pr-agent-commit {
+  padding: 0.8rem;
+  border: 1px solid #dbe3ed;
+  border-radius: 9px;
+  background-color: #fff;
+  box-shadow: 0 2px 7px rgba(31, 50, 81, 0.05);
+}
+
+.pr-agent-commit-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.pr-agent-sha {
+  display: inline-block;
+  margin-right: 0.45rem;
+  padding: 0.08rem 0.35rem;
+  border-radius: 5px;
+  background-color: #fff0f6;
+  color: #d63384;
+  font-family: monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.pr-agent-status {
+  flex-shrink: 0;
+  padding: 0.18rem 0.48rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pr-agent-status.success { color: #157347; background-color: #e8f5ed; }
+.pr-agent-status.warning { color: #946200; background-color: #fff4d6; }
+.pr-agent-status.error { color: #b02a37; background-color: #fbeaec; }
+.pr-agent-status.neutral { color: #5f6871; background-color: #eceff2; }
+
+.pr-agent-commit-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+  color: #748091;
+  font-size: 0.7rem;
+}
+
+.pr-agent-commit-meta span {
+  padding: 0.12rem 0.38rem;
+  border-radius: 5px;
+  background-color: #f4f6f8;
+}
+
+.pr-agent-commit-meta .additions { color: #18864b; background-color: #ebf7f0; }
+.pr-agent-commit-meta .deletions { color: #c33c4a; background-color: #fceff1; }
+
+.pr-agent-commit-summary {
+  margin-top: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 6px;
+  background-color: #f7f9fc;
+  line-height: 1.55;
+}
+
+.pr-agent-commit-summary > span {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #5c6f86;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.pr-agent-commit-summary p {
+  margin: 0;
+  color: #3f4854;
+  font-size: 0.75rem;
+}
+
+.pr-agent-commit-summary.unavailable {
+  background-color: #fff8e8;
+}
+
 .bonus-checklist {
   display: flex;
   gap: 0.75rem;

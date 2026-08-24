@@ -194,6 +194,24 @@ _CLARITY_LABELS = {
 }
 
 
+def _bonus_reason(label: str, satisfied: bool) -> str:
+    if label in ('재현 자료', '참고 자료'):
+        material = '스크린샷, 코드 블록 또는 참고 URL' if label == '재현 자료' else '스크린샷 또는 참고 URL'
+        return (
+            f'이슈 본문에서 {material}을 확인했습니다.' if satisfied
+            else f'이슈 본문에서 {material}을 확인하지 못했습니다.'
+        )
+    if label == '제목 태그':
+        return (
+            '이슈 제목에 대괄호 태그 또는 인정된 접두사가 있습니다.' if satisfied
+            else '이슈 제목에 [Bug], [Feature] 같은 태그를 확인하지 못했습니다.'
+        )
+    return (
+        '본문에 관련 이슈 또는 PR 링크가 있습니다.' if satisfied
+        else '본문에서 관련 이슈 또는 PR 링크를 확인하지 못했습니다.'
+    )
+
+
 def _build_sentence_inputs(
     f: llm_client.IssueFulfilmentResult,
     c: llm_client.PrClarityResult,
@@ -206,21 +224,33 @@ def _build_sentence_inputs(
     labels = _FULFILMENT_LABELS_BUG if issue_type == 'bug' else _FULFILMENT_LABELS_FEATURE
     for key, label in labels.items():
         val = getattr(f, key)
+        item = {'label': label, 'reason': getattr(f, f'{key}_reason')}
         if val == 'satisfied':
-            good.append(label)
+            good.append(item)
         elif val in ('unsatisfied', 'N/A'):
-            bad.append(label)
+            bad.append(item)
 
     # 명료성 통합 (single_focus도 점수 신호이므로 통합 대상에 포함)
     judgeable = {k: getattr(c, k) for k in _CLARITY_LABELS if getattr(c, k) != 'N/A'}
     if any(v == 'satisfied' for v in judgeable.values()):
-        good.append('목적 명료성')
+        reasons = [
+            getattr(c, f'{key}_reason')
+            for key, value in judgeable.items()
+            if value == 'satisfied'
+        ]
+        good.append({'label': '목적 명료성', 'reason': ' '.join(reasons)})
     for key, label in _CLARITY_LABELS.items():
         if getattr(c, key) == 'unsatisfied':
-            bad.append(label)
+            bad.append({'label': label, 'reason': getattr(c, f'{key}_reason')})
 
-    good.extend(bonus_earned)
-    bad.extend(bonus_missing)
+    good.extend(
+        {'label': label, 'reason': _bonus_reason(label, True)}
+        for label in bonus_earned
+    )
+    bad.extend(
+        {'label': label, 'reason': _bonus_reason(label, False)}
+        for label in bonus_missing
+    )
 
     return good, bad
 
@@ -257,7 +287,14 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
     score = llm_client.score_issue(repo_name, issue_number, issue_title, issue_body, body_present)
 
     issue_type = score.issue_type
-    logger.info("이슈 유형 분류 결과: %s/%s#%d → %s", github_username, repo_name, issue_number, issue_type)
+    judgment_label = f'{github_username}/{repo_name}#{issue_number} | Issue'
+    llm_client.log_judgment(
+        judgment_label,
+        'issue_type',
+        issue_type,
+        score.issue_type_reason,
+        score.actual_model,
+    )
 
     # 2. 스킵 처리
     if issue_type == 'skip':
@@ -275,6 +312,12 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
         entity.issue_missing = None
         entity.save()
         logger.info("이슈 스킵 처리 완료: %s/%s#%d", github_username, repo_name, issue_number)
+        logger.info(
+            '[LLM 총 비용] %s/%s#%d | Issue 평가(skip) | total=$%.6f '
+            '| 분류·채점=$%.6f | 문장화=$0.000000',
+            github_username, repo_name, issue_number,
+            score.actual_cost, score.actual_cost,
+        )
         return _entity_to_dict(entity, raw_body)
 
     # 3. 보너스 판정 (코드)
@@ -284,12 +327,17 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
 
     f = score.fulfilment
     c = score.clarity
-    logger.info(
-        "LLM 판정 결과 | 충실도 — what=%s, why=%s, verification=%s | "
-        "명료성 — title=%s, match=%s, focus=%s",
-        f.what, f.why, f.verification,
-        c.title_specificity, c.title_body_match, c.single_focus,
-    )
+    for criterion, result, reason in (
+        ('what', f.what, f.what_reason),
+        ('why', f.why, f.why_reason),
+        ('verification', f.verification, f.verification_reason),
+        ('title_specificity', c.title_specificity, c.title_specificity_reason),
+        ('title_body_match', c.title_body_match, c.title_body_match_reason),
+        ('single_focus', c.single_focus, c.single_focus_reason),
+    ):
+        llm_client.log_judgment(
+            judgment_label, criterion, result, reason, score.actual_model
+        )
 
     fulfilment_score = _compute_fulfilment_score(f)
     clarity_score = _compute_clarity_score(c)
@@ -342,13 +390,21 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
     entity.issue_strengths = strengths
     entity.issue_improvements = improvements
     entity.issue_advice = advice
-    entity.issue_missing = bad_items
+    entity.issue_missing = [item['label'] for item in bad_items]
     entity.save()
 
     logger.info(
         "이슈 평가 완료: %s/%s#%d → %s (%.1f점 = 충실도%d + 명료성%d + 보너스%.1f) [%s]",
         github_username, repo_name, issue_number, grade, total,
         fulfilment_score, clarity_score, bonus_score, issue_type,
+    )
+    logger.info(
+        '[LLM 총 비용] %s/%s#%d | Issue 평가 | total=$%.6f '
+        '| 분류·채점=$%.6f | 문장화=$%.6f',
+        github_username, repo_name, issue_number,
+        score.actual_cost + sentences.actual_cost,
+        score.actual_cost,
+        sentences.actual_cost,
     )
     return _entity_to_dict(entity, raw_body)
 

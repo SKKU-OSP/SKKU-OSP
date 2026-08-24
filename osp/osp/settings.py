@@ -267,7 +267,19 @@ CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
 
 SPRING_BACKEND_URL = os.environ.get('SPRING_BACKEND_URL', 'http://localhost:8080')
 COMMIT_CONSISTENCY_MAX_TOKENS = int(
-    os.environ.get('COMMIT_CONSISTENCY_MAX_TOKENS', '30000')
+    os.environ.get('COMMIT_CONSISTENCY_MAX_TOKENS', '60000')
+)
+PR_CONSISTENCY_MAX_ITERATIONS = int(
+    os.environ.get('PR_CONSISTENCY_MAX_ITERATIONS', '7')
+)
+PR_CONSISTENCY_MAX_TOKENS = int(
+    os.environ.get('PR_CONSISTENCY_MAX_TOKENS', '60000')
+)
+PR_COHESION_MAX_ITERATIONS = int(
+    os.environ.get('PR_COHESION_MAX_ITERATIONS', '7')
+)
+PR_COHESION_MAX_TOKENS = int(
+    os.environ.get('PR_COHESION_MAX_TOKENS', '60000')
 )
 COMMIT_FILE_SUMMARY_MAX_TOKENS = int(
     os.environ.get('COMMIT_FILE_SUMMARY_MAX_TOKENS', '6000')

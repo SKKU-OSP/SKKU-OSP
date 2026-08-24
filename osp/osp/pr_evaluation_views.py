@@ -1,5 +1,7 @@
 import logging
+import re
 
+from django.core.cache import cache
 from django.db import connection
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -7,6 +9,25 @@ from rest_framework.views import APIView
 from . import pr_evaluation_service as svc
 
 logger = logging.getLogger(__name__)
+
+_PROGRESS_ID_PATTERN = re.compile(r'^[A-Za-z0-9_-]{8,100}$')
+_PROGRESS_TIMEOUT_SECONDS = 300
+
+
+def _progress_cache_key(progress_id):
+    return f'pr-evaluation-progress:{progress_id}'
+
+
+class PrEvaluationProgressView(APIView):
+    def get(self, request):
+        progress_id = request.GET.get('progressId', '')
+        if not _PROGRESS_ID_PATTERN.fullmatch(progress_id):
+            return JsonResponse(
+                {'status': 'fail', 'message': '올바른 progressId가 필요합니다.'},
+                status=400,
+            )
+        phase = cache.get(_progress_cache_key(progress_id), 'unknown')
+        return JsonResponse({'status': 'success', 'data': {'phase': phase}})
 
 
 class PrCountsView(APIView):
@@ -68,17 +89,36 @@ class PrEvaluationView(APIView):
         github_username = request.data.get('githubUsername')
         repo_name = request.data.get('repoName')
         pr_number = request.data.get('prNumber')
+        progress_id = request.data.get('progressId', '')
         if not github_username or not repo_name or pr_number is None:
             return JsonResponse(
                 {'status': 'fail', 'message': 'githubUsername, repoName, prNumber은 필수입니다.'},
                 status=400,
             )
+        progress_key = (
+            _progress_cache_key(progress_id)
+            if _PROGRESS_ID_PATTERN.fullmatch(progress_id) else None
+        )
+
+        def update_progress(phase):
+            if progress_key:
+                cache.set(progress_key, phase, timeout=_PROGRESS_TIMEOUT_SECONDS)
+
         try:
-            result = svc.evaluate(github_username, repo_name, int(pr_number))
+            update_progress('text_evaluation')
+            result = svc.evaluate(
+                github_username,
+                repo_name,
+                int(pr_number),
+                progress_callback=update_progress,
+            )
+            update_progress('complete')
             return JsonResponse({'status': 'success', 'data': result})
         except ValueError as e:
+            update_progress('error')
             return JsonResponse({'status': 'fail', 'message': str(e)}, status=400)
         except Exception as e:
+            update_progress('error')
             logger.error("PR 평가 실패: %s/%s#%s - %s", github_username, repo_name, pr_number, e)
             msg = str(e) if e.args else ''
             if '429' in msg or 'RESOURCE_EXHAUSTED' in msg:

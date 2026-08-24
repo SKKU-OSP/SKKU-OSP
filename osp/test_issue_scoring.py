@@ -24,13 +24,23 @@ from osp.llm_client import (
 # ── 헬퍼 ──────────────────────────────────────────────────────────
 
 def fulfilment(what='satisfied', why='satisfied', verification='satisfied'):
-    return IssueFulfilmentResult(what=what, why=why, verification=verification)
+    return IssueFulfilmentResult(
+        what=what,
+        what_reason='테스트용 내용 판정 근거',
+        why=why,
+        why_reason='테스트용 배경 판정 근거',
+        verification=verification,
+        verification_reason='테스트용 검증 판정 근거',
+    )
 
 def clarity(title_specificity='satisfied', title_body_match='satisfied', single_focus='N/A'):
     return PrClarityResult(
         title_specificity=title_specificity,
+        title_specificity_reason='테스트용 제목 구체성 판정 근거',
         title_body_match=title_body_match,
+        title_body_match_reason='테스트용 제목 본문 일치 판정 근거',
         single_focus=single_focus,
+        single_focus_reason='테스트용 단일 집중도 판정 근거',
     )
 
 def sep(char='─', width=60):

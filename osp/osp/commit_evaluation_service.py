@@ -55,7 +55,9 @@ _GENERATED_SUFFIXES = (
 )
 _GENERATED_NAMES = {'.ds_store'}
 _MAX_ATOMICITY_FILES = 30
+_MAX_COMPLETE_COMMIT_FILES = 300
 _MERGE_SKIP_REASON = '머지 커밋은 평가 대상이 아닙니다.'
+_FILE_LIMIT_SKIP_REASON = '변경 파일이 300개 이상인 커밋은 평가 대상이 아닙니다.'
 
 
 def _normalize_path(filename: str) -> str:
@@ -98,6 +100,51 @@ def _merge_skip_result(commit: dict, updated_at=None) -> dict:
         'commit_missing': [],
         'updated_at': _isoformat(updated_at),
     }
+
+
+def _file_limit_skip_result(commit: dict, file_count: int, updated_at=None) -> dict:
+    return {
+        **commit,
+        'evaluated': True,
+        'evaluation_status': 'skipped',
+        'is_merge_commit': False,
+        'is_file_limit_exceeded': True,
+        'file_count': file_count,
+        'skip_reason': _FILE_LIMIT_SKIP_REASON,
+        'model_name': None,
+        'commit_score': None,
+        'commit_total_score': None,
+        'commit_max_score': None,
+        'commit_full_max_score': 6,
+        'is_provisional': False,
+        'commit_breakdown': {
+            'evaluation_status': 'skipped',
+            'is_file_limit_exceeded': True,
+            'file_count': file_count,
+            'skip_reason': _FILE_LIMIT_SKIP_REASON,
+        },
+        'commit_strengths': [],
+        'commit_improvements': [],
+        'commit_advice': [],
+        'commit_missing': [],
+        'updated_at': _isoformat(updated_at),
+    }
+
+
+def _save_skipped_evaluation(entity, breakdown: dict) -> None:
+    entity.model_name = None
+    entity.commit_score = None
+    entity.commit_total_score = None
+    entity.message_clarity_score = None
+    entity.consistency_score = None
+    entity.atomicity_score = None
+    entity.convention_score = None
+    entity.commit_breakdown = breakdown
+    entity.commit_strengths = []
+    entity.commit_improvements = []
+    entity.commit_advice = []
+    entity.commit_missing = []
+    entity.save()
 
 
 def _get_commit(github_username: str, repo_name: str, sha: str) -> Optional[dict]:
@@ -331,16 +378,15 @@ def _merge_convention_feedback(
     return strengths, improvements
 
 
-def _to_grade(total: float, max_score: int) -> str:
-    """N/A 축을 분모에서 제외한 뒤 6점 척도로 환산해 등급을 정한다."""
-    normalized = (total / max_score * 6) if max_score else 0
-    if normalized >= 5.0:
+def _to_grade(total: float) -> str:
+    """N/A 여부와 무관하게 커밋의 고정 6점 척도로 등급을 정한다."""
+    if total >= 5.0:
         return 'A+'
-    if normalized >= 3.5:
+    if total >= 3.5:
         return 'A'
-    if normalized >= 2.0:
+    if total >= 2.0:
         return 'B'
-    if normalized >= 1.0:
+    if total >= 1.0:
         return 'C'
     return 'D'
 
@@ -366,17 +412,18 @@ def _evaluate_atomicity(
     headline: str,
     body: str,
     source_files: list[dict],
-) -> tuple[Optional[int], str, str, Optional[str]]:
-    """(점수, 상태, 근거, 실제 모델)을 반환한다."""
+) -> tuple[Optional[int], str, str, Optional[str], float]:
+    """(점수, 상태, 근거, 실제 모델, LLM 비용)을 반환한다."""
     if not source_files:
         return (
             None,
             'N/A',
             '직접 작성한 소스 코드 변경이 없어 원자성을 평가하지 않았습니다.',
             None,
+            0.0,
         )
     if len(source_files) == 1:
-        return 1, 'satisfied', '사람이 작성한 변경 파일이 1개여서 하나의 관심사로 판정했습니다.', None
+        return 1, 'satisfied', '사람이 작성한 변경 파일이 1개여서 하나의 관심사로 판정했습니다.', None, 0.0
     if len(source_files) > _MAX_ATOMICITY_FILES:
         return (
             None,
@@ -384,14 +431,25 @@ def _evaluate_atomicity(
             f'직접 변경한 파일이 {len(source_files)}개로 너무 많아 한 가지 작업에 '
             '집중한 커밋인지 정확히 판단하기 어려워 평가하지 않았습니다.',
             None,
+            0.0,
         )
 
     source_names = [str(file['filename']) for file in source_files]
     result = llm_client.score_commit_atomicity(
         repo_name, sha, headline, body, source_names
     )
+    llm_client.log_judgment(
+        f'{repo_name}@{sha[:8]} | Commit',
+        'atomicity',
+        result.result,
+        result.reason,
+        result.actual_model,
+    )
     score = 1 if result.result == 'satisfied' else 0
-    return score, result.result, result.reason, result.actual_model
+    return (
+        score, result.result, result.reason, result.actual_model,
+        result.actual_cost,
+    )
 
 
 def _build_patch_text(source_files: list[dict]) -> tuple[str, int]:
@@ -420,14 +478,14 @@ def _evaluate_consistency(
     body: str,
     clarity: llm_client.CommitMessageClarityResult,
     source_files: list[dict],
-) -> tuple[Optional[int], str, str, Optional[str], int, int]:
-    """(점수, 상태, 근거, 실제 모델, patch 토큰 수, patch 파일 수)."""
+) -> tuple[Optional[int], str, str, Optional[str], int, int, float]:
+    """(점수, 상태, 근거, 실제 모델, patch 토큰 수, patch 파일 수, LLM 비용)."""
     if clarity.what != 'satisfied':
         return (
             None, 'N/A',
             '커밋 메시지만으로는 무엇을 변경했는지 알기 어려워 실제 코드와의 '
             '일치 여부를 평가하지 않았습니다.',
-            None, 0, 0,
+            None, 0, 0, 0.0,
         )
 
     patch_text, patch_file_count = _build_patch_text(source_files)
@@ -436,7 +494,7 @@ def _evaluate_consistency(
             None, 'N/A',
             '비교할 수 있는 소스 코드 변경 내용이 없어 메시지와 코드의 일치 여부를 '
             '평가하지 않았습니다.',
-            None, 0, 0,
+            None, 0, 0, 0.0,
         )
 
     patch_injection_hits = llm_client.scan_injection(patch_text)
@@ -460,15 +518,23 @@ def _evaluate_consistency(
             None,
             patch_tokens,
             patch_file_count,
+            0.0,
         )
 
     result = llm_client.score_commit_consistency(
         repo_name, sha, headline, body, patch_text
     )
+    llm_client.log_judgment(
+        f'{repo_name}@{sha[:8]} | Commit',
+        'consistency',
+        result.result,
+        result.reason,
+        result.actual_model,
+    )
     scores = {'matched': 2, 'partially_matched': 1, 'mismatched': 0}
     return (
         scores[result.result], result.result, result.reason, result.actual_model,
-        patch_tokens, patch_file_count,
+        patch_tokens, patch_file_count, result.actual_cost,
     )
 
 
@@ -619,6 +685,12 @@ def get_evaluation(github_username: str, repo_name: str, sha: str) -> dict:
                 github_username, repo_name, sha[:7], error,
             )
             files = []
+        if len(files) >= _MAX_COMPLETE_COMMIT_FILES:
+            return _file_limit_skip_result(
+                commit,
+                len(files),
+                updated_at=entity.updated_at,
+            )
         return _entity_to_dict(entity, commit=commit, files=files)
     except GithubCommitAiEvaluation.DoesNotExist:
         return {**commit, 'evaluated': False}
@@ -635,23 +707,12 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
         entity, _ = GithubCommitAiEvaluation.objects.get_or_create(
             github_id=github_username, repo_name=repo_name, sha=sha
         )
-        entity.model_name = None
-        entity.commit_score = None
-        entity.commit_total_score = None
-        entity.message_clarity_score = None
-        entity.consistency_score = None
-        entity.atomicity_score = None
-        entity.convention_score = None
-        entity.commit_breakdown = {
+        breakdown = {
             'evaluation_status': 'skipped',
             'is_merge_commit': True,
             'skip_reason': _MERGE_SKIP_REASON,
         }
-        entity.commit_strengths = []
-        entity.commit_improvements = []
-        entity.commit_advice = []
-        entity.commit_missing = []
-        entity.save()
+        _save_skipped_evaluation(entity, breakdown)
         logger.info(
             '머지 커밋 평가 제외: %s/%s@%s',
             github_username, repo_name, sha[:7],
@@ -667,6 +728,26 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
     headline = sanitize_text(raw_headline, '커밋 메시지 제목')
     body = sanitize_text(raw_body, '커밋 메시지 본문')
     files = _fetch_commit_files(github_username, repo_name, sha)
+    if len(files) >= _MAX_COMPLETE_COMMIT_FILES:
+        entity, _ = GithubCommitAiEvaluation.objects.get_or_create(
+            github_id=github_username, repo_name=repo_name, sha=sha
+        )
+        breakdown = {
+            'evaluation_status': 'skipped',
+            'is_file_limit_exceeded': True,
+            'file_count': len(files),
+            'skip_reason': _FILE_LIMIT_SKIP_REASON,
+        }
+        _save_skipped_evaluation(entity, breakdown)
+        logger.info(
+            '변경 파일 300개 이상 커밋 평가 제외: %s/%s@%s',
+            github_username, repo_name, sha[:7],
+        )
+        return _file_limit_skip_result(
+            commit,
+            len(files),
+            updated_at=entity.updated_at,
+        )
     generated_files, source_files = _split_generated_files(files)
     raw_source_names = [str(file['filename']) for file in source_files]
     file_injection_hits = llm_client.scan_injection('\n'.join(raw_source_names))
@@ -687,13 +768,32 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
     message_result = llm_client.score_commit_message(
         repo_name, sha, headline, body
     )
+    message_clarity = message_result.message_clarity
+    llm_client.log_judgment(
+        f'{github_username}/{repo_name}@{sha[:8]} | Commit',
+        'message_what',
+        message_clarity.what,
+        message_clarity.what_reason,
+        message_result.actual_model,
+    )
+    llm_client.log_judgment(
+        f'{github_username}/{repo_name}@{sha[:8]} | Commit',
+        'message_why',
+        message_clarity.why,
+        message_clarity.why_reason,
+        message_result.actual_model,
+    )
     message_clarity_score = _compute_message_clarity_score(
-        message_result.message_clarity
+        message_clarity
     )
 
-    atomicity_score, atomicity_status, atomicity_reason, atomicity_model = _evaluate_atomicity(
-        repo_name, sha, headline, body, scoring_source_files
-    )
+    (
+        atomicity_score,
+        atomicity_status,
+        atomicity_reason,
+        atomicity_model,
+        atomicity_cost,
+    ) = _evaluate_atomicity(repo_name, sha, headline, body, scoring_source_files)
 
     (
         consistency_score,
@@ -702,6 +802,7 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
         consistency_model,
         consistency_patch_tokens,
         consistency_patch_file_count,
+        consistency_cost,
     ) = _evaluate_consistency(
         repo_name,
         sha,
@@ -717,9 +818,7 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
         + (atomicity_score or 0)
         + (consistency_score or 0)
     )
-    max_score = 6 - (1 if atomicity_score is None else 0) - (
-        2 if consistency_score is None else 0
-    )
+    max_score = 6
     good_items, bad_items = _build_sentence_inputs(
         message_result.message_clarity,
         atomicity_status,
@@ -730,6 +829,12 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
     sentences = llm_client.write_commit_sentences(
         repo_name, sha, headline, body, source_names, good_items, bad_items
     )
+    total_llm_cost = sum((
+        message_result.actual_cost,
+        atomicity_cost,
+        consistency_cost,
+        sentences.actual_cost,
+    ))
     # 컨벤션은 판정과 안내가 모두 기계적이므로 LLM 문장화 결과에 직접 삽입한다.
     strengths, improvements = _merge_convention_feedback(
         sentences, convention_score, convention_reason
@@ -745,7 +850,7 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
         github_id=github_username, repo_name=repo_name, sha=sha
     )
     entity.model_name = ', '.join(scoring_models)
-    entity.commit_score = _to_grade(total, max_score)
+    entity.commit_score = _to_grade(total)
     entity.commit_total_score = total
     entity.message_clarity_score = message_clarity_score
     entity.consistency_score = consistency_score
@@ -789,6 +894,18 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
         'N/A' if consistency_score is None else consistency_score,
         'N/A' if atomicity_score is None else atomicity_score,
         convention_score,
+    )
+    logger.info(
+        '[LLM 총 비용] %s/%s@%s | Commit 평가 | total=$%.6f '
+        '| 메시지=$%.6f | 원자성=$%.6f | 정합성=$%.6f | 문장화=$%.6f',
+        github_username,
+        repo_name,
+        sha[:7],
+        total_llm_cost,
+        message_result.actual_cost,
+        atomicity_cost,
+        consistency_cost,
+        sentences.actual_cost,
     )
     return _entity_to_dict(
         entity,
@@ -850,17 +967,18 @@ def _entity_to_dict(
 ) -> dict:
     breakdown = entity.commit_breakdown or {}
     is_provisional = 'consistency_status' not in breakdown
-    consistency_score = entity.consistency_score
-    max_score = 6 - (1 if entity.atomicity_score is None else 0)
-    if consistency_score is None:
-        max_score -= 2
-    if is_provisional:
-        max_score = 3 if entity.atomicity_score is None else 4
+    max_score = 6
+    display_grade = (
+        _to_grade(entity.commit_total_score)
+        if entity.commit_total_score is not None
+        else entity.commit_score
+    )
     result = {
         'evaluated': True,
         'sha': entity.sha,
         'model_name': entity.model_name,
-        'commit_score': entity.commit_score,
+        # 과거 N/A 축을 분모에서 제외해 저장한 등급도 고정 6점 기준으로 보정한다.
+        'commit_score': display_grade,
         'commit_total_score': entity.commit_total_score,
         'commit_max_score': max_score,
         'commit_full_max_score': 6,

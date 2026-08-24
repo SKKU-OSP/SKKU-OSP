@@ -391,9 +391,12 @@ function PrTab({ repos, loading, errorOccur }) {
 
   const [selectedPr, setSelectedPr] = useState(null);
   const [evalLoading, setEvalLoading] = useState(false);
+  const [evalPhase, setEvalPhase] = useState(null);
   const [evalData, setEvalData] = useState(null);
   const [evalError, setEvalError] = useState(null);
   const [prBodyOpen, setPrBodyOpen] = useState(false);
+  const [agentDetailsOpen, setAgentDetailsOpen] = useState(false);
+  const [cohesionAgentDetailsOpen, setCohesionAgentDetailsOpen] = useState(false);
   const [prBody, setPrBody] = useState(null);
 
   const fetchPrList = async (repo) => {
@@ -446,19 +449,45 @@ function PrTab({ repos, loading, errorOccur }) {
 
   const evaluatePr = async (pr) => {
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
+    const progressId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID().replaceAll('-', '')
+      : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    let progressTimer = null;
     setEvalLoading(true);
+    setEvalPhase('text_evaluation');
     setEvalError(null);
+    setAgentDetailsOpen(false);
+    setCohesionAgentDetailsOpen(false);
     try {
+      progressTimer = window.setInterval(async () => {
+        try {
+          const progressRes = await axiosInstance.get(
+            `/v2/ai-evaluation/pr-progress?progressId=${encodeURIComponent(progressId)}`,
+            getAuthConfig()
+          );
+          const phase = progressRes.data?.data?.phase;
+          if (phase && phase !== 'unknown') setEvalPhase(phase);
+        } catch {
+          // 진행 상태 조회 실패가 실제 평가 요청을 방해하지 않도록 무시한다.
+        }
+      }, 2000);
       const res = await axiosInstance.post(
         '/v2/ai-evaluation/pr',
-        { githubUsername, repoName: selectedRepo.repo_name, prNumber: pr.pr_number },
-        { ...getAuthConfig(), timeout: 115000 }
+        {
+          githubUsername,
+          repoName: selectedRepo.repo_name,
+          prNumber: pr.pr_number,
+          progressId,
+        },
+        { ...getAuthConfig(), timeout: 240000 }
       );
       if (res.data.status === 'success') setEvalData(res.data.data);
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
       setEvalError(error.response?.data?.message || 'AI 평가 요청에 실패했습니다.');
     } finally {
+      if (progressTimer) window.clearInterval(progressTimer);
+      setEvalPhase(null);
       setEvalLoading(false);
     }
   };
@@ -468,6 +497,8 @@ function PrTab({ repos, loading, errorOccur }) {
     setEvalData(null);
     setEvalError(null);
     setPrBodyOpen(false);
+    setAgentDetailsOpen(false);
+    setCohesionAgentDetailsOpen(false);
     setPrBody(undefined);
     await fetchExistingEval(pr);
   };
@@ -598,7 +629,19 @@ function PrTab({ repos, loading, errorOccur }) {
               {evalLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
-                  <p className="mt-3 text-muted">AI가 PR을 분석 중입니다...</p>
+                  <p className="mt-3 mb-2 font-weight-bold">PR 평가를 진행하고 있습니다</p>
+                  {evalPhase === 'consistency_agent' && (
+                    <p className="pr-agent-loading-status">
+                      <span /> 정합성 검증 에이전트가 커밋을 확인하고 있습니다.<br />
+                      코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
+                    </p>
+                  )}
+                  {evalPhase === 'cohesion_agent' && (
+                    <p className="pr-agent-loading-status">
+                      <span /> 응집성 검증 에이전트가 커밋들의 관련성을 확인하고 있습니다.<br />
+                      애매한 커밋의 코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
+                    </p>
+                  )}
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
@@ -612,25 +655,36 @@ function PrTab({ repos, loading, errorOccur }) {
                           <h6 className="mb-1 font-weight-bold">PR Quality Score</h6>
                           <p className="mb-0 text-muted small">
                             {evalData.pr_total_score != null
-                              ? `${evalData.pr_total_score} / 6점`
-                              : '충실도 (0~3) + 명료성 (0~1) + 보너스 (0~2) = 최대 6점'}
+                              ? `${evalData.pr_total_score} / ${evalData.pr_breakdown?.max_score ?? 6}점`
+                              : '충실도 (0~3) + 명료성 (0~1) + 보너스 (0~2) + 변경 정합성 (0~2) + 응집성 (0~1)'}
                           </p>
                         </div>
                       </div>
                       {evalData.pr_breakdown && (
-                        <div className="d-flex" style={{ gap: '16px', alignItems: 'flex-start', borderTop: '1px solid #dee2e6', paddingTop: '0.75rem' }}>
-                          <div className="criteria-scores" style={{ flex: 1, borderTop: 'none', paddingTop: 0 }}>
+                        <div style={{ borderTop: '1px solid #dee2e6', paddingTop: '0.75rem' }}>
+                          <div className="d-flex" style={{ gap: '16px', alignItems: 'flex-start' }}>
+                            <div className="criteria-scores" style={{ flex: 1, minWidth: 0, borderTop: 'none', paddingTop: 0 }}>
                             {[
                               { label: '설명 충실도', score: evalData.pr_breakdown.fulfilment ?? 0, max: 3 },
                               { label: '목적 명료성', score: evalData.pr_breakdown.clarity ?? 0, max: 1 },
+                              {
+                                label: '변경 정합성',
+                                score: evalData.pr_breakdown.consistency,
+                                max: 2,
+                              },
+                              {
+                                label: 'PR 응집성',
+                                score: evalData.pr_breakdown.cohesion,
+                                max: 1,
+                              },
                               { label: '보너스',     score: evalData.pr_breakdown.bonus ?? 0,      max: 2 },
                             ].map(({ label, score, max }) => (
                               <div key={label} className="criteria-row">
                                 <span className="criteria-label">{label}</span>
                                 <div className="criteria-bar-wrap">
-                                  <div className="criteria-bar" style={{ width: `${(score / max) * 100}%` }} />
+                                  <div className="criteria-bar" style={{ width: `${score == null ? 0 : (score / max) * 100}%` }} />
                                 </div>
-                                <span className="criteria-score">{score} / {max}</span>
+                                <span className="criteria-score">{score == null ? 'N/A' : score} / {max}</span>
                               </div>
                             ))}
                             <div className="bonus-checklist">
@@ -645,13 +699,230 @@ function PrTab({ repos, loading, errorOccur }) {
                               })}
                             </div>
                           </div>
-                          <div style={{ flexShrink: 0, marginTop: '-8px' }}>
-                            <RadarChart axes={[
-                              { label: '충실도', value: evalData.pr_breakdown.fulfilment ?? 0, max: 3 },
-                              { label: '명료성', value: evalData.pr_breakdown.clarity ?? 0, max: 1 },
-                              { label: '보너스', value: evalData.pr_breakdown.bonus ?? 0, max: 2 },
-                            ]} size={130} />
+                            <div style={{ flexShrink: 0, marginTop: '-8px' }}>
+                              <RadarChart axes={[
+                                { label: '충실도', value: evalData.pr_breakdown.fulfilment ?? 0, max: 3 },
+                                { label: '명료성', value: evalData.pr_breakdown.clarity ?? 0, max: 1 },
+                                { label: '정합성', value: evalData.pr_breakdown.consistency ?? 0, max: 2 },
+                                { label: '응집성', value: evalData.pr_breakdown.cohesion ?? 0, max: 1 },
+                                { label: '보너스', value: evalData.pr_breakdown.bonus ?? 0, max: 2 },
+                              ]} size={130} />
+                            </div>
                           </div>
+                          {evalData.pr_breakdown.consistency_reason && (
+                            <div className="pr-consistency-result mt-3">
+                              <div className="pr-consistency-result-title">변경 정합성 평가 결과</div>
+                              {(() => {
+                                const status = evalData.pr_breakdown.consistency_status;
+                                const statusMeta = {
+                                  matched: { icon: '✓', label: '설명과 실제 변경이 일치합니다', className: 'matched' },
+                                  partially_matched: { icon: '△', label: '설명과 실제 변경이 일부 일치합니다', className: 'partial' },
+                                  mismatched: { icon: '!', label: '설명과 실제 변경이 일치하지 않습니다', className: 'mismatched' },
+                                  'N/A': { icon: '−', label: '변경 정합성을 평가하지 않았습니다', className: 'na' },
+                                }[status];
+                                return statusMeta ? (
+                                  <div className={`pr-consistency-verdict ${statusMeta.className}`}>
+                                    {statusMeta.icon} {statusMeta.label}
+                                  </div>
+                                ) : null;
+                              })()}
+                              <div className="pr-consistency-result-text">
+                                {evalData.pr_breakdown.consistency_reason}
+                              </div>
+                              {Array.isArray(evalData.pr_breakdown.consistency_evidence)
+                                && evalData.pr_breakdown.consistency_evidence.length > 0 && (
+                                <div className="pr-consistency-evidence">
+                                  <div className="pr-consistency-evidence-title">확인한 주요 변경</div>
+                                  <ul>
+                                    {evalData.pr_breakdown.consistency_evidence.map((item, index) => (
+                                      <li key={`${index}-${item}`}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {Array.isArray(evalData.pr_breakdown.consistency_commits)
+                            && evalData.pr_breakdown.consistency_commits.some(
+                              (commit) => commit.status !== 'not_selected',
+                            ) && (
+                            <div className="pr-agent-details mt-3 pt-2" style={{ borderTop: '1px dashed #d8dee6' }}>
+                              <button
+                                type="button"
+                                className="pr-agent-toggle"
+                                onClick={() => setAgentDetailsOpen((open) => !open)}
+                              >
+                                <span className="pr-agent-toggle-heading">
+                                  <span className="pr-agent-toggle-icon"><BsCodeSlash /></span>
+                                  <span>
+                                    <strong>정합성 검증 에이전트</strong>
+                                    <small>
+                                      {evalData.pr_breakdown.consistency_commits.filter((commit) => commit.status === 'success').length}
+                                      /
+                                      {evalData.pr_breakdown.consistency_commits.length}
+                                      개 커밋을 판정에 사용
+                                    </small>
+                                  </span>
+                                </span>
+                                <span className="pr-agent-toggle-arrow">{agentDetailsOpen ? '▲' : '▼'}</span>
+                              </button>
+                              {agentDetailsOpen && (
+                                <div className="pr-agent-commit-list">
+                                  {evalData.pr_breakdown.consistency_commits
+                                    .filter((commit) => commit.status !== 'not_selected')
+                                    .map((commit) => {
+                                      const statusMeta = {
+                                        token_limit: { icon: '⚠', label: '토큰 예산 초과', className: 'warning' },
+                                        unavailable: { icon: '⚠', label: '변경 내용 확인 불가', className: 'warning' },
+                                        error: { icon: '!', label: '조회 실패', className: 'error' },
+                                      }[commit.status] || { icon: '○', label: commit.status, className: 'neutral' };
+                                      return (
+                                        <div key={commit.sha} className="pr-agent-commit">
+                                          <div className="pr-agent-commit-header">
+                                            <div className="pr-agent-commit-title" style={{ minWidth: 0 }}>
+                                              <span className="pr-agent-sha">
+                                                {String(commit.sha).slice(0, 7)}
+                                              </span>
+                                              <span>{commit.message_headline || '(커밋 메시지 없음)'}</span>
+                                            </div>
+                                            {commit.status !== 'success' && (
+                                              <span className={`pr-agent-status ${statusMeta.className}`}>
+                                                {statusMeta.icon} {statusMeta.label}
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="pr-agent-commit-meta">
+                                            <span>파일 {commit.file_count ?? '?'}개</span>
+                                            <span className="additions">+{commit.additions ?? 0}</span>
+                                            <span className="deletions">-{commit.deletions ?? 0}</span>
+                                          </div>
+                                          {commit.summary && (
+                                            <div className="pr-agent-commit-summary">
+                                              <span>변경 요약</span>
+                                              <p>{commit.summary}</p>
+                                            </div>
+                                          )}
+                                          {!commit.summary && commit.status !== 'success' && commit.status_reason && (
+                                            <div className="pr-agent-commit-summary unavailable">
+                                              <span>확인 결과</span>
+                                              <p>{commit.status_reason}</p>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {evalData.pr_breakdown.cohesion_reason && (
+                            <div className="pr-consistency-result pr-cohesion-result mt-3">
+                              <div className="pr-consistency-result-title">PR 응집성 평가 결과</div>
+                              {(() => {
+                                const status = evalData.pr_breakdown.cohesion_status;
+                                const statusMeta = {
+                                  cohesive: { icon: '✓', label: '커밋들이 하나의 주제로 모여 있습니다', className: 'matched' },
+                                  scattered: { icon: '!', label: '서로 무관한 여러 작업이 섞여 있습니다', className: 'mismatched' },
+                                  'N/A': { icon: '−', label: 'PR 응집성을 평가하지 않았습니다', className: 'na' },
+                                }[status];
+                                return statusMeta ? (
+                                  <div className={`pr-consistency-verdict ${statusMeta.className}`}>
+                                    {statusMeta.icon} {statusMeta.label}
+                                  </div>
+                                ) : null;
+                              })()}
+                              <div className="pr-consistency-result-text">
+                                {evalData.pr_breakdown.cohesion_reason}
+                              </div>
+                              {Array.isArray(evalData.pr_breakdown.cohesion_evidence)
+                                && evalData.pr_breakdown.cohesion_evidence.length > 0 && (
+                                <div className="pr-consistency-evidence pr-cohesion-evidence">
+                                  <div className="pr-consistency-evidence-title">판정 근거</div>
+                                  <ul>
+                                    {evalData.pr_breakdown.cohesion_evidence.map((item, index) => (
+                                      <li key={`${index}-${item}`}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {Array.isArray(evalData.pr_breakdown.cohesion_commits)
+                            && evalData.pr_breakdown.cohesion_commits.length > 0 && (
+                            <div className="pr-agent-details mt-3 pt-2" style={{ borderTop: '1px dashed #d8dee6' }}>
+                              <button
+                                type="button"
+                                className="pr-agent-toggle"
+                                onClick={() => setCohesionAgentDetailsOpen((open) => !open)}
+                              >
+                                <span className="pr-agent-toggle-heading">
+                                  <span className="pr-agent-toggle-icon"><BsCodeSlash /></span>
+                                  <span>
+                                    <strong>응집성 검증 에이전트</strong>
+                                    <small>
+                                      {evalData.pr_breakdown.cohesion_commits.filter((commit) => commit.status === 'success').length}
+                                      /
+                                      {evalData.pr_breakdown.cohesion_commits.length}
+                                      개 중 제목이 애매한 커밋의 diff를 확인
+                                    </small>
+                                  </span>
+                                </span>
+                                <span className="pr-agent-toggle-arrow">{cohesionAgentDetailsOpen ? '▲' : '▼'}</span>
+                              </button>
+                              {cohesionAgentDetailsOpen && (
+                                <div className="pr-agent-commit-list">
+                                  {evalData.pr_breakdown.cohesion_commits.every(
+                                    (commit) => commit.status === 'not_selected',
+                                  ) && (
+                                    <p className="pr-agent-title-only-note">
+                                      모든 커밋 제목이 명확하여 diff를 추가로 확인하지 않고 판정했습니다.
+                                    </p>
+                                  )}
+                                  {evalData.pr_breakdown.cohesion_commits
+                                    .filter((commit) => commit.status !== 'not_selected')
+                                    .map((commit) => {
+                                      const statusMeta = {
+                                        token_limit: { icon: '⚠', label: '토큰 예산 초과', className: 'warning' },
+                                        unavailable: { icon: '⚠', label: '변경 내용 확인 불가', className: 'warning' },
+                                        error: { icon: '!', label: '조회 실패', className: 'error' },
+                                      }[commit.status] || { icon: '○', label: commit.status, className: 'neutral' };
+                                      return (
+                                        <div key={commit.sha} className="pr-agent-commit">
+                                          <div className="pr-agent-commit-header">
+                                            <div className="pr-agent-commit-title" style={{ minWidth: 0 }}>
+                                              <span className="pr-agent-sha">{String(commit.sha).slice(0, 7)}</span>
+                                              <span>{commit.message_headline || '(커밋 메시지 없음)'}</span>
+                                            </div>
+                                            {commit.status !== 'success' && (
+                                              <span className={`pr-agent-status ${statusMeta.className}`}>
+                                                {statusMeta.icon} {statusMeta.label}
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="pr-agent-commit-meta">
+                                            <span>파일 {commit.file_count ?? '?'}개</span>
+                                            <span className="additions">+{commit.additions ?? 0}</span>
+                                            <span className="deletions">-{commit.deletions ?? 0}</span>
+                                          </div>
+                                          {commit.summary && (
+                                            <div className="pr-agent-commit-summary">
+                                              <span>변경 요약</span>
+                                              <p>{commit.summary}</p>
+                                            </div>
+                                          )}
+                                          {!commit.summary && commit.status !== 'success' && commit.status_reason && (
+                                            <div className="pr-agent-commit-summary unavailable">
+                                              <span>확인 결과</span>
+                                              <p>{commit.status_reason}</p>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1474,12 +1745,16 @@ function CommitTab({ repos, loading, errorOccur }) {
               {evalLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
-                  <p className="mt-3 text-muted">AI가 커밋과 변경 내용을 분석 중입니다...</p>
+                  <p className="mt-3 mb-2 font-weight-bold">커밋 평가를 진행하고 있습니다</p>
+                  <p className="pr-agent-loading-status">
+                    <span /> 커밋 메시지와 코드 변경 내용을 분석하고 있습니다.<br />
+                    코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
+                  </p>
                 </div>
               ) : evalData?.evaluation_status === 'skipped' ? (
                 <div className="alert alert-secondary mt-4 mb-0 text-center py-4" role="status">
                   <BsGit className="mr-2" />
-                  <strong>{evalData.skip_reason || '머지 커밋은 평가 대상이 아닙니다.'}</strong>
+                  <strong>{evalData.skip_reason || '이 커밋은 평가 대상이 아닙니다.'}</strong>
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
@@ -1495,7 +1770,7 @@ function CommitTab({ repos, loading, errorOccur }) {
                           </h6>
                           <p className="mb-0 text-muted small">
                             {evalData.commit_total_score != null
-                              ? `${evalData.commit_total_score}${evalData.commit_max_score != null ? ` / ${evalData.commit_max_score}점` : '점'}`
+                              ? `${evalData.commit_total_score} / ${evalData.commit_full_max_score ?? 6}점`
                               : '커밋 메시지와 변경 내용의 품질을 종합한 점수입니다.'}
                           </p>
                           {evalData.is_provisional && (

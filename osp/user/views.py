@@ -9,6 +9,7 @@ import os
 from django.contrib.auth.models import User
 from django.db import DatabaseError, transaction
 from django.db.models import Q, Avg, Subquery, Sum
+from django.db.models.functions import Coalesce
 
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -901,8 +902,11 @@ class UserDashboardView(APIView):
                 try:
                     # GithubRepoStats에 커밋 라인 수 데이터가 없어 따로 계산
                     commit_data = GithubRepoCommits.objects.filter(
-                        github_id=owner_id, repo_name=repo_name).aggregate(
-                        commit_lines=Sum('additions')+Sum('deletions')
+                        owner_name=owner_id, repo_name=repo_name).aggregate(
+                        commit_lines=(
+                            Coalesce(Sum('additions'), 0)
+                            + Coalesce(Sum('deletions'), 0)
+                        )
                     )
                     repo_stat = GithubRepoStats.objects.get(
                         github_id=owner_id, repo_name=repo_name)
