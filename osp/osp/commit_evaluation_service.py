@@ -512,8 +512,8 @@ def _evaluate_consistency(
         return (
             None,
             'N/A',
-            f'코드 변경 내용이 너무 커서 메시지와 코드의 일치 여부를 정확히 평가하기 '
-            f'어렵습니다({patch_tokens:,}/{token_limit:,}토큰). 커밋을 더 작은 단위로 '
+            '코드 변경 내용이 너무 커서 메시지와 코드의 일치 여부를 정확히 평가하기 '
+            '어렵습니다. 커밋을 더 작은 단위로 '
             '나누면 평가받을 수 있습니다.',
             None,
             patch_tokens,

@@ -132,6 +132,32 @@ class PrCohesionAgentTest(SimpleTestCase):
         self.assertEqual(result['commits'][1]['status'], 'success')
         self.assertEqual(fetch.call_count, 2)
 
+    @override_settings(PR_COHESION_MAX_ITERATIONS=2, PR_COHESION_MAX_TOKENS=1000)
+    @patch.object(llm_client, 'score_pr_cohesion')
+    @patch.object(llm_client, 'count_text_tokens', return_value=1200)
+    @patch.object(service, 'fetch_commit_diff', return_value=FILES)
+    @patch.object(llm_client, 'choose_pr_cohesion_action')
+    @patch.object(service, 'list_pr_commits', return_value=COMMITS[:1])
+    def test_all_required_commits_over_budget_returns_zero_point_na(
+        self, _list, choose, fetch, _tokens, score
+    ):
+        choose.side_effect = [
+            decision('fetch_commit_diff', 'a' * 40),
+            decision('finish'),
+        ]
+
+        result = service._run_pr_cohesion_agent(
+            'octocat', 'repo', 1, 'feat: login', 'body'
+        )
+
+        self.assertEqual(result['score'], 0)
+        self.assertEqual(result['status'], 'N/A')
+        self.assertIn('평가 불가로 0점', result['reason'])
+        self.assertEqual(result['stop_reason'], 'all_commits_unavailable')
+        self.assertEqual(choose.call_count, 2)
+        fetch.assert_called_once()
+        score.assert_not_called()
+
     @patch.object(llm_client, 'score_pr_cohesion')
     @patch.object(llm_client, 'count_text_tokens', return_value=20)
     @patch.object(service, 'fetch_commit_diff')
@@ -241,3 +267,4 @@ class PrCohesionAgentTest(SimpleTestCase):
         self.assertEqual(service._to_grade(3.0, 9), 'B')
         self.assertEqual(service._to_grade(1.5, 9), 'C')
         self.assertEqual(service._to_grade(1.0, 9), 'D')
+        self.assertEqual(service._to_grade(6.0, 9), 'A')

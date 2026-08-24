@@ -152,7 +152,7 @@ def _compute_clarity_score(c: llm_client.PrClarityResult) -> int:
 
 
 def _to_grade(total: float, max_score: float = 9.0) -> str:
-    """9점 등급컷을 적용한다. N/A 축은 9점 척도로 비례 환산한다."""
+    """9점 등급컷을 적용한다. 실제 PR 평가는 항상 고정 9점 만점을 사용한다."""
     normalized = total / max_score * 9 if max_score else 0
     if normalized >= 7.5:
         return 'A+'
@@ -336,6 +336,11 @@ def _run_pr_consistency_agent(
             if examined:
                 stop_reason = 'agent_finished'
                 break
+            if len(seen) >= len(commit_by_sha):
+                # 모든 커밋을 이미 시도했지만 diff를 하나도 담지 못했다면
+                # 모델에게 같은 선택을 반복해서 요구해도 새로 확인할 대상이 없다.
+                stop_reason = 'all_commits_unavailable'
+                break
             observations.append(_agent_observation(
                 '', 'error', '아직 확인한 diff가 없습니다. 커밋 하나 이상을 선택해야 합니다.'
             ))
@@ -391,8 +396,8 @@ def _run_pr_consistency_agent(
                 remaining_tokens = token_limit - cumulative_tokens
                 observations.append(_agent_observation(
                     sha, 'token_limit',
-                    f'이 diff는 남은 토큰 예산({remaining_tokens:,}토큰)을 '
-                    f'초과해 확인하지 못했습니다. 더 작은 커밋을 선택하세요.'
+                    '코드 변경량이 너무 커서 이 커밋의 diff를 확인하지 못했습니다. '
+                    '더 작은 커밋을 선택하세요.'
                 ))
                 logger.info(
                     '[PR 정합성 에이전트] run_id=%s 커밋 토큰 예산 초과로 스킵 '
@@ -430,13 +435,14 @@ def _run_pr_consistency_agent(
     if not examined:
         if any(item.get('status') == 'token_limit' for item in observations):
             reason = (
-                'PR의 커밋들이 모두 토큰 예산을 초과해 변경 정합성을 평가하지 '
-                '못했습니다. 커밋을 더 작은 단위로 나누면 평가받을 수 있습니다.'
+                'PR의 커밋들이 모두 정합성을 평가하기에 너무 커서 실제 코드 변경을 '
+                '확인하지 못했습니다. 평가 불가로 0점이 '
+                '반영되었습니다. 커밋을 더 작은 단위로 나누면 평가받을 수 있습니다.'
             )
         else:
             reason = '확인 가능한 커밋 코드 변경을 가져오지 못해 변경 정합성을 평가하지 않았습니다.'
         return {
-            'score': None, 'status': 'N/A', 'reason': reason, 'run_id': run_id,
+            'score': 0, 'status': 'N/A', 'reason': reason, 'run_id': run_id,
             'examined_commits': examined, 'attempted_commits': attempted,
             'patch_tokens': cumulative_tokens, 'stop_reason': stop_reason,
             'actual_models': list(dict.fromkeys(actual_models)),
@@ -565,7 +571,14 @@ def _run_pr_cohesion_agent(
 
         # 응집성은 제목만으로 충분하면 diff 조회 0회 finish가 정상이다.
         if decision.action == 'finish':
-            stop_reason = 'agent_finished'
+            if (
+                not examined
+                and len(seen) >= len(commit_by_sha)
+                and any(item.get('status') == 'token_limit' for item in observations)
+            ):
+                stop_reason = 'all_commits_unavailable'
+            else:
+                stop_reason = 'agent_finished'
             break
 
         sha = (decision.sha or '').strip()
@@ -616,8 +629,8 @@ def _run_pr_cohesion_agent(
                 remaining_tokens = token_limit - cumulative_tokens
                 observations.append(_agent_observation(
                     sha, 'token_limit',
-                    f'이 diff는 남은 토큰 예산({remaining_tokens:,}토큰)을 초과해 '
-                    '확인하지 못했습니다. 더 작은 커밋을 선택하세요.'
+                    '코드 변경량이 너무 커서 이 커밋의 diff를 확인하지 못했습니다. '
+                    '더 작은 커밋을 선택하세요.'
                 ))
                 logger.info(
                     '[PR 응집성 에이전트] run_id=%s 커밋 토큰 예산 초과로 스킵 '
@@ -645,6 +658,26 @@ def _run_pr_cohesion_agent(
                 '[PR 응집성 에이전트] run_id=%s fetch_commit_diff 실패 sha=%s: %s',
                 run_id, sha, error,
             )
+
+    if (
+        not examined
+        and any(item.get('status') == 'token_limit' for item in observations)
+    ):
+        reason = (
+            '응집성 판정에 필요해 선택한 커밋들의 변경량이 모두 너무 커서 실제 '
+            '변경을 확인하지 못했습니다. '
+            '평가 불가로 0점이 반영되었습니다. 커밋을 더 작은 단위로 나누면 '
+            '평가받을 수 있습니다.'
+        )
+        return {
+            'score': 0, 'status': 'N/A', 'reason': reason, 'evidence': [],
+            'run_id': run_id, 'examined_commits': examined,
+            'attempted_commits': attempted, 'patch_tokens': cumulative_tokens,
+            'stop_reason': stop_reason,
+            'actual_models': list(dict.fromkeys(actual_models)),
+            'commits': _build_commit_trace(commits, observations),
+            'llm_cost': llm_cost,
+        }
 
     final = llm_client.score_pr_cohesion(
         repo_name, pr_number, pr_title, pr_body, commits, observations
@@ -710,6 +743,7 @@ def _build_sentence_inputs(
     bonus_earned: list,
     bonus_missing: list,
     consistency_status: Optional[str] = None,
+    consistency_score: Optional[int] = None,
     consistency_reason: str = '',
     cohesion_status: Optional[str] = None,
     cohesion_reason: str = '',
@@ -753,7 +787,9 @@ def _build_sentence_inputs(
         'reason': _BONUS_REASONS[label][False],
     } for label in bonus_missing)
 
-    # 정합성 N/A는 좋고 나쁨을 판정한 결과가 아니므로 문장화에서 제외한다.
+    # 정합성 N/A가 감점되지 않는 경우에는 문장화에서 제외한다. 다만 변경량
+    # 초과 등으로 평가 불가 0점이 반영된 경우에는 그 사유와 개선 방법을
+    # 사용자에게 안내할 수 있도록 보완 항목으로 전달한다.
     if consistency_status == 'matched':
         good.append({'label': '변경 정합성', 'reason': consistency_reason})
     elif consistency_status == 'partially_matched':
@@ -764,6 +800,11 @@ def _build_sentence_inputs(
     elif consistency_status == 'mismatched':
         bad.append({
             'label': '변경 정합성(설명과 실제 변경이 일치하지 않음)',
+            'reason': consistency_reason,
+        })
+    elif consistency_status == 'N/A' and consistency_score == 0:
+        bad.append({
+            'label': '변경 정합성(변경량 초과로 평가하지 못함)',
             'reason': consistency_reason,
         })
 
@@ -877,11 +918,8 @@ def evaluate(
 
     consistency_score = consistency['score']
     cohesion_score = cohesion['score']
-    max_score = (
-        6
-        + (2 if consistency_score is not None else 0)
-        + (1 if cohesion_score is not None else 0)
-    )
+    # 평가 불가 축도 0점으로 반영하고 PR은 항상 동일한 9점 척도를 사용한다.
+    max_score = 9
     total = round(
         fulfilment_score + clarity_score + bonus_score
         + (consistency_score or 0) + (cohesion_score or 0), 1
@@ -892,6 +930,7 @@ def evaluate(
     good_items, bad_items = _build_sentence_inputs(
         score.fulfilment, score.clarity, bonus_earned, bonus_missing,
         consistency_status=consistency['status'],
+        consistency_score=consistency['score'],
         consistency_reason=consistency['reason'],
         cohesion_status=cohesion['status'],
         cohesion_reason=cohesion['reason'],

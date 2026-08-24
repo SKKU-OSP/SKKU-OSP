@@ -104,6 +104,14 @@ class PrConsistencyAgentTest(SimpleTestCase):
         na_good, na_bad = service._build_sentence_inputs(
             fulfilment, clarity, [], [], consistency_status='N/A'
         )
+        unavailable_good, unavailable_bad = service._build_sentence_inputs(
+            fulfilment, clarity, [], [], consistency_status='N/A',
+            consistency_score=0,
+            consistency_reason=(
+                'PR의 커밋 변경량이 너무 커 평가하지 못했습니다. '
+                '커밋을 더 작은 단위로 나누어 주세요.'
+            ),
+        )
 
         self.assertTrue(any(item['label'] == '변경 정합성' for item in matched_good))
         self.assertEqual(
@@ -118,6 +126,12 @@ class PrConsistencyAgentTest(SimpleTestCase):
         self.assertTrue(any('변경 정합성' in item['label'] for item in partial_bad))
         self.assertFalse(any('변경 정합성' in item['label'] for item in partial_good))
         self.assertFalse(any('변경 정합성' in item['label'] for item in na_good + na_bad))
+        self.assertFalse(any('변경 정합성' in item['label'] for item in unavailable_good))
+        unavailable_item = next(
+            item for item in unavailable_bad if '변경 정합성' in item['label']
+        )
+        self.assertIn('변경량 초과', unavailable_item['label'])
+        self.assertIn('더 작은 단위', unavailable_item['reason'])
 
     @patch.object(llm_client, 'score_pr_consistency')
     @patch.object(llm_client, 'count_text_tokens', return_value=20)
@@ -259,7 +273,7 @@ class PrConsistencyAgentTest(SimpleTestCase):
     @patch.object(service.commit_service, '_fetch_commit_files', return_value=FILES)
     @patch.object(llm_client, 'choose_pr_consistency_action')
     @patch.object(service, 'list_pr_commits', return_value=COMMITS)
-    def test_all_commits_over_budget_returns_na(
+    def test_all_commits_over_budget_returns_zero_point_na(
         self, _list, choose, fetch, _tokens, score
     ):
         choose.side_effect = [
@@ -271,10 +285,35 @@ class PrConsistencyAgentTest(SimpleTestCase):
             'octocat', 'repo', 1, 'feat: login', 'body'
         )
 
-        self.assertIsNone(result['score'])
+        self.assertEqual(result['score'], 0)
         self.assertEqual(result['status'], 'N/A')
-        self.assertIn('모두 토큰 예산을 초과', result['reason'])
+        self.assertIn('평가 불가로 0점', result['reason'])
         self.assertEqual(fetch.call_count, 2)
+        score.assert_not_called()
+
+    @override_settings(PR_CONSISTENCY_MAX_ITERATIONS=7, PR_CONSISTENCY_MAX_TOKENS=1000)
+    @patch.object(llm_client, 'score_pr_consistency')
+    @patch.object(llm_client, 'count_text_tokens', return_value=1200)
+    @patch.object(service.commit_service, '_fetch_commit_files', return_value=FILES)
+    @patch.object(llm_client, 'choose_pr_consistency_action')
+    @patch.object(service, 'list_pr_commits', return_value=COMMITS[:1])
+    def test_finish_stops_when_all_commits_are_unavailable(
+        self, _list, choose, fetch, _tokens, score
+    ):
+        choose.side_effect = [
+            decision('fetch_commit_diff', 'a' * 40),
+            decision('finish'),
+        ]
+
+        result = service._run_pr_consistency_agent(
+            'octocat', 'repo', 1, 'feat: login', 'body'
+        )
+
+        self.assertEqual(result['score'], 0)
+        self.assertEqual(result['status'], 'N/A')
+        self.assertEqual(result['stop_reason'], 'all_commits_unavailable')
+        self.assertEqual(choose.call_count, 2)
+        fetch.assert_called_once()
         score.assert_not_called()
 
     @override_settings(PR_CONSISTENCY_MAX_ITERATIONS=3, PR_CONSISTENCY_MAX_TOKENS=1000)

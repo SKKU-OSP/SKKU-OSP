@@ -655,7 +655,7 @@ function PrTab({ repos, loading, errorOccur }) {
                           <h6 className="mb-1 font-weight-bold">PR Quality Score</h6>
                           <p className="mb-0 text-muted small">
                             {evalData.pr_total_score != null
-                              ? `${evalData.pr_total_score} / ${evalData.pr_breakdown?.max_score ?? 6}점`
+                              ? `${evalData.pr_total_score} / ${evalData.pr_breakdown?.max_score ?? 9}점`
                               : '충실도 (0~3) + 명료성 (0~1) + 보너스 (0~2) + 변경 정합성 (0~2) + 응집성 (0~1)'}
                           </p>
                         </div>
@@ -772,7 +772,7 @@ function PrTab({ repos, loading, errorOccur }) {
                                     .filter((commit) => commit.status !== 'not_selected')
                                     .map((commit) => {
                                       const statusMeta = {
-                                        token_limit: { icon: '⚠', label: '토큰 예산 초과', className: 'warning' },
+                                        token_limit: { icon: '⚠', label: '변경량 초과', className: 'warning' },
                                         unavailable: { icon: '⚠', label: '변경 내용 확인 불가', className: 'warning' },
                                         error: { icon: '!', label: '조회 실패', className: 'error' },
                                       }[commit.status] || { icon: '○', label: commit.status, className: 'neutral' };
@@ -882,7 +882,7 @@ function PrTab({ repos, loading, errorOccur }) {
                                     .filter((commit) => commit.status !== 'not_selected')
                                     .map((commit) => {
                                       const statusMeta = {
-                                        token_limit: { icon: '⚠', label: '토큰 예산 초과', className: 'warning' },
+                                        token_limit: { icon: '⚠', label: '변경량 초과', className: 'warning' },
                                         unavailable: { icon: '⚠', label: '변경 내용 확인 불가', className: 'warning' },
                                         error: { icon: '!', label: '조회 실패', className: 'error' },
                                       }[commit.status] || { icon: '○', label: commit.status, className: 'neutral' };
