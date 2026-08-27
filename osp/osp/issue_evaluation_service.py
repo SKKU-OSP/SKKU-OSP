@@ -258,10 +258,18 @@ def _build_sentence_inputs(
 # ── 스킵 메시지 ───────────────────────────────────────────────────
 
 _SKIP_MESSAGE = (
-    "이 이슈는 버그 리포트나 기능 제안이 아닌 것으로 분류되어 품질 평가 대상이 아닙니다. "
-    "품질 평가를 받으시려면 버그 리포트(재현 가능한 오류 보고) 또는 기능 제안(구체적인 기능 추가 요청) "
-    "형식으로 이슈를 작성해 주세요."
+    '버그 증상이나 원하는 기능을 구체적으로 작성한 뒤 다시 평가해 주세요.'
 )
+
+_SKIP_REASON_FALLBACK = (
+    '구체적인 버그 증상이나 기능 요청을 확인하기 어렵습니다.'
+)
+
+
+def _normalize_skip_reason(reason: Optional[str]) -> str:
+    """LLM 분류 근거를 사용자에게 표시할 수 있는 한 줄 문장으로 정리한다."""
+    normalized = re.sub(r'\s+', ' ', str(reason or '')).strip()
+    return normalized or _SKIP_REASON_FALLBACK
 
 
 # ── 평가 실행 ─────────────────────────────────────────────────────
@@ -305,7 +313,9 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
         entity.model_name = score.actual_model
         entity.issue_score = None
         entity.issue_total_score = None
-        entity.issue_breakdown = None
+        entity.issue_breakdown = {
+            'skip_reason': _normalize_skip_reason(score.issue_type_reason),
+        }
         entity.issue_strengths = None
         entity.issue_improvements = None
         entity.issue_advice = None
@@ -413,10 +423,12 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
 
 def _entity_to_dict(entity: GithubIssueAiEvaluation, issue_body: Optional[str] = None) -> dict:
     if entity.issue_type == 'skip':
+        breakdown = entity.issue_breakdown or {}
         return {
             'evaluated': True,
             'issue_type': 'skip',
             'skip_message': _SKIP_MESSAGE,
+            'skip_reason': _normalize_skip_reason(breakdown.get('skip_reason')),
             'issue_number': entity.issue_number,
             'model_name': entity.model_name,
             'issue_score': None,

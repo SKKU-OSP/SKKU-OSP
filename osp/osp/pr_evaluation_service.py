@@ -1,4 +1,5 @@
 """PR 평가 서비스 — 텍스트 6점 + 정합성 2점 + 응집성 1점."""
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import re
 import uuid
@@ -252,6 +253,7 @@ def _run_pr_consistency_agent(
     pr_number: int,
     pr_title: str,
     pr_body: str,
+    commits: Optional[list[dict]] = None,
 ) -> dict:
     """LLM이 필요한 커밋 diff를 고르는 ReAct 루프를 실행한다."""
     run_id = uuid.uuid4().hex
@@ -262,19 +264,20 @@ def _run_pr_consistency_agent(
         run_id, owner, repo_name, pr_number, max_iterations, token_limit,
     )
 
-    try:
-        commits = list_pr_commits(owner, repo_name, pr_number)
-    except Exception as error:
-        reason = 'PR에 포함된 커밋 목록을 가져오지 못해 변경 정합성을 평가하지 않았습니다.'
-        logger.warning(
-            '[PR 정합성 에이전트] run_id=%s list_pr_commits 실패: %s', run_id, error
-        )
-        return {
-            'score': None, 'status': 'N/A', 'reason': reason, 'run_id': run_id,
-            'examined_commits': [], 'attempted_commits': [], 'patch_tokens': 0,
-            'stop_reason': 'list_pr_commits_failed', 'actual_models': [],
-            'commits': [], 'llm_cost': 0.0,
-        }
+    if commits is None:
+        try:
+            commits = list_pr_commits(owner, repo_name, pr_number)
+        except Exception as error:
+            reason = 'PR에 포함된 커밋 목록을 가져오지 못해 변경 정합성을 평가하지 않았습니다.'
+            logger.warning(
+                '[PR 정합성 에이전트] run_id=%s list_pr_commits 실패: %s', run_id, error
+            )
+            return {
+                'score': None, 'status': 'N/A', 'reason': reason, 'run_id': run_id,
+                'examined_commits': [], 'attempted_commits': [], 'patch_tokens': 0,
+                'stop_reason': 'list_pr_commits_failed', 'actual_models': [],
+                'commits': [], 'llm_cost': 0.0,
+            }
 
     if not commits:
         return {
@@ -487,6 +490,7 @@ def _run_pr_cohesion_agent(
     pr_number: int,
     pr_title: str,
     pr_body: str,
+    commits: Optional[list[dict]] = None,
 ) -> dict:
     """제목이 애매한 커밋만 골라 확인하고 PR의 주제 응집성을 판정한다."""
     run_id = uuid.uuid4().hex
@@ -497,20 +501,21 @@ def _run_pr_cohesion_agent(
         run_id, owner, repo_name, pr_number, max_iterations, token_limit,
     )
 
-    try:
-        commits = list_pr_commits(owner, repo_name, pr_number)
-    except Exception as error:
-        reason = 'PR에 포함된 커밋 목록을 가져오지 못해 응집성을 평가하지 않았습니다.'
-        logger.warning(
-            '[PR 응집성 에이전트] run_id=%s list_pr_commits 실패: %s', run_id, error
-        )
-        return {
-            'score': None, 'status': 'N/A', 'reason': reason, 'evidence': [],
-            'run_id': run_id, 'examined_commits': [], 'attempted_commits': [],
-            'patch_tokens': 0, 'stop_reason': 'list_pr_commits_failed',
-            'actual_models': [], 'commits': [],
-            'llm_cost': 0.0,
-        }
+    if commits is None:
+        try:
+            commits = list_pr_commits(owner, repo_name, pr_number)
+        except Exception as error:
+            reason = 'PR에 포함된 커밋 목록을 가져오지 못해 응집성을 평가하지 않았습니다.'
+            logger.warning(
+                '[PR 응집성 에이전트] run_id=%s list_pr_commits 실패: %s', run_id, error
+            )
+            return {
+                'score': None, 'status': 'N/A', 'reason': reason, 'evidence': [],
+                'run_id': run_id, 'examined_commits': [], 'attempted_commits': [],
+                'patch_tokens': 0, 'stop_reason': 'list_pr_commits_failed',
+                'actual_models': [], 'commits': [],
+                'llm_cost': 0.0,
+            }
 
     if not commits:
         return {
@@ -821,6 +826,46 @@ def _build_sentence_inputs(
 
 # ── 평가 실행 ─────────────────────────────────────────────────────
 
+def _run_pr_agents_parallel(
+    owner: str,
+    repo_name: str,
+    pr_number: int,
+    pr_title: str,
+    pr_body: str,
+) -> tuple[dict, dict]:
+    """독립적인 정합성·응집성 에이전트를 동시에 실행한다."""
+    shared_commits = None
+    try:
+        shared_commits = list_pr_commits(owner, repo_name, pr_number)
+    except Exception as error:
+        # 일시적인 목록 조회 실패라면 각 에이전트가 자체 조회를 한 번 더
+        # 시도하도록 한다. 기존의 독립적인 실패 처리도 그대로 유지된다.
+        logger.warning(
+            '[PR 평가] 공유 커밋 목록 조회 실패 — 에이전트별 재시도: %s',
+            error,
+        )
+
+    agent_args = (owner, repo_name, pr_number, pr_title, pr_body)
+    with ThreadPoolExecutor(
+        max_workers=2,
+        thread_name_prefix='pr-evaluation-agent',
+    ) as executor:
+        consistency_future = executor.submit(
+            _run_pr_consistency_agent,
+            *agent_args,
+            commits=shared_commits,
+        )
+        cohesion_future = executor.submit(
+            _run_pr_cohesion_agent,
+            *agent_args,
+            commits=shared_commits,
+        )
+        consistency = consistency_future.result()
+        cohesion = cohesion_future.result()
+
+    return consistency, cohesion
+
+
 def evaluate(
     github_username: str,
     repo_name: str,
@@ -890,18 +935,17 @@ def evaluate(
             'commits': [],
             'llm_cost': 0.0,
         }
-    else:
         if progress_callback:
-            progress_callback('consistency_agent')
-        consistency = _run_pr_consistency_agent(
+            progress_callback('cohesion_agent')
+        cohesion = _run_pr_cohesion_agent(
             github_username, repo_name, pr_number, pr_title, pr_body
         )
-
-    if progress_callback:
-        progress_callback('cohesion_agent')
-    cohesion = _run_pr_cohesion_agent(
-        github_username, repo_name, pr_number, pr_title, pr_body
-    )
+    else:
+        if progress_callback:
+            progress_callback('evaluation_agents')
+        consistency, cohesion = _run_pr_agents_parallel(
+            github_username, repo_name, pr_number, pr_title, pr_body
+        )
 
     if progress_callback:
         progress_callback('finalizing')

@@ -46,6 +46,8 @@ _IMG_MARKDOWN = re.compile(r'!\[.*?\]\(([^)]+)\)')
 _IMG_HTML = re.compile(r'<img\s[^>]*src=["\']([^"\']+)["\']', re.IGNORECASE)
 _CODE_BLOCK = re.compile(r'```', re.MULTILINE)
 _LIST_OR_TABLE = re.compile(r'^([-*+] |\d+\. |\|)', re.MULTILINE)
+_FENCE = re.compile(r'^\s{0,3}(`{3,}|~{3,})')
+_ATX_HEADING = re.compile(r'^\s{0,3}(#{1,6})[ \t]+(.*)$')
 _VERSION = re.compile(
     r'(Python|Node|Ruby|Java|Go|PHP|Kotlin|Swift|Rust|C\+\+|TypeScript)\s*[>=v]?\s*\d'
     r'|>= ?\d+\.\d+|~=\d|\^\d+\.\d+',
@@ -77,20 +79,63 @@ def _is_badge(url: str) -> bool:
     return any(domain in url_lower for domain in BADGE_DOMAINS)
 
 
+def _heading_levels(readme: str) -> List[int]:
+    """코드 펜스 밖의 내용이 있는 ATX 헤딩 레벨을 문서 순서대로 반환한다."""
+    levels = []
+    fence_char = None
+    fence_length = 0
+
+    for line in readme.splitlines():
+        fence_match = _FENCE.match(line)
+        if fence_match:
+            marker = fence_match.group(1)
+            if fence_char is None:
+                fence_char = marker[0]
+                fence_length = len(marker)
+            elif marker[0] == fence_char and len(marker) >= fence_length:
+                fence_char = None
+                fence_length = 0
+            continue
+
+        if fence_char is not None:
+            continue
+
+        heading_match = _ATX_HEADING.match(line)
+        if not heading_match:
+            continue
+
+        # 닫는 # 표시는 제목 내용으로 세지 않는다. 제목이 비어 있으면 헤딩
+        # 구조 판정의 근거로 사용하지 않는다.
+        title = heading_match.group(2).strip().rstrip('#').strip()
+        if title:
+            levels.append(len(heading_match.group(1)))
+
+    return levels
+
+
 def readability_detail(readme: str) -> SubItemDetail:
     result = SubItemDetail()
 
-    has_h2 = bool(re.search(r'^## [^#]', readme, re.MULTILINE))
-    has_h3 = bool(re.search(r'^### [^#]', readme, re.MULTILINE))
-    (result.good if has_h2 and has_h3 else result.bad).append("헤딩 계층")
+    heading_levels = _heading_levels(readme)
+    # H3 사용을 강제하지 않는다. 의미 있는 헤딩이 둘 이상이고 문서의 가장
+    # 상위 레벨이 H1/H2이면 헤딩으로 섹션을 구조화했다고 본다.
+    has_heading_structure = (
+        len(heading_levels) >= 2
+        and min(heading_levels) <= 2
+    )
+    (result.good if has_heading_structure else result.bad).append("헤딩 구조 활용")
 
     cb_count = len(_CODE_BLOCK.findall(readme))
     (result.good if cb_count >= 2 else result.bad).append("코드 블록")
 
     (result.good if _LIST_OR_TABLE.search(readme) else result.bad).append("목록/표")
 
-    has_skip = bool(re.search(r'^# [^#].*\n(?:(?!^#).*\n)*^### ', readme, re.MULTILINE))
-    (result.good if not has_skip else result.bad).append("헤딩 연속성")
+    has_skip = any(
+        current > previous + 1
+        for previous, current in zip(heading_levels, heading_levels[1:])
+    )
+    has_continuous_headings = bool(heading_levels) and not has_skip
+    (result.good if has_continuous_headings else result.bad).append("헤딩 연속성")
 
     return result
 

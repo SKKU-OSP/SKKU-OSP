@@ -233,16 +233,21 @@ def evaluate(github_username: str, repo_name: str) -> dict:
 
 
 def _entity_to_dict(entity: GithubRepoAiEvaluation, readme: Optional[str]) -> dict:
+    status = entity.readme_evaluation_status
+    score_available = status in {'partial', 'full'}
+    feedback_available = status == 'full'
     return {
-        'evaluation_status': entity.readme_evaluation_status,
-        'model_name': entity.model_name,
-        'score': entity.readme_score,
-        'total_score': entity.readme_total_score,
-        'criteria_scores': entity.readme_criteria_scores,
-        'missing_essentials': entity.readme_missing_essentials,
-        'strengths': entity.readme_strengths,
-        'improvements': entity.readme_improvements,
-        'advice': entity.readme_advice,
+        'evaluation_status': status,
+        'model_name': entity.model_name if score_available else None,
+        'score': entity.readme_score if score_available else None,
+        'total_score': entity.readme_total_score if score_available else None,
+        'criteria_scores': entity.readme_criteria_scores if score_available else None,
+        'missing_essentials': (
+            entity.readme_missing_essentials if score_available else None
+        ),
+        'strengths': entity.readme_strengths if feedback_available else None,
+        'improvements': entity.readme_improvements if feedback_available else None,
+        'advice': entity.readme_advice if feedback_available else None,
         'updated_at': entity.updated_at.isoformat() if entity.updated_at else None,
         'readme': readme,
     }

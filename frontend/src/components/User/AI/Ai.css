@@ -134,6 +134,59 @@
   font-weight: bold;
 }
 
+.issue-skip-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid #dde2e7;
+  border-radius: 12px;
+  background: #f8f9fa;
+  color: #343a40;
+}
+
+.issue-skip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.issue-skip-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.issue-skip-title {
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #343a40;
+}
+
+.issue-skip-reason {
+  margin: 0;
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.issue-skip-guide {
+  margin: 0.8rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e1e5e9;
+  color: #6c757d;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 /* Score Section Styles */
 .score-container {
   border: 1px solid #e9ecef;

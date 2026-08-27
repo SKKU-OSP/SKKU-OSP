@@ -235,11 +235,24 @@ function ReadmeTab({ repos, loading, errorOccur }) {
               {evaluationLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
-                  <p className="mt-3 text-muted">AI가 분석 중입니다...</p>
-                  <p className="text-muted small">README 길이에 따라 최대 2분까지 소요될 수 있습니다.</p>
+                  <p className="mt-3 mb-2 font-weight-bold">README 평가를 진행하고 있습니다</p>
+                  <p className="pr-agent-loading-status">
+                    <span /> README의 구조와 문서 내용을 분석하고 있습니다.<br />
+                    README 길이에 따라 시간이 오래 소요될 수 있습니다.
+                  </p>
                 </div>
               ) : evaluationData ? (
                 <div className="mt-4">
+                  {evaluationData.evaluation_status === 'code_only' && (
+                    <div className="alert alert-warning" role="alert">
+                      README의 기본 구조 분석은 완료했지만 AI 세부 판정을 완료하지 못했습니다. 잠시 후 다시 평가해 주세요.
+                    </div>
+                  )}
+                  {evaluationData.evaluation_status === 'partial' && (
+                    <div className="alert alert-warning" role="alert">
+                      README 채점은 완료했지만 상세 피드백 생성을 완료하지 못했습니다. 잠시 후 다시 평가해 주세요.
+                    </div>
+                  )}
                   {evaluationData.score && (
                     <div className="mb-4 p-3 bg-light rounded score-container">
                       <div className="d-flex align-items-center mb-3">
@@ -633,6 +646,12 @@ function PrTab({ repos, loading, errorOccur }) {
                   {evalPhase === 'consistency_agent' && (
                     <p className="pr-agent-loading-status">
                       <span /> 정합성 검증 에이전트가 커밋을 확인하고 있습니다.<br />
+                      코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
+                    </p>
+                  )}
+                  {evalPhase === 'evaluation_agents' && (
+                    <p className="pr-agent-loading-status">
+                      <span /> 정합성·응집성 검증 에이전트가 커밋을 확인하고 있습니다.<br />
                       코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
                     </p>
                   )}
@@ -1222,14 +1241,26 @@ function IssueTab({ repos, loading, errorOccur }) {
               {evalLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
-                  <p className="mt-3 text-muted">AI가 이슈를 분석 중입니다...</p>
+                  <p className="mt-3 mb-2 font-weight-bold">이슈 평가를 진행하고 있습니다</p>
+                  <p className="pr-agent-loading-status">
+                    <span /> 이슈의 유형과 제목·본문 내용을 분석하고 있습니다.<br />
+                    본문 길이에 따라 시간이 오래 소요될 수 있습니다.
+                  </p>
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
                   {evalData.issue_type === 'skip' ? (
-                    <div className="alert alert-secondary mt-3" role="alert" style={{ borderLeft: '4px solid #6c757d' }}>
-                      <strong>평가 제외 이슈</strong>
-                      <p className="mb-0 mt-1" style={{ fontSize: '0.9rem' }}>{evalData.skip_message}</p>
+                    <div className="issue-skip-notice mt-3" role="status">
+                      <div className="issue-skip-icon" aria-hidden="true">
+                        <BsExclamationCircle />
+                      </div>
+                      <div className="issue-skip-content">
+                        <div className="issue-skip-title">이 이슈는 품질 평가 대상이 아닙니다</div>
+                        <p className="issue-skip-reason">
+                          {evalData.skip_reason || '구체적인 버그 증상이나 기능 요청을 확인하기 어렵습니다.'}
+                        </p>
+                        <p className="issue-skip-guide">{evalData.skip_message}</p>
+                      </div>
                     </div>
                   ) : (
                     <>

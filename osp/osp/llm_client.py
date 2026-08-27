@@ -12,72 +12,43 @@ logger = logging.getLogger(__name__)
 
 MAX_README_CHARS = 8000
 
-LLM_MODEL = os.environ.get('LLM_MODEL', 'claude-haiku-4-5')
-LLM_FALLBACK_MODEL = os.environ.get(
-    'LLM_FALLBACK_MODEL', 'gemini/gemini-3.1-flash-lite'
-)
-LLM_FALLBACKS = (
-    [LLM_FALLBACK_MODEL]
-    if LLM_FALLBACK_MODEL and LLM_FALLBACK_MODEL != LLM_MODEL
-    else []
-)
+HAIKU_MODEL = os.environ.get('HAIKU_MODEL', 'claude-haiku-4-5')
+
+
+def _fallbacks_for(model: str) -> list[str]:
+    """Sonnet 호출만 Haiku로 폴백하고 그 외 호출은 폴백하지 않는다."""
+    if 'sonnet' in model.lower() and model != HAIKU_MODEL:
+        return [HAIKU_MODEL]
+    return []
+
+
+LLM_MODEL = os.environ.get('LLM_MODEL', HAIKU_MODEL)
+# 기존 참조와의 호환을 위한 별칭이다. 기본 Haiku 호출의 폴백에는 쓰지 않는다.
+LLM_FALLBACK_MODEL = HAIKU_MODEL
+LLM_FALLBACKS = _fallbacks_for(LLM_MODEL)
 PR_WHY_MODEL = os.environ.get('PR_WHY_MODEL', 'claude-sonnet-4-6')
-PR_WHY_FALLBACK_MODEL = os.environ.get(
-    'PR_WHY_FALLBACK_MODEL', LLM_FALLBACK_MODEL
-)
-PR_WHY_FALLBACKS = (
-    [PR_WHY_FALLBACK_MODEL]
-    if PR_WHY_FALLBACK_MODEL and PR_WHY_FALLBACK_MODEL != PR_WHY_MODEL
-    else []
-)
+PR_WHY_FALLBACK_MODEL = HAIKU_MODEL
+PR_WHY_FALLBACKS = _fallbacks_for(PR_WHY_MODEL)
 COMMIT_MESSAGE_MODEL = os.environ.get(
     'COMMIT_MESSAGE_MODEL', 'claude-sonnet-4-6'
 )
-COMMIT_MESSAGE_FALLBACK_MODEL = os.environ.get(
-    'COMMIT_MESSAGE_FALLBACK_MODEL', LLM_FALLBACK_MODEL
-)
-COMMIT_MESSAGE_FALLBACKS = (
-    [COMMIT_MESSAGE_FALLBACK_MODEL]
-    if COMMIT_MESSAGE_FALLBACK_MODEL
-    and COMMIT_MESSAGE_FALLBACK_MODEL != COMMIT_MESSAGE_MODEL
-    else []
-)
+COMMIT_MESSAGE_FALLBACK_MODEL = HAIKU_MODEL
+COMMIT_MESSAGE_FALLBACKS = _fallbacks_for(COMMIT_MESSAGE_MODEL)
 COMMIT_CONSISTENCY_MODEL = os.environ.get(
     'COMMIT_CONSISTENCY_MODEL', 'claude-sonnet-4-6'
 )
-COMMIT_CONSISTENCY_FALLBACK_MODEL = os.environ.get(
-    'COMMIT_CONSISTENCY_FALLBACK_MODEL', LLM_FALLBACK_MODEL
-)
-COMMIT_CONSISTENCY_FALLBACKS = (
-    [COMMIT_CONSISTENCY_FALLBACK_MODEL]
-    if COMMIT_CONSISTENCY_FALLBACK_MODEL
-    and COMMIT_CONSISTENCY_FALLBACK_MODEL != COMMIT_CONSISTENCY_MODEL
-    else []
-)
+COMMIT_CONSISTENCY_FALLBACK_MODEL = HAIKU_MODEL
+COMMIT_CONSISTENCY_FALLBACKS = _fallbacks_for(COMMIT_CONSISTENCY_MODEL)
 PR_COHESION_MODEL = os.environ.get(
     'PR_COHESION_MODEL', 'claude-sonnet-4-6'
 )
-PR_COHESION_FALLBACK_MODEL = os.environ.get(
-    'PR_COHESION_FALLBACK_MODEL', LLM_FALLBACK_MODEL
-)
-PR_COHESION_FALLBACKS = (
-    [PR_COHESION_FALLBACK_MODEL]
-    if PR_COHESION_FALLBACK_MODEL
-    and PR_COHESION_FALLBACK_MODEL != PR_COHESION_MODEL
-    else []
-)
+PR_COHESION_FALLBACK_MODEL = HAIKU_MODEL
+PR_COHESION_FALLBACKS = _fallbacks_for(PR_COHESION_MODEL)
 COMMIT_FILE_SUMMARY_MODEL = os.environ.get(
-    'COMMIT_FILE_SUMMARY_MODEL', 'claude-haiku-4-5'
+    'COMMIT_FILE_SUMMARY_MODEL', HAIKU_MODEL
 )
-COMMIT_FILE_SUMMARY_FALLBACK_MODEL = os.environ.get(
-    'COMMIT_FILE_SUMMARY_FALLBACK_MODEL', LLM_FALLBACK_MODEL
-)
-COMMIT_FILE_SUMMARY_FALLBACKS = (
-    [COMMIT_FILE_SUMMARY_FALLBACK_MODEL]
-    if COMMIT_FILE_SUMMARY_FALLBACK_MODEL
-    and COMMIT_FILE_SUMMARY_FALLBACK_MODEL != COMMIT_FILE_SUMMARY_MODEL
-    else []
-)
+COMMIT_FILE_SUMMARY_FALLBACK_MODEL = HAIKU_MODEL
+COMMIT_FILE_SUMMARY_FALLBACKS = _fallbacks_for(COMMIT_FILE_SUMMARY_MODEL)
 LLM_NUM_RETRIES = int(os.environ.get('LLM_NUM_RETRIES', '2'))
 LLM_TIMEOUT = float(os.environ.get('LLM_TIMEOUT', '30'))
 LLM_BASE_URL = os.environ.get('LLM_BASE_URL', None)
@@ -113,11 +84,17 @@ class CriterionScore(LlmResponse):
     reason: str
 
 
+class ReadmeClarityResponse(LlmResponse):
+    clarity: ClarityScore
+    # 표시용 누락 목록이 생략돼도 명확성 판정 자체를 폐기하지 않는다.
+    missing_essentials: List[str] = Field(default_factory=list)
+
+
 class ScoreResponse(LlmResponse):
     clarity: ClarityScore
     reproducibility_result: CriterionScore
     collaboration: CriterionScore
-    missing_essentials: List[str] = []
+    missing_essentials: List[str] = Field(default_factory=list)
 
 
 class SentenceResponse(LlmResponse):
@@ -180,7 +157,7 @@ class IssueFulfilmentResult(LlmResponse):
 
 class IssueScoreResponse(LlmResponse):
     issue_type: Literal["bug", "feature", "skip"]
-    issue_type_reason: str = Field(min_length=1, max_length=500)
+    issue_type_reason: str = Field(min_length=1, max_length=200)
     fulfilment: Optional[IssueFulfilmentResult] = None
     clarity: Optional[PrClarityResult] = None
 
@@ -337,7 +314,9 @@ def _call_llm(
     fallbacks: Optional[list[str]] = None,
 ) -> tuple[str, str, float]:
     target_model = model or LLM_MODEL
-    target_fallbacks = LLM_FALLBACKS if fallbacks is None else fallbacks
+    target_fallbacks = (
+        _fallbacks_for(target_model) if fallbacks is None else fallbacks
+    )
     combined = system_prompt + user_prompt
     input_tokens = litellm.token_counter(model=target_model, text=combined)
     est_output_tokens = 400
@@ -373,8 +352,7 @@ def _call_llm(
         parallel_tool_calls=False,
     )
 
-    # api_key를 직접 넘기지 않아야 fallback 모델이 provider별 환경변수
-    # (ANTHROPIC_API_KEY / GEMINI_API_KEY)를 각각 사용할 수 있다.
+    # API 키는 LiteLLM이 모델 provider에 맞는 환경변수에서 읽도록 맡긴다.
     if LLM_BASE_URL:
         kwargs['api_base'] = LLM_BASE_URL
 
@@ -536,17 +514,58 @@ def score_readme(
     reproducibility_code: int,
     license: int,
 ) -> ScoreResponse:
-    system_prompt = _build_score_system(repo_name, readability, visual, reproducibility_code, license)
     content = _truncate(readme_content)
-
     user_prompt = f"[README_CONTENT]\n{content}\n[/README_CONTENT]"
-    return _call_and_parse(
-        system_prompt, user_prompt,
-        temperature=0.0,
-        model_class=ScoreResponse,
-        tool_name='submit_readme_score',
-        label=f"{repo_name} | README/채점",
+    completed_results = []
+
+    try:
+        clarity = _call_and_parse(
+            _build_readme_clarity_system(repo_name, visual), user_prompt,
+            temperature=0.0,
+            model_class=ReadmeClarityResponse,
+            tool_name='submit_readme_clarity',
+            label=f"{repo_name} | README/채점/clarity",
+        )
+        completed_results.append(clarity)
+        reproducibility_result = _call_and_parse(
+            _build_readme_reproducibility_result_system(repo_name), user_prompt,
+            temperature=0.0,
+            model_class=CriterionScore,
+            tool_name='submit_readme_reproducibility_result',
+            label=f"{repo_name} | README/채점/reproducibility_result",
+        )
+        completed_results.append(reproducibility_result)
+        collaboration = _call_and_parse(
+            _build_readme_collaboration_system(repo_name), user_prompt,
+            temperature=0.0,
+            model_class=CriterionScore,
+            tool_name='submit_readme_collaboration',
+            label=f"{repo_name} | README/채점/collaboration",
+        )
+        completed_results.append(collaboration)
+    except Exception as error:
+        # 뒤쪽 세부 판정이 실패해도 앞서 완료된 호출 비용을 유실하지 않는다.
+        previous_cost = sum(result.actual_cost for result in completed_results)
+        try:
+            error.actual_cost = float(getattr(error, 'actual_cost', 0.0)) + previous_cost
+        except Exception:
+            pass
+        raise
+
+    result = ScoreResponse(
+        clarity=clarity.clarity,
+        reproducibility_result=reproducibility_result,
+        collaboration=collaboration,
+        missing_essentials=clarity.missing_essentials,
     )
+    models = list(dict.fromkeys(filter(None, [
+        clarity.actual_model,
+        reproducibility_result.actual_model,
+        collaboration.actual_model,
+    ])))
+    result._actual_model = '|'.join(models)[:64]
+    result._actual_cost = sum(item.actual_cost for item in completed_results)
+    return result
 
 
 def write_sentences(
@@ -597,22 +616,11 @@ _INJECTION_GUARD = (
 )
 
 
-def _build_score_system(
-    repo_name: str,
-    readability: int, visual: int, reproducibility_code: int, license: int,
-) -> str:
+def _build_readme_clarity_system(repo_name: str, visual: int) -> str:
     return f"""당신은 학생들의 성장을 돕는 친절하고 꼼꼼한 시니어 개발자입니다.
-GitHub 리포지토리 '{repo_name}'의 README.md를 채점합니다.
+GitHub 리포지토리 '{repo_name}'의 README.md에서 명확성과 필수 항목만 판정합니다.
 
-[코드 분석으로 이미 채점된 항목]
-- 가독성 (헤딩 계층·코드 블록·목록/표·헤딩 연속성): {readability} / 4점
-- 시각 자료 (배지 제외 이미지): {visual} / 1점
-- 재현성 코드분 (버전 명시·의존성 설치·실행 명령어): {reproducibility_code} / 3점
-- 라이선스 (GitHub 라이선스 필드): {license} / 1점
-
-[당신이 채점할 항목]
-
-1. clarity (명확성) — 0~4점
+[clarity — 명확성]
 아래 4개 세부 항목을 README 원문 근거와 함께 판정하세요.
 근거 문장이 없으면 반드시 미충족으로 처리하세요.
   - 프로젝트 목적: 무엇을 해결·수행하는지 문장으로 서술됨 (제목 반복만으론 미충족)
@@ -622,20 +630,12 @@ GitHub 리포지토리 '{repo_name}'의 README.md를 채점합니다.
 충족 개수 = 점수 (0~4)
 satisfied_subs에 충족된 세부 항목명을, unsatisfied_subs에 미충족 항목명을 담으세요.
 
-2. reproducibility_result (재현성 — 실행 결과) — 0~1점
-  1점: 출력 예시(코드 블록 안 실행 로그·샘플 결과) 또는 실행 후 기대 동작 문장 설명이 있음
-  0점: 명령어만 있고 결과·기대 동작 설명이 전혀 없음
-  규칙: 스크린샷·이미지만 있고 텍스트 설명이 없으면 0점.
-
-3. collaboration (협업) — 0/1점
-  1점: 따라 할 수 있는 구체적 절차 존재
-       (포크→브랜치→PR 흐름 / CONTRIBUTING 링크 / 개발환경 세팅+테스트 실행 안내 중 하나 이상)
-  0점: 없거나 "Contributions welcome" 같은 한 줄 언급뿐 (반드시 0점)
-
 [missing_essentials 판정]
 아래 항목 중 README에 없는 것을 배열에 담으세요.
 - 필수: 프로젝트 목적, 설치 방법, 실행 방법
 - 권장 (없으면 "(권장)" 표시 추가): 시각 자료, 협업 안내
+코드 분석에서 배지를 제외한 시각 자료 존재 여부는 {visual}점으로 확인되었습니다.
+시각 자료가 1점이면 시각 자료를 누락으로 판정하지 마세요.
 
 [출력 형식]
 {{
@@ -644,10 +644,39 @@ satisfied_subs에 충족된 세부 항목명을, unsatisfied_subs에 미충족 �
         "satisfied_subs": ["프로젝트 목적", "주요 기능", "기술 스택"],
         "unsatisfied_subs": ["사용 맥락"]
     }},
-    "reproducibility_result": {{ "result": "satisfied", "reason": "근거 한 문장" }},
-    "collaboration":          {{ "result": "unsatisfied", "reason": "근거 한 문장" }},
     "missing_essentials": ["누락된 항목. 모두 있다면 빈 배열"]
 }}{_INJECTION_GUARD}"""
+
+
+def _build_readme_reproducibility_result_system(repo_name: str) -> str:
+    return f"""당신은 학생들의 성장을 돕는 친절하고 꼼꼼한 시니어 개발자입니다.
+GitHub 리포지토리 '{repo_name}'의 README.md에서 실행 결과 설명만 판정합니다.
+
+[reproducibility_result — 재현성의 실행 결과]
+- satisfied: 출력 예시(코드 블록 안 실행 로그·샘플 결과) 또는 실행 후 기대 동작을 설명한 문장이 있습니다.
+- unsatisfied: 명령어만 있고 결과·기대 동작 설명이 전혀 없습니다.
+- 스크린샷·이미지만 있고 텍스트 설명이 없으면 unsatisfied입니다.
+- README에 실제로 있는 근거만 사용하고, 다른 평가 항목은 판단하지 마세요.
+
+[출력 형식]
+{{"result": "satisfied", "reason": "README 원문에 근거한 판정 이유 한 문장"}}
+{_INJECTION_GUARD}"""
+
+
+def _build_readme_collaboration_system(repo_name: str) -> str:
+    return f"""당신은 학생들의 성장을 돕는 친절하고 꼼꼼한 시니어 개발자입니다.
+GitHub 리포지토리 '{repo_name}'의 README.md에서 협업 안내만 판정합니다.
+
+[collaboration — 협업]
+- satisfied: 따라 할 수 있는 구체적 절차가 하나 이상 있습니다.
+  예: 포크→브랜치→PR 흐름, CONTRIBUTING 링크, 개발환경 설정과 테스트 실행 안내.
+- unsatisfied: 협업 안내가 없거나 "Contributions welcome" 같은 한 줄 언급뿐입니다.
+- 일반 사용자용 설치·실행 안내만으로는 협업 절차가 충족되지 않습니다.
+- README에 실제로 있는 근거만 사용하고, 다른 평가 항목은 판단하지 마세요.
+
+[출력 형식]
+{{"result": "unsatisfied", "reason": "README 원문에 근거한 판정 이유 한 문장"}}
+{_INJECTION_GUARD}"""
 
 
 def _build_sentence_system(
@@ -1190,14 +1219,18 @@ GitHub 리포지토리 '{repo_name}'의 이슈를 평가합니다. 제목과 본
   N/A: 본문 없음
 
 ══ 판정 근거 ══
-- issue_type_reason에는 이슈 유형을 그렇게 분류한 실제 근거를 작성하세요.
+- issue_type_reason에는 이슈 유형을 그렇게 분류한 실제 근거를 120자 이내의
+  간단한 존댓말 한 문장으로 작성하세요.
+- skip일 때는 왜 버그 리포트나 기능 제안으로 보기 어려운지만 설명하세요.
+  "평가에서 제외했습니다", "평가 대상이 아닙니다"처럼 화면 제목과 중복되는
+  결론은 issue_type_reason에 작성하지 마세요.
 - 모든 판정값 바로 옆의 *_reason에 제목·본문에서 확인한 실제 근거를 한 문장으로 작성하세요.
 - N/A도 왜 판정할 수 없는지 이유를 작성하세요.
 - 입력에 없는 내용을 추측하지 마세요.
 
 ══ 출력 형식 ══
 skip일 때:
-{{"issue_type": "skip", "issue_type_reason": "질문이나 작업 메모로 분류한 실제 근거"}}
+{{"issue_type": "skip", "issue_type_reason": "여러 수정 사항을 나열한 작업 메모로, 구체적인 버그 증상이나 기능 요청을 확인하기 어렵습니다."}}
 
 bug 또는 feature일 때:
 {{

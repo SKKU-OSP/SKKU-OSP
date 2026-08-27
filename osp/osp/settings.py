@@ -289,8 +289,7 @@ COMMIT_FILE_SUMMARY_MAX_WORKERS = int(
     os.environ.get('COMMIT_FILE_SUMMARY_MAX_WORKERS', '0')
 )
 
-# LLM — secret.key에서 로드, 없으면 환경변수 fallback
-os.environ.setdefault('GEMINI_API_KEY', SETTINGS.get('GEMINI_API_KEY', ''))
+# LLM — Anthropic 키를 secret.key에서 로드하고, 이미 설정된 환경변수는 유지한다.
 os.environ.setdefault('ANTHROPIC_API_KEY', SETTINGS.get('ANTHROPIC_API_KEY', ''))
 
 # Default primary key field type

@@ -1,3 +1,4 @@
+from threading import Barrier
 from unittest.mock import patch
 
 from django.test import SimpleTestCase, override_settings
@@ -59,6 +60,35 @@ FILES = [{
 
 @override_settings(PR_CONSISTENCY_MAX_ITERATIONS=4, PR_CONSISTENCY_MAX_TOKENS=30000)
 class PrConsistencyAgentTest(SimpleTestCase):
+
+    @patch.object(service, '_run_pr_cohesion_agent')
+    @patch.object(service, '_run_pr_consistency_agent')
+    @patch.object(service, 'list_pr_commits', return_value=COMMITS)
+    def test_consistency_and_cohesion_agents_run_in_parallel_with_shared_commits(
+        self, list_commits, run_consistency, run_cohesion
+    ):
+        rendezvous = Barrier(2)
+
+        def complete_consistency(*_args, **_kwargs):
+            rendezvous.wait(timeout=5)
+            return {'agent': 'consistency'}
+
+        def complete_cohesion(*_args, **_kwargs):
+            rendezvous.wait(timeout=5)
+            return {'agent': 'cohesion'}
+
+        run_consistency.side_effect = complete_consistency
+        run_cohesion.side_effect = complete_cohesion
+
+        consistency, cohesion = service._run_pr_agents_parallel(
+            'octocat', 'repo', 1, 'feat: login', '로그인 기능을 추가합니다.'
+        )
+
+        self.assertEqual(consistency, {'agent': 'consistency'})
+        self.assertEqual(cohesion, {'agent': 'cohesion'})
+        list_commits.assert_called_once_with('octocat', 'repo', 1)
+        self.assertIs(run_consistency.call_args.kwargs['commits'], COMMITS)
+        self.assertIs(run_cohesion.call_args.kwargs['commits'], COMMITS)
 
     def test_bonus_excludes_bare_number_reference_but_accepts_issue_closer(self):
         bare_score, bare_items = service._compute_bonus(
