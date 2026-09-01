@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import re
 import uuid
+from contextvars import copy_context
 from typing import Callable, Optional
 from urllib.parse import quote
 
@@ -379,10 +380,13 @@ def _run_pr_consistency_agent(
             _, source_files = commit_service._split_generated_files(files)
             patch_text, patch_file_count = commit_service._build_patch_text(source_files)
             if not patch_text:
-                observations.append(_agent_observation(
-                    sha, 'unavailable',
-                    '자동 생성 파일을 제외한 뒤 확인 가능한 소스 patch가 없습니다.'
-                ))
+                if not files:
+                    unavailable_reason = '변경된 파일이 없는 빈 커밋입니다.'
+                elif not source_files:
+                    unavailable_reason = '자동 생성 파일을 제외하니 검증할 소스가 없습니다.'
+                else:
+                    unavailable_reason = '바이너리 파일이라 코드 변경을 확인할 수 없습니다.'
+                observations.append(_agent_observation(sha, 'unavailable', unavailable_reason))
                 continue
 
             patch_injection_hits = llm_client.scan_injection(patch_text)
@@ -614,10 +618,13 @@ def _run_pr_cohesion_agent(
             _, source_files = commit_service._split_generated_files(files)
             patch_text, patch_file_count = commit_service._build_patch_text(source_files)
             if not patch_text:
-                observations.append(_agent_observation(
-                    sha, 'unavailable',
-                    '자동 생성 파일을 제외한 뒤 확인 가능한 소스 patch가 없습니다.'
-                ))
+                if not files:
+                    unavailable_reason = '변경된 파일이 없는 빈 커밋입니다.'
+                elif not source_files:
+                    unavailable_reason = '자동 생성 파일을 제외하니 검증할 소스가 없습니다.'
+                else:
+                    unavailable_reason = '바이너리 파일이라 코드 변경을 확인할 수 없습니다.'
+                observations.append(_agent_observation(sha, 'unavailable', unavailable_reason))
                 continue
 
             patch_injection_hits = llm_client.scan_injection(patch_text)
@@ -851,11 +858,13 @@ def _run_pr_agents_parallel(
         thread_name_prefix='pr-evaluation-agent',
     ) as executor:
         consistency_future = executor.submit(
+            copy_context().run,
             _run_pr_consistency_agent,
             *agent_args,
             commits=shared_commits,
         )
         cohesion_future = executor.submit(
+            copy_context().run,
             _run_pr_cohesion_agent,
             *agent_args,
             commits=shared_commits,

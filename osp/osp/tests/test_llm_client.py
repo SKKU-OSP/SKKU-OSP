@@ -236,6 +236,21 @@ class LlmFallbackConfigurationTest(TestCase):
         self.assertIn('간단한 존댓말 한 문장', issue_prompt)
         self.assertIn('화면 제목과 중복되는', issue_prompt)
 
+    def test_issue_prompt_preserves_single_topic_checklists_and_short_clear_requests(self):
+        prompt = llm_client._build_issue_score_system(
+            'repo', body_present=True
+        )
+        no_body_prompt = llm_client._build_issue_score_system(
+            'repo', body_present=False
+        )
+
+        self.assertIn('목록·체크리스트 형식이라는 이유만으로 skip하지 마세요', prompt)
+        self.assertIn('회원가입 검증 강화', prompt)
+        self.assertIn('로그인 버튼을 눌러도 로그인이 안 됩니다', prompt)
+        self.assertIn('다크 모드 추가', prompt)
+        self.assertIn('게시글 검색 기능 추가', no_body_prompt)
+        self.assertIn('상세 구현은 기준이 아닙니다', prompt)
+
     def test_pr_fulfilment_prompt_does_not_confuse_what_with_why(self):
         prompt = llm_client._build_pr_why_system('repo')
 

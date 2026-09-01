@@ -361,6 +361,10 @@ def _call_llm(
     usage = response.usage
     actual_cost = litellm.completion_cost(completion_response=response)
     actual_model = str(getattr(response, 'model', None) or target_model)
+    # 평가 요청 컨텍스트가 활성화된 경우에만 실제 호출 비용을 누적한다.
+    # 지연 import로 LLM 모듈과 사용량 모델 간 결합을 최소화한다.
+    from .ai_evaluation_usage import capture_llm_call
+    capture_llm_call(actual_cost, actual_model)
     logger.info(
         "[LLM 호출 완료] %s | model=%s | 실제 입력=%d | 실제 출력=%d | 실제 비용=$%.6f",
         label, actual_model, usage.prompt_tokens, usage.completion_tokens, actual_cost,
@@ -1170,13 +1174,23 @@ GitHub 리포지토리 '{repo_name}'의 이슈를 평가합니다. 제목과 본
 - "skip": 질문·논의·작업 메모·할일 등 버그도 기능 제안도 아닌 이슈
 
 버그와 기능 특성이 혼재하면 더 우세한 쪽으로 분류하세요.
+- 목록·체크리스트 형식이라는 이유만으로 skip하지 마세요. 여러 항목이 하나의
+  기능이나 문제를 구성하면 bug 또는 feature입니다.
+  예: "회원가입 검증 강화" 아래 이메일 형식·비밀번호 길이·닉네임 중복 검증을
+  나열한 것은 하나의 회원가입 기능을 구체화한 feature입니다.
+- "추가", "개선", "수정"처럼 명사형으로 끝나더라도 제목과 본문에서 원하는
+  변경 대상과 행위를 파악할 수 있으면 요청으로 인정하세요.
+- skip은 완료한 일을 기록한 일지, 서로 무관한 할 일 모음, 단순 질문처럼
+  버그 증상이나 원하는 기능을 실제로 특정할 수 없는 경우에만 사용하세요.
 유형이 "skip"이면 issue_type과 issue_type_reason만 반환하고 STEP 2·3을 건너뛰세요.
 
 ══ STEP 2: 충실도(fulfilment) ══
 【버그 리포트일 때】
 - what(증상): 무엇이 잘못됐는지 구체적으로 파악되는가?
-  satisfied: 증상·오류·잘못된 동작이 구체적으로 서술됨
-  unsatisfied: "안 돼요", "오류 있어요"처럼 막연하거나 제목 반복
+  satisfied: 변경 대상과 관찰된 잘못된 동작을 파악할 수 있음. 짧더라도
+  "로그인 버튼을 눌러도 로그인이 안 됩니다"처럼 대상과 증상이 있으면 satisfied.
+  unsatisfied: "안 돼요", "오류 있어요"처럼 무엇이 어떤 상황에서 잘못됐는지
+  대상조차 파악할 수 없거나 제목을 그대로 반복함
   ※ what이 unsatisfied면 why, verification도 반드시 "unsatisfied"로 출력.
 
 - why(재현/환경): 언제·어떻게 발생하는지 또는 환경이 언급됐는가?
@@ -1191,8 +1205,13 @@ GitHub 리포지토리 '{repo_name}'의 이슈를 평가합니다. 제목과 본
 
 【기능 제안일 때】
 - what(제안 내용): 무엇을 원하는지 구체적으로 파악되는가?
-  satisfied: 원하는 기능·변경이 구체적으로 서술됨
-  unsatisfied: "있으면 좋겠어요"처럼 막연함
+  satisfied: 변경 대상과 요청 행위를 파악할 수 있음. 상세 구현은 기준이 아닙니다.
+  "다크 모드 추가", "게시글 검색 기능 추가"처럼 이름 있는 기능과 추가·수정·삭제
+  행위가 있으면 짧아도 satisfied.
+  unsatisfied: "기능 추가", "개선 필요", "있으면 좋겠어요"처럼 대상이나 원하는
+  변화가 없어 무엇을 요청하는지 파악할 수 없음
+  ※ 본문이 없어도 제목만으로 대상과 요청 행위를 파악할 수 있으면 what은
+  satisfied이고, why와 verification만 N/A입니다.
   ※ what이 unsatisfied면 why, verification도 반드시 "unsatisfied"로 출력.
 
 - why(배경/문제): 왜 필요한지, 어떤 불편을 해결하는지 서술됐는가?
@@ -1209,6 +1228,9 @@ GitHub 리포지토리 '{repo_name}'의 이슈를 평가합니다. 제목과 본
 유형과 무관하게 공통 판정합니다.
 
 - title_specificity: {title_anchor}
+  상세한 구현 설명은 제목 구체성의 기준이 아닙니다. "게시글 검색 기능 추가"처럼
+  대상과 행위를 제목만으로 파악할 수 있으면 satisfied이고, "수정", "기능 추가",
+  "오류"처럼 대상이 없는 제목만 unsatisfied입니다.
 
 - title_body_match: 제목과 본문이 같은 문제/제안을 가리키는가?
   N/A: 본문 없음
