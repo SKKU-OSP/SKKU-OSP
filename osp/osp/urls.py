@@ -35,6 +35,7 @@ from .commit_evaluation_views import (
     CommitFileSummariesView,
     CommitListView,
 )
+from .ai_evaluation_usage_views import AiEvaluationQuotaView, AiEvaluationUsageView
 
 urlpatterns = [
     path('', lambda req: redirect('/admin/')),
@@ -58,6 +59,16 @@ urlpatterns = [
         'v2/ai-evaluation/commit-file-summaries',
         CommitFileSummariesView.as_view(),
         name='ai-evaluation-commit-file-summaries',
+    ),
+    path(
+        'v2/ai-evaluation/usage',
+        AiEvaluationUsageView.as_view(),
+        name='ai-evaluation-usage',
+    ),
+    path(
+        'v2/ai-evaluation/usage/me',
+        AiEvaluationQuotaView.as_view(),
+        name='ai-evaluation-usage-me',
     ),
 
     path('home/', include('home.urls')),

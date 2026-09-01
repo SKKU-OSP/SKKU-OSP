@@ -284,6 +284,52 @@ class GithubCommitFileSummaryCache(models.Model):
         unique_together = (('github_id', 'repo_name', 'sha'),)
 
 
+class AiEvaluationUsage(models.Model):
+    """AI 평가 요청 한 건에서 실제로 발생한 LLM 사용량."""
+
+    EVAL_TYPE_CHOICES = [
+        ('readme', 'README'),
+        ('pr', 'PR'),
+        ('issue', 'Issue'),
+        ('commit', 'Commit'),
+    ]
+    STATUS_CHOICES = [
+        ('full', '전체 완료'),
+        ('partial', '부분 완료'),
+        ('code_only', '코드 분석만 완료'),
+        ('skipped', '평가 제외'),
+        ('failed', '실패'),
+    ]
+
+    # 평가 대상 소유자가 아니라 평가 버튼을 누른 로그인 사용자다.
+    github_id = models.CharField(max_length=40, db_index=True)
+    eval_type = models.CharField(
+        max_length=10, choices=EVAL_TYPE_CHOICES, db_index=True
+    )
+    target = models.JSONField(default=dict)
+    actual_cost = models.DecimalField(
+        max_digits=16, decimal_places=10, default=0
+    )
+    model_name = models.CharField(max_length=512, blank=True, default='')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='failed'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = 'ai_evaluation_usage'
+        indexes = [
+            models.Index(
+                fields=['github_id', 'created_at'],
+                name='ai_usage_user_created_idx',
+            ),
+            models.Index(
+                fields=['eval_type', 'created_at'],
+                name='ai_usage_type_created_idx',
+            ),
+        ]
+
+
 class GithubRepoCommitFiles(models.Model):
     github_id = models.CharField(max_length=40, primary_key=True)
     repo_name = models.CharField(max_length=100)

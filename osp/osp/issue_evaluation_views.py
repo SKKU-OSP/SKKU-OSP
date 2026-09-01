@@ -5,6 +5,14 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 
 from . import issue_evaluation_service as svc
+from .ai_evaluation_usage import (
+    enforce_daily_limit,
+    EvaluationLimitExceeded,
+    evaluation_status,
+    get_request_github_id,
+    RequireAuthenticatedEvaluationPostMixin,
+    track_evaluation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +57,7 @@ class IssueListView(APIView):
         return JsonResponse({'status': 'success', 'data': issues})
 
 
-class IssueEvaluationView(APIView):
+class IssueEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
 
     def get(self, request):
         github_username = request.GET.get('githubUsername')
@@ -73,8 +81,30 @@ class IssueEvaluationView(APIView):
                 status=400,
             )
         try:
-            result = svc.evaluate(github_username, repo_name, int(issue_number))
+            actor_github_id = get_request_github_id(request)
+            enforce_daily_limit(actor_github_id, 'issue')
+            with track_evaluation(
+                actor_github_id,
+                'issue',
+                {
+                    'owner': github_username,
+                    'repo': repo_name,
+                    'issue_number': int(issue_number),
+                },
+            ) as usage:
+                result = svc.evaluate(
+                    github_username, repo_name, int(issue_number)
+                )
+                usage.complete(evaluation_status(result, 'issue'))
             return JsonResponse({'status': 'success', 'data': result})
+        except EvaluationLimitExceeded as e:
+            return JsonResponse({
+                'status': 'fail',
+                'code': 'AI_EVALUATION_LIMIT_EXCEEDED',
+                'reason': e.reason,
+                'message': str(e),
+                'usage': e.usage_state,
+            }, status=429)
         except ValueError as e:
             return JsonResponse({'status': 'fail', 'message': str(e)}, status=400)
         except Exception as e:

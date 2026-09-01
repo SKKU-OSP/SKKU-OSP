@@ -7,6 +7,144 @@ from osp import issue_evaluation_service
 
 
 class LlmFallbackConfigurationTest(TestCase):
+    def test_haiku_routes_do_not_use_fallbacks(self):
+        self.assertEqual(llm_client._fallbacks_for(llm_client.HAIKU_MODEL), [])
+        self.assertEqual(
+            llm_client.LLM_FALLBACKS,
+            llm_client._fallbacks_for(llm_client.LLM_MODEL),
+        )
+        self.assertEqual(
+            llm_client.COMMIT_FILE_SUMMARY_FALLBACKS,
+            llm_client._fallbacks_for(llm_client.COMMIT_FILE_SUMMARY_MODEL),
+        )
+
+    def test_sonnet_routes_fallback_to_haiku_only(self):
+        routes = [
+            (llm_client.PR_WHY_MODEL, llm_client.PR_WHY_FALLBACKS),
+            (
+                llm_client.COMMIT_MESSAGE_MODEL,
+                llm_client.COMMIT_MESSAGE_FALLBACKS,
+            ),
+            (
+                llm_client.COMMIT_CONSISTENCY_MODEL,
+                llm_client.COMMIT_CONSISTENCY_FALLBACKS,
+            ),
+            (
+                llm_client.PR_COHESION_MODEL,
+                llm_client.PR_COHESION_FALLBACKS,
+            ),
+        ]
+
+        for primary_model, fallbacks in routes:
+            with self.subTest(primary_model=primary_model):
+                self.assertIn('sonnet', primary_model.lower())
+                self.assertEqual(fallbacks, [llm_client.HAIKU_MODEL])
+                self.assertNotIn('gemini', ' '.join(fallbacks).lower())
+
+    @patch.object(llm_client, '_call_and_parse')
+    def test_readme_scoring_uses_three_calls_and_combines_results(self, call_and_parse):
+        clarity = llm_client.ReadmeClarityResponse(
+            clarity={
+                'reason': '목적과 기능이 명확합니다.',
+                'satisfied_subs': ['프로젝트 목적', '주요 기능'],
+                'unsatisfied_subs': ['기술 스택', '사용 맥락'],
+            },
+            missing_essentials=['실행 방법'],
+        )
+        clarity._actual_model = 'claude-haiku-test'
+        clarity._actual_cost = 0.001
+        reproducibility = llm_client.CriterionScore(
+            result='satisfied', reason='기대 동작이 설명되어 있습니다.'
+        )
+        reproducibility._actual_model = 'claude-haiku-test'
+        reproducibility._actual_cost = 0.002
+        collaboration = llm_client.CriterionScore(
+            result='unsatisfied', reason='협업 절차가 없습니다.'
+        )
+        collaboration._actual_model = 'claude-haiku-fallback-test'
+        collaboration._actual_cost = 0.003
+        call_and_parse.side_effect = [clarity, reproducibility, collaboration]
+
+        result = llm_client.score_readme(
+            'repo', '# README', readability=1, visual=0,
+            reproducibility_code=1, license=0,
+        )
+
+        self.assertEqual(call_and_parse.call_count, 3)
+        self.assertEqual(result.clarity.satisfied_subs, ['프로젝트 목적', '주요 기능'])
+        self.assertEqual(result.reproducibility_result.result, 'satisfied')
+        self.assertEqual(result.collaboration.result, 'unsatisfied')
+        self.assertEqual(result.missing_essentials, ['실행 방법'])
+        self.assertEqual(
+            result.actual_model,
+            'claude-haiku-test|claude-haiku-fallback-test',
+        )
+        self.assertAlmostEqual(result.actual_cost, 0.006)
+        self.assertEqual(
+            [call.kwargs['tool_name'] for call in call_and_parse.call_args_list],
+            [
+                'submit_readme_clarity',
+                'submit_readme_reproducibility_result',
+                'submit_readme_collaboration',
+            ],
+        )
+        self.assertEqual(
+            [call.kwargs['model_class'] for call in call_and_parse.call_args_list],
+            [
+                llm_client.ReadmeClarityResponse,
+                llm_client.CriterionScore,
+                llm_client.CriterionScore,
+            ],
+        )
+
+    @patch.object(llm_client, '_call_and_parse')
+    def test_readme_scoring_failure_keeps_previous_call_cost(self, call_and_parse):
+        clarity = llm_client.ReadmeClarityResponse(
+            clarity={
+                'reason': '목적이 명확합니다.',
+                'satisfied_subs': ['프로젝트 목적'],
+                'unsatisfied_subs': ['주요 기능', '기술 스택', '사용 맥락'],
+            },
+            missing_essentials=[],
+        )
+        clarity._actual_cost = 0.004
+        failure = llm_client.LlmResponseParseError(
+            '실행 결과 응답 오류', actual_cost=0.003
+        )
+        call_and_parse.side_effect = [clarity, failure]
+
+        with self.assertRaises(llm_client.LlmResponseParseError) as raised:
+            llm_client.score_readme('repo', '# README', 1, 0, 1, 0)
+
+        self.assertAlmostEqual(raised.exception.actual_cost, 0.007)
+        self.assertEqual(call_and_parse.call_count, 2)
+
+    def test_readme_scoring_prompts_have_separate_responsibilities(self):
+        clarity_prompt = llm_client._build_readme_clarity_system('repo', 0)
+        reproducibility_prompt = (
+            llm_client._build_readme_reproducibility_result_system('repo')
+        )
+        collaboration_prompt = llm_client._build_readme_collaboration_system('repo')
+
+        self.assertIn('missing_essentials', clarity_prompt)
+        self.assertNotIn('reproducibility_result', clarity_prompt)
+        self.assertNotIn('collaboration — 협업', clarity_prompt)
+        self.assertIn('실행 결과', reproducibility_prompt)
+        self.assertNotIn('협업 안내만', reproducibility_prompt)
+        self.assertIn('협업 안내만', collaboration_prompt)
+        self.assertNotIn('명확성과 필수 항목', collaboration_prompt)
+
+    def test_readme_clarity_accepts_omitted_display_only_missing_items(self):
+        result = llm_client.ReadmeClarityResponse.model_validate({
+            'clarity': {
+                'reason': '목적과 기능이 명확합니다.',
+                'satisfied_subs': ['프로젝트 목적', '주요 기능'],
+                'unsatisfied_subs': ['기술 스택', '사용 맥락'],
+            },
+        })
+
+        self.assertEqual(result.missing_essentials, [])
+
     def test_readme_sentence_prompt_includes_judgment_reasons(self):
         prompt = llm_client._build_sentence_system(
             'repo',
@@ -94,6 +232,24 @@ class LlmFallbackConfigurationTest(TestCase):
             self.assertIn(reason_field, clarity_prompt)
             self.assertIn(reason_field, issue_prompt)
         self.assertIn('issue_type_reason', issue_prompt)
+        self.assertIn('120자 이내', issue_prompt)
+        self.assertIn('간단한 존댓말 한 문장', issue_prompt)
+        self.assertIn('화면 제목과 중복되는', issue_prompt)
+
+    def test_issue_prompt_preserves_single_topic_checklists_and_short_clear_requests(self):
+        prompt = llm_client._build_issue_score_system(
+            'repo', body_present=True
+        )
+        no_body_prompt = llm_client._build_issue_score_system(
+            'repo', body_present=False
+        )
+
+        self.assertIn('목록·체크리스트 형식이라는 이유만으로 skip하지 마세요', prompt)
+        self.assertIn('회원가입 검증 강화', prompt)
+        self.assertIn('로그인 버튼을 눌러도 로그인이 안 됩니다', prompt)
+        self.assertIn('다크 모드 추가', prompt)
+        self.assertIn('게시글 검색 기능 추가', no_body_prompt)
+        self.assertIn('상세 구현은 기준이 아닙니다', prompt)
 
     def test_pr_fulfilment_prompt_does_not_confuse_what_with_why(self):
         prompt = llm_client._build_pr_why_system('repo')
@@ -357,7 +513,7 @@ class LlmFallbackConfigurationTest(TestCase):
     @patch.object(llm_client.litellm, 'cost_per_token', return_value=(0.001, 0.001))
     @patch.object(llm_client.litellm, 'token_counter', return_value=10)
     @patch.object(llm_client.litellm, 'completion')
-    def test_completion_uses_runtime_fallback_and_provider_env_keys(
+    def test_completion_uses_configured_fallbacks_without_direct_api_key(
         self, completion, _token_counter, _cost_per_token, _completion_cost
     ):
         completion.return_value = SimpleNamespace(
@@ -527,7 +683,7 @@ class LlmFallbackConfigurationTest(TestCase):
             '"title_body_match_reason":"제목과 본문이 일치함",'
             '"single_focus":"satisfied",'
             '"single_focus_reason":"하나의 목적에 집중함"}',
-             'gemini-test'),
+             'claude-haiku-clarity-test'),
         ]
 
         result = llm_client.score_pr(
@@ -537,7 +693,7 @@ class LlmFallbackConfigurationTest(TestCase):
         self.assertEqual(result.clarity.single_focus, 'satisfied')
         self.assertEqual(
             result.actual_model,
-            'claude-haiku-test|claude-sonnet-test|gemini-test',
+            'claude-haiku-test|claude-sonnet-test|claude-haiku-clarity-test',
         )
         self.assertEqual(call_llm.call_count, 3)
 
@@ -742,6 +898,7 @@ class LlmFallbackConfigurationTest(TestCase):
 
     def test_all_output_schemas_forbid_unknown_fields(self):
         output_models = (
+            llm_client.ReadmeClarityResponse,
             llm_client.ScoreResponse,
             llm_client.SentenceResponse,
             llm_client.PrScoreResponse,

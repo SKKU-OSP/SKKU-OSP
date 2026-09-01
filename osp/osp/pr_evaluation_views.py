@@ -7,6 +7,13 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 
 from . import pr_evaluation_service as svc
+from .ai_evaluation_usage import (
+    enforce_daily_limit,
+    EvaluationLimitExceeded,
+    get_request_github_id,
+    RequireAuthenticatedEvaluationPostMixin,
+    track_evaluation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +78,7 @@ class PrListView(APIView):
         return JsonResponse({'status': 'success', 'data': pulls})
 
 
-class PrEvaluationView(APIView):
+class PrEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
 
     def get(self, request):
         github_username = request.GET.get('githubUsername')
@@ -106,14 +113,35 @@ class PrEvaluationView(APIView):
 
         try:
             update_progress('text_evaluation')
-            result = svc.evaluate(
-                github_username,
-                repo_name,
-                int(pr_number),
-                progress_callback=update_progress,
-            )
+            actor_github_id = get_request_github_id(request)
+            enforce_daily_limit(actor_github_id, 'pr')
+            with track_evaluation(
+                actor_github_id,
+                'pr',
+                {
+                    'owner': github_username,
+                    'repo': repo_name,
+                    'pr_number': int(pr_number),
+                },
+            ) as usage:
+                result = svc.evaluate(
+                    github_username,
+                    repo_name,
+                    int(pr_number),
+                    progress_callback=update_progress,
+                )
+                usage.complete('full')
             update_progress('complete')
             return JsonResponse({'status': 'success', 'data': result})
+        except EvaluationLimitExceeded as e:
+            update_progress('error')
+            return JsonResponse({
+                'status': 'fail',
+                'code': 'AI_EVALUATION_LIMIT_EXCEEDED',
+                'reason': e.reason,
+                'message': str(e),
+                'usage': e.usage_state,
+            }, status=429)
         except ValueError as e:
             update_progress('error')
             return JsonResponse({'status': 'fail', 'message': str(e)}, status=400)

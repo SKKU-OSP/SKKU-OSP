@@ -44,6 +44,7 @@ six==1.16.0
 sqlparse==0.4.3
 stevedore==3.5.0
 threadpoolctl
+tenacity>=8.2.0,<10
 typing_extensions>=4.6.0
 Twisted
 urllib3==1.26.9

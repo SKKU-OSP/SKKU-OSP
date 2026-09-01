@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { BsStar, BsChatLeftDots, BsArrowRightShort, BsGithub, BsChevronLeft, BsChevronRight, BsGit, BsFileEarmarkText, BsExclamationCircle, BsCodeSlash } from 'react-icons/bs';
+import { BsStar, BsChatLeftDots, BsArrowRightShort, BsGithub, BsChevronLeft, BsChevronRight, BsGit, BsFileEarmarkText, BsExclamationCircle, BsCodeSlash, BsBarChart } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import axiosInstance from '../../../utils/axiosInterCeptor';
 import { getAuthConfig } from '../../../utils/auth';
+import AuthContext from '../../../utils/auth-context';
+import AiUsageDashboard from './AiUsageDashboard';
 import '../User.css';
 import './Ai.css';
 
@@ -26,6 +28,97 @@ const mdImgComponents = {
     />
   ),
 };
+
+const isCanceledRequest = (error) => (
+  error?.code === 'ERR_CANCELED'
+  || error?.name === 'CanceledError'
+  || error?.name === 'AbortError'
+);
+
+const EVALUATION_LIMIT_LABELS = {
+  readme: 'README',
+  pr: 'PR',
+  issue: '이슈',
+  commit: '커밋',
+};
+
+const evaluationQuota = (usageState, evalType) => (
+  usageState?.limits?.[evalType] || { used: 0, limit: 0, remaining: 0, blocked: false }
+);
+
+const evaluationLimitMessage = (usageState, evalType) => {
+  if (usageState?.circuit_breaker?.blocked) {
+    return '오늘 AI 평가 서비스의 전체 사용 한도에 도달했습니다. 내일 00:00부터 다시 이용해 주세요.';
+  }
+  const quota = evaluationQuota(usageState, evalType);
+  if (quota.limit && quota.used >= quota.limit) {
+    return `오늘 ${EVALUATION_LIMIT_LABELS[evalType]} AI 평가 ${quota.limit}회를 모두 사용했습니다. 내일 00:00부터 다시 이용해 주세요.`;
+  }
+  return '';
+};
+
+const evaluationButtonText = (text, loading, usageState, evalType) => {
+  const quota = evaluationQuota(usageState, evalType);
+  const count = quota.limit ? ` (${quota.used}/${quota.limit})` : '';
+  return `${loading ? '평가 중...' : text}${count}`;
+};
+
+function EvaluationLimitNotice({ usageState }) {
+  if (!usageState) return null;
+  const circuit = usageState.circuit_breaker || {};
+  return (
+    <div className={`ai-limit-notice${circuit.blocked ? ' blocked' : ''}`}>
+      <div className="ai-limit-copy">
+        <span>AI 평가의 경우, 하루 사용량이 오른쪽과 같이 제한됩니다.</span>
+        <span>또한, 서버 전체 비용을 초과한 경우에도 제한될 수 있음에 양해 바랍니다.</span>
+      </div>
+      <div className="ai-limit-quotas">
+        {Object.entries(EVALUATION_LIMIT_LABELS).map(([type, label]) => {
+          const quota = evaluationQuota(usageState, type);
+          return (
+            <span key={type} className={quota.used >= quota.limit ? 'limit-reached' : ''}>
+              {label} {quota.used}/{quota.limit}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function useCancelableEvaluationRequest() {
+  const activeController = useRef(null);
+
+  useEffect(() => () => {
+    activeController.current?.abort();
+    activeController.current = null;
+  }, []);
+
+  const begin = useCallback(() => {
+    activeController.current?.abort();
+    const controller = new AbortController();
+    activeController.current = controller;
+    return controller;
+  }, []);
+
+  const cancel = useCallback(() => {
+    const controller = activeController.current;
+    activeController.current = null;
+    controller?.abort();
+  }, []);
+
+  const isCurrent = useCallback((controller) => (
+    activeController.current === controller && !controller.signal.aborted
+  ), []);
+
+  const finish = useCallback((controller) => {
+    if (activeController.current !== controller) return false;
+    activeController.current = null;
+    return true;
+  }, []);
+
+  return { begin, cancel, isCurrent, finish };
+}
 
 // ── 레이더 차트 ─────────────────────────────────────────────────────────
 
@@ -87,7 +180,7 @@ function RadarChart({ axes, size = 240 }) {
 
 // ── README 탭 ────────────────────────────────────────────────────
 
-function ReadmeTab({ repos, loading, errorOccur }) {
+function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsage }) {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [evaluationLoading, setEvaluationLoading] = useState(false);
   const [evaluationData, setEvaluationData] = useState(null);
@@ -95,6 +188,14 @@ function ReadmeTab({ repos, loading, errorOccur }) {
   const [noReadme, setNoReadme] = useState(false);
   const [repoListOpen, setRepoListOpen] = useState(true);
   const [evaluationError, setEvaluationError] = useState(null);
+  const evaluationRequest = useCancelableEvaluationRequest();
+  const cancelEvaluationRequest = evaluationRequest.cancel;
+
+  useEffect(() => {
+    if (active) return;
+    cancelEvaluationRequest();
+    setEvaluationLoading(false);
+  }, [active, cancelEvaluationRequest]);
 
   const fetchAiEvaluation = async (githubUsername, repoName) => {
     try {
@@ -113,14 +214,21 @@ function ReadmeTab({ repos, loading, errorOccur }) {
   };
 
   const evaluateReadme = async (githubUsername, repoName) => {
+    const limitMessage = evaluationLimitMessage(usageState, 'readme');
+    if (limitMessage) {
+      setEvaluationError(limitMessage);
+      return;
+    }
+    const controller = evaluationRequest.begin();
     setEvaluationLoading(true);
     setEvaluationError(null);
     try {
       const response = await axiosInstance.post(
         '/v2/ai-evaluation/readme',
         { githubUsername, repoName },
-        { ...getAuthConfig(), timeout: 115000 }
+        { ...getAuthConfig(), timeout: 115000, signal: controller.signal }
       );
+      if (!evaluationRequest.isCurrent(controller)) return;
       if (response.data.status === 'success') {
         setEvaluationData(response.data.data);
       } else {
@@ -129,15 +237,21 @@ function ReadmeTab({ repos, loading, errorOccur }) {
         else setEvaluationError(msg);
       }
     } catch (error) {
+      if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
       const serverMessage = error.response?.data?.message || '';
       if (serverMessage.includes('README가 없는')) setNoReadme(true);
       else setEvaluationError(serverMessage || 'AI 평가 요청에 실패했습니다.');
     } finally {
-      setEvaluationLoading(false);
+      if (evaluationRequest.finish(controller)) {
+        setEvaluationLoading(false);
+        refreshUsage();
+      }
     }
   };
 
   const handleRepoClick = async (repo) => {
+    evaluationRequest.cancel();
+    setEvaluationLoading(false);
     setSelectedRepo(repo);
     setEvaluationData(null);
     setReadmeOpen(false);
@@ -205,9 +319,9 @@ function ReadmeTab({ repos, loading, errorOccur }) {
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm"
                 onClick={() => evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name)}
-                disabled={evaluationLoading}
+                disabled={evaluationLoading || evaluationQuota(usageState, 'readme').blocked}
               >
-                {evaluationLoading ? '평가 중...' : 'AI 재평가'}
+                {evaluationButtonText('AI 재평가', evaluationLoading, usageState, 'readme')}
               </button>
             </div>
             <div className="card-body ai-result-body">
@@ -235,11 +349,24 @@ function ReadmeTab({ repos, loading, errorOccur }) {
               {evaluationLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
-                  <p className="mt-3 text-muted">AI가 분석 중입니다...</p>
-                  <p className="text-muted small">README 길이에 따라 최대 2분까지 소요될 수 있습니다.</p>
+                  <p className="mt-3 mb-2 font-weight-bold">README 평가를 진행하고 있습니다</p>
+                  <p className="pr-agent-loading-status">
+                    <span /> README의 구조와 문서 내용을 분석하고 있습니다.<br />
+                    README 길이에 따라 시간이 오래 소요될 수 있습니다.
+                  </p>
                 </div>
               ) : evaluationData ? (
                 <div className="mt-4">
+                  {evaluationData.evaluation_status === 'code_only' && (
+                    <div className="alert alert-warning" role="alert">
+                      README의 기본 구조 분석은 완료했지만 AI 세부 판정을 완료하지 못했습니다. 잠시 후 다시 평가해 주세요.
+                    </div>
+                  )}
+                  {evaluationData.evaluation_status === 'partial' && (
+                    <div className="alert alert-warning" role="alert">
+                      README 채점은 완료했지만 상세 피드백 생성을 완료하지 못했습니다. 잠시 후 다시 평가해 주세요.
+                    </div>
+                  )}
                   {evaluationData.score && (
                     <div className="mb-4 p-3 bg-light rounded score-container">
                       <div className="d-flex align-items-center mb-3">
@@ -368,7 +495,7 @@ function ReadmeTab({ repos, loading, errorOccur }) {
 
 // ── PR 탭 ────────────────────────────────────────────────────────
 
-function PrTab({ repos, loading, errorOccur }) {
+function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage }) {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [repoListOpen, setRepoListOpen] = useState(true);
   const [prCounts, setPrCounts] = useState({});
@@ -398,6 +525,15 @@ function PrTab({ repos, loading, errorOccur }) {
   const [agentDetailsOpen, setAgentDetailsOpen] = useState(false);
   const [cohesionAgentDetailsOpen, setCohesionAgentDetailsOpen] = useState(false);
   const [prBody, setPrBody] = useState(null);
+  const evaluationRequest = useCancelableEvaluationRequest();
+  const cancelEvaluationRequest = evaluationRequest.cancel;
+
+  useEffect(() => {
+    if (active) return;
+    cancelEvaluationRequest();
+    setEvalLoading(false);
+    setEvalPhase(null);
+  }, [active, cancelEvaluationRequest]);
 
   const fetchPrList = async (repo) => {
     setPrListLoading(true);
@@ -420,6 +556,9 @@ function PrTab({ repos, loading, errorOccur }) {
   };
 
   const handleRepoClick = (repo) => {
+    evaluationRequest.cancel();
+    setEvalLoading(false);
+    setEvalPhase(null);
     setSelectedRepo(repo);
     setEvalData(null);
     setEvalError(null);
@@ -448,6 +587,12 @@ function PrTab({ repos, loading, errorOccur }) {
   };
 
   const evaluatePr = async (pr) => {
+    const limitMessage = evaluationLimitMessage(usageState, 'pr');
+    if (limitMessage) {
+      setEvalError(limitMessage);
+      return;
+    }
+    const controller = evaluationRequest.begin();
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     const progressId = (typeof crypto !== 'undefined' && crypto.randomUUID)
       ? crypto.randomUUID().replaceAll('-', '')
@@ -463,8 +608,9 @@ function PrTab({ repos, loading, errorOccur }) {
         try {
           const progressRes = await axiosInstance.get(
             `/v2/ai-evaluation/pr-progress?progressId=${encodeURIComponent(progressId)}`,
-            getAuthConfig()
+            { ...getAuthConfig(), signal: controller.signal }
           );
+          if (!evaluationRequest.isCurrent(controller)) return;
           const phase = progressRes.data?.data?.phase;
           if (phase && phase !== 'unknown') setEvalPhase(phase);
         } catch {
@@ -479,20 +625,28 @@ function PrTab({ repos, loading, errorOccur }) {
           prNumber: pr.pr_number,
           progressId,
         },
-        { ...getAuthConfig(), timeout: 240000 }
+        { ...getAuthConfig(), timeout: 240000, signal: controller.signal }
       );
+      if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') setEvalData(res.data.data);
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
+      if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
       setEvalError(error.response?.data?.message || 'AI 평가 요청에 실패했습니다.');
     } finally {
       if (progressTimer) window.clearInterval(progressTimer);
-      setEvalPhase(null);
-      setEvalLoading(false);
+      if (evaluationRequest.finish(controller)) {
+        setEvalPhase(null);
+        setEvalLoading(false);
+        refreshUsage();
+      }
     }
   };
 
   const handlePrClick = async (pr) => {
+    evaluationRequest.cancel();
+    setEvalLoading(false);
+    setEvalPhase(null);
     setSelectedPr(pr);
     setEvalData(null);
     setEvalError(null);
@@ -594,10 +748,10 @@ function PrTab({ repos, loading, errorOccur }) {
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm flex-shrink-0"
                 onClick={() => evaluatePr(selectedPr)}
-                disabled={evalLoading || !evalData}
+                disabled={evalLoading || !evalData || evaluationQuota(usageState, 'pr').blocked}
                 title={!evalData ? '먼저 AI 평가를 실행해 주세요.' : ''}
               >
-                {evalLoading ? '평가 중...' : 'AI 재평가'}
+                {evaluationButtonText('AI 재평가', evalLoading, usageState, 'pr')}
               </button>
             </div>
             <div className="card-body ai-result-body">
@@ -636,6 +790,12 @@ function PrTab({ repos, loading, errorOccur }) {
                       코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
                     </p>
                   )}
+                  {evalPhase === 'evaluation_agents' && (
+                    <p className="pr-agent-loading-status">
+                      <span /> 정합성·응집성 검증 에이전트가 커밋을 확인하고 있습니다.<br />
+                      코드 변경량에 따라 시간이 오래 소요될 수 있습니다.
+                    </p>
+                  )}
                   {evalPhase === 'cohesion_agent' && (
                     <p className="pr-agent-loading-status">
                       <span /> 응집성 검증 에이전트가 커밋들의 관련성을 확인하고 있습니다.<br />
@@ -655,7 +815,7 @@ function PrTab({ repos, loading, errorOccur }) {
                           <h6 className="mb-1 font-weight-bold">PR Quality Score</h6>
                           <p className="mb-0 text-muted small">
                             {evalData.pr_total_score != null
-                              ? `${evalData.pr_total_score} / ${evalData.pr_breakdown?.max_score ?? 6}점`
+                              ? `${evalData.pr_total_score} / ${evalData.pr_breakdown?.max_score ?? 9}점`
                               : '충실도 (0~3) + 명료성 (0~1) + 보너스 (0~2) + 변경 정합성 (0~2) + 응집성 (0~1)'}
                           </p>
                         </div>
@@ -772,7 +932,7 @@ function PrTab({ repos, loading, errorOccur }) {
                                     .filter((commit) => commit.status !== 'not_selected')
                                     .map((commit) => {
                                       const statusMeta = {
-                                        token_limit: { icon: '⚠', label: '토큰 예산 초과', className: 'warning' },
+                                        token_limit: { icon: '⚠', label: '변경량 초과', className: 'warning' },
                                         unavailable: { icon: '⚠', label: '변경 내용 확인 불가', className: 'warning' },
                                         error: { icon: '!', label: '조회 실패', className: 'error' },
                                       }[commit.status] || { icon: '○', label: commit.status, className: 'neutral' };
@@ -882,7 +1042,7 @@ function PrTab({ repos, loading, errorOccur }) {
                                     .filter((commit) => commit.status !== 'not_selected')
                                     .map((commit) => {
                                       const statusMeta = {
-                                        token_limit: { icon: '⚠', label: '토큰 예산 초과', className: 'warning' },
+                                        token_limit: { icon: '⚠', label: '변경량 초과', className: 'warning' },
                                         unavailable: { icon: '⚠', label: '변경 내용 확인 불가', className: 'warning' },
                                         error: { icon: '!', label: '조회 실패', className: 'error' },
                                       }[commit.status] || { icon: '○', label: commit.status, className: 'neutral' };
@@ -967,9 +1127,9 @@ function PrTab({ repos, loading, errorOccur }) {
                   <button
                     className="btn btn-sm btn-primary px-4"
                     onClick={() => evaluatePr(selectedPr)}
-                    disabled={evalLoading}
+                    disabled={evalLoading || evaluationQuota(usageState, 'pr').blocked}
                   >
-                    AI 평가 시작
+                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'pr')}
                   </button>
                 </div>
               )}
@@ -989,7 +1149,7 @@ function PrTab({ repos, loading, errorOccur }) {
 
 // ── Issue 탭 ─────────────────────────────────────────────────────
 
-function IssueTab({ repos, loading, errorOccur }) {
+function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage }) {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [repoListOpen, setRepoListOpen] = useState(true);
   const [issueCounts, setIssueCounts] = useState({});
@@ -1016,6 +1176,14 @@ function IssueTab({ repos, loading, errorOccur }) {
   const [evalError, setEvalError] = useState(null);
   const [issueBodyOpen, setIssueBodyOpen] = useState(false);
   const [issueBody, setIssueBody] = useState(null);
+  const evaluationRequest = useCancelableEvaluationRequest();
+  const cancelEvaluationRequest = evaluationRequest.cancel;
+
+  useEffect(() => {
+    if (active) return;
+    cancelEvaluationRequest();
+    setEvalLoading(false);
+  }, [active, cancelEvaluationRequest]);
 
   const fetchIssueList = async (repo) => {
     setIssueListLoading(true);
@@ -1038,6 +1206,8 @@ function IssueTab({ repos, loading, errorOccur }) {
   };
 
   const handleRepoClick = (repo) => {
+    evaluationRequest.cancel();
+    setEvalLoading(false);
     setSelectedRepo(repo);
     setEvalData(null);
     setEvalError(null);
@@ -1066,6 +1236,12 @@ function IssueTab({ repos, loading, errorOccur }) {
   };
 
   const evaluateIssue = async (issue) => {
+    const limitMessage = evaluationLimitMessage(usageState, 'issue');
+    if (limitMessage) {
+      setEvalError(limitMessage);
+      return;
+    }
+    const controller = evaluationRequest.begin();
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     setEvalLoading(true);
     setEvalError(null);
@@ -1073,18 +1249,25 @@ function IssueTab({ repos, loading, errorOccur }) {
       const res = await axiosInstance.post(
         '/v2/ai-evaluation/issue',
         { githubUsername, repoName: selectedRepo.repo_name, issueNumber: issue.issue_number },
-        { ...getAuthConfig(), timeout: 115000 }
+        { ...getAuthConfig(), timeout: 115000, signal: controller.signal }
       );
+      if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') setEvalData(res.data.data);
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
+      if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
       setEvalError(error.response?.data?.message || 'AI 평가 요청에 실패했습니다.');
     } finally {
-      setEvalLoading(false);
+      if (evaluationRequest.finish(controller)) {
+        setEvalLoading(false);
+        refreshUsage();
+      }
     }
   };
 
   const handleIssueClick = async (issue) => {
+    evaluationRequest.cancel();
+    setEvalLoading(false);
     setSelectedIssue(issue);
     setEvalData(null);
     setEvalError(null);
@@ -1187,10 +1370,10 @@ function IssueTab({ repos, loading, errorOccur }) {
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm flex-shrink-0"
                 onClick={() => evaluateIssue(selectedIssue)}
-                disabled={evalLoading || !evalData}
+                disabled={evalLoading || !evalData || evaluationQuota(usageState, 'issue').blocked}
                 title={!evalData ? '먼저 AI 평가를 실행해 주세요.' : ''}
               >
-                {evalLoading ? '평가 중...' : 'AI 재평가'}
+                {evaluationButtonText('AI 재평가', evalLoading, usageState, 'issue')}
               </button>
             </div>
             <div className="card-body ai-result-body">
@@ -1222,14 +1405,26 @@ function IssueTab({ repos, loading, errorOccur }) {
               {evalLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
-                  <p className="mt-3 text-muted">AI가 이슈를 분석 중입니다...</p>
+                  <p className="mt-3 mb-2 font-weight-bold">이슈 평가를 진행하고 있습니다</p>
+                  <p className="pr-agent-loading-status">
+                    <span /> 이슈의 유형과 제목·본문 내용을 분석하고 있습니다.<br />
+                    본문 길이에 따라 시간이 오래 소요될 수 있습니다.
+                  </p>
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
                   {evalData.issue_type === 'skip' ? (
-                    <div className="alert alert-secondary mt-3" role="alert" style={{ borderLeft: '4px solid #6c757d' }}>
-                      <strong>평가 제외 이슈</strong>
-                      <p className="mb-0 mt-1" style={{ fontSize: '0.9rem' }}>{evalData.skip_message}</p>
+                    <div className="issue-skip-notice mt-3" role="status">
+                      <div className="issue-skip-icon" aria-hidden="true">
+                        <BsExclamationCircle />
+                      </div>
+                      <div className="issue-skip-content">
+                        <div className="issue-skip-title">이 이슈는 품질 평가 대상이 아닙니다</div>
+                        <p className="issue-skip-reason">
+                          {evalData.skip_reason || '구체적인 버그 증상이나 기능 요청을 확인하기 어렵습니다.'}
+                        </p>
+                        <p className="issue-skip-guide">{evalData.skip_message}</p>
+                      </div>
                     </div>
                   ) : (
                     <>
@@ -1333,9 +1528,9 @@ function IssueTab({ repos, loading, errorOccur }) {
                   <button
                     className="btn btn-sm btn-primary px-4"
                     onClick={() => evaluateIssue(selectedIssue)}
-                    disabled={evalLoading}
+                    disabled={evalLoading || evaluationQuota(usageState, 'issue').blocked}
                   >
-                    AI 평가 시작
+                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'issue')}
                   </button>
                 </div>
               )}
@@ -1355,7 +1550,7 @@ function IssueTab({ repos, loading, errorOccur }) {
 
 // ── Commit 탭 ────────────────────────────────────────────────────
 
-function CommitTab({ repos, loading, errorOccur }) {
+function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsage }) {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [repoListOpen, setRepoListOpen] = useState(true);
   const [commitCounts, setCommitCounts] = useState({});
@@ -1372,6 +1567,14 @@ function CommitTab({ repos, loading, errorOccur }) {
   const [fileSummariesLoading, setFileSummariesLoading] = useState(false);
   const [fileSummariesError, setFileSummariesError] = useState(null);
   const fileSummaryRequestId = useRef(0);
+  const evaluationRequest = useCancelableEvaluationRequest();
+  const cancelEvaluationRequest = evaluationRequest.cancel;
+
+  useEffect(() => {
+    if (active) return;
+    cancelEvaluationRequest();
+    setEvalLoading(false);
+  }, [active, cancelEvaluationRequest]);
 
   useEffect(() => {
     if (!repos.length) return;
@@ -1410,6 +1613,8 @@ function CommitTab({ repos, loading, errorOccur }) {
   };
 
   const handleRepoClick = (repo) => {
+    evaluationRequest.cancel();
+    setEvalLoading(false);
     fileSummaryRequestId.current += 1;
     setSelectedRepo(repo);
     setEvalData(null);
@@ -1443,6 +1648,12 @@ function CommitTab({ repos, loading, errorOccur }) {
   };
 
   const evaluateCommit = async (commit) => {
+    const limitMessage = evaluationLimitMessage(usageState, 'commit');
+    if (limitMessage) {
+      setEvalError(limitMessage);
+      return;
+    }
+    const controller = evaluationRequest.begin();
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     setEvalLoading(true);
     setEvalError(null);
@@ -1450,20 +1661,27 @@ function CommitTab({ repos, loading, errorOccur }) {
       const res = await axiosInstance.post(
         '/v2/ai-evaluation/commit',
         { githubUsername, repoName: selectedRepo.repo_name, sha: commit.sha },
-        { ...getAuthConfig(), timeout: 180000 }
+        { ...getAuthConfig(), timeout: 180000, signal: controller.signal }
       );
+      if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') {
         setEvalData(res.data.data);
       }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
+      if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
       setEvalError(error.response?.data?.message || 'AI 평가 요청에 실패했습니다.');
     } finally {
-      setEvalLoading(false);
+      if (evaluationRequest.finish(controller)) {
+        setEvalLoading(false);
+        refreshUsage();
+      }
     }
   };
 
   const handleCommitClick = async (commit) => {
+    evaluationRequest.cancel();
+    setEvalLoading(false);
     fileSummaryRequestId.current += 1;
     setSelectedCommit(commit);
     setEvalData(null);
@@ -1671,14 +1889,14 @@ function CommitTab({ repos, loading, errorOccur }) {
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm flex-shrink-0"
                 onClick={() => evaluateCommit(selectedCommit)}
-                disabled={evalLoading || !evalData || evalData?.evaluation_status === 'skipped'}
+                disabled={evalLoading || !evalData || evalData?.evaluation_status === 'skipped' || evaluationQuota(usageState, 'commit').blocked}
                 title={!evalData ? '먼저 AI 평가를 실행해 주세요.' : ''}
               >
                 {evalLoading
-                  ? '평가 중...'
+                  ? evaluationButtonText('AI 재평가', true, usageState, 'commit')
                   : evalData?.evaluation_status === 'skipped'
                   ? '평가 제외'
-                  : 'AI 재평가'}
+                  : evaluationButtonText('AI 재평가', false, usageState, 'commit')}
               </button>
             </div>
             <div className="card-body ai-result-body">
@@ -1845,8 +2063,8 @@ function CommitTab({ repos, loading, errorOccur }) {
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
                   <p className="mb-2">아직 AI 평가가 없습니다.</p>
-                  <button className="btn btn-sm btn-primary px-4" onClick={() => evaluateCommit(selectedCommit)} disabled={evalLoading}>
-                    AI 평가 시작
+                  <button className="btn btn-sm btn-primary px-4" onClick={() => evaluateCommit(selectedCommit)} disabled={evalLoading || evaluationQuota(usageState, 'commit').blocked}>
+                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'commit')}
                   </button>
                 </div>
               )}
@@ -1868,13 +2086,62 @@ function CommitTab({ repos, loading, errorOccur }) {
 
 function AiEvaluation() {
   const { username } = useParams();
+  const { isSuperuser } = useContext(AuthContext);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorOccur, setErrorOccur] = useState(false);
+  const [usageState, setUsageState] = useState(null);
   const [activeTab, setActiveTab] = useState('readme');
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set(['readme']));
   // 'readme' | 'pr' | 'issue' | 'commit'
 
   useEffect(() => {
+    if (!isSuperuser) return;
+    setActiveTab('usage');
+    setVisitedTabs((previous) => {
+      if (previous.has('usage')) return previous;
+      const next = new Set(previous);
+      next.add('usage');
+      return next;
+    });
+  }, [isSuperuser]);
+
+  const selectTab = (tab) => {
+    setVisitedTabs((previous) => {
+      if (previous.has(tab)) return previous;
+      const next = new Set(previous);
+      next.add(tab);
+      return next;
+    });
+    setActiveTab(tab);
+  };
+
+  const refreshUsage = useCallback(async () => {
+    if (isSuperuser) return;
+    try {
+      const response = await axiosInstance.get(
+        '/v2/ai-evaluation/usage/me',
+        getAuthConfig(),
+      );
+      if (response.data?.status === 'success') {
+        setUsageState(response.data.data);
+      }
+    } catch {
+      // 제한 상태 조회 실패가 기존 평가 결과 조회를 방해하지 않도록 한다.
+    }
+  }, [isSuperuser]);
+
+  useEffect(() => {
+    refreshUsage();
+  }, [refreshUsage]);
+
+  useEffect(() => {
+    if (isSuperuser) {
+      setRepos([]);
+      setErrorOccur(false);
+      setLoading(false);
+      return undefined;
+    }
     const getRepoList = async () => {
       try {
         setLoading(true);
@@ -1889,58 +2156,95 @@ function AiEvaluation() {
       }
     };
     getRepoList();
-  }, [username]);
+    return undefined;
+  }, [username, isSuperuser]);
 
   return (
     <div className="container ai-eval-container">
       <div className="ai-tab-nav">
-        <button
-          className={`ai-tab-item${activeTab === 'readme' ? ' active' : ''}`}
-          onClick={() => setActiveTab('readme')}
-        >
-          <BsFileEarmarkText size={14} />
-          README 평가
-        </button>
-        <button
-          className={`ai-tab-item${activeTab === 'pr' ? ' active' : ''}`}
-          onClick={() => setActiveTab('pr')}
-        >
-          <BsGit size={14} />
-          PR 평가
-        </button>
-        <button
-          className={`ai-tab-item${activeTab === 'issue' ? ' active' : ''}`}
-          onClick={() => setActiveTab('issue')}
-        >
-          <BsExclamationCircle size={14} />
-          이슈 평가
-        </button>
-        <button
-          className={`ai-tab-item${activeTab === 'commit' ? ' active' : ''}`}
-          onClick={() => setActiveTab('commit')}
-        >
-          <BsCodeSlash size={14} />
-          커밋 평가
-        </button>
+        {isSuperuser ? (
+          <button
+            className={`ai-tab-item${activeTab === 'usage' ? ' active' : ''}`}
+            onClick={() => selectTab('usage')}
+          >
+            <BsBarChart size={14} />
+            사용량 관리
+          </button>
+        ) : (
+          <>
+            <button
+              className={`ai-tab-item${activeTab === 'readme' ? ' active' : ''}`}
+              onClick={() => selectTab('readme')}
+            >
+              <BsFileEarmarkText size={14} />
+              README 평가
+            </button>
+            <button
+              className={`ai-tab-item${activeTab === 'pr' ? ' active' : ''}`}
+              onClick={() => selectTab('pr')}
+            >
+              <BsGit size={14} />
+              PR 평가
+            </button>
+            <button
+              className={`ai-tab-item${activeTab === 'issue' ? ' active' : ''}`}
+              onClick={() => selectTab('issue')}
+            >
+              <BsExclamationCircle size={14} />
+              이슈 평가
+            </button>
+            <button
+              className={`ai-tab-item${activeTab === 'commit' ? ' active' : ''}`}
+              onClick={() => selectTab('commit')}
+            >
+              <BsCodeSlash size={14} />
+              커밋 평가
+            </button>
+          </>
+        )}
       </div>
 
       <div className="ai-eval-description">
-        {activeTab === 'readme'
+        {isSuperuser
+          ? 'AI 평가의 실제 비용과 사용자별 사용량을 확인합니다.'
+          : activeTab === 'readme'
           ? 'AI 모델을 활용해 레포지토리 README의 품질과 수준을 분석하고, 구체적인 개선점을 제안합니다.'
           : activeTab === 'pr'
           ? 'AI 모델을 활용해 Pull Request의 제목과 본문 품질을 분석하고, 더 나은 PR 작성법을 안내합니다.'
           : activeTab === 'issue'
           ? 'AI 모델을 활용해 이슈의 제목과 본문 품질을 분석하고, 더 나은 이슈 작성법을 안내합니다.'
-          : 'AI 모델을 활용해 커밋 메시지와 코드 변경의 품질을 분석하고, 더 나은 커밋 작성법을 안내합니다.'}
+          : activeTab === 'commit'
+          ? 'AI 모델을 활용해 커밋 메시지와 코드 변경의 품질을 분석하고, 더 나은 커밋 작성법을 안내합니다.'
+          : 'AI 평가의 실제 비용과 사용자별 사용량을 확인합니다.'}
       </div>
 
-      {activeTab === 'readme'
-        ? <ReadmeTab repos={repos} loading={loading} errorOccur={errorOccur} />
-        : activeTab === 'pr'
-        ? <PrTab repos={repos} loading={loading} errorOccur={errorOccur} />
-        : activeTab === 'issue'
-        ? <IssueTab repos={repos} loading={loading} errorOccur={errorOccur} />
-        : <CommitTab repos={repos} loading={loading} errorOccur={errorOccur} />}
+      {!isSuperuser && <EvaluationLimitNotice usageState={usageState} />}
+
+      {!isSuperuser && visitedTabs.has('readme') && (
+        <div hidden={activeTab !== 'readme'}>
+          <ReadmeTab key={`readme-${username}`} repos={repos} loading={loading} errorOccur={errorOccur} active={activeTab === 'readme'} usageState={usageState} refreshUsage={refreshUsage} />
+        </div>
+      )}
+      {!isSuperuser && visitedTabs.has('pr') && (
+        <div hidden={activeTab !== 'pr'}>
+          <PrTab key={`pr-${username}`} repos={repos} loading={loading} errorOccur={errorOccur} active={activeTab === 'pr'} usageState={usageState} refreshUsage={refreshUsage} />
+        </div>
+      )}
+      {!isSuperuser && visitedTabs.has('issue') && (
+        <div hidden={activeTab !== 'issue'}>
+          <IssueTab key={`issue-${username}`} repos={repos} loading={loading} errorOccur={errorOccur} active={activeTab === 'issue'} usageState={usageState} refreshUsage={refreshUsage} />
+        </div>
+      )}
+      {!isSuperuser && visitedTabs.has('commit') && (
+        <div hidden={activeTab !== 'commit'}>
+          <CommitTab key={`commit-${username}`} repos={repos} loading={loading} errorOccur={errorOccur} active={activeTab === 'commit'} usageState={usageState} refreshUsage={refreshUsage} />
+        </div>
+      )}
+      {isSuperuser && visitedTabs.has('usage') && (
+        <div hidden={activeTab !== 'usage'}>
+          <AiUsageDashboard active={activeTab === 'usage'} />
+        </div>
+      )}
     </div>
   );
 }

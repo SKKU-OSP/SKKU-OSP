@@ -5,6 +5,14 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 
 from . import commit_evaluation_service as svc
+from .ai_evaluation_usage import (
+    enforce_daily_limit,
+    EvaluationLimitExceeded,
+    evaluation_status,
+    get_request_github_id,
+    RequireAuthenticatedEvaluationPostMixin,
+    track_evaluation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +64,7 @@ class CommitListView(APIView):
             )
 
 
-class CommitEvaluationView(APIView):
+class CommitEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
     def get(self, request):
         github_username = request.GET.get('githubUsername')
         repo_name = request.GET.get('repoName')
@@ -88,8 +96,24 @@ class CommitEvaluationView(APIView):
                 status=400,
             )
         try:
-            result = svc.evaluate(github_username, repo_name, sha)
+            actor_github_id = get_request_github_id(request)
+            enforce_daily_limit(actor_github_id, 'commit')
+            with track_evaluation(
+                actor_github_id,
+                'commit',
+                {'owner': github_username, 'repo': repo_name, 'sha': sha},
+            ) as usage:
+                result = svc.evaluate(github_username, repo_name, sha)
+                usage.complete(evaluation_status(result, 'commit'))
             return JsonResponse({'status': 'success', 'data': result})
+        except EvaluationLimitExceeded as error:
+            return JsonResponse({
+                'status': 'fail',
+                'code': 'AI_EVALUATION_LIMIT_EXCEEDED',
+                'reason': error.reason,
+                'message': str(error),
+                'usage': error.usage_state,
+            }, status=429)
         except ValueError as error:
             return JsonResponse({'status': 'fail', 'message': str(error)}, status=400)
         except Exception as error:
