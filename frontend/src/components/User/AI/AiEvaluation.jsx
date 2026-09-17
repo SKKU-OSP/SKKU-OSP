@@ -183,13 +183,16 @@ function RadarChart({ axes, size = 240 }) {
 function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsage }) {
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [evaluationLoading, setEvaluationLoading] = useState(false);
+  const [storedEvaluationLoading, setStoredEvaluationLoading] = useState(false);
   const [evaluationData, setEvaluationData] = useState(null);
+  const [storedEvaluationData, setStoredEvaluationData] = useState(null);
   const [readmeOpen, setReadmeOpen] = useState(false);
   const [noReadme, setNoReadme] = useState(false);
   const [repoListOpen, setRepoListOpen] = useState(true);
   const [evaluationError, setEvaluationError] = useState(null);
   const evaluationRequest = useCancelableEvaluationRequest();
   const cancelEvaluationRequest = evaluationRequest.cancel;
+  const lookupId = useRef(0);
 
   useEffect(() => {
     if (active) return;
@@ -197,40 +200,46 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
     setEvaluationLoading(false);
   }, [active, cancelEvaluationRequest]);
 
-  const fetchAiEvaluation = async (githubUsername, repoName) => {
+  const fetchAiEvaluation = async (githubUsername, repoName, currentLookupId) => {
     try {
       const response = await axiosInstance.get(
         `/v2/ai-evaluation/readme?githubUsername=${githubUsername}&repoName=${repoName}`,
         getAuthConfig()
       );
-      if (response.data.status === 'success' && response.data.data) {
-        setEvaluationData(response.data.data);
-        return true;
+      if (lookupId.current === currentLookupId && response.data.status === 'success'
+        && ['full', 'partial'].includes(response.data.data?.evaluation_status)) {
+        setStoredEvaluationData(response.data.data);
       }
-      return false;
     } catch {
-      return false;
+      if (lookupId.current === currentLookupId) {
+        setEvaluationError('기존 평가 결과를 불러오지 못했습니다. 다시 선택해 주세요.');
+      }
+    } finally {
+      if (lookupId.current === currentLookupId) setStoredEvaluationLoading(false);
     }
   };
 
-  const evaluateReadme = async (githubUsername, repoName) => {
+  const evaluateReadme = async (githubUsername, repoName, forceReevaluate = false) => {
     const limitMessage = evaluationLimitMessage(usageState, 'readme');
     if (limitMessage) {
       setEvaluationError(limitMessage);
       return;
     }
+    lookupId.current += 1;
+    setStoredEvaluationLoading(false);
     const controller = evaluationRequest.begin();
     setEvaluationLoading(true);
     setEvaluationError(null);
     try {
       const response = await axiosInstance.post(
         '/v2/ai-evaluation/readme',
-        { githubUsername, repoName },
+        { githubUsername, repoName, forceReevaluate },
         { ...getAuthConfig(), timeout: 115000, signal: controller.signal }
       );
       if (!evaluationRequest.isCurrent(controller)) return;
       if (response.data.status === 'success') {
         setEvaluationData(response.data.data);
+        setStoredEvaluationData(response.data.data);
       } else {
         const msg = response.data.message || '';
         if (msg.includes('README가 없는')) setNoReadme(true);
@@ -251,15 +260,17 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
 
   const handleRepoClick = async (repo) => {
     evaluationRequest.cancel();
+    const currentLookupId = ++lookupId.current;
     setEvaluationLoading(false);
+    setStoredEvaluationLoading(true);
     setSelectedRepo(repo);
     setEvaluationData(null);
+    setStoredEvaluationData(null);
     setReadmeOpen(false);
     setNoReadme(false);
     setEvaluationError(null);
     const githubUsername = repo.github_id || repo.owner_id;
-    const hasData = await fetchAiEvaluation(githubUsername, repo.repo_name);
-    if (!hasData) evaluateReadme(githubUsername, repo.repo_name);
+    await fetchAiEvaluation(githubUsername, repo.repo_name, currentLookupId);
   };
 
   if (loading) return <div className="text-center" style={{ marginTop: '100px' }}><LoaderIcon /></div>;
@@ -318,10 +329,17 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
               </a>
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm"
-                onClick={() => evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name)}
-                disabled={evaluationLoading || evaluationQuota(usageState, 'readme').blocked}
+                onClick={() => {
+                  if (evaluationData) evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name, true);
+                  else if (storedEvaluationData) setEvaluationData(storedEvaluationData);
+                  else evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name);
+                }}
+                disabled={storedEvaluationLoading || evaluationLoading
+                  || (!storedEvaluationData && evaluationQuota(usageState, 'readme').blocked)}
               >
-                {evaluationButtonText('AI 재평가', evaluationLoading, usageState, 'readme')}
+                {storedEvaluationData && !evaluationData
+                  ? '저장된 평가 보기'
+                  : evaluationButtonText(evaluationData ? 'AI 재평가' : 'AI 평가 시작', evaluationLoading, usageState, 'readme')}
               </button>
             </div>
             <div className="card-body ai-result-body">
@@ -346,7 +364,12 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
 
               {evaluationError && <div className="alert alert-warning mt-3" role="alert">⚠️ {evaluationError}</div>}
 
-              {evaluationLoading ? (
+              {storedEvaluationLoading ? (
+                <div className="text-center py-5 mt-4">
+                  <LoaderIcon />
+                  <p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p>
+                </div>
+              ) : evaluationLoading ? (
                 <div className="text-center py-5 mt-4">
                   <LoaderIcon />
                   <p className="mt-3 mb-2 font-weight-bold">README 평가를 진행하고 있습니다</p>
@@ -476,7 +499,9 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                 </div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-0">분석된 데이터가 없습니다. 상단의 AI 재평가 버튼을 눌러 분석을 시작하세요.</p>
+                  <p className="mb-0">{storedEvaluationData
+                    ? '저장된 평가 결과가 있습니다. 상단의 저장된 평가 보기 버튼을 눌러 확인하세요.'
+                    : '아직 AI 평가가 없습니다. 상단의 AI 평가 시작 버튼을 눌러 분석을 시작하세요.'}</p>
                 </div>
               )}
             </div>
@@ -485,7 +510,7 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
           <div className="card shadow-sm empty-selection-card d-flex flex-column align-items-center justify-content-center text-muted">
             <BsArrowRightShort size={60} className="mb-3" style={{ opacity: 0.3 }} />
             <h5>Select a Repository</h5>
-            <p className="text-center">왼쪽 목록에서 분석하고 싶은 리포지토리를 선택하면<br />AI가 README를 평가해 드립니다.</p>
+            <p className="text-center">왼쪽 목록에서 리포지토리를 선택한 뒤<br />AI 평가 시작 버튼을 눌러 주세요.</p>
           </div>
         )}
       </div>
@@ -520,6 +545,8 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalPhase, setEvalPhase] = useState(null);
   const [evalData, setEvalData] = useState(null);
+  const [storedEvalData, setStoredEvalData] = useState(null);
+  const [existingLoading, setExistingLoading] = useState(false);
   const [evalError, setEvalError] = useState(null);
   const [prBodyOpen, setPrBodyOpen] = useState(false);
   const [agentDetailsOpen, setAgentDetailsOpen] = useState(false);
@@ -527,6 +554,7 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
   const [prBody, setPrBody] = useState(null);
   const evaluationRequest = useCancelableEvaluationRequest();
   const cancelEvaluationRequest = evaluationRequest.cancel;
+  const lookupId = useRef(0);
 
   useEffect(() => {
     if (active) return;
@@ -540,6 +568,7 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
     setPrList([]);
     setSelectedPr(null);
     setEvalData(null);
+    setStoredEvalData(null);
     setPrBody(null);
     try {
       const githubUsername = repo.github_id || repo.owner_id;
@@ -557,42 +586,48 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
 
   const handleRepoClick = (repo) => {
     evaluationRequest.cancel();
+    lookupId.current += 1;
     setEvalLoading(false);
+    setExistingLoading(false);
     setEvalPhase(null);
     setSelectedRepo(repo);
     setEvalData(null);
+    setStoredEvalData(null);
     setEvalError(null);
     fetchPrList(repo);
   };
 
-  const fetchExistingEval = async (pr) => {
+  const fetchExistingEval = async (pr, currentLookupId) => {
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     try {
       const res = await axiosInstance.get(
         `/v2/ai-evaluation/pr?githubUsername=${githubUsername}&repoName=${selectedRepo.repo_name}&prNumber=${pr.pr_number}`,
         getAuthConfig()
       );
+      if (lookupId.current !== currentLookupId) return;
       if (res.data.status === 'success' && res.data.data) {
         const data = res.data.data;
         setPrBody(data.pr_body || null);
         if (data.evaluated) {
-          setEvalData(data);
-          return true;
+          setStoredEvalData(data);
         }
       }
     } catch {
-      setPrBody(null);
+      if (lookupId.current === currentLookupId) setPrBody(null);
+    } finally {
+      if (lookupId.current === currentLookupId) setExistingLoading(false);
     }
-    return false;
   };
 
-  const evaluatePr = async (pr) => {
+  const evaluatePr = async (pr, forceReevaluate = false) => {
     const limitMessage = evaluationLimitMessage(usageState, 'pr');
     if (limitMessage) {
       setEvalError(limitMessage);
       return;
     }
     const controller = evaluationRequest.begin();
+    lookupId.current += 1;
+    setExistingLoading(false);
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     const progressId = (typeof crypto !== 'undefined' && crypto.randomUUID)
       ? crypto.randomUUID().replaceAll('-', '')
@@ -624,11 +659,15 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
           repoName: selectedRepo.repo_name,
           prNumber: pr.pr_number,
           progressId,
+          forceReevaluate,
         },
         { ...getAuthConfig(), timeout: 240000, signal: controller.signal }
       );
       if (!evaluationRequest.isCurrent(controller)) return;
-      if (res.data.status === 'success') setEvalData(res.data.data);
+      if (res.data.status === 'success') {
+        setEvalData(res.data.data);
+        setStoredEvalData(res.data.data);
+      }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
       if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
@@ -645,16 +684,19 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
 
   const handlePrClick = async (pr) => {
     evaluationRequest.cancel();
+    const currentLookupId = ++lookupId.current;
     setEvalLoading(false);
+    setExistingLoading(true);
     setEvalPhase(null);
     setSelectedPr(pr);
     setEvalData(null);
+    setStoredEvalData(null);
     setEvalError(null);
     setPrBodyOpen(false);
     setAgentDetailsOpen(false);
     setCohesionAgentDetailsOpen(false);
     setPrBody(undefined);
-    await fetchExistingEval(pr);
+    await fetchExistingEval(pr, currentLookupId);
   };
 
   const gradeClass = (score) => {
@@ -747,7 +789,7 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
               </div>
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm flex-shrink-0"
-                onClick={() => evaluatePr(selectedPr)}
+                onClick={() => evaluatePr(selectedPr, true)}
                 disabled={evalLoading || !evalData || evaluationQuota(usageState, 'pr').blocked}
                 title={!evalData ? '먼저 AI 평가를 실행해 주세요.' : ''}
               >
@@ -1121,15 +1163,17 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
                     </span>
                   </div>
                 </div>
+              ) : existingLoading ? (
+                <div className="text-center py-5"><LoaderIcon /><p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p></div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-2">아직 AI 평가가 없습니다.</p>
+                  <p className="mb-2">{storedEvalData ? '저장된 평가 결과가 있습니다.' : '아직 AI 평가가 없습니다.'}</p>
                   <button
                     className="btn btn-sm btn-primary px-4"
-                    onClick={() => evaluatePr(selectedPr)}
-                    disabled={evalLoading || evaluationQuota(usageState, 'pr').blocked}
+                    onClick={() => storedEvalData ? setEvalData(storedEvalData) : evaluatePr(selectedPr)}
+                    disabled={evalLoading || (!storedEvalData && evaluationQuota(usageState, 'pr').blocked)}
                   >
-                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'pr')}
+                    {storedEvalData ? '저장된 평가 보기' : evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'pr')}
                   </button>
                 </div>
               )}
@@ -1173,11 +1217,14 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalData, setEvalData] = useState(null);
+  const [storedEvalData, setStoredEvalData] = useState(null);
+  const [existingLoading, setExistingLoading] = useState(false);
   const [evalError, setEvalError] = useState(null);
   const [issueBodyOpen, setIssueBodyOpen] = useState(false);
   const [issueBody, setIssueBody] = useState(null);
   const evaluationRequest = useCancelableEvaluationRequest();
   const cancelEvaluationRequest = evaluationRequest.cancel;
+  const lookupId = useRef(0);
 
   useEffect(() => {
     if (active) return;
@@ -1190,6 +1237,7 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
     setIssueList([]);
     setSelectedIssue(null);
     setEvalData(null);
+    setStoredEvalData(null);
     setIssueBody(null);
     try {
       const githubUsername = repo.github_id || repo.owner_id;
@@ -1207,52 +1255,61 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
 
   const handleRepoClick = (repo) => {
     evaluationRequest.cancel();
+    lookupId.current += 1;
     setEvalLoading(false);
+    setExistingLoading(false);
     setSelectedRepo(repo);
     setEvalData(null);
+    setStoredEvalData(null);
     setEvalError(null);
     fetchIssueList(repo);
   };
 
-  const fetchExistingEval = async (issue) => {
+  const fetchExistingEval = async (issue, currentLookupId) => {
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     try {
       const res = await axiosInstance.get(
         `/v2/ai-evaluation/issue?githubUsername=${githubUsername}&repoName=${selectedRepo.repo_name}&issueNumber=${issue.issue_number}`,
         getAuthConfig()
       );
+      if (lookupId.current !== currentLookupId) return;
       if (res.data.status === 'success' && res.data.data) {
         const data = res.data.data;
         setIssueBody(data.issue_body || null);
         if (data.evaluated) {
-          setEvalData(data);
-          return true;
+          setStoredEvalData(data);
         }
       }
     } catch {
-      setIssueBody(null);
+      if (lookupId.current === currentLookupId) setIssueBody(null);
+    } finally {
+      if (lookupId.current === currentLookupId) setExistingLoading(false);
     }
-    return false;
   };
 
-  const evaluateIssue = async (issue) => {
+  const evaluateIssue = async (issue, forceReevaluate = false) => {
     const limitMessage = evaluationLimitMessage(usageState, 'issue');
     if (limitMessage) {
       setEvalError(limitMessage);
       return;
     }
     const controller = evaluationRequest.begin();
+    lookupId.current += 1;
+    setExistingLoading(false);
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     setEvalLoading(true);
     setEvalError(null);
     try {
       const res = await axiosInstance.post(
         '/v2/ai-evaluation/issue',
-        { githubUsername, repoName: selectedRepo.repo_name, issueNumber: issue.issue_number },
+        { githubUsername, repoName: selectedRepo.repo_name, issueNumber: issue.issue_number, forceReevaluate },
         { ...getAuthConfig(), timeout: 115000, signal: controller.signal }
       );
       if (!evaluationRequest.isCurrent(controller)) return;
-      if (res.data.status === 'success') setEvalData(res.data.data);
+      if (res.data.status === 'success') {
+        setEvalData(res.data.data);
+        setStoredEvalData(res.data.data);
+      }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
       if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
@@ -1267,13 +1324,16 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
 
   const handleIssueClick = async (issue) => {
     evaluationRequest.cancel();
+    const currentLookupId = ++lookupId.current;
     setEvalLoading(false);
+    setExistingLoading(true);
     setSelectedIssue(issue);
     setEvalData(null);
+    setStoredEvalData(null);
     setEvalError(null);
     setIssueBodyOpen(false);
     setIssueBody(undefined);
-    await fetchExistingEval(issue);
+    await fetchExistingEval(issue, currentLookupId);
   };
 
   const gradeClass = (score) => {
@@ -1369,7 +1429,7 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
               </div>
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm flex-shrink-0"
-                onClick={() => evaluateIssue(selectedIssue)}
+                onClick={() => evaluateIssue(selectedIssue, true)}
                 disabled={evalLoading || !evalData || evaluationQuota(usageState, 'issue').blocked}
                 title={!evalData ? '먼저 AI 평가를 실행해 주세요.' : ''}
               >
@@ -1522,15 +1582,17 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
                     </span>
                   </div>
                 </div>
+              ) : existingLoading ? (
+                <div className="text-center py-5"><LoaderIcon /><p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p></div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-2">아직 AI 평가가 없습니다.</p>
+                  <p className="mb-2">{storedEvalData ? '저장된 평가 결과가 있습니다.' : '아직 AI 평가가 없습니다.'}</p>
                   <button
                     className="btn btn-sm btn-primary px-4"
-                    onClick={() => evaluateIssue(selectedIssue)}
-                    disabled={evalLoading || evaluationQuota(usageState, 'issue').blocked}
+                    onClick={() => storedEvalData ? setEvalData(storedEvalData) : evaluateIssue(selectedIssue)}
+                    disabled={evalLoading || (!storedEvalData && evaluationQuota(usageState, 'issue').blocked)}
                   >
-                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'issue')}
+                    {storedEvalData ? '저장된 평가 보기' : evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'issue')}
                   </button>
                 </div>
               )}
@@ -1560,6 +1622,8 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
   const [selectedCommit, setSelectedCommit] = useState(null);
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalData, setEvalData] = useState(null);
+  const [storedEvalData, setStoredEvalData] = useState(null);
+  const [existingLoading, setExistingLoading] = useState(false);
   const [evalError, setEvalError] = useState(null);
   const [filesOpen, setFilesOpen] = useState(false);
   const [messageBodyOpen, setMessageBodyOpen] = useState(false);
@@ -1569,6 +1633,7 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
   const fileSummaryRequestId = useRef(0);
   const evaluationRequest = useCancelableEvaluationRequest();
   const cancelEvaluationRequest = evaluationRequest.cancel;
+  const lookupId = useRef(0);
 
   useEffect(() => {
     if (active) return;
@@ -1595,6 +1660,7 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
     setCommitListError(null);
     setSelectedCommit(null);
     setEvalData(null);
+    setStoredEvalData(null);
     setFileSummaries(null);
     setFileSummariesError(null);
     try {
@@ -1614,10 +1680,13 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
 
   const handleRepoClick = (repo) => {
     evaluationRequest.cancel();
+    lookupId.current += 1;
     setEvalLoading(false);
+    setExistingLoading(false);
     fileSummaryRequestId.current += 1;
     setSelectedRepo(repo);
     setEvalData(null);
+    setStoredEvalData(null);
     setEvalError(null);
     setFileSummaries(null);
     setFileSummariesLoading(false);
@@ -1625,47 +1694,51 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
     fetchCommitList(repo);
   };
 
-  const fetchExistingEval = async (commit) => {
+  const fetchExistingEval = async (commit, currentLookupId) => {
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     try {
       const res = await axiosInstance.get(
         `/v2/ai-evaluation/commit?githubUsername=${encodeURIComponent(githubUsername)}&repoName=${encodeURIComponent(selectedRepo.repo_name)}&sha=${encodeURIComponent(commit.sha)}`,
         getAuthConfig()
       );
+      if (lookupId.current !== currentLookupId) return;
       if (res.data.status === 'success' && res.data.data) {
         const data = res.data.data;
-        if (data.evaluated) {
-          setEvalData(data);
-          return true;
+        if (data.evaluated || data.evaluation_status === 'skipped') {
+          setStoredEvalData(data);
         }
       }
     } catch (error) {
-      if (error.response?.status !== 404) {
+      if (lookupId.current === currentLookupId && error.response?.status !== 404) {
         setEvalError(error.response?.data?.message || '기존 평가를 불러오지 못했습니다.');
       }
+    } finally {
+      if (lookupId.current === currentLookupId) setExistingLoading(false);
     }
-    return false;
   };
 
-  const evaluateCommit = async (commit) => {
+  const evaluateCommit = async (commit, forceReevaluate = false) => {
     const limitMessage = evaluationLimitMessage(usageState, 'commit');
     if (limitMessage) {
       setEvalError(limitMessage);
       return;
     }
     const controller = evaluationRequest.begin();
+    lookupId.current += 1;
+    setExistingLoading(false);
     const githubUsername = selectedRepo.github_id || selectedRepo.owner_id;
     setEvalLoading(true);
     setEvalError(null);
     try {
       const res = await axiosInstance.post(
         '/v2/ai-evaluation/commit',
-        { githubUsername, repoName: selectedRepo.repo_name, sha: commit.sha },
+        { githubUsername, repoName: selectedRepo.repo_name, sha: commit.sha, forceReevaluate },
         { ...getAuthConfig(), timeout: 180000, signal: controller.signal }
       );
       if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') {
         setEvalData(res.data.data);
+        setStoredEvalData(res.data.data);
       }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
@@ -1681,17 +1754,20 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
 
   const handleCommitClick = async (commit) => {
     evaluationRequest.cancel();
+    const currentLookupId = ++lookupId.current;
     setEvalLoading(false);
+    setExistingLoading(true);
     fileSummaryRequestId.current += 1;
     setSelectedCommit(commit);
     setEvalData(null);
+    setStoredEvalData(null);
     setEvalError(null);
     setFilesOpen(false);
     setMessageBodyOpen(false);
     setFileSummaries(null);
     setFileSummariesLoading(false);
     setFileSummariesError(null);
-    await fetchExistingEval(commit);
+    await fetchExistingEval(commit, currentLookupId);
   };
 
   const gradeClass = (score) => {
@@ -1888,7 +1964,7 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
               </div>
               <button
                 className="btn btn-sm btn-primary px-3 shadow-sm flex-shrink-0"
-                onClick={() => evaluateCommit(selectedCommit)}
+                onClick={() => evaluateCommit(selectedCommit, true)}
                 disabled={evalLoading || !evalData || evalData?.evaluation_status === 'skipped' || evaluationQuota(usageState, 'commit').blocked}
                 title={!evalData ? '먼저 AI 평가를 실행해 주세요.' : ''}
               >
@@ -2060,11 +2136,15 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                     </span>
                   </div>
                 </div>
+              ) : existingLoading ? (
+                <div className="text-center py-5"><LoaderIcon /><p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p></div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-2">아직 AI 평가가 없습니다.</p>
-                  <button className="btn btn-sm btn-primary px-4" onClick={() => evaluateCommit(selectedCommit)} disabled={evalLoading || evaluationQuota(usageState, 'commit').blocked}>
-                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'commit')}
+                  <p className="mb-2">{storedEvalData ? '저장된 평가 결과가 있습니다.' : '아직 AI 평가가 없습니다.'}</p>
+                  <button className="btn btn-sm btn-primary px-4"
+                    onClick={() => storedEvalData ? setEvalData(storedEvalData) : evaluateCommit(selectedCommit)}
+                    disabled={evalLoading || (!storedEvalData && evaluationQuota(usageState, 'commit').blocked)}>
+                    {storedEvalData ? '저장된 평가 보기' : evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'commit')}
                   </button>
                 </div>
               )}

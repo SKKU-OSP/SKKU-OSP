@@ -26,6 +26,9 @@ DAILY_EVALUATION_LIMITS = {
     'commit': 5,
 }
 DAILY_TOTAL_COST_LIMIT = Decimal('8.00')
+# 평가 결과를 받지 못한 시도는 개인별 일일 횟수에서 제외한다.
+# 실제 발생한 LLM 비용은 상태와 무관하게 전체 비용에 계속 합산한다.
+NON_CHARGEABLE_STATUSES = ('failed', 'code_only')
 
 _current_tracker: ContextVar['AiEvaluationUsageTracker | None'] = ContextVar(
     'ai_evaluation_usage_tracker', default=None
@@ -57,7 +60,9 @@ def get_daily_usage_state(github_id: str) -> dict:
     )
     counts = {
         row['eval_type']: row['count']
-        for row in today_usage.filter(github_id=github_id).values(
+        for row in today_usage.filter(github_id=github_id).exclude(
+            status__in=NON_CHARGEABLE_STATUSES
+        ).values(
             'eval_type'
         ).annotate(count=Count('id'))
     }

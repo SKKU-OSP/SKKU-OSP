@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react'; // the AG Grid React Component
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
-import axios from 'axios';
 import axiosInstance from '../../utils/axiosInterCeptor';
 
 import { getAuthConfig } from '../../utils/auth';
@@ -22,6 +21,7 @@ function RankUser() {
   const [rowData, setRowData] = useState();
   const [years, setYears] = useState([]);
   const [error, setError] = useState(false);
+  const [excludeGraduates, setExcludeGraduates] = useState(false);
 
   // Column 세팅 값
   const columnDefs = [
@@ -34,7 +34,7 @@ function RankUser() {
     { field: 'github_id', width: 120, headerName: 'GitHub ID', cellClass: 'rank-cell link-cell' },
     {
       field: 'year',
-      width: 60,
+      width: 70,
       filter: true,
       filterParams: {
         filterOptions: ['equal'],
@@ -42,8 +42,24 @@ function RankUser() {
       },
       filterValueGetter: 2022
     },
-    { field: 'score', width: 80, sort: 'desc', filter: 'agNumberColumnFilter' },
-    { field: 'commit_cnt', headerName: 'Commits', width: 80 },
+    {
+      field: 'score',
+      headerName: 'Score',
+      width: 90,
+      sort: 'desc',
+      filter: 'agNumberColumnFilter',
+      comparator: (scoreA, scoreB, nodeA, nodeB) =>
+        Number(scoreA) - Number(scoreB) ||
+        (nodeA.data?.star_count ?? 0) - (nodeB.data?.star_count ?? 0)
+    },
+    {
+      field: 'star_count',
+      headerName: 'Star',
+      headerTooltip: '해당 연도에 기여한 본인 소유 공개 저장소의 마지막 수집 시점 누적 스타 합계',
+      width: 60,
+      filter: 'agNumberColumnFilter'
+    },
+    { field: 'commit_cnt', headerName: 'Commits', width: 110 },
     { field: 'commit_line', headerName: 'Commit lines', width: 120 },
     { field: 'issue_cnt', headerName: 'Issuses', width: 80 },
     { field: 'pr_cnt', headerName: 'PRs', width: 80 },
@@ -91,7 +107,9 @@ function RankUser() {
     let currentRank = 1;
     let rankCount = 1;
 
-    data.sort((a, b) => b.score - a.score);
+    data.sort((a, b) =>
+      b.score - a.score || b.star_count - a.star_count || a.id - b.id || a.year - b.year
+    );
 
     for (let i = 0; i < data.length; i++) {
       if (i > 0 && data[i].score !== data[i - 1].score) {
@@ -109,8 +127,12 @@ function RankUser() {
   }, []);
 
   const onBtnExport = useCallback(() => {
-    gridRef.current.api.exportDataAsCsv();
-  }, []);
+    gridRef.current.api.exportDataAsCsv(
+      excludeGraduates
+        ? { shouldRowBeSkipped: ({ node }) => node.data?.absence_label === '졸업' }
+        : {}
+    );
+  }, [excludeGraduates]);
 
   const navigateYear = (year) => {
     if (year) navigate(`/rank/user/?year=${year}`);
@@ -187,7 +209,16 @@ function RankUser() {
                 전체연도
               </Dropdown.Item>
             </DropdownButton>
-            <div className="d-flex gap-2">
+            <div className="d-flex align-items-center gap-2">
+              <label className="form-check d-flex align-items-center gap-1 mb-0">
+                <input
+                  className="form-check-input mt-0"
+                  type="checkbox"
+                  checked={excludeGraduates}
+                  onChange={(event) => setExcludeGraduates(event.target.checked)}
+                />
+                <span className="form-check-label">CSV에서 졸업생 제외</span>
+              </label>
               <button className="btn btn-success" onClick={onBtnExport}>
                 Export CSV
               </button>

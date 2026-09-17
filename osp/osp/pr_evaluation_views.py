@@ -112,6 +112,12 @@ class PrEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
                 cache.set(progress_key, phase, timeout=_PROGRESS_TIMEOUT_SECONDS)
 
         try:
+            if request.data.get('forceReevaluate') is not True:
+                cached = svc.get_evaluation(github_username, repo_name, int(pr_number))
+                if cached.get('evaluated'):
+                    update_progress('complete')
+                    return JsonResponse({'status': 'success', 'data': cached, 'cached': True})
+
             update_progress('text_evaluation')
             actor_github_id = get_request_github_id(request)
             enforce_daily_limit(actor_github_id, 'pr')
