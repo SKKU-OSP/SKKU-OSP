@@ -3,7 +3,7 @@ import time
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db import DatabaseError
+from django.db import DatabaseError, connection
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.response import Response
@@ -16,6 +16,60 @@ from repository.serializers import (GithubRepoContributorSerializer,
                                     GithubRepoStatsSerializer)
 from user.models import Account, GitHubScoreTable, StudentTab
 from user.serializers import GithubScoreTableSerializer
+
+
+def get_user_star_counts(year=None):
+    """Return the star totals included in each user's yearly Spring score."""
+    with connection.cursor() as cursor:
+        columns = {
+            column.name
+            for column in connection.introspection.get_table_description(
+                cursor, 'github_repository'
+            )
+        }
+        availability_filter = (
+            "AND (repo.availability_status IS NULL OR repo.availability_status <> %s)"
+            if 'availability_status' in columns else ''
+        )
+        year_filter = 'AND stats.year = %s' if year is not None else ''
+        params = ['PUBLICLY_UNAVAILABLE'] if availability_filter else []
+        if year is not None:
+            params.append(year)
+        cursor.execute(f"""
+            SELECT LOWER(account.github_login_username), stats.year,
+                   COALESCE(SUM(stats.star_count), 0)
+            FROM github_contribution_stats AS stats
+            JOIN github_account AS account ON account.github_id = stats.github_id
+            JOIN github_repository AS repo ON repo.id = stats.repo_id
+            WHERE (repo.is_private = 0 OR repo.is_private IS NULL)
+              {availability_filter}
+              {year_filter}
+              AND BINARY repo.owner_name = BINARY account.github_login_username
+              AND (COALESCE(stats.commit_count, 0)
+                   + COALESCE(stats.pr_count, 0)
+                   + COALESCE(stats.issue_count, 0)) > 0
+            GROUP BY LOWER(account.github_login_username), stats.year
+        """, params)
+        return {
+            (login.casefold(), int(score_year)): int(stars)
+            for login, score_year, stars in cursor.fetchall()
+        }
+
+
+def rank_user_scores(score_table_data, star_counts):
+    for row in score_table_data:
+        row['star_count'] = star_counts.get((row['github_id'].casefold(), row['year']), 0)
+
+    ranked_rows = sorted(
+        score_table_data,
+        key=lambda row: (-row['score'], -row['star_count'], row['id'], row['year']),
+    )
+    rank = 1
+    for idx, row in enumerate(ranked_rows):
+        if idx > 0 and row['score'] != ranked_rows[idx - 1]['score']:
+            rank += 1
+        row['rank'] = rank
+    return ranked_rows
 
 
 class UserRanking(APIView):
@@ -69,22 +123,17 @@ class UserRanking(APIView):
             return Response(get_fail_res(error_code="data_not_found"))
         score_table_data = GithubScoreTableSerializer(
             score_table, many=True).data
-        sorted_score_by_year = sorted(
-            score_table_data, key=lambda x: x['score'], reverse=True)
+        star_counts = get_user_star_counts(target_year)
+        sorted_score_by_year = rank_user_scores(score_table_data, star_counts)
 
-        # 랭킹 부여
-        rank = 1
-        for idx, row in enumerate(sorted_score_by_year):
-            if idx > 0 and sorted_score_by_year[idx]['score'] != sorted_score_by_year[idx - 1]['score']:
-                rank += 1
-            row['rank'] = rank
+        for row in sorted_score_by_year:
             if row['id'] in student_user_relations:
                 row['username'] = student_user_relations[row['id']]
             else:
                 # 계정정보는 없고(삭제되었고) 수집데이터만 존재하는 경우
                 row['username'] = None
 
-        data['score_table'] = score_table_data
+        data['score_table'] = sorted_score_by_year
         data['years'] = distinct_years
         res['data'] = data
         res['status'] = status

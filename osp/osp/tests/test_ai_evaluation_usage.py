@@ -3,13 +3,16 @@ from concurrent.futures import ThreadPoolExecutor
 from contextvars import copy_context
 from decimal import Decimal
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from osp.ai_evaluation_usage_views import AiEvaluationUsageView, _distribution
 from osp.ai_proxy_views import AiEvaluationProxyView
+from osp.commit_evaluation_views import CommitEvaluationView
+from osp.issue_evaluation_views import IssueEvaluationView
+from osp.pr_evaluation_views import PrEvaluationView
 from osp.ai_evaluation_usage import (
     capture_llm_call,
     DAILY_EVALUATION_LIMITS,
@@ -17,6 +20,7 @@ from osp.ai_evaluation_usage import (
     enforce_daily_limit,
     EvaluationLimitExceeded,
     evaluation_status,
+    get_daily_usage_state,
     get_request_github_id,
     track_evaluation,
 )
@@ -110,6 +114,26 @@ class AiEvaluationUsageTrackerTest(SimpleTestCase):
 
 
 class AiEvaluationLimitPolicyTest(SimpleTestCase):
+    @patch('osp.ai_evaluation_usage.AiEvaluationUsage.objects.filter')
+    def test_failed_and_code_only_do_not_use_quota_but_cost_still_counts(self, filter_usage):
+        today_usage = MagicMock()
+        filter_usage.return_value = today_usage
+        today_usage.filter.return_value.exclude.return_value.values.return_value.annotate.return_value.__iter__.return_value = iter([
+            {'eval_type': 'readme', 'count': 1},
+        ])
+        today_usage.aggregate.return_value = {'total': Decimal('0.25')}
+
+        state = get_daily_usage_state('runner')
+
+        today_usage.filter.assert_called_once_with(github_id='runner')
+        today_usage.filter.return_value.exclude.assert_called_once_with(
+            status__in=('failed', 'code_only')
+        )
+        self.assertEqual(state['limits']['readme']['used'], 1)
+        self.assertEqual(state['limits']['readme']['remaining'], 9)
+        self.assertEqual(state['circuit_breaker']['actual_cost'], 0.25)
+        today_usage.aggregate.assert_called_once()
+
     def _state(self, eval_type='pr', used=0, cost=0):
         limits = {
             key: {
@@ -185,8 +209,9 @@ class AiEvaluationUsagePermissionTest(SimpleTestCase):
 
     @patch('osp.ai_proxy_views.svc.evaluate')
     @patch('osp.ai_proxy_views.enforce_daily_limit')
+    @patch('osp.ai_proxy_views.svc.get_evaluation', return_value=None)
     def test_limit_response_stops_evaluation_before_llm_call(
-        self, enforce_limit, evaluate
+        self, _get_evaluation, enforce_limit, evaluate
     ):
         usage_state = {
             'limits': {'readme': {'used': 10, 'limit': 10, 'blocked': True}},
@@ -216,3 +241,65 @@ class AiEvaluationUsagePermissionTest(SimpleTestCase):
             json.loads(response.content)['reason'], 'user_daily_limit'
         )
         evaluate.assert_not_called()
+
+    def test_existing_results_are_shared_without_llm_or_quota_usage(self):
+        cases = (
+            (AiEvaluationProxyView, 'osp.ai_proxy_views', 'readme',
+             {'githubUsername': 'octocat', 'repoName': 'repo'},
+             {'evaluation_status': 'full'}),
+            (PrEvaluationView, 'osp.pr_evaluation_views', 'pr',
+             {'githubUsername': 'octocat', 'repoName': 'repo', 'prNumber': 1},
+             {'evaluated': True}),
+            (IssueEvaluationView, 'osp.issue_evaluation_views', 'issue',
+             {'githubUsername': 'octocat', 'repoName': 'repo', 'issueNumber': 1},
+             {'evaluated': True}),
+            (CommitEvaluationView, 'osp.commit_evaluation_views', 'commit',
+             {'githubUsername': 'octocat', 'repoName': 'repo', 'sha': 'abc'},
+             {'evaluated': True}),
+        )
+        for view, module, eval_type, payload, cached in cases:
+            with self.subTest(eval_type=eval_type), \
+                    patch(f'{module}.svc.get_evaluation', return_value=cached), \
+                    patch(f'{module}.svc.evaluate') as evaluate, \
+                    patch(f'{module}.enforce_daily_limit') as enforce_limit, \
+                    patch(f'{module}.track_evaluation') as track:
+                request = self.factory.post(
+                    f'/v2/ai-evaluation/{eval_type}', payload, format='json'
+                )
+                force_authenticate(request, user=SimpleNamespace(
+                    is_authenticated=True, username='runner', pk=1,
+                    account=SimpleNamespace(github_id='runner'),
+                ))
+
+                response = view.as_view()(request)
+
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(json.loads(response.content)['cached'])
+                evaluate.assert_not_called()
+                enforce_limit.assert_not_called()
+                track.assert_not_called()
+
+    @patch('osp.ai_proxy_views.track_evaluation')
+    @patch('osp.ai_proxy_views.enforce_daily_limit')
+    @patch('osp.ai_proxy_views.svc.evaluate', return_value={'evaluation_status': 'full'})
+    @patch('osp.ai_proxy_views.svc.get_evaluation')
+    def test_explicit_reevaluation_bypasses_cache(
+        self, get_evaluation, evaluate, enforce_limit, track
+    ):
+        request = self.factory.post(
+            '/v2/ai-evaluation/readme',
+            {'githubUsername': 'octocat', 'repoName': 'repo', 'forceReevaluate': True},
+            format='json',
+        )
+        force_authenticate(request, user=SimpleNamespace(
+            is_authenticated=True, username='runner', pk=1,
+            account=SimpleNamespace(github_id='runner'),
+        ))
+
+        response = AiEvaluationProxyView.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+        get_evaluation.assert_not_called()
+        evaluate.assert_called_once_with('octocat', 'repo')
+        enforce_limit.assert_called_once_with('runner', 'readme')
+        track.assert_called_once()

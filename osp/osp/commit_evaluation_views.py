@@ -96,6 +96,11 @@ class CommitEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
                 status=400,
             )
         try:
+            if request.data.get('forceReevaluate') is not True:
+                cached = svc.get_evaluation(github_username, repo_name, sha)
+                if cached.get('evaluated') or cached.get('evaluation_status') == 'skipped':
+                    return JsonResponse({'status': 'success', 'data': cached, 'cached': True})
+
             actor_github_id = get_request_github_id(request)
             enforce_daily_limit(actor_github_id, 'commit')
             with track_evaluation(
