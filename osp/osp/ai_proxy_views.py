@@ -9,14 +9,14 @@ from .ai_evaluation_usage import (
     EvaluationLimitExceeded,
     evaluation_status,
     get_request_github_id,
-    RequireAuthenticatedEvaluationPostMixin,
     track_evaluation,
 )
+from .ai_evaluation_permissions import RequireAiEvaluationAccessMixin
 
 logger = logging.getLogger(__name__)
 
 
-class AiEvaluationProxyView(RequireAuthenticatedEvaluationPostMixin, APIView):
+class AiEvaluationProxyView(RequireAiEvaluationAccessMixin, APIView):
 
     def get(self, request):
         github_username = request.GET.get('githubUsername')

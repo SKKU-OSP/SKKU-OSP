@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from repository.models import AiEvaluationUsage
 from .ai_evaluation_usage import get_daily_usage_state, get_request_github_id
+from .ai_evaluation_permissions import CanUseAiEvaluation, can_use_ai_evaluation
 
 
 def _percentile(values: list[float], percentile: float) -> float:
@@ -142,10 +143,25 @@ class AiEvaluationUsageView(APIView):
 
 
 class AiEvaluationQuotaView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanUseAiEvaluation]
 
     def get(self, request):
         return JsonResponse({
             'status': 'success',
             'data': get_daily_usage_state(get_request_github_id(request)),
+        })
+
+
+class AiEvaluationAccessView(APIView):
+    """프론트엔드가 로그인 사용자의 파일럿 접근 가능 여부만 조회한다."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return JsonResponse({
+            'status': 'success',
+            'data': {
+                'allowed': can_use_ai_evaluation(request.user),
+                'isAdmin': bool(getattr(request.user, 'is_superuser', False)),
+            },
         })

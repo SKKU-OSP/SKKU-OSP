@@ -33,6 +33,7 @@ services:
     restart: always
     environment:
       SPRING_BACKEND_URL: 'http://host.docker.internal:4403'
+      AI_EVALUATION_ALLOWED_USER_IDS: '${AI_EVALUATION_ALLOWED_USER_IDS:-}'
     volumes:
       - '/home/sosd-dev/SKKU-OSP_FB/osp/data/media:/app/data/media'
       - '/home/sosd-dev/SKKU-OSP_FB/osp/static:/app/staticfiles'

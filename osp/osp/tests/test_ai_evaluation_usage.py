@@ -5,14 +5,33 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from osp.ai_evaluation_usage_views import AiEvaluationUsageView, _distribution
+from osp.ai_evaluation_usage_views import (
+    AiEvaluationAccessView,
+    AiEvaluationQuotaView,
+    AiEvaluationUsageView,
+    _distribution,
+)
 from osp.ai_proxy_views import AiEvaluationProxyView
-from osp.commit_evaluation_views import CommitEvaluationView
-from osp.issue_evaluation_views import IssueEvaluationView
-from osp.pr_evaluation_views import PrEvaluationView
+from osp.commit_evaluation_views import (
+    CommitCountsView,
+    CommitEvaluationView,
+    CommitFileSummariesView,
+    CommitListView,
+)
+from osp.issue_evaluation_views import (
+    IssueCountsView,
+    IssueEvaluationView,
+    IssueListView,
+)
+from osp.pr_evaluation_views import (
+    PrCountsView,
+    PrEvaluationProgressView,
+    PrEvaluationView,
+    PrListView,
+)
 from osp.ai_evaluation_usage import (
     capture_llm_call,
     DAILY_EVALUATION_LIMITS,
@@ -185,6 +204,7 @@ class AiEvaluationUsageDistributionTest(SimpleTestCase):
         self.assertEqual(result['max'], 100)
 
 
+@override_settings(AI_EVALUATION_ALLOWED_USER_IDS=frozenset({1}))
 class AiEvaluationUsagePermissionTest(SimpleTestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
@@ -206,6 +226,60 @@ class AiEvaluationUsagePermissionTest(SimpleTestCase):
         ))
         response = AiEvaluationUsageView.as_view()(request)
         self.assertEqual(response.status_code, 403)
+
+    def test_non_allowlisted_user_is_rejected_from_all_evaluation_endpoints(self):
+        get_views = (
+            AiEvaluationProxyView,
+            PrCountsView,
+            PrListView,
+            PrEvaluationView,
+            PrEvaluationProgressView,
+            IssueCountsView,
+            IssueListView,
+            IssueEvaluationView,
+            CommitCountsView,
+            CommitListView,
+            CommitEvaluationView,
+            AiEvaluationQuotaView,
+        )
+        denied_user = SimpleNamespace(
+            is_authenticated=True,
+            is_superuser=False,
+            pk=2,
+        )
+        for view in get_views:
+            with self.subTest(view=view.__name__):
+                request = self.factory.get('/v2/ai-evaluation/test')
+                force_authenticate(request, user=denied_user)
+                response = view.as_view()(request)
+                self.assertEqual(response.status_code, 403)
+
+        request = self.factory.post(
+            '/v2/ai-evaluation/commit-file-summaries', {}, format='json'
+        )
+        force_authenticate(request, user=denied_user)
+        response = CommitFileSummariesView.as_view()(request)
+        self.assertEqual(response.status_code, 403)
+
+    def test_access_endpoint_reports_allowlist_and_superuser_access(self):
+        cases = (
+            (1, False, True),
+            (2, False, False),
+            (999, True, True),
+        )
+        for user_id, is_superuser, expected in cases:
+            with self.subTest(user_id=user_id, is_superuser=is_superuser):
+                request = self.factory.get('/v2/ai-evaluation/access')
+                force_authenticate(request, user=SimpleNamespace(
+                    is_authenticated=True,
+                    is_superuser=is_superuser,
+                    pk=user_id,
+                ))
+                response = AiEvaluationAccessView.as_view()(request)
+                data = json.loads(response.content)['data']
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(data['allowed'], expected)
+                self.assertEqual(data['isAdmin'], is_superuser)
 
     @patch('osp.ai_proxy_views.svc.evaluate')
     @patch('osp.ai_proxy_views.enforce_daily_limit')

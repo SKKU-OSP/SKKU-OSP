@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { BsStar, BsChatLeftDots, BsArrowRightShort, BsGithub, BsChevronLeft, BsChevronRight, BsGit, BsFileEarmarkText, BsExclamationCircle, BsCodeSlash, BsBarChart } from 'react-icons/bs';
 import LoaderIcon from 'react-loader-icon';
 import ReactMarkdown from 'react-markdown';
@@ -2166,7 +2166,12 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
 
 function AiEvaluation() {
   const { username } = useParams();
-  const { isSuperuser } = useContext(AuthContext);
+  const {
+    aiEvaluationAccessLoaded,
+    canUseAiEvaluation,
+    isSuperuser,
+    username: loggedInUsername,
+  } = useContext(AuthContext);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorOccur, setErrorOccur] = useState(false);
@@ -2197,7 +2202,7 @@ function AiEvaluation() {
   };
 
   const refreshUsage = useCallback(async () => {
-    if (isSuperuser) return;
+    if (!canUseAiEvaluation || isSuperuser) return;
     try {
       const response = await axiosInstance.get(
         '/v2/ai-evaluation/usage/me',
@@ -2209,13 +2214,19 @@ function AiEvaluation() {
     } catch {
       // 제한 상태 조회 실패가 기존 평가 결과 조회를 방해하지 않도록 한다.
     }
-  }, [isSuperuser]);
+  }, [canUseAiEvaluation, isSuperuser]);
 
   useEffect(() => {
     refreshUsage();
   }, [refreshUsage]);
 
   useEffect(() => {
+    if (!canUseAiEvaluation) {
+      setRepos([]);
+      setErrorOccur(false);
+      setLoading(false);
+      return undefined;
+    }
     if (isSuperuser) {
       setRepos([]);
       setErrorOccur(false);
@@ -2237,7 +2248,15 @@ function AiEvaluation() {
     };
     getRepoList();
     return undefined;
-  }, [username, isSuperuser]);
+  }, [username, canUseAiEvaluation, isSuperuser]);
+
+  if (!aiEvaluationAccessLoaded) {
+    return <div className="text-center" style={{ marginTop: '100px' }}><LoaderIcon /></div>;
+  }
+
+  if (!canUseAiEvaluation) {
+    return <Navigate to={`/user/${loggedInUsername || username}/profile`} replace />;
+  }
 
   return (
     <div className="container ai-eval-container">

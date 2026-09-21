@@ -10,9 +10,9 @@ from .ai_evaluation_usage import (
     EvaluationLimitExceeded,
     evaluation_status,
     get_request_github_id,
-    RequireAuthenticatedEvaluationPostMixin,
     track_evaluation,
 )
+from .ai_evaluation_permissions import RequireAiEvaluationAccessMixin
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def _parse_repositories(repos_param: str) -> list[tuple[str, str]]:
     return repositories
 
 
-class CommitCountsView(APIView):
+class CommitCountsView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         repositories = _parse_repositories(request.GET.get('repos', ''))
         try:
@@ -43,7 +43,7 @@ class CommitCountsView(APIView):
             )
 
 
-class CommitListView(APIView):
+class CommitListView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         github_username = request.GET.get('githubUsername')
         repo_name = request.GET.get('repoName')
@@ -64,7 +64,7 @@ class CommitListView(APIView):
             )
 
 
-class CommitEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
+class CommitEvaluationView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         github_username = request.GET.get('githubUsername')
         repo_name = request.GET.get('repoName')
@@ -137,7 +137,7 @@ class CommitEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
             return JsonResponse({'status': 'fail', 'message': user_message}, status=500)
 
 
-class CommitFileSummariesView(APIView):
+class CommitFileSummariesView(RequireAiEvaluationAccessMixin, APIView):
     def post(self, request):
         github_username = request.data.get('githubUsername')
         repo_name = request.data.get('repoName')

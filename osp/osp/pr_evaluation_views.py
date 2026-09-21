@@ -11,9 +11,9 @@ from .ai_evaluation_usage import (
     enforce_daily_limit,
     EvaluationLimitExceeded,
     get_request_github_id,
-    RequireAuthenticatedEvaluationPostMixin,
     track_evaluation,
 )
+from .ai_evaluation_permissions import RequireAiEvaluationAccessMixin
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def _progress_cache_key(progress_id):
     return f'pr-evaluation-progress:{progress_id}'
 
 
-class PrEvaluationProgressView(APIView):
+class PrEvaluationProgressView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         progress_id = request.GET.get('progressId', '')
         if not _PROGRESS_ID_PATTERN.fullmatch(progress_id):
@@ -37,7 +37,7 @@ class PrEvaluationProgressView(APIView):
         return JsonResponse({'status': 'success', 'data': {'phase': phase}})
 
 
-class PrCountsView(APIView):
+class PrCountsView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         # repos 파라미터: "owner1/repo1,owner2/repo2,..." 형태
         repos_param = request.GET.get('repos', '')
@@ -68,7 +68,7 @@ class PrCountsView(APIView):
         return JsonResponse({'status': 'success', 'data': result})
 
 
-class PrListView(APIView):
+class PrListView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         github_username = request.GET.get('githubUsername')
         repo_name = request.GET.get('repoName')
@@ -78,7 +78,7 @@ class PrListView(APIView):
         return JsonResponse({'status': 'success', 'data': pulls})
 
 
-class PrEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
+class PrEvaluationView(RequireAiEvaluationAccessMixin, APIView):
 
     def get(self, request):
         github_username = request.GET.get('githubUsername')

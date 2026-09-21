@@ -25,6 +25,20 @@ docker-compose up -d --build
 
 ## 상용서버 배포
 
+### AI 평가 파일럿 사용자 설정
+
+AI 평가 기능은 Django 사용자 ID 허용 목록에 포함된 사용자와 관리자에게만
+노출됩니다. 배포 디렉토리의 `.env`에 상용 DB 기준 사용자 ID를 쉼표로
+구분해 설정합니다.
+
+```bash
+cd deploy/prod
+echo 'AI_EVALUATION_ALLOWED_USER_IDS=475,512' > .env
+```
+
+개발 서버는 `deploy/dev/.env`에 개발 DB의 사용자 ID를 별도로 설정합니다.
+값이 비어 있으면 관리자 외 일반 사용자는 AI 평가 기능을 사용할 수 없습니다.
+
 상용서버 배포는 두 가지 방식으로 수행할 수 있습니다.
 
 ### ① 수동 배포 (버전 명시 필요)

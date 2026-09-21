@@ -13,7 +13,6 @@ from typing import Iterator
 from django.conf import settings
 from django.db.models import Count, Sum
 from django.utils import timezone
-from rest_framework.permissions import IsAuthenticated
 
 from repository.models import AiEvaluationUsage
 
@@ -221,12 +220,3 @@ def evaluation_status(result: dict, eval_type: str) -> str:
         if breakdown.get('evaluation_status') == 'skipped':
             return 'skipped'
     return 'full'
-
-
-class RequireAuthenticatedEvaluationPostMixin:
-    """조회는 유지하되 비용이 발생하는 평가 실행은 로그인 사용자만 허용한다."""
-
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
-        return super().get_permissions()

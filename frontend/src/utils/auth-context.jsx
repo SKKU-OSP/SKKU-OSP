@@ -12,18 +12,23 @@ const AuthContext = React.createContext({
   name: undefined,
   photo: undefined,
   isSuperuser: false,
+  canUseAiEvaluation: false,
+  aiEvaluationAccessLoaded: false,
   setUser: () => {},
   unsetUser: () => {}
 });
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 const url = `${server_url}/user/api/info/`;
+const aiEvaluationAccessUrl = `${server_url}/v2/ai-evaluation/access`;
 
 export const AuthContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(localStorage.getItem('username'));
   const [isSuperuser, setIsSuperuser] = useState(false);
+  const [canUseAiEvaluation, setCanUseAiEvaluation] = useState(false);
+  const [aiEvaluationAccessLoaded, setAiEvaluationAccessLoaded] = useState(false);
 
   const [githubUsername, setGithubUsername] = useState(null);
   const [photo, setPhoto] = useState(null);
@@ -47,6 +52,15 @@ export const AuthContextProvider = (props) => {
           setGithubUsername(account.github_id);
           setName(res.data.name);
           localStorage.setItem('username', account.user.username);
+          try {
+            const accessResponse = await axios.get(aiEvaluationAccessUrl, config);
+            setCanUseAiEvaluation(Boolean(accessResponse.data?.data?.allowed));
+          } catch {
+            // 권한 조회에 실패하면 기능을 노출하지 않는 방향으로 처리한다.
+            setCanUseAiEvaluation(false);
+          } finally {
+            setAiEvaluationAccessLoaded(true);
+          }
         } else {
           console.log(res.errors);
           setUserId(null);
@@ -55,6 +69,8 @@ export const AuthContextProvider = (props) => {
           setPhoto(null);
           setGithubUsername(null);
           setName(null);
+          setCanUseAiEvaluation(false);
+          setAiEvaluationAccessLoaded(true);
           localStorage.removeItem('username');
         }
       } catch (error) {
@@ -65,14 +81,19 @@ export const AuthContextProvider = (props) => {
         setPhoto(null);
         setGithubUsername(null);
         setName(null);
+        setCanUseAiEvaluation(false);
+        setAiEvaluationAccessLoaded(true);
         localStorage.removeItem('username');
       }
     };
     if (token) {
       setIsLoggedIn(true);
+      setAiEvaluationAccessLoaded(false);
       setUserInfo();
     } else {
       console.log('no token');
+      setCanUseAiEvaluation(false);
+      setAiEvaluationAccessLoaded(true);
     }
   };
 
@@ -85,6 +106,8 @@ export const AuthContextProvider = (props) => {
     setName(null);
     setPhoto(null);
     setGithubUsername(null);
+    setCanUseAiEvaluation(false);
+    setAiEvaluationAccessLoaded(true);
   };
 
   useEffect(() => {
@@ -102,6 +125,8 @@ export const AuthContextProvider = (props) => {
         githubUsername: githubUsername,
         name: name,
         photo: photo,
+        canUseAiEvaluation: canUseAiEvaluation,
+        aiEvaluationAccessLoaded: aiEvaluationAccessLoaded,
         setUser: setUser,
         unsetUser: unsetUser
       }}

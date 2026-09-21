@@ -10,14 +10,14 @@ from .ai_evaluation_usage import (
     EvaluationLimitExceeded,
     evaluation_status,
     get_request_github_id,
-    RequireAuthenticatedEvaluationPostMixin,
     track_evaluation,
 )
+from .ai_evaluation_permissions import RequireAiEvaluationAccessMixin
 
 logger = logging.getLogger(__name__)
 
 
-class IssueCountsView(APIView):
+class IssueCountsView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         repos_param = request.GET.get('repos', '')
         if not repos_param:
@@ -47,7 +47,7 @@ class IssueCountsView(APIView):
         return JsonResponse({'status': 'success', 'data': result})
 
 
-class IssueListView(APIView):
+class IssueListView(RequireAiEvaluationAccessMixin, APIView):
     def get(self, request):
         github_username = request.GET.get('githubUsername')
         repo_name = request.GET.get('repoName')
@@ -57,7 +57,7 @@ class IssueListView(APIView):
         return JsonResponse({'status': 'success', 'data': issues})
 
 
-class IssueEvaluationView(RequireAuthenticatedEvaluationPostMixin, APIView):
+class IssueEvaluationView(RequireAiEvaluationAccessMixin, APIView):
 
     def get(self, request):
         github_username = request.GET.get('githubUsername')
