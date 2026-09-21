@@ -54,6 +54,26 @@ elif os.environ['ENV_MODE'] in ['PRODUCT', 'CRAWL']:
 else:
     SETTINGS = get_secret('DEBUG')
 
+
+def _parse_user_id_set(value):
+    """쉼표로 구분한 Django 사용자 ID 환경변수를 정수 집합으로 변환한다."""
+    user_ids = set()
+    for item in value.split(','):
+        item = item.strip()
+        if not item:
+            continue
+        if not item.isdigit():
+            raise ImproperlyConfigured(
+                'AI_EVALUATION_ALLOWED_USER_IDS에는 숫자 사용자 ID만 사용할 수 있습니다.'
+            )
+        user_ids.add(int(item))
+    return frozenset(user_ids)
+
+
+AI_EVALUATION_ALLOWED_USER_IDS = _parse_user_id_set(
+    os.environ.get('AI_EVALUATION_ALLOWED_USER_IDS', '')
+)
+
 # 발신할 이메일
 EMAIL_HOST_USER = SETTINGS.get('EMAIL_HOST_USER', '')
 # 발신할 메일의 비밀번호

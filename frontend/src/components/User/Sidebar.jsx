@@ -1,10 +1,13 @@
+import { useContext } from 'react';
 import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { BsUnindent, BsIndent, BsRobot, BsFillPersonFill, BsFillBarChartFill } from 'react-icons/bs';
 import { FaShapes } from 'react-icons/fa6';
+import AuthContext from '../../utils/auth-context';
 
 function Sidebar(props) {
   const { onToggle, isToggled } = props;
   const username = useParams().username;
+  const { canUseAiEvaluation } = useContext(AuthContext);
   const location = useLocation();
   const activeStyle = { color: 'black' };
 
@@ -40,16 +43,18 @@ function Sidebar(props) {
             <span className="sidebar-menu">대시보드</span>
           </NavLink>
         </li>
-        <li>
-          <NavLink
-            to={`/user/${username}/ai-evaluation`}
-            style={isActive(`/user/${username}/ai-evaluation`) ? activeStyle : {}}
-            className="text-nowrap"
-          >
-            <BsRobot size={24} />
-            <span className="sidebar-menu">AI 평가</span>
-          </NavLink>
-        </li>
+        {canUseAiEvaluation && (
+          <li>
+            <NavLink
+              to={`/user/${username}/ai-evaluation`}
+              style={isActive(`/user/${username}/ai-evaluation`) ? activeStyle : {}}
+              className="text-nowrap"
+            >
+              <BsRobot size={24} />
+              <span className="sidebar-menu">AI 평가</span>
+            </NavLink>
+          </li>
+        )}
         <li>
           <NavLink
             to={`/user/${username}/dev-type`}
