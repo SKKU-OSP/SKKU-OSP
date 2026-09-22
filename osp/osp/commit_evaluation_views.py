@@ -107,8 +107,14 @@ class CommitEvaluationView(RequireAiEvaluationAccessMixin, APIView):
                 actor_github_id,
                 'commit',
                 {'owner': github_username, 'repo': repo_name, 'sha': sha},
+                stage='commit_evaluation',
             ) as usage:
-                result = svc.evaluate(github_username, repo_name, sha)
+                result = svc.evaluate(
+                    github_username,
+                    repo_name,
+                    sha,
+                    evaluated_by=actor_github_id,
+                )
                 usage.complete(evaluation_status(result, 'commit'))
             return JsonResponse({'status': 'success', 'data': result})
         except EvaluationLimitExceeded as error:

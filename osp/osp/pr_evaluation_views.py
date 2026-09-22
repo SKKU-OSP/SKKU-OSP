@@ -129,12 +129,14 @@ class PrEvaluationView(RequireAiEvaluationAccessMixin, APIView):
                     'repo': repo_name,
                     'pr_number': int(pr_number),
                 },
+                stage='pr_evaluation',
             ) as usage:
                 result = svc.evaluate(
                     github_username,
                     repo_name,
                     int(pr_number),
                     progress_callback=update_progress,
+                    evaluated_by=actor_github_id,
                 )
                 usage.complete('full')
             update_progress('complete')

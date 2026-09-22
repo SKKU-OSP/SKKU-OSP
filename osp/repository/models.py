@@ -35,6 +35,7 @@ class GithubRepoAiEvaluation(models.Model):
     readme_strengths = models.JSONField(blank=True, null=True)
     readme_improvements = models.JSONField(blank=True, null=True)
     readme_advice = models.JSONField(blank=True, null=True)
+    evaluated_by = models.CharField(max_length=40, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -216,6 +217,7 @@ class GithubPrAiEvaluation(models.Model):
     pr_improvements = models.JSONField(blank=True, null=True)
     pr_advice = models.JSONField(blank=True, null=True)
     pr_missing = models.JSONField(blank=True, null=True)
+    evaluated_by = models.CharField(max_length=40, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -237,6 +239,7 @@ class GithubIssueAiEvaluation(models.Model):
     issue_improvements = models.JSONField(blank=True, null=True)
     issue_advice = models.JSONField(blank=True, null=True)
     issue_missing = models.JSONField(blank=True, null=True)
+    evaluated_by = models.CharField(max_length=40, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -261,6 +264,7 @@ class GithubCommitAiEvaluation(models.Model):
     commit_improvements = models.JSONField(blank=True, null=True)
     commit_advice = models.JSONField(blank=True, null=True)
     commit_missing = models.JSONField(blank=True, null=True)
+    evaluated_by = models.CharField(max_length=40, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -298,6 +302,7 @@ class AiEvaluationUsage(models.Model):
         ('partial', '부분 완료'),
         ('code_only', '코드 분석만 완료'),
         ('skipped', '평가 제외'),
+        ('rejected', '평가 입력 없음'),
         ('failed', '실패'),
     ]
 
@@ -314,6 +319,10 @@ class AiEvaluationUsage(models.Model):
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default='failed'
     )
+    error_stage = models.CharField(max_length=64, blank=True, default='')
+    error_category = models.CharField(max_length=64, blank=True, default='')
+    error_code = models.CharField(max_length=128, blank=True, default='')
+    error_message = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:

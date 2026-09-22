@@ -16,7 +16,21 @@ const STATUS_LABELS = {
   partial: '부분 완료',
   code_only: '코드 분석만 완료',
   skipped: '평가 제외',
+  rejected: '평가 입력 없음',
   failed: '실패',
+};
+
+const ERROR_CATEGORY_LABELS = {
+  missing_content: '평가 입력 없음',
+  invalid_target: '잘못된 평가 대상',
+  llm_credit: 'LLM 크레딧 부족',
+  llm_auth: 'LLM 인증 오류',
+  llm_rate_limit: 'LLM 호출 한도 초과',
+  timeout: '응답 시간 초과',
+  response_parse: 'LLM 응답 해석 실패',
+  token_limit: '입력 크기 초과',
+  dependency_unavailable: '외부 서비스 연결 실패',
+  internal_error: '내부 오류',
 };
 
 const usd = (value, digits = 4) => `$${Number(value || 0).toFixed(digits)}`;
@@ -27,6 +41,11 @@ function targetLabel(target = {}) {
   if (target.issue_number != null) return `${repository}#${target.issue_number}`;
   if (target.sha) return `${repository}@${String(target.sha).slice(0, 7)}`;
   return repository || '-';
+}
+
+function errorLabel(row) {
+  if (!row.error_category) return '-';
+  return ERROR_CATEGORY_LABELS[row.error_category] || row.error_category;
 }
 
 function AiUsageDashboard({ active }) {
@@ -126,6 +145,31 @@ function AiUsageDashboard({ active }) {
             4,
           )}</strong>
         </div>
+        <div className="ai-usage-metric">
+          <span>실패</span>
+          <strong>{Number(summary.failed_count || 0).toLocaleString()}건</strong>
+        </div>
+      </div>
+
+      <div className="ai-usage-section">
+        <h5>실패·부분 실패 원인</h5>
+        <div className="table-responsive">
+          <table className="table table-sm ai-usage-table mb-0">
+            <thead>
+              <tr><th>원인</th><th>상태</th><th>건수</th><th>발생 비용</th></tr>
+            </thead>
+            <tbody>
+              {(data?.failure_categories || []).length ? data.failure_categories.map((row) => (
+                <tr key={`${row.error_category}-${row.status}`}>
+                  <td className="font-weight-bold">{ERROR_CATEGORY_LABELS[row.error_category] || row.error_category}</td>
+                  <td>{STATUS_LABELS[row.status] || row.status}</td>
+                  <td>{row.count}</td>
+                  <td>{usd(row.total_cost, 6)}</td>
+                </tr>
+              )) : <tr><td colSpan="4" className="text-muted text-center">기록된 실패가 없습니다.</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="ai-usage-section">
@@ -201,7 +245,7 @@ function AiUsageDashboard({ active }) {
         <div className="table-responsive ai-usage-table-scroll ai-usage-recent-scroll">
           <table className="table table-sm ai-usage-table mb-0">
             <thead>
-              <tr><th>실행 시각</th><th>사용자</th><th>유형</th><th>대상</th><th>상태</th><th>비용</th><th>실제 모델</th></tr>
+              <tr><th>실행 시각</th><th>사용자</th><th>유형</th><th>대상</th><th>상태</th><th>실패 단계</th><th>원인</th><th>비용</th><th>실제 모델</th></tr>
             </thead>
             <tbody>
               {(data?.recent || []).length ? data.recent.map((row) => (
@@ -211,10 +255,14 @@ function AiUsageDashboard({ active }) {
                   <td>{TYPE_LABELS[row.eval_type] || row.eval_type}</td>
                   <td>{targetLabel(row.target)}</td>
                   <td><span className={`ai-usage-status status-${row.status}`}>{STATUS_LABELS[row.status] || row.status}</span></td>
+                  <td>{row.error_stage || '-'}</td>
+                  <td className="ai-usage-error" title={row.error_message || ''}>
+                    {errorLabel(row)}{row.error_code ? ` (${row.error_code})` : ''}
+                  </td>
                   <td>{usd(row.actual_cost, 6)}</td>
                   <td className="ai-usage-model">{row.model_name || '-'}</td>
                 </tr>
-              )) : <tr><td colSpan="7" className="text-muted text-center">기록이 없습니다.</td></tr>}
+              )) : <tr><td colSpan="9" className="text-muted text-center">기록이 없습니다.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -96,9 +96,13 @@ class IssueEvaluationView(RequireAiEvaluationAccessMixin, APIView):
                     'repo': repo_name,
                     'issue_number': int(issue_number),
                 },
+                stage='issue_evaluation',
             ) as usage:
                 result = svc.evaluate(
-                    github_username, repo_name, int(issue_number)
+                    github_username,
+                    repo_name,
+                    int(issue_number),
+                    evaluated_by=actor_github_id,
                 )
                 usage.complete(evaluation_status(result, 'issue'))
             return JsonResponse({'status': 'success', 'data': result})
