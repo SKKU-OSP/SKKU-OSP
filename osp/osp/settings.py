@@ -54,6 +54,26 @@ elif os.environ['ENV_MODE'] in ['PRODUCT', 'CRAWL']:
 else:
     SETTINGS = get_secret('DEBUG')
 
+
+def _parse_user_id_set(value):
+    """쉼표로 구분한 Django 사용자 ID 환경변수를 정수 집합으로 변환한다."""
+    user_ids = set()
+    for item in value.split(','):
+        item = item.strip()
+        if not item:
+            continue
+        if not item.isdigit():
+            raise ImproperlyConfigured(
+                'AI_EVALUATION_ALLOWED_USER_IDS에는 숫자 사용자 ID만 사용할 수 있습니다.'
+            )
+        user_ids.add(int(item))
+    return frozenset(user_ids)
+
+
+AI_EVALUATION_ALLOWED_USER_IDS = _parse_user_id_set(
+    os.environ.get('AI_EVALUATION_ALLOWED_USER_IDS', '')
+)
+
 # 발신할 이메일
 EMAIL_HOST_USER = SETTINGS.get('EMAIL_HOST_USER', '')
 # 발신할 메일의 비밀번호
@@ -266,9 +286,37 @@ SCHEDULER_DEFAULT = True
 CRAWLING_LOG_PATH = os.path.join(BASE_DIR, 'crawler/log')
 
 SPRING_BACKEND_URL = os.environ.get('SPRING_BACKEND_URL', 'http://localhost:8080')
+COMMIT_CONSISTENCY_MAX_TOKENS = int(
+    os.environ.get('COMMIT_CONSISTENCY_MAX_TOKENS', '60000')
+)
+PR_CONSISTENCY_MAX_ITERATIONS = int(
+    os.environ.get('PR_CONSISTENCY_MAX_ITERATIONS', '7')
+)
+PR_CONSISTENCY_MAX_TOKENS = int(
+    os.environ.get('PR_CONSISTENCY_MAX_TOKENS', '60000')
+)
+PR_COHESION_MAX_ITERATIONS = int(
+    os.environ.get('PR_COHESION_MAX_ITERATIONS', '7')
+)
+PR_COHESION_MAX_TOKENS = int(
+    os.environ.get('PR_COHESION_MAX_TOKENS', '60000')
+)
+COMMIT_FILE_SUMMARY_MAX_TOKENS = int(
+    os.environ.get('COMMIT_FILE_SUMMARY_MAX_TOKENS', '6000')
+)
+COMMIT_FILE_SUMMARY_MAX_WORKERS = int(
+    # 0이면 요약 대상 파일 수만큼 동시에 실행한다. 운영 환경에서 필요하면 제한 가능.
+    os.environ.get('COMMIT_FILE_SUMMARY_MAX_WORKERS', '0')
+)
 
-'''
-nginx에서 중계해준 패킷에 대한 정보 주석해제 후 사용
+# LLM — Anthropic 키를 secret.key에서 로드하고, 이미 설정된 환경변수는 유지한다.
+os.environ.setdefault('ANTHROPIC_API_KEY', SETTINGS.get('ANTHROPIC_API_KEY', ''))
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -279,11 +327,10 @@ LOGGING = {
         },
     },
     'loggers': {
-        '': {  # 이렇게 설정하면 모든 로거에 대해 적용됩니다.
+        '': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
     },
-} 
-'''
+}

@@ -1,6 +1,48 @@
 from django.db import models
 
 
+class GithubRepository(models.Model):
+    """Spring이 관리하는 github_repository 테이블 읽기 전용 모델."""
+    id = models.BigAutoField(primary_key=True)
+    owner_name = models.CharField(max_length=255)
+    repo_name = models.CharField(max_length=255)
+    readme = models.TextField(blank=True, null=True)
+    license = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'github_repository'
+        unique_together = (('owner_name', 'repo_name'),)
+
+
+class GithubRepoAiEvaluation(models.Model):
+    EVALUATION_STATUS_CHOICES = [
+        ('code_only',  '코드 분석만 완료'),
+        ('partial',    '채점까지 완료'),
+        ('full',       '전체 완료'),
+    ]
+
+    github_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    model_name = models.CharField(max_length=64, blank=True, null=True)
+    readme_evaluation_status = models.CharField(
+        max_length=20, choices=EVALUATION_STATUS_CHOICES, default='code_only'
+    )
+    readme_score = models.CharField(max_length=10, blank=True, null=True)
+    readme_total_score = models.FloatField(blank=True, null=True)
+    readme_criteria_scores = models.JSONField(blank=True, null=True)
+    readme_missing_essentials = models.JSONField(blank=True, null=True)
+    readme_strengths = models.JSONField(blank=True, null=True)
+    readme_improvements = models.JSONField(blank=True, null=True)
+    readme_advice = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_repo_ai_evaluation'
+        unique_together = (('github_id', 'repo_name'),)
+
+
 class GithubRepoCommits(models.Model):
     github_id = models.CharField(primary_key=True, max_length=40)
     owner_name = models.CharField(max_length=255, blank=True, null=True)
@@ -161,6 +203,132 @@ class GithubRepoStatsyymm(models.Model):
         managed = False
         db_table = 'github_repo_stats_yymm'
         unique_together = (('github_id', 'repo_name'),)
+
+class GithubPrAiEvaluation(models.Model):
+    github_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    pr_number = models.IntegerField()
+    model_name = models.CharField(max_length=64, blank=True, null=True)
+    pr_score = models.CharField(max_length=10, blank=True, null=True)
+    pr_total_score = models.FloatField(blank=True, null=True)
+    pr_breakdown = models.JSONField(blank=True, null=True)
+    pr_strengths = models.JSONField(blank=True, null=True)
+    pr_improvements = models.JSONField(blank=True, null=True)
+    pr_advice = models.JSONField(blank=True, null=True)
+    pr_missing = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_pr_ai_evaluation'
+        unique_together = (('github_id', 'repo_name', 'pr_number'),)
+
+
+class GithubIssueAiEvaluation(models.Model):
+    github_id = models.CharField(max_length=40)
+    repo_name = models.CharField(max_length=100)
+    issue_number = models.IntegerField()
+    model_name = models.CharField(max_length=64, blank=True, null=True)
+    issue_type = models.CharField(max_length=20, blank=True, null=True)  # bug / feature / skip
+    issue_score = models.CharField(max_length=10, blank=True, null=True)
+    issue_total_score = models.FloatField(blank=True, null=True)
+    issue_breakdown = models.JSONField(blank=True, null=True)
+    issue_strengths = models.JSONField(blank=True, null=True)
+    issue_improvements = models.JSONField(blank=True, null=True)
+    issue_advice = models.JSONField(blank=True, null=True)
+    issue_missing = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_issue_ai_evaluation'
+        unique_together = (('github_id', 'repo_name', 'issue_number'),)
+
+
+class GithubCommitAiEvaluation(models.Model):
+    github_id = models.CharField(max_length=255)
+    repo_name = models.CharField(max_length=255)
+    sha = models.CharField(max_length=40)
+    model_name = models.CharField(max_length=128, blank=True, null=True)
+    commit_score = models.CharField(max_length=10, blank=True, null=True)
+    commit_total_score = models.FloatField(blank=True, null=True)
+    message_clarity_score = models.IntegerField(blank=True, null=True)
+    consistency_score = models.IntegerField(blank=True, null=True)
+    atomicity_score = models.IntegerField(blank=True, null=True)
+    convention_score = models.IntegerField(blank=True, null=True)
+    commit_breakdown = models.JSONField(blank=True, null=True)
+    commit_strengths = models.JSONField(blank=True, null=True)
+    commit_improvements = models.JSONField(blank=True, null=True)
+    commit_advice = models.JSONField(blank=True, null=True)
+    commit_missing = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_commit_ai_evaluation'
+        unique_together = (('github_id', 'repo_name', 'sha'),)
+
+
+class GithubCommitFileSummaryCache(models.Model):
+    """점수 계산과 분리된 커밋 파일별 표시용 요약 캐시."""
+
+    github_id = models.CharField(max_length=255)
+    repo_name = models.CharField(max_length=255)
+    sha = models.CharField(max_length=40)
+    summaries = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'github_commit_file_summary_cache'
+        unique_together = (('github_id', 'repo_name', 'sha'),)
+
+
+class AiEvaluationUsage(models.Model):
+    """AI 평가 요청 한 건에서 실제로 발생한 LLM 사용량."""
+
+    EVAL_TYPE_CHOICES = [
+        ('readme', 'README'),
+        ('pr', 'PR'),
+        ('issue', 'Issue'),
+        ('commit', 'Commit'),
+    ]
+    STATUS_CHOICES = [
+        ('full', '전체 완료'),
+        ('partial', '부분 완료'),
+        ('code_only', '코드 분석만 완료'),
+        ('skipped', '평가 제외'),
+        ('failed', '실패'),
+    ]
+
+    # 평가 대상 소유자가 아니라 평가 버튼을 누른 로그인 사용자다.
+    github_id = models.CharField(max_length=40, db_index=True)
+    eval_type = models.CharField(
+        max_length=10, choices=EVAL_TYPE_CHOICES, db_index=True
+    )
+    target = models.JSONField(default=dict)
+    actual_cost = models.DecimalField(
+        max_digits=16, decimal_places=10, default=0
+    )
+    model_name = models.CharField(max_length=512, blank=True, default='')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='failed'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = 'ai_evaluation_usage'
+        indexes = [
+            models.Index(
+                fields=['github_id', 'created_at'],
+                name='ai_usage_user_created_idx',
+            ),
+            models.Index(
+                fields=['eval_type', 'created_at'],
+                name='ai_usage_type_created_idx',
+            ),
+        ]
+
 
 class GithubRepoCommitFiles(models.Model):
     github_id = models.CharField(max_length=40, primary_key=True)

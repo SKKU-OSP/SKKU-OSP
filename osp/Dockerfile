@@ -1,5 +1,5 @@
 # docker/backend/Dockerfile
-FROM python:3.9
+FROM python:3.12
 
 # Build argument for environment
 ARG BUILD_ENV=dev
@@ -10,7 +10,7 @@ ENV ENV_MODE ${BUILD_ENV}
 
 # Install requirements
 ADD ./deploy/requirements.txt /tmp
-RUN /usr/local/bin/python -m pip install --upgrade pip && \
+RUN /usr/local/bin/python -m pip install --upgrade pip setuptools wheel && \
     /usr/local/bin/python -m pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Install Chrome
@@ -32,5 +32,5 @@ WORKDIR /app
 # Collect static files
 RUN echo yes | python manage.py collectstatic
 
-# Run server
-CMD python manage.py runserver 0.0.0.0:8000
+# Run server (migrate first to apply any pending schema changes)
+CMD python manage.py migrate repository && python manage.py runserver 0.0.0.0:8000
