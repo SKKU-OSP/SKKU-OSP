@@ -33,6 +33,8 @@ services:
     restart: always
     environment:
       SPRING_BACKEND_URL: 'http://host.docker.internal:4403'
+      ANTHROPIC_API_KEY: '${ANTHROPIC_API_KEY:-}'
+      LLM_TIMEOUT: '${LLM_TIMEOUT:-90}'
       AI_EVALUATION_ALLOWED_USER_IDS: '${AI_EVALUATION_ALLOWED_USER_IDS:-}'
     volumes:
       - '/home/sosd-dev/SKKU-OSP_FB/osp/data/media:/app/data/media'
