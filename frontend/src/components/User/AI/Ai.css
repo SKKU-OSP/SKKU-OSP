@@ -192,6 +192,14 @@
   font-size: 0.75rem;
 }
 
+.ai-usage-error {
+  min-width: 150px;
+  max-width: 260px;
+  overflow-wrap: anywhere;
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
 .ai-usage-status {
   display: inline-block;
   padding: 0.15rem 0.45rem;
@@ -209,6 +217,11 @@
 .ai-usage-status.status-failed {
   background: #fff0f1;
   color: #dc3545;
+}
+
+.ai-usage-status.status-rejected {
+  background: #fff4df;
+  color: #946200;
 }
 
 .ai-usage-state {
@@ -332,6 +345,20 @@
 .ai-analysis-title {
   margin-top: 0.5rem;
   font-weight: bold;
+}
+
+.ai-evaluation-attribution {
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #d8e6f8;
+  border-radius: 8px;
+  background: #f3f8ff;
+  color: #52606d;
+  font-size: 0.8rem;
+}
+
+.ai-evaluation-attribution strong {
+  color: #1f5fae;
 }
 
 .issue-skip-notice {

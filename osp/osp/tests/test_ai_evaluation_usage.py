@@ -33,7 +33,9 @@ from osp.pr_evaluation_views import (
     PrListView,
 )
 from osp.ai_evaluation_usage import (
+    capture_evaluation_error,
     capture_llm_call,
+    classify_evaluation_error,
     DAILY_EVALUATION_LIMITS,
     DAILY_TOTAL_COST_LIMIT,
     enforce_daily_limit,
@@ -41,6 +43,7 @@ from osp.ai_evaluation_usage import (
     evaluation_status,
     get_daily_usage_state,
     get_request_github_id,
+    sanitize_error_message,
     track_evaluation,
 )
 
@@ -72,6 +75,58 @@ class AiEvaluationUsageTrackerTest(SimpleTestCase):
         kwargs = create.call_args.kwargs
         self.assertEqual(kwargs['actual_cost'], Decimal('0.003'))
         self.assertEqual(kwargs['status'], 'failed')
+        self.assertEqual(kwargs['error_stage'], 'evaluation')
+        self.assertEqual(kwargs['error_category'], 'internal_error')
+        self.assertEqual(kwargs['error_code'], 'RuntimeError')
+        self.assertEqual(kwargs['error_message'], 'failed')
+
+    @patch('osp.ai_evaluation_usage.AiEvaluationUsage.objects.create')
+    def test_missing_content_is_recorded_as_rejected(self, create):
+        with self.assertRaises(ValueError):
+            with track_evaluation(
+                'runner', 'readme', {'repo': 'repo'}, stage='readme_evaluation'
+            ):
+                raise ValueError('README가 없는 레포지토리입니다: repo')
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs['status'], 'rejected')
+        self.assertEqual(kwargs['error_stage'], 'readme_evaluation')
+        self.assertEqual(kwargs['error_category'], 'missing_content')
+
+    @patch('osp.ai_evaluation_usage.AiEvaluationUsage.objects.create')
+    def test_recoverable_llm_failure_keeps_degraded_status_and_reason(self, create):
+        with track_evaluation('runner', 'readme', {'repo': 'repo'}) as usage:
+            capture_evaluation_error(
+                RuntimeError('Your credit balance is too low: sk-ant-secret'),
+                'readme_scoring',
+                status='code_only',
+            )
+            usage.complete('code_only')
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs['status'], 'code_only')
+        self.assertEqual(kwargs['error_stage'], 'readme_scoring')
+        self.assertEqual(kwargs['error_category'], 'llm_credit')
+        self.assertNotIn('sk-ant-secret', kwargs['error_message'])
+        self.assertIn('[REDACTED]', kwargs['error_message'])
+
+    def test_error_classification_and_sanitization(self):
+        category, code = classify_evaluation_error(
+            TimeoutError('provider request timed out')
+        )
+        self.assertEqual(category, 'timeout')
+        self.assertEqual(code, 'TimeoutError')
+        self.assertEqual(
+            sanitize_error_message('Authorization: Bearer abc123'),
+            'Authorization: [REDACTED]',
+        )
+
+    def test_validation_value_error_is_classified_as_response_parse(self):
+        category, code = classify_evaluation_error(
+            ValueError('2 validation errors for ScoreResponse')
+        )
+        self.assertEqual(category, 'response_parse')
+        self.assertEqual(code, 'ValueError')
 
     @patch('osp.ai_evaluation_usage.AiEvaluationUsage.objects.create')
     def test_parallel_agent_contexts_add_to_same_evaluation(self, create):
@@ -146,10 +201,10 @@ class AiEvaluationLimitPolicyTest(SimpleTestCase):
 
         today_usage.filter.assert_called_once_with(github_id='runner')
         today_usage.filter.return_value.exclude.assert_called_once_with(
-            status__in=('failed', 'code_only')
+            status__in=('failed', 'code_only', 'rejected')
         )
         self.assertEqual(state['limits']['readme']['used'], 1)
-        self.assertEqual(state['limits']['readme']['remaining'], 9)
+        self.assertEqual(state['limits']['readme']['remaining'], 49)
         self.assertEqual(state['circuit_breaker']['actual_cost'], 0.25)
         today_usage.aggregate.assert_called_once()
 
@@ -175,14 +230,14 @@ class AiEvaluationLimitPolicyTest(SimpleTestCase):
 
     @patch('osp.ai_evaluation_usage.get_daily_usage_state')
     def test_user_limit_blocks_at_configured_count(self, get_state):
-        get_state.return_value = self._state('pr', used=3)
+        get_state.return_value = self._state('pr', used=50)
         with self.assertRaises(EvaluationLimitExceeded) as raised:
             enforce_daily_limit('runner', 'pr')
         self.assertEqual(raised.exception.reason, 'user_daily_limit')
 
     @patch('osp.ai_evaluation_usage.get_daily_usage_state')
     def test_user_limit_allows_one_before_configured_count(self, get_state):
-        get_state.return_value = self._state('commit', used=4)
+        get_state.return_value = self._state('commit', used=49)
         state = enforce_daily_limit('runner', 'commit')
         self.assertEqual(state['limits']['commit']['remaining'], 1)
 
@@ -288,11 +343,11 @@ class AiEvaluationUsagePermissionTest(SimpleTestCase):
         self, _get_evaluation, enforce_limit, evaluate
     ):
         usage_state = {
-            'limits': {'readme': {'used': 10, 'limit': 10, 'blocked': True}},
+            'limits': {'readme': {'used': 50, 'limit': 50, 'blocked': True}},
             'circuit_breaker': {'blocked': False},
         }
         enforce_limit.side_effect = EvaluationLimitExceeded(
-            '오늘 README AI 평가 10회를 모두 사용했습니다.',
+            '오늘 README AI 평가 50회를 모두 사용했습니다.',
             'user_daily_limit',
             usage_state,
         )
@@ -374,6 +429,8 @@ class AiEvaluationUsagePermissionTest(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         get_evaluation.assert_not_called()
-        evaluate.assert_called_once_with('octocat', 'repo')
+        evaluate.assert_called_once_with(
+            'octocat', 'repo', evaluated_by='runner'
+        )
         enforce_limit.assert_called_once_with('runner', 'readme')
         track.assert_called_once()

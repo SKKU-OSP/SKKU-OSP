@@ -106,6 +106,17 @@ class AiEvaluationUsageView(APIView):
             evaluation_count=Count('id'),
             unique_users=Count('github_id', distinct=True),
         )
+        failure_categories = [
+            row for row in queryset.exclude(error_category='').values(
+                'error_category', 'status'
+            ).annotate(
+                count=Count('id'),
+                total_cost=Sum('actual_cost'),
+            ).order_by('-count', 'error_category')
+        ]
+        for row in failure_categories:
+            row['total_cost'] = float(row['total_cost'] or 0)
+
         recent = [
             {
                 'id': usage.id,
@@ -115,9 +126,13 @@ class AiEvaluationUsageView(APIView):
                 'actual_cost': float(usage.actual_cost),
                 'model_name': usage.model_name,
                 'status': usage.status,
+                'error_stage': usage.error_stage,
+                'error_category': usage.error_category,
+                'error_code': usage.error_code,
+                'error_message': usage.error_message,
                 'created_at': usage.created_at.isoformat(),
             }
-            for usage in queryset.order_by('-created_at')[:50]
+            for usage in queryset.order_by('-created_at')[:100]
         ]
 
         return JsonResponse({
@@ -132,11 +147,17 @@ class AiEvaluationUsageView(APIView):
                     'total_cost': float(totals['total_cost'] or 0),
                     'evaluation_count': totals['evaluation_count'],
                     'unique_users': totals['unique_users'],
+                    'failed_count': queryset.filter(status='failed').count(),
+                    'rejected_count': queryset.filter(status='rejected').count(),
+                    'degraded_count': queryset.filter(
+                        status__in=('partial', 'code_only'),
+                    ).count(),
                 },
                 'daily': daily,
                 'daily_by_type': daily_by_type,
                 'daily_by_user': daily_by_user,
                 'cost_distribution': distributions,
+                'failure_categories': failure_categories,
                 'recent': recent,
             },
         })

@@ -35,6 +35,24 @@ const isCanceledRequest = (error) => (
   || error?.name === 'AbortError'
 );
 
+const hasNoReadme = (repo) => (
+  repo != null
+  && Object.prototype.hasOwnProperty.call(repo, 'readme')
+  && (repo.readme == null || repo.readme === false || Number(repo.readme) === 0)
+);
+
+const getApiErrorMessage = (error) => {
+  const data = error?.response?.data;
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data)?.message || '';
+    } catch {
+      return '';
+    }
+  }
+  return data?.message || '';
+};
+
 const EVALUATION_LIMIT_LABELS = {
   readme: 'README',
   pr: 'PR',
@@ -62,6 +80,18 @@ const evaluationButtonText = (text, loading, usageState, evalType) => {
   const count = quota.limit ? ` (${quota.used}/${quota.limit})` : '';
   return `${loading ? '평가 중...' : text}${count}`;
 };
+
+function EvaluationAttribution({ data }) {
+  if (!data?.updated_at) return null;
+  const evaluatedAt = new Date(data.updated_at).toLocaleString('ko-KR');
+  return (
+    <div className="ai-evaluation-attribution" role="status">
+      {data.evaluated_by
+        ? <><strong>{data.evaluated_by}</strong>님이 {evaluatedAt}에 평가했습니다.</>
+        : <>{evaluatedAt}에 저장된 평가 결과입니다.</>}
+    </div>
+  );
+}
 
 function EvaluationLimitNotice({ usageState }) {
   if (!usageState) return null;
@@ -185,7 +215,6 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
   const [evaluationLoading, setEvaluationLoading] = useState(false);
   const [storedEvaluationLoading, setStoredEvaluationLoading] = useState(false);
   const [evaluationData, setEvaluationData] = useState(null);
-  const [storedEvaluationData, setStoredEvaluationData] = useState(null);
   const [readmeOpen, setReadmeOpen] = useState(false);
   const [noReadme, setNoReadme] = useState(false);
   const [repoListOpen, setRepoListOpen] = useState(true);
@@ -208,7 +237,7 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
       );
       if (lookupId.current === currentLookupId && response.data.status === 'success'
         && ['full', 'partial'].includes(response.data.data?.evaluation_status)) {
-        setStoredEvaluationData(response.data.data);
+        setEvaluationData(response.data.data);
       }
     } catch {
       if (lookupId.current === currentLookupId) {
@@ -220,6 +249,7 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
   };
 
   const evaluateReadme = async (githubUsername, repoName, forceReevaluate = false) => {
+    if (noReadme) return;
     const limitMessage = evaluationLimitMessage(usageState, 'readme');
     if (limitMessage) {
       setEvaluationError(limitMessage);
@@ -239,7 +269,6 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
       if (!evaluationRequest.isCurrent(controller)) return;
       if (response.data.status === 'success') {
         setEvaluationData(response.data.data);
-        setStoredEvaluationData(response.data.data);
       } else {
         const msg = response.data.message || '';
         if (msg.includes('README가 없는')) setNoReadme(true);
@@ -247,7 +276,7 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
       }
     } catch (error) {
       if (isCanceledRequest(error) || !evaluationRequest.isCurrent(controller)) return;
-      const serverMessage = error.response?.data?.message || '';
+      const serverMessage = getApiErrorMessage(error);
       if (serverMessage.includes('README가 없는')) setNoReadme(true);
       else setEvaluationError(serverMessage || 'AI 평가 요청에 실패했습니다.');
     } finally {
@@ -261,14 +290,15 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
   const handleRepoClick = async (repo) => {
     evaluationRequest.cancel();
     const currentLookupId = ++lookupId.current;
+    const readmeMissing = hasNoReadme(repo);
     setEvaluationLoading(false);
-    setStoredEvaluationLoading(true);
+    setStoredEvaluationLoading(!readmeMissing);
     setSelectedRepo(repo);
     setEvaluationData(null);
-    setStoredEvaluationData(null);
     setReadmeOpen(false);
-    setNoReadme(false);
+    setNoReadme(readmeMissing);
     setEvaluationError(null);
+    if (readmeMissing) return;
     const githubUsername = repo.github_id || repo.owner_id;
     await fetchAiEvaluation(githubUsername, repo.repo_name, currentLookupId);
   };
@@ -297,9 +327,14 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                     <h6 className="repo-card-title">{repo.repo_name}</h6>
                     <small className="text-muted d-block mb-2">Created by {repo.owner_id}</small>
                   </div>
-                  <span className="badge badge-light" style={{ fontSize: '0.85rem' }}>
-                    <BsStar className="mr-1" /> {repo.star_count}
-                  </span>
+                  <div className="d-flex flex-column align-items-end">
+                    <span className="badge badge-light" style={{ fontSize: '0.85rem' }}>
+                      <BsStar className="mr-1" /> {repo.star_count}
+                    </span>
+                    {hasNoReadme(repo) && (
+                      <span className="badge badge-secondary mt-2">README 없음</span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-muted mb-2 repo-description">{repo.proj_short_desc || '설명이 없습니다.'}</p>
                 <div className="text-right">
@@ -331,14 +366,13 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                 className="btn btn-sm btn-primary px-3 shadow-sm"
                 onClick={() => {
                   if (evaluationData) evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name, true);
-                  else if (storedEvaluationData) setEvaluationData(storedEvaluationData);
                   else evaluateReadme(selectedRepo.github_id || selectedRepo.owner_id, selectedRepo.repo_name);
                 }}
-                disabled={storedEvaluationLoading || evaluationLoading
-                  || (!storedEvaluationData && evaluationQuota(usageState, 'readme').blocked)}
+                disabled={noReadme || storedEvaluationLoading || evaluationLoading
+                  || evaluationQuota(usageState, 'readme').blocked}
               >
-                {storedEvaluationData && !evaluationData
-                  ? '저장된 평가 보기'
+                {noReadme
+                  ? 'README 없음'
                   : evaluationButtonText(evaluationData ? 'AI 재평가' : 'AI 평가 시작', evaluationLoading, usageState, 'readme')}
               </button>
             </div>
@@ -380,6 +414,7 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                 </div>
               ) : evaluationData ? (
                 <div className="mt-4">
+                  <EvaluationAttribution data={evaluationData} />
                   {evaluationData.evaluation_status === 'code_only' && (
                     <div className="alert alert-warning" role="alert">
                       README의 기본 구조 분석은 완료했지만 AI 세부 판정을 완료하지 못했습니다. 잠시 후 다시 평가해 주세요.
@@ -485,9 +520,6 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                       target="_blank" rel="noopener noreferrer"
                       className="btn btn-sm btn-outline-primary"
                     >README 수정하러 가기 →</a>
-                    <span className="text-muted small">
-                      Last AI Analysis: {evaluationData.updated_at ? new Date(evaluationData.updated_at).toLocaleString() : 'N/A'}
-                    </span>
                   </div>
                 </div>
               ) : noReadme ? (
@@ -499,9 +531,7 @@ function ReadmeTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                 </div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-0">{storedEvaluationData
-                    ? '저장된 평가 결과가 있습니다. 상단의 저장된 평가 보기 버튼을 눌러 확인하세요.'
-                    : '아직 AI 평가가 없습니다. 상단의 AI 평가 시작 버튼을 눌러 분석을 시작하세요.'}</p>
+                  <p className="mb-0">아직 AI 평가가 없습니다. 상단의 AI 평가 시작 버튼을 눌러 분석을 시작하세요.</p>
                 </div>
               )}
             </div>
@@ -545,7 +575,6 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalPhase, setEvalPhase] = useState(null);
   const [evalData, setEvalData] = useState(null);
-  const [storedEvalData, setStoredEvalData] = useState(null);
   const [existingLoading, setExistingLoading] = useState(false);
   const [evalError, setEvalError] = useState(null);
   const [prBodyOpen, setPrBodyOpen] = useState(false);
@@ -568,7 +597,6 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
     setPrList([]);
     setSelectedPr(null);
     setEvalData(null);
-    setStoredEvalData(null);
     setPrBody(null);
     try {
       const githubUsername = repo.github_id || repo.owner_id;
@@ -592,7 +620,6 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
     setEvalPhase(null);
     setSelectedRepo(repo);
     setEvalData(null);
-    setStoredEvalData(null);
     setEvalError(null);
     fetchPrList(repo);
   };
@@ -609,7 +636,7 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
         const data = res.data.data;
         setPrBody(data.pr_body || null);
         if (data.evaluated) {
-          setStoredEvalData(data);
+          setEvalData(data);
         }
       }
     } catch {
@@ -666,7 +693,6 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
       if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') {
         setEvalData(res.data.data);
-        setStoredEvalData(res.data.data);
       }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
@@ -690,7 +716,6 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
     setEvalPhase(null);
     setSelectedPr(pr);
     setEvalData(null);
-    setStoredEvalData(null);
     setEvalError(null);
     setPrBodyOpen(false);
     setAgentDetailsOpen(false);
@@ -847,6 +872,7 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
+                  <EvaluationAttribution data={evalData} />
                   {evalData.pr_score && (
                     <div className="mb-4 p-3 bg-light rounded score-container">
                       <div className="d-flex align-items-center mb-2">
@@ -1158,22 +1184,19 @@ function PrTab({ repos, loading, errorOccur, active, usageState, refreshUsage })
                       target="_blank" rel="noopener noreferrer"
                       className="btn btn-sm btn-outline-primary"
                     >GitHub PR 보러 가기 →</a>
-                    <span className="text-muted small">
-                      Last AI Analysis: {evalData.updated_at ? new Date(evalData.updated_at).toLocaleString() : 'N/A'}
-                    </span>
                   </div>
                 </div>
               ) : existingLoading ? (
                 <div className="text-center py-5"><LoaderIcon /><p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p></div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-2">{storedEvalData ? '저장된 평가 결과가 있습니다.' : '아직 AI 평가가 없습니다.'}</p>
+                  <p className="mb-2">아직 AI 평가가 없습니다.</p>
                   <button
                     className="btn btn-sm btn-primary px-4"
-                    onClick={() => storedEvalData ? setEvalData(storedEvalData) : evaluatePr(selectedPr)}
-                    disabled={evalLoading || (!storedEvalData && evaluationQuota(usageState, 'pr').blocked)}
+                    onClick={() => evaluatePr(selectedPr)}
+                    disabled={evalLoading || evaluationQuota(usageState, 'pr').blocked}
                   >
-                    {storedEvalData ? '저장된 평가 보기' : evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'pr')}
+                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'pr')}
                   </button>
                 </div>
               )}
@@ -1217,7 +1240,6 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalData, setEvalData] = useState(null);
-  const [storedEvalData, setStoredEvalData] = useState(null);
   const [existingLoading, setExistingLoading] = useState(false);
   const [evalError, setEvalError] = useState(null);
   const [issueBodyOpen, setIssueBodyOpen] = useState(false);
@@ -1237,7 +1259,6 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
     setIssueList([]);
     setSelectedIssue(null);
     setEvalData(null);
-    setStoredEvalData(null);
     setIssueBody(null);
     try {
       const githubUsername = repo.github_id || repo.owner_id;
@@ -1260,7 +1281,6 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
     setExistingLoading(false);
     setSelectedRepo(repo);
     setEvalData(null);
-    setStoredEvalData(null);
     setEvalError(null);
     fetchIssueList(repo);
   };
@@ -1277,7 +1297,7 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
         const data = res.data.data;
         setIssueBody(data.issue_body || null);
         if (data.evaluated) {
-          setStoredEvalData(data);
+          setEvalData(data);
         }
       }
     } catch {
@@ -1308,7 +1328,6 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
       if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') {
         setEvalData(res.data.data);
-        setStoredEvalData(res.data.data);
       }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
@@ -1329,7 +1348,6 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
     setExistingLoading(true);
     setSelectedIssue(issue);
     setEvalData(null);
-    setStoredEvalData(null);
     setEvalError(null);
     setIssueBodyOpen(false);
     setIssueBody(undefined);
@@ -1473,6 +1491,7 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
+                  <EvaluationAttribution data={evalData} />
                   {evalData.issue_type === 'skip' ? (
                     <div className="issue-skip-notice mt-3" role="status">
                       <div className="issue-skip-icon" aria-hidden="true">
@@ -1577,22 +1596,19 @@ function IssueTab({ repos, loading, errorOccur, active, usageState, refreshUsage
                       target="_blank" rel="noopener noreferrer"
                       className="btn btn-sm btn-outline-primary"
                     >GitHub 이슈 보러 가기 →</a>
-                    <span className="text-muted small">
-                      Last AI Analysis: {evalData.updated_at ? new Date(evalData.updated_at).toLocaleString() : 'N/A'}
-                    </span>
                   </div>
                 </div>
               ) : existingLoading ? (
                 <div className="text-center py-5"><LoaderIcon /><p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p></div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-2">{storedEvalData ? '저장된 평가 결과가 있습니다.' : '아직 AI 평가가 없습니다.'}</p>
+                  <p className="mb-2">아직 AI 평가가 없습니다.</p>
                   <button
                     className="btn btn-sm btn-primary px-4"
-                    onClick={() => storedEvalData ? setEvalData(storedEvalData) : evaluateIssue(selectedIssue)}
-                    disabled={evalLoading || (!storedEvalData && evaluationQuota(usageState, 'issue').blocked)}
+                    onClick={() => evaluateIssue(selectedIssue)}
+                    disabled={evalLoading || evaluationQuota(usageState, 'issue').blocked}
                   >
-                    {storedEvalData ? '저장된 평가 보기' : evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'issue')}
+                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'issue')}
                   </button>
                 </div>
               )}
@@ -1622,7 +1638,6 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
   const [selectedCommit, setSelectedCommit] = useState(null);
   const [evalLoading, setEvalLoading] = useState(false);
   const [evalData, setEvalData] = useState(null);
-  const [storedEvalData, setStoredEvalData] = useState(null);
   const [existingLoading, setExistingLoading] = useState(false);
   const [evalError, setEvalError] = useState(null);
   const [filesOpen, setFilesOpen] = useState(false);
@@ -1660,7 +1675,6 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
     setCommitListError(null);
     setSelectedCommit(null);
     setEvalData(null);
-    setStoredEvalData(null);
     setFileSummaries(null);
     setFileSummariesError(null);
     try {
@@ -1686,7 +1700,6 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
     fileSummaryRequestId.current += 1;
     setSelectedRepo(repo);
     setEvalData(null);
-    setStoredEvalData(null);
     setEvalError(null);
     setFileSummaries(null);
     setFileSummariesLoading(false);
@@ -1705,7 +1718,7 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
       if (res.data.status === 'success' && res.data.data) {
         const data = res.data.data;
         if (data.evaluated || data.evaluation_status === 'skipped') {
-          setStoredEvalData(data);
+          setEvalData(data);
         }
       }
     } catch (error) {
@@ -1738,7 +1751,6 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
       if (!evaluationRequest.isCurrent(controller)) return;
       if (res.data.status === 'success') {
         setEvalData(res.data.data);
-        setStoredEvalData(res.data.data);
       }
       else setEvalError(res.data.message || 'AI 평가에 실패했습니다.');
     } catch (error) {
@@ -1760,7 +1772,6 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
     fileSummaryRequestId.current += 1;
     setSelectedCommit(commit);
     setEvalData(null);
-    setStoredEvalData(null);
     setEvalError(null);
     setFilesOpen(false);
     setMessageBodyOpen(false);
@@ -2046,12 +2057,16 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                   </p>
                 </div>
               ) : evalData?.evaluation_status === 'skipped' ? (
-                <div className="alert alert-secondary mt-4 mb-0 text-center py-4" role="status">
-                  <BsGit className="mr-2" />
-                  <strong>{evalData.skip_reason || '이 커밋은 평가 대상이 아닙니다.'}</strong>
+                <div className="mt-3">
+                  <EvaluationAttribution data={evalData} />
+                  <div className="alert alert-secondary mt-3 mb-0 text-center py-4" role="status">
+                    <BsGit className="mr-2" />
+                    <strong>{evalData.skip_reason || '이 커밋은 평가 대상이 아닙니다.'}</strong>
+                  </div>
                 </div>
               ) : evalData ? (
                 <div className="mt-3">
+                  <EvaluationAttribution data={evalData} />
                   {evalData.commit_total_score != null && (
                     <div className="mb-4 p-3 bg-light rounded score-container">
                       <div className="d-flex align-items-center mb-2">
@@ -2131,20 +2146,17 @@ function CommitTab({ repos, loading, errorOccur, active, usageState, refreshUsag
                       target="_blank" rel="noopener noreferrer"
                       className="btn btn-sm btn-outline-primary"
                     >GitHub 커밋 보러 가기 →</a>
-                    <span className="text-muted small">
-                      Last AI Analysis: {evalData.updated_at ? new Date(evalData.updated_at).toLocaleString() : 'N/A'}
-                    </span>
                   </div>
                 </div>
               ) : existingLoading ? (
                 <div className="text-center py-5"><LoaderIcon /><p className="mt-3 mb-0">기존 평가 결과를 확인하고 있습니다.</p></div>
               ) : (
                 <div className="empty-data-box text-center text-muted border rounded mt-4">
-                  <p className="mb-2">{storedEvalData ? '저장된 평가 결과가 있습니다.' : '아직 AI 평가가 없습니다.'}</p>
+                  <p className="mb-2">아직 AI 평가가 없습니다.</p>
                   <button className="btn btn-sm btn-primary px-4"
-                    onClick={() => storedEvalData ? setEvalData(storedEvalData) : evaluateCommit(selectedCommit)}
-                    disabled={evalLoading || (!storedEvalData && evaluationQuota(usageState, 'commit').blocked)}>
-                    {storedEvalData ? '저장된 평가 보기' : evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'commit')}
+                    onClick={() => evaluateCommit(selectedCommit)}
+                    disabled={evalLoading || evaluationQuota(usageState, 'commit').blocked}>
+                    {evaluationButtonText('AI 평가 시작', evalLoading, usageState, 'commit')}
                   </button>
                 </div>
               )}
