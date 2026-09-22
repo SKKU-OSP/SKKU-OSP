@@ -76,7 +76,7 @@ def _is_merge_commit(message_headline: str) -> bool:
     return bool(_MERGE_COMMIT_RE.match(message_headline or ''))
 
 
-def _merge_skip_result(commit: dict, updated_at=None) -> dict:
+def _merge_skip_result(commit: dict, updated_at=None, evaluated_by: str = '') -> dict:
     return {
         **commit,
         'evaluated': True,
@@ -98,11 +98,17 @@ def _merge_skip_result(commit: dict, updated_at=None) -> dict:
         'commit_improvements': [],
         'commit_advice': [],
         'commit_missing': [],
+        'evaluated_by': evaluated_by or None,
         'updated_at': _isoformat(updated_at),
     }
 
 
-def _file_limit_skip_result(commit: dict, file_count: int, updated_at=None) -> dict:
+def _file_limit_skip_result(
+    commit: dict,
+    file_count: int,
+    updated_at=None,
+    evaluated_by: str = '',
+) -> dict:
     return {
         **commit,
         'evaluated': True,
@@ -127,6 +133,7 @@ def _file_limit_skip_result(commit: dict, file_count: int, updated_at=None) -> d
         'commit_improvements': [],
         'commit_advice': [],
         'commit_missing': [],
+        'evaluated_by': evaluated_by or None,
         'updated_at': _isoformat(updated_at),
     }
 
@@ -672,7 +679,17 @@ def get_evaluation(github_username: str, repo_name: str, sha: str) -> dict:
     if not commit:
         raise ValueError(f'커밋을 찾을 수 없습니다: {github_username}/{repo_name}@{sha}')
     if _is_merge_commit(commit['message']):
-        return _merge_skip_result(commit)
+        try:
+            entity = GithubCommitAiEvaluation.objects.get(
+                github_id=github_username, repo_name=repo_name, sha=sha
+            )
+            return _merge_skip_result(
+                commit,
+                updated_at=entity.updated_at,
+                evaluated_by=entity.evaluated_by,
+            )
+        except GithubCommitAiEvaluation.DoesNotExist:
+            return _merge_skip_result(commit)
     try:
         entity = GithubCommitAiEvaluation.objects.get(
             github_id=github_username, repo_name=repo_name, sha=sha
@@ -690,13 +707,19 @@ def get_evaluation(github_username: str, repo_name: str, sha: str) -> dict:
                 commit,
                 len(files),
                 updated_at=entity.updated_at,
+                evaluated_by=entity.evaluated_by,
             )
         return _entity_to_dict(entity, commit=commit, files=files)
     except GithubCommitAiEvaluation.DoesNotExist:
         return {**commit, 'evaluated': False}
 
 
-def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
+def evaluate(
+    github_username: str,
+    repo_name: str,
+    sha: str,
+    evaluated_by: str = '',
+) -> dict:
     commit = _get_commit(github_username, repo_name, sha)
     if not commit:
         raise ValueError(f'커밋을 찾을 수 없습니다: {github_username}/{repo_name}@{sha}')
@@ -712,12 +735,17 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
             'is_merge_commit': True,
             'skip_reason': _MERGE_SKIP_REASON,
         }
+        entity.evaluated_by = evaluated_by
         _save_skipped_evaluation(entity, breakdown)
         logger.info(
             '머지 커밋 평가 제외: %s/%s@%s',
             github_username, repo_name, sha[:7],
         )
-        return _merge_skip_result(commit, updated_at=entity.updated_at)
+        return _merge_skip_result(
+            commit,
+            updated_at=entity.updated_at,
+            evaluated_by=entity.evaluated_by,
+        )
 
     injection_hits = llm_client.scan_injection(raw_headline + '\n' + raw_body)
     if injection_hits:
@@ -738,6 +766,7 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
             'file_count': len(files),
             'skip_reason': _FILE_LIMIT_SKIP_REASON,
         }
+        entity.evaluated_by = evaluated_by
         _save_skipped_evaluation(entity, breakdown)
         logger.info(
             '변경 파일 300개 이상 커밋 평가 제외: %s/%s@%s',
@@ -747,6 +776,7 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
             commit,
             len(files),
             updated_at=entity.updated_at,
+            evaluated_by=entity.evaluated_by,
         )
     generated_files, source_files = _split_generated_files(files)
     raw_source_names = [str(file['filename']) for file in source_files]
@@ -884,6 +914,7 @@ def evaluate(github_username: str, repo_name: str, sha: str) -> dict:
     entity.commit_advice = sentences.advice or []
     # 커밋 화면에서는 improvements와 중복되는 별도 누락 항목을 제공하지 않는다.
     entity.commit_missing = []
+    entity.evaluated_by = evaluated_by
     entity.save()
 
     logger.info(
@@ -993,6 +1024,7 @@ def _entity_to_dict(
         'commit_strengths': entity.commit_strengths,
         'commit_improvements': entity.commit_improvements,
         'commit_advice': entity.commit_advice,
+        'evaluated_by': entity.evaluated_by or None,
         # 이전 평가 레코드에 값이 남아 있어도 API에서는 더 이상 노출하지 않는다.
         'commit_missing': [],
         'updated_at': entity.updated_at.isoformat() if entity.updated_at else None,

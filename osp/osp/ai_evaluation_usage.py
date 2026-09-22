@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import threading
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -19,15 +20,23 @@ from repository.models import AiEvaluationUsage
 logger = logging.getLogger(__name__)
 
 DAILY_EVALUATION_LIMITS = {
-    'readme': 10,
-    'pr': 3,
-    'issue': 10,
-    'commit': 5,
+    'readme': 50,
+    'pr': 50,
+    'issue': 50,
+    'commit': 50,
 }
 DAILY_TOTAL_COST_LIMIT = Decimal('8.00')
 # 평가 결과를 받지 못한 시도는 개인별 일일 횟수에서 제외한다.
 # 실제 발생한 LLM 비용은 상태와 무관하게 전체 비용에 계속 합산한다.
-NON_CHARGEABLE_STATUSES = ('failed', 'code_only')
+NON_CHARGEABLE_STATUSES = ('failed', 'code_only', 'rejected')
+
+_ERROR_MESSAGE_MAX_LENGTH = 2000
+_SENSITIVE_PATTERNS = (
+    re.compile(r'(?i)(authorization\s*[:=]\s*)(?:bearer\s+)?[^\s,;]+'),
+    re.compile(r'(?i)((?:api[_-]?key|token|secret|password)\s*[:=]\s*)[^\s,;]+'),
+    re.compile(r'\bsk-ant-[A-Za-z0-9_-]+\b'),
+    re.compile(r'\bgh[pousr]_[A-Za-z0-9_]+\b'),
+)
 
 _current_tracker: ContextVar['AiEvaluationUsageTracker | None'] = ContextVar(
     'ai_evaluation_usage_tracker', default=None
@@ -39,6 +48,59 @@ def _cost_decimal(value: float) -> Decimal:
         return Decimal(str(value or 0))
     except (InvalidOperation, TypeError, ValueError):
         return Decimal('0')
+
+
+def sanitize_error_message(error: Exception | str) -> str:
+    """운영 DB에 저장할 수 있도록 비밀값을 제거하고 길이를 제한한다."""
+    message = str(error or '').replace('\x00', '').strip()
+    for pattern in _SENSITIVE_PATTERNS:
+        if pattern.groups:
+            message = pattern.sub(r'\1[REDACTED]', message)
+        else:
+            message = pattern.sub('[REDACTED]', message)
+    return message[:_ERROR_MESSAGE_MAX_LENGTH]
+
+
+def classify_evaluation_error(error: Exception) -> tuple[str, str]:
+    """예외를 관리자 집계에 사용할 안정적인 분류와 코드로 변환한다."""
+    message = str(error or '')
+    lowered = message.lower()
+    status_code = getattr(error, 'status_code', None)
+    response = getattr(error, 'response', None)
+    if status_code is None and response is not None:
+        status_code = getattr(response, 'status_code', None)
+    code = str(status_code or getattr(error, 'code', '') or type(error).__name__)
+
+    if 'readme가 없는' in lowered or '본문이 없습니다' in message:
+        return 'missing_content', code
+    if 'credit balance is too low' in lowered or 'insufficient credit' in lowered:
+        return 'llm_credit', code
+    if status_code in (401, 403) or 'invalid api key' in lowered or 'authentication' in lowered:
+        return 'llm_auth', code
+    if status_code == 429 or 'resource_exhausted' in lowered or 'rate limit' in lowered:
+        return 'llm_rate_limit', code
+    if 'timed out' in lowered or 'timeout' in lowered:
+        return 'timeout', code
+    if (
+        'validation error' in lowered
+        or '파싱 실패' in message
+        or 'json decode' in lowered
+        or '응답 형식이 올바르지 않습니다' in message
+    ):
+        return 'response_parse', code
+    if 'context length' in lowered or 'token limit' in lowered or 'too many tokens' in lowered:
+        return 'token_limit', code
+    if (
+        status_code in (502, 503, 504, 529)
+        or 'connection refused' in lowered
+        or 'failed to establish a new connection' in lowered
+        or 'unavailable' in lowered
+        or 'high demand' in lowered
+    ):
+        return 'dependency_unavailable', code
+    if status_code in (400, 404) or '찾을 수 없습니다' in message:
+        return 'invalid_target', code
+    return 'internal_error', code
 
 
 def _today_range() -> tuple[datetime, datetime]:
@@ -127,6 +189,11 @@ class AiEvaluationUsageTracker:
     status: str = 'failed'
     actual_cost: Decimal = Decimal('0')
     models: list[str] = field(default_factory=list)
+    error_stage: str = ''
+    error_category: str = ''
+    error_code: str = ''
+    error_message: str = ''
+    current_stage: str = 'evaluation'
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     def add_call(self, actual_cost: float, model_name: str | None) -> None:
@@ -138,6 +205,29 @@ class AiEvaluationUsageTracker:
     def complete(self, status: str = 'full') -> None:
         self.status = status
 
+    def set_stage(self, stage: str) -> None:
+        self.current_stage = (stage or 'evaluation')[:64]
+
+    def record_error(
+        self,
+        error: Exception,
+        *,
+        stage: str = '',
+        status: str | None = None,
+    ) -> None:
+        category, code = classify_evaluation_error(error)
+        with self._lock:
+            self.error_stage = (stage or self.current_stage or 'evaluation')[:64]
+            self.error_category = category[:64]
+            self.error_code = code[:128]
+            self.error_message = sanitize_error_message(error)
+            if status is not None:
+                self.status = status
+            elif category in {'missing_content', 'invalid_target'}:
+                self.status = 'rejected'
+            else:
+                self.status = 'failed'
+
     def persist(self) -> None:
         try:
             usage = AiEvaluationUsage.objects.create(
@@ -147,16 +237,22 @@ class AiEvaluationUsageTracker:
                 actual_cost=self.actual_cost,
                 model_name=', '.join(self.models)[:512],
                 status=self.status,
+                error_stage=self.error_stage,
+                error_category=self.error_category,
+                error_code=self.error_code,
+                error_message=self.error_message,
             )
             logger.info(
                 '[AI 사용량 기록] id=%s | user=%s | type=%s | status=%s '
-                '| total=$%s | models=%s',
+                '| total=$%s | models=%s | error=%s/%s',
                 usage.pk,
                 self.github_id,
                 self.eval_type,
                 self.status,
                 self.actual_cost,
                 ', '.join(self.models) or '-',
+                self.error_stage or '-',
+                self.error_category or '-',
             )
         except Exception:
             # 사용량 기록 장애가 사용자 평가 응답을 막아서는 안 된다.
@@ -175,17 +271,19 @@ def track_evaluation(
     github_id: str,
     eval_type: str,
     target: dict,
+    stage: str = 'evaluation',
 ) -> Iterator[AiEvaluationUsageTracker]:
     tracker = AiEvaluationUsageTracker(
         github_id=github_id or 'anonymous',
         eval_type=eval_type,
         target=target,
+        current_stage=stage,
     )
     token = _current_tracker.set(tracker)
     try:
         yield tracker
-    except Exception:
-        tracker.status = 'failed'
+    except Exception as error:
+        tracker.record_error(error)
         raise
     finally:
         _current_tracker.reset(token)
@@ -197,6 +295,17 @@ def capture_llm_call(actual_cost: float, model_name: str | None) -> None:
     tracker = _current_tracker.get()
     if tracker is not None:
         tracker.add_call(actual_cost, model_name)
+
+
+def capture_evaluation_error(
+    error: Exception,
+    stage: str,
+    status: str | None = None,
+) -> None:
+    """복구 가능한 부분 실패도 현재 평가 레코드에 함께 남긴다."""
+    tracker = _current_tracker.get()
+    if tracker is not None:
+        tracker.record_error(error, stage=stage, status=status)
 
 
 def get_request_github_id(request) -> str:

@@ -880,6 +880,7 @@ def evaluate(
     repo_name: str,
     pr_number: int,
     progress_callback: Optional[Callable[[str], None]] = None,
+    evaluated_by: str = '',
 ) -> dict:
     # 1. PR 기본 정보 조회
     pull = GithubPulls.objects.filter(
@@ -1062,6 +1063,7 @@ def evaluate(
     entity.pr_improvements = improvements
     entity.pr_advice = sentences.advice or []
     entity.pr_missing = [item['label'] for item in bad_items]
+    entity.evaluated_by = evaluated_by
     entity.save()
 
     logger.info(
@@ -1102,6 +1104,7 @@ def _entity_to_dict(entity: GithubPrAiEvaluation, pr_body: Optional[str] = None)
         'pr_strengths': entity.pr_strengths,
         'pr_improvements': entity.pr_improvements,
         'pr_advice': entity.pr_advice,
+        'evaluated_by': entity.evaluated_by or None,
         'updated_at': entity.updated_at.isoformat() if entity.updated_at else None,
         'pr_body': pr_body,
     }

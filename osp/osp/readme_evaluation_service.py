@@ -11,6 +11,7 @@ from .readme_code_analyzer import (
     analyze_license,
 )
 from .readme_score_calculator import calculate_total, to_grade
+from .ai_evaluation_usage import capture_evaluation_error
 from . import llm_client
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,11 @@ def get_evaluation(github_username: str, repo_name: str) -> Optional[dict]:
         return None
 
 
-def evaluate(github_username: str, repo_name: str) -> dict:
+def evaluate(
+    github_username: str,
+    repo_name: str,
+    evaluated_by: str = '',
+) -> dict:
     # 1. DB에서 README + license 조회
     try:
         repo = GithubRepository.objects.get(owner_name=github_username, repo_name=repo_name)
@@ -62,14 +67,18 @@ def evaluate(github_username: str, repo_name: str) -> dict:
         github_id=github_username,
         repo_name=repo_name,
     )
+    entity.evaluated_by = evaluated_by
     entity.readme_evaluation_status = 'code_only'
-    entity.save(update_fields=['readme_evaluation_status', 'updated_at'])
+    entity.save(update_fields=[
+        'evaluated_by', 'readme_evaluation_status', 'updated_at',
+    ])
 
     # 4. LLM 1차 호출: 채점 (temperature=0.0)
     logger.info("LLM 채점 시작: %s/%s", github_username, repo_name)
     try:
         score = llm_client.score_readme(repo_name, sanitized_readme, readability, visual, reproducibility_code, lic)
     except Exception as e:
+        capture_evaluation_error(e, 'readme_scoring', status='code_only')
         logger.error("LLM 채점 실패, code_only로 착지: %s/%s — %s", github_username, repo_name, e)
         logger.info(
             '[LLM 총 비용] %s/%s | README 평가(code_only) | total=$%.6f',
@@ -192,6 +201,7 @@ def evaluate(github_username: str, repo_name: str) -> dict:
     try:
         sentences = llm_client.write_sentences(repo_name, sanitized_readme, core_criteria, bonus_items)
     except Exception as e:
+        capture_evaluation_error(e, 'readme_wording', status='partial')
         logger.error("LLM 문장화 실패, partial로 착지: %s/%s — %s", github_username, repo_name, e)
         sentence_failure_cost = float(getattr(e, 'actual_cost', 0.0))
         logger.info(
@@ -248,6 +258,7 @@ def _entity_to_dict(entity: GithubRepoAiEvaluation, readme: Optional[str]) -> di
         'strengths': entity.readme_strengths if feedback_available else None,
         'improvements': entity.readme_improvements if feedback_available else None,
         'advice': entity.readme_advice if feedback_available else None,
+        'evaluated_by': entity.evaluated_by or None,
         'updated_at': entity.updated_at.isoformat() if entity.updated_at else None,
         'readme': readme,
     }

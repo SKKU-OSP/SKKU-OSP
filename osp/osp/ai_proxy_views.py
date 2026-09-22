@@ -53,8 +53,13 @@ class AiEvaluationProxyView(RequireAiEvaluationAccessMixin, APIView):
                 actor_github_id,
                 'readme',
                 {'owner': github_username, 'repo': repo_name},
+                stage='readme_evaluation',
             ) as usage:
-                result = svc.evaluate(github_username, repo_name)
+                result = svc.evaluate(
+                    github_username,
+                    repo_name,
+                    evaluated_by=actor_github_id,
+                )
                 usage.complete(evaluation_status(result, 'readme'))
             return JsonResponse({'status': 'success', 'data': result})
         except EvaluationLimitExceeded as e:

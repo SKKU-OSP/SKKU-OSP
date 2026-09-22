@@ -274,7 +274,12 @@ def _normalize_skip_reason(reason: Optional[str]) -> str:
 
 # ── 평가 실행 ─────────────────────────────────────────────────────
 
-def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
+def evaluate(
+    github_username: str,
+    repo_name: str,
+    issue_number: int,
+    evaluated_by: str = '',
+) -> dict:
     issue = GithubIssues.objects.filter(
         owner_id=github_username, repo_name=repo_name, number=issue_number
     ).first()
@@ -320,6 +325,7 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
         entity.issue_improvements = None
         entity.issue_advice = None
         entity.issue_missing = None
+        entity.evaluated_by = evaluated_by
         entity.save()
         logger.info("이슈 스킵 처리 완료: %s/%s#%d", github_username, repo_name, issue_number)
         logger.info(
@@ -401,6 +407,7 @@ def evaluate(github_username: str, repo_name: str, issue_number: int) -> dict:
     entity.issue_improvements = improvements
     entity.issue_advice = advice
     entity.issue_missing = [item['label'] for item in bad_items]
+    entity.evaluated_by = evaluated_by
     entity.save()
 
     logger.info(
@@ -437,6 +444,7 @@ def _entity_to_dict(entity: GithubIssueAiEvaluation, issue_body: Optional[str] =
             'issue_strengths': None,
             'issue_improvements': None,
             'issue_advice': None,
+            'evaluated_by': entity.evaluated_by or None,
             'updated_at': entity.updated_at.isoformat() if entity.updated_at else None,
             'issue_body': issue_body,
         }
@@ -451,6 +459,7 @@ def _entity_to_dict(entity: GithubIssueAiEvaluation, issue_body: Optional[str] =
         'issue_strengths': entity.issue_strengths,
         'issue_improvements': entity.issue_improvements,
         'issue_advice': entity.issue_advice,
+        'evaluated_by': entity.evaluated_by or None,
         'updated_at': entity.updated_at.isoformat() if entity.updated_at else None,
         'issue_body': issue_body,
     }
